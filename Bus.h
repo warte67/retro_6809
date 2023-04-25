@@ -18,7 +18,6 @@ class Bus
         static void _quit();
         static void _onetime_init();
         static void _final_quit();
-
         static void _onActivate();
         static void _onDeactivate();
         static void _onUpdate();
@@ -35,6 +34,7 @@ class Bus
         static Bus* GetInstance();
         static void Run();
 
+        // temporary statics
         static SDL_Window* s_window;
         static SDL_Renderer* s_renderer;
         static int s_window_width;
