@@ -16,17 +16,18 @@ GIT Stuff:
 *****************************************************/
 
 #include <stdio.h>
-#include <iostream>
+//#include <iostream>
 
-#include <SDL2/SDL.h>
+// #include <SDL2/SDL.h>
 
 #include "Bus.h"
 
 int main(void)
 {
     printf("Apparently it works.\n");
-    std::cout << "Does this work?" << std::endl;
-    Bus();
+    // std::cout << "Does this work?" << std::endl;
+    //Bus();
+    Bus bus;
 }
 
 
