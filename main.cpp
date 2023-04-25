@@ -29,7 +29,7 @@ git revert <hash>
 git remote add origin https://github.com/warte67/retro_6809.git
 
 
-===============
+=============== TESTING ===============
 git status
 git add .
 git commit -m "first commit"
