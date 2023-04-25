@@ -11,8 +11,8 @@ bool Bus::s_bIsRunning = true;
 // temporary statics
 SDL_Window* Bus::s_window = nullptr;
 SDL_Renderer* Bus::s_renderer = nullptr;
-int Bus::s_window_width = 512 * 2;
-int Bus::s_window_height = 384 * 2;
+int Bus::s_window_width = 640 * 2;
+int Bus::s_window_height = 400 * 2;
 
 
 // private constructor
