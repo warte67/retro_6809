@@ -1,10 +1,10 @@
-// bus.cpp
+// Bus.cpp
 //
 
 
 #include <stdio.h>
 
-int bus()
+int Bus()
 {
     printf("A bus exists.\n");
     return 0;

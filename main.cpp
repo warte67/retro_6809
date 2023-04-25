@@ -20,13 +20,13 @@ GIT Stuff:
 
 #include <SDL2/SDL.h>
 
-#include "bus.h"
+#include "Bus.h"
 
 int main(void)
 {
     printf("Apparently it works.\n");
     std::cout << "Does this work?" << std::endl;
-    bus();
+    Bus();
 }
 
 
