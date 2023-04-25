@@ -23,8 +23,9 @@ GIT Stuff:
 
 int main(void)
 {
-    printf("Loading the Bus device.\n");
-    Bus bus;
+    printf("Initializing...\n");
+    Bus* bus = Bus::GetInstance();
+    bus->run();
 }
 
 

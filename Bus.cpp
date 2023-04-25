@@ -1,11 +1,34 @@
 // Bus.cpp
 //
-
-
 #include <stdio.h>
 
-int Bus()
+#include "Bus.h"
+
+Bus* Bus::s_bus = nullptr;
+Bus::Bus() {
+    printf("Bus::Bus()\n");
+}   
+Bus::~Bus() {
+    printf("Bus::~Bus()\n");
+}
+void Bus::_quit() {
+    if (s_bus != nullptr)
+        delete s_bus;
+}
+
+// main loop: returns false on error
+void Bus::run()
 {
-    printf("A bus exists.\n");
-    return 0;
+
+
+    _quit();
+}
+
+// fetch a pointer to the Bus singleton
+Bus* Bus::GetInstance()
+{
+    if (s_bus == nullptr) {
+        s_bus = new Bus();        
+    }
+    return s_bus;
 }
