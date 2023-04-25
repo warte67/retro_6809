@@ -16,7 +16,6 @@ GIT Stuff:
 *****************************************************/
 
 #include <stdio.h>
-//#include <iostream>
 
 // #include <SDL2/SDL.h>
 
@@ -24,9 +23,7 @@ GIT Stuff:
 
 int main(void)
 {
-    printf("Apparently it works.\n");
-    // std::cout << "Does this work?" << std::endl;
-    //Bus();
+    printf("Loading the Bus device.\n");
     Bus bus;
 }
 
