@@ -16,6 +16,15 @@ class Bus
         static bool s_bIsDirty;
 
         static void _quit();
+        static void _onetime_init();
+        static void _final_quit();
+
+        static void _onActivate();
+        static void _onDeactivate();
+        static void _onUpdate();
+        static void _onEvent();
+        static void _onRender();
+
 
     public:    
         ~Bus();
@@ -24,34 +33,13 @@ class Bus
 
         static void Error(std::string sErr);
         static Bus* GetInstance();
+        static void Run();
 
-        static void OnInit();
-        static void run();
-
-        // // move to the Gfx object
-        // SDL_Window* pWin = nullptr;
-        // Uint32 window_flags = 0;
-        // SDL_Renderer* rend = nullptr;
-        // Uint32 render_flags = SDL_RENDERER_ACCELERATED;
-        // int pixel_scan = 2;
-        // int window_width = 640 * pixel_scan;
-        // int window_height = 400 * pixel_scan;
-
+        static SDL_Window* s_window;
+        static SDL_Renderer* s_renderer;
 };
 
 
 
 
 #endif // __BUS_H__
-
-
-/*
-		OnAttach()			called on creation to add to memory map
-		OnInit()			calls once after all devices are added
-		OnQuit()			called when Gfx is closed
-		OnActivate()		called when opening a new graphics mode
-		OnDeactivate()		called to close current graphics mode
-		OnEvent(event)		called when an event was received
-		OnUpdate(elapsedTime)	called every	
-		OnRender()			called every frame for rendering images
-*/

@@ -25,7 +25,7 @@ int main(void)
 {
     printf("Initializing...\n");
     Bus* bus = Bus::GetInstance();
-    bus->run();
+    bus->Run();
 }
 
 
