@@ -28,6 +28,10 @@ git revert <hash>
 
 git remote add origin https://github.com/warte67/retro_6809.git
 
+git push origin master
+
+
+
 
 *****************************************************/
 
