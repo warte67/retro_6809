@@ -11,6 +11,8 @@ bool Bus::s_bIsRunning = true;
 // temporary statics
 SDL_Window* Bus::s_window = nullptr;
 SDL_Renderer* Bus::s_renderer = nullptr;
+int Bus::s_window_width = 512 * 2;
+int Bus::s_window_height = 384 * 2;
 
 
 // private constructor
@@ -77,17 +79,30 @@ void Bus::_onActivate()
     // move to the Gfx object
         Uint32 window_flags = 0;
         Uint32 render_flags = SDL_RENDERER_ACCELERATED;
-        int pixel_scan = 2;
-        int window_width = 640 * pixel_scan;
-        int window_height = 400 * pixel_scan;
+        // int pixel_scan = 2;
+        // int window_width = 512 * pixel_scan;
+        // int window_height = 384 * pixel_scan;
         // create a new environment
         s_window = SDL_CreateWindow("Retro_6809",
                         SDL_WINDOWPOS_CENTERED,
                         SDL_WINDOWPOS_CENTERED,
-                        window_width, 
-                        window_height, 
+                        s_window_width, 
+                        s_window_height, 
                         window_flags);
         s_renderer = SDL_CreateRenderer(s_window, -1, render_flags);
+
+        for (int t=0; t<4; t++)
+        {
+            SDL_SetRenderDrawColor(s_renderer, 0, 0, 0, 255);
+            SDL_RenderClear(s_renderer);
+            SDL_RenderCopy(s_renderer, NULL, NULL, NULL);
+            SDL_RenderPresent(s_renderer); 
+        }
+        // SDL_RenderClear(s_renderer);
+        // SDL_RenderCopy(s_renderer, NULL, NULL, NULL);
+        // SDL_RenderPresent(s_renderer); 
+
+
     // no longer dirty
     s_bIsDirty = false;
 }
@@ -150,9 +165,22 @@ void Bus::_onEvent()
 void Bus::_onRender()
 {
     // simply clears the screen
-    SDL_RenderClear(s_renderer);
-    SDL_RenderCopy(s_renderer, NULL, NULL, NULL); 
+    //SDL_SetRenderDrawColor(s_renderer, 0, 0, 0, 255);
+    //SDL_RenderClear(s_renderer);
+    //SDL_RenderCopy(s_renderer, NULL, NULL, NULL); 
 
+    // testing
+    for (int t = 0; t < 10000; t++)
+    {
+        int x = rand() % (s_window_width);
+        int y = rand() % (s_window_height);
+        Uint8 r = rand() % 256;
+        Uint8 g = rand() % 256;
+        Uint8 b = rand() % 256;
+        SDL_SetRenderDrawColor(s_renderer, r, g, b, 255);
+        SDL_RenderDrawPoint(s_renderer, x, y);
+        SDL_RenderCopy(s_renderer, NULL, NULL, NULL); 
+    }
     // OnRender()     // call for each attached device
 }
 

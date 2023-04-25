@@ -26,6 +26,8 @@ int main(void)
     printf("Initializing...\n");
     Bus* bus = Bus::GetInstance();
     bus->Run();
+
+    printf("%s\n", SDL_GetError());
 }
 
 

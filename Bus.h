@@ -37,6 +37,9 @@ class Bus
 
         static SDL_Window* s_window;
         static SDL_Renderer* s_renderer;
+        static int s_window_width;
+        static int s_window_height;
+
 };
 
 
