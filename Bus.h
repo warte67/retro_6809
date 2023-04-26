@@ -3,8 +3,10 @@
 #ifndef __BUS_H__
 #define __BUS_H__
 
-#include <string>
-#include <SDL2/SDL.h>
+// #include <string>
+// #include <SDL2/SDL.h>
+#include "types.h"
+#include "Memory.h"
 
 class Bus
 {
@@ -23,7 +25,8 @@ class Bus
         static void _onUpdate();
         static void _onEvent();
         static void _onRender();
-
+        
+        static Memory* s_memory;
 
     public:    
         ~Bus();

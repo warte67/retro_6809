@@ -6,17 +6,33 @@
 
 #include "Device.h"
 
+
+Word Device::OnAttach() 
+{ 
+	printf("Device::OnAttach()\n");
+	return 10; 
+}
+void Device::OnInit() {}
+void Device::OnQuit() {}
+void Device::OnActivate() {}
+void Device::OnDeactivate() {}
+void Device::OnEvent(SDL_Event* evnt) {}
+void Device::OnUpdate(float fElapsedTime) {}
+void Device::OnRender() {}
+
+
+
 Byte Device::read(Word offset, bool debug) 
 {
-	if (offset - base < size)
-		return memory[(Word)(offset - base)];
+	if (offset - _base < _size)
+		return memory[(Word)(offset - _base)];
 	return 0xCC;
 }
 
 void Device::write(Word offset, Byte data, bool debug) 
 {
-	if (offset - base < size)
-		memory[(Word)(offset - base)] = data;
+	if (offset - _base < _size)
+		memory[(Word)(offset - _base)] = data;
 }
 
 Word Device::read_word(Word offset, bool debug) 

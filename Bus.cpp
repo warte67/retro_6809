@@ -5,6 +5,7 @@
 #include "Bus.h"
 
 Bus* Bus::s_bus = nullptr;
+Memory* Bus::s_memory = nullptr;
 bool Bus::s_bIsDirty = true;
 bool Bus::s_bIsRunning = true;
 
@@ -46,12 +47,29 @@ Bus* Bus::GetInstance()
 
 void Bus::_onetime_init()
 {    
+    // create the memory map object
+    s_memory = new Memory();
+
+    // install the memory devices
+    Device* dev = nullptr;
+
+    dev = new Device("Zero Page");
+    s_memory->Attach(dev);
+
+    dev = new Device("User Page");
+    s_memory->Attach(dev);    
+
+    s_memory->DumpMemoryMap();
+
+
+
     // setup/initialize SDL
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         Bus::Error("Error initializing SDL!");
     }    
 
     // OnInit()     // call for each attached device
+    s_memory->_onInit();
 
     // start up external threads
     // ...    
@@ -62,7 +80,13 @@ void Bus::_final_quit()
     _onDeactivate();
 
     // OnQuit()     // call for each attached device
-    
+    if (s_memory)
+    {
+        s_memory->_onQuit();
+        delete s_memory;
+        s_memory = nullptr;
+    }
+        
     // close SDL
     SDL_Quit();
 
@@ -75,6 +99,7 @@ void Bus::_final_quit()
 void Bus::_onActivate()
 {    
     // OnActivate()     // call for each attached device
+    s_memory->_onActivate();
 
     // move to the Gfx object
         Uint32 window_flags = 0;
@@ -111,6 +136,7 @@ void Bus::_onActivate()
 void Bus::_onDeactivate()
 {    
     // OnDeactivate()     // call for each attached device
+    s_memory->_onDeactivate();
 
     // move all of this to the Gfx device object
         // shutdown SDL based devices
@@ -136,6 +162,7 @@ void Bus::_onUpdate()
 {
     // float elapsedtime = time since last frame
     // OnUpdate(elapsedtime)     // call for each attached device
+    s_memory->_onUpdate(0.0f);  // for now zero elapsed time
 }
 
 void Bus::_onEvent()
@@ -144,6 +171,7 @@ void Bus::_onEvent()
     while (SDL_PollEvent(&evnt))
     {
         // OnEvent(evnt)
+        s_memory->_onEvent(&evnt);
 
         switch (evnt.type) {
 
@@ -182,6 +210,7 @@ void Bus::_onRender()
         SDL_RenderCopy(s_renderer, NULL, NULL, NULL); 
     }
     // OnRender()     // call for each attached device
+    s_memory->_onRender();
 }
 
 
