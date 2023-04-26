@@ -53,23 +53,56 @@ void Bus::_onetime_init()
     // install the memory devices
     Device* dev = nullptr;
 
-    dev = new RAM("Zero Page");
-    s_memory->Attach(dev, 256);
 
-    dev = new Device("User Page");
-    s_memory->Attach(dev, 128);    
 
-    dev = new ROM("Simple ROM");
-    s_memory->Attach(dev, 128);    
 
+    // RUN SOME TESTS
+    {
+        dev = new RAM("ZERO_PAGE");
+        s_memory->Attach(dev, 256);
+        dev->DisplayEnum("",0,"This is a single line comment?");
+        dev->DisplayEnum("FIRST", 0x0000,"This is a comment");
+        dev->DisplayEnum("SECOND",0x0001,"Another Comment");
+        dev->DisplayEnum("THIRD", 0x0002,"Something Special");
+        dev->DisplayEnum("FOURTH",0x0003,"Third wasn't enough");
+        printf("\n");
+        dev = new Device("USER_PAGE");
+        s_memory->Attach(dev, 128);    
+        dev = new ROM("SIMPLE_ROM");
+        s_memory->Attach(dev, 128);    
+    }
+    // END TESTS
+
+
+
+
+    // close the memory map definitions
+    if (COMPILE_MEMORY_MAP)
+    {
+        if (MEMORY_MAP_OUTPUT_CPP)
+            printf("};  // END: enum MEMMAP\n\n");
+        else
+            printf("; END of definitions\n\n");
+    }
     s_memory->DumpMemoryMap();
 
-    Byte wr = 127;
-    Word addr = 0x0181;
-    s_memory->write(addr, 69, true);
-    s_memory->write(addr, wr);
-    Byte data = s_memory->read(addr);
-    printf("  $%04x:$%02x written, $%02X read\n", addr, wr, data);
+
+
+
+
+    // TESTING READ/WRITE
+    {
+        Byte wr = 127;
+        Word addr = 0x0181;
+        s_memory->write(addr, 69, true);
+        s_memory->write(addr, wr);
+        Byte data = s_memory->read(addr);
+        printf("  $%04x:$%02x written, $%02X read\n", addr, wr, data);
+    }
+    // END TESTS
+
+
+
 
     // setup/initialize SDL
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {

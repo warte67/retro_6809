@@ -41,9 +41,11 @@ class Device
         void Size(Word size) { _size = size; memory.resize(size); }
         std::string Name()  { return _deviceName; }
         void Name(std::string n) { _deviceName = n; }
-
         Byte _memory(Word ofs) { return memory[ofs]; }
         void _memory(Word ofs, Byte data) { memory[ofs] = data; }
+
+        // helpers
+        void DisplayEnum(std::string sToken, Word ofs, std::string sComment);
 
     private:
         std::string _deviceName = "??DEV??";

@@ -50,3 +50,30 @@ void Device::write_word(Word offset, Word data, bool debug)
 	write(offset, msb);
 	write(offset + 1, lsb);
 }
+
+void Device::DisplayEnum(std::string sToken, Word ofs, std::string sComment)
+{
+	if (COMPILE_MEMORY_MAP)
+	{
+		std::string sCTK = "; ";
+		if (MEMORY_MAP_OUTPUT_CPP)
+			sCTK = "// ";
+		if (sComment.empty())
+			sCTK = "";
+		// single line comment
+		if (sToken.empty())
+		{
+			printf("    %s%s\n", sCTK.c_str(), sComment.c_str());
+		}
+		// normal line
+		else
+		{
+			printf("  %12s = 0x%04x,\t%s%s\n", 
+				sToken.c_str(),
+				ofs, 
+				sCTK.c_str(),
+				sComment.c_str()
+			);		
+		}
+	}
+}

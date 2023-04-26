@@ -51,16 +51,12 @@ Word Memory::Attach(Device* dev, Word size)
     if (dev != nullptr)
     {
         if (size == 0)
-            size = dev->OnAttach();            
+            size = dev->OnAttach();     
+        else
+            dev->DisplayEnum(dev->Name(), _lastAddress, "");
         dev->Base(_lastAddress);
-
         dev->Size(size);
-
-
-        _lastAddress += size;
-
-        
-        
+        _lastAddress += size;               
         _memoryNodes.push_back(dev);
     }
     if (size > 65536)
@@ -84,6 +80,24 @@ void Memory::DumpMemoryMap()
 Memory::Memory()
 {
     printf("Memory::Memory()\n");
+    if (COMPILE_MEMORY_MAP)
+    {
+        if (MEMORY_MAP_OUTPUT_CPP)
+        {
+            printf("\n");
+            printf("enum MEMMAP\n");
+            printf("{\n");
+            printf("    //  **********************************************\n");
+            printf("    //  * Allocated 64k Memory Mapped System Symbols *\n");
+            printf("    //  **********************************************\n");
+        }
+        else
+        {
+            printf(";  **********************************************\n");
+            printf(";  * Allocated 64k Memory Mapped System Symbols *\n");
+            printf(";  **********************************************\n");
+        }
+    }
 }
 Memory::~Memory()
 {
