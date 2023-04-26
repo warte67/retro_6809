@@ -9,7 +9,7 @@
 
 Word Device::OnAttach(Word nextAddr) 
 { 
-	printf("Device::OnAttach()\n");
+	//printf("Device::OnAttach()\n");
 	// return the size of this devices memory block
 	// default = 0 (undefined device)
 	return 0; 
@@ -62,9 +62,7 @@ void Device::DisplayEnum(std::string sToken, Word ofs, std::string sComment)
 			sCTK = "";
 		// single line comment
 		if (sToken.empty())
-		{
 			printf("    %s%s\n", sCTK.c_str(), sComment.c_str());
-		}
 		// normal line
 		else
 		{

@@ -66,35 +66,45 @@ void Bus::_onetime_init()
     s_memory->Attach(dev, 512);  
     dev->DisplayEnum("STACK_TOP",0x0400, "Top of the system stack space");  
 
-
-    printf("\n");
+    dev->DisplayEnum("",0, "");
     dev->DisplayEnum("",0, "Text Display Buffer (5K bytes)");
     dev = new RAM("SCREEN_BUFFER");
     s_memory->Attach(dev, 5120);    
 
-    printf("\n");
+    dev->DisplayEnum("",0, "");
     dev->DisplayEnum("",0, "Device Registers (2K Bytes)");
     dev->DisplayEnum("HDW_REGS", 0x1800, "Begin Device Hardware Registers");
 
     dev = new Gfx("GFX_DEVICE");
     s_memory->Attach(dev);    
 
-    printf("\n");
+    // calculate space remaining for registers
+    dev->DisplayEnum("",0, "");
+    int ap = 0x2000 - s_memory->ap();
+    std::string sC = ";";
+    if (MEMORY_MAP_OUTPUT_CPP)
+        sC = "//";
+    printf("    %s %d ($%04X) bytes remaining for additional registers.\n",sC.c_str(), ap, ap);
+    dev = new RAM("RESERVED");
+    s_memory->Attach(dev, ap);
+
+
+    dev->DisplayEnum("",0, "");
     dev->DisplayEnum("",0x2000, "User RAM (44K bytes)");
     dev = new RAM("USER_RAM");
     s_memory->Attach(dev, 0xB000);    
 
-    printf("\n");
+    dev->DisplayEnum("",0, "");
     dev->DisplayEnum("",0xD000, "Paged Memory (8K)");
     dev = new RAM("PAGED_MEM");
     s_memory->Attach(dev, 0x2000);   
 
-    printf("\n");
+    dev->DisplayEnum("",0, "");
     dev->DisplayEnum("",0xF000, "KERNEL ROM (4K bytes)");
     dev = new ROM("KERNEL_ROM");
     s_memory->Attach(dev, 0x1000);      
 
-    printf("\n");
+    dev->DisplayEnum("",0, "");
     dev->DisplayEnum("",0,"Hardware Interrupt Vectors:");
     dev->DisplayEnum("HARD_RSRVD",0xfff0, "Motorola RESERVED Hardware Interrupt Vector");
     dev->DisplayEnum("HARD_SWI3", 0xfff2, "SWI3 Hardware Interrupt Vector");

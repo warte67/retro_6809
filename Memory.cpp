@@ -13,9 +13,7 @@ Byte Memory::read(Word offset, bool debug)
     {
         if (offset - a->Base() < a->Size())
         {
-            //Byte data = a->read(offset - a->Base());
             Byte data = a->read(offset, debug);
-            // printf("-->%s:%d\n", a->Name().c_str(), data);
             return data;
         }
     }
@@ -28,9 +26,7 @@ void Memory::write(Word offset, Byte data, bool debug)
     {
         if (offset - a->Base() < a->Size())
         {
-            // a->write(offset - a->Base(), data);
             a->write(offset, data, debug);
-            // printf("-->%s:%d\n", a->Name().c_str(), data);
             return;
         }
     }    
