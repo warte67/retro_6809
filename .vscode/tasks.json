@@ -9,7 +9,7 @@
                 "-g",
                 "*.cpp",
                 "-o",
-                "${fileDirname}/bin/${fileBasenameNoExtension}",
+                "${fileDirname}/bin/main",
                 "-std=c++20",
                 "-lSDL2"
             ],
