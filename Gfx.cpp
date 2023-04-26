@@ -252,7 +252,7 @@ void Gfx::OnActivate()
     SDL_SetRenderDrawBlendMode(_renderer, SDL_BLENDMODE_BLEND);
 
     // create the desktop texture
-    _texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_ARGB8888,
+    _bg_texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_ARGB8888,
 			SDL_TEXTUREACCESS_STREAMING, _texture_width, _texture_height);
 }
 
@@ -261,10 +261,10 @@ void Gfx::OnDeactivate()
     printf("Gfx::OnDeactivate()\n");
     // shutdown SDL based devices
     // destroy texture
-    if (_texture)
+    if (_bg_texture)
     {
-        SDL_DestroyTexture(_texture);
-        _texture = nullptr;
+        SDL_DestroyTexture(_bg_texture);
+        _bg_texture = nullptr;
     }
     // destroy renderer
     if (_renderer != nullptr)
@@ -377,7 +377,7 @@ void Gfx::_updateGraphics(float fElapsedTime)
     void *pixels;
     int pitch;
     Uint8 clr_index = 0;
-    if (SDL_LockTexture(_texture, NULL, &pixels, &pitch) < 0) {
+    if (SDL_LockTexture(_bg_texture, NULL, &pixels, &pitch) < 0) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't lock texture: %s\n", SDL_GetError());
         Bus::Error("");
     }
@@ -399,11 +399,8 @@ void Gfx::_updateGraphics(float fElapsedTime)
                 );
             }
         }
-        SDL_UnlockTexture(_texture);    
+        SDL_UnlockTexture(_bg_texture);    
     }
-
-    SDL_SetRenderTarget(_renderer, NULL);
-    SDL_RenderCopy(_renderer, _texture, NULL, NULL);
 }
 void Gfx::_updateTiles(float fElapsedTime) {}
 void Gfx::_updateTextGlyphs(float fElapsedTime) {}
@@ -498,8 +495,12 @@ void Gfx::_decode_gmode()
 
 void Gfx::OnRender() 
 {
-    // render the background graphics layer
+    // clear the window    
     SDL_SetRenderTarget(_renderer, NULL);
+    SDL_RenderClear(_renderer);
+    SDL_RenderCopy(_renderer, NULL, NULL, NULL);
+
+    // build the destination rectangle according to current aspect ratio
     int ww = _window_width;
     int wh = _window_height;
     float fh = (float)_window_height;
@@ -516,7 +517,8 @@ void Gfx::OnRender()
         (int)fw, 
         (int)fh 
     };
-    SDL_RenderCopy(_renderer, _texture, NULL, &dest);
+    // render the background graphics layer
+    SDL_RenderCopy(_renderer, _bg_texture, NULL, &dest);
     
     // render the text glyph layer
     // ...

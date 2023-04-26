@@ -32,7 +32,7 @@ class Gfx : public Device
         // read-only accessors:
         SDL_Renderer* GetRenderer() { return _renderer; }
         SDL_Window* GetWindow() { return _window; }
-        SDL_Texture* GetTexture() { return _texture; }
+        SDL_Texture* GetBGTexture() { return _bg_texture; }
 
     private:
 
@@ -46,7 +46,7 @@ class Gfx : public Device
                             SDL_RENDERER_TARGETTEXTURE;
         SDL_Window* _window = nullptr;
         SDL_Renderer* _renderer = nullptr;
-        SDL_Texture* _texture;        
+        SDL_Texture* _bg_texture;        
         const float _aspect = 1.6f;     //16x10
         int _timing_width = 512;
         int _timing_height = _timing_width / _aspect;   //384;
