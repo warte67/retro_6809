@@ -62,7 +62,7 @@ Word Memory::Attach(Device* dev, Word size)
 
 void Memory::DumpMemoryMap()
 {
-    printf("  Dumping the memory map allocation info:\n");
+    printf("  Simple Memory Map:\n");
     for(auto &o : _memoryNodes)
     {
         printf("    $%04X-$%04X %s\n", 
@@ -75,7 +75,7 @@ void Memory::DumpMemoryMap()
 
 Memory::Memory()
 {
-    printf("Memory::Memory()\n");
+    //printf("Memory::Memory()\n");
     if (COMPILE_MEMORY_MAP)
     {
         if (MEMORY_MAP_OUTPUT_CPP)
@@ -97,18 +97,18 @@ Memory::Memory()
 }
 Memory::~Memory()
 {
-    printf("Memory::~Memory()\n");
+    //printf("Memory::~Memory()\n");
 }
 
 void Memory::_onInit() 
 {
-    printf("Memory::_onInit()\n");
+    //printf("Memory::_onInit()\n");
     for (auto &m : _memoryNodes)
         m->OnInit();
 }
 void Memory::_onQuit() 
 {
-    printf("Memory::_onQuit()\n");
+    //printf("Memory::_onQuit()\n");
     // close out each memory node
     for (auto& m : _memoryNodes)
         m->OnQuit();
@@ -120,13 +120,13 @@ void Memory::_onQuit()
 }
 void Memory::_onActivate() 
 {
-    printf("Memory::_onActivate()\n");
+    //printf("Memory::_onActivate()\n");
     for (auto &m : _memoryNodes)
         m->OnActivate();    
 }
 void Memory::_onDeactivate() 
 {
-    printf("Memory::_onDeactivate()\n");
+    //printf("Memory::_onDeactivate()\n");
     for (auto &m : _memoryNodes)
         m->OnDeactivate();      
 }
@@ -155,6 +155,6 @@ void Memory::_onRender()
 void ROM::write(Word offset, Byte data, bool debug) 
 {
     if (debug)
-        if (offset - _base < _size)
-            memory[(Word)(offset -_base)] = data;
+        if (offset - m_base < m_size)
+            m_memory[(Word)(offset - m_base)] = data;
 }

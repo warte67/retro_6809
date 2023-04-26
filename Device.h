@@ -35,14 +35,14 @@ class Device
 
         // public accessors
         std::string name() { return _deviceName; }
-        Word Base() { return _base; }
-        void Base(Word addr) { _base = addr; }
-        Word Size() { return _size = memory.size(); }
-        void Size(Word size) { _size = size; memory.resize(size); }
+        Word Base() { return m_base; }
+        void Base(Word addr) { m_base = addr; }
+        Word Size() { return m_size = m_memory.size(); }
+        void Size(Word size) { m_size = size; m_memory.resize(size); }
         std::string Name()  { return _deviceName; }
         void Name(std::string n) { _deviceName = n; }
-        Byte _memory(Word ofs) { return memory[ofs]; }
-        void _memory(Word ofs, Byte data) { memory[ofs] = data; }
+        Byte _memory(Word ofs) { return m_memory[ofs]; }
+        void _memory(Word ofs, Byte data) { m_memory[ofs] = data; }
 
         // helpers
         void DisplayEnum(std::string sToken, Word ofs, std::string sComment);
@@ -51,9 +51,9 @@ class Device
         std::string _deviceName = "??DEV??";
 
     protected:
-        Uint16 _base = 0;
-        Uint16 _size = 0;
-        std::vector<Uint8> memory;	// memory mapped to this device    
+        Uint16 m_base = 0;
+        Uint16 m_size = 0;
+        std::vector<Uint8> m_memory;	// memory mapped to this device    
 };
 
 

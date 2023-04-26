@@ -26,15 +26,15 @@ void Device::OnRender() {}
 
 Byte Device::read(Word offset, bool debug) 
 {
-	if (offset - _base < _size)
-		return memory[(Word)(offset - _base)];
+	if (offset - m_base < m_size)
+		return m_memory[(Word)(offset - m_base)];
 	return 0xCC;
 }
 
 void Device::write(Word offset, Byte data, bool debug) 
 {
-	if (offset - _base < _size)
-		memory[(Word)(offset - _base)] = data;
+	if (offset - m_base < m_size)
+		m_memory[(Word)(offset - m_base)] = data;
 }
 
 Word Device::read_word(Word offset, bool debug) 

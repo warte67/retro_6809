@@ -24,7 +24,7 @@ GIT Stuff:
 
 int main(void)
 {
-    printf("Initializing...\n");
+    //printf("Initializing...\n");
     Bus* bus = Bus::GetInstance();
     bus->Run();
 

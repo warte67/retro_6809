@@ -7,6 +7,7 @@
 // #include <SDL2/SDL.h>
 #include "types.h"
 #include "Memory.h"
+#include "Gfx.h"
 
 class Bus
 {
@@ -28,6 +29,8 @@ class Bus
         
         static Memory* s_memory;
 
+        int _fps = 0;
+
     public:    
         ~Bus();
         Bus(Bus &other) = delete;
@@ -38,11 +41,13 @@ class Bus
         static void Run();
 
         // temporary statics
-        static SDL_Window* s_window;
-        static SDL_Renderer* s_renderer;
-        static int s_window_width;
-        static int s_window_height;
-
+        // static SDL_Window* s_window;
+        // static SDL_Renderer* s_renderer;
+        // static int s_window_width;
+        // static int s_window_height;
+    
+        static Gfx* _gfx;
+        int FPS() { return _fps; }
 };
 
 

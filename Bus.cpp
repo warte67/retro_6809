@@ -1,6 +1,8 @@
 // Bus.cpp
 //
 #include <stdio.h>
+#include <sstream>
+#include <chrono>
 
 #include "Bus.h"
 #include "Gfx.h"
@@ -9,21 +11,22 @@ Bus* Bus::s_bus = nullptr;
 Memory* Bus::s_memory = nullptr;
 bool Bus::s_bIsDirty = true;
 bool Bus::s_bIsRunning = true;
+Gfx* Bus::_gfx = nullptr;
 
 // temporary statics
-SDL_Window* Bus::s_window = nullptr;
-SDL_Renderer* Bus::s_renderer = nullptr;
-int Bus::s_window_width = 512 * 2;
-int Bus::s_window_height = 384 * 2;
+// SDL_Window* Bus::s_window = nullptr;
+// SDL_Renderer* Bus::s_renderer = nullptr;
+// int Bus::s_window_width = 512 * 2;
+// int Bus::s_window_height = 384 * 2;
 
 
 // private constructor
 Bus::Bus() {
-    printf("Bus::Bus()\n");
+    //printf("Bus::Bus()\n");
 }   
 // public destructor
 Bus::~Bus() {
-    printf("Bus::~Bus()\n");
+   // printf("Bus::~Bus()\n");
 }
 // internal shutdown
 void Bus::_quit() {
@@ -76,7 +79,8 @@ void Bus::_onetime_init()
     dev->DisplayEnum("HDW_REGS", 0x1800, "Begin Device Hardware Registers");
 
     dev = new Gfx("GFX_DEVICE");
-    s_memory->Attach(dev);    
+    s_memory->Attach(dev); 
+    _gfx = dynamic_cast<Gfx*>(dev);   
 
     // calculate space remaining for registers
     dev->DisplayEnum("",0, "");
@@ -84,10 +88,13 @@ void Bus::_onetime_init()
     std::string sC = ";";
     if (MEMORY_MAP_OUTPUT_CPP)
         sC = "//";
-    printf("    %s %d ($%04X) bytes remaining for additional registers.\n",sC.c_str(), ap, ap);
-    dev = new RAM("RESERVED");
+    if (COMPILE_MEMORY_MAP)
+        printf("    %s %d ($%04X) bytes remaining for additional registers.\n",sC.c_str(), ap, ap);
+    std::stringstream ss;
+    ss << "RESERVED (" << ap << " bytes remaining)";
+    dev = new RAM(ss.str().c_str());
+    // dev = new RAM("RESERVED");
     s_memory->Attach(dev, ap);
-
 
     dev->DisplayEnum("",0, "");
     dev->DisplayEnum("",0x2000, "User RAM (44K bytes)");
@@ -96,7 +103,7 @@ void Bus::_onetime_init()
 
     dev->DisplayEnum("",0, "");
     dev->DisplayEnum("",0xD000, "Paged Memory (8K)");
-    dev = new RAM("PAGED_MEM");
+    dev = new RAM("PAGED_MEMORY");
     s_memory->Attach(dev, 0x2000);   
 
     dev->DisplayEnum("",0, "");
@@ -122,12 +129,19 @@ void Bus::_onetime_init()
             printf("};  // END: enum MEMMAP\n\n");
         else
             printf("; END of definitions\n\n");
+
+        printf("\n\nThe flag COMPILE_MEMORY_MAP is set as true, therefore this app\n");
+        printf("cannot continue past this point. Set the definition of COMPILE_MEMORY_MAP\n");
+        printf("to false in the file types.h and recompile to run this application.\n\n");
+        Error("Copy the above enumerated definitions above to memory_map.h");
+        exit(0);
     }
     s_memory->DumpMemoryMap();
 
 
 
     // TESTING READ/WRITE
+    if (false)
     {
         Byte wr = 0xAA;
         Word addr = 0x0181;
@@ -182,33 +196,6 @@ void Bus::_onActivate()
     // OnActivate()     // call for each attached device
     s_memory->_onActivate();
 
-    // move to the Gfx object
-        Uint32 window_flags = 0;
-        Uint32 render_flags = SDL_RENDERER_ACCELERATED;
-        // int pixel_scan = 2;
-        // int window_width = 512 * pixel_scan;
-        // int window_height = 384 * pixel_scan;
-        // create a new environment
-        s_window = SDL_CreateWindow("Retro_6809",
-                        SDL_WINDOWPOS_CENTERED,
-                        SDL_WINDOWPOS_CENTERED,
-                        s_window_width, 
-                        s_window_height, 
-                        window_flags);
-        s_renderer = SDL_CreateRenderer(s_window, -1, render_flags);
-
-        for (int t=0; t<4; t++)
-        {
-            SDL_SetRenderDrawColor(s_renderer, 0, 0, 0, 255);
-            SDL_RenderClear(s_renderer);
-            SDL_RenderCopy(s_renderer, NULL, NULL, NULL);
-            SDL_RenderPresent(s_renderer); 
-        }
-        // SDL_RenderClear(s_renderer);
-        // SDL_RenderCopy(s_renderer, NULL, NULL, NULL);
-        // SDL_RenderPresent(s_renderer); 
-
-
     // no longer dirty
     s_bIsDirty = false;
 }
@@ -218,32 +205,41 @@ void Bus::_onDeactivate()
 {    
     // OnDeactivate()     // call for each attached device
     s_memory->_onDeactivate();
-
-    // move all of this to the Gfx device object
-        // shutdown SDL based devices
-        // destroy texture
-        //SDL_DestroyTexture(tex);
-
-        // destroy renderer
-        if (s_renderer != nullptr) 
-        {
-            SDL_DestroyRenderer(s_renderer);
-            s_renderer=nullptr;
-        }
-        // destroy window
-        if (s_window != nullptr)
-        {
-            SDL_DestroyWindow(s_window);
-        }    
+ 
     // no longer dirty
     s_bIsDirty = true;
 }
 
 void Bus::_onUpdate()
 {
+    // Handle Timing
+    static std::chrono::time_point<std::chrono::system_clock> tp1 = std::chrono::system_clock::now();
+    static std::chrono::time_point<std::chrono::system_clock> tp2 = std::chrono::system_clock::now();
+
+    tp2 = std::chrono::system_clock::now();
+    std::chrono::duration<float> elapsedTime = tp2 - tp1;
+    tp1 = tp2;
+    // Our time per frame coefficient
+    float fElapsedTime = elapsedTime.count();
+    static float fLastElapsed = fElapsedTime;
+    static float fFrameTimer = fElapsedTime;
+
+    // count frames per second
+    static int fps = 0;
+    static int frame_count = 0;
+    static float frame_acc = fElapsedTime;
+    frame_count++;
+    frame_acc += fElapsedTime;    
+
+    if (frame_acc > 1.0f + fElapsedTime)
+    {
+        frame_acc -= 1.0f;
+		s_bus->_fps = frame_count;
+		frame_count = 0;
+    }    
     // float elapsedtime = time since last frame
     // OnUpdate(elapsedtime)     // call for each attached device
-    s_memory->_onUpdate(0.0f);  // for now zero elapsed time
+    s_memory->_onUpdate(fElapsedTime);  // for now zero elapsed time
 }
 
 void Bus::_onEvent()
@@ -278,18 +274,6 @@ void Bus::_onRender()
     //SDL_RenderClear(s_renderer);
     //SDL_RenderCopy(s_renderer, NULL, NULL, NULL); 
 
-    // testing
-    for (int t = 0; t < 10000; t++)
-    {
-        int x = rand() % (s_window_width);
-        int y = rand() % (s_window_height);
-        Uint8 r = rand() % 256;
-        Uint8 g = rand() % 256;
-        Uint8 b = rand() % 256;
-        SDL_SetRenderDrawColor(s_renderer, r, g, b, 255);
-        SDL_RenderDrawPoint(s_renderer, x, y);
-        SDL_RenderCopy(s_renderer, NULL, NULL, NULL); 
-    }
     // OnRender()     // call for each attached device
     s_memory->_onRender();
 }
@@ -313,8 +297,10 @@ void Bus::Run()
         _onUpdate();
         _onEvent();
         _onRender();  
-        // present the frame
-        SDL_RenderPresent(s_renderer);           
+
+        // swap display buffers / present
+        if (_gfx)
+            SDL_RenderPresent(_gfx->GetRenderer());           
     }
     _final_quit();
 }
