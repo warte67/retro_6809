@@ -9,9 +9,6 @@
 
 Byte Gfx::read(Word offset, bool debug)
 {
-    // if (offset - _base < _size)
-    // 	return memory[(Word)(offset - _base)];
-
     // printf("READ GFX: $%04X = ???\n", offset);
     switch(offset)
     {
@@ -31,7 +28,7 @@ Byte Gfx::read(Word offset, bool debug)
         case DSP_PAL_CLR:       return (_dsp_pal_clr >> 8) & 0xFF;
         case DSP_PAL_CLR+1:     return _dsp_pal_clr & 0xFF;
 
-        // text glyph definition data registers (TODO: move to text glyphy mode)
+        // text glyph definition data registers (TODO: move to text glyph mode)
         case DSP_GLYPH_IDX:     return _dsp_glyph_idx;
         case DSP_GLYPH_DATA:    return 0;   //(_dsp_glhph_data[_dsp_glyph_idx] >> 8) & 0xFF;
         case DSP_GLYPH_DATA+1:  return 0;   //_dsp_glhph_data[_dsp_glyph_idx] & 0xFF;
@@ -45,10 +42,6 @@ Byte Gfx::read(Word offset, bool debug)
 
 void Gfx::write(Word offset, Byte data, bool debug)
 {
-    // if (debug)
-    //     if (offset - _base < _size)
-    //         memory[(Word)(offset -_base)] = data;
-
     printf("WRITE GFX: $%04X = $%02X\n", offset, data);
 
     switch (offset)
@@ -81,9 +74,6 @@ void Gfx::write(Word offset, Byte data, bool debug)
                 _dsp_emuflags = data;                 
                 return;
             }
-            // // screen needs to be refreshed
-            // _dsp_gmode = data;      
-            // Bus::IsDirty(false);
         }
         break;
     }
@@ -188,8 +178,52 @@ Word Gfx::OnAttach(Word nextAddr)
     return nextAddr - old_addr;
 }
 
-void Gfx::OnInit() {}
-void Gfx::OnQuit() {}
+void Gfx::OnInit() 
+{
+    if (_gfxDisplayBuffer.size() == 0)
+        _gfxDisplayBuffer.resize(65536);
+
+	// initialize the default color palette
+	if (_palette.size() == 0)
+	{
+		for (int t = 0; t < 16; t++)
+			_palette.push_back({0x00});
+		std::vector<PALETTE> ref = {
+			{ 0x0000 },	// 0000 0000.0000 0000		0
+			{ 0x005F },	// 0000 0000.0101 1111		1
+			{ 0x050F },	// 0000 0101.0000 1111		2
+			{ 0x055F },	// 0000 0101.0101 1111		3
+			{ 0x500F },	// 0101 0000.0000 1111		4
+			{ 0x505F },	// 0101 0000.0101 1111		5
+			{ 0x631F },	// 0101 0101.0000 1111		6		{ 0x550F }
+			{ 0xAAAF },	// 1010 1010.1010 1111		7
+			{ 0x555F },	// 0101 0101.0101 1111		8
+			{ 0x00FF },	// 0000 0000.1111 1111		9
+			{ 0x0F0F },	// 0000 1111.0000 1111		a
+			{ 0x0FFF },	// 0000 1111.1111 1111		b
+			{ 0xF00F },	// 1111 0000.0000 1111		c
+			{ 0xF0FF },	// 1111 0000.1111 1111		d
+			{ 0xFF0F },	// 1111 1111.0000 1111		e
+			{ 0xFFFF },	// 1111 1111.1111 1111		f
+		};
+        int t=0;
+        for (auto &p : ref)
+            _palette[t++] = p;
+        
+        // ToDo: define the rest of the color palette
+        // ...
+
+        // Temp: Fill the rest of the palette with black
+		PALETTE blank { 0 };
+		while (_palette.size() < 256)
+			_palette.push_back(blank);
+	}        
+}
+void Gfx::OnQuit() 
+{    
+    _palette.clear();
+    _gfxDisplayBuffer.clear();
+}
 
 void Gfx::OnActivate()
 {
@@ -216,13 +250,10 @@ void Gfx::OnActivate()
         _render_flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE | SDL_RENDERER_PRESENTVSYNC;         
     _renderer = SDL_CreateRenderer(_window, -1, _render_flags);
     SDL_SetRenderDrawBlendMode(_renderer, SDL_BLENDMODE_BLEND);
+
     // create the desktop texture
-    _texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGBA4444,
-			SDL_TEXTUREACCESS_TARGET, _texture_width, _texture_height);
-    SDL_SetRenderTarget(_renderer, _texture);
-    SDL_SetRenderDrawColor(_renderer, 0, 0, 255, 255);  //clear to blue for now
-    SDL_RenderClear(_renderer);
-    SDL_SetRenderTarget(_renderer, NULL);
+    _texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_ARGB8888,
+			SDL_TEXTUREACCESS_STREAMING, _texture_width, _texture_height);
 }
 
 void Gfx::OnDeactivate()
@@ -302,7 +333,7 @@ void Gfx::OnEvent(SDL_Event *evnt)
             // number keys change pixel size
             if (evnt->key.keysym.sym >= SDLK_0 && evnt->key.keysym.sym <= SDLK_8)
             {
-                Byte key =  evnt->key.keysym.sym - 48;                
+                Byte key =  evnt->key.keysym.sym - SDLK_0;                
                 printf("key: %d\n", key);
                 Byte data = Bus::memory()->read(DSP_GMODE) & 0xF0;
                 switch(key)
@@ -322,28 +353,81 @@ void Gfx::OnEvent(SDL_Event *evnt)
         }
         break;
     }
+} 
+
+void Gfx::_updateGraphics(float fElapsedTime)
+{
+    // TEMPORARY RANDOM NOISE
+    const float _texDelay = 0.01f;
+    static float _texAcc = fElapsedTime;
+    _texAcc += fElapsedTime;
+    if (_texAcc > fElapsedTime + _texDelay)
+    {
+        _texAcc -= _texDelay;
+        for (int t=0; t<65536; t++)
+            _gfxDisplayBuffer[t] = rand() % 16;
+    }
+    printf("fElapsedTime: %f\n", fElapsedTime);
+
+    // steam to the background texture
+    Word pixel_index = 0;
+    SDL_Color sdl_c;
+    Uint8 *src;
+    Uint32 *dst;
+    void *pixels;
+    int pitch;
+    Uint8 clr_index = 0;
+    if (SDL_LockTexture(_texture, NULL, &pixels, &pitch) < 0) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't lock texture: %s\n", SDL_GetError());
+        Bus::Error("");
+    }
+    else
+    {
+        for (int row = 0; row < _texture_height; ++row) 
+        {
+            dst = (Uint32*)((Uint8*)pixels + row * pitch);
+            //for (int col = 0; col < _texture_width; ++col) 
+            for (int col = 0; col < _texture_width; ++col) 
+            {
+                clr_index = _gfxDisplayBuffer[pixel_index++];
+                *dst++ = 
+                (
+                    0xFF000000 |
+                    (red(clr_index)<<16) |
+                    (grn(clr_index)<<8) |
+                    blu(clr_index)
+                );
+            }
+        }
+        SDL_UnlockTexture(_texture);    
+    }
+
+    SDL_SetRenderTarget(_renderer, NULL);
+    SDL_RenderCopy(_renderer, _texture, NULL, NULL);
 }
+void Gfx::_updateTiles(float fElapsedTime) {}
+void Gfx::_updateTextGlyphs(float fElapsedTime) {}
+void Gfx::_updateSprites(float fElapsedTime) {}
 
 void Gfx::OnUpdate(float fElapsedTime)
 {
+    // update the window title bar
     Bus* bus = Bus::GetInstance();
     std::string sTitle = "Retro_68009 - FPS: ";
     sTitle += std::to_string(bus->FPS());
     SDL_SetWindowTitle(_window, sTitle.c_str());
 
-    // fill the Gfx screen with static
-    SDL_SetRenderTarget(_renderer, _texture);
-    for (int t=0; t<10000; t++)
-    {
-        int x = rand() % (_texture_width);
-        int y = rand() % (_texture_height);
-        Uint8 r = rand() % 256;
-        Uint8 g = rand() % 256;
-        Uint8 b = rand() % 256;
-        SDL_SetRenderDrawColor(_renderer, r, g, b, 255);
-        SDL_RenderDrawPoint(_renderer, x, y);
-        SDL_RenderCopy(_renderer, NULL, NULL, NULL);
-    }
+    // display the background graphics (OR the tile graphics)
+    if (true)
+        _updateGraphics(fElapsedTime);
+    else
+        _updateTiles(fElapsedTime);
+
+    // overlay the text glyphs
+    _updateTextGlyphs(fElapsedTime);
+
+    // overlay sprites
+    _updateSprites(fElapsedTime);
 }
 
 void Gfx::_decode_gmode()
@@ -414,10 +498,8 @@ void Gfx::_decode_gmode()
 
 void Gfx::OnRender() 
 {
+    // render the background graphics layer
     SDL_SetRenderTarget(_renderer, NULL);
-    SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
-    SDL_RenderClear(_renderer);
-    SDL_RenderCopy(_renderer, NULL, NULL, NULL);    
     int ww = _window_width;
     int wh = _window_height;
     float fh = (float)_window_height;
@@ -435,6 +517,12 @@ void Gfx::OnRender()
         (int)fh 
     };
     SDL_RenderCopy(_renderer, _texture, NULL, &dest);
+    
+    // render the text glyph layer
+    // ...
+    
+    // render the sprite layer
+    // ...
 
     // The Bus object presents after everything renders
     // SDL_RenderPresent(_renderer);    
