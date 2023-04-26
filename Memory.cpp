@@ -51,7 +51,7 @@ Word Memory::Attach(Device* dev, Word size)
     if (dev != nullptr)
     {
         if (size == 0)
-            size = dev->OnAttach();     
+            size = dev->OnAttach((Word)_lastAddress);     
         else
             dev->DisplayEnum(dev->Name(), _lastAddress, "");
         dev->Base(_lastAddress);

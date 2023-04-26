@@ -25,6 +25,10 @@ class Memory
 		Word Attach(Device* dev, Word size = 0);   // attach a user defined memory node
         void DumpMemoryMap();
 
+        
+        int ap() { return _lastAddress; }
+        void ap(int _addr)  { _lastAddress = _addr; }
+        
     private:
 		void _onInit();
 		void _onQuit();

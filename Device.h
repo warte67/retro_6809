@@ -19,7 +19,7 @@ class Device
         virtual ~Device() {}
 
         // virtuals
-		virtual Word OnAttach();        // map memory and return the size
+		virtual Word OnAttach(Word nextAddr);        // map memory and return the size
 		virtual void OnInit();
 		virtual void OnQuit();
 		virtual void OnActivate();

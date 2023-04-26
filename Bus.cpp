@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 #include "Bus.h"
+#include "Gfx.h"
 
 Bus* Bus::s_bus = nullptr;
 Memory* Bus::s_memory = nullptr;
@@ -75,11 +76,8 @@ void Bus::_onetime_init()
     dev->DisplayEnum("",0, "Device Registers (2K Bytes)");
     dev->DisplayEnum("HDW_REGS", 0x1800, "Begin Device Hardware Registers");
 
-
-    // TODO:  GFX DEVICE
-        dev = new RAM("GFX_DEVICE");
-        s_memory->Attach(dev, 0x800);    
-    // TODO:  GFX DEVICE
+    dev = new Gfx("GFX_DEVICE");
+    s_memory->Attach(dev);    
 
     printf("\n");
     dev->DisplayEnum("",0x2000, "User RAM (44K bytes)");
@@ -107,27 +105,6 @@ void Bus::_onetime_init()
     dev->DisplayEnum("HARD_NMI",  0xfffC, "NMI Hardware Interrupt Vector");
     dev->DisplayEnum("HARD_RESET",0xfffE, "RESET Hardware Interrupt Vector");
 
-
-    // RUN SOME TESTS
-    // {
-    //     dev = new RAM("ZERO_PAGE");
-    //     s_memory->Attach(dev, 256);
-    //     dev->DisplayEnum("",0,"This is a single line comment?");
-    //     dev->DisplayEnum("FIRST", 0x0000,"This is a comment");
-    //     dev->DisplayEnum("SECOND",0x0001,"Another Comment");
-    //     dev->DisplayEnum("THIRD", 0x0002,"Something Special");
-    //     dev->DisplayEnum("FOURTH",0x0003,"Third wasn't enough");
-    //     printf("\n");
-    //     dev = new Device("USER_PAGE");
-    //     s_memory->Attach(dev, 128);    
-    //     dev = new ROM("SIMPLE_ROM");
-    //     s_memory->Attach(dev, 128);    
-    // }
-    // END TESTS
-
-
-
-
     // close the memory map definitions
     if (COMPILE_MEMORY_MAP)
     {
@@ -140,16 +117,17 @@ void Bus::_onetime_init()
 
 
 
-
-
     // TESTING READ/WRITE
     {
-        Byte wr = 127;
+        Byte wr = 0xAA;
         Word addr = 0x0181;
         s_memory->write(addr, 69, true);
         s_memory->write(addr, wr);
         Byte data = s_memory->read(addr);
         printf("  $%04x:$%02x written, $%02X read\n", addr, wr, data);
+
+        s_memory->write(0x1800, 0x7f);
+        s_memory->read(0x1800);
     }
     // END TESTS
 

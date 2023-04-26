@@ -7,7 +7,7 @@
 #include "Device.h"
 
 
-Word Device::OnAttach() 
+Word Device::OnAttach(Word nextAddr) 
 { 
 	printf("Device::OnAttach()\n");
 	// return the size of this devices memory block
