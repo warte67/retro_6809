@@ -68,7 +68,7 @@ void Device::DisplayEnum(std::string sToken, Word ofs, std::string sComment)
 		// normal line
 		else
 		{
-			printf("  %12s = 0x%04x,\t%s%s\n", 
+			printf("  %12s = 0x%04X,\t%s%s\n", 
 				sToken.c_str(),
 				ofs, 
 				sCTK.c_str(),

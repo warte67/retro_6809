@@ -53,24 +53,76 @@ void Bus::_onetime_init()
     // install the memory devices
     Device* dev = nullptr;
 
+    // build the memoyr map
+    dev = new RAM("ZERO_PAGE");
+    s_memory->Attach(dev, 256);
 
+    dev = new RAM("USER_PAGE");
+    s_memory->Attach(dev, 256);    
+    dev->DisplayEnum("USER_TOP",0x0200, "Top of user variable space");  
+
+    dev = new RAM("SYSTEM_STACK");
+    s_memory->Attach(dev, 512);  
+    dev->DisplayEnum("STACK_TOP",0x0400, "Top of the system stack space");  
+
+
+    printf("\n");
+    dev->DisplayEnum("",0, "Text Display Buffer (5K bytes)");
+    dev = new RAM("SCREEN_BUFFER");
+    s_memory->Attach(dev, 5120);    
+
+    printf("\n");
+    dev->DisplayEnum("",0, "Device Registers (2K Bytes)");
+    dev->DisplayEnum("HDW_REGS", 0x1800, "Begin Device Hardware Registers");
+
+
+    // TODO:  GFX DEVICE
+        dev = new RAM("GFX_DEVICE");
+        s_memory->Attach(dev, 0x800);    
+    // TODO:  GFX DEVICE
+
+    printf("\n");
+    dev->DisplayEnum("",0x2000, "User RAM (44K bytes)");
+    dev = new RAM("USER_RAM");
+    s_memory->Attach(dev, 0xB000);    
+
+    printf("\n");
+    dev->DisplayEnum("",0xD000, "Paged Memory (8K)");
+    dev = new RAM("PAGED_MEM");
+    s_memory->Attach(dev, 0x2000);   
+
+    printf("\n");
+    dev->DisplayEnum("",0xF000, "KERNEL ROM (4K bytes)");
+    dev = new ROM("KERNEL_ROM");
+    s_memory->Attach(dev, 0x1000);      
+
+    printf("\n");
+    dev->DisplayEnum("",0,"Hardware Interrupt Vectors:");
+    dev->DisplayEnum("HARD_RSRVD",0xfff0, "Motorola RESERVED Hardware Interrupt Vector");
+    dev->DisplayEnum("HARD_SWI3", 0xfff2, "SWI3 Hardware Interrupt Vector");
+    dev->DisplayEnum("HARD_SWI2", 0xfff4, "SWI2 Hardware Interrupt Vector");
+    dev->DisplayEnum("HARD_FIRQ", 0xfff6, "FIRQ Hardware Interrupt Vector");
+    dev->DisplayEnum("HARD_IRQ",  0xfff8, "IRQ Hardware Interrupt Vector");
+    dev->DisplayEnum("HARD_SWI",  0xfffA, "SWI / SYS Hardware Interrupt Vector");
+    dev->DisplayEnum("HARD_NMI",  0xfffC, "NMI Hardware Interrupt Vector");
+    dev->DisplayEnum("HARD_RESET",0xfffE, "RESET Hardware Interrupt Vector");
 
 
     // RUN SOME TESTS
-    {
-        dev = new RAM("ZERO_PAGE");
-        s_memory->Attach(dev, 256);
-        dev->DisplayEnum("",0,"This is a single line comment?");
-        dev->DisplayEnum("FIRST", 0x0000,"This is a comment");
-        dev->DisplayEnum("SECOND",0x0001,"Another Comment");
-        dev->DisplayEnum("THIRD", 0x0002,"Something Special");
-        dev->DisplayEnum("FOURTH",0x0003,"Third wasn't enough");
-        printf("\n");
-        dev = new Device("USER_PAGE");
-        s_memory->Attach(dev, 128);    
-        dev = new ROM("SIMPLE_ROM");
-        s_memory->Attach(dev, 128);    
-    }
+    // {
+    //     dev = new RAM("ZERO_PAGE");
+    //     s_memory->Attach(dev, 256);
+    //     dev->DisplayEnum("",0,"This is a single line comment?");
+    //     dev->DisplayEnum("FIRST", 0x0000,"This is a comment");
+    //     dev->DisplayEnum("SECOND",0x0001,"Another Comment");
+    //     dev->DisplayEnum("THIRD", 0x0002,"Something Special");
+    //     dev->DisplayEnum("FOURTH",0x0003,"Third wasn't enough");
+    //     printf("\n");
+    //     dev = new Device("USER_PAGE");
+    //     s_memory->Attach(dev, 128);    
+    //     dev = new ROM("SIMPLE_ROM");
+    //     s_memory->Attach(dev, 128);    
+    // }
     // END TESTS
 
 

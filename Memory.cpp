@@ -69,7 +69,7 @@ void Memory::DumpMemoryMap()
     printf("  Dumping the memory map allocation info:\n");
     for(auto &o : _memoryNodes)
     {
-        printf("    $%04x-$%04x %s\n", 
+        printf("    $%04X-$%04X %s\n", 
             o->Base(), 
             o->Base() + o->Size() - 1,
             o->Name().c_str()
