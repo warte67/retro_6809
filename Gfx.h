@@ -36,18 +36,17 @@ class Gfx : public Device
 
     private:
 
-        // helper functions
+        // helper functions:
         void _decode_gmode();
 
-    protected:
+        // internals:
         Uint32 _window_flags = SDL_WINDOW_OPENGL | 
                             SDL_WINDOW_RESIZABLE;
         Uint32 _render_flags = SDL_RENDERER_ACCELERATED |
                             SDL_RENDERER_TARGETTEXTURE;
         SDL_Window* _window = nullptr;
         SDL_Renderer* _renderer = nullptr;
-        SDL_Texture* _texture;
-        
+        SDL_Texture* _texture;        
         const float _aspect = 1.6f;     //16x10
         int _timing_width = 512;
         int _timing_height = _timing_width / _aspect;   //384;
@@ -72,6 +71,9 @@ class Gfx : public Device
         Byte _dsp_glyph_idx = 0x00; // DSP_GLYPH_IDX
         // Byte _dsp_glhph_data[8]{0}; // DSP_GLYPH_DATA   *
         Byte _dsp_emuflags = 0;     // DSP_EMUFLAGS
+
+    public:
+        // accessors:
 };
 
 #endif  // __GFX_H__

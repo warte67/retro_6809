@@ -30,6 +30,7 @@ class Bus
         static Memory* s_memory;
 
         int _fps = 0;
+        static Gfx* _gfx;
 
     public:    
         ~Bus();
@@ -46,8 +47,8 @@ class Bus
         // static int s_window_width;
         // static int s_window_height;
     
-        static Gfx* _gfx;
         int FPS() { return _fps; }
+        static Gfx* gfx() { return _gfx;}
         static Memory* memory() {return s_memory;}
         static bool IsRunning() { return s_bIsRunning;}
         static void IsRunning(bool state) { s_bIsRunning = state;}

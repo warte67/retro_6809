@@ -15,11 +15,29 @@ Byte Gfx::read(Word offset, bool debug)
     // printf("READ GFX: $%04X = ???\n", offset);
     switch(offset)
     {
-        case DSP_GMODE:
-            return _dsp_gmode;
+        // standard graphics sub-system hardware registers
+        case DSP_GMODE:     return _dsp_gmode;
+        case DSP_PXLOFS:    return _dsp_pxlofs;
+        case DSP_TBASE:     return (_dsp_tbase >> 8) & 0xFF;
+        case DSP_TBASE+1:   return _dsp_tbase & 0xFF;
+        case DSP_GBASE:     return (_dsp_gbase >> 8) & 0xFF;
+        case DSP_GBASE+1:   return _dsp_gbase & 0xFF;
+        case DSP_GADDR:     return (_dsp_gaddr >> 8) & 0xFF;
+        case DSP_GADDR+1:   return _dsp_gaddr & 0xFF;
+        case DSP_GDATA:     return _dsp_data;
 
-        case DSP_EMUFLAGS:
-            return _dsp_emuflags;
+        // color palete registers (TODO: make these based on array)
+        case DSP_PAL_IDX:       return _dsp_pal_idx;
+        case DSP_PAL_CLR:       return (_dsp_pal_clr >> 8) & 0xFF;
+        case DSP_PAL_CLR+1:     return _dsp_pal_clr & 0xFF;
+
+        // text glyph definition data registers (TODO: move to text glyphy mode)
+        case DSP_GLYPH_IDX:     return _dsp_glyph_idx;
+        case DSP_GLYPH_DATA:    return 0;   //(_dsp_glhph_data[_dsp_glyph_idx] >> 8) & 0xFF;
+        case DSP_GLYPH_DATA+1:  return 0;   //_dsp_glhph_data[_dsp_glyph_idx] & 0xFF;
+
+        // auxillary emulation flags
+        case DSP_EMUFLAGS:  return _dsp_emuflags;
     }
 
     return 0xCC;
@@ -268,7 +286,7 @@ void Gfx::OnEvent(SDL_Event *evnt)
             if (evnt->key.keysym.sym == SDLK_SPACE)
             {
                 Byte data = Bus::memory()->read(DSP_GMODE);
-                if ((SDL_GetModState() & KMOD_SHIFT))
+                if (SDL_GetModState() & KMOD_SHIFT)
                 {
                     Byte data = Bus::memory()->read(DSP_GMODE);
                     data |= 0x40;
@@ -280,6 +298,26 @@ void Gfx::OnEvent(SDL_Event *evnt)
                     data &= ~0x40;
                     Bus::memory()->write(DSP_GMODE, data);
                 }
+            }
+            // number keys change pixel size
+            if (evnt->key.keysym.sym >= SDLK_0 && evnt->key.keysym.sym <= SDLK_8)
+            {
+                Byte key =  evnt->key.keysym.sym - 48;                
+                printf("key: %d\n", key);
+                Byte data = Bus::memory()->read(DSP_GMODE) & 0xF0;
+                switch(key)
+                {
+                    case 0:     data |= 0b00000000;      break;
+                    case 1:     data |= 0b00000001;      break;
+                    case 2:     data |= 0b00000010;      break;
+                    case 3:     data |= 0b00000100;      break;
+                    case 4:     data |= 0b00000101;      break;
+                    case 5:     data |= 0b00000110;      break;
+                    case 6:     data |= 0b00001000;      break;
+                    case 7:     data |= 0b00001001;      break;
+                    case 8:     data |= 0b00001010;      break;
+                }
+                Bus::memory()->write(DSP_GMODE, data);
             }
         }
         break;
