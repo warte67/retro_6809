@@ -48,6 +48,11 @@ class Bus
     
         static Gfx* _gfx;
         int FPS() { return _fps; }
+        static Memory* memory() {return s_memory;}
+        static bool IsRunning() { return s_bIsRunning;}
+        static void IsRunning(bool state) { s_bIsRunning = state;}
+        static bool IsDirty() { return s_bIsDirty;}
+        static void IsDirty(bool state) { s_bIsDirty = state;}
 };
 
 

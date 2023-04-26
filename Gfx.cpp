@@ -12,7 +12,15 @@ Byte Gfx::read(Word offset, bool debug)
     // if (offset - _base < _size)
     // 	return memory[(Word)(offset - _base)];
 
-    printf("READ GFX: $%04X = ???\n", offset);
+    // printf("READ GFX: $%04X = ???\n", offset);
+    switch(offset)
+    {
+        case DSP_GMODE:
+            return _dsp_gmode;
+
+        case DSP_EMUFLAGS:
+            return _dsp_emuflags;
+    }
 
     return 0xCC;
 }
@@ -24,6 +32,43 @@ void Gfx::write(Word offset, Byte data, bool debug)
     //         memory[(Word)(offset -_base)] = data;
 
     printf("WRITE GFX: $%04X = $%02X\n", offset, data);
+
+    switch (offset)
+    {
+        case DSP_GMODE:
+        {
+            if (_dsp_gmode == data)
+                return; // no change
+            // screen needs to be refreshed
+            _dsp_gmode = data;      
+            Bus::IsDirty(true);
+        }
+        break;
+
+        case DSP_EMUFLAGS:
+        {
+            if (_dsp_emuflags == data)
+                return; // no change
+            // fullscreen / windowed toggle only
+            if ((_dsp_emuflags & 0x01) != (data & 0x01))
+            {
+                if (data & 0x01)
+                    _fullscreen = true;
+                else
+                    _fullscreen = false;
+                Uint32 flags = 0;
+                if (_fullscreen)
+                    flags = SDL_WINDOW_FULLSCREEN_DESKTOP;
+                SDL_SetWindowFullscreen(_window, flags);   
+                _dsp_emuflags = data;                 
+                return;
+            }
+            // // screen needs to be refreshed
+            // _dsp_gmode = data;      
+            // Bus::IsDirty(false);
+        }
+        break;
+    }
 }
 
 Word Gfx::OnAttach(Word nextAddr)
@@ -130,6 +175,7 @@ void Gfx::OnQuit() {}
 
 void Gfx::OnActivate()
 {
+    printf("Gfx::OnActivate()\n");
     // decode current settings
     _decode_gmode();
 
@@ -163,6 +209,7 @@ void Gfx::OnActivate()
 
 void Gfx::OnDeactivate()
 {
+    printf("Gfx::OnDeactivate()\n");
     // shutdown SDL based devices
     // destroy texture
     if (_texture)
@@ -204,29 +251,38 @@ void Gfx::OnEvent(SDL_Event *evnt)
 
         case SDL_KEYDOWN:
         {
+            // FULLSCREEN TOGGLE
             if (evnt->key.keysym.sym == SDLK_RETURN)
-            {
-                if ((SDL_GetModState() & KMOD_ALT) &&
-                    (SDL_GetModState() & KMOD_CTRL))
+            {                
+                if ((SDL_GetModState() & KMOD_SHIFT))
                 {
-                    // _fullscreen
-                    printf("FULLSCREEN TOGGLE\n");
-
-                    _fullscreen = !_fullscreen;
-                    Uint32 flags = 0;
-                    if (_fullscreen)
-                       flags = SDL_WINDOW_FULLSCREEN_DESKTOP;
-                    SDL_SetWindowFullscreen(_window, flags);
+                    Byte data = Bus::memory()->read(DSP_EMUFLAGS);
+                    if (data & 0b00000001)
+                        data &= 0b11111110;
+                    else
+                        data |= 0b00000001;
+                    Bus::memory()->write(DSP_EMUFLAGS, data);
                 }
             }            
+            // DISPLAY TESTS (SPACE and ALT-SPACE)
+            if (evnt->key.keysym.sym == SDLK_SPACE)
+            {
+                Byte data = Bus::memory()->read(DSP_GMODE);
+                if ((SDL_GetModState() & KMOD_SHIFT))
+                {
+                    Byte data = Bus::memory()->read(DSP_GMODE);
+                    data |= 0x40;
+                    Bus::memory()->write(DSP_GMODE, data);
+                }
+                else
+                {                    
+                    Byte data = Bus::memory()->read(DSP_GMODE);
+                    data &= ~0x40;
+                    Bus::memory()->write(DSP_GMODE, data);
+                }
+            }
         }
         break;
-
-
-
-
-
-
     }
 }
 
@@ -254,13 +310,6 @@ void Gfx::OnUpdate(float fElapsedTime)
 
 void Gfx::_decode_gmode()
 {
-    // DSP_GMODE: ABCC.DDEE
-    // A = VSYNC     0:off       1:on
-    // B = timing    0:512x384   1:640x400
-    // C = bit depth 00:1bpp    01:2bpp  10:4bpp 11:8bpp (text00:mono)
-    // D = h_scan    00:1x      01:2x    10:4x           (text: lsb only)
-    // E = v_scan    00:1x      01:2x    10:4x           (text: lsb only)
-
     // VSYNC (A000.0000)
     _vsync = false;
     if (_dsp_gmode & 0b10000000)
@@ -331,7 +380,6 @@ void Gfx::OnRender()
     SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
     SDL_RenderClear(_renderer);
     SDL_RenderCopy(_renderer, NULL, NULL, NULL);    
-
     int ww = _window_width;
     int wh = _window_height;
     float fh = (float)_window_height;
@@ -341,7 +389,6 @@ void Gfx::OnRender()
         fw = ww;
         fh = fw / _aspect;
     }
-
     SDL_Rect dest = 
     { 
         int(_window_width / 2 - (int)fw / 2), 
@@ -350,7 +397,6 @@ void Gfx::OnRender()
         (int)fh 
     };
     SDL_RenderCopy(_renderer, _texture, NULL, &dest);
-
 
     // The Bus object presents after everything renders
     // SDL_RenderPresent(_renderer);    

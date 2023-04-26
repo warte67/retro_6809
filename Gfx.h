@@ -72,7 +72,6 @@ class Gfx : public Device
         Byte _dsp_glyph_idx = 0x00; // DSP_GLYPH_IDX
         // Byte _dsp_glhph_data[8]{0}; // DSP_GLYPH_DATA   *
         Byte _dsp_emuflags = 0;     // DSP_EMUFLAGS
-
 };
 
 #endif  // __GFX_H__
