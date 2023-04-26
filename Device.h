@@ -37,8 +37,8 @@ class Device
         std::string name() { return _deviceName; }
         Word Base() { return _base; }
         void Base(Word addr) { _base = addr; }
-        Word Size() { return _size; }
-        void Size(Word size) { _size = size; }
+        Word Size() { return _size = memory.size(); }
+        void Size(Word size) { _size = size; memory.resize(size); }
         std::string Name()  { return _deviceName; }
         void Name(std::string n) { _deviceName = n; }
 

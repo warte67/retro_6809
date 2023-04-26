@@ -9,11 +9,31 @@
 
 Byte Memory::read(Word offset, bool debug) 
 {    
+    for (auto &a : _memoryNodes)
+    {
+        if (offset - a->Base() < a->Size())
+        {
+            //Byte data = a->read(offset - a->Base());
+            Byte data = a->read(offset, debug);
+            // printf("-->%s:%d\n", a->Name().c_str(), data);
+            return data;
+        }
+    }
     return 0xCC;
 }
 
 void Memory::write(Word offset, Byte data, bool debug) 
 {
+    for (auto &a : _memoryNodes)
+    {
+        if (offset - a->Base() < a->Size())
+        {
+            // a->write(offset - a->Base(), data);
+            a->write(offset, data, debug);
+            // printf("-->%s:%d\n", a->Name().c_str(), data);
+            return;
+        }
+    }    
 }
 Word Memory::read_word(Word offset, bool debug) 
 {
@@ -33,8 +53,14 @@ Word Memory::Attach(Device* dev, Word size)
         if (size == 0)
             size = dev->OnAttach();            
         dev->Base(_lastAddress);
+
         dev->Size(size);
+
+
         _lastAddress += size;
+
+        
+        
         _memoryNodes.push_back(dev);
     }
     if (size > 65536)

@@ -65,7 +65,8 @@ void Bus::_onetime_init()
     s_memory->DumpMemoryMap();
 
     Byte wr = 127;
-    Word addr = 0x0001;
+    Word addr = 0x0181;
+    s_memory->write(addr, 69, true);
     s_memory->write(addr, wr);
     Byte data = s_memory->read(addr);
     printf("  $%04x:$%02x written, $%02X read\n", addr, wr, data);
