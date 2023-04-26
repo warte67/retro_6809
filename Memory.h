@@ -22,7 +22,7 @@ class Memory
         Word read_word(Word offset, bool debug = false);
         void write_word(Word offset, Word data, bool debug = false);  
 
-		Word Attach(Device* dev);   // attach a user defined memory node
+		Word Attach(Device* dev, Word size = 0);   // attach a user defined memory node
         void DumpMemoryMap();
 
     private:
@@ -36,6 +36,24 @@ class Memory
 
         int _lastAddress = 0;
         std::vector<Device*> _memoryNodes;
+};
+
+class RAM : public Device
+{
+    public:
+        RAM() {  Name("RAM"); }
+        RAM(std::string sName) { Name(sName); }
+        virtual ~RAM() {}    
+};
+
+class ROM : public Device
+{
+    public:
+        ROM() {  Name("ROM"); }
+        ROM(std::string sName) { Name(sName); }
+        virtual ~ROM() {}    
+
+        virtual void write(Word offset, Byte data, bool debug = false);
 };
 
 

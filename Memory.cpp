@@ -7,6 +7,40 @@
 
 
 
+Byte Memory::read(Word offset, bool debug) 
+{    
+    return 0xCC;
+}
+
+void Memory::write(Word offset, Byte data, bool debug) 
+{
+}
+Word Memory::read_word(Word offset, bool debug) 
+{
+    return 0xCCCC;
+}
+void Memory::write_word(Word offset, Word data, bool debug) 
+{    
+}
+
+
+
+
+Word Memory::Attach(Device* dev, Word size) 
+{    
+    if (dev != nullptr)
+    {
+        if (size == 0)
+            size = dev->OnAttach();            
+        dev->Base(_lastAddress);
+        dev->Size(size);
+        _lastAddress += size;
+        _memoryNodes.push_back(dev);
+    }
+    if (size > 65536)
+        Bus::Error("Memory allocation beyond 64k boundary!");
+    return size;
+}
 
 void Memory::DumpMemoryMap()
 {
@@ -19,22 +53,6 @@ void Memory::DumpMemoryMap()
             o->Name().c_str()
         );
     }
-}
-
-Word Memory::Attach(Device* dev) 
-{
-    Word size = 0;
-    if (dev != nullptr)
-    {
-        size = dev->OnAttach();
-        dev->Base(_lastAddress);
-        dev->Size(size);
-        _lastAddress += size;
-        _memoryNodes.push_back(dev);
-    }
-    if (size > 65536)
-        Bus::Error("Memory allocation beyond 64k boundary!");
-    return size;
 }
 
 Memory::Memory()
@@ -93,4 +111,14 @@ void Memory::_onRender()
     //printf("Memory::_onRender()\n");
     for (auto &m : _memoryNodes)
         m->OnRender();       
+}
+
+// ROM /////////////////////////////////////
+
+// only write to ROM when the debug flag is true
+void ROM::write(Word offset, Byte data, bool debug) 
+{
+    if (debug)
+        if (offset - _base < _size)
+            memory[(Word)(offset -_base)] = data;
 }

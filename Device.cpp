@@ -10,7 +10,9 @@
 Word Device::OnAttach() 
 { 
 	printf("Device::OnAttach()\n");
-	return 10; 
+	// return the size of this devices memory block
+	// default = 0 (undefined device)
+	return 0; 
 }
 void Device::OnInit() {}
 void Device::OnQuit() {}

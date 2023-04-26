@@ -53,15 +53,22 @@ void Bus::_onetime_init()
     // install the memory devices
     Device* dev = nullptr;
 
-    dev = new Device("Zero Page");
-    s_memory->Attach(dev);
+    dev = new RAM("Zero Page");
+    s_memory->Attach(dev, 256);
 
     dev = new Device("User Page");
-    s_memory->Attach(dev);    
+    s_memory->Attach(dev, 128);    
+
+    dev = new ROM("Simple ROM");
+    s_memory->Attach(dev, 128);    
 
     s_memory->DumpMemoryMap();
 
-
+    Byte wr = 127;
+    Word addr = 0x0001;
+    s_memory->write(addr, wr);
+    Byte data = s_memory->read(addr);
+    printf("  $%04x:$%02x written, $%02X read\n", addr, wr, data);
 
     // setup/initialize SDL
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {

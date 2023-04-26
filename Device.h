@@ -42,8 +42,13 @@ class Device
         std::string Name()  { return _deviceName; }
         void Name(std::string n) { _deviceName = n; }
 
+        Byte _memory(Word ofs) { return memory[ofs]; }
+        void _memory(Word ofs, Byte data) { memory[ofs] = data; }
+
     private:
         std::string _deviceName = "??DEV??";
+
+    protected:
         Uint16 _base = 0;
         Uint16 _size = 0;
         std::vector<Uint8> memory;	// memory mapped to this device    
