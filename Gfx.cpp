@@ -53,6 +53,7 @@ void Gfx::write(Word offset, Byte data, bool debug)
         {
             if (_dsp_gmode == data)
                 return; // no change
+
             // screen needs to be refreshed
             _dsp_gmode = data;      
             Bus::IsDirty(true);
@@ -63,6 +64,7 @@ void Gfx::write(Word offset, Byte data, bool debug)
         {
             if (_dsp_emuflags == data)
                 return; // no change
+            
             // fullscreen / windowed toggle only
             if ((_dsp_emuflags & 0x01) != (data & 0x01))
             {
@@ -323,8 +325,8 @@ void Gfx::OnInit()
     // clear the text buffer to white on black spaces
     for (int t=SCREEN_BUFFER; t<SCREEN_BUFFER+0x1200; t+=2)
     {
-        Bus::memory()->write(t, 32);        
-        Bus::memory()->write(t+1, 0xF0);        
+        Bus::write(t, 32);        
+        Bus::write(t+1, 0xF0);       
     }
 
     // output a test string
@@ -332,8 +334,8 @@ void Gfx::OnInit()
     Word addr = _dsp_tbase;
     for (auto &a : sMessage)
     {
-        Bus::memory()->write(addr, a);
-        Bus::memory()->write(addr+1, 0xF0);
+        Bus::write(addr, a);
+        Bus::write(addr+1, 0xF0);
         addr+=2;
     }
 }
@@ -426,29 +428,27 @@ void Gfx::OnEvent(SDL_Event *evnt)
             {                
                 if ((SDL_GetModState() & KMOD_SHIFT))
                 {
-                    Byte data = Bus::memory()->read(DSP_EMUFLAGS);
+                    Byte data = Bus::read(DSP_EMUFLAGS);
                     if (data & 0b00000001)
                         data &= 0b11111110;
                     else
                         data |= 0b00000001;
-                    Bus::memory()->write(DSP_EMUFLAGS, data);
+                    Bus::write(DSP_EMUFLAGS, data);
                 }
             }            
             // DISPLAY TESTS (SPACE and ALT-SPACE)
             if (evnt->key.keysym.sym == SDLK_SPACE)
             {
-                Byte data = Bus::memory()->read(DSP_GMODE);
+                Byte data = Bus::read(DSP_GMODE);
                 if (SDL_GetModState() & KMOD_SHIFT)
                 {
-                    Byte data = Bus::memory()->read(DSP_GMODE);
                     data |= 0x40;
-                    Bus::memory()->write(DSP_GMODE, data);
+                    Bus::write(DSP_GMODE, data);
                 }
                 else
                 {                    
-                    Byte data = Bus::memory()->read(DSP_GMODE);
                     data &= ~0x40;
-                    Bus::memory()->write(DSP_GMODE, data);
+                    Bus::write(DSP_GMODE, data);
                 }
             }
             // number keys change pixel size
@@ -456,7 +456,7 @@ void Gfx::OnEvent(SDL_Event *evnt)
             {
                 Byte key =  evnt->key.keysym.sym - SDLK_0;                
                 printf("key: %d\n", key);
-                Byte data = Bus::memory()->read(DSP_GMODE) & 0xF0;
+                Byte data = Bus::read(DSP_GMODE) & 0xF0;
                 switch(key)
                 {
                     case 0:     data |= 0b00000000;      break;
@@ -469,15 +469,14 @@ void Gfx::OnEvent(SDL_Event *evnt)
                     case 7:     data |= 0b00001001;      break;
                     case 8:     data |= 0b00001010;      break;
                 }
-                Bus::memory()->write(DSP_GMODE, data);
+                Bus::write(DSP_GMODE, data);
             }
             // [+] and [-] change bit depth
             if (evnt->key.keysym.sym == SDLK_EQUALS || evnt->key.keysym.sym == SDLK_MINUS)
             {
                 // C = bit depth 00:1bpp    01:2bpp  10:4bpp 11:8bpp (text00:mono)
-                Byte data = Bus::memory()->read(DSP_GMODE);
+                Byte data = Bus::read(DSP_GMODE);
                 Byte b = (data >> 4) & 0x03;
-
                 // PLUS
                 if (evnt->key.keysym.sym == SDLK_EQUALS)
                 {
@@ -485,6 +484,7 @@ void Gfx::OnEvent(SDL_Event *evnt)
                     if (b>3)
                         b=3;
                 }
+                // MINUS
                 if (evnt->key.keysym.sym == SDLK_MINUS)
                 {
                     b--;
@@ -493,7 +493,7 @@ void Gfx::OnEvent(SDL_Event *evnt)
                 }
                 data &= 0b11001111;
                 data |= (b << 4);
-                Bus::memory()->write(DSP_GMODE, data);
+                Bus::write(DSP_GMODE, data);
             }
         }
         break;
@@ -588,8 +588,8 @@ void Gfx::_updateTextScreen(float fElapsedTime)
             for (int x = 0; x < _texture_width; x+=8)
             {
                 Word addr = _dsp_tbase + ((y>>3) * t_pitch) + ((x>>3)<<1);
-                Byte ch = Bus::memory()->read(addr);
-                Byte at = Bus::memory()->read(addr+1);
+                Byte ch = Bus::read(addr);
+                Byte at = Bus::read(addr+1);
 
                 if (addr >= 0x1800)
                 {

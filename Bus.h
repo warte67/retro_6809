@@ -54,6 +54,11 @@ class Bus
         static void IsRunning(bool state) { s_bIsRunning = state;}
         static bool IsDirty() { return s_bIsDirty;}
         static void IsDirty(bool state) { s_bIsDirty = state;}
+
+        static Byte read(Word offset, bool debug = false);
+        static void write(Word offset, Byte data, bool debug = false);
+        static Word read_word(Word offset, bool debug = false);
+        static void write_word(Word offset, Word data, bool debug = false);          
 };
 
 

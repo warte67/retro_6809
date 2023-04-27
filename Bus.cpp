@@ -304,3 +304,21 @@ void Bus::Run()
     }
     _final_quit();
 }
+
+
+Byte Bus::read(Word offset, bool debug) 
+{
+    return s_memory->read(offset, debug);
+}
+void Bus::write(Word offset, Byte data, bool debug) 
+{
+    s_memory->write(offset, data, debug);
+}
+Word Bus::read_word(Word offset, bool debug) 
+{
+    return s_memory->read_word(offset, debug);
+}
+void Bus::write_word(Word offset, Word data, bool debug) 
+{
+    s_memory->write_word(offset, data, debug);
+}
