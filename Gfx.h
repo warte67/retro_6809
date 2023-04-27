@@ -68,7 +68,7 @@ class Gfx : public Device
         Word _dsp_tbase = 0x0400;   // DSP_TBASE
         Word _dsp_gbase = 0x0000;   // DSP_GBASE
         Word _dsp_gaddr = 0x0000;   // DSP_GADDR
-        Byte _dsp_data = 0x00;      // DSP_GDATA
+        //Byte _dsp_data = 0x00;      // DSP_GDATA
         // display pitch registers (not yet implemented)
         Word _dsp_tpitch = _texture_width / 8;  // DSP_TPITCH
         Word _dsp_gpitch = _texture_width;      // DSP_GPITCH

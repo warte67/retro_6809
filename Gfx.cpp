@@ -19,18 +19,18 @@ Byte Gfx::read(Word offset, bool debug)
         case DSP_GMODE:     return _dsp_gmode;
         case DSP_EMUFLAGS:  return _dsp_emuflags;
         case DSP_PXLOFS:    return _dsp_pxlofs;
-        case DSP_TBASE:     return (_dsp_tbase >> 8) & 0xFF;
+        case DSP_TBASE+0:   return (_dsp_tbase >> 8) & 0xFF;
         case DSP_TBASE+1:   return _dsp_tbase & 0xFF;
         case DSP_GBASE:     return (_dsp_gbase >> 8) & 0xFF;
         case DSP_GBASE+1:   return _dsp_gbase & 0xFF;
         case DSP_GADDR:     return (_dsp_gaddr >> 8) & 0xFF;
         case DSP_GADDR+1:   return _dsp_gaddr & 0xFF;
-        case DSP_GDATA:     return _dsp_data;
+        case DSP_GDATA:     return _gfxDisplayBuffer[_dsp_gaddr];
 
         // color palete registers
         case DSP_PAL_IDX:       return _dsp_pal_idx;
-        case DSP_PAL_CLR:       return (_palette[_dsp_pal_idx].color >> 8) & 0xFF;
-        case DSP_PAL_CLR+1:     return _palette[_dsp_pal_idx].color  & 0xFF;
+        case DSP_PAL_CLR+1:     return (_palette[_dsp_pal_idx].color >> 8) & 0xFF;
+        case DSP_PAL_CLR+0:     return _palette[_dsp_pal_idx].color  & 0xFF;
 
         // text glyph definition data registers
         case DSP_GLYPH_IDX:     return _dsp_glyph_idx;
@@ -42,7 +42,6 @@ Byte Gfx::read(Word offset, bool debug)
         case DSP_GLYPH_DATA+5:  return _dsp_glyph_data[_dsp_glyph_idx][5];
         case DSP_GLYPH_DATA+6:  return _dsp_glyph_data[_dsp_glyph_idx][6];
         case DSP_GLYPH_DATA+7:  return _dsp_glyph_data[_dsp_glyph_idx][7];
-
     }
 
     return 0xCC;
@@ -86,6 +85,37 @@ void Gfx::write(Word offset, Byte data, bool debug)
             }
         }
         break;
+
+        case DSP_PXLOFS:  _dsp_pxlofs = data;  return;
+
+        case DSP_TBASE+0:
+            _dsp_tbase = (_dsp_tbase & 0xff00) | (data << 0);
+            return;
+        case DSP_TBASE+1:        
+            _dsp_tbase = (_dsp_tbase & 0x00ff) | (data << 8);
+            return;
+
+        case DSP_GBASE+0:
+            _dsp_gbase = (_dsp_gbase & 0xff00) | (data << 0);
+            return;
+        case DSP_GBASE+1:        
+            _dsp_gbase = (_dsp_gbase & 0x00ff) | (data << 8);
+            return;
+
+        // graphiics buffer I/O registers
+        case DSP_GADDR+0:
+            _dsp_gaddr = (_dsp_gaddr & 0xff00) | (data << 0);
+            return;
+        case DSP_GADDR+1:        
+            _dsp_gaddr = (_dsp_gaddr & 0x00ff) | (data << 8);
+            return;
+        case DSP_GDATA:
+            _gfxDisplayBuffer[_dsp_gaddr] = data;
+            return;
+
+        // case DSP_GDATA:     return _dsp_data;
+        // case DSP_GDATA:     return _gfxDisplayBuffer[_dsp_gaddr];
+
 
         // ...
 
@@ -438,10 +468,11 @@ void Gfx::OnDeactivate()
         _window = nullptr;
     }
 
-    // // on deactivate tests 72
-    // Bus::write(DSP_GLYPH_IDX, 72);
-    // //Bus::write(DSP_GLYPH_DATA, 0xFF);
-    // printf("glyph: $%02X\n", Bus::read(DSP_GLYPH_DATA));
+    // // on deactivate tests 
+    // Bus::write_word(DSP_GADDR, 0x1234);
+    // printf("read DSP_GADDR: $%04X\n", Bus::read_word(DSP_GADDR));
+    // Bus::write(DSP_GDATA, 0x56);
+    // printf("read DSP_GDATA: $%02X\n", Bus::read(DSP_GDATA));    
 }
 
 void Gfx::OnEvent(SDL_Event *evnt) 
