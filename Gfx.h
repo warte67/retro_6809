@@ -113,6 +113,7 @@ class Gfx : public Device
         Uint8 alf(Uint8 index) { Uint8 c = _palette[index].a;  return c | (c << 4) | (c << 8) | (c << 12); }        
 };
 
+// this is here mostly to get an idea of the size of future Sprite objects
 class Sprite : public Device
 {
     public:
