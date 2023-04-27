@@ -6,6 +6,9 @@
 
 #include "Bus.h"
 #include "Gfx.h"
+#include "font8x8_system.h"
+
+extern Byte font8x8_system[256][8];
 
 Byte Gfx::read(Word offset, bool debug)
 {
@@ -251,16 +254,127 @@ void Gfx::OnActivate()
     _renderer = SDL_CreateRenderer(_window, -1, _render_flags);
     SDL_SetRenderDrawBlendMode(_renderer, SDL_BLENDMODE_BLEND);
 
-    // create the desktop texture
+    // // create the main target texture
+    // _main_texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_ARGB8888,
+	// 		SDL_TEXTUREACCESS_TARGET, _texture_width, _texture_height);
+
+    // create the background graphics texture
     _bg_texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_ARGB8888,
 			SDL_TEXTUREACCESS_STREAMING, _texture_width, _texture_height);
+
+    // // create the text layer texture
+    // _txt_texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_ARGB8888,
+	// 		SDL_TEXTUREACCESS_STREAMING, _texture_width, _texture_height);
+
+/*
+    // create the font glyphs
+	if (_glyph_texture.size() == 0)
+	{
+		for (int t = 0; t < 256; t++)
+		{
+			SDL_Texture* glyph = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGBA4444,
+				SDL_TEXTUREACCESS_TARGET, 8, 8);
+			SDL_SetRenderTarget(_renderer, glyph);
+			SDL_SetTextureBlendMode(glyph, SDL_BLENDMODE_BLEND);
+			SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 0);
+			SDL_RenderClear(_renderer);
+			for (int y = 0; y < 8; y++)
+			{
+				for (int x = 0; x < 8; x++)
+				{
+					Byte bitMask = 1 << (7 - x);
+					//if (font8x8_system[t][y] & bitMask)
+					if (font8x8_system[t][y] & bitMask)
+					{
+						SDL_SetRenderDrawColor(_renderer, 255, 255, 255, 255);
+						SDL_RenderDrawPoint(_renderer, x, y);
+					}
+				}
+			}
+			_glyph_texture.push_back(glyph);
+		}
+	}
+*/
+   
+    for (int i=0; i<256; i++)
+    {
+        SDL_Texture* temp = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_ARGB8888,
+			SDL_TEXTUREACCESS_STREAMING, 8, 8);
+        SDL_Color sdl_c;
+        Uint32 *dst;
+        void *pixels;
+        int pitch;            
+        if (SDL_LockTexture(temp, NULL, &pixels, &pitch) < 0) 
+        {
+            SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't lock texture: %s\n", SDL_GetError());
+            Bus::Error("");
+        }
+        for (int r=0; r<8; r++)
+        {
+            dst = (Uint32*)((Uint8*)pixels + r * pitch);
+            Byte data = font8x8_system[i][r];
+            for (int b=0; b<8; b++)
+            {
+                if (data & (1 << (7 - b)))
+                {
+                    //printf("1");       
+                    sdl_c.a = 255;      
+                    sdl_c.r = 255;      
+                    sdl_c.g = 255;      
+                    sdl_c.b = 255;      
+                }
+                else
+                {
+                    //printf(" ");    
+                    // transparent
+                    sdl_c.a = 0;    
+                    sdl_c.r = 255;      
+                    sdl_c.g = 0;      
+                    sdl_c.b = 0;                               
+                }
+                *dst++ = 
+                (
+                    sdl_c.a<<24 |
+                    (sdl_c.r<<16) |
+                    (sdl_c.g<<8) |
+                    sdl_c.b
+                );                
+            }
+            //printf("\n");
+        }
+        //printf("\n");
+        SDL_UnlockTexture(temp); 
+        _glyph_texture.push_back(temp);
+    }
+
 }
 
 void Gfx::OnDeactivate()
 {
     printf("Gfx::OnDeactivate()\n");
+
+	// destroy the glyph textures
+	for (auto& a : _glyph_texture)
+	{
+    	SDL_DestroyTexture(a);    
+        // delete a;
+    }
+	_glyph_texture.clear();
+
     // shutdown SDL based devices
-    // destroy texture
+    // // destroy text texture
+    // if (_main_texture)
+    // {
+    //     SDL_DestroyTexture(_main_texture);
+    //     _main_texture = nullptr;
+    // }
+    // // destroy text texture
+    // if (_txt_texture)
+    // {
+    //     SDL_DestroyTexture(_txt_texture);
+    //     _txt_texture = nullptr;
+    // }
+    // destroy bg texture
     if (_bg_texture)
     {
         SDL_DestroyTexture(_bg_texture);
@@ -367,7 +481,7 @@ void Gfx::_updateGraphics(float fElapsedTime)
         for (int t=0; t<65536; t++)
             _gfxDisplayBuffer[t] = rand() % 16;
     }
-    printf("fElapsedTime: %f\n", fElapsedTime);
+    //printf("fElapsedTime: %f\n", fElapsedTime);
 
     // steam to the background texture
     Word pixel_index = 0;
@@ -403,7 +517,16 @@ void Gfx::_updateGraphics(float fElapsedTime)
     }
 }
 void Gfx::_updateTiles(float fElapsedTime) {}
-void Gfx::_updateTextGlyphs(float fElapsedTime) {}
+void Gfx::_updateTextGlyphs(float fElapsedTime) 
+{
+    // SDL_SetRenderTarget(_renderer, _txt_texture);
+    // SDL_SetRenderDrawBlendMode(_renderer, SDL_BLENDMODE_NONE);
+    // SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 0);
+    // SDL_RenderClear(_renderer);
+
+    // SDL_Rect dst = {0, 0, 8, 8};
+    // SDL_RenderCopy(_renderer, _glyph_texture[0], NULL, &dst);
+}
 void Gfx::_updateSprites(float fElapsedTime) {}
 
 void Gfx::OnUpdate(float fElapsedTime)
@@ -478,12 +601,13 @@ void Gfx::_decode_gmode()
         _pixel_height = 1;
         break;
     }
+    // SDL_SetRenderTarget(_renderer, _txt_texture);
+    // SDL_SetRenderDrawBlendMode(_renderer, SDL_BLENDMODE_NONE);
+    // SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 0);
+    // SDL_RenderClear(_renderer);
 
-    // texture size
-    _texture_width = _timing_width / _pixel_width;
-    _texture_height = _timing_height / _pixel_height;
-
-    /////////////////////////////////////////////////////
+    // SDL_Rect dst = {0, 0, 8, 8};
+    // SDL_RenderCopy(_renderer, _glyph_texture[0], NULL, &dst);
     // auxillary emulation flags
 
     // WINDOWED or FULLSCREEN
@@ -494,7 +618,7 @@ void Gfx::_decode_gmode()
 
 
 void Gfx::OnRender() 
-{
+{    
     // clear the window    
     SDL_SetRenderTarget(_renderer, NULL);
     SDL_RenderClear(_renderer);
@@ -517,14 +641,23 @@ void Gfx::OnRender()
         (int)fw, 
         (int)fh 
     };
+    
     // render the background graphics layer
+    //SDL_SetRenderTarget(_renderer, NULL);
     SDL_RenderCopy(_renderer, _bg_texture, NULL, &dest);
     
     // render the text glyph layer
-    // ...
+    // SDL_SetRenderTarget(_renderer, _main_texture);
+    // SDL_SetRenderDrawBlendMode(_renderer, SDL_BLENDMODE_NONE);
+    // SDL_RenderCopy(_renderer, _txt_texture, NULL, NULL);//&dest);
     
     // render the sprite layer
     // ...
+
+    // render the final result
+    // SDL_SetRenderTarget(_renderer, NULL);
+    // SDL_RenderCopy(_renderer, _main_texture, NULL, &dest);
+
 
     // The Bus object presents after everything renders
     // SDL_RenderPresent(_renderer);    
