@@ -17,6 +17,7 @@ Byte Gfx::read(Word offset, bool debug)
     {
         // standard graphics sub-system hardware registers
         case DSP_GMODE:     return _dsp_gmode;
+        case DSP_EMUFLAGS:  return _dsp_emuflags;
         case DSP_PXLOFS:    return _dsp_pxlofs;
         case DSP_TBASE:     return (_dsp_tbase >> 8) & 0xFF;
         case DSP_TBASE+1:   return _dsp_tbase & 0xFF;
@@ -28,16 +29,14 @@ Byte Gfx::read(Word offset, bool debug)
 
         // color palete registers (TODO: make these based on array)
         case DSP_PAL_IDX:       return _dsp_pal_idx;
-        case DSP_PAL_CLR:       return (_dsp_pal_clr >> 8) & 0xFF;
-        case DSP_PAL_CLR+1:     return _dsp_pal_clr & 0xFF;
+        case DSP_PAL_CLR:       return (_palette[_dsp_pal_idx].color >> 8) & 0xFF;
+        case DSP_PAL_CLR+1:     return _palette[_dsp_pal_idx].color  & 0xFF;
 
         // text glyph definition data registers (TODO: move to text glyph mode)
         case DSP_GLYPH_IDX:     return _dsp_glyph_idx;
         case DSP_GLYPH_DATA:    return 0;   //(_dsp_glhph_data[_dsp_glyph_idx] >> 8) & 0xFF;
         case DSP_GLYPH_DATA+1:  return 0;   //_dsp_glhph_data[_dsp_glyph_idx] & 0xFF;
 
-        // auxillary emulation flags
-        case DSP_EMUFLAGS:  return _dsp_emuflags;
     }
 
     return 0xCC;
@@ -81,6 +80,18 @@ void Gfx::write(Word offset, Byte data, bool debug)
             }
         }
         break;
+
+        // ...
+
+        case DSP_PAL_IDX:   _dsp_pal_idx = data;  return;
+        case DSP_PAL_CLR+1: { 
+            Word c = _palette[_dsp_pal_idx].color & 0x00ff;
+            _palette[_dsp_pal_idx].color = c | ((Word)data << 8);
+            return;         }
+        case DSP_PAL_CLR:   {
+            Word c = _palette[_dsp_pal_idx].color & 0xff00;
+            _palette[_dsp_pal_idx].color = c | data;
+            return;         }
     }
 }
 
@@ -401,6 +412,11 @@ void Gfx::OnDeactivate()
         SDL_DestroyWindow(_window);
         _window = nullptr;
     }
+
+    // on deactivate tests
+    Bus::write(DSP_PAL_IDX, 0x0f);
+    Bus::write_word(DSP_PAL_CLR, 0x822F);
+    printf("palette: $%04X\n", Bus::read_word(DSP_PAL_CLR));
 }
 
 void Gfx::OnEvent(SDL_Event *evnt) 
@@ -661,6 +677,9 @@ void Gfx::OnUpdate(float fElapsedTime)
         _texAcc -= _texDelay;
         for (int t=0; t<65536; t++)
             _gfxDisplayBuffer[t] = rand() % 256;
+
+        Bus::write(DSP_PAL_IDX, 0x0f);
+        Bus::write_word(DSP_PAL_CLR, rand()%0x10000);
     }
 
     // update the window title bar

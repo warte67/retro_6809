@@ -33,12 +33,16 @@ void Memory::write(Word offset, Byte data, bool debug)
 }
 Word Memory::read_word(Word offset, bool debug) 
 {
-    return 0xCCCC;
+	Word ret = (read(offset) << 8) | read(offset + 1);
+	return ret;
 }
 void Memory::write_word(Word offset, Word data, bool debug) 
 {    
+	Byte lsb = (data >> 8) & 0xFF;
+	Byte msb = data & 0xff;
+	write(offset, msb);
+	write(offset + 1, lsb);
 }
-
 
 
 

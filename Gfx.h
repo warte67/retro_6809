@@ -77,7 +77,7 @@ class Gfx : public Device
 
         // color palette
         Byte _dsp_pal_idx = 0x00;   // DSP_PAL_IDX
-        Word _dsp_pal_clr = 0x0000; // DSP_PAL_CLR
+        // Word _dsp_pal_clr = 0x0000; // DSP_PAL_CLR
         // text glyph definition array  (move to glyph mode device)
         Byte _dsp_glyph_idx = 0x00; // DSP_GLYPH_IDX
         // Byte _dsp_glhph_data[8]{0}; // DSP_GLYPH_DATA 
@@ -123,6 +123,8 @@ class Sprite : public Device
         Word flags;
         Byte collision_data[8];
         Byte color_data[256];
+
+    private:
 };
 
 
