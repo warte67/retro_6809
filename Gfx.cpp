@@ -649,7 +649,7 @@ void Gfx::_updateTextScreen(float fElapsedTime)
     }
     else
     {
-        int t_pitch = _texture_width >> 2;
+        int t_pitch = _texture_width >> 2;            
         for (int y = 0; y < _texture_height; y+=8)
         {
             for (int x = 0; x < _texture_width; x+=8)
@@ -681,7 +681,7 @@ void Gfx::_updateTextScreen(float fElapsedTime)
         }
         SDL_UnlockTexture(_bg_texture); 
     }
-}
+}            
 
 
 void Gfx::_setPixel(int x, int y, Byte color_index, bool bIgnoreAlpha)
@@ -703,18 +703,47 @@ void Gfx::_setPixel(int x, int y, Byte color_index, bool bIgnoreAlpha)
 void Gfx::_setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_index, bool bIgnoreAlpha)
 {
     Uint32 *dst = (Uint32*)((Uint8*)pixels + (y * pitch) + (x*4));    // why is this (x*4) and not simply x?
-    // simple non-zero alpha channel
-    if (alf(color_index) != 0 || bIgnoreAlpha)
-    {
-        *dst = 
-        (
-            //(alf(color_index)<<24) |
-            0xFF000000 |
-            (red(color_index)<<16) |
-            (grn(color_index)<<8) |
-            blu(color_index)
-        );    
+    bool ALPHA_BLEND = true;
+    if (ALPHA_BLEND)
+    {       
+        // int ret = ((p1 * (256-a))) + (p2 * (a+1)) >> 8;
+        Uint32 pixel = *dst;
+        Byte r1 = pixel >> 16;
+        Byte g1 = pixel >> 8;
+        Byte b1 = pixel >> 0;
+        Byte a2 = alf(color_index);
+        Byte r2 = red(color_index);
+        Byte g2 = grn(color_index);
+        Byte b2 = blu(color_index);
+        if (bIgnoreAlpha)
+            a2 = 255;
+        Byte r = ((r1 * (256-a2))) + (r2 * (a2+1)) >> 8;;
+        Byte g = ((g1 * (256-a2))) + (g2 * (a2+1)) >> 8;;
+        Byte b = ((b1 * (256-a2))) + (b2 * (a2+1)) >> 8;;
+        if (alf(color_index) != 0 || bIgnoreAlpha)
+        {
+            *dst = (
+                0xFF000000 | 
+                (r<<16) | 
+                (g<<8) | 
+                (b)
+            );  
+        }
     }
+    else
+    {        
+        // simple non-zero alpha channel
+        if (alf(color_index) != 0 || bIgnoreAlpha)
+        {
+            *dst = 
+            (
+                0xFF000000 |
+                (red(color_index)<<16) |
+                (grn(color_index)<<8) |
+                blu(color_index)
+            );    
+        }
+    }    
 }
 
 void Gfx::OnUpdate(float fElapsedTime)
