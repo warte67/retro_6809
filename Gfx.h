@@ -47,9 +47,7 @@ class Gfx : public Device
         SDL_Window* _window = nullptr;
         SDL_Renderer* _renderer = nullptr;
 
-        //SDL_Texture* _main_texture;
         SDL_Texture* _bg_texture;      
-        //SDL_Texture* _txt_texture;
         std::vector<SDL_Texture*> _glyph_texture;
 
         const float _aspect = 1.6f;     //16x10
