@@ -47,10 +47,10 @@ class Device
         // helpers
         void DisplayEnum(std::string sToken, Word ofs, std::string sComment);
 
-    private:        
+    private:
+        std::string _deviceName = "??DEV??";
 
     protected:
-        std::string _deviceName = "??DEV??";
         Uint16 m_base = 0;
         Uint16 m_size = 0;
         std::vector<Uint8> m_memory;	// memory mapped to this device    

@@ -12,6 +12,9 @@ extern Byte font8x8_system[256][8];
 
 Byte Gfx::read(Word offset, bool debug)
 {
+    // if (offset - _base < _size)
+    // 	return memory[(Word)(offset - _base)];
+
     // printf("READ GFX: $%04X = ???\n", offset);
     switch(offset)
     {
@@ -31,7 +34,7 @@ Byte Gfx::read(Word offset, bool debug)
         case DSP_PAL_CLR:       return (_dsp_pal_clr >> 8) & 0xFF;
         case DSP_PAL_CLR+1:     return _dsp_pal_clr & 0xFF;
 
-        // text glyph definition data registers (TODO: move to text glyph mode)
+        // text glyph definition data registers (TODO: move to text glyphy mode)
         case DSP_GLYPH_IDX:     return _dsp_glyph_idx;
         case DSP_GLYPH_DATA:    return 0;   //(_dsp_glhph_data[_dsp_glyph_idx] >> 8) & 0xFF;
         case DSP_GLYPH_DATA+1:  return 0;   //_dsp_glhph_data[_dsp_glyph_idx] & 0xFF;
@@ -45,6 +48,10 @@ Byte Gfx::read(Word offset, bool debug)
 
 void Gfx::write(Word offset, Byte data, bool debug)
 {
+    // if (debug)
+    //     if (offset - _base < _size)
+    //         memory[(Word)(offset -_base)] = data;
+
     printf("WRITE GFX: $%04X = $%02X\n", offset, data);
 
     switch (offset)
@@ -77,6 +84,9 @@ void Gfx::write(Word offset, Byte data, bool debug)
                 _dsp_emuflags = data;                 
                 return;
             }
+            // // screen needs to be refreshed
+            // _dsp_gmode = data;      
+            // Bus::IsDirty(false);
         }
         break;
     }
@@ -181,52 +191,8 @@ Word Gfx::OnAttach(Word nextAddr)
     return nextAddr - old_addr;
 }
 
-void Gfx::OnInit() 
-{
-    if (_gfxDisplayBuffer.size() == 0)
-        _gfxDisplayBuffer.resize(65536);
-
-	// initialize the default color palette
-	if (_palette.size() == 0)
-	{
-		for (int t = 0; t < 16; t++)
-			_palette.push_back({0x00});
-		std::vector<PALETTE> ref = {
-			{ 0x0000 },	// 0000 0000.0000 0000		0
-			{ 0x005F },	// 0000 0000.0101 1111		1
-			{ 0x050F },	// 0000 0101.0000 1111		2
-			{ 0x055F },	// 0000 0101.0101 1111		3
-			{ 0x500F },	// 0101 0000.0000 1111		4
-			{ 0x505F },	// 0101 0000.0101 1111		5
-			{ 0x631F },	// 0101 0101.0000 1111		6		{ 0x550F }
-			{ 0xAAAF },	// 1010 1010.1010 1111		7
-			{ 0x555F },	// 0101 0101.0101 1111		8
-			{ 0x00FF },	// 0000 0000.1111 1111		9
-			{ 0x0F0F },	// 0000 1111.0000 1111		a
-			{ 0x0FFF },	// 0000 1111.1111 1111		b
-			{ 0xF00F },	// 1111 0000.0000 1111		c
-			{ 0xF0FF },	// 1111 0000.1111 1111		d
-			{ 0xFF0F },	// 1111 1111.0000 1111		e
-			{ 0xFFFF },	// 1111 1111.1111 1111		f
-		};
-        int t=0;
-        for (auto &p : ref)
-            _palette[t++] = p;
-        
-        // ToDo: define the rest of the color palette
-        // ...
-
-        // Temp: Fill the rest of the palette with black
-		PALETTE blank { 0 };
-		while (_palette.size() < 256)
-			_palette.push_back(blank);
-	}        
-}
-void Gfx::OnQuit() 
-{    
-    _palette.clear();
-    _gfxDisplayBuffer.clear();
-}
+void Gfx::OnInit() {}
+void Gfx::OnQuit() {}
 
 void Gfx::OnActivate()
 {
@@ -253,6 +219,7 @@ void Gfx::OnActivate()
         _render_flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE | SDL_RENDERER_PRESENTVSYNC;         
     _renderer = SDL_CreateRenderer(_window, -1, _render_flags);
     SDL_SetRenderDrawBlendMode(_renderer, SDL_BLENDMODE_BLEND);
+<<<<<<< HEAD
 
     // // create the main target texture
     // _main_texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_ARGB8888,
@@ -347,6 +314,15 @@ void Gfx::OnActivate()
         _glyph_texture.push_back(temp);
     }
 
+=======
+    // create the desktop texture
+    _texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGBA4444,
+			SDL_TEXTUREACCESS_TARGET, _texture_width, _texture_height);
+    SDL_SetRenderTarget(_renderer, _texture);
+    SDL_SetRenderDrawColor(_renderer, 0, 0, 255, 255);  //clear to blue for now
+    SDL_RenderClear(_renderer);
+    SDL_SetRenderTarget(_renderer, NULL);
+>>>>>>> parent of 9b0a92a (background texture is now streamed)
 }
 
 void Gfx::OnDeactivate()
@@ -447,7 +423,7 @@ void Gfx::OnEvent(SDL_Event *evnt)
             // number keys change pixel size
             if (evnt->key.keysym.sym >= SDLK_0 && evnt->key.keysym.sym <= SDLK_8)
             {
-                Byte key =  evnt->key.keysym.sym - SDLK_0;                
+                Byte key =  evnt->key.keysym.sym - 48;                
                 printf("key: %d\n", key);
                 Byte data = Bus::memory()->read(DSP_GMODE) & 0xF0;
                 switch(key)
@@ -467,6 +443,7 @@ void Gfx::OnEvent(SDL_Event *evnt)
         }
         break;
     }
+<<<<<<< HEAD
 } 
 
 void Gfx::_updateGraphics(float fElapsedTime)
@@ -528,26 +505,30 @@ void Gfx::_updateTextGlyphs(float fElapsedTime)
     // SDL_RenderCopy(_renderer, _glyph_texture[0], NULL, &dst);
 }
 void Gfx::_updateSprites(float fElapsedTime) {}
+=======
+}
+>>>>>>> parent of 9b0a92a (background texture is now streamed)
 
 void Gfx::OnUpdate(float fElapsedTime)
 {
-    // update the window title bar
     Bus* bus = Bus::GetInstance();
     std::string sTitle = "Retro_68009 - FPS: ";
     sTitle += std::to_string(bus->FPS());
     SDL_SetWindowTitle(_window, sTitle.c_str());
 
-    // display the background graphics (OR the tile graphics)
-    if (true)
-        _updateGraphics(fElapsedTime);
-    else
-        _updateTiles(fElapsedTime);
-
-    // overlay the text glyphs
-    _updateTextGlyphs(fElapsedTime);
-
-    // overlay sprites
-    _updateSprites(fElapsedTime);
+    // fill the Gfx screen with static
+    SDL_SetRenderTarget(_renderer, _texture);
+    for (int t=0; t<10000; t++)
+    {
+        int x = rand() % (_texture_width);
+        int y = rand() % (_texture_height);
+        Uint8 r = rand() % 256;
+        Uint8 g = rand() % 256;
+        Uint8 b = rand() % 256;
+        SDL_SetRenderDrawColor(_renderer, r, g, b, 255);
+        SDL_RenderDrawPoint(_renderer, x, y);
+        SDL_RenderCopy(_renderer, NULL, NULL, NULL);
+    }
 }
 
 void Gfx::_decode_gmode()
@@ -618,6 +599,7 @@ void Gfx::_decode_gmode()
 
 
 void Gfx::OnRender() 
+<<<<<<< HEAD
 {    
     // clear the window    
     SDL_SetRenderTarget(_renderer, NULL);
@@ -625,6 +607,13 @@ void Gfx::OnRender()
     SDL_RenderCopy(_renderer, NULL, NULL, NULL);
 
     // build the destination rectangle according to current aspect ratio
+=======
+{
+    SDL_SetRenderTarget(_renderer, NULL);
+    SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
+    SDL_RenderClear(_renderer);
+    SDL_RenderCopy(_renderer, NULL, NULL, NULL);    
+>>>>>>> parent of 9b0a92a (background texture is now streamed)
     int ww = _window_width;
     int wh = _window_height;
     float fh = (float)_window_height;
@@ -641,6 +630,7 @@ void Gfx::OnRender()
         (int)fw, 
         (int)fh 
     };
+<<<<<<< HEAD
     
     // render the background graphics layer
     //SDL_SetRenderTarget(_renderer, NULL);
@@ -653,6 +643,9 @@ void Gfx::OnRender()
     
     // render the sprite layer
     // ...
+=======
+    SDL_RenderCopy(_renderer, _texture, NULL, &dest);
+>>>>>>> parent of 9b0a92a (background texture is now streamed)
 
     // render the final result
     // SDL_SetRenderTarget(_renderer, NULL);
