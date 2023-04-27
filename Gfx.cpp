@@ -57,7 +57,6 @@ void Gfx::write(Word offset, Byte data, bool debug)
         {
             if (_dsp_gmode == data)
                 return; // no change
-
             // screen needs to be refreshed
             _dsp_gmode = data;      
             Bus::IsDirty(true);
@@ -67,8 +66,7 @@ void Gfx::write(Word offset, Byte data, bool debug)
         case DSP_EMUFLAGS:
         {
             if (_dsp_emuflags == data)
-                return; // no change
-            
+                return; // no change            
             // fullscreen / windowed toggle only
             if ((_dsp_emuflags & 0x01) != (data & 0x01))
             {
@@ -86,8 +84,10 @@ void Gfx::write(Word offset, Byte data, bool debug)
         }
         break;
 
+        // text pixel offset register
         case DSP_PXLOFS:  _dsp_pxlofs = data;  return;
 
+        // text base address registers
         case DSP_TBASE+0:
             _dsp_tbase = (_dsp_tbase & 0xff00) | (data << 0);
             return;
@@ -95,6 +95,7 @@ void Gfx::write(Word offset, Byte data, bool debug)
             _dsp_tbase = (_dsp_tbase & 0x00ff) | (data << 8);
             return;
 
+        // graphics base address registers
         case DSP_GBASE+0:
             _dsp_gbase = (_dsp_gbase & 0xff00) | (data << 0);
             return;
@@ -102,7 +103,7 @@ void Gfx::write(Word offset, Byte data, bool debug)
             _dsp_gbase = (_dsp_gbase & 0x00ff) | (data << 8);
             return;
 
-        // graphiics buffer I/O registers
+        // graphics buffer I/O registers
         case DSP_GADDR+0:
             _dsp_gaddr = (_dsp_gaddr & 0xff00) | (data << 0);
             return;
@@ -112,12 +113,6 @@ void Gfx::write(Word offset, Byte data, bool debug)
         case DSP_GDATA:
             _gfxDisplayBuffer[_dsp_gaddr] = data;
             return;
-
-        // case DSP_GDATA:     return _dsp_data;
-        // case DSP_GDATA:     return _gfxDisplayBuffer[_dsp_gaddr];
-
-
-        // ...
 
         // color palete registers
         case DSP_PAL_IDX:   _dsp_pal_idx = data;  return;
