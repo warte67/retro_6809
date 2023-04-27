@@ -394,7 +394,7 @@ void Gfx::OnInit()
     for (auto &a : sMessage)
     {
         Bus::write(addr, a);
-        Bus::write(addr+1, 0xF0);
+        Bus::write(addr+1, 0xE0);
         addr+=2;
     }
     Bus::write(_dsp_tbase+3, 0xE4);
@@ -730,8 +730,8 @@ void Gfx::OnUpdate(float fElapsedTime)
             _gfxDisplayBuffer[t] = rand() % 256;
 
         // update palette
-        Bus::write(DSP_PAL_IDX, 0x0f);
-        Bus::write_word(DSP_PAL_CLR, rand()%0x10000);
+        // Bus::write(DSP_PAL_IDX, 0x0f);
+        // Bus::write_word(DSP_PAL_CLR, rand()%0x10000);
 
         // update third row of character 108 'l'
         Bus::write(DSP_GLYPH_IDX, 108);
