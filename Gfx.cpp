@@ -377,6 +377,30 @@ void Gfx::OnEvent(SDL_Event *evnt)
                 }
                 Bus::memory()->write(DSP_GMODE, data);
             }
+            // [+] and [-] change bit depth
+            if (evnt->key.keysym.sym == SDLK_EQUALS || evnt->key.keysym.sym == SDLK_MINUS)
+            {
+                // C = bit depth 00:1bpp    01:2bpp  10:4bpp 11:8bpp (text00:mono)
+                Byte data = Bus::memory()->read(DSP_GMODE);
+                Byte b = (data >> 4) & 0x03;
+
+                // PLUS
+                if (evnt->key.keysym.sym == SDLK_EQUALS)
+                {
+                    b++;
+                    if (b>3)
+                        b=3;
+                }
+                if (evnt->key.keysym.sym == SDLK_MINUS)
+                {
+                    b--;
+                    if (b>3)    //unsigned
+                        b=0;
+                }
+                data &= 0b11001111;
+                data |= (b << 4);
+                Bus::memory()->write(DSP_GMODE, data);
+            }
         }
         break;
     }
@@ -565,8 +589,9 @@ void Gfx::_decode_gmode()
         break;
     default:
         _pixel_height = 1;  
-        // To prevent memory overflow and speed problems
-        // 640x400 becomes 640x200.  
+
+        // To prevent text address overflow and speed problems
+        // restrict the 640x400 mode to 640x200 regardless of bpp.  
         if (_timing_width > 512 && _pixel_width == 1)
             _pixel_height = 2;  
         break;
@@ -581,9 +606,12 @@ void Gfx::_decode_gmode()
     if (_dsp_emuflags)      // for now:  non-zero = fullscreen
         _fullscreen = true;
 
-    // debugging
-    int size = _texture_width * _texture_height;
-    printf("graphics size: $%04X (%d)\n", size, size);
+    // restrict bits-per-pixel based on memory usage    
+    while ((_texture_width * _texture_height) / (8/_bpp) >= 65536)
+        _bpp >>=1;
+    int size = (_texture_width * _texture_height) / (8/_bpp);
+
+    printf("%d-bpp graphics size: $%04X (%d)\n", _bpp, size, size);
 }
 
 
