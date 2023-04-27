@@ -17,14 +17,8 @@ class Memory
         Memory();
         virtual ~Memory();
 
-        Byte read(Word offset, bool debug = false);
-        void write(Word offset, Byte data, bool debug = false);
-        Word read_word(Word offset, bool debug = false);
-        void write_word(Word offset, Word data, bool debug = false);  
-
 		Word Attach(Device* dev, Word size = 0);   // attach a user defined memory node
         void DumpMemoryMap();
-
         
         int ap() { return _lastAddress; }
         void ap(int _addr)  { _lastAddress = _addr; }
@@ -37,6 +31,11 @@ class Memory
 		void _onEvent(SDL_Event* evnt);
 		void _onUpdate(float fElapsedTime);
 		void _onRender();
+
+        Byte read(Word offset, bool debug = false);
+        void write(Word offset, Byte data, bool debug = false);
+        Word read_word(Word offset, bool debug = false);
+        void write_word(Word offset, Word data, bool debug = false);          
 
         int _lastAddress = 0;
         std::vector<Device*> _memoryNodes;

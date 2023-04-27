@@ -40,13 +40,8 @@ class Bus
         static void Error(std::string sErr);
         static Bus* GetInstance();
         static void Run();
-
-        // temporary statics
-        // static SDL_Window* s_window;
-        // static SDL_Renderer* s_renderer;
-        // static int s_window_width;
-        // static int s_window_height;
     
+        // static accessors
         int FPS() { return _fps; }
         static Gfx* gfx() { return _gfx;}
         static Memory* memory() {return s_memory;}
@@ -54,7 +49,7 @@ class Bus
         static void IsRunning(bool state) { s_bIsRunning = state;}
         static bool IsDirty() { return s_bIsDirty;}
         static void IsDirty(bool state) { s_bIsDirty = state;}
-
+        // static memory access
         static Byte read(Word offset, bool debug = false);
         static void write(Word offset, Byte data, bool debug = false);
         static Word read_word(Word offset, bool debug = false);

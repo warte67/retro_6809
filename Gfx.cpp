@@ -665,8 +665,17 @@ void Gfx::OnUpdate(float fElapsedTime)
 
     // update the window title bar
     Bus* bus = Bus::GetInstance();
-    std::string sTitle = "Retro_68009 - FPS: ";
+    std::string sTitle = "      (fps:";
     sTitle += std::to_string(bus->FPS());
+    sTitle += ")";
+    sTitle += "  Retro_68009 - ";
+    sTitle += "  W:";
+    sTitle += std::to_string(_texture_width);
+    sTitle += "  H:";
+    sTitle += std::to_string(_texture_height);
+    sTitle += "  bpp: ";
+    sTitle += std::to_string(_bpp);
+
     SDL_SetWindowTitle(_window, sTitle.c_str());
 
     // display the background graphics (OR the tile graphics)
@@ -751,8 +760,12 @@ void Gfx::_decode_gmode()
     while ((_texture_width * _texture_height) / (8/_bpp) >= 65536)
         _bpp >>=1;
     int size = (_texture_width * _texture_height) / (8/_bpp);
+    _g_top_addr = size;
 
     printf("%d-bpp graphics size: $%04X (%d)\n", _bpp, size, size);
+
+    int num_sprites = (0x10000 - _g_top_addr)/sizeof(Sprite);
+    printf("Room for %d sprites.\n",  num_sprites);
 }
 
 

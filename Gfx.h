@@ -73,6 +73,8 @@ class Gfx : public Device
         Word _dsp_tpitch = _texture_width / 8;  // DSP_TPITCH
         Word _dsp_gpitch = _texture_width;      // DSP_GPITCH
 
+        Word _g_top_addr = 0xffff;  // top of graphics memory +1 (start sprites here)
+
         // color palette
         Byte _dsp_pal_idx = 0x00;   // DSP_PAL_IDX
         Word _dsp_pal_clr = 0x0000; // DSP_PAL_CLR
@@ -109,6 +111,17 @@ class Gfx : public Device
         Uint8 grn(Uint8 index) { Uint8 c = _palette[index].g;  return c | (c << 4) | (c << 8) | (c << 12); }
         Uint8 blu(Uint8 index) { Uint8 c = _palette[index].b;  return c | (c << 4) | (c << 8) | (c << 12); }
         Uint8 alf(Uint8 index) { Uint8 c = _palette[index].a;  return c | (c << 4) | (c << 8) | (c << 12); }        
+};
+
+class Sprite : public Device
+{
+    public:
+
+        Sint16 x_pos;
+        Sint16 y_pos;
+        Word flags;
+        Byte collision_data[8];
+        Byte color_data[256];
 };
 
 
