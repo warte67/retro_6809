@@ -372,6 +372,8 @@ void Gfx::OnInit()
         Bus::write(addr+1, 0xF0);
         addr+=2;
     }
+    Bus::write(_dsp_tbase+3, 0xE4);
+    Bus::write(_dsp_tbase+5, 0xA2);
 }
 void Gfx::OnQuit() 
 {    
@@ -705,8 +707,8 @@ void Gfx::OnUpdate(float fElapsedTime)
         Bus::write(DSP_PAL_IDX, 0x0f);
         Bus::write_word(DSP_PAL_CLR, rand()%0x10000);
 
-        // update third row of character 87 'W'
-        Bus::write(DSP_GLYPH_IDX, 87);
+        // update third row of character 108 'l'
+        Bus::write(DSP_GLYPH_IDX, 108);
         Bus::write(DSP_GLYPH_DATA+2, rand()%256);
         //printf("glyph: $%02X\n", Bus::read(DSP_GLYPH_DATA));        
     }
