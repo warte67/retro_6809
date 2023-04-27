@@ -46,9 +46,7 @@ class Gfx : public Device
                             SDL_RENDERER_TARGETTEXTURE;
         SDL_Window* _window = nullptr;
         SDL_Renderer* _renderer = nullptr;
-
         SDL_Texture* _bg_texture;      
-        std::vector<SDL_Texture*> _glyph_texture;
 
         const float _aspect = 1.6f;     //16x10
         int _timing_width = 512;
@@ -89,8 +87,11 @@ class Gfx : public Device
         // helper functions:
         void _updateGraphics(float fElapsedTime);
         void _updateTiles(float fElapsedTime);
-        void _updateTextGlyphs(float fElapsedTime);
-        void _updateSprites(float fElapsedTime);
+        void _updateTextScreen(float fElapsedTime);
+        
+        void _setPixel(int x, int y, Byte color_index);
+        void _setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_index);
+
 
         // Palette Stuff
         union PALETTE {
@@ -109,22 +110,6 @@ class Gfx : public Device
         Uint8 blu(Uint8 index) { Uint8 c = _palette[index].b;  return c | (c << 4) | (c << 8) | (c << 12); }
         Uint8 alf(Uint8 index) { Uint8 c = _palette[index].a;  return c | (c << 4) | (c << 8) | (c << 12); }        
 };
-
-
-
-
-
-
-
-//          // base class for the Graphics Modes
-//          class GfxNode : public Device
-//          {
-//              public:
-//                  GfxNode() {  Name("GfxNode"); }
-//                  GfxNode(std::string sName) { Name(sName); }
-//                  virtual ~GfxNode() {}           
-//                  virtual Word OnAttach(Word nextAddr) = 0;
-//          };
 
 
 #endif  // __GFX_H__

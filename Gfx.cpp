@@ -220,7 +220,28 @@ void Gfx::OnInit()
 		PALETTE blank { 0 };
 		while (_palette.size() < 256)
 			_palette.push_back(blank);
-	}        
+	}  
+
+    // clear the graphis buffer
+    for (int t=0; t<65536; t++)
+        _gfxDisplayBuffer[t] = 0;
+
+    // clear the text buffer to white on black spaces
+    for (int t=SCREEN_BUFFER; t<SCREEN_BUFFER+0x1200; t+=2)
+    {
+        Bus::memory()->write(t, 32);        
+        Bus::memory()->write(t+1, 0xF0);        
+    }
+
+    // output a test string
+    std::string sMessage = "Hello World, are you having a good day?";
+    Word addr = _dsp_tbase;
+    for (auto &a : sMessage)
+    {
+        Bus::memory()->write(addr, a);
+        Bus::memory()->write(addr+1, 0xF0);
+        addr+=2;
+    }
 }
 void Gfx::OnQuit() 
 {    
@@ -260,70 +281,11 @@ void Gfx::OnActivate()
 
 
     printf("SIZE  W:%d   H:%d\n", _texture_width, _texture_height);            
-   
-    for (int i=0; i<256; i++)
-    {
-        SDL_Texture* temp = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_ARGB8888,
-			SDL_TEXTUREACCESS_STREAMING, 8, 8);
-        SDL_Color sdl_c;
-        Uint32 *dst;
-        void *pixels;
-        int pitch;            
-        if (SDL_LockTexture(temp, NULL, &pixels, &pitch) < 0) 
-        {
-            SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't lock texture: %s\n", SDL_GetError());
-            Bus::Error("");
-        }
-        for (int r=0; r<8; r++)
-        {
-            dst = (Uint32*)((Uint8*)pixels + r * pitch);
-            Byte data = font8x8_system[i][r];
-            for (int b=0; b<8; b++)
-            {
-                if (data & (1 << (7 - b)))
-                {
-                    //printf("1");       
-                    sdl_c.a = 255;      
-                    sdl_c.r = 255;      
-                    sdl_c.g = 255;      
-                    sdl_c.b = 255;      
-                }
-                else
-                {
-                    //printf(" ");    
-                    // transparent
-                    sdl_c.a = 0;    
-                    sdl_c.r = 255;      
-                    sdl_c.g = 0;      
-                    sdl_c.b = 0;                               
-                }
-                *dst++ = 
-                (
-                    sdl_c.a<<24 |
-                    (sdl_c.r<<16) |
-                    (sdl_c.g<<8) |
-                    sdl_c.b
-                );                
-            }
-            //printf("\n");
-        }
-        //printf("\n");
-        SDL_UnlockTexture(temp); 
-        _glyph_texture.push_back(temp);
-    }
 }
 
 void Gfx::OnDeactivate()
 {
     printf("Gfx::OnDeactivate()\n");
-
-	// destroy the glyph textures
-	for (auto& a : _glyph_texture)
-	{
-    	SDL_DestroyTexture(a);    
-        // delete a;
-    }
-	_glyph_texture.clear();
 
     // destroy bg texture
     if (_bg_texture)
@@ -422,6 +384,109 @@ void Gfx::OnEvent(SDL_Event *evnt)
 
 void Gfx::_updateGraphics(float fElapsedTime)
 {
+    // stream to the background texture
+    Word pixel_index = 0;
+    void *pixels;
+    int pitch;
+    if (SDL_LockTexture(_bg_texture, NULL, &pixels, &pitch) < 0) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't lock texture: %s\n", SDL_GetError());
+        Bus::Error("");
+    }
+    else
+    {
+        for (int y = 0; y < _texture_height; y++)
+        {
+            for (int x = 0; x < _texture_width; x++)
+            {
+                // graphics pixel
+                Byte index = _gfxDisplayBuffer[pixel_index++];
+                _setPixel_unlocked(pixels, pitch, x, y, index);   
+            }
+        }
+        SDL_UnlockTexture(_bg_texture); 
+    }
+}
+void Gfx::_updateTiles(float fElapsedTime) {}
+
+void Gfx::_updateTextScreen(float fElapsedTime) 
+{
+    void *pixels;
+    int pitch;
+    if (SDL_LockTexture(_bg_texture, NULL, &pixels, &pitch) < 0) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't lock texture: %s\n", SDL_GetError());
+        Bus::Error("");
+    }
+    else
+    {
+        int t_pitch = _texture_width >> 2;
+        for (int y = 0; y < _texture_height; y+=8)
+        {
+            for (int x = 0; x < _texture_width; x+=8)
+            {
+                Word addr = _dsp_tbase + ((y>>3) * t_pitch) + ((x>>3)<<1);
+                Byte ch = Bus::memory()->read(addr);
+                Byte at = Bus::memory()->read(addr+1);
+
+                if (addr >= 0x1800)
+                {
+                    ch = 0;
+                    at = 0xe4;
+                }
+
+                Byte fg = at >> 4;
+                Byte bg = at & 0x0f;
+
+                for (int v=0; v<8; v++)
+                {    
+                    for (int h=0; h<8; h++)
+                    {
+                        int index = bg;
+                        if (font8x8_system[ch][v] & (1 << 7-h))
+                            index = fg;
+                        _setPixel_unlocked(pixels, pitch, x+h, y+v, index);   
+                    }
+                }
+            }
+        }
+        SDL_UnlockTexture(_bg_texture); 
+    }
+}
+
+
+void Gfx::_setPixel(int x, int y, Byte color_index)
+{
+
+    void *pixels;
+    int pitch;
+    Uint8 clr_index = 0;    
+    if (SDL_LockTexture(_bg_texture, NULL, &pixels, &pitch) < 0) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't lock texture: %s\n", SDL_GetError());
+        Bus::Error("");
+    }
+    else
+    {
+        _setPixel_unlocked(pixels, pitch, x, y, color_index);
+        SDL_UnlockTexture(_bg_texture);
+    }    
+}
+void Gfx::_setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_index)
+{
+    Uint32 *dst = (Uint32*)((Uint8*)pixels + (y * pitch) + (x*4));    // why is this (x*4) and not simply x?
+    // simple non-zero alpha channel
+    if (alf(color_index) != 0)
+    {
+        *dst = 
+        (
+            (alf(color_index)<<24) |
+            (red(color_index)<<16) |
+            (grn(color_index)<<8) |
+            blu(color_index)
+        );    
+    }
+}
+
+void Gfx::OnUpdate(float fElapsedTime)
+{
     // TEMPORARY RANDOM NOISE
     const float _texDelay = 0.01f;
     static float _texAcc = fElapsedTime;
@@ -432,47 +497,7 @@ void Gfx::_updateGraphics(float fElapsedTime)
         for (int t=0; t<65536; t++)
             _gfxDisplayBuffer[t] = rand() % 16;
     }
-    //printf("fElapsedTime: %f\n", fElapsedTime);
 
-    // steam to the background texture
-    Word pixel_index = 0;
-    SDL_Color sdl_c;
-    Uint8 *src;
-    Uint32 *dst;
-    void *pixels;
-    int pitch;
-    Uint8 clr_index = 0;
-    if (SDL_LockTexture(_bg_texture, NULL, &pixels, &pitch) < 0) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't lock texture: %s\n", SDL_GetError());
-        Bus::Error("");
-    }
-    else
-    {
-        for (int row = 0; row < _texture_height; ++row) 
-        {
-            dst = (Uint32*)((Uint8*)pixels + row * pitch);
-            //for (int col = 0; col < _texture_width; ++col) 
-            for (int col = 0; col < _texture_width; ++col) 
-            {
-                clr_index = _gfxDisplayBuffer[pixel_index++];
-                *dst++ = 
-                (
-                    0xFF000000 |
-                    (red(clr_index)<<16) |
-                    (grn(clr_index)<<8) |
-                    blu(clr_index)
-                );
-            }
-        }
-        SDL_UnlockTexture(_bg_texture);    
-    }
-}
-void Gfx::_updateTiles(float fElapsedTime) {}
-void Gfx::_updateTextGlyphs(float fElapsedTime) {}
-void Gfx::_updateSprites(float fElapsedTime) {}
-
-void Gfx::OnUpdate(float fElapsedTime)
-{
     // update the window title bar
     Bus* bus = Bus::GetInstance();
     std::string sTitle = "Retro_68009 - FPS: ";
@@ -485,11 +510,9 @@ void Gfx::OnUpdate(float fElapsedTime)
     else
         _updateTiles(fElapsedTime);
 
-    // overlay the text glyphs
-    _updateTextGlyphs(fElapsedTime);
-
-    // overlay sprites
-    _updateSprites(fElapsedTime);
+    // display text glyphs
+    _updateTextScreen(fElapsedTime);
+    
 }
 
 void Gfx::_decode_gmode()
@@ -534,13 +557,18 @@ void Gfx::_decode_gmode()
     switch (_dsp_gmode & 0x03)
     {
     case 00:
+        //_pixel_height = 4;
         _pixel_height = 4;
         break;
     case 01:
         _pixel_height = 2;
         break;
     default:
-        _pixel_height = 1;
+        _pixel_height = 1;  
+        // To prevent memory overflow and speed problems
+        // 640x400 becomes 640x200.  
+        if (_timing_width > 512 && _pixel_width == 1)
+            _pixel_height = 2;  
         break;
     }
 
@@ -552,6 +580,10 @@ void Gfx::_decode_gmode()
     _fullscreen = false;
     if (_dsp_emuflags)      // for now:  non-zero = fullscreen
         _fullscreen = true;
+
+    // debugging
+    int size = _texture_width * _texture_height;
+    printf("graphics size: $%04X (%d)\n", size, size);
 }
 
 
