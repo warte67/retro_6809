@@ -75,14 +75,6 @@ class Gfx : public Device
 
         Word _g_top_addr = 0xffff;  // top of graphics memory +1 (start sprites here)
 
-        // color palette
-        Byte _dsp_pal_idx = 0x00;   // DSP_PAL_IDX
-        // Word _dsp_pal_clr = 0x0000; // DSP_PAL_CLR
-        // text glyph definition array  (move to glyph mode device)
-        Byte _dsp_glyph_idx = 0x00; // DSP_GLYPH_IDX
-        // Byte _dsp_glhph_data[8]{0}; // DSP_GLYPH_DATA 
-
-
         // 64k graphics display buffer
         std::vector<Byte> _gfxDisplayBuffer;
 
@@ -94,7 +86,6 @@ class Gfx : public Device
         void _setPixel(int x, int y, Byte color_index, bool bIgnoreAlpha = false);
         void _setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_index, bool bIgnoreAlpha = false);
 
-
         // Palette Stuff
         union PALETTE {
             Word color;
@@ -105,7 +96,13 @@ class Gfx : public Device
                 Uint8 r : 4;
             };
         };
+        Byte _dsp_pal_idx = 0x00;   // DSP_PAL_IDX
         std::vector<PALETTE> _palette;
+
+        // text glyph stuff
+        Byte _dsp_glyph_idx = 0x00;         // DSP_GLYPH_IDX
+        Byte _dsp_glyph_data[256][8]{0};    // DSP_GLYPH_DATA
+
     public:
         Uint8 red(Uint8 index) { Uint8 c = _palette[index].r;  return c | (c << 4) | (c << 8) | (c << 12); }
         Uint8 grn(Uint8 index) { Uint8 c = _palette[index].g;  return c | (c << 4) | (c << 8) | (c << 12); }

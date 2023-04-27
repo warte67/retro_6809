@@ -27,15 +27,21 @@ Byte Gfx::read(Word offset, bool debug)
         case DSP_GADDR+1:   return _dsp_gaddr & 0xFF;
         case DSP_GDATA:     return _dsp_data;
 
-        // color palete registers (TODO: make these based on array)
+        // color palete registers
         case DSP_PAL_IDX:       return _dsp_pal_idx;
         case DSP_PAL_CLR:       return (_palette[_dsp_pal_idx].color >> 8) & 0xFF;
         case DSP_PAL_CLR+1:     return _palette[_dsp_pal_idx].color  & 0xFF;
 
-        // text glyph definition data registers (TODO: move to text glyph mode)
+        // text glyph definition data registers
         case DSP_GLYPH_IDX:     return _dsp_glyph_idx;
-        case DSP_GLYPH_DATA:    return 0;   //(_dsp_glhph_data[_dsp_glyph_idx] >> 8) & 0xFF;
-        case DSP_GLYPH_DATA+1:  return 0;   //_dsp_glhph_data[_dsp_glyph_idx] & 0xFF;
+        case DSP_GLYPH_DATA+0:  return _dsp_glyph_data[_dsp_glyph_idx][0];
+        case DSP_GLYPH_DATA+1:  return _dsp_glyph_data[_dsp_glyph_idx][1];
+        case DSP_GLYPH_DATA+2:  return _dsp_glyph_data[_dsp_glyph_idx][2];
+        case DSP_GLYPH_DATA+3:  return _dsp_glyph_data[_dsp_glyph_idx][3];
+        case DSP_GLYPH_DATA+4:  return _dsp_glyph_data[_dsp_glyph_idx][4];
+        case DSP_GLYPH_DATA+5:  return _dsp_glyph_data[_dsp_glyph_idx][5];
+        case DSP_GLYPH_DATA+6:  return _dsp_glyph_data[_dsp_glyph_idx][6];
+        case DSP_GLYPH_DATA+7:  return _dsp_glyph_data[_dsp_glyph_idx][7];
 
     }
 
@@ -44,7 +50,7 @@ Byte Gfx::read(Word offset, bool debug)
 
 void Gfx::write(Word offset, Byte data, bool debug)
 {
-    printf("WRITE GFX: $%04X = $%02X\n", offset, data);
+    // printf("WRITE GFX: $%04X = $%02X\n", offset, data);
 
     switch (offset)
     {
@@ -83,6 +89,7 @@ void Gfx::write(Word offset, Byte data, bool debug)
 
         // ...
 
+        // color palete registers
         case DSP_PAL_IDX:   _dsp_pal_idx = data;  return;
         case DSP_PAL_CLR+1: { 
             Word c = _palette[_dsp_pal_idx].color & 0x00ff;
@@ -92,6 +99,17 @@ void Gfx::write(Word offset, Byte data, bool debug)
             Word c = _palette[_dsp_pal_idx].color & 0xff00;
             _palette[_dsp_pal_idx].color = c | data;
             return;         }
+
+        // text glyph definition data registers
+        case DSP_GLYPH_IDX: _dsp_glyph_idx = data; return;
+        case DSP_GLYPH_DATA+0:  _dsp_glyph_data[_dsp_glyph_idx][0] = data; return;
+        case DSP_GLYPH_DATA+1:  _dsp_glyph_data[_dsp_glyph_idx][1] = data; return;
+        case DSP_GLYPH_DATA+2:  _dsp_glyph_data[_dsp_glyph_idx][2] = data; return;
+        case DSP_GLYPH_DATA+3:  _dsp_glyph_data[_dsp_glyph_idx][3] = data; return;
+        case DSP_GLYPH_DATA+4:  _dsp_glyph_data[_dsp_glyph_idx][4] = data; return;
+        case DSP_GLYPH_DATA+5:  _dsp_glyph_data[_dsp_glyph_idx][5] = data; return;
+        case DSP_GLYPH_DATA+6:  _dsp_glyph_data[_dsp_glyph_idx][6] = data; return;
+        case DSP_GLYPH_DATA+7:  _dsp_glyph_data[_dsp_glyph_idx][7] = data; return;            
     }
 }
 
@@ -339,6 +357,11 @@ void Gfx::OnInit()
         Bus::write(t, 32);        
         Bus::write(t+1, 0xF0);       
     }
+    
+    // initialize the font glyph buffer
+    for (int i=0; i<256; i++)
+        for (int r=0; r<8; r++)
+            _dsp_glyph_data[i][r] = font8x8_system[i][r];
 
     // output a test string
     std::string sMessage = "Hello World, are you having a good day?";
@@ -413,10 +436,10 @@ void Gfx::OnDeactivate()
         _window = nullptr;
     }
 
-    // on deactivate tests
-    Bus::write(DSP_PAL_IDX, 0x0f);
-    Bus::write_word(DSP_PAL_CLR, 0x822F);
-    printf("palette: $%04X\n", Bus::read_word(DSP_PAL_CLR));
+    // // on deactivate tests 72
+    // Bus::write(DSP_GLYPH_IDX, 72);
+    // //Bus::write(DSP_GLYPH_DATA, 0xFF);
+    // printf("glyph: $%02X\n", Bus::read(DSP_GLYPH_DATA));
 }
 
 void Gfx::OnEvent(SDL_Event *evnt) 
@@ -621,7 +644,7 @@ void Gfx::_updateTextScreen(float fElapsedTime)
                     for (int h=0; h<8; h++)
                     {
                         int index = bg;
-                        if (font8x8_system[ch][v] & (1 << 7-h))
+                        if (_dsp_glyph_data[ch][v] & (1 << 7-h))
                             index = fg;
                         _setPixel_unlocked(pixels, pitch, x+h, y+v, index);   
                     }
@@ -678,8 +701,14 @@ void Gfx::OnUpdate(float fElapsedTime)
         for (int t=0; t<65536; t++)
             _gfxDisplayBuffer[t] = rand() % 256;
 
+        // update palette
         Bus::write(DSP_PAL_IDX, 0x0f);
         Bus::write_word(DSP_PAL_CLR, rand()%0x10000);
+
+        // update third row of character 87 'W'
+        Bus::write(DSP_GLYPH_IDX, 87);
+        Bus::write(DSP_GLYPH_DATA+2, rand()%256);
+        //printf("glyph: $%02X\n", Bus::read(DSP_GLYPH_DATA));        
     }
 
     // update the window title bar
