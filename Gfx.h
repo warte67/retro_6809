@@ -89,8 +89,8 @@ class Gfx : public Device
         void _updateTiles(float fElapsedTime);
         void _updateTextScreen(float fElapsedTime);
         
-        void _setPixel(int x, int y, Byte color_index);
-        void _setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_index);
+        void _setPixel(int x, int y, Byte color_index, bool bIgnoreAlpha = false);
+        void _setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_index, bool bIgnoreAlpha = false);
 
 
         // Palette Stuff
