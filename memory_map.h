@@ -39,8 +39,8 @@ enum MEMMAP
     //     care should be taken to ensure the screen remains within 
     //     the text buffer ($0400-$1800).
     
-  DSP_TXT_COLS = 0x1804,        //  (Byte) Text Screen Columns
-  DSP_TXT_ROWS = 0x1805,        //  (Byte) Text Screens Rows
+  DSP_TXT_COLS = 0x1804,        //  (Byte) READ-ONLY Text Screen Columns
+  DSP_TXT_ROWS = 0x1805,        //  (Byte) READ-ONLY Text Screens Rows
   DSP_TXT_PITCH = 0x1806,       //  (Word) Text Screen Pitch
     
   DSP_TXT_PXLOFS = 0x1808,      //  (Byte) Text Screen Pixel Offset
@@ -54,8 +54,8 @@ enum MEMMAP
     // Note: This is the base address to begin displaying pixel
     //     graphics information within the external serial QSPI RAM.
     
-  DSP_SCN_WIDTH = 0x180B,       //  (Word) Screen Pixel Width
-  DSP_SCN_HEIGHT = 0x180D,      //  (Word) Screen Pixel Height
+  DSP_SCN_WIDTH = 0x180B,       //  (Word) READ-ONLY Screen Pixel Width
+  DSP_SCN_HEIGHT = 0x180D,      //  (Word) READ-ONLY Screen Pixel Height
   DSP_SCN_PITCH = 0x180F,       //  (Word) Graphics Screen Pitch
     
      DSP_GADDR = 0x1811,        //  (Word) Pixel Address
@@ -90,8 +90,26 @@ enum MEMMAP
     //     array represents the top line of 8 pixels. Each array entry represents
     //     a row of 8 pixels. 
     
-    // 2016 ($07E0) bytes remaining for additional registers.
-      RESERVED = 0x1820,
+    // Mouse Cursor Hardware Registers:
+     CSR_BEGIN = 0x1820,        //  start of mouse cursor hardware registers
+      CSR_XPOS = 0x1820,        //  (Word) horizontal mouse cursor coordinate
+      CSR_YPOS = 0x1822,        //  (Word) vertical mouse cursor coordinate
+      CSR_XOFS = 0x1824,        //  (Byte) horizontal mouse cursor offset
+      CSR_YOFS = 0x1825,        //  (Byte) vertical mouse cursor offset
+      CSR_SIZE = 0x1826,        //  (Byte) cursor size (0-15) 0:off
+    CSR_SCROLL = 0x1827,        //  (Signed) MouseWheel Scroll: -1, 0, 1
+     CSR_FLAGS = 0x1828,        //  (Byte) mouse button flags:
+    //  CSR_FLAGS:
+    //       bits 0-5: button states
+    //       bits 6-7: number of clicks
+  CSR_PAL_INDX = 0x1829,        //  (Byte) mouse cursor color palette index (0-15)
+  CSR_PAL_DATA = 0x182A,        //  (Word) mouse cursor color palette data RGBA4444
+  CSR_BMP_INDX = 0x182C,        //  (Byte) mouse cursor bitmap pixel offset
+  CSR_BMP_DATA = 0x182D,        //  (Byte) mouse cursor bitmap pixel index color
+       CSR_END = 0x182F,        //  end of mouse cursor hardware registers
+    
+    // 2000 ($07D0) bytes remaining for additional registers.
+      RESERVED = 0x1830,
     
     // User RAM (44K bytes)
       USER_RAM = 0x2000,

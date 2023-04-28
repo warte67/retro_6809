@@ -25,4 +25,8 @@
         #define DWord Uint32
     #endif
 
+// constants
+const Byte DEFAULT_MOUSE_SIZE = 8;
+
+
 #endif //__TYPES_H__

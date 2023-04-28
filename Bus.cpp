@@ -6,18 +6,14 @@
 
 #include "Bus.h"
 #include "Gfx.h"
+#include "Mouse.h"
 
 Bus* Bus::s_bus = nullptr;
 Memory* Bus::s_memory = nullptr;
 bool Bus::s_bIsDirty = true;
 bool Bus::s_bIsRunning = true;
-Gfx* Bus::_gfx = nullptr;
-
-// temporary statics
-// SDL_Window* Bus::s_window = nullptr;
-// SDL_Renderer* Bus::s_renderer = nullptr;
-// int Bus::s_window_width = 512 * 2;
-// int Bus::s_window_height = 384 * 2;
+Gfx* Bus::s_gfx = nullptr;
+Mouse* Bus::s_mouse = nullptr;
 
 
 // private constructor
@@ -80,7 +76,11 @@ void Bus::_onetime_init()
 
     dev = new Gfx("GFX_DEVICE");
     s_memory->Attach(dev); 
-    _gfx = dynamic_cast<Gfx*>(dev);   
+    s_gfx = dynamic_cast<Gfx*>(dev);   
+
+    dev = new Mouse("CSR_BEGIN");
+    s_memory->Attach(dev); 
+    s_mouse = dynamic_cast<Mouse*>(dev);   
 
     // calculate space remaining for registers
     dev->DisplayEnum("",0, "");
@@ -276,8 +276,8 @@ void Bus::Run()
         _onRender();  
 
         // swap display buffers / present
-        if (_gfx)
-            SDL_RenderPresent(_gfx->GetRenderer());           
+        if (s_gfx)
+            SDL_RenderPresent(s_gfx->GetRenderer());           
     }
     _final_quit();
 }

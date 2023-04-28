@@ -53,7 +53,7 @@ class Gfx : public Device
         int _timing_height = _timing_width / _aspect;   //384;
         int _window_width = _timing_width * 2;
         int _window_height = _timing_height * 2;
-        int _bpp = 1;
+        int _bpp = 8;
         int _pixel_width = 1;
         int _pixel_height = 1;
         int _texture_width = _timing_width / _pixel_width;
@@ -62,13 +62,12 @@ class Gfx : public Device
         bool _vsync = false;
 
         // base graphics device registers
-        Byte _dsp_gmode = 0x00;     // DSP_GMODE
+        Byte _dsp_gmode = 0x30;     // DSP_GMODE
         Byte _dsp_emuflags = 0;     // DSP_EMUFLAGS
         //Byte _dsp_pxlofs = 0;       // DSP_PXLOFS
         Word _dsp_tbase = 0x0400;   // DSP_TBASE
         Word _dsp_gbase = 0x0000;   // DSP_GBASE
         Word _dsp_gaddr = 0x0000;   // DSP_GADDR
-        //Byte _dsp_data = 0x00;      // DSP_GDATA
         // display pitch registers (not yet implemented)
         Word _dsp_tpitch = _texture_width / 8;  // DSP_TPITCH
         Word _dsp_gpitch = _texture_width;      // DSP_GPITCH

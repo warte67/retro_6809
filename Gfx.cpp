@@ -16,21 +16,32 @@ Byte Gfx::read(Word offset, bool debug)
     switch(offset)
     {
         // standard graphics sub-system hardware registers
-        case DSP_GMODE:     return _dsp_gmode;
-        case DSP_EMUFLAGS:  return _dsp_emuflags;
-        //case DSP_PXLOFS:    return _dsp_pxlofs;
-        case DSP_TBASE+0:   return (_dsp_tbase >> 8) & 0xFF;
-        case DSP_TBASE+1:   return _dsp_tbase & 0xFF;
-        case DSP_GBASE:     return (_dsp_gbase >> 8) & 0xFF;
-        case DSP_GBASE+1:   return _dsp_gbase & 0xFF;
-        case DSP_GADDR:     return (_dsp_gaddr >> 8) & 0xFF;
+        case DSP_EMUFLAGS:      return _dsp_emuflags;
+        case DSP_GMODE:         return _dsp_gmode;
+        case DSP_TBASE+0:       return _dsp_tbase >> 8;
+        case DSP_TBASE+1:       return _dsp_tbase & 0xFF;
+        case DSP_TXT_COLS:      return _texture_width / 8;      // read-only
+        case DSP_TXT_ROWS:      return _texture_height / 8;     // read-only
+        case DSP_TXT_PITCH+0:   return _texture_width >> 8;
+        case DSP_TXT_PITCH+1:   return _texture_width & 0xFF;
+
+        case DSP_GBASE:         return (_dsp_gbase >> 8) & 0xFF;
+        case DSP_GBASE+1:       return _dsp_gbase & 0xFF;
+        case DSP_SCN_WIDTH+0:   return _texture_width >> 8;     // read-only
+        case DSP_SCN_WIDTH+1:   return _texture_width & 0xFF;   // read-only
+        case DSP_SCN_HEIGHT+0:  return _texture_height >> 8;    // read-only
+        case DSP_SCN_HEIGHT+1:  return _texture_height & 0xFF;  // read-only
+        case DSP_SCN_PITCH:     return _dsp_gpitch >> 8;
+        case DSP_SCN_PITCH+1:   return _dsp_gpitch & 0xFF;     
+
+        case DSP_GADDR+0:   return _dsp_gaddr >> 8;
         case DSP_GADDR+1:   return _dsp_gaddr & 0xFF;
         case DSP_GDATA:     return _gfxDisplayBuffer[_dsp_gaddr];
 
         // color palete registers
-        case DSP_PAL_IDX:       return _dsp_pal_idx;
-        case DSP_PAL_CLR+1:     return (_palette[_dsp_pal_idx].color >> 8) & 0xFF;
-        case DSP_PAL_CLR+0:     return _palette[_dsp_pal_idx].color  & 0xFF;
+        case DSP_PAL_IDX:   return _dsp_pal_idx;
+        case DSP_PAL_CLR+1: return (_palette[_dsp_pal_idx].color >> 8) & 0xFF;
+        case DSP_PAL_CLR+0: return _palette[_dsp_pal_idx].color  & 0xFF;
 
         // text glyph definition data registers
         case DSP_GLYPH_IDX:     return _dsp_glyph_idx;
@@ -61,8 +72,7 @@ void Gfx::write(Word offset, Byte data, bool debug)
             _dsp_gmode = data;      
             Bus::IsDirty(true);
             break;
-        }
-        
+        }       
 
         case DSP_EMUFLAGS:
         {
@@ -86,9 +96,6 @@ void Gfx::write(Word offset, Byte data, bool debug)
         }
         
 
-        // text pixel offset register
-        //case DSP_PXLOFS:  _dsp_pxlofs = data;  return;
-
         // text base address registers
         case DSP_TBASE+0:
             _dsp_tbase = (_dsp_tbase & 0xff00) | (data << 0);
@@ -97,6 +104,13 @@ void Gfx::write(Word offset, Byte data, bool debug)
             _dsp_tbase = (_dsp_tbase & 0x00ff) | (data << 8);
             return;
 
+        case DSP_TXT_PITCH+0:   
+            _dsp_tbase = (_dsp_tbase & 0xff00) | (data << 0);
+            return;        
+        case DSP_TXT_PITCH+1:   
+            _dsp_tbase = (_dsp_tbase & 0x00ff) | (data << 8);
+            return;        
+
         // graphics base address registers
         case DSP_GBASE+0:
             _dsp_gbase = (_dsp_gbase & 0xff00) | (data << 0);
@@ -104,6 +118,13 @@ void Gfx::write(Word offset, Byte data, bool debug)
         case DSP_GBASE+1:        
             _dsp_gbase = (_dsp_gbase & 0x00ff) | (data << 8);
             return;
+
+        case DSP_SCN_PITCH+0:   
+            _dsp_gpitch = (_dsp_gpitch & 0xff00) | (data << 0);
+            return;        
+        case DSP_SCN_PITCH+1:   
+            _dsp_gpitch = (_dsp_gpitch & 0x00ff) | (data << 8);
+            return;     
 
         // graphics buffer I/O registers
         case DSP_GADDR+0:
@@ -170,9 +191,9 @@ Word Gfx::OnAttach(Word nextAddr)
     nextAddr += 2;
 
     DisplayEnum("", 0, "");
-    DisplayEnum("DSP_TXT_COLS", nextAddr, " (Byte) Text Screen Columns");
+    DisplayEnum("DSP_TXT_COLS", nextAddr, " (Byte) READ-ONLY Text Screen Columns");
     nextAddr += 1;
-    DisplayEnum("DSP_TXT_ROWS", nextAddr, " (Byte) Text Screens Rows");
+    DisplayEnum("DSP_TXT_ROWS", nextAddr, " (Byte) READ-ONLY Text Screens Rows");
     nextAddr += 1;
     DisplayEnum("DSP_TXT_PITCH", nextAddr, " (Word) Text Screen Pitch");
     nextAddr += 2;
@@ -193,9 +214,9 @@ Word Gfx::OnAttach(Word nextAddr)
     nextAddr += 2;
 
     DisplayEnum("", 0, "");
-    DisplayEnum("DSP_SCN_WIDTH", nextAddr, " (Word) Screen Pixel Width");
+    DisplayEnum("DSP_SCN_WIDTH", nextAddr, " (Word) READ-ONLY Screen Pixel Width");
     nextAddr += 2;
-    DisplayEnum("DSP_SCN_HEIGHT", nextAddr, " (Word) Screen Pixel Height");
+    DisplayEnum("DSP_SCN_HEIGHT", nextAddr, " (Word) READ-ONLY Screen Pixel Height");
     nextAddr += 2;
     DisplayEnum("DSP_SCN_PITCH", nextAddr, " (Word) Graphics Screen Pitch");
     nextAddr += 2;
@@ -602,6 +623,9 @@ void Gfx::_updateGraphics(float fElapsedTime)
         {
             for (int x = 0; x < _texture_width; )
             {
+                // figure out how to use graphics pitch with this algorhythm
+                // _dsp_gpitch
+
                 // 256 color mode
                 if (_bpp == 8)
                 {
@@ -668,12 +692,11 @@ void Gfx::_updateTextScreen(float fElapsedTime)
     }
     else
     {
-        int t_pitch = _texture_width >> 2;            
         for (int y = 0; y < _texture_height; y+=8)
         {
             for (int x = 0; x < _texture_width; x+=8)
             {
-                Word addr = _dsp_tbase + ((y>>3) * t_pitch) + ((x>>3)<<1);
+                Word addr = _dsp_tbase + ((y>>3) * _dsp_tpitch) + ((x>>3)<<1);
                 Byte ch = Bus::read(addr);
                 Byte at = Bus::read(addr+1);
                 if (addr >= 0x1800)
@@ -871,6 +894,12 @@ void Gfx::_decode_gmode()
     // texture size
     _texture_width = _timing_width / _pixel_width;
     _texture_height = _timing_height / _pixel_height;
+
+    // text screen pitch default
+    _dsp_tpitch = _texture_width >> 2; 
+
+    // graphics pitch default
+    _dsp_gpitch = _texture_width;
 
     // WINDOWED or FULLSCREEN
     _fullscreen = false;

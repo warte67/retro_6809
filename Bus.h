@@ -8,6 +8,7 @@
 #include "types.h"
 #include "Memory.h"
 #include "Gfx.h"
+#include "Mouse.h"
 
 class Bus
 {
@@ -30,7 +31,8 @@ class Bus
         static Memory* s_memory;
 
         int _fps = 0;
-        static Gfx* _gfx;
+        static Gfx* s_gfx;
+        static Mouse* s_mouse;
 
     public:    
         ~Bus();
@@ -43,7 +45,7 @@ class Bus
     
         // static accessors
         int FPS() { return _fps; }
-        static Gfx* gfx() { return _gfx;}
+        static Gfx* gfx() { return s_gfx;}
         static Memory* memory() {return s_memory;}
         static bool IsRunning() { return s_bIsRunning;}
         static void IsRunning(bool state) { s_bIsRunning = state;}
