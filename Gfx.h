@@ -64,7 +64,7 @@ class Gfx : public Device
         // base graphics device registers
         Byte _dsp_gmode = 0x00;     // DSP_GMODE
         Byte _dsp_emuflags = 0;     // DSP_EMUFLAGS
-        Byte _dsp_pxlofs = 0;       // DSP_PXLOFS
+        //Byte _dsp_pxlofs = 0;       // DSP_PXLOFS
         Word _dsp_tbase = 0x0400;   // DSP_TBASE
         Word _dsp_gbase = 0x0000;   // DSP_GBASE
         Word _dsp_gaddr = 0x0000;   // DSP_GADDR

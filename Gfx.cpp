@@ -18,7 +18,7 @@ Byte Gfx::read(Word offset, bool debug)
         // standard graphics sub-system hardware registers
         case DSP_GMODE:     return _dsp_gmode;
         case DSP_EMUFLAGS:  return _dsp_emuflags;
-        case DSP_PXLOFS:    return _dsp_pxlofs;
+        //case DSP_PXLOFS:    return _dsp_pxlofs;
         case DSP_TBASE+0:   return (_dsp_tbase >> 8) & 0xFF;
         case DSP_TBASE+1:   return _dsp_tbase & 0xFF;
         case DSP_GBASE:     return (_dsp_gbase >> 8) & 0xFF;
@@ -85,7 +85,7 @@ void Gfx::write(Word offset, Byte data, bool debug)
         break;
 
         // text pixel offset register
-        case DSP_PXLOFS:  _dsp_pxlofs = data;  return;
+        //case DSP_PXLOFS:  _dsp_pxlofs = data;  return;
 
         // text base address registers
         case DSP_TBASE+0:
@@ -144,6 +144,12 @@ Word Gfx::OnAttach(Word nextAddr)
     Word old_addr = nextAddr;
 
     DisplayEnum("", 0, "");
+    DisplayEnum("DSP_EMUFLAGS", nextAddr, " (Byte) Auxillary Emulation Flags");
+    DisplayEnum("", 0, "DSP_EMUFLAGS: 0000.000A");
+    DisplayEnum("", 0, "A=0:WINDOWED 1:FULLSCREEN");
+    nextAddr += 1;
+
+    DisplayEnum("", 0, "");
     DisplayEnum("DSP_GMODE", nextAddr, " (Byte) Display Mode Register");
     DisplayEnum("", 0, "DSP_GMODE: ABCC.DDEE");
     DisplayEnum("", 0, "A = VSYNC     0:off       1:on");
@@ -151,14 +157,6 @@ Word Gfx::OnAttach(Word nextAddr)
     DisplayEnum("", 0, "C = bit depth 00:1bpp    01:2bpp  10:4bpp 11:8bpp (text00:mono)");
     DisplayEnum("", 0, "D = h_scan    00:1x      01:2x    10:4x           (text: lsb only)");
     DisplayEnum("", 0, "E = v_scan    00:1x      01:2x    10:4x           (text: lsb only)");
-    nextAddr++;
-
-    DisplayEnum("", 0, "");
-    DisplayEnum("DSP_PXLOFS", nextAddr, " (Byte) Display Pixel Offset");
-    DisplayEnum("", 0, "DSP_PXLOFS: AAAA.BBBB");
-    DisplayEnum("", 0, "A = horizontal pixel offset (signed 4-bit)");
-    DisplayEnum("", 0, "B = vertical pixel offset (signed 4-bit)");
-    DisplayEnum("", 0, "Smooth scrolling affects only text modes.");
     nextAddr++;
 
     DisplayEnum("", 0, "");
@@ -170,10 +168,34 @@ Word Gfx::OnAttach(Word nextAddr)
     nextAddr += 2;
 
     DisplayEnum("", 0, "");
+    DisplayEnum("DSP_TXT_COLS", nextAddr, " (Byte) Text Screen Columns");
+    nextAddr += 1;
+    DisplayEnum("DSP_TXT_ROWS", nextAddr, " (Byte) Text Screens Rows");
+    nextAddr += 1;
+    DisplayEnum("DSP_TXT_PITCH", nextAddr, " (Word) Text Screen Pitch");
+    nextAddr += 2;
+    
+    DisplayEnum("", 0, "");
+    DisplayEnum("DSP_TXT_PXLOFS", nextAddr, " (Byte) Text Screen Pixel Offset");
+    DisplayEnum("", 0, "DSP_TXT_PXLOFS: AAAA.BBBB");
+    DisplayEnum("", 0, "A = horizontal pixel offset (signed 4-bit)");
+    DisplayEnum("", 0, "B = vertical pixel offset (signed 4-bit)");
+    DisplayEnum("", 0, "Smooth scrolling affects only text modes.");
+    nextAddr++;
+
+    DisplayEnum("", 0, "");
     DisplayEnum("DSP_GBASE", nextAddr, " (Word) Graphics Base Address");
     DisplayEnum("", 0, "DSP_GBASE: Can be used for page swapping ($0000 default)");
     DisplayEnum("", 0, "Note: This is the base address to begin displaying pixel");
     DisplayEnum("", 0, "    graphics information within the external serial QSPI RAM.");
+    nextAddr += 2;
+
+    DisplayEnum("", 0, "");
+    DisplayEnum("DSP_SCN_WIDTH", nextAddr, " (Word) Screen Pixel Width");
+    nextAddr += 2;
+    DisplayEnum("DSP_SCN_HEIGHT", nextAddr, " (Word) Screen Pixel Height");
+    nextAddr += 2;
+    DisplayEnum("DSP_SCN_PITCH", nextAddr, " (Word) Graphics Screen Pitch");
     nextAddr += 2;
 
     DisplayEnum("", 0, "");
@@ -220,11 +242,6 @@ Word Gfx::OnAttach(Word nextAddr)
     DisplayEnum("", 0, "    a row of 8 pixels. ");
     nextAddr += 8;
 
-    DisplayEnum("", 0, "");
-    DisplayEnum("DSP_EMUFLAGS", nextAddr, " (Byte) Auxillary Emulation Flags");
-    DisplayEnum("", 0, "DSP_EMUFLAGS: 0000.000A");
-    DisplayEnum("", 0, "A=0:WINDOWED 1:FULLSCREEN");
-    nextAddr += 1;
     /*
     DSP_SPRITE & DSP_TILES (varies):
         Sprites and Tiles will not be immediately implemented, but will
@@ -409,6 +426,7 @@ void Gfx::OnQuit()
 void Gfx::OnActivate()
 {
     printf("Gfx::OnActivate()\n");
+
     // decode current settings
     _decode_gmode();
 
@@ -443,7 +461,6 @@ void Gfx::OnActivate()
 void Gfx::OnDeactivate()
 {
     printf("Gfx::OnDeactivate()\n");
-
     // destroy bg texture
     if (_bg_texture)
     {
@@ -657,16 +674,13 @@ void Gfx::_updateTextScreen(float fElapsedTime)
                 Word addr = _dsp_tbase + ((y>>3) * t_pitch) + ((x>>3)<<1);
                 Byte ch = Bus::read(addr);
                 Byte at = Bus::read(addr+1);
-
                 if (addr >= 0x1800)
                 {
                     ch = 0;
                     at = 0xe4;
                 }
-
                 Byte fg = at >> 4;
                 Byte bg = at & 0x0f;
-
                 for (int v=0; v<8; v++)
                 {    
                     for (int h=0; h<8; h++)

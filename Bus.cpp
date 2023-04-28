@@ -90,10 +90,7 @@ void Bus::_onetime_init()
         sC = "//";
     if (COMPILE_MEMORY_MAP)
         printf("    %s %d ($%04X) bytes remaining for additional registers.\n",sC.c_str(), ap, ap);
-    std::stringstream ss;
-    ss << "RESERVED (" << ap << " bytes remaining)";
-    dev = new RAM(ss.str().c_str());
-    // dev = new RAM("RESERVED");
+    dev = new Gfx("RESERVED");
     s_memory->Attach(dev, ap);
 
     dev->DisplayEnum("",0, "");
@@ -206,8 +203,8 @@ void Bus::_onDeactivate()
     // OnDeactivate()     // call for each attached device
     s_memory->_onDeactivate();
  
-    // no longer dirty
-    s_bIsDirty = true;
+    // // no longer dirty
+    // s_bIsDirty = true;
 }
 
 void Bus::_onUpdate()
