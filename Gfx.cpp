@@ -60,8 +60,9 @@ void Gfx::write(Word offset, Byte data, bool debug)
             // screen needs to be refreshed
             _dsp_gmode = data;      
             Bus::IsDirty(true);
+            break;
         }
-        break;
+        
 
         case DSP_EMUFLAGS:
         {
@@ -81,8 +82,9 @@ void Gfx::write(Word offset, Byte data, bool debug)
                 _dsp_emuflags = data;                 
                 return;
             }
+            break;
         }
-        break;
+        
 
         // text pixel offset register
         //case DSP_PXLOFS:  _dsp_pxlofs = data;  return;
@@ -406,7 +408,7 @@ void Gfx::OnInit()
             _dsp_glyph_data[i][r] = font8x8_system[i][r];
 
     // output a test string
-    std::string sMessage = "Hello World, are you having a good day?";
+    std::string sMessage = "Hello World...";
     Word addr = _dsp_tbase;
     for (auto &a : sMessage)
     {
@@ -414,8 +416,8 @@ void Gfx::OnInit()
         Bus::write(addr+1, 0xE0);
         addr+=2;
     }
-    Bus::write(_dsp_tbase+3, 0xE4);
-    Bus::write(_dsp_tbase+5, 0xA2);
+    // Bus::write(_dsp_tbase+3, 0xE4);
+    // Bus::write(_dsp_tbase+5, 0xA2);
 }
 void Gfx::OnQuit() 
 {    
@@ -777,8 +779,8 @@ void Gfx::OnUpdate(float fElapsedTime)
         // Bus::write_word(DSP_PAL_CLR, rand()%0x10000);
 
         // update third row of character 108 'l'
-        Bus::write(DSP_GLYPH_IDX, 108);
-        Bus::write(DSP_GLYPH_DATA+2, rand()%256);
+        // Bus::write(DSP_GLYPH_IDX, 108);
+        // Bus::write(DSP_GLYPH_DATA+2, rand()%256);
         //printf("glyph: $%02X\n", Bus::read(DSP_GLYPH_DATA));        
     }
 

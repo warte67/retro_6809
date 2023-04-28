@@ -90,7 +90,7 @@ void Bus::_onetime_init()
         sC = "//";
     if (COMPILE_MEMORY_MAP)
         printf("    %s %d ($%04X) bytes remaining for additional registers.\n",sC.c_str(), ap, ap);
-    dev = new Gfx("RESERVED");
+    dev = new RAM("RESERVED");
     s_memory->Attach(dev, ap);
 
     dev->DisplayEnum("",0, "");
@@ -134,26 +134,6 @@ void Bus::_onetime_init()
         exit(0);
     }
     s_memory->DumpMemoryMap();
-
-
-
-    // TESTING READ/WRITE
-    if (false)
-    {
-        Byte wr = 0xAA;
-        Word addr = 0x0181;
-        s_memory->write(addr, 69, true);
-        s_memory->write(addr, wr);
-        Byte data = s_memory->read(addr);
-        printf("  $%04x:$%02x written, $%02X read\n", addr, wr, data);
-
-        s_memory->write(0x1800, 0x7f);
-        s_memory->read(0x1800);
-    }
-    // END TESTS
-
-
-
 
     // setup/initialize SDL
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
@@ -204,7 +184,7 @@ void Bus::_onDeactivate()
     s_memory->_onDeactivate();
  
     // // no longer dirty
-    // s_bIsDirty = true;
+    s_bIsDirty = true;
 }
 
 void Bus::_onUpdate()
