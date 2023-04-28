@@ -406,16 +406,16 @@ void Gfx::OnInit()
             _dsp_glyph_data[i][r] = font8x8_system[i][r];
 
     // output a test string
-    std::string sMessage = "Hello World";
+    std::string sMessage = "Hello World, are you having a good day?";
     Word addr = _dsp_tbase;
     for (auto &a : sMessage)
-    { 
+    {
         Bus::write(addr, a);
         Bus::write(addr+1, 0xE0);
         addr+=2;
     }
-    // Bus::write(_dsp_tbase+3, 0xE4);
-    // Bus::write(_dsp_tbase+5, 0xA2);
+    Bus::write(_dsp_tbase+3, 0xE4);
+    Bus::write(_dsp_tbase+5, 0xA2);
 }
 void Gfx::OnQuit() 
 {    
@@ -700,8 +700,7 @@ void Gfx::_updateTextScreen(float fElapsedTime)
 
 void Gfx::_setPixel(int x, int y, Byte color_index, bool bIgnoreAlpha)
 {
-        // Bus::write(DSP_GLYPH_IDX, 108);
-        // Bus::write(DSP_GLYPH_DATA+2, rand()%256);
+
     void *pixels;
     int pitch;
     Uint8 clr_index = 0;    
@@ -778,8 +777,8 @@ void Gfx::OnUpdate(float fElapsedTime)
         // Bus::write_word(DSP_PAL_CLR, rand()%0x10000);
 
         // update third row of character 108 'l'
-        // Bus::write(DSP_GLYPH_IDX, 108);
-        // Bus::write(DSP_GLYPH_DATA+2, rand()%256);
+        Bus::write(DSP_GLYPH_IDX, 108);
+        Bus::write(DSP_GLYPH_DATA+2, rand()%256);
         //printf("glyph: $%02X\n", Bus::read(DSP_GLYPH_DATA));        
     }
 
@@ -915,6 +914,7 @@ void Gfx::OnRender()
     };
     
     // render the background graphics layer
+    //SDL_SetRenderTarget(_renderer, NULL);
     SDL_RenderCopy(_renderer, _bg_texture, NULL, &dest);
     
     // The Bus object presents after everything renders
