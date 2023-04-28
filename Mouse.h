@@ -38,6 +38,9 @@ class Mouse : public Device
         void Mouse_Size(Byte size) { m_size = size; }
 
     private:
+		Gfx* gfx = nullptr;
+
+		bool bIsDirty = true;
         int mouse_x_screen = 0;
         int mouse_y_screen = 0;
         int mouse_x = 0;
@@ -81,7 +84,13 @@ class Mouse : public Device
                 Uint8 r : 4;
             };
         };    
-        std::vector<PALETTE> default_palette;
+        std::vector<PALETTE> mouse_palette;
+
+public:
+	Uint8 _red(Uint8 index) { Uint8 c = mouse_palette[index].r;  return c | (c << 4) | (c << 8) | (c << 12); }
+	Uint8 _grn(Uint8 index) { Uint8 c = mouse_palette[index].g;  return c | (c << 4) | (c << 8) | (c << 12); }
+	Uint8 _blu(Uint8 index) { Uint8 c = mouse_palette[index].b;  return c | (c << 4) | (c << 8) | (c << 12); }
+	Uint8 _alf(Uint8 index) { Uint8 c = mouse_palette[index].a;  return c | (c << 4) | (c << 8) | (c << 12); }		
 };
 
 

@@ -33,6 +33,7 @@ class Gfx : public Device
         SDL_Renderer* GetRenderer() { return _renderer; }
         SDL_Window* GetWindow() { return _window; }
         SDL_Texture* GetBGTexture() { return _bg_texture; }
+		float Aspect() { return _aspect; }
 
     private:
 
