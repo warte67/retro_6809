@@ -66,12 +66,12 @@ void Bus::_onetime_init()
     dev->DisplayEnum("STACK_TOP",0x0400, "Top of the system stack space");  
 
     dev->DisplayEnum("",0, "");
-    dev->DisplayEnum("",0, "Text Display Buffer (5K bytes)");
+    dev->DisplayEnum("",0, "Text Display Buffer (6K bytes)");
     dev = new RAM("SCREEN_BUFFER");
-    s_memory->Attach(dev, 5120);    
+    s_memory->Attach(dev, 5120);	// 64x48 text (16x10 aspect) 5K 
 
     dev->DisplayEnum("",0, "");
-    dev->DisplayEnum("",0, "Device Registers (2K Bytes)");
+    dev->DisplayEnum("",0, "Device Registers:");
     dev->DisplayEnum("HDW_REGS", 0x1800, "Begin Device Hardware Registers");
 
     dev = new Gfx("GFX_DEVICE");

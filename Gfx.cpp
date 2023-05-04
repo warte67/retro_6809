@@ -79,9 +79,9 @@ void Gfx::write(Word offset, Byte data, bool debug)
             if (_dsp_emuflags == data)
                 return; // no change            
             // fullscreen / windowed toggle only
-            if ((_dsp_emuflags & 0x01) != (data & 0x01))
+            if ((_dsp_emuflags & 0x80) != (data & 0x80))
             {
-                if (data & 0x01)
+                if (data & 0x80)
                     _fullscreen = true;
                 else
                     _fullscreen = false;
@@ -168,7 +168,7 @@ Word Gfx::OnAttach(Word nextAddr)
 
     DisplayEnum("", 0, "");
     DisplayEnum("DSP_EMUFLAGS", nextAddr, " (Byte) Auxillary Emulation Flags");
-    DisplayEnum("", 0, "DSP_EMUFLAGS: 0000.000A");
+    DisplayEnum("", 0, "DSP_EMUFLAGS: A000.0000");
     DisplayEnum("", 0, "A=0:WINDOWED 1:FULLSCREEN");
     nextAddr += 1;
 
@@ -176,7 +176,7 @@ Word Gfx::OnAttach(Word nextAddr)
     DisplayEnum("DSP_GMODE", nextAddr, " (Byte) Display Mode Register");
     DisplayEnum("", 0, "DSP_GMODE: ABCC.DDEE");
     DisplayEnum("", 0, "A = VSYNC     0:off       1:on");
-    DisplayEnum("", 0, "B = timing    0:512x384   1:640x400");
+    DisplayEnum("", 0, "B = gfx_enable 	0:off		1:on");
     DisplayEnum("", 0, "C = bit depth 00:1bpp    01:2bpp  10:4bpp 11:8bpp (text00:mono)");
     DisplayEnum("", 0, "D = h_scan    00:1x      01:2x    10:4x           (text: lsb only)");
     DisplayEnum("", 0, "E = v_scan    00:1x      01:2x    10:4x           (text: lsb only)");
@@ -288,22 +288,22 @@ void Gfx::OnInit()
 		for (int t = 0; t < 16; t++)
 			_palette.push_back({0x0000});
 		std::vector<PALETTE> ref = {
-			{ 0x0000 },	// 0000 0000.0000 0000		0
-			{ 0x005F },	// 0000 0000.0101 1111		1
-			{ 0x050F },	// 0000 0101.0000 1111		2
-			{ 0x055F },	// 0000 0101.0101 1111		3
-			{ 0x500F },	// 0101 0000.0000 1111		4
-			{ 0x505F },	// 0101 0000.0101 1111		5
-			{ 0x631F },	// 0101 0101.0000 1111		6		{ 0x550F }
-			{ 0xAAAF },	// 1010 1010.1010 1111		7
-			{ 0x555F },	// 0101 0101.0101 1111		8
-			{ 0x00FF },	// 0000 0000.1111 1111		9
-			{ 0x0F0F },	// 0000 1111.0000 1111		a
-			{ 0x0FFF },	// 0000 1111.1111 1111		b
-			{ 0xF00F },	// 1111 0000.0000 1111		c
-			{ 0xF0FF },	// 1111 0000.1111 1111		d
-			{ 0xFF0F },	// 1111 1111.0000 1111		e
-			{ 0xFFFF },	// 1111 1111.1111 1111		f
+			{ 0x0000 },		// 0: transparent black
+			{ 0x444F },		// 1: dk gray
+			{ 0x999F },		// 2: lt gray
+			{ 0xEEEF },		// 3: white
+			{ 0x817F },		// 4:
+			{ 0xa35F },		// 5:
+			{ 0xc66F },		// 6:
+			{ 0xe94F },		// 7: 
+			{ 0xed0F },		// 8: yellow
+			{ 0x9d5F },		// 9: 	
+			{ 0x4d8F },		// A;
+			{ 0x2cbF },		// B:
+			{ 0x0bcF },		// C:
+			{ 0x09cF },		// D:
+			{ 0x36bF },		// C:
+			{ 0x639F },		// E:
 		};
         int t=0;
         for (auto &p : ref)
@@ -434,7 +434,7 @@ void Gfx::OnInit()
     for (auto &a : sMessage)
     {
         Bus::write(addr, a);
-        Bus::write(addr+1, 0xE0);
+        Bus::write(addr+1, 0x80);
         addr+=2;
     }
     // Bus::write(_dsp_tbase+3, 0xE4);
@@ -536,14 +536,14 @@ void Gfx::OnEvent(SDL_Event *evnt)
                 if ((SDL_GetModState() & KMOD_SHIFT))
                 {
                     Byte data = Bus::read(DSP_EMUFLAGS);
-                    if (data & 0b00000001)
-                        data &= 0b11111110;
+                    if (data & 0x80)
+                        data &= ~0x80;
                     else
-                        data |= 0b00000001;
+                        data |= 0x80;
                     Bus::write(DSP_EMUFLAGS, data);
                 }
             }            
-            // DISPLAY TESTS (SPACE and ALT-SPACE)
+            // DISPLAY TESTS (SPACE and SHIFT-SPACE)
             if (evnt->key.keysym.sym == SDLK_SPACE)
             {
                 Byte data = Bus::read(DSP_GMODE);
@@ -609,6 +609,10 @@ void Gfx::OnEvent(SDL_Event *evnt)
 
 void Gfx::_updateGraphics(float fElapsedTime)
 {
+	// enabled?
+	if (!_dsp_gfx_enable)
+		return;
+
     // stream to the background texture
     Word pixel_index = 0;
     void *pixels;
@@ -841,15 +845,23 @@ void Gfx::_decode_gmode()
         _vsync = true;
 
     // timing (0B00.0000)
-    _timing_width = 512;
-    _timing_height = _timing_width / _aspect;   //384;
-    if (_dsp_gmode & 0b01000000)
-    {
-        _timing_width = 640;
-        _timing_height = _timing_width / _aspect;   //400;
-    }
+    // _timing_width = 512;
+    // _timing_height = _timing_width / _aspect;   //384;
+    // if (_dsp_gmode & 0b01000000)
+    // {
+    //     _timing_width = 640;
+    //     _timing_height = _timing_width / _aspect;   //400;
+    // }
+    // _window_width = _timing_width * 2;
+    // _window_height = _timing_height * 2;
+
+	// timing changed to graphics enable bit (0B00.0000)
+	// B = gfx_enable 	0:off	1:on 
+	_dsp_gfx_enable = false;
+	if (_dsp_gmode & 0b01000000)
+		_dsp_gfx_enable = true;
     _window_width = _timing_width * 2;
-    _window_height = _timing_height * 2;
+    _window_height = _timing_height * 2;		
 
     // bits per pixel (00CC.0000)
     _bpp = 1;
@@ -923,6 +935,7 @@ void Gfx::OnRender()
 {    
     // clear the window    
     SDL_SetRenderTarget(_renderer, NULL);
+	SDL_SetRenderDrawColor(_renderer, 16, 16, 16, 255);	// border color
     SDL_RenderClear(_renderer);
     SDL_RenderCopy(_renderer, NULL, NULL, NULL);
 

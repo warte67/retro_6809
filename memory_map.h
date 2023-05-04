@@ -4,6 +4,7 @@
 #define __MEMMAP_H__
 
 
+
 enum MEMMAP
 {
     //  **********************************************
@@ -15,20 +16,20 @@ enum MEMMAP
   SYSTEM_STACK = 0x0200,
      STACK_TOP = 0x0400,        // Top of the system stack space
     
-    // Text Display Buffer (5K bytes)
+    // Text Display Buffer (6K bytes)
   SCREEN_BUFFER = 0x0400,
     
-    // Device Registers (2K Bytes)
+    // Device Registers:
       HDW_REGS = 0x1800,        // Begin Device Hardware Registers
     
   DSP_EMUFLAGS = 0x1800,        //  (Byte) Auxillary Emulation Flags
-    // DSP_EMUFLAGS: 0000.000A
+    // DSP_EMUFLAGS: A000.000A
     // A=0:WINDOWED 1:FULLSCREEN
     
      DSP_GMODE = 0x1801,        //  (Byte) Display Mode Register
     // DSP_GMODE: ABCC.DDEE
-    // A = VSYNC     0:off       1:on
-    // B = timing    0:512x384   1:640x400
+    // A = VSYNC     0:off      1:on
+    // B = gfx_enable 	0:off	1:on 
     // C = bit depth 00:1bpp    01:2bpp  10:4bpp 11:8bpp (text00:mono)
     // D = h_scan    00:1x      01:2x    10:4x           (text: lsb only)
     // E = v_scan    00:1x      01:2x    10:4x           (text: lsb only)

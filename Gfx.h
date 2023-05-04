@@ -50,7 +50,7 @@ class Gfx : public Device
         SDL_Texture* _bg_texture;      
 
         const float _aspect = 1.6f;     //16x10
-        int _timing_width = 512;
+        int _timing_width = 512;		// for now only one timing mode
         int _timing_height = _timing_width / _aspect;   //384;
         int _window_width = _timing_width * 2;
         int _window_height = _timing_height * 2;
@@ -63,8 +63,9 @@ class Gfx : public Device
         bool _vsync = false;
 
         // base graphics device registers
-        Byte _dsp_gmode = 0x30;     // DSP_GMODE
+        Byte _dsp_gmode = 0x75;     // DSP_GMODE
         Byte _dsp_emuflags = 0;     // DSP_EMUFLAGS
+		bool _dsp_gfx_enable = true;	// graphics mode enable
         //Byte _dsp_pxlofs = 0;       // DSP_PXLOFS
         Word _dsp_tbase = 0x0400;   // DSP_TBASE
         Word _dsp_gbase = 0x0000;   // DSP_GBASE
