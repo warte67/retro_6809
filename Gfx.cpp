@@ -964,3 +964,33 @@ void Gfx::OnRender()
     // The Bus object presents after everything renders
     // SDL_RenderPresent(_renderer);    
 }
+
+
+
+
+/********************
+ 
+    
+     DSP_GMODE = 0x1801,        //  (Byte) Display Mode Register
+    // DSP_GMODE: ABCC.DDEE
+    // A = VSYNC     0:off      1:on
+    // B = gfx_enable 	0:off	1:on 
+    // C = bit depth 00:1bpp    01:2bpp  10:4bpp 11:8bpp (text00:mono)
+    // D = h_scan    00:1x      01:2x    10:4x           (text: lsb only)
+    // E = v_scan    00:1x      01:2x    10:4x           (text: lsb only)
+    
+
+	ToDo:
+		- Select tile or pixel mode	(change B above to select pixel/tile)
+
+		Add Gfx Mode enable flag (in painters algorhythm order):
+		0) Pixel/Tile Layer Enable (Gfx Modes)
+		1) Text Layer Enable
+		2-4) Additional  Text Layers Enable (optional?)
+		5) Sprite Layer Enable
+		6) Debug Layer Enable
+		7) Cursor Layer Enable
+
+
+
+*********************/
