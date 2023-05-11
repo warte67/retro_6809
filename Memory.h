@@ -21,7 +21,7 @@ class Memory
         void DumpMemoryMap();
         
         int ap() { return _lastAddress; }
-        void ap(int _addr)  { _lastAddress = _addr; }
+        void ap(int _addr)  { _lastAddress = _addr; }		
         
     private:
 		void _onInit();
