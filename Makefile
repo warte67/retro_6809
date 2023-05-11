@@ -1,3 +1,4 @@
+# Makefile
 CC = g++
 TARGET = ./bin/main
 FLAGS = -std=c++20 #-g
