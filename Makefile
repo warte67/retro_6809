@@ -14,7 +14,7 @@ main.o: main.cpp
 
 all: $(OBJ_FILES)
 	g++ $(OBJ_FILES) $(FLAGS) $(LIBS) -o $(TARGET)
-	$(TARGET)
+	#$(TARGET)
 
 clean:
 	rm -f $(OBJ_FILES)
