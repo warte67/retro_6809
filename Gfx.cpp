@@ -473,7 +473,7 @@ void Gfx::OnActivate()
     _renderer = SDL_CreateRenderer(_window, -1, _render_flags);
     SDL_SetRenderDrawBlendMode(_renderer, SDL_BLENDMODE_BLEND);
 
-    // create the background graphics texture
+    // create the background graphics texture	
     _bg_texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_ARGB8888,
 			SDL_TEXTUREACCESS_STREAMING, _texture_width, _texture_height);
 
