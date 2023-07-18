@@ -285,66 +285,81 @@ void Gfx::OnInit()
 	// initialize the default color palette
 	if (_palette.size() == 0)
 	{
-		for (int t = 0; t < 16; t++)
-			_palette.push_back({0x0000});
 		std::vector<PALETTE> ref = {
 			{ 0x0000 },		// 0: transparent black
-			{ 0xFEEE },		// 1: white
-			{ 0xF999 },		// 2: lt gray
-			{ 0xF444 },		// 3: dk gray
-			{ 0xF817 },		// 4:
-			{ 0xFa35 },		// 5:
-			{ 0xFc66 },		// 6:
-			{ 0xFe94 },		// 7: 
-			{ 0xFed0 },		// 8: yellow
-			{ 0xF9d5 },		// 9: 	
-			{ 0xF4d8 },		// A;
-			{ 0xF2cb },		// B:
-			{ 0xF0bc },		// C:
-			{ 0xF09c },		// D:
-			{ 0xF36b },		// C:
-			{ 0xF639 },		// E:
+			{ 0xFFFF },		// 1: white
+			{ 0xF007 },		// 2: dk blue
+			{ 0xF600 },		// 5: dk red
+			{ 0xF057 },		// 4: dk cyan
+			{ 0xF050 },		// 3: dk green
+			{ 0xF607 },		// 6: dk magenta
+			{ 0xF650 },		// 7: brown			
+			{ 0xFAAA },		// 8: lt gray
+			{ 0xF666 },		// 9: dk gray
+			{ 0xF00F },		// A: blue
+			{ 0xF0F0 },		// B: green
+			{ 0xF0FF },		// C: cyan
+			{ 0xFF00 },		// D: red
+			{ 0xFF0F },		// E: magenta
+			{ 0xFFF0 },		// F: yellow
+
+			{ 0xF000 },		// N: opaque black
+			{ 0xFEEE },		// N: lt silver
+			{ 0xF999 },		// N: md silver
+			{ 0xF444 },		// N: dk silver
+			{ 0xF817 },		// N:
+			{ 0xFa35 },		// N:
+			{ 0xFc66 },		// N:
+			{ 0xFe94 },		// N: 
+			{ 0xFed0 },		// N: yellow
+			{ 0xF9d5 },		// N: 	
+			{ 0xF4d8 },		// N;
+			{ 0xF2cb },		// N:
+			{ 0xF0bc },		// N:
+			{ 0xF09c },		// N:
+			{ 0xF36b },		// N:
+			{ 0xF639 },		// N:
 		};
-        int t=0;
         for (auto &p : ref)
-            _palette[t++] = p;
+			_palette.push_back(p);
         
         // ToDo: define the rest of the color palette
+		// ...
 		for (int r = 0; r < 16; r++)
 		{
-			PALETTE ent = { 0xf000 };
+			PALETTE ent = { 0x000f };
 			ent.r = r;
             _palette.push_back(ent);
 		}        
 		for (int t = 0; t < 16; t++)
 		{
-			PALETTE ent = { 0xf000 };
+			PALETTE ent = { 0x000f };
 			ent.g = t;
 			_palette.push_back(ent);
 		}
 		for (int t = 0; t < 16; t++)
 		{
-			PALETTE ent = { 0xf000 };
+			PALETTE ent = { 0x000f };
 			ent.b = t;
 			_palette.push_back(ent);
 		}
 		for (int t = 0; t < 16; t++)
 		{
-			PALETTE ent = { 0xf000 };
+			PALETTE ent = { 0x000f };
 			ent.r = t;
 			ent.b = t;
 			_palette.push_back(ent);
 		}
 		for (int t = 0; t < 16; t++)
 		{
-			PALETTE ent = { 0xf000 };
+			PALETTE ent = { 0x000f };
 			ent.r = t;
 			ent.g = t;
 			_palette.push_back(ent);
 		}
 		for (int t = 0; t < 16; t++)
 		{
-			PALETTE ent = { 0xf000 };
+			PALETTE ent = { 0x000f };
 			ent.r = t;
 			ent.g = t;
 			ent.b = t;
@@ -352,28 +367,28 @@ void Gfx::OnInit()
 		}
 		for (int t = 0; t < 16; t++)
 		{
-			PALETTE ent = { 0xf000 };
+			PALETTE ent = { 0x000f };
 			ent.r = 15 - t;
 			ent.b = t;
 			_palette.push_back(ent);
 		}
 		for (int t = 0; t < 16; t++)
 		{
-			PALETTE ent = { 0xf000 };
+			PALETTE ent = { 0x000f };
 			ent.r = 15 - t;
 			ent.g = t;
 			_palette.push_back(ent);
 		}
 		for (int t = 0; t < 16; t++)
 		{
-			PALETTE ent = { 0xf000 };
+			PALETTE ent = { 0x000f };
 			ent.g = 15 - t;
 			ent.b = t;
 			_palette.push_back(ent);
 		}
 		for (int t = 0; t < 16; t++)
 		{
-			PALETTE ent = { 0xf000 };
+			PALETTE ent = { 0x000f };
 			ent.r = 15 - t;
 			ent.g = 15 - t;
 			ent.b = t;
@@ -381,7 +396,7 @@ void Gfx::OnInit()
 		}
 		for (int t = 0; t < 16; t++)
 		{
-			PALETTE ent = { 0xf000 };
+			PALETTE ent = { 0x000f };
 			ent.r = 15 - t;
 			ent.g = t;
 			ent.b = 15 - t;
@@ -389,22 +404,42 @@ void Gfx::OnInit()
 		}
 		for (int t = 0; t < 16; t++)
 		{
-			PALETTE ent = { 0xf000 };
+			PALETTE ent = { 0x000f };
 			ent.r = t;
 			ent.g = 15 - t;
 			ent.b = 15 - t;
+			_palette.push_back(ent);
+		}
+		for (int t = 0; t < 16; t++)
+		{
+			PALETTE ent = { 0x000f };
+			ent.r = 15 - t;
+			ent.g = t;
+			ent.b = 15 - t;
+			_palette.push_back(ent);
+		}
+		for (int t = 0; t < 16; t++)
+		{
+			PALETTE ent = { 0x000f };
+			ent.r = 15 - t;
+			ent.g = 15 - t;
+			ent.b = t;
 			_palette.push_back(ent);
 		}
 
-		// fill out the remaining entries with random junk for now
-		Word color = 0x0010;
-		while (_palette.size() < 256)
-		{
-			PALETTE ent;
-			color += 0x2340;	// rand() % 0x10000;
-			ent.color = color;
-			_palette.push_back(ent);
-		}
+
+
+
+		// // fill out the remaining entries with random junk for now
+		// Word color = 0x0010;
+		// while (_palette.size() < 256)
+		// {
+		// 	PALETTE ent;
+		// 	color = rand() % 0x10000;
+		// 	//color = 0;
+		// 	ent.color = color;
+		// 	_palette.push_back(ent);
+		// }
 
         // Temp: Fill the rest of the palette with black
 		PALETTE blank { 0 };
@@ -434,7 +469,7 @@ void Gfx::OnInit()
     for (auto &a : sMessage)
     {
         Bus::write(addr, a);
-        Bus::write(addr+1, 0x80);
+        Bus::write(addr+1, 0xF0);		// F: yellow
         addr+=2;
     }
     // Bus::write(_dsp_tbase+3, 0xE4);
@@ -777,29 +812,7 @@ void Gfx::_setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_i
                 (g<<4) | 
                 (b)
             );          
-		}
-        // Uint32 pixel = *dst;
-        // Byte r1 = pixel >> 16;
-        // Byte g1 = pixel >> 8;
-        // Byte b1 = pixel >> 0;
-        // Byte a2 = alf(color_index);
-        // Byte r2 = red(color_index);
-        // Byte g2 = grn(color_index);
-        // Byte b2 = blu(color_index);
-        // if (bIgnoreAlpha)
-        //     a2 = 255;
-        // Byte r = ((r1 * (256-a2))) + (r2 * (a2+1)) >> 8;;
-        // Byte g = ((g1 * (256-a2))) + (g2 * (a2+1)) >> 8;;
-        // Byte b = ((b1 * (256-a2))) + (b2 * (a2+1)) >> 8;;
-        // if (alf(color_index) != 0 || bIgnoreAlpha)
-        // {
-        //     *dst = (
-        //         0xF000 | 
-        //         (r<<8) | 
-        //         (g<<4) | 
-        //         (b)
-        //     );          
-		// }		
+		}	
     }
     else
     {        
@@ -825,10 +838,11 @@ void Gfx::OnUpdate(float fElapsedTime)
     _texAcc += fElapsedTime;
     if (_texAcc > fElapsedTime + _texDelay)
     {
+		Byte clr = 0;
         _texAcc -= _texDelay;
         for (int t=0; t<65536; t++)
-            _gfxDisplayBuffer[t] = rand() % 256;
-            //_gfxDisplayBuffer[t] = 0x02;
+            //_gfxDisplayBuffer[t] = rand() % 256;
+            _gfxDisplayBuffer[t] = clr++;
 
         // update palette
         // Bus::write(DSP_PAL_IDX, 0x0f);
