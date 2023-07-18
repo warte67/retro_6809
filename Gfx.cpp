@@ -838,20 +838,12 @@ void Gfx::OnUpdate(float fElapsedTime)
     _texAcc += fElapsedTime;
     if (_texAcc > fElapsedTime + _texDelay)
     {
-		Byte clr = 0;
+		static Byte clr = 0;
         _texAcc -= _texDelay;
         for (int t=0; t<65536; t++)
             //_gfxDisplayBuffer[t] = rand() % 256;
             _gfxDisplayBuffer[t] = clr++;
-
-        // update palette
-        // Bus::write(DSP_PAL_IDX, 0x0f);
-        // Bus::write_word(DSP_PAL_CLR, rand()%0x10000);
-
-        // update third row of character 108 'l'
-        // Bus::write(DSP_GLYPH_IDX, 108);
-        // Bus::write(DSP_GLYPH_DATA+2, rand()%256);
-        //printf("glyph: $%02X\n", Bus::read(DSP_GLYPH_DATA));        
+		clr++;      
     }
 
     // update the window title bar
