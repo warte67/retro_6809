@@ -11,7 +11,8 @@
                 "-o",
                 "${fileDirname}/bin/main",
                 "-std=c++20",
-                "-lSDL2"
+                "-lSDL2",
+				"-ldl"
             ],
             "options": {
                 "cwd": "${fileDirname}"
