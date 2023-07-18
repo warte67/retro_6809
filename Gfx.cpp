@@ -955,7 +955,7 @@ void Gfx::_decode_gmode()
 
     // restrict bits-per-pixel based on memory usage    
     //while ((_texture_width * _texture_height) / (8/_bpp) >= 65536)
-    while ((_texture_width * _texture_height) / (8/_bpp) >= (5*1024))
+    while ((_texture_width * _texture_height) / (8/_bpp) >= (64*1024))
         _bpp >>=1;
     int size = (_texture_width * _texture_height) / (8/_bpp);
     _g_top_addr = size;
