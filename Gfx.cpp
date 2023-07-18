@@ -289,21 +289,21 @@ void Gfx::OnInit()
 			_palette.push_back({0x0000});
 		std::vector<PALETTE> ref = {
 			{ 0x0000 },		// 0: transparent black
-			{ 0x444F },		// 1: dk gray
-			{ 0x999F },		// 2: lt gray
-			{ 0xEEEF },		// 3: white
-			{ 0x817F },		// 4:
-			{ 0xa35F },		// 5:
-			{ 0xc66F },		// 6:
-			{ 0xe94F },		// 7: 
-			{ 0xed0F },		// 8: yellow
-			{ 0x9d5F },		// 9: 	
-			{ 0x4d8F },		// A;
-			{ 0x2cbF },		// B:
-			{ 0x0bcF },		// C:
-			{ 0x09cF },		// D:
-			{ 0x36bF },		// C:
-			{ 0x639F },		// E:
+			{ 0xFEEE },		// 1: white
+			{ 0xF999 },		// 2: lt gray
+			{ 0xF444 },		// 3: dk gray
+			{ 0xF817 },		// 4:
+			{ 0xFa35 },		// 5:
+			{ 0xFc66 },		// 6:
+			{ 0xFe94 },		// 7: 
+			{ 0xFed0 },		// 8: yellow
+			{ 0xF9d5 },		// 9: 	
+			{ 0xF4d8 },		// A;
+			{ 0xF2cb },		// B:
+			{ 0xF0bc },		// C:
+			{ 0xF09c },		// D:
+			{ 0xF36b },		// C:
+			{ 0xF639 },		// E:
 		};
         int t=0;
         for (auto &p : ref)
@@ -312,39 +312,39 @@ void Gfx::OnInit()
         // ToDo: define the rest of the color palette
 		for (int r = 0; r < 16; r++)
 		{
-			PALETTE ent = { 0x000f };
+			PALETTE ent = { 0xf000 };
 			ent.r = r;
             _palette.push_back(ent);
 		}        
 		for (int t = 0; t < 16; t++)
 		{
-			PALETTE ent = { 0x000f };
+			PALETTE ent = { 0xf000 };
 			ent.g = t;
 			_palette.push_back(ent);
 		}
 		for (int t = 0; t < 16; t++)
 		{
-			PALETTE ent = { 0x000f };
+			PALETTE ent = { 0xf000 };
 			ent.b = t;
 			_palette.push_back(ent);
 		}
 		for (int t = 0; t < 16; t++)
 		{
-			PALETTE ent = { 0x000f };
+			PALETTE ent = { 0xf000 };
 			ent.r = t;
 			ent.b = t;
 			_palette.push_back(ent);
 		}
 		for (int t = 0; t < 16; t++)
 		{
-			PALETTE ent = { 0x000f };
+			PALETTE ent = { 0xf000 };
 			ent.r = t;
 			ent.g = t;
 			_palette.push_back(ent);
 		}
 		for (int t = 0; t < 16; t++)
 		{
-			PALETTE ent = { 0x000f };
+			PALETTE ent = { 0xf000 };
 			ent.r = t;
 			ent.g = t;
 			ent.b = t;
@@ -352,28 +352,28 @@ void Gfx::OnInit()
 		}
 		for (int t = 0; t < 16; t++)
 		{
-			PALETTE ent = { 0x000f };
+			PALETTE ent = { 0xf000 };
 			ent.r = 15 - t;
 			ent.b = t;
 			_palette.push_back(ent);
 		}
 		for (int t = 0; t < 16; t++)
 		{
-			PALETTE ent = { 0x000f };
+			PALETTE ent = { 0xf000 };
 			ent.r = 15 - t;
 			ent.g = t;
 			_palette.push_back(ent);
 		}
 		for (int t = 0; t < 16; t++)
 		{
-			PALETTE ent = { 0x000f };
+			PALETTE ent = { 0xf000 };
 			ent.g = 15 - t;
 			ent.b = t;
 			_palette.push_back(ent);
 		}
 		for (int t = 0; t < 16; t++)
 		{
-			PALETTE ent = { 0x000f };
+			PALETTE ent = { 0xf000 };
 			ent.r = 15 - t;
 			ent.g = 15 - t;
 			ent.b = t;
@@ -381,7 +381,7 @@ void Gfx::OnInit()
 		}
 		for (int t = 0; t < 16; t++)
 		{
-			PALETTE ent = { 0x000f };
+			PALETTE ent = { 0xf000 };
 			ent.r = 15 - t;
 			ent.g = t;
 			ent.b = 15 - t;
@@ -389,7 +389,7 @@ void Gfx::OnInit()
 		}
 		for (int t = 0; t < 16; t++)
 		{
-			PALETTE ent = { 0x000f };
+			PALETTE ent = { 0xf000 };
 			ent.r = t;
 			ent.g = 15 - t;
 			ent.b = 15 - t;
@@ -474,7 +474,9 @@ void Gfx::OnActivate()
     SDL_SetRenderDrawBlendMode(_renderer, SDL_BLENDMODE_BLEND);
 
     // create the background graphics texture	
-    _bg_texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_ARGB8888,
+    // _bg_texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_ARGB8888,
+	// 		SDL_TEXTUREACCESS_STREAMING, _texture_width, _texture_height);
+    _bg_texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_ARGB4444,
 			SDL_TEXTUREACCESS_STREAMING, _texture_width, _texture_height);
 
 
@@ -745,33 +747,59 @@ void Gfx::_setPixel(int x, int y, Byte color_index, bool bIgnoreAlpha)
 }
 void Gfx::_setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_index, bool bIgnoreAlpha)
 {
-    Uint32 *dst = (Uint32*)((Uint8*)pixels + (y * pitch) + (x*4));    // why is this (x*4) and not simply x?
+    //Uint32 *dst = (Uint32*)((Uint8*)pixels + (y * pitch) + (x*4));    // why is this (x*4) and not simply x?
+    Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));		// because data size is two bytes 
     bool ALPHA_BLEND = true;
     if (ALPHA_BLEND)
     {       
         // int ret = ((p1 * (256-a))) + (p2 * (a+1)) >> 8;
-        Uint32 pixel = *dst;
-        Byte r1 = pixel >> 16;
-        Byte g1 = pixel >> 8;
-        Byte b1 = pixel >> 0;
+        Uint16 pixel = *dst;	// 0xARGB
+		Byte r1 = (pixel & 0x0f00) >> 8;
+		Byte g1 = (pixel & 0x00f0) >> 4;
+		Byte b1 = (pixel & 0x000f) >> 0;
+
         Byte a2 = alf(color_index);
         Byte r2 = red(color_index);
         Byte g2 = grn(color_index);
         Byte b2 = blu(color_index);
         if (bIgnoreAlpha)
-            a2 = 255;
-        Byte r = ((r1 * (256-a2))) + (r2 * (a2+1)) >> 8;;
-        Byte g = ((g1 * (256-a2))) + (g2 * (a2+1)) >> 8;;
-        Byte b = ((b1 * (256-a2))) + (b2 * (a2+1)) >> 8;;
+            a2 = 15;
+
+        Byte r = ((r1 * (16-a2))) + (r2 * (a2+1)) >> 4;
+        Byte g = ((g1 * (16-a2))) + (g2 * (a2+1)) >> 4;
+        Byte b = ((b1 * (16-a2))) + (b2 * (a2+1)) >> 4;
+
         if (alf(color_index) != 0 || bIgnoreAlpha)
         {
             *dst = (
-                0xFF000000 | 
-                (r<<16) | 
-                (g<<8) | 
+                0xF000 | 
+                (r<<8) | 
+                (g<<4) | 
                 (b)
-            );  
-        }
+            );          
+		}
+        // Uint32 pixel = *dst;
+        // Byte r1 = pixel >> 16;
+        // Byte g1 = pixel >> 8;
+        // Byte b1 = pixel >> 0;
+        // Byte a2 = alf(color_index);
+        // Byte r2 = red(color_index);
+        // Byte g2 = grn(color_index);
+        // Byte b2 = blu(color_index);
+        // if (bIgnoreAlpha)
+        //     a2 = 255;
+        // Byte r = ((r1 * (256-a2))) + (r2 * (a2+1)) >> 8;;
+        // Byte g = ((g1 * (256-a2))) + (g2 * (a2+1)) >> 8;;
+        // Byte b = ((b1 * (256-a2))) + (b2 * (a2+1)) >> 8;;
+        // if (alf(color_index) != 0 || bIgnoreAlpha)
+        // {
+        //     *dst = (
+        //         0xF000 | 
+        //         (r<<8) | 
+        //         (g<<4) | 
+        //         (b)
+        //     );          
+		// }		
     }
     else
     {        
@@ -780,9 +808,9 @@ void Gfx::_setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_i
         {
             *dst = 
             (
-                0xFF000000 |
-                (red(color_index)<<16) |
-                (grn(color_index)<<8) |
+                0xF000 |
+                (red(color_index)<<8) |
+                (grn(color_index)<<4) |
                 blu(color_index)
             );    
         }
@@ -800,6 +828,7 @@ void Gfx::OnUpdate(float fElapsedTime)
         _texAcc -= _texDelay;
         for (int t=0; t<65536; t++)
             _gfxDisplayBuffer[t] = rand() % 256;
+            //_gfxDisplayBuffer[t] = 0x02;
 
         // update palette
         // Bus::write(DSP_PAL_IDX, 0x0f);
