@@ -1,5 +1,5 @@
-/*****************************************************
-main.cpp
+/******************************************************
+main.cpp (updated)
 
 build with debug symbols:
     g++ -g *.cpp -o bin/main -std=c++20 -lSDL2 
@@ -13,7 +13,7 @@ GIT Stuff:
     git commit -m "Commit Comment"
     git push origin master
 
-*****************************************************/
+******************************************************/
 
 #include <stdio.h>
 
