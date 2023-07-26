@@ -105,10 +105,6 @@ class Gfx : public Device
         Byte _dsp_glyph_data[256][8]{0};    // DSP_GLYPH_DATA
 
     public:
-        // Uint8 red(Uint8 index) { Uint8 c = _palette[index].r;  return c | (c << 4) | (c << 8) | (c << 12); }
-        // Uint8 grn(Uint8 index) { Uint8 c = _palette[index].g;  return c | (c << 4) | (c << 8) | (c << 12); }
-        // Uint8 blu(Uint8 index) { Uint8 c = _palette[index].b;  return c | (c << 4) | (c << 8) | (c << 12); }
-        // Uint8 alf(Uint8 index) { Uint8 c = _palette[index].a;  retur12); }        
         Uint8 red(Uint8 index) { Uint8 c = _palette[index].r;  return c; }
         Uint8 grn(Uint8 index) { Uint8 c = _palette[index].g;  return c; }
         Uint8 blu(Uint8 index) { Uint8 c = _palette[index].b;  return c; }
