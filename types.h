@@ -5,6 +5,9 @@
 #ifndef __TYPES_H__
 #define __TYPES_H__
 
+//#pragma comment(lib, "SDL2.lib")
+//#pragma comment(lib, "SDL2main.lib")
+
 #include <SDL2/SDL.h>
 #include <string>
 #include <vector>
@@ -24,6 +27,7 @@
     #ifndef DWord
         #define DWord Uint32
     #endif
+
 
 // constants
 const Byte DEFAULT_MOUSE_SIZE = 8;
