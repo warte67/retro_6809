@@ -26,7 +26,11 @@ int main(int argc, char* argv[])
 {
     //printf("Initializing...\n");
 
-    system("clear");
+#ifdef _WIN32 
+    system("cls");          // this should be "cls" for windows
+#else
+    system("clear");        // this would be "clear" under linux
+#endif
 
     Bus* bus = Bus::GetInstance();
     bus->Run();
