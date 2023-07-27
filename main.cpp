@@ -1,5 +1,5 @@
 /******************************************************
-main.cpp (updated 4)
+main.cpp (updated test)
 
 build with debug symbols:
     g++ -g *.cpp -o bin/main -std=c++20 -lSDL2 
