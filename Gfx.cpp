@@ -960,10 +960,9 @@ void Gfx::_decode_gmode()
     int size = (_texture_width * _texture_height) / (8/_bpp);
     _g_top_addr = size;
 
-    printf("%d-bpp graphics size: $%04X (%d)\n", _bpp, size, size);
-
-    int num_sprites = (0x10000 - _g_top_addr)/sizeof(Sprite);
-    printf("Room for %d sprites.\n",  num_sprites);
+    // printf("%d-bpp graphics size: $%04X (%d)\n", _bpp, size, size);
+    // int num_sprites = (0x10000 - _g_top_addr)/sizeof(Sprite);
+    // printf("Room for %d sprites.\n",  num_sprites);
 }
 
 
