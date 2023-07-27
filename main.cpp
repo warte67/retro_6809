@@ -32,10 +32,7 @@ int main(int argc, char* argv[])
     bus->Run();
 
     printf("%s\n", SDL_GetError());
-<<<<<<< HEAD
-=======
-    
->>>>>>> 06bc8542c1847b30a4d89597b098dcda99467c72
+
     return 0;
 }
 
