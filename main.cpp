@@ -22,7 +22,7 @@ GIT Stuff:
 
 #include "Bus.h"
 
-int main(void)
+int main(int argc, char* argv[])
 {
     //printf("Initializing...\n");
 
@@ -32,6 +32,8 @@ int main(void)
     bus->Run();
 
     printf("%s\n", SDL_GetError());
+    
+    return 0;
 }
 
 
