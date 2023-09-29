@@ -4,6 +4,8 @@
 // Graphics Device
 ////////
 
+#include <sstream>
+
 #include "Bus.h"
 #include "Gfx.h"
 #include "font8x8_system.h"
@@ -463,17 +465,90 @@ void Gfx::OnInit()
         for (int r=0; r<8; r++)
             _dsp_glyph_data[i][r] = font8x8_system[i][r];
 
-    // output a test string
-    std::string sMessage = "Hello World...";
+    // // output a test string
+    // std::string sMessage = "Hello World...";
+    // Word addr = _dsp_tbase;
+    // for (auto &a : sMessage)
+    // {
+    //     Bus::write(addr, a);
+    //     Bus::write(addr+1, 0xF0);		// F: yellow
+    //     addr+=2;
+    // }
+    // Bus::write(_dsp_tbase+3, 0xE4);
+    // Bus::write(_dsp_tbase+5, 0xA2);
+}
+void Gfx::_statusText(void)
+{
+	static Byte fg = 0x01;
+	static Byte bg = 0x01;
+
+    std::string sMessage = "";
+	std::ostringstream osMsg;
+	osMsg << "W:" << _texture_width;
+	osMsg << " H:" << _texture_height;
+	osMsg << " BPP:" << _bpp;
+
+	// new line
+	while (osMsg.str().length() < (_texture_width / 8)-1)
+		osMsg << " ";
+
+	osMsg << " aspect:" << _aspect;		
+
+	// new line
+	while (osMsg.str().length() < ((_texture_width / 8)*2)-1)
+		osMsg << " ";
+
+	osMsg << " fps:" << Bus::GetInstance()->FPS();		
+
+	// new line
+	while (osMsg.str().length() < ((_texture_width / 8)*3))
+		osMsg << " ";		
+
+	// output the string
+	sMessage = osMsg.str();
+
+	// clear the text buffer
+    for (int t=SCREEN_BUFFER; t<HDW_REGS; t+=2)
+    {
+        Bus::write(t, 32);        
+        Bus::write(t+1, 0xf0);       
+    }
+
+	// output the text to the bufffer
     Word addr = _dsp_tbase;
     for (auto &a : sMessage)
     {
         Bus::write(addr, a);
-        Bus::write(addr+1, 0xF0);		// F: yellow
+        //Bus::write(addr+1, (color & 0xf0) | 0x02);		// F: yellow
+        Bus::write(addr+1, (bg<<4) | fg);       
         addr+=2;
-    }
-    // Bus::write(_dsp_tbase+3, 0xE4);
-    // Bus::write(_dsp_tbase+5, 0xA2);
+    }	
+	static Byte skip=0;
+	if (skip++ > 16)
+	{
+		bg++;
+		bg%=16;
+		skip = 0;
+		if (bg==0)	
+		{
+			fg++;
+			fg%=16;
+		}		
+	}
+
+	// render one line of transparent text
+	std::string sHello = "Hello World!";
+    addr = _dsp_tbase + (_texture_width / 4)*4;
+	static Byte color = 0xf0;
+	if (skip==0)
+		color = (rand() % 16) << 4;	//0xf0;
+    for (auto &a : sHello)
+    {
+        Bus::write(addr, a);
+        Bus::write(addr+1, color);		// F: yellow
+        addr+=2;
+    }	
+
 }
 void Gfx::OnQuit() 
 {    
@@ -639,6 +714,45 @@ void Gfx::OnEvent(SDL_Event *evnt)
                 data |= (b << 4);
                 Bus::write(DSP_GMODE, data);
             }
+			// [ and ] change aspect ratio
+			if (evnt->key.keysym.sym == SDLK_LEFTBRACKET || evnt->key.keysym.sym == SDLK_RIGHTBRACKET)
+			{
+				if (evnt->key.keysym.sym == SDLK_RIGHTBRACKET)
+				{
+					if (_aspect == 1.33333333333f)
+						_aspect = 1.6f;
+					else if (_aspect == 1.6f)
+						_aspect = 1.77777777778f;
+					else if (_aspect == 1.77777777778f)
+						_aspect = 1.33333333333f;
+				}
+				else
+				{
+					if (_aspect == 1.33333333333f)
+						_aspect = 1.77777777778f;
+					else if (_aspect == 1.77777777778f)
+						_aspect = 1.6f;
+					else if (_aspect == 1.6f)
+						_aspect = 1.33333333333f;
+				}
+
+				_timing_height = _timing_width / _aspect;   //384;
+				_window_width = _timing_width * 2;
+				_window_height = _timing_height * 2;		
+				Bus::IsDirty(true);
+			}
+			if (evnt->key.keysym.sym == SDLK_BACKSLASH)
+			{
+				if (_timing_width == 640)
+					_timing_width = 512;
+				else
+					_timing_width = 640;
+
+				_timing_height = _timing_width / _aspect;   //384;
+				_window_width = _timing_width * 2;
+				_window_height = _timing_height * 2;		
+				Bus::IsDirty(true);
+			}
         }
         break;
     }
@@ -740,11 +854,11 @@ void Gfx::_updateTextScreen(float fElapsedTime)
                 Word addr = _dsp_tbase + ((y>>3) * _dsp_tpitch) + ((x>>3)<<1);
                 Byte ch = Bus::read(addr);
                 Byte at = Bus::read(addr+1);
-                if (addr >= 0x1800)
-                {
-                    ch = 0;
-                    at = 0xe4;
-                }
+                // if (addr >= 0x1800)
+                // {
+                //     ch = 0;
+                //     at = 0xe4;
+                // }
                 Byte fg = at >> 4;
                 Byte bg = at & 0x0f;
                 for (int v=0; v<8; v++)
@@ -846,6 +960,9 @@ void Gfx::OnUpdate(float fElapsedTime)
 		clr++;      
     }
 
+	// update the text buffer
+	_statusText();
+
     // update the window title bar
     Bus* bus = Bus::GetInstance();
     std::string sTitle = "      (fps:";
@@ -858,7 +975,6 @@ void Gfx::OnUpdate(float fElapsedTime)
     sTitle += std::to_string(_texture_height);
     sTitle += "  bpp: ";
     sTitle += std::to_string(_bpp);
-
     SDL_SetWindowTitle(_window, sTitle.c_str());
 
     // display the background graphics (OR the tile graphics)
@@ -933,8 +1049,8 @@ void Gfx::_decode_gmode()
 
         // To prevent text address overflow and speed problems
         // restrict the 640x400 mode to 640x200 regardless of bpp.  
-        if (_timing_width > 512 && _pixel_width == 1)
-            _pixel_height = 2;  
+        // if (_timing_width > 512 && _pixel_width == 1)
+        //     _pixel_height = 2;  
         break;
     }
 
@@ -1003,7 +1119,8 @@ void Gfx::OnRender()
 
 
 
-/********************
+/********************        // if (_timing_width > 512 && _pixel_width == 1)
+        //     _pixel_height = 2;  
  
     
      DSP_GMODE = 0x1801,        //  (Byte) Display Mode Register

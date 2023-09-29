@@ -23,3 +23,5 @@ clean:
 	rm -f $(OBJ_FILES)
 	rm -f $(TARGET)
 
+run:
+	$(TARGET)

@@ -68,7 +68,9 @@ void Bus::_onetime_init()
     dev->DisplayEnum("",0, "");
     dev->DisplayEnum("",0, "Text Display Buffer (6K bytes)");
     dev = new RAM("SCREEN_BUFFER");
-    s_memory->Attach(dev, 5120);	// 64x48 text (16x10 aspect) 5K 
+    //s_memory->Attach(dev, 5120);	// 64x48 text (16x10 aspect) 5K 			(16x10 aspect)
+    //s_memory->Attach(dev, 8000);	// 80x50 text (with fg/bg color) 8000 bytes (4x3 aspect)
+    s_memory->Attach(dev, 9600);	// 80x60 text (with fg/bg color) 9600 bytes (4x3 aspect)
 
     dev->DisplayEnum("",0, "");
     dev->DisplayEnum("",0, "Device Registers:");
