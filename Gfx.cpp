@@ -719,21 +719,25 @@ void Gfx::OnEvent(SDL_Event *evnt)
 			{
 				if (evnt->key.keysym.sym == SDLK_RIGHTBRACKET)
 				{
-					if (_aspect == 1.33333333333f)
-						_aspect = 1.6f;
+					if (_aspect == 1.25f)
+						_aspect = 1.33333333333f;
+					else if (_aspect == 1.33333333333f)
+						_aspect = 1.6f;						
 					else if (_aspect == 1.6f)
 						_aspect = 1.77777777778f;
 					else if (_aspect == 1.77777777778f)
-						_aspect = 1.33333333333f;
+						_aspect = 1.25f;
 				}
 				else
 				{
-					if (_aspect == 1.33333333333f)
+					if (_aspect == 1.25f)
 						_aspect = 1.77777777778f;
 					else if (_aspect == 1.77777777778f)
 						_aspect = 1.6f;
 					else if (_aspect == 1.6f)
 						_aspect = 1.33333333333f;
+					else if (_aspect == 1.33333333333f)
+						_aspect = 1.25f;
 				}
 
 				_timing_height = _timing_width / _aspect;   //384;
@@ -1070,8 +1074,7 @@ void Gfx::_decode_gmode()
         _fullscreen = true;
 
     // restrict bits-per-pixel based on memory usage    
-    //while ((_texture_width * _texture_height) / (8/_bpp) >= 65536)
-    while ((_texture_width * _texture_height) / (8/_bpp) >= (64*1024))
+    while ((_texture_width * _texture_height) / (8/_bpp) > (64*1024))
         _bpp >>=1;
     int size = (_texture_width * _texture_height) / (8/_bpp);
     _g_top_addr = size;
