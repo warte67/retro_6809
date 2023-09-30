@@ -66,7 +66,7 @@ void Bus::_onetime_init()
     dev->DisplayEnum("STACK_TOP",0x0400, "Top of the system stack space");  
 
     dev->DisplayEnum("",0, "");
-    dev->DisplayEnum("",0, "Text Display Buffer (6K bytes)");
+    dev->DisplayEnum("",0, "Display Buffer (6K bytes)");
     dev = new RAM("SCREEN_BUFFER");
     //s_memory->Attach(dev, 5120);	// 64x48 text (16x10 aspect) 5K 			(16x10 aspect)
     //s_memory->Attach(dev, 8000);	// 80x50 text (with fg/bg color) 8000 bytes (4x3 aspect)
@@ -74,7 +74,8 @@ void Bus::_onetime_init()
 
     dev->DisplayEnum("",0, "");
     dev->DisplayEnum("",0, "Device Registers:");
-    dev->DisplayEnum("HDW_REGS", 0x1800, "Begin Device Hardware Registers");
+    //dev->DisplayEnum("HDW_REGS", 0x1800, "Begin Device Hardware Registers");
+    dev->DisplayEnum("HDW_REGS", 0x2980, "Begin Device Hardware Registers");
 
     dev = new Gfx("GFX_DEVICE");
     s_memory->Attach(dev); 
@@ -86,7 +87,7 @@ void Bus::_onetime_init()
 
     // calculate space remaining for registers
     dev->DisplayEnum("",0, "");
-    int ap = 0x2000 - s_memory->ap();
+    int ap = 0x3000 - s_memory->ap();
     std::string sC = ";";
     if (MEMORY_MAP_OUTPUT_CPP)
         sC = "//";
@@ -96,14 +97,14 @@ void Bus::_onetime_init()
     s_memory->Attach(dev, ap);
 
     dev->DisplayEnum("",0, "");
-    dev->DisplayEnum("",0x2000, "User RAM (44K bytes)");
+    dev->DisplayEnum("",0x3000, "User RAM (32K)");
     dev = new RAM("USER_RAM");
     s_memory->Attach(dev, 0xB000);    
 
     dev->DisplayEnum("",0, "");
     dev->DisplayEnum("",0xD000, "Paged Memory (8K)");
     dev = new RAM("PAGED_MEMORY");
-    s_memory->Attach(dev, 0x2000);   
+    s_memory->Attach(dev, 0x3000);   
 
     dev->DisplayEnum("",0, "");
     dev->DisplayEnum("",0xF000, "KERNEL ROM (4K bytes)");

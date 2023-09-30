@@ -1,0 +1,14 @@
+
+Mode 0:
+    256x192
+    aspect: 4/3  (1.333333)
+    32x24: 1536 bytes
+    gfx: 48K Bytes
+    sprites: 16K Bytes
+
+Mode 1:
+    320x200
+    aspect: 16/10 (1.6)
+    40x25: 2000 bytes
+    gfx: 64000 bytes
+    sprites: 6 available

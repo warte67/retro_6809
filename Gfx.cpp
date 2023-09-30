@@ -486,27 +486,42 @@ void Gfx::_statusText(void)
 	std::ostringstream osMsg;
 	osMsg << "W:" << _texture_width;
 	osMsg << " H:" << _texture_height;
-	osMsg << " BPP:" << _bpp;
+	// osMsg << " BPP:" << _bpp;
 
 	// new line
-	while (osMsg.str().length() < (_texture_width / 8)-1)
+	while (osMsg.str().length() < (_texture_width / 8))
 		osMsg << " ";
-
-	osMsg << " aspect:" << _aspect;		
-
+	osMsg << "BPP:" << _bpp;
 	// new line
-	while (osMsg.str().length() < ((_texture_width / 8)*2)-1)
+	while (osMsg.str().length() < ((_texture_width / 8)*2))
 		osMsg << " ";
-
-	osMsg << " fps:" << Bus::GetInstance()->FPS();		
-
+	osMsg << "aspect:" << _aspect;		
 	// new line
 	while (osMsg.str().length() < ((_texture_width / 8)*3))
+		osMsg << " ";
+	osMsg << "fps:" << Bus::GetInstance()->FPS();		
+	// new line
+	while (osMsg.str().length() < ((_texture_width / 8)*4))
 		osMsg << " ";		
+
+	// osMsg << "text:" << ((_texture_width / 8) * (_texture_height / 8)) * 2 << " bytes";
+	osMsg << (_texture_width/8) << "x" << ((float)_texture_height/8.0f) << ":";
+	osMsg << ((_texture_width / 8) * (_texture_height / 8)) * 2 << " bytes";
+
+
+	// new line
+	while (osMsg.str().length() < ((_texture_width / 8)*5))
+		osMsg << " ";		
+	osMsg << "gfx:" << ((_texture_width * _texture_height) / 8) * _bpp << " bytes";
+
+	// new line
+	while (osMsg.str().length() < ((_texture_width / 8)*6))
+		osMsg << " ";		
+
+		
 
 	// output the string
 	sMessage = osMsg.str();
-
 	// clear the text buffer
     for (int t=SCREEN_BUFFER; t<HDW_REGS; t+=2)
     {
@@ -538,7 +553,7 @@ void Gfx::_statusText(void)
 
 	// render one line of transparent text
 	std::string sHello = "Hello World!";
-    addr = _dsp_tbase + (_texture_width / 4)*4;
+    addr = _dsp_tbase + (_texture_width / 4)*7;
 	static Byte color = 0xf0;
 	if (skip==0)
 		color = (rand() % 16) << 4;	//0xf0;
@@ -717,27 +732,40 @@ void Gfx::OnEvent(SDL_Event *evnt)
 			// [ and ] change aspect ratio
 			if (evnt->key.keysym.sym == SDLK_LEFTBRACKET || evnt->key.keysym.sym == SDLK_RIGHTBRACKET)
 			{
-				if (evnt->key.keysym.sym == SDLK_RIGHTBRACKET)
+				if (evnt->key.keysym.sym == SDLK_LEFTBRACKET)
 				{
-					if (_aspect == 1.25f)
-						_aspect = 1.33333333333f;
-					else if (_aspect == 1.33333333333f)
+					// if (_aspect == 1.25f)
+					// 	_aspect = 1.33333333333f;
+					// else if (_aspect == 1.33333333333f)
+					// 	_aspect = 1.6f;						
+					// else if (_aspect == 1.6f)
+					// 	_aspect = 1.77777777778f;
+					// else if (_aspect == 1.77777777778f)
+					// 	_aspect = 1.25f;
+
+					if (_aspect == 1.33333333333f)
 						_aspect = 1.6f;						
 					else if (_aspect == 1.6f)
 						_aspect = 1.77777777778f;
 					else if (_aspect == 1.77777777778f)
-						_aspect = 1.25f;
-				}
+						_aspect = 1.33333333333f;				}
 				else
 				{
-					if (_aspect == 1.25f)
+					// if (_aspect == 1.25f)
+					// 	_aspect = 1.77777777778f;
+					// else if (_aspect == 1.77777777778f)
+					// 	_aspect = 1.6f;
+					// else if (_aspect == 1.6f)
+					// 	_aspect = 1.33333333333f;
+					// else if (_aspect == 1.33333333333f)
+					// 	_aspect = 1.25f;
+					
+					if (_aspect == 1.33333333333f)
 						_aspect = 1.77777777778f;
 					else if (_aspect == 1.77777777778f)
 						_aspect = 1.6f;
 					else if (_aspect == 1.6f)
 						_aspect = 1.33333333333f;
-					else if (_aspect == 1.33333333333f)
-						_aspect = 1.25f;
 				}
 
 				_timing_height = _timing_width / _aspect;   //384;
@@ -858,23 +886,18 @@ void Gfx::_updateTextScreen(float fElapsedTime)
                 Word addr = _dsp_tbase + ((y>>3) * _dsp_tpitch) + ((x>>3)<<1);
                 Byte ch = Bus::read(addr);
                 Byte at = Bus::read(addr+1);
-                // if (addr >= 0x1800)
-                // {
-                //     ch = 0;
-                //     at = 0xe4;
-                // }
                 Byte fg = at >> 4;
                 Byte bg = at & 0x0f;
-                for (int v=0; v<8; v++)
-                {    
-                    for (int h=0; h<8; h++)
-                    {
-                        int index = bg;
-                        if (_dsp_glyph_data[ch][v] & (1 << 7-h))
-                            index = fg;
-                        _setPixel_unlocked(pixels, pitch, x+h, y+v, index);   
-                    }
-                }
+				for (int v=0; v<8; v++)
+				{    
+					for (int h=0; h<8; h++)
+					{
+						int index = bg;
+						if (_dsp_glyph_data[ch][v] & (1 << 7-h))
+							index = fg;
+						_setPixel_unlocked(pixels, pitch, x+h, y+v, index);   
+					}
+				}
             }
         }
         SDL_UnlockTexture(_bg_texture); 

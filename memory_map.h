@@ -1,8 +1,6 @@
 // memory_map.h
 
 #ifndef __MEMMAP_H__
-#define __MEMMAP_H__
-
 
 enum MEMMAP
 {
@@ -15,11 +13,11 @@ enum MEMMAP
   SYSTEM_STACK = 0x0200,
      STACK_TOP = 0x0400,        // Top of the system stack space
     
-    // Text Display Buffer (6K bytes)
+    // Display Buffer (9600 bytes)
   SCREEN_BUFFER = 0x0400,
     
     // Device Registers:
-      HDW_REGS = 0x1800,        // Begin Device Hardware Registers
+      HDW_REGS = 0x2980,        // Begin Device Hardware Registers
     
   DSP_EMUFLAGS = 0x2980,        //  (Byte) Auxillary Emulation Flags
     // DSP_EMUFLAGS: A000.0000
@@ -108,17 +106,17 @@ enum MEMMAP
   CSR_BMP_DATA = 0x29AD,        //  (Byte) mouse cursor bitmap pixel index color
        CSR_END = 0x29AF,        //  end of mouse cursor hardware registers
     
-    // -2480 ($FFFFF650) bytes remaining for additional registers.
+    // 1616 ($0650) bytes remaining for additional registers.
       RESERVED = 0x29B0,
     
-    // User RAM (44K bytes)
-      USER_RAM = 0x2000,
+    // User RAM (32K)
+      USER_RAM = 0x3000,
     
     // Paged Memory (8K)
-  PAGED_MEMORY = 0xD000,
+  PAGED_MEMORY = 0xE000,
     
     // KERNEL ROM (4K bytes)
-    KERNEL_ROM = 0xF000,
+    KERNEL_ROM = 0x1000,
     
     // Hardware Interrupt Vectors:
     HARD_RSRVD = 0xFFF0,        // Motorola RESERVED Hardware Interrupt Vector
