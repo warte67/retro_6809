@@ -292,18 +292,32 @@ void Gfx::OnInit()
 			{ 0xFFFF },		// 1: white
 			{ 0xF007 },		// 2: dk blue
 			{ 0xF600 },		// 5: dk red
-			{ 0xF057 },		// 4: dk cyan
-			{ 0xF050 },		// 3: dk green
-			{ 0xF607 },		// 6: dk magenta
-			{ 0xF650 },		// 7: brown			
-			{ 0xFAAA },		// 8: lt gray
-			{ 0xF666 },		// 9: dk gray
-			{ 0xF00F },		// A: blue
-			{ 0xF0F0 },		// B: green
-			{ 0xF0FF },		// C: cyan
-			{ 0xFF00 },		// D: red
-			{ 0xFF0F },		// E: magenta
-			{ 0xFFF0 },		// F: yellow
+			{ 0xF140 },		// 4: dk green
+			{ 0xF840 },		// 3: brown
+			{ 0xF406 },		// 6: purple          
+			{ 0xF046 },		// 7: deep sea           	
+			{ 0xF555 },		// 8: gray
+			{ 0xF22F },		// 9: blue
+			{ 0xFd00 },		// A: red
+			{ 0xF4F6 },		// B: lt green
+			{ 0xFED0 },		// C: yellow
+			{ 0xF85b },		// D: Lt Purple
+			{ 0xF59f },		// E: lt sky
+			{ 0xF000 },		// F: black
+
+			// { 0xF057 },		// 4: dk cyan
+			// { 0xF050 },		// 3: dk green
+			// { 0xF607 },		// 6: dk magenta
+			// { 0xF650 },		// 7: brown			
+			// { 0xFAAA },		// 8: lt gray
+			// { 0xF666 },		// 9: dk gray
+			// { 0xF00F },		// A: blue
+			// { 0xF0F0 },		// B: green
+			// { 0xF0FF },		// C: cyan
+			// { 0xFF00 },		// D: red
+			// { 0xFF0F },		// E: magenta
+			// { 0xFFF0 },		// F: yellow
+
 
 			{ 0xF000 },		// N: opaque black
 			{ 0xFEEE },		// N: lt silver
@@ -669,39 +683,72 @@ void Gfx::OnEvent(SDL_Event *evnt)
                         data |= 0x80;
                     Bus::write(DSP_EMUFLAGS, data);
                 }
-            }            
-            // DISPLAY TESTS (SPACE and SHIFT-SPACE)
+            }     
+			// TOGGLE VSYNC
+			if (evnt->key.keysym.sym == SDLK_BACKSPACE)
+			{
+				Byte data = Bus::read(DSP_GMODE);
+				if (data & 0x80)
+				{
+					data &= ~0x80;
+					Bus::write(DSP_GMODE, data);
+				}
+				else
+				{
+					data |= 0x80;
+					Bus::write(DSP_GMODE, data);
+				}
+			}
+
+            // DISPLAY TESTS
+			// SPACEBAR TOGGLES EXTENDED GRAPHICS
             if (evnt->key.keysym.sym == SDLK_SPACE)
             {
                 Byte data = Bus::read(DSP_GMODE);
-                if (SDL_GetModState() & KMOD_SHIFT)
-                {
+				if (data & 0x40)
+				{
+					data &= ~0x40;
+					Bus::write(DSP_GMODE, data);
+				}
+				else
+				{
                     data |= 0x40;
-                    Bus::write(DSP_GMODE, data);
-                }
-                else
-                {                    
-                    data &= ~0x40;
-                    Bus::write(DSP_GMODE, data);
-                }
+                    Bus::write(DSP_GMODE, data);					
+				}
             }
             // number keys change pixel size
+
             if (evnt->key.keysym.sym >= SDLK_0 && evnt->key.keysym.sym <= SDLK_8)
+            // if (evnt->key.keysym.sym >= SDLK_1 && evnt->key.keysym.sym <= SDLK_6)
+            // if (evnt->key.keysym.sym >= SDLK_1 && evnt->key.keysym.sym <= SDLK_5)
             {
                 Byte key =  evnt->key.keysym.sym - SDLK_0;                
                 printf("key: %d\n", key);
                 Byte data = Bus::read(DSP_GMODE) & 0xF0;
                 switch(key)
                 {
-                    case 0:     data |= 0b00000000;      break;
-                    case 1:     data |= 0b00000001;      break;
-                    case 2:     data |= 0b00000010;      break;
-                    case 3:     data |= 0b00000100;      break;
-                    case 4:     data |= 0b00000101;      break;
-                    case 5:     data |= 0b00000110;      break;
-                    case 6:     data |= 0b00001000;      break;
-                    case 7:     data |= 0b00001001;      break;
-                    case 8:     data |= 0b00001010;      break;
+						case 0:     data |= 0b00000000;      break;
+						case 1:     data |= 0b00000001;      break;
+						case 2:     data |= 0b00000010;      break;
+						case 3:     data |= 0b00000100;      break;
+						case 4:     data |= 0b00000101;      break;
+						case 5:     data |= 0b00000110;      break;
+						case 6:     data |= 0b00001000;      break;
+						case 7:     data |= 0b00001001;      break;
+						case 8:     data |= 0b00001010;      break;
+
+						// case 1:     data |= 0b00000000;      break;
+						// case 2:     data |= 0b00000001;      break;
+						// case 3:     data |= 0b00000100;      break;
+						// case 4:     data |= 0b00000101;      break;
+						// case 5:     data |= 0b00001000;      break;
+						// case 6:     data |= 0b00001001;      break;
+
+						// case 1:     data |= 0b00000000;      break;		// 1x / 1x
+						// case 2:     data |= 0b00000001;      break;		// 1x / 2x
+						// case 3:     data |= 0b00000100;      break;		// 2x / 1x
+						// case 4:     data |= 0b00000101;      break;		// 2x / 2x
+						// case 5:     data |= 0b00001001;      break;		// 4x / 2x
                 }
                 Bus::write(DSP_GMODE, data);
             }
@@ -734,37 +781,23 @@ void Gfx::OnEvent(SDL_Event *evnt)
 			{
 				if (evnt->key.keysym.sym == SDLK_LEFTBRACKET)
 				{
-					// if (_aspect == 1.25f)
-					// 	_aspect = 1.33333333333f;
-					// else if (_aspect == 1.33333333333f)
-					// 	_aspect = 1.6f;						
-					// else if (_aspect == 1.6f)
-					// 	_aspect = 1.77777777778f;
-					// else if (_aspect == 1.77777777778f)
-					// 	_aspect = 1.25f;
-
 					if (_aspect == 1.33333333333f)
-						_aspect = 1.6f;						
-					else if (_aspect == 1.6f)
-						_aspect = 1.77777777778f;
-					else if (_aspect == 1.77777777778f)
-						_aspect = 1.33333333333f;				}
-				else
-				{
-					// if (_aspect == 1.25f)
-					// 	_aspect = 1.77777777778f;
-					// else if (_aspect == 1.77777777778f)
-					// 	_aspect = 1.6f;
-					// else if (_aspect == 1.6f)
-					// 	_aspect = 1.33333333333f;
-					// else if (_aspect == 1.33333333333f)
-					// 	_aspect = 1.25f;
-					
-					if (_aspect == 1.33333333333f)
-						_aspect = 1.77777777778f;
+						_aspect = 1.77777777778f;						
 					else if (_aspect == 1.77777777778f)
 						_aspect = 1.6f;
 					else if (_aspect == 1.6f)
+						_aspect = 1.45454545f;
+					else if (_aspect == 1.45454545f)
+						_aspect = 1.33333333333f;				}
+				else
+				{
+					if (_aspect == 1.33333333333f)
+						_aspect = 1.45454545f;
+					else if (_aspect == 1.45454545f)
+						_aspect = 1.6f;
+					else if (_aspect == 1.6f)
+						_aspect = 1.77777777778f;
+					else if (_aspect == 1.77777777778f)
 						_aspect = 1.33333333333f;
 				}
 
@@ -905,7 +938,7 @@ void Gfx::_updateTextScreen(float fElapsedTime)
 }            
 
 
-void Gfx::_setPixel(int x, int y, Byte color_index, bool bIgnoreAlpha)
+inline void Gfx::_setPixel(int x, int y, Byte color_index, bool bIgnoreAlpha)
 {
 
     void *pixels;
@@ -921,7 +954,7 @@ void Gfx::_setPixel(int x, int y, Byte color_index, bool bIgnoreAlpha)
         SDL_UnlockTexture(_bg_texture);
     }    
 }
-void Gfx::_setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_index, bool bIgnoreAlpha)
+inline void Gfx::_setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_index, bool bIgnoreAlpha)
 {
     //Uint32 *dst = (Uint32*)((Uint8*)pixels + (y * pitch) + (x*4));    // why is this (x*4) and not simply x?
     Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));		// because data size is two bytes 
@@ -1157,6 +1190,8 @@ void Gfx::OnRender()
     // D = h_scan    00:1x      01:2x    10:4x           (text: lsb only)
     // E = v_scan    00:1x      01:2x    10:4x           (text: lsb only)
     
+	// possibly restrict the vertical scan to 1x and 2x only due to refresh rates on the pico
+
 
 	ToDo:
 		- Select tile or pixel mode	(change B above to select pixel/tile)
