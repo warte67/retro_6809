@@ -11,20 +11,15 @@ class Bus
 {
 	protected:
 		Bus() = default;
-
+		inline static bool s_bIsRunning = false;
+		inline static bool s_bIsDirty = false;
 
 	public:
-		static Bus& GetInst() 
-		{
-			static Bus inst;
-			return inst;
-		}
+		static Bus& GetInst() {  	static Bus inst; return inst; 		}
 
 		void Run();
 
 	private:
-		inline static bool s_bIsRunning = false;
-		inline static bool s_bIsDirty = false;
 		void _onetime_init();
 		void _onDeactivate();
 		void _onActivate();
