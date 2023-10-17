@@ -1,15 +1,30 @@
 //////////
 //
-//  Bus.h  (singleton)
+//  Bus.h  (thread-safe singleton)
 //
 /////////////
 
 #include <iostream>
 #include "Bus.h"
 
-void Bus::_onetime_init() 
+Bus::Bus()
 {
-	std::cout << "void Bus::_onetime_init()\n";
+	std::cout << "Bus::Bus()\n";
+}
+
+Bus::~Bus()
+{
+	std::cout << "Bus::~Bus()\n";
+}
+
+void Bus::_onInit() 
+{
+	std::cout << "void Bus::_onInit()\n";
+}
+
+void Bus::_onQuit() 
+{
+	std::cout << "void Bus::_onQuit()\n";
 }
 
 void Bus::_onDeactivate() 
@@ -24,36 +39,38 @@ void Bus::_onActivate()
 
 void Bus::_onUpdate() 
 {
-	std::cout << "void Bus::_onUpdate()\n";
+	// std::cout << "void Bus::_onUpdate()\n";
 }
 
 void Bus::_onEvent() 
 {
-	std::cout << "void Bus::_onEvent() \n";
+	// std::cout << "void Bus::_onEvent() \n";
 }
 
 void Bus::_onRender() 
 {
-	std::cout << "void Bus::_onRender()\n";
+	// std::cout << "void Bus::_onRender()\n";
 }
 
 void Bus::_onPresent() 
 {
-	std::cout << "void Bus::_onPresent()\n";
+	// std::cout << "void Bus::_onPresent()\n";
 }
 
-void Bus::_onetime_quit() 
+void Bus::Error(const std::string& sErr)
 {
-	std::cout << "void Bus::_onetime_quit()\n";
+	std::cout << "\n    ERROR: " << sErr << SDL_GetError() << "\n\n";
+    s_bIsRunning = false;
 }
+
 
 
 // main loop
 void Bus::Run()
 {
-	std::cout << "Retro_6809\n";
+	// called after Bus() constructor for each attached device
+    _onInit();	
 
-    _onetime_init();
     while (s_bIsRunning)
     {
         // create a new environment
@@ -74,6 +91,18 @@ void Bus::Run()
         // if (s_gfx)
         //     SDL_RenderPresent(s_gfx->GetRenderer());      
 		_onPresent();
+
+
+		// TESTING: for now just stop
+		//IsRunning(false);
+		//IsDirty(true);
+
+		Bus::Error("Automated Stop");
+
     }
-    _onetime_quit();
+	// shutdown the old environment
+	_onDeactivate();	
+
+	// one time shutdown
+    _onQuit();
 }
