@@ -49,11 +49,8 @@ class Gfx : public Device
         SDL_Renderer* _renderer = nullptr;
         SDL_Texture* _bg_texture;      
 
-        //float _aspect = 1.33333333333f;     //4x3
-        float _aspect = 1.6f;     //16x10		320x200 or 256x192 (512x384)
-        //float _aspect = 1.77777777778f;     //16x9
-        //int _timing_width = 512;		// for now only one timing mode
-        int _timing_width = 640;		// for now only one timing mode
+        const float _aspect = 1.6f;     //16x10
+        int _timing_width = 512;		// for now only one timing mode
         int _timing_height = _timing_width / _aspect;   //384;
         int _window_width = _timing_width * 2;
         int _window_height = _timing_height * 2;
@@ -111,9 +108,7 @@ class Gfx : public Device
         Uint8 red(Uint8 index) { Uint8 c = _palette[index].r;  return c; }
         Uint8 grn(Uint8 index) { Uint8 c = _palette[index].g;  return c; }
         Uint8 blu(Uint8 index) { Uint8 c = _palette[index].b;  return c; }
-        Uint8 alf(Uint8 index) { Uint8 c = _palette[index].a;  return c; }      
-
-		void _statusText(void);  
+        Uint8 alf(Uint8 index) { Uint8 c = _palette[index].a;  return c; }        
 };
 // this is here mostly to get an idea of the size of future Sprite objects
 class Sprite : public Device

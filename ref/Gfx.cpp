@@ -597,8 +597,15 @@ void Gfx::OnActivate()
         _window_flags = SDL_WINDOW_OPENGL | 
                         SDL_WINDOW_FULLSCREEN_DESKTOP;              
     else // WINDOWED
+	{
         _window_flags = SDL_WINDOW_OPENGL | 
                         SDL_WINDOW_RESIZABLE;    
+		if (_timing_width == 512)
+		{
+			_window_width = _timing_width * 2.5;
+			_window_height = _timing_height * 2.5;		
+		}
+	}
     _window = SDL_CreateWindow("Retro_6809",
                                SDL_WINDOWPOS_CENTERED,
                                SDL_WINDOWPOS_CENTERED,
@@ -808,10 +815,15 @@ void Gfx::OnEvent(SDL_Event *evnt)
 			}
 			if (evnt->key.keysym.sym == SDLK_BACKSLASH)
 			{
-				if (_timing_width == 640)
-					_timing_width = 512;
-				else
+				if (_timing_width == 512)
 					_timing_width = 640;
+				else
+					_timing_width = 512;
+
+				// if (_timing_width == 640)
+				// 	_timing_width = 512;
+				// else
+				// 	_timing_width = 640;
 
 				_timing_height = _timing_width / _aspect;   //384;
 				_window_width = _timing_width * 2;
@@ -1066,13 +1078,23 @@ void Gfx::_decode_gmode()
     // _window_width = _timing_width * 2;
     // _window_height = _timing_height * 2;
 
+	// BYPASS TIMING BIT:
+	_timing_width = 512;
+	_timing_height = _timing_width / _aspect; 
+	float _delta = 2.0f;
+	if (!_dsp_emuflags)
+		_delta = 2.5f;
+    _window_width = _timing_width * _delta;
+    _window_height = _timing_height * _delta;
+
+
 	// timing changed to graphics enable bit (0B00.0000)
 	// B = gfx_enable 	0:off	1:on 
 	_dsp_gfx_enable = false;
 	if (_dsp_gmode & 0b01000000)
 		_dsp_gfx_enable = true;
     _window_width = _timing_width * 2;
-    _window_height = _timing_height * 2;		
+    _window_height = _timing_height * 2;	
 
     // bits per pixel (00CC.0000)
     _bpp = 1;
@@ -1088,8 +1110,8 @@ void Gfx::_decode_gmode()
     case 01:
         _pixel_width = 2;
         break;
-    default:    // SDL_RenderClear(_renderer);
-    // SDL_RenderCopy(_renderer, NULL, NULL, NULL);    
+
+    default:     
         _pixel_width = 1;
         break;
     }
@@ -1098,7 +1120,6 @@ void Gfx::_decode_gmode()
     switch (_dsp_gmode & 0x03)
     {
     case 00:
-        //_pixel_height = 4;
         _pixel_height = 4;
         break;
     case 01:
