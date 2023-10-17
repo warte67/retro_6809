@@ -13,7 +13,6 @@ int main()
 	bus.Run();
 
 	//Bus::GetInst().Run();		// also works
-
 	
 	return 0;
 }
