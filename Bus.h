@@ -9,7 +9,8 @@
 
 #include "types.h"
 //#include "Memory.h"		// integrate the memory class into the bus class
-
+							// and use static read and write:
+							// 		Bus::Read() and Bus::Write()
 
 class Bus
 {
