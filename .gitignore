@@ -3,7 +3,4 @@ obj/
 x64/
 .vs/
 *.o
-Retro_6809.sln
-Retro_6809.vcxproj
-Retro_6809.vcxproj.filters
-Retro_6809.vcxproj.user
+
