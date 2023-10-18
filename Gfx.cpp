@@ -117,15 +117,15 @@ void Gfx::OnActivate()
     SDL_SetRenderDrawBlendMode(_renderer, SDL_BLENDMODE_BLEND);
 
 	// create the extended graphics texture
-	_ext_texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_ARGB8888,
+	_ext_texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_ARGB4444,
 	 		SDL_TEXTUREACCESS_STREAMING, _texture_width, _texture_height);
 
 	// create the standard graphics texture
-	_std_texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_ARGB8888,
+	_std_texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_ARGB4444,
 	 		SDL_TEXTUREACCESS_STREAMING, _texture_width, _texture_height);
 
 	// create the render target texture
-	_render_target = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGBA4444,
+	_render_target = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_ARGB4444,
 			SDL_TEXTUREACCESS_TARGET, _texture_width, _texture_height);
 
 }
@@ -184,6 +184,41 @@ void Gfx::OnUpdate(float fElapsedTime)
     SDL_SetRenderTarget(_renderer, NULL);
 	SDL_SetRenderDrawColor(_renderer, 16, 16, 16, 255);	// border color
     SDL_RenderClear(_renderer);
+
+	// fill extended buffer with noise
+	if (_extended_graphics_enable)
+	{
+		void *pixels;
+		int pitch;
+		if (SDL_LockTexture(_ext_texture, NULL, &pixels, &pitch) < 0)
+			Bus::Error("Failed to lock texture: ");	
+		else
+		{
+			for (int t=0; t<1000; t++)
+			{
+				int x = random() % (_texture_width);
+				int y = random() % (_texture_height);
+
+				Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));		// because data size is two bytes 
+
+				*dst = ( 
+					0xF000	|		// alpha
+					(random() % 0xF) << 8 |
+					(random() % 0xF) << 4 |
+					(random() % 0xF)
+				);    
+			}
+			SDL_UnlockTexture(_ext_texture);
+		}
+		SDL_SetRenderTarget(_renderer, _render_target);
+		SDL_RenderCopy(_renderer, _ext_texture, NULL, NULL);
+	}
+	else
+	{
+		SDL_SetRenderTarget(_renderer, _render_target);
+		SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
+		SDL_RenderClear(_renderer);
+	}
 }
 void Gfx::OnRender() 
 {
@@ -216,6 +251,75 @@ void Gfx::OnPresent()
 	// swap display buffers / present
 	SDL_RenderPresent(_renderer);  	
 }
+
+
+// void Gfx::_setPixel(int x, int y, Byte color_index, bool bIgnoreAlpha)
+// {
+
+//     void *pixels;
+//     int pitch;
+//     Uint8 clr_index = 0;    
+//     if (SDL_LockTexture(_bg_texture, NULL, &pixels, &pitch) < 0) {
+//         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't lock texture: %s\n", SDL_GetError());
+//         Bus::Error("");
+//     }
+//     else
+//     {
+//         _setPixel_unlocked(pixels, pitch, x, y, color_index, bIgnoreAlpha);
+//         SDL_UnlockTexture(_bg_texture);
+//     }    
+// }
+
+// void Gfx::_setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_index, bool bIgnoreAlpha)
+// {
+//     //Uint32 *dst = (Uint32*)((Uint8*)pixels + (y * pitch) + (x*4));    // why is this (x*4) and not simply x?
+//     Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));		// because data size is two bytes 
+//     bool ALPHA_BLEND = true;
+//     if (ALPHA_BLEND)
+//     {       
+//         // int ret = ((p1 * (256-a))) + (p2 * (a+1)) >> 8;
+//         Uint16 pixel = *dst;	// 0xARGB
+// 		Byte r1 = (pixel & 0x0f00) >> 8;
+// 		Byte g1 = (pixel & 0x00f0) >> 4;
+// 		Byte b1 = (pixel & 0x000f) >> 0;
+// 		//
+//         Byte a2 = alf(color_index);
+//         Byte r2 = red(color_index);
+//         Byte g2 = grn(color_index);
+//         Byte b2 = blu(color_index);
+//         if (bIgnoreAlpha)
+//             a2 = 15;
+// 		//
+//         Byte r = ((r1 * (16-a2))) + (r2 * (a2+1)) >> 4;
+//         Byte g = ((g1 * (16-a2))) + (g2 * (a2+1)) >> 4;
+//         Byte b = ((b1 * (16-a2))) + (b2 * (a2+1)) >> 4;
+
+//         if (alf(color_index) != 0 || bIgnoreAlpha)
+//         {
+//             *dst = (
+//                 0xF000 | 
+//                 (r<<8) | 
+//                 (g<<4) | 
+//                 (b)
+//             );          
+// 		}	
+//     }
+//     else
+//     {        
+//         // simple non-zero alpha channel
+//         if (alf(color_index) != 0 || bIgnoreAlpha)
+//         {
+//             *dst = 
+//             (
+//                 0xF000 |
+//                 (red(color_index)<<8) |
+//                 (grn(color_index)<<4) |
+//                 blu(color_index)
+//             );    
+//         }
+//     }    
+// }
+
 
 
 
@@ -288,6 +392,11 @@ void Gfx::_decode_gfx()
 
 	// adjust bits-per-pixel to fit within the video buffer
 	// ...
+    // while ((_texture_width * _texture_height) / (8/_bpp) > (64*1024))
+    //     _bpp >>=1;
+    // int size = (_texture_width * _texture_height) / (8/_bpp);
+
+
 
 	// graphics enable bits
 	_extended_graphics_enable = bus.read(DSP_GMODE) & 0x20;

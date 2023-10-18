@@ -57,8 +57,8 @@ class Gfx : public Device
 		bool _standard_bitmap = false;		// 0:text, 1:graphics
 
 		// hardware registers
-		Byte _dsp_gres	= 0b11011111;	// default
-		Byte _dsp_gmode = 0b01001010;	// default
+		Byte _dsp_gres	= 0b11010101;	// default
+		Byte _dsp_gmode = 0b01101010;	// default
 	
 	private:
 		// helpers
