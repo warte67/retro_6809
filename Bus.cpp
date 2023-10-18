@@ -420,18 +420,12 @@ void Bus::Run()
         _onRender();      
 		_onPresent();
 
-
-		// TESTING: for now just stop
-		//IsRunning(false);
-		//IsDirty(true);
-
-		// Bus::Error("Automated Stop");
-
+		//Bus::Error("Automatic Exit");
     }
 	// shutdown the old environment
 	_onDeactivate();	
 
-	// one time shutdown
+	// one time shutdown	
     _onQuit();
 }
 

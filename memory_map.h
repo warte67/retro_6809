@@ -33,10 +33,10 @@ enum MEMMAP
     
       DSP_GRES = 0x1C00,        //  (Byte) Screen Resolution Register
     // DSP_GRES: BBRR.HHVV
-    //     BB:00 = 1-bpp (2-colors)
-    //     BB:01 = 2-bpp (4-colors)
-    //     BB:10 = 4-bpp (16-colors)
-    //     BB:11 = 8-bpp (256-colors)
+    //     BB:00 = Extended Graphics 1-bpp (2-color mode)
+    //     BB:01 = Extended Graphics 2-bpp (4-color mode)
+    //     BB:10 = Extended Graphics 4-bpp (16-color mode)
+    //     BB:11 = Extended Graphics 8-bpp (256-color mode)
     //     RR:00 = 16:9  aspect (1.777778)
     //     RR:01 = 16:10 aspect (1.600000)
     //     RR:10 = 16:11 aspect (1.454545)
@@ -51,7 +51,7 @@ enum MEMMAP
     //     VV:11 = 4x Vertical Multiplier
     
      DSP_GMODE = 0x1C01,        //  (Byte) Graphics Mode Register
-    // DSP_GRES: ABCD.EFGG
+    // DSP_GMODE: ABCD.EFGG
     //     A:0 = VSYNC OFF
     //     A:1 = VSYNC ON
     //     B:0 = Fullscreen Enabled (emulator only)
@@ -64,10 +64,10 @@ enum MEMMAP
     //     E:1 = Standard Text / Bitmap ENABLED
     //     F:0 = Standard Text Mode ENABLED
     //     F:1 = Standard Bitmap Mode ENABLED
-    //     GG:00 = Standard Graphics 1-bpp (2-colors)
-    //     GG:01 = Standard Graphics 2-bpp (4-colors)
-    //     GG:10 = Standard Graphics 4-bpp (16-colors)
-    //     GG:11 = Standard Graphics 8-bpp (256-colors)
+    //     GG:00 = Extended Graphics 1-bpp (2-colors)
+    //     GG:01 = Extended Graphics 2-bpp (4-colors)
+    //     GG:10 = Extended Graphics 4-bpp (16-colors)
+    //     GG:11 = Extended Graphics 8-bpp (256-colors)
     
     // 5118 ($13FE) bytes remaining for additional registers.
       RESERVED = 0x1C02,
