@@ -68,7 +68,7 @@ class Gfx : public Device
 
 #endif //__GFX_H__
 
-    // TEST V1
+    // TEST V2
     // DSP_GRES: BBRR.HHVV
     //     BB:00 = Extended Graphics 1-bpp (2-color mode)
     //     BB:01 = Extended Graphics 2-bpp (4-color mode)
