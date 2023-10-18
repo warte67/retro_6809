@@ -10,6 +10,157 @@
 Bus::Bus()
 {
 	std::cout << "Bus::Bus()\n";
+
+    if (COMPILE_MEMORY_MAP)
+    {
+        if (MEMORY_MAP_OUTPUT_CPP)		// C++ version
+        {
+			printf("\n\n");
+			printf("// memory_map.h\n");
+			printf("#ifndef __MEMORY_MAP_H__\n");
+			printf("#define __MEMORY_MAP_H__\n");
+            printf("\n");
+            printf("enum MEMMAP\n");
+            printf("{\n");
+            printf("    //  **********************************************\n");
+            printf("    //  * Allocated 64k Memory Mapped System Symbols *\n");
+            printf("    //  **********************************************\n");
+        }
+		else							// 6809 ASM version
+		{
+            printf(";  **********************************************\n");
+            printf(";  * Allocated 64k Memory Mapped System Symbols *\n");
+            printf(";  **********************************************\n");
+        }
+    }
+
+    // BUILD THE MEMORY MAP /////////////////////
+
+
+	// SOFT VECTORS
+	Device* dev = nullptr;
+	dev = new RAM("SOFT_VECTORS");
+    // dev->DisplayEnum("",0, "");
+
+	int addr = Attach(dev, 16);
+    dev->DisplayEnum("",0, "");
+    dev->DisplayEnum("",0,"Software Interrupt Vectors:");
+    dev->DisplayEnum("SOFT_RSRVD",0x0000, "Motorola RESERVED Software Interrupt Vector");
+    dev->DisplayEnum("SOFT_SWI3", 0x0002, "SWI3 Software Interrupt Vector");
+    dev->DisplayEnum("SOFT_SWI2", 0x0004, "SWI2 Software Interrupt Vector");
+    dev->DisplayEnum("SOFT_FIRQ", 0x0006, "FIRQ Software Interrupt Vector");
+    dev->DisplayEnum("SOFT_IRQ",  0x0008, "IRQ Software Interrupt Vector");
+    dev->DisplayEnum("SOFT_SWI",  0x000A, "SWI / SYS Software Interrupt Vector");
+    dev->DisplayEnum("SOFT_NMI",  0x000C, "NMI Software Interrupt Vector");
+    dev->DisplayEnum("SOFT_RESET",0x000E, "RESET Software Interrupt Vector");	
+	dev->DisplayEnum("",0, "");
+
+	// zero page 256 bytes	
+    dev = new RAM("ZERO_PAGE");
+    addr = Attach(dev, 256 - 16);	
+
+	// system stack 512 bytes
+    dev = new RAM("SYSTEM_STACK");
+    addr += Attach(dev, 512);  
+    dev->DisplayEnum("SSTACK_TOP",0x0300, "Top of the system stack space");  	
+
+	// user stack 256 bytes
+    dev = new RAM("USER_STACK");
+    addr += Attach(dev, 256);  
+    dev->DisplayEnum("USTACK_TOP",0x0400, "Top of the user stack space");  	
+
+	// display buffer 6k bytes
+    dev = new RAM("SCREEN_BUFFER");
+    dev->DisplayEnum("",0, "");
+    dev->DisplayEnum("",0, "Display Buffer (6K bytes)");
+    addr += Attach(dev, 6*1024);
+
+	// start hardware registers
+	dev->DisplayEnum("",0, "");
+    dev->DisplayEnum("",0, "Device Registers:");
+    dev->DisplayEnum("HDW_REGS", 0x2980, "Begin Device Hardware Registers");
+
+    // calculate space remaining for registers
+    dev->DisplayEnum("",0, "");
+    int ap = 0x3000 - this->ap();
+    std::string sC = ";";
+    if (MEMORY_MAP_OUTPUT_CPP)
+        sC = "//";
+    if (COMPILE_MEMORY_MAP)
+        printf("    %s %d ($%04X) bytes remaining for additional registers.\n",sC.c_str(), ap, ap);
+    dev = new RAM("RESERVED");
+    addr += Attach(dev, ap);
+
+	// user ram
+    dev->DisplayEnum("",0, "");
+    dev->DisplayEnum("",0x3000, "User RAM (32K)");
+    dev = new RAM("USER_RAM");
+    addr += Attach(dev, 32*1024);    
+
+	// paged RAM
+    dev->DisplayEnum("",0, "");
+    dev->DisplayEnum("",0xD000, "Paged RAM (8K)");
+    dev = new RAM("PAGED_RAM");
+    addr += Attach(dev, 8*1024);   
+
+	// paged ROM
+    dev->DisplayEnum("",0, "");
+    dev->DisplayEnum("",0xF000, "PAGED ROM (8K bytes)");
+    dev = new ROM("PAGED_ROM");
+    addr += Attach(dev, 8*1024);      
+
+	// KERNEL ROM
+    dev->DisplayEnum("",0, "");
+    dev->DisplayEnum("",0xF000, "KERNEL ROM (4K bytes)");
+    dev = new ROM("KERNEL_ROM");
+    addr += Attach(dev, 4*1024);      
+
+	//printf("ADDR: 0x%04X \n", addr);
+
+	// ROM VECTORS
+    dev->DisplayEnum("",0, "");
+    dev->DisplayEnum("",0,"Hardware Interrupt Vectors:");
+    dev->DisplayEnum("HARD_RSRVD",0xfff0, "Motorola RESERVED Hardware Interrupt Vector");
+    dev->DisplayEnum("HARD_SWI3", 0xfff2, "SWI3 Hardware Interrupt Vector");
+    dev->DisplayEnum("HARD_SWI2", 0xfff4, "SWI2 Hardware Interrupt Vector");
+    dev->DisplayEnum("HARD_FIRQ", 0xfff6, "FIRQ Hardware Interrupt Vector");
+    dev->DisplayEnum("HARD_IRQ",  0xfff8, "IRQ Hardware Interrupt Vector");
+    dev->DisplayEnum("HARD_SWI",  0xfffA, "SWI / SYS Hardware Interrupt Vector");
+    dev->DisplayEnum("HARD_NMI",  0xfffC, "NMI Hardware Interrupt Vector");
+    dev->DisplayEnum("HARD_RESET",0xfffE, "RESET Hardware Interrupt Vector");
+
+    // close the memory map definitions
+    if (COMPILE_MEMORY_MAP)
+    {
+        if (MEMORY_MAP_OUTPUT_CPP)
+		{
+            printf("};  // END: enum MEMMAP\n\n");
+
+			printf("\n");
+			printf("#endif // __MEMORY_MAP_H__\n");
+			printf("\n\n");
+		}
+        else
+            printf("; END of definitions\n\n");
+
+        printf("\n\nThe flag COMPILE_MEMORY_MAP is set as true, therefore this app\n");
+        printf("cannot continue past this point. Set the definition of COMPILE_MEMORY_MAP\n");
+        printf("to false in the file types.h and recompile to run this application.\n\n");
+        Error("Copy the above enumerated definitions above to memory_map.h");
+        //exit(0);
+    }
+    DumpMemoryMap();
+
+    // setup/initialize SDL
+    if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
+        Bus::Error("Error initializing SDL!");
+    }    
+
+    // OnInit()     // call for each attached device
+    _onInit();
+
+    // start up external threads
+    // ...   
 }
 
 Bus::~Bus()
@@ -63,9 +214,82 @@ void Bus::Error(const std::string& sErr)
     s_bIsRunning = false;
 }
 
+// MEMORY RELATED /////////////////////////////////////////////////
 
 
-// main loop
+Byte Bus::read(Word offset, bool debug) 
+{    
+    for (auto &a : _memoryNodes)
+    {
+        if (offset - a->Base() < a->Size())
+        {
+            Byte data = a->read(offset, debug);
+            return data;
+        }
+    }
+    return 0xCC;
+}
+
+void Bus::write(Word offset, Byte data, bool debug) 
+{
+    for (auto &a : _memoryNodes)
+    {
+        if (offset - a->Base() < a->Size())
+        {
+            a->write(offset, data, debug);
+            return;
+        }
+    }    
+}
+Word Bus::read_word(Word offset, bool debug) 
+{
+	Word ret = (read(offset) << 8) | read(offset + 1);
+	return ret;
+}
+void Bus::write_word(Word offset, Word data, bool debug) 
+{    
+	Byte lsb = (data >> 8) & 0xFF;
+	Byte msb = data & 0xff;
+	write(offset, msb);
+	write(offset + 1, lsb);
+}
+
+
+
+Word Bus::Attach(Device* dev, Word size) 
+{    
+    if (dev != nullptr)
+    {
+        if (size == 0)
+            size = dev->OnAttach((Word)_lastAddress);     
+        else
+            dev->DisplayEnum(dev->Name(), _lastAddress, "");
+        dev->Base(_lastAddress);
+        dev->Size(size);
+        _lastAddress += size;               
+        _memoryNodes.push_back(dev);
+    }
+    if (size > 65536)
+        Bus::Error("Memory allocation beyond 64k boundary!");
+    return size;
+}
+
+void Bus::DumpMemoryMap()
+{
+    std::cout << "  Simple Memory Map:\n";
+    for(auto &o : _memoryNodes)
+    {
+        printf("    $%04X-$%04X %s\n", 		
+            o->Base(), 
+            o->Base() + o->Size() - 1,
+            o->Name().c_str()
+        );
+    }
+}
+
+
+
+// main loop //////////////////////////////////////////////////////
 void Bus::Run()
 {
 	// called after Bus() constructor for each attached device
@@ -105,4 +329,16 @@ void Bus::Run()
 
 	// one time shutdown
     _onQuit();
+}
+
+
+
+// ROM /////////////////////////////////////
+
+// only write to ROM when the debug flag is true
+void ROM::write(Word offset, Byte data, bool debug) 
+{
+    if (debug)
+        if (offset - m_base < m_size)
+            m_memory[(Word)(offset - m_base)] = data;
 }

@@ -5,15 +5,15 @@ FLAGS = -std=c++20 -O2 #-g -V
 LIBS = -lSDL2 -ldl
 OBJ = obj
 #OBJ_FILES = Bus.o Device.o Gfx.o Memory.o Mouse.o main.o
-OBJ_FILES = Bus.o main.o
+OBJ_FILES = Bus.o Device.o main.o
 
 all: $(OBJ_FILES)	 
 	Bus.o: 		Bus.cpp 	Bus.h
 	main.o: 	main.cpp
+	Device.o: 	Device.cpp 	Device.h
 
-# Device.o: 	Device.cpp 	Device.h
-# Gfx.o: 	Gfx.cpp 	Gfx.h
 # Memory.o: 	Memory.cpp 	Memory.h
+# Gfx.o: 	Gfx.cpp 	Gfx.h
 # Mouse.o:	Mouse.cpp 	Mouse.h
 
 all: $(OBJ_FILES)

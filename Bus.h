@@ -8,9 +8,15 @@
 #define __BUS_H__
 
 #include "types.h"
+#include "Device.h"
+
 //#include "Memory.h"		// integrate the memory class into the bus class
 							// and use static read and write:
 							// 		Bus::Read() and Bus::Write()
+
+// // forward declarations:
+// class RAM;
+// class ROM;
 
 class Bus
 {
@@ -33,6 +39,17 @@ class Bus
 		void IsRunning(bool _bIsRunning)		{ s_bIsRunning = _bIsRunning; }
 		static void Error(const std::string& sErr);
 
+		// Public Memory Stuff
+		Word Attach(Device* dev, Word size = 0);   // attach a user defined memory node
+        void DumpMemoryMap();        
+        int ap() { return _lastAddress; }
+        void ap(int _addr)  { _lastAddress = _addr; }		
+
+        Byte read(Word offset, bool debug = false);
+        void write(Word offset, Byte data, bool debug = false);
+        Word read_word(Word offset, bool debug = false);
+        void write_word(Word offset, Word data, bool debug = false);   				
+
 	private:
 		void _onInit();			// one time init after all devices have been created
 		void _onQuit();			// quit each device prior to app termination
@@ -42,7 +59,39 @@ class Bus
 		void _onEvent();		// calls each device on SDL event
 		void _onRender();		// calls each device for rendering
 		void _onPresent();		// calls SDL_RenderPresent() from the Gfx device
+
+		// Private Memory Stuff
+        int _lastAddress = 0;
+        std::vector<Device*> _memoryNodes;		
+};    // dev->DisplayEnum("",0, "");
+    // dev->DisplayEnum("",0xF000, "KERNEL ROM (4K bytes)");
+    // dev = new ROM("KERNEL_ROM");
+
+
+/////////////////////
+//
+// Standard Memory Devices
+//
+////////
+
+class RAM : public Device
+{
+    public:
+        RAM() {  Name("RAM"); }
+        RAM(std::string sName) { Name(sName); }
+        virtual ~RAM() {}    
 };
+
+class ROM : public Device
+{
+    public:
+        ROM() {  Name("ROM"); }
+        ROM(std::string sName) { Name(sName); }
+        virtual ~ROM() {}    
+
+        virtual void write(Word offset, Byte data, bool debug = false);
+};
+
 
 
 

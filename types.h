@@ -11,7 +11,7 @@
 #include <SDL2/SDL.h>
 #include <string>
 #include <vector>
-// #include "memory_map.h"
+#include "memory_map.h"
 
 // Generate a memory map definition file?
 #define COMPILE_MEMORY_MAP      false
