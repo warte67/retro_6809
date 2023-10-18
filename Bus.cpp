@@ -4,6 +4,7 @@
 //
 /////////////
 
+#include <chrono>
 #include <iostream>
 #include "Bus.h"
 
@@ -79,6 +80,18 @@ Bus::Bus()
 	dev->DisplayEnum("",0, "");
     dev->DisplayEnum("",0, "Device Registers:");
     dev->DisplayEnum("HDW_REGS", 0x2980, "Begin Device Hardware Registers");
+
+
+
+
+	// base graphics device
+    dev = new Gfx();    
+    addr += Attach(dev); 
+    m_gfx = dynamic_cast<Gfx*>(dev);   
+
+
+
+
 
     // calculate space remaining for registers
     dev->DisplayEnum("",0, "");
@@ -166,46 +179,126 @@ Bus::Bus()
 Bus::~Bus()
 {
 	std::cout << "Bus::~Bus()\n";
+
+    // shutdown external threads
+    // ...	
+
+    // close SDL
+    SDL_Quit();
 }
 
 void Bus::_onInit() 
 {
 	std::cout << "void Bus::_onInit()\n";
+
+	// for (auto &d : _memoryNodes)
+	// 	d->OnInit();
 }
 
 void Bus::_onQuit() 
 {
 	std::cout << "void Bus::_onQuit()\n";
+
+	// for (auto &d : _memoryNodes)
+	// 	d->OnQuit();
 }
 
 void Bus::_onDeactivate() 
 {
 	std::cout << "void Bus::_onDeactivate()\n";
+
+	// for (auto &d : _memoryNodes)
+	// 	d->OnDeactivate();
 }
 
 void Bus::_onActivate() 
 {
 	std::cout << "void Bus::_onActivate()\n";
+
+	for (auto &d : _memoryNodes)
+		d->OnActivate();
 }
 
 void Bus::_onUpdate() 
 {
 	// std::cout << "void Bus::_onUpdate()\n";
+
+	// Handle Timing
+    static std::chrono::time_point<std::chrono::system_clock> tp1 = std::chrono::system_clock::now();
+    static std::chrono::time_point<std::chrono::system_clock> tp2 = std::chrono::system_clock::now();
+
+    tp2 = std::chrono::system_clock::now();
+    std::chrono::duration<float> elapsedTime = tp2 - tp1;
+    tp1 = tp2;
+    // Our time per frame coefficient
+    float fElapsedTime = elapsedTime.count();
+    static float fLastElapsed = fElapsedTime;
+    static float fFrameTimer = fElapsedTime;
+
+    // count frames per second
+    // static int fps = 0;
+    static int frame_count = 0;
+    static float frame_acc = fElapsedTime;
+    frame_count++;
+    frame_acc += fElapsedTime;    
+
+    if (frame_acc > 1.0f + fElapsedTime)
+    {
+        frame_acc -= 1.0f;
+		_fps = frame_count;
+		frame_count = 0;
+    }    
+
+    // float elapsedtime = time since last frame
+    // OnUpdate(elapsedtime)     // call for each attached device
+    // s_memory->_onUpdate(fElapsedTime);  // for now zero elapsed time	
+	for (auto &d : _memoryNodes)
+		d->OnUpdate(fElapsedTime);	
 }
 
 void Bus::_onEvent() 
 {
 	// std::cout << "void Bus::_onEvent() \n";
+
+    SDL_Event evnt;
+    while (SDL_PollEvent(&evnt))
+    {
+        // OnEvent(evnt)
+		for (auto &d : _memoryNodes)
+			d->OnEvent(&evnt);		
+
+        switch (evnt.type) {
+
+		// handle default events SDL_QUIT and [ESC] quits
+        case SDL_QUIT:
+            // handling of close button
+            s_bIsRunning = false;
+            break;
+        
+        case SDL_KEYDOWN:
+            if (evnt.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
+            {
+                s_bIsRunning = false;
+                break;
+            }
+        }
+    }    
 }
 
 void Bus::_onRender() 
 {
 	// std::cout << "void Bus::_onRender()\n";
+
+	for (auto &d : _memoryNodes)
+		d->OnRender();
 }
 
 void Bus::_onPresent() 
 {
 	// std::cout << "void Bus::_onPresent()\n";
+
+	// only a present for Gfx
+	m_gfx->OnPresent();
 }
 
 void Bus::Error(const std::string& sErr)
@@ -223,7 +316,8 @@ Byte Bus::read(Word offset, bool debug)
     {
         if (offset - a->Base() < a->Size())
         {
-            Byte data = a->read(offset, debug);
+            // Byte data = a->read(offset, debug);
+            Byte data = a->read(offset - a->Base(), debug);
             return data;
         }
     }
@@ -236,7 +330,8 @@ void Bus::write(Word offset, Byte data, bool debug)
     {
         if (offset - a->Base() < a->Size())
         {
-            a->write(offset, data, debug);
+            // a->write(offset, data, debug);
+            a->write(offset - a->Base(), data, debug);
             return;
         }
     }    
@@ -309,11 +404,7 @@ void Bus::Run()
         }
         _onUpdate();
         _onEvent();
-        _onRender();  
-
-        // swap display buffers / present
-        // if (s_gfx)
-        //     SDL_RenderPresent(s_gfx->GetRenderer());      
+        _onRender();      
 		_onPresent();
 
 
@@ -321,7 +412,7 @@ void Bus::Run()
 		//IsRunning(false);
 		//IsDirty(true);
 
-		Bus::Error("Automated Stop");
+		// Bus::Error("Automated Stop");
 
     }
 	// shutdown the old environment

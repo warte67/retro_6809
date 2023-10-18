@@ -45,7 +45,7 @@ class Device
         // helpers
         void DisplayEnum(std::string sToken, Word ofs, std::string sComment);
 
-    private:
+    protected:
         std::string _deviceName = "??DEV??";
 
     protected:

@@ -9,6 +9,7 @@
 
 #include "types.h"
 #include "Device.h"
+#include "Gfx.h"
 
 //#include "Memory.h"		// integrate the memory class into the bus class
 							// and use static read and write:
@@ -25,6 +26,8 @@ class Bus
 		
 		inline static bool s_bIsRunning = true;
 		inline static bool s_bIsDirty = true;
+		Gfx* m_gfx = nullptr;
+		int _fps = 0;
 
 	public:
 		~Bus();									// destructor
@@ -42,8 +45,9 @@ class Bus
 		// Public Memory Stuff
 		Word Attach(Device* dev, Word size = 0);   // attach a user defined memory node
         void DumpMemoryMap();        
-        int ap() { return _lastAddress; }
-        void ap(int _addr)  { _lastAddress = _addr; }		
+        int ap() { return _lastAddress; }					// move to private as _ap() helper
+        void ap(int _addr)  { _lastAddress = _addr; }		// move to private as _ap() helper
+		int FPS() { return _fps; }
 
         Byte read(Word offset, bool debug = false);
         void write(Word offset, Byte data, bool debug = false);
@@ -63,9 +67,9 @@ class Bus
 		// Private Memory Stuff
         int _lastAddress = 0;
         std::vector<Device*> _memoryNodes;		
-};    // dev->DisplayEnum("",0, "");
-    // dev->DisplayEnum("",0xF000, "KERNEL ROM (4K bytes)");
-    // dev = new ROM("KERNEL_ROM");
+};    
+
+
 
 
 /////////////////////
