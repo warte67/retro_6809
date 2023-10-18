@@ -247,11 +247,17 @@ void Bus::_onUpdate()
         frame_acc -= 1.0f;
 		_fps = frame_count;
 		frame_count = 0;
+
+		// clean this up (get rid of the requirement for th GFX friend class Bus bullshit)
+		std::string sTitle = "Retro 6809";
+		sTitle += "  FPS: ";
+		sTitle += std::to_string(_fps);
+		if (m_gfx)
+			if (m_gfx->_window)
+				 SDL_SetWindowTitle(m_gfx->_window, sTitle.c_str());
     }    
 
-    // float elapsedtime = time since last frame
-    // OnUpdate(elapsedtime)     // call for each attached device
-    // s_memory->_onUpdate(fElapsedTime);  // for now zero elapsed time	
+	// update the devices
 	for (auto &d : _memoryNodes)
 		d->OnUpdate(fElapsedTime);	
 }
@@ -316,9 +322,11 @@ Byte Bus::read(Word offset, bool debug)
     {
         if (offset - a->Base() < a->Size())
         {
-            // Byte data = a->read(offset, debug);
-            Byte data = a->read(offset - a->Base(), debug);
-            return data;
+			if (debug)
+				if (offset - a->Base() < a->Size())
+					return a->_memory((Word)(offset - a->Base()));	
+
+            return a->read(offset, debug);
         }
     }
     return 0xCC;
@@ -330,8 +338,13 @@ void Bus::write(Word offset, Byte data, bool debug)
     {
         if (offset - a->Base() < a->Size())
         {
-            // a->write(offset, data, debug);
-            a->write(offset - a->Base(), data, debug);
+			if (debug)
+			{
+				if (offset - a->Base() < a->Size())
+					a->_memory((Word)(offset - a->Base()), data);	
+				return;
+			}
+            a->write(offset, data, debug);
             return;
         }
     }    

@@ -8,6 +8,8 @@
 
 class Gfx : public Device
 {
+	friend class Bus;
+	
     public:
         Gfx() {  _deviceName = "GFX_DEVICE"; }
         // Gfx(std::string sName) { _deviceName = sName; }
@@ -29,11 +31,12 @@ class Gfx : public Device
         virtual void write(Word offset, Byte data, bool debug = false);
 
 	protected:
-        // internals:
+        // SDL window stuff
         Uint32 _window_flags = 0;							
 		SDL_Window* _window = nullptr;
 		float _aspect = 1.0f;		// invalid default
 
+		// hardware registers
 		Byte _dsp_gres	= 0b10111111;	// default
 		Byte _dsp_gmode = 0b01001010;	// default
 };

@@ -9,34 +9,27 @@
 
 Byte Gfx::read(Word offset, bool debug )
 {
-	Byte data = Bus::Inst().read(offset);
-	if (debug)
-		return data;
 	if (offset == DSP_GRES)
 		return _dsp_gres;
 	if (offset == DSP_GMODE)
 		return _dsp_gres;
-	return data;
+	return 0xCC;	//data;
 }
 
 void Gfx::write(Word offset, Byte data, bool debug)
 {
-	if (debug)
-	{
-		Bus::Inst().write(offset, data);
-		return;
-	}
-
 	if (offset == DSP_GRES)
 	{
 		printf("Write to DSP_GRES: 0x%02x\n", data);
 		_dsp_gres = data;
+		Bus::Inst().write(DSP_GRES, _dsp_gres, true);
 		Bus::Inst().IsDirty(true);
 	}
 	if (offset == DSP_GMODE)
 	{
 		printf("Write to DSP_GMODE: 0x%02x\n", data);
 		_dsp_gres = data;
+		Bus::Inst().write(DSP_GRES, _dsp_gres, true);
 		Bus::Inst().IsDirty(true);
 	}
 }
@@ -107,6 +100,11 @@ void Gfx::OnActivate()
 
 	Bus& bus = Bus::Inst();
 
+
+	// testing
+	// bus.write(DSP_GRES, 0b10111111);
+
+
 	// move to gmode decoder function
 		// set up fullscreen/windowed
 		bool bFullscreen = false;
@@ -119,32 +117,34 @@ void Gfx::OnActivate()
 							SDL_WINDOW_FULLSCREEN_DESKTOP;  
 
 		// set up aspect
-		int asp = (bus.read(DSP_GRES) & 0b00110000) >> 4;
+		int asp = (bus.read(DSP_GRES) & 0x30) >> 4;
+		printf("asp: 0x%02x\n", asp);
 		switch (asp)
 		{
-			case 0b00:
+			case 0:
 				_aspect = 1.777778f;
 				break;
-			case 0b01:
+			case 1:
 				_aspect = 1.6f;
 				break;
-			case 0b10:
+			case 2:
 				_aspect = 1.454545f;
 				break;
-			case 0b11:
+			case 3:
 				_aspect = 1.333333f;
 				break;
 		}
-		int window_width = 1024;
-		int window_height = window_width / _aspect;
+		printf("Aspect: %f\n", _aspect);
+		float window_width = 1280.0f;
+		float window_height = window_width / _aspect;
 	// ENDIF: move to 
 	
 
     _window = SDL_CreateWindow("Retro_6809",
                                SDL_WINDOWPOS_CENTERED,
                                SDL_WINDOWPOS_CENTERED,
-                               window_width,
-                               window_height,
+                               (int)window_width,
+                               (int)window_height,
                                _window_flags);		
 
 
@@ -164,9 +164,8 @@ void Gfx::OnEvent(SDL_Event* evnt) {}
 void Gfx::OnUpdate(float fElapsedTime) 
 {
 	std::string sTitle = "Retro_6809    FPS: ";
-	if (_window)
-		printf("FPS: %d\n", Bus::Inst().FPS());
-	// SDL_SetWindowTitle(_window, sTitle.c_str());	
+
+	//SDL_SetWindowTitle(_window, "text");	 // crashes hard!
 }
 void Gfx::OnRender() {}
 
