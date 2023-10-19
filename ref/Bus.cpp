@@ -109,7 +109,7 @@ void Bus::_onetime_init()
     dev->DisplayEnum("",0, "");
     dev->DisplayEnum("",0xF000, "KERNEL ROM (4K bytes)");
     dev = new ROM("KERNEL_ROM");
-    s_memory->Attach(dev, 0x1000);      
+    s_memory->Attach(dev, 0x1000);      // ToDo: load hex file here
 
     dev->DisplayEnum("",0, "");
     dev->DisplayEnum("",0,"Hardware Interrupt Vectors:");

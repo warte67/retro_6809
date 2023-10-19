@@ -29,7 +29,7 @@ enum MEMMAP
   SCREEN_BUFFER = 0x0400,
     
     // Device Registers:
-      HDW_REGS = 0x2980,        // Begin Device Hardware Registers
+      HDW_REGS = 0x1C00,        // Begin Device Hardware Registers
     
       DSP_GRES = 0x1C00,        //  (Byte) Screen Resolution Register
     // DSP_GRES: BBRR.HHVV
@@ -80,8 +80,8 @@ enum MEMMAP
     //      G:0   = Reserved 
     //      H:0   = Reserved 
     
-    // 5118 ($13FE) bytes remaining for additional registers.
-      RESERVED = 0x1C02,
+    // 5117 ($13FD) bytes remaining for additional registers.
+      RESERVED = 0x1C03,
     
     // User RAM (32K)
       USER_RAM = 0x3000,
@@ -106,5 +106,4 @@ enum MEMMAP
     HARD_RESET = 0xFFFE,        // RESET Hardware Interrupt Vector
 };  // END: enum MEMMAP
 
-
-#endif // __MEMORY_MAP_H__
+#endif //__MEMORY_MAP_H__

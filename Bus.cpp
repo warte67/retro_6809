@@ -58,7 +58,7 @@ Bus::Bus()
 
 	// zero page 256 bytes	
     dev = new RAM("ZERO_PAGE");
-    addr = Attach(dev, 256 - 16);	
+    addr += Attach(dev, 256 - 16);	
 
 	// system stack 512 bytes
     dev = new RAM("SYSTEM_STACK");
@@ -79,7 +79,7 @@ Bus::Bus()
 	// start hardware registers
 	dev->DisplayEnum("",0, "");
     dev->DisplayEnum("",0, "Device Registers:");
-    dev->DisplayEnum("HDW_REGS", 0x2980, "Begin Device Hardware Registers");
+    dev->DisplayEnum("HDW_REGS", addr, "Begin Device Hardware Registers");
 
 
 

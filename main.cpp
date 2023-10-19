@@ -2,6 +2,9 @@
 //
 // retro_6809 main.cpp
 //
+// Notes:  remember to open an extra list window use
+//       chord:  CTRL-K then O
+//
 ////////////////////
 
 #include <iostream>
