@@ -10,14 +10,14 @@
 int main(int argc, char* argv[])
 {	
 	// clear screen using shell. (Yeah, I know. Whatever!)
-	if (false)	
+	if (true)	
 	{
 		#ifdef __linux__		// LINUX
 			system("clear");
 		#endif
-		#ifdef _WIN32		// WINDOWS
-			system("cls");
-		#endif
+		//	#ifdef _WIN32		// WINDOWS
+		//		system("cls");
+		//	#endif
 		// __unix__		// Unix (Linux, *BSD, but not Mac OS X)
 		// __APPLE__	// Mac OS
 		// __FreeBSD__
