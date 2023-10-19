@@ -12,7 +12,7 @@ class Gfx : public Device
 	
     public:
         Gfx() {  _deviceName = "GFX_DEVICE"; }
-        // Gfx(std::string sName) { _deviceName = sName; }
+        //Gfx(std::string sName) { _deviceName = sName; }
         // virtual ~Device() {}
 
         // virtuals
@@ -60,14 +60,13 @@ class Gfx : public Device
 
 		// hardware registers
 		Byte _dsp_gres	= 0b11111111;	// defaults
-
-		Byte _dsp_ext = 0b01001001;	// defaults
+		Byte _dsp_ext = 0b01001001;	    // defaults
+        Byte _dsp_err = 0;          
 	
 	private:
 		// helpers
 		void _decode_dsp_gres();
         void _decode_dsp_ext();
-
 };
 
 
@@ -110,5 +109,14 @@ class Gfx : public Device
     //     G:0   = Fullscreen Enabled( emulator only ) 
     //     G:1   = Windowed Enabled ( emulator only ) 
 
+    // DSP_ERR: ABCD.EFGH
+    //      A:0   = Standard Buffer Overflow 
+    //      B:0   = Extended Buffer Overflow 
+    //      C:0   = Reserved 
+    //      D:0   = Reserved 
+    //      E:0   = Reserved 
+    //      F:0   = Reserved 
+    //      G:0   = Reserved 
+    //      H:0   = Reserved 
 
 

@@ -13,6 +13,12 @@ Byte Gfx::read(Word offset, bool debug )
 		return _dsp_gres;
 	if (offset == DSP_EXT)
 		return _dsp_ext;
+	if (offset == DSP_ERR)
+	{
+		Byte err = _dsp_err;
+		_dsp_err = 0;			// reset the error when read
+		return err;
+	}
 	return 0xCC;	//data;
 }
 
@@ -20,17 +26,23 @@ void Gfx::write(Word offset, Byte data, bool debug)
 {
 	if (offset == DSP_GRES)
 	{
-		printf("Write to DSP_GRES: 0x%02x\n", data);
+		//printf("Write to DSP_GRES: 0x%02x\n", data);
 		_dsp_gres = data;
 		Bus::Inst().write(DSP_GRES, _dsp_gres, true);
 		Bus::Inst().IsDirty(true);
 	}
 	if (offset == DSP_EXT)
 	{
-		printf("Write to DSP_EXT: 0x%02x\n", data);
+		//printf("Write to DSP_EXT: 0x%02x\n", data);
 		_dsp_ext = data;
 		Bus::Inst().write(DSP_EXT, _dsp_ext, true);
 		Bus::Inst().IsDirty(true);
+	}
+	if (offset == DSP_ERR)
+	{
+		// printf("Write to DSP_ERR: 0x%02x\n", data);
+		_dsp_err = data;
+		Bus::Inst().write(DSP_ERR, _dsp_err, true);
 	}
 }
 
@@ -81,6 +93,19 @@ Word Gfx::OnAttach(Word nextAddr)
     DisplayEnum("", 0, "     B:0   = Fullscreen Enabled( emulator only ) ");
     DisplayEnum("", 0, "     B:1   = Windowed Enabled ( emulator only ) ");
     nextAddr++;
+
+    DisplayEnum("", 0, "");
+    DisplayEnum("DSP_ERR", nextAddr, " (Byte) Display Sub-System Error Code Register");
+    DisplayEnum("", 0, "DSP_ERR: ABCD.EFGH");
+    DisplayEnum("", 0, "     A:0   = Standard Buffer Overflow ");
+    DisplayEnum("", 0, "     B:0   = Extended Buffer Overflow ");
+    DisplayEnum("", 0, "     C:0   = Reserved ");
+    DisplayEnum("", 0, "     D:0   = Reserved ");
+    DisplayEnum("", 0, "     E:0   = Reserved ");
+    DisplayEnum("", 0, "     F:0   = Reserved ");
+    DisplayEnum("", 0, "     G:0   = Reserved ");
+    DisplayEnum("", 0, "     H:0   = Reserved ");
+	nextAddr++;
 
 	// add more gfx registers here
 	// ....
@@ -377,6 +402,9 @@ void Gfx::_decode_dsp_gres()
 		d &= 0x3f;
 		d |= ((_std_bpp)-1) << 6;
 		bus.write(DSP_GRES, d, true);
+		// set the error bit
+		d = bus.read(DSP_ERR) | 0x80;
+		bus.write(DSP_ERR, d);
 	}
 
 	// bpp error buffer too big
@@ -413,8 +441,7 @@ void Gfx::_decode_dsp_gres()
 	printf("  Real Width: %3.2f\n", real_width);
 	printf("  Real Height: %3.2f\n", real_height);
 	printf("  Standard Graphics BPP: %d\n", _std_bpp);
-	printf("  Buffer Size: %3.2fK\n", req_buffer_size / 1024.0f);
-	
+	printf("  Buffer Size: %3.2fK\n", req_buffer_size / 1024.0f);	
 }
 
 
