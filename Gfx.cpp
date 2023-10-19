@@ -206,9 +206,9 @@ void Gfx::OnEvent(SDL_Event* evnt)
 
 void Gfx::OnUpdate(float fElapsedTime) 
 {
-	// clear the window    
+	// clear the window to the border color
     SDL_SetRenderTarget(_renderer, NULL);
-	SDL_SetRenderDrawColor(_renderer, 16, 16, 16, 255);	// border color
+	SDL_SetRenderDrawColor(_renderer, 32, 32, 32, 255);	// border color
     SDL_RenderClear(_renderer);
 
 	// fill extended buffer with noise for testing
@@ -241,6 +241,7 @@ void Gfx::OnUpdate(float fElapsedTime)
 	}
 	else
 	{
+		// clear the display to solid color
 		SDL_SetRenderTarget(_renderer, _render_target);
 		SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
 		SDL_RenderClear(_renderer);
