@@ -202,10 +202,10 @@ void Gfx::OnUpdate(float fElapsedTime)
 				Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));		// because data size is two bytes 
 
 				*dst = ( 
-					0xF000	|		// alpha
-					(std::rand() % 0xF) << 8 |
-					(std::rand() % 0xF) << 4 |
-					(std::rand() % 0xF)
+					0xF000	|							// alpha
+					(std::rand() % 0xF) << 8 |			// red
+					(std::rand() % 0xF) << 4 |			// green
+					(std::rand() % 0xF)					// blue
 				);    
 			}
 			SDL_UnlockTexture(_ext_texture);
