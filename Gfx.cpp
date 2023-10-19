@@ -185,7 +185,7 @@ void Gfx::OnUpdate(float fElapsedTime)
 	SDL_SetRenderDrawColor(_renderer, 16, 16, 16, 255);	// border color
     SDL_RenderClear(_renderer);
 
-	// fill extended buffer with noise
+	// fill extended buffer with noise for testing
 	if (_extended_graphics_enable)
 	{
 		void *pixels;
