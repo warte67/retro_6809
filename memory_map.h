@@ -33,41 +33,41 @@ enum MEMMAP
     
       DSP_GRES = 0x1C00,        //  (Byte) Screen Resolution Register
     // DSP_GRES: BBRR.HHVV
-    //     BB:00 = Extended Graphics 1-bpp (2-color mode)
-    //     BB:01 = Extended Graphics 2-bpp (4-color mode)
-    //     BB:10 = Extended Graphics 4-bpp (16-color mode)
-    //     BB:11 = Extended Graphics 8-bpp (256-color mode)
+    //     BB:00 = Standard Graphics 1-bpp (2-color mode)
+    //     BB:01 = Standard Graphics 2-bpp (4-color mode)
+    //     BB:10 = Standard Graphics 4-bpp (16-color mode)
+    //     BB:11 = Standard Graphics 8-bpp (256-color mode)
     //     RR:00 = 16:9  aspect (1.777778)
     //     RR:01 = 16:10 aspect (1.600000)
     //     RR:10 = 16:11 aspect (1.454545)
     //     RR:11 = 16:12 aspect (1.333333)
-    //     HH:00 = 1x Horizontal Multiplier
-    //     HH:01 = 2x Horizontal Multiplier
-    //     HH:10 = 3x Horizontal Multiplier
-    //     HH:11 = 4x Horizontal Multiplier
-    //     VV:00 = 1x Vertical Multiplier
-    //     VV:01 = 2x Vertical Multiplier
-    //     VV:10 = 3x Vertical Multiplier
-    //     VV:11 = 4x Vertical Multiplier
+    //     HH:00 = 4x Horizontal Multiplier
+    //     HH:01 = 3x Horizontal Multiplier
+    //     HH:10 = 2x Horizontal Multiplier
+    //     HH:11 = 1x Horizontal Multiplier
+    //     VV:00 = 4x Vertical Multiplier
+    //     VV:01 = 3x Vertical Multiplier
+    //     VV:10 = 2x Vertical Multiplier
+    //     VV:11 = 1x Vertical Multiplier
     
-     DSP_GMODE = 0x1C01,        //  (Byte) Graphics Mode Register
-    // DSP_GMODE: ABCD.EFGG
-    //     A:0 = VSYNC OFF
-    //     A:1 = VSYNC ON
-    //     B:0 = Fullscreen Enabled (emulator only)
-    //     B:1 = Windowed Enabled (emulator only)
-    //     C:0 = Extended Graphics DISABLED
-    //     C:1 = Extended Graphics ENABLED
-    //     D:0 = Extended Bitmap Mode Active
-    //     D:1 = Extended Tile Graphics Active
-    //     E:0 = Standard Text / Bitmap DISABLED
-    //     E:1 = Standard Text / Bitmap ENABLED
-    //     F:0 = Standard Text Mode ENABLED
-    //     F:1 = Standard Bitmap Mode ENABLED
-    //     GG:00 = Extended Graphics 1-bpp (2-colors)
-    //     GG:01 = Extended Graphics 2-bpp (4-colors)
-    //     GG:10 = Extended Graphics 4-bpp (16-colors)
-    //     GG:11 = Extended Graphics 8-bpp (256-colors)
+       DSP_EXT = 0x1C01,        //  (Byte) Extended Graphics Register
+    // DSP_EXT: AABC.DEFG
+    //      AA:00 = Extended Graphics 1bpp (2-color mode) 
+    //      AA:01 = Extended Graphics 2bpp (4-color mode) 
+    //      AA:10 = Extended Graphics 4bpp (16-color mode) 
+    //      AA:11 = Extended Graphics 4bpp (16-color mode) 
+    //      B:0   = Extended Graphics: DISABLED 
+    //      B:1   = Extended Graphics: ENABLED 
+    //      C:0   = Extended Mode: BITMAP
+    //      C:1   = Extended Mode: TILES
+    //      D:0   = Standard Graphics: DISABLED 
+    //      D:1   = Standard Graphics: ENABLED 
+    //      E:0   = Standard Display Mode: TEXT
+    //      E:1   = Standard Display Mode: BITMAP
+    //      F:0   = VSYNC OFF 
+    //      F:1   = VSYNC ON 
+    //      G:0   = Fullscreen Enabled( emulator only ) 
+    //      G:1   = Windowed Enabled ( emulator only ) 
     
     // 5118 ($13FE) bytes remaining for additional registers.
       RESERVED = 0x1C02,

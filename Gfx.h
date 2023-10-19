@@ -33,6 +33,8 @@ class Gfx : public Device
 	protected:
         // SDL window stuff	
 		const float _base_texture_width = 128.0f;	// 1024x768 basic screen timing
+       	const int std_buffer_size = 6 * 1024;       // standard buffer size
+
 		float _window_width = 1280.0f;;	
 		float _window_height = 0;			// invalid default
 		float _aspect = 1.0f;				// invalid default		
@@ -50,57 +52,63 @@ class Gfx : public Device
 		Byte _h_scan = 0;			// invalid default
 		Byte _v_scan = 0;			// invalid default
 		bool _vsync = false;
-		bool _fullscreen = false;
+		bool _windowed = false;
 		bool _extended_graphics_enable = false;
-		bool _extended_tilemode_enable = false;
-		bool _standard_graphics = false;	// i.e. the standard buffer
-		bool _standard_bitmap = false;		// 0:text, 1:graphics
+		bool _extended_display_mode = false;
+		bool _standard_graphics_enable = false; // invalid default
+		bool _standard_display_mode = false;		// 0:text, 1:graphics
 
 		// hardware registers
-		Byte _dsp_gres	= 0b11110101;	// default
-		Byte _dsp_gmode = 0b01101010;	// default
+		Byte _dsp_gres	= 0b11111111;	// defaults
+
+		Byte _dsp_ext = 0b01001001;	// defaults
 	
 	private:
 		// helpers
-		void _decode_gfx();
+		void _decode_dsp_gres();
+        void _decode_dsp_ext();
+
 };
 
 
 #endif //__GFX_H__
 
-    // TEST V4
     // DSP_GRES: BBRR.HHVV
-    //     BB:00 = Extended Graphics 1-bpp (2-color mode)
-    //     BB:01 = Extended Graphics 2-bpp (4-color mode)
-    //     BB:10 = Extended Graphics 4-bpp (16-color mode)
-    //     BB:11 = Extended Graphics 8-bpp (256-color mode)
-    //     RR:00 = 16:9  aspect (1.777778)
-    //     RR:01 = 16:10 aspect (1.600000)
-    //     RR:10 = 16:11 aspect (1.454545)
-    //     RR:11 = 16:12 aspect (1.333333)
-    //     HH:00 = 1x Horizontal Multiplier
-    //     HH:01 = 2x Horizontal Multiplier
-    //     HH:10 = 3x Horizontal Multiplier
-    //     HH:11 = 4x Horizontal Multiplier
-    //     VV:00 = 1x Vertical Multiplier
-    //     VV:01 = 2x Vertical Multiplier
-    //     VV:10 = 3x Vertical Multiplier
-    //     VV:11 = 4x Vertical Multiplier
+    //     BB:00 = Standard Graphics 1-bpp (2-color mode)	
+    //     BB:01 = Standard Graphics 2-bpp (4-color mode)	
+    //     BB:10 = Standard Graphics 4-bpp (16-color mode)	
+    //     BB:11 = Standard Graphics 8-bpp (256-color mode)	
+    //     RR:00 = 16 / 9  	Aspect:
+    //     RR:01 = 16 / 10	Aspect:
+    //     RR:10 = 16 / 11	Aspect:
+    //     RR:11 = 16 / 12	Aspect:
+    //     HH:00 = 4x Horizontal Overscan Multiplier
+    //     HH:01 = 3x Horizontal Overscan Multiplier
+    //     HH:10 = 2x Horizontal Overscan Multiplier
+    //     HH:11 = 1x Horizontal Overscan Multiplier
+    //     VV:00 = 4x Vertical Overscan Multiplier
+    //     VV:01 = 3x Vertical Overscan Multiplier
+    //     VV:10 = 2x Vertical Overscan Multiplier
+    //     VV:11 = 1x Vertical Overscan Multiplier
+
     
-    // DSP_GMODE: ABCD.EFGG
-    //     A:0 = VSYNC OFF
-    //     A:1 = VSYNC ON
-    //     B:0 = Fullscreen Enabled (emulator only)
-    //     B:1 = Windowed Enabled (emulator only)
-    //     C:0 = Extended Graphics DISABLED
-    //     C:1 = Extended Graphics ENABLED
-    //     D:0 = Extended Bitmap Mode Active
-    //     D:1 = Extended Tile Graphics Active
-    //     E:0 = Standard Graphics DISABLED
-    //     E:1 = Standard Graphics ENABLED
-    //     F:0 = Standard Text Mode ENABLED
-    //     F:1 = Standard Bitmap Mode ENABLED
-    //     GG:00 = Extended Graphics 1-bpp (2-colors)
-    //     GG:01 = Extended Graphics 2-bpp (4-colors)
-    //     GG:10 = Extended Graphics 4-bpp (16-colors)
-    //     GG:11 = Extended Graphics 8-bpp (256-colors)
+    // DSP_EXT: AABC.DEFG
+    //     AA:00 = Extended Graphics 1bpp (2-color mode) 
+    //     AA:01 = Extended Graphics 2bpp (4-color mode) 
+    //     AA:10 = Extended Graphics 4bpp (16-color mode) 
+    //     AA:11 = Extended Graphics 4bpp (16-color mode) 
+    //     B:0   = Extended Graphics: DISABLED 
+    //     B:1   = Extended Graphics: ENABLED 
+    //     C:0   = Extended Mode: BITMAP
+    //     C:1   = Extended Mode: TILES
+    //     D:0   = Standard Graphics: DISABLED 
+    //     D:1   = Standard Graphics: ENABLED 
+    //     E:0   = Standard Display Mode: Text
+    //     E:1   = Standard Display Mode: Bitmap
+    //     F:0   = VSYNC OFF 
+    //     F:1   = VSYNC ON 
+    //     G:0   = Fullscreen Enabled( emulator only ) 
+    //     G:1   = Windowed Enabled ( emulator only ) 
+
+
+
