@@ -196,16 +196,16 @@ void Gfx::OnUpdate(float fElapsedTime)
 		{
 			for (int t=0; t<1000; t++)
 			{
-				int x = random() % (_texture_width);
-				int y = random() % (_texture_height);
+				int x = std::rand() % (_texture_width);
+				int y = std::rand() % (_texture_height);
 
 				Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));		// because data size is two bytes 
 
 				*dst = ( 
 					0xF000	|		// alpha
-					(random() % 0xF) << 8 |
-					(random() % 0xF) << 4 |
-					(random() % 0xF)
+					(std::rand() % 0xF) << 8 |
+					(std::rand() % 0xF) << 4 |
+					(std::rand() % 0xF)
 				);    
 			}
 			SDL_UnlockTexture(_ext_texture);

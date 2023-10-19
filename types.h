@@ -8,6 +8,7 @@
 //#pragma comment(lib, "SDL2.lib")
 //#pragma comment(lib, "SDL2main.lib")
 
+
 #include <SDL2/SDL.h>
 #include <string>
 #include <vector>

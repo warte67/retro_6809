@@ -7,7 +7,7 @@
 #include <iostream>
 #include "Bus.h"
 
-int main()
+int main(int argc, char* argv[])
 {	
 	// clear screen using shell. (Yeah, I know. Whatever!)
 	if (false)	
