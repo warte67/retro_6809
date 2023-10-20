@@ -1,4 +1,8 @@
-                      (asm/kernel_f000.a):00001                 INCLUDE "memory_map.asm"
+                      (asm/kernel_f000.a):00001         ; kernel_f000.asm
+                      (asm/kernel_f000.a):00002         ;
+                      (asm/kernel_f000.a):00003         ;  ./asm/build.sh asm/kernel_f000
+                      (asm/kernel_f000.a):00004         ;
+                      (asm/kernel_f000.a):00005                 INCLUDE "memory_map.asm"
                       (   memory_map.asm):00001         ;  **********************************************
                       (   memory_map.asm):00002         ;  * Allocated 64k Memory Mapped System Symbols *
                       (   memory_map.asm):00003         ;  **********************************************
@@ -127,59 +131,59 @@
      FFFC             (   memory_map.asm):00126         HARD_NMI     = $FFFC    ; NMI Hardware Interrupt Vector
      FFFE             (   memory_map.asm):00127         HARD_RESET   = $FFFE    ; RESET Hardware Interrupt Vector
                       (   memory_map.asm):00128         ; END of definitions
-                      (asm/kernel_f000.a):00002         
-                      (asm/kernel_f000.a):00003                 org     $f000   
-                      (asm/kernel_f000.a):00004         
-F000                  (asm/kernel_f000.a):00005         start   
                       (asm/kernel_f000.a):00006         
-                      (asm/kernel_f000.a):00007         ; fill the screen
-F000 8600             (asm/kernel_f000.a):00008                 lda     #$00
-F002 8E0400           (asm/kernel_f000.a):00009                 ldx     #SCREEN_BUFFER
-F005                  (asm/kernel_f000.a):00010         lp1     
-F005 4C               (asm/kernel_f000.a):00011                 inca
-F006 A780             (asm/kernel_f000.a):00012                 sta     ,x+
-F008 BC1C00           (asm/kernel_f000.a):00013                 cmpx    STD_VID_MAX
-F00B 2FF8             (asm/kernel_f000.a):00014                 ble     lp1
-                      (asm/kernel_f000.a):00015         
-                      (asm/kernel_f000.a):00016         ; cycle the palette colors
-                      (asm/kernel_f000.a):00017         ;       lda     #0      
-                      (asm/kernel_f000.a):00018         ;lp2    sta     DSP_PAL_IDX
-                      (asm/kernel_f000.a):00019         ;       ldy     DSP_PAL_CLR
-                      (asm/kernel_f000.a):00020         ;       leay    256,y
-                      (asm/kernel_f000.a):00021         ;       sty     DSP_PAL_CLR
-                      (asm/kernel_f000.a):00022         ;       inca
-                      (asm/kernel_f000.a):00023         ;       bra     lp2
-                      (asm/kernel_f000.a):00024         
-                      (asm/kernel_f000.a):00025         ; increment the text glyph bitmaps
-                      (asm/kernel_f000.a):00026         ;       lda     #0
-                      (asm/kernel_f000.a):00027         ;lp4    sta     DSP_GLYPH_IDX
-                      (asm/kernel_f000.a):00028         ;       ldx     #DSP_GLYPH_DATA
-                      (asm/kernel_f000.a):00029         ;lp_b   rol     ,x+
-                      (asm/kernel_f000.a):00030         ;       cmpx    #DSP_GLYPH_DATA+8
-                      (asm/kernel_f000.a):00031         ;       blt     lp_b
-                      (asm/kernel_f000.a):00032         ;       inca
-                      (asm/kernel_f000.a):00033         ;       bra     lp4
-                      (asm/kernel_f000.a):00034         
-                      (asm/kernel_f000.a):00035         
-                      (asm/kernel_f000.a):00036         ; increment the characters on the screen
-F00D                  (asm/kernel_f000.a):00037         inc_screen
-F00D 8E0400           (asm/kernel_f000.a):00038                 ldx     #SCREEN_BUFFER
-F010                  (asm/kernel_f000.a):00039         lp3
-F010 6C80             (asm/kernel_f000.a):00040                 inc     ,x+
-F012 BC1C00           (asm/kernel_f000.a):00041                 cmpx    STD_VID_MAX
-F015 2FF9             (asm/kernel_f000.a):00042                 ble     lp3
-                      (asm/kernel_f000.a):00043         
-F017 20F4             (asm/kernel_f000.a):00044                 bra     inc_screen
-                      (asm/kernel_f000.a):00045         
-                      (asm/kernel_f000.a):00046         
+                      (asm/kernel_f000.a):00007                 org     $f000   
+                      (asm/kernel_f000.a):00008         
+F000                  (asm/kernel_f000.a):00009         start   
+                      (asm/kernel_f000.a):00010         
+                      (asm/kernel_f000.a):00011         ; fill the screen
+F000 8600             (asm/kernel_f000.a):00012                 lda     #$00
+F002 8E0400           (asm/kernel_f000.a):00013                 ldx     #SCREEN_BUFFER
+F005                  (asm/kernel_f000.a):00014         lp1     
+F005 4C               (asm/kernel_f000.a):00015                 inca
+F006 A780             (asm/kernel_f000.a):00016                 sta     ,x+
+F008 BC1C00           (asm/kernel_f000.a):00017                 cmpx    STD_VID_MAX
+F00B 2FF8             (asm/kernel_f000.a):00018                 ble     lp1
+                      (asm/kernel_f000.a):00019         
+                      (asm/kernel_f000.a):00020         ; cycle the palette colors
+                      (asm/kernel_f000.a):00021         ;       lda     #0      
+                      (asm/kernel_f000.a):00022         ;lp2    sta     DSP_PAL_IDX
+                      (asm/kernel_f000.a):00023         ;       ldy     DSP_PAL_CLR
+                      (asm/kernel_f000.a):00024         ;       leay    256,y
+                      (asm/kernel_f000.a):00025         ;       sty     DSP_PAL_CLR
+                      (asm/kernel_f000.a):00026         ;       inca
+                      (asm/kernel_f000.a):00027         ;       bra     lp2
+                      (asm/kernel_f000.a):00028         
+                      (asm/kernel_f000.a):00029         ; increment the text glyph bitmaps
+                      (asm/kernel_f000.a):00030         ;       lda     #0
+                      (asm/kernel_f000.a):00031         ;lp4    sta     DSP_GLYPH_IDX
+                      (asm/kernel_f000.a):00032         ;       ldx     #DSP_GLYPH_DATA
+                      (asm/kernel_f000.a):00033         ;lp_b   rol     ,x+
+                      (asm/kernel_f000.a):00034         ;       cmpx    #DSP_GLYPH_DATA+8
+                      (asm/kernel_f000.a):00035         ;       blt     lp_b
+                      (asm/kernel_f000.a):00036         ;       inca
+                      (asm/kernel_f000.a):00037         ;       bra     lp4
+                      (asm/kernel_f000.a):00038         
+                      (asm/kernel_f000.a):00039         
+                      (asm/kernel_f000.a):00040         ; increment the characters on the screen
+F00D                  (asm/kernel_f000.a):00041         inc_screen
+F00D 8E0400           (asm/kernel_f000.a):00042                 ldx     #SCREEN_BUFFER
+F010                  (asm/kernel_f000.a):00043         lp3
+F010 6C80             (asm/kernel_f000.a):00044                 inc     ,x+
+F012 BC1C00           (asm/kernel_f000.a):00045                 cmpx    STD_VID_MAX
+F015 2FF9             (asm/kernel_f000.a):00046                 ble     lp3
                       (asm/kernel_f000.a):00047         
-                      (asm/kernel_f000.a):00048         
-                      (asm/kernel_f000.a):00049                 org     $FFF0
-FFF0 0000             (asm/kernel_f000.a):00050                 fdb     $0000   ; HARD_RSRVD    Motorola RESERVED Hardware Interrupt Vector
-FFF2 0000             (asm/kernel_f000.a):00051                 fdb     $0000   ; HARD_SWI3     SWI3 Hardware Interrupt Vector
-FFF4 0000             (asm/kernel_f000.a):00052                 fdb     $0000   ; HARD_SWI2     SWI2 Hardware Interrupt Vector
-FFF6 0000             (asm/kernel_f000.a):00053                 fdb     $0000   ; HARD_FIRQ     FIRQ Hardware Interrupt Vector
-FFF8 0000             (asm/kernel_f000.a):00054                 fdb     $0000   ; HARD_IRQ      IRQ Hardware Interrupt Vector
-FFFA 0000             (asm/kernel_f000.a):00055                 fdb     $0000   ; HARD_SWI      SWI / SYS Hardware Interrupt Vector
-FFFC 0000             (asm/kernel_f000.a):00056                 fdb     $0000   ; HARD_NMI      NMI Hardware Interrupt Vector
-FFFE F000             (asm/kernel_f000.a):00057                 fdb     $F000   ; HARD_RESET    RESET Hardware Interrupt Vector
+F017 20F4             (asm/kernel_f000.a):00048                 bra     inc_screen
+                      (asm/kernel_f000.a):00049         
+                      (asm/kernel_f000.a):00050         
+                      (asm/kernel_f000.a):00051         
+                      (asm/kernel_f000.a):00052         
+                      (asm/kernel_f000.a):00053                 org     $FFF0
+FFF0 0000             (asm/kernel_f000.a):00054                 fdb     $0000   ; HARD_RSRVD    Motorola RESERVED Hardware Interrupt Vector
+FFF2 0000             (asm/kernel_f000.a):00055                 fdb     $0000   ; HARD_SWI3     SWI3 Hardware Interrupt Vector
+FFF4 0000             (asm/kernel_f000.a):00056                 fdb     $0000   ; HARD_SWI2     SWI2 Hardware Interrupt Vector
+FFF6 0000             (asm/kernel_f000.a):00057                 fdb     $0000   ; HARD_FIRQ     FIRQ Hardware Interrupt Vector
+FFF8 0000             (asm/kernel_f000.a):00058                 fdb     $0000   ; HARD_IRQ      IRQ Hardware Interrupt Vector
+FFFA 0000             (asm/kernel_f000.a):00059                 fdb     $0000   ; HARD_SWI      SWI / SYS Hardware Interrupt Vector
+FFFC 0000             (asm/kernel_f000.a):00060                 fdb     $0000   ; HARD_NMI      NMI Hardware Interrupt Vector
+FFFE F000             (asm/kernel_f000.a):00061                 fdb     $F000   ; HARD_RESET    RESET Hardware Interrupt Vector

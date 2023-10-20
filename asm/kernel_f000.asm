@@ -1,3 +1,7 @@
+; kernel_f000.asm
+;
+;  ./asm/build.sh asm/kernel_f000
+;
 	INCLUDE "memory_map.asm"
 
 	org	$f000	
