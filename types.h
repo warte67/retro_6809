@@ -18,6 +18,7 @@
 #define COMPILE_MEMORY_MAP      false
 #define MEMORY_MAP_OUTPUT_CPP   true
 
+
 // simple 6809 types
     #ifndef Byte
         #define Byte Uint8

@@ -58,15 +58,43 @@ class Gfx : public Device
 		bool _standard_graphics_enable = false; // invalid default
 		bool _standard_display_mode = false;		// 0:text, 1:graphics
 
+		// palette stuff
+        union PALETTE {
+            Word color;
+            struct {
+                Uint8 b : 4;
+                Uint8 g : 4;
+                Uint8 r : 4;
+                Uint8 a : 4;
+            };
+        };
+        Byte _dsp_pal_idx = 0x00;   // DSP_PAL_IDX
+        std::vector<PALETTE> _palette;
+	public:
+	    Uint8 red(Uint8 index) { Uint8 c = _palette[index].r;  return c; }
+        Uint8 grn(Uint8 index) { Uint8 c = _palette[index].g;  return c; }
+        Uint8 blu(Uint8 index) { Uint8 c = _palette[index].b;  return c; }
+        Uint8 alf(Uint8 index) { Uint8 c = _palette[index].a;  return c; }  
+
 		// hardware registers
-		Byte _dsp_gres	= 0b11110000;	// defaults
-		Byte _dsp_ext 	= 0b01101001;	// defaults
+	protected:
+		Word _std_vid_max = 0x1C00;		// [STD_VID_MAX]
+		Byte _dsp_gres	= 0b11010000;	// defaults
+		Byte _dsp_ext 	= 0b00011101;	// defaults
         Byte _dsp_err = 0;          
 	
 	private:
 		// helpers
 		void _decode_dsp_gres();
         void _decode_dsp_ext();
+
+		void _setPixel(int x, int y, Byte color_index, 	
+						SDL_Texture* _texture, bool bIgnoreAlpha = false);
+        void _setPixel_unlocked(void* pixels, int pitch, int x, int y, 
+								Byte color_index, bool bIgnoreAlpha = false);
+
+		void _display_standard();		// TEMPORARY
+		void _display_extended();		// TEMPORARY
 };
 
 #endif //__GFX_H__

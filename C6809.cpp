@@ -38,7 +38,7 @@ C6809::~C6809()
 
 void C6809::clock()
 {
-	printf("C6809::clock() -- PC:$%04X\n", PC);
+	// printf("C6809::clock() -- PC:$%04X\n", PC);
 
 	// if (debug)
 	if (true)

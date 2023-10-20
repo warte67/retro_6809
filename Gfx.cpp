@@ -19,6 +19,11 @@ Byte Gfx::read(Word offset, bool debug )
 		_dsp_err = 0;			// reset the error when read
 		return err;
 	}
+	if (offset == STD_VID_MAX)
+		return _std_vid_max >> 8;
+	if (offset == STD_VID_MAX+1)
+		return _std_vid_max & 0xFF;
+
 	return 0xCC;	//data;
 }
 
@@ -95,6 +100,10 @@ Word Gfx::OnAttach(Word nextAddr)
     nextAddr++;
 
     DisplayEnum("", 0, "");
+    DisplayEnum("STD_VID_MAX", nextAddr, " (Word) Standard Video Buffer Max");
+    nextAddr+=2;
+
+    DisplayEnum("", 0, "");
     DisplayEnum("DSP_ERR", nextAddr, " (Byte) Display Sub-System Error Code Register");
     DisplayEnum("", 0, "DSP_ERR: ABCD.EFGH");
     DisplayEnum("", 0, "     A:0   = Standard Buffer Overflow ");
@@ -107,16 +116,208 @@ Word Gfx::OnAttach(Word nextAddr)
     DisplayEnum("", 0, "     H:0   = Reserved ");
 	nextAddr++;
 
+
 	// add more gfx registers here
 	// ....
 
 	return nextAddr - old_addr;
 }
 
+void Gfx::OnInit() 
+{
+	// initialize the default color palette
+	if (_palette.size() == 0)
+	{
+		std::vector<PALETTE> ref = {
+			{ 0x0000 },		// 0: transparent black
+			{ 0xFFFF },		// 1: white
+			{ 0xF007 },		// 2: dk blue
+			{ 0xF600 },		// 5: dk red
+			{ 0xF140 },		// 4: dk green
+			{ 0xF840 },		// 3: brown
+			{ 0xF406 },		// 6: purple          
+			{ 0xF046 },		// 7: deep sea           	
+			{ 0xF555 },		// 8: gray
+			{ 0xF22F },		// 9: blue
+			{ 0xFd00 },		// A: red
+			{ 0xF4F6 },		// B: lt green
+			{ 0xFED0 },		// C: yellow
+			{ 0xF85b },		// D: Lt Purple
+			{ 0xF59f },		// E: lt sky
+			{ 0xF000 },		// F: black
+
+			// { 0xF057 },		// 4: dk cyan
+			// { 0xF050 },		// 3: dk green
+			// { 0xF607 },		// 6: dk magenta
+			// { 0xF650 },		// 7: brown			
+			// { 0xFAAA },		// 8: lt gray
+			// { 0xF666 },		// 9: dk gray
+			// { 0xF00F },		// A: blue
+			// { 0xF0F0 },		// B: green
+			// { 0xF0FF },		// C: cyan
+			// { 0xFF00 },		// D: red
+			// { 0xFF0F },		// E: magenta
+			// { 0xFFF0 },		// F: yellow
+
+
+			{ 0xF000 },		// N: opaque black
+			{ 0xFEEE },		// N: lt silver
+			{ 0xF999 },		// N: md silver
+			{ 0xF444 },		// N: dk silver
+			{ 0xF817 },		// N:
+			{ 0xFa35 },		// N:
+			{ 0xFc66 },		// N:
+			{ 0xFe94 },		// N: 
+			{ 0xFed0 },		// N: yellow
+			{ 0xF9d5 },		// N: 	
+			{ 0xF4d8 },		// N;
+			{ 0xF2cb },		// N:
+			{ 0xF0bc },		// N:
+			{ 0xF09c },		// N:
+			{ 0xF36b },		// N:
+			{ 0xF639 },		// N:
+		};
+        for (auto &p : ref)
+			_palette.push_back(p);        
+        // ToDo: define the rest of the color palette
+		for (int r = 0; r < 16; r++)
+		{
+			PALETTE ent = { 0x000f };
+			ent.r = r;
+            _palette.push_back(ent);
+		}        
+		for (int t = 0; t < 16; t++)
+		{
+			PALETTE ent = { 0x000f };
+			ent.g = t;
+			_palette.push_back(ent);
+		}
+		for (int t = 0; t < 16; t++)
+		{
+			PALETTE ent = { 0x000f };
+			ent.b = t;
+			_palette.push_back(ent);
+		}
+		for (int t = 0; t < 16; t++)
+		{
+			PALETTE ent = { 0x000f };
+			ent.r = t;
+			ent.b = t;
+			_palette.push_back(ent);
+		}
+		for (int t = 0; t < 16; t++)
+		{
+			PALETTE ent = { 0x000f };
+			ent.r = t;
+			ent.g = t;
+			_palette.push_back(ent);
+		}
+		for (int t = 0; t < 16; t++)
+		{
+			PALETTE ent = { 0x000f };
+			ent.r = t;
+			ent.g = t;
+			ent.b = t;
+			_palette.push_back(ent);
+		}
+		for (int t = 0; t < 16; t++)
+		{
+			PALETTE ent = { 0x000f };
+			ent.r = 15 - t;
+			ent.b = t;
+			_palette.push_back(ent);
+		}
+		for (int t = 0; t < 16; t++)
+		{
+			PALETTE ent = { 0x000f };
+			ent.r = 15 - t;
+			ent.g = t;
+			_palette.push_back(ent);
+		}
+		for (int t = 0; t < 16; t++)
+		{
+			PALETTE ent = { 0x000f };
+			ent.g = 15 - t;
+			ent.b = t;
+			_palette.push_back(ent);
+		}
+		for (int t = 0; t < 16; t++)
+		{
+			PALETTE ent = { 0x000f };
+			ent.r = 15 - t;
+			ent.g = 15 - t;
+			ent.b = t;
+			_palette.push_back(ent);
+		}
+		for (int t = 0; t < 16; t++)
+		{
+			PALETTE ent = { 0x000f };
+			ent.r = 15 - t;
+			ent.g = t;
+			ent.b = 15 - t;
+			_palette.push_back(ent);
+		}
+		for (int t = 0; t < 16; t++)
+		{
+			PALETTE ent = { 0x000f };
+			ent.r = t;
+			ent.g = 15 - t;
+			ent.b = 15 - t;
+			_palette.push_back(ent);
+		}
+		for (int t = 0; t < 16; t++)
+		{
+			PALETTE ent = { 0x000f };
+			ent.r = 15 - t;
+			ent.g = t;
+			ent.b = 15 - t;
+			_palette.push_back(ent);
+		}
+		for (int t = 0; t < 16; t++)
+		{
+			PALETTE ent = { 0x000f };
+			ent.r = 15 - t;
+			ent.g = 15 - t;
+			ent.b = t;
+			_palette.push_back(ent);
+		}
+        // Temp: Fill the rest of the palette with black
+		PALETTE blank { 0 };
+		while (_palette.size() < 256)
+			_palette.push_back(blank);
+	}  
+
+    // // clear the graphics buffer
+    // for (int t=0; t<65536; t++)
+    //     _gfxDisplayBuffer[t] = 0;
+
+    // // clear the text buffer to white on black spaces
+    // for (int t=SCREEN_BUFFER; t<SCREEN_BUFFER+0x1200; t+=2)
+    // {
+    //     Bus::write(t, 32);        
+    //     Bus::write(t+1, 0xF0);       
+    // }    
+    // // initialize the font glyph buffer
+    // for (int i=0; i<256; i++)
+    //     for (int r=0; r<8; r++)
+    //         _dsp_glyph_data[i][r] = font8x8_system[i][r];
+
+    // // output a test string
+    // std::string sMessage = "Hello World...";
+    // Word addr = _dsp_tbase;
+    // for (auto &a : sMessage)
+    // {
+    //     Bus::write(addr, a);
+    //     Bus::write(addr+1, 0xF0);		// F: yellow
+    //     addr+=2;
+    // }
+    // Bus::write(_dsp_tbase+3, 0xE4);
+    // Bus::write(_dsp_tbase+5, 0xA2);
+}
 
 
 
-void Gfx::OnInit() {}
+
 void Gfx::OnQuit() {}
 
 void Gfx::OnActivate() 
@@ -211,41 +412,13 @@ void Gfx::OnUpdate(float fElapsedTime)
 	SDL_SetRenderDrawColor(_renderer, 32, 32, 32, 255);	// border color
     SDL_RenderClear(_renderer);
 
-	// fill extended buffer with noise for testing
-	if (_extended_graphics_enable)
-	{
-		void *pixels;
-		int pitch;
-		if (SDL_LockTexture(_ext_texture, NULL, &pixels, &pitch) < 0)
-			Bus::Error("Failed to lock texture: ");	
-		else
-		{
-			for (int t=0; t<1000; t++)
-			{
-				int x = std::rand() % (_texture_width);
-				int y = std::rand() % (_texture_height);
+	// do nothing extra anymore
+	// video buffer is being updated via asm
+	// the 6809 CPU should nowbe working
 
-				Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));		// because data size is two bytes 
-
-				*dst = ( 
-					0xF000	|							// alpha
-					(std::rand() % 0xF) << 8 |			// red
-					(std::rand() % 0xF) << 4 |			// green
-					(std::rand() % 0xF)					// blue
-				);    
-			}
-			SDL_UnlockTexture(_ext_texture);
-		}
-		SDL_SetRenderTarget(_renderer, _render_target);
-		SDL_RenderCopy(_renderer, _ext_texture, NULL, NULL);
-	}
-	else
-	{
-		// clear the display to solid color
-		SDL_SetRenderTarget(_renderer, _render_target);
-		SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
-		SDL_RenderClear(_renderer);
-	}
+	// update the display textures
+	_display_extended();
+	_display_standard();
 }
 void Gfx::OnRender() 
 {
@@ -279,73 +452,6 @@ void Gfx::OnPresent()
 	SDL_RenderPresent(_renderer);  	
 }
 
-
-// void Gfx::_setPixel(int x, int y, Byte color_index, bool bIgnoreAlpha)
-// {
-
-//     void *pixels;
-//     int pitch;
-//     Uint8 clr_index = 0;    
-//     if (SDL_LockTexture(_bg_texture, NULL, &pixels, &pitch) < 0) {
-//         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't lock texture: %s\n", SDL_GetError());
-//         Bus::Error("");
-//     }
-//     else
-//     {
-//         _setPixel_unlocked(pixels, pitch, x, y, color_index, bIgnoreAlpha);
-//         SDL_UnlockTexture(_bg_texture);
-//     }    
-// }
-
-// void Gfx::_setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_index, bool bIgnoreAlpha)
-// {
-//     //Uint32 *dst = (Uint32*)((Uint8*)pixels + (y * pitch) + (x*4));    // why is this (x*4) and not simply x?
-//     Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));		// because data size is two bytes 
-//     bool ALPHA_BLEND = true;
-//     if (ALPHA_BLEND)
-//     {       
-//         // int ret = ((p1 * (256-a))) + (p2 * (a+1)) >> 8;
-//         Uint16 pixel = *dst;	// 0xARGB
-// 		Byte r1 = (pixel & 0x0f00) >> 8;
-// 		Byte g1 = (pixel & 0x00f0) >> 4;
-// 		Byte b1 = (pixel & 0x000f) >> 0;
-// 		//
-//         Byte a2 = alf(color_index);
-//         Byte r2 = red(color_index);
-//         Byte g2 = grn(color_index);
-//         Byte b2 = blu(color_index);
-//         if (bIgnoreAlpha)
-//             a2 = 15;
-// 		//
-//         Byte r = ((r1 * (16-a2))) + (r2 * (a2+1)) >> 4;
-//         Byte g = ((g1 * (16-a2))) + (g2 * (a2+1)) >> 4;
-//         Byte b = ((b1 * (16-a2))) + (b2 * (a2+1)) >> 4;
-
-//         if (alf(color_index) != 0 || bIgnoreAlpha)
-//         {
-//             *dst = (
-//                 0xF000 | 
-//                 (r<<8) | 
-//                 (g<<4) | 
-//                 (b)
-//             );          
-// 		}	
-//     }
-//     else
-//     {        
-//         // simple non-zero alpha channel
-//         if (alf(color_index) != 0 || bIgnoreAlpha)
-//         {
-//             *dst = 
-//             (
-//                 0xF000 |
-//                 (red(color_index)<<8) |
-//                 (grn(color_index)<<4) |
-//                 blu(color_index)
-//             );    
-//         }
-//     }    
-// }
 
 
 
@@ -383,11 +489,21 @@ void Gfx::_decode_dsp_gres()
 		case 3: _std_bpp = 8; break;	// 256-colors
 	}
 	// Adjust to fit within Standard Buffer
+	auto get_div = [](Byte bpp) {
+		switch (bpp)
+		{
+			case 1: return 8;
+			case 2: return 4;
+			case 4: return 2;
+			case 8: return 1;
+		}	
+		return 8;
+	};
 	float real_width = _base_texture_width * (5-_h_scan);
 	float real_height = (_base_texture_width / _aspect) * (5-_v_scan);	
-	float div = 9 - _std_bpp;		// bpp divisor
+	//float div = 9 - _std_bpp;		// bpp divisor
+	float div = get_div(_std_bpp);
 	float req_buffer_size = (real_width * real_height) / div;
-
 	if (req_buffer_size > std_buffer_size)
 		printf ("    ERROR: Buffer Overrun... Making Adjustments\n");
 	while (req_buffer_size > std_buffer_size)
@@ -395,7 +511,8 @@ void Gfx::_decode_dsp_gres()
 		_std_bpp >>= 1;					// _std_bpp changed
 		if (_std_bpp == 0) break;
 		printf("    -->_std_bpp: %d\n", _std_bpp);
-		div = 9 - _std_bpp;		// bpp divisor
+		//div = 9 - _std_bpp;		// bpp divisor
+		div = get_div(_std_bpp);
 		req_buffer_size = (real_width * real_height) / div;
 
 		// ENCODE THE CHANGES (_std_bpp: XX00.0000)
@@ -419,7 +536,8 @@ void Gfx::_decode_dsp_gres()
 			_v_scan++;					// _v_scan changed
 			real_height = (_base_texture_width / _aspect) * (5-_v_scan);	
 			printf("    -->real_height: %4.2f\n", real_height);
-			div = 9 - _std_bpp;		// bpp divisor
+			//div = 9 - _std_bpp;		// bpp divisor
+			div = get_div(_std_bpp);
 			req_buffer_size = (real_width * real_height) / div;	
 
 			// ENCODE THE CHANGES (_v_scan: 0000.00XX)
@@ -434,6 +552,9 @@ void Gfx::_decode_dsp_gres()
 	_texture_width = (int)real_width;
 	_texture_height = (int)real_height;
 
+	// [DSP_VID_MAX] video buffer end
+	_std_vid_max = (SCREEN_BUFFER + (int)req_buffer_size)-1;
+
 	// output debugging text
 	printf("DSP_GRES decoded:\n");
 	printf("  Aspect Ratio: %f\n", _aspect);
@@ -443,6 +564,7 @@ void Gfx::_decode_dsp_gres()
 	printf("  Real Height: %3.2f\n", real_height);
 	printf("  Standard Graphics BPP: %d\n", _std_bpp);
 	printf("  Buffer Size: %3.2fK\n", req_buffer_size / 1024.0f);	
+	printf("  Buffer Top: $%04X\n", read_word(STD_VID_MAX));
 }
 
 
@@ -511,4 +633,186 @@ void Gfx::_decode_dsp_ext()
 	(_vsync) ? printf("(ON)\n") : printf("(OFF)\n");
 	printf("  Emulation Mode: %d ", _windowed);
 	(_windowed) ? printf("(WINDOWED)\n") : printf("(FULLSCREEN)\n");
+}
+
+
+// helpers
+void Gfx::_display_standard()
+{
+	if (_palette.size()==0)
+		return;
+	// STILL JUST TESTING, NEED PALETTE COLORS
+	if (_standard_graphics_enable)
+	{
+		Bus& bus = Bus::Inst();				
+		Word pixel_index = SCREEN_BUFFER;
+		void *pixels;
+		int pitch;
+		if (SDL_LockTexture(_std_texture, NULL, &pixels, &pitch) < 0)
+			Bus::Error("Failed to lock texture: ");	
+		else
+		{
+			for (int y = 0; y < _texture_height; y++)
+			{
+				for (int x = 0; x < _texture_width; )
+				{
+					// 256 color mode
+					if (_std_bpp == 8)
+					{
+						Byte index = bus.read(pixel_index++);
+						_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+					}
+					// 16 color mode
+					else if (_std_bpp == 4)
+					{
+						Byte data = bus.read(pixel_index++);
+						Byte index = (data >> 4);
+						_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+						index = (data & 0x0f);
+						_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+					}
+					// 4 color mode
+					else if (_std_bpp == 2)
+					{
+						Byte data = bus.read(pixel_index++);
+						Byte index = (data >> 6) & 0x03;
+						_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+						index = (data >> 4) & 0x03;
+						_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+						index = (data >> 2) & 0x03;
+						_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+						index = (data >> 0) & 0x03;
+						_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+					}
+					// 2 color mode
+					else if (_std_bpp == 1)
+					{
+						Byte data = bus.read(pixel_index++);
+						Byte index = (data >> 7) & 1;
+						_setPixel_unlocked(pixels, pitch, x++, y, index, true); 
+						index = (data >> 6) & 1;
+						_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+						index = (data >> 5) & 1;
+						_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+						index = (data >> 4) & 1;
+						_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+						index = (data >> 3) & 1;
+						_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+						index = (data >> 2) & 1;
+						_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+						index = (data >> 1) & 1;
+						_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+						index = (data >> 0) & 1;
+						_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+					}
+				}
+			}
+			SDL_UnlockTexture(_std_texture); 
+		}
+		SDL_SetRenderTarget(_renderer, _render_target);
+		SDL_RenderCopy(_renderer, _std_texture, NULL, NULL);
+	}
+}
+void Gfx::_display_extended()
+{
+	// STILL JUST TESTING, NEED PALETTE COLORS
+	// fill extended buffer with noise for testing
+	if (_extended_graphics_enable)
+	{
+		void *pixels;
+		int pitch;
+		if (SDL_LockTexture(_ext_texture, NULL, &pixels, &pitch) < 0)
+			Bus::Error("Failed to lock texture: ");	
+		else
+		{
+			for (int t=0; t<1000; t++)
+			{
+				int x = std::rand() % (_texture_width);
+				int y = std::rand() % (_texture_height);
+				Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));		// because data size is two bytes 
+				*dst = ( 
+					0xF000	|							// alpha
+					(std::rand() % 0xF) << 8 |			// red
+					(std::rand() % 0xF) << 4 |			// green
+					(std::rand() % 0xF)					// blue
+				);    
+			}
+			SDL_UnlockTexture(_ext_texture);
+		}
+		SDL_SetRenderTarget(_renderer, _render_target);
+		SDL_RenderCopy(_renderer, _ext_texture, NULL, NULL);
+	}
+	else
+	{
+		// clear the display to solid color
+		SDL_SetRenderTarget(_renderer, _render_target);
+		SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
+		SDL_RenderClear(_renderer);
+	}
+}
+
+void Gfx::_setPixel(int x, int y, Byte color_index, 
+						SDL_Texture* _texture, bool bIgnoreAlpha)
+{
+    void *pixels;
+    int pitch;
+    Uint8 clr_index = 0;    
+    if (SDL_LockTexture(_texture, NULL, &pixels, &pitch) < 0) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't lock texture: %s\n", SDL_GetError());
+        Bus::Error("");
+    }
+    else
+    {
+        _setPixel_unlocked(pixels, pitch, x, y, color_index, bIgnoreAlpha);
+        SDL_UnlockTexture(_texture);
+    }    
+}
+
+void Gfx::_setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_index, bool bIgnoreAlpha)
+{
+    Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));		// because data size is two bytes 
+    bool ALPHA_BLEND = true;
+    if (ALPHA_BLEND)
+    {       
+        // int ret = ((p1 * (256-a))) + (p2 * (a+1)) >> 8;
+        Uint16 pixel = *dst;	// 0xARGB
+		Byte r1 = (pixel & 0x0f00) >> 8;
+		Byte g1 = (pixel & 0x00f0) >> 4;
+		Byte b1 = (pixel & 0x000f) >> 0;
+		//
+        Byte a2 = alf(color_index);
+        Byte r2 = red(color_index);
+        Byte g2 = grn(color_index);
+        Byte b2 = blu(color_index);
+        if (bIgnoreAlpha)
+            a2 = 15;
+		//
+        Byte r = ((r1 * (16-a2))) + (r2 * (a2+1)) >> 4;
+        Byte g = ((g1 * (16-a2))) + (g2 * (a2+1)) >> 4;
+        Byte b = ((b1 * (16-a2))) + (b2 * (a2+1)) >> 4;
+
+        if (alf(color_index) != 0 || bIgnoreAlpha)
+        {
+            *dst = (
+                0xF000 | 
+                (r<<8) | 
+                (g<<4) | 
+                (b)
+            );          
+		}	
+    }
+    else
+    {        
+        // simple non-zero alpha channel
+        if (alf(color_index) != 0 || bIgnoreAlpha)
+        {
+            *dst = 
+            (
+                0xF000 |
+                (red(color_index)<<8) |
+                (grn(color_index)<<4) |
+                blu(color_index)
+            );    
+        }
+    }    
 }

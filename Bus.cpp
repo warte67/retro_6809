@@ -176,7 +176,7 @@ Bus::Bus()
     _onInit();
 
 	// load up the memory map
-	load_hex("asm/test.hex");	
+	load_hex("asm/kernel_f000.hex");	
 	// printf("BUS::read(0xFFFE): 0x%04X\n", read_word(0xFFFE));
 
 	// Install the CPU
@@ -228,24 +228,24 @@ void Bus::_onInit()
 {
 	std::cout << "void Bus::_onInit()\n";
 
-	// for (auto &d : _memoryNodes)
-	// 	d->OnInit();
+	for (auto &d : _memoryNodes)
+		d->OnInit();
 }
 
 void Bus::_onQuit() 
 {
 	std::cout << "void Bus::_onQuit()\n";
 
-	// for (auto &d : _memoryNodes)
-	// 	d->OnQuit();
+	for (auto &d : _memoryNodes)
+		d->OnQuit();
 }
 
 void Bus::_onDeactivate() 
 {
 	std::cout << "void Bus::_onDeactivate()\n";
 
-	// for (auto &d : _memoryNodes)
-	// 	d->OnDeactivate();
+	for (auto &d : _memoryNodes)
+		d->OnDeactivate();
 }
 
 void Bus::_onActivate() 

@@ -13,7 +13,7 @@
 int main(int argc, char* argv[])
 {	
 	// clear screen using shell. (Yeah, I know. Whatever!)
-	if (true)	
+	if (false)	
 	{
 		#ifdef __linux__		// LINUX
 			system("clear");
