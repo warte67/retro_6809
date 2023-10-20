@@ -31,40 +31,76 @@ Byte Gfx::read(Word offset, bool debug )
 
 void Gfx::write(Word offset, Byte data, bool debug)
 {
-	if (offset == DSP_GRES)
+	switch (offset)
 	{
-		//printf("Write to DSP_GRES: 0x%02x\n", data);
-		_dsp_gres = data;
-		Bus::Inst().write(DSP_GRES, _dsp_gres, true);
-		Bus::Inst().IsDirty(true);
+		case DSP_GRES: 	{
+			_dsp_gres = data;
+			Bus::Inst().write(DSP_GRES, _dsp_gres, true);
+			Bus::Inst().IsDirty(true);		
+			return;	
+		}
+		case DSP_EXT:	{
+			_dsp_ext = data;
+			Bus::Inst().write(DSP_EXT, _dsp_ext, true);
+			Bus::Inst().IsDirty(true);
+			return;
+		}
+		case DSP_ERR:	{
+			_dsp_err = data;
+			Bus::Inst().write(DSP_ERR, _dsp_err, true);
+			return;
+		}
+		// color palete registers
+		case DSP_PAL_IDX:	{ _dsp_pal_idx = data;  return; }
+		case DSP_PAL_CLR:	{
+			Word c = _palette[_dsp_pal_idx].color & 0xff00;
+			_palette[_dsp_pal_idx].color = c | data;
+			return;
+		}
+		case DSP_PAL_CLR+1:	{
+			Word c = _palette[_dsp_pal_idx].color & 0x00ff;
+			_palette[_dsp_pal_idx].color = c | ((Word)data << 8);
+			return; 
+		}
 	}
-	if (offset == DSP_EXT)
-	{
-		//printf("Write to DSP_EXT: 0x%02x\n", data);
-		_dsp_ext = data;
-		Bus::Inst().write(DSP_EXT, _dsp_ext, true);
-		Bus::Inst().IsDirty(true);
-	}
-	if (offset == DSP_ERR)
-	{
-		// printf("Write to DSP_ERR: 0x%02x\n", data);
-		_dsp_err = data;
-		Bus::Inst().write(DSP_ERR, _dsp_err, true);
-	}
+
+
+
+
+	// if (offset == DSP_GRES)
+	// {
+	// 	//printf("Write to DSP_GRES: 0x%02x\n", data);
+	// 	_dsp_gres = data;
+	// 	Bus::Inst().write(DSP_GRES, _dsp_gres, true);
+	// 	Bus::Inst().IsDirty(true);
+	// }
+	// if (offset == DSP_EXT)
+	// {
+	// 	//printf("Write to DSP_EXT: 0x%02x\n", data);
+	// 	_dsp_ext = data;
+	// 	Bus::Inst().write(DSP_EXT, _dsp_ext, true);
+	// 	Bus::Inst().IsDirty(true);
+	// }
+	// if (offset == DSP_ERR)
+	// {
+	// 	// printf("Write to DSP_ERR: 0x%02x\n", data);
+	// 	_dsp_err = data;
+	// 	Bus::Inst().write(DSP_ERR, _dsp_err, true);
+	// }
     // color palete registers
-	if (offset == DSP_PAL_IDX)	{ _dsp_pal_idx = data;  return; }
-	if (offset == DSP_PAL_CLR) 
-	{
-		Word c = _palette[_dsp_pal_idx].color & 0xff00;
-		_palette[_dsp_pal_idx].color = c | data;
-		return;
-	}
-	if (offset == DSP_PAL_CLR+1)
-	{
-		Word c = _palette[_dsp_pal_idx].color & 0x00ff;
-		_palette[_dsp_pal_idx].color = c | ((Word)data << 8);
-		return; 
-	}
+	// if (offset == DSP_PAL_IDX)	{ _dsp_pal_idx = data;  return; }
+	// if (offset == DSP_PAL_CLR) 
+	// {
+	// 	Word c = _palette[_dsp_pal_idx].color & 0xff00;
+	// 	_palette[_dsp_pal_idx].color = c | data;
+	// 	return;
+	// }
+	// if (offset == DSP_PAL_CLR+1)
+	// {
+	// 	Word c = _palette[_dsp_pal_idx].color & 0x00ff;
+	// 	_palette[_dsp_pal_idx].color = c | ((Word)data << 8);
+	// 	return; 
+	// }
 
 }
 

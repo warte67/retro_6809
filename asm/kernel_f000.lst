@@ -130,7 +130,7 @@ F006 A780             (asm/kernel_f000.a):00012                 sta     ,x+
 F008 BC1C00           (asm/kernel_f000.a):00013                 cmpx    STD_VID_MAX
 F00B 2FF8             (asm/kernel_f000.a):00014                 ble     lp1
                       (asm/kernel_f000.a):00015         
-                      (asm/kernel_f000.a):00016         ; cycle color 0
+                      (asm/kernel_f000.a):00016         ; cycle the palette colors
                       (asm/kernel_f000.a):00017         ;       lda     #0      
                       (asm/kernel_f000.a):00018         ;lp2    sta     DSP_PAL_IDX
                       (asm/kernel_f000.a):00019         ;       ldy     DSP_PAL_CLR
