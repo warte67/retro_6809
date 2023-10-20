@@ -5,7 +5,9 @@
 
 #include "Bus.h"
 #include "Gfx.h"
+#include "font8x8_system.h"
 
+// extern const Byte font8x8_system[256][8];
 
 Byte Gfx::read(Word offset, bool debug )
 {
@@ -291,28 +293,26 @@ void Gfx::OnInit()
     // for (int t=0; t<65536; t++)
     //     _gfxDisplayBuffer[t] = 0;
 
-    // // clear the text buffer to white on black spaces
-    // for (int t=SCREEN_BUFFER; t<SCREEN_BUFFER+0x1200; t+=2)
-    // {
-    //     Bus::write(t, 32);        
-    //     Bus::write(t+1, 0xF0);       
-    // }    
-    // // initialize the font glyph buffer
-    // for (int i=0; i<256; i++)
-    //     for (int r=0; r<8; r++)
-    //         _dsp_glyph_data[i][r] = font8x8_system[i][r];
+    // clear the text buffer to white on black spaces
+    for (int t=SCREEN_BUFFER; t<SCREEN_BUFFER+std_buffer_size; t+=2)
+    {
+        write(t, 32);        
+        write(t+1, 0xF0);       
+    }    
+    // initialize the font glyph buffer
+    for (int i=0; i<256; i++)
+        for (int r=0; r<8; r++)
+            _dsp_glyph_data[i][r] = font8x8_system[i][r];
 
     // // output a test string
     // std::string sMessage = "Hello World...";
-    // Word addr = _dsp_tbase;
+    // Word addr = SCREEN_BUFFER;
     // for (auto &a : sMessage)
     // {
-    //     Bus::write(addr, a);
-    //     Bus::write(addr+1, 0xF0);		// F: yellow
+    //     write(addr, a);
+    //     write(addr+1, 0xF0);		// F: yellow
     //     addr+=2;
     // }
-    // Bus::write(_dsp_tbase+3, 0xE4);
-    // Bus::write(_dsp_tbase+5, 0xA2);
 }
 
 
@@ -407,18 +407,27 @@ void Gfx::OnEvent(SDL_Event* evnt)
 
 void Gfx::OnUpdate(float fElapsedTime) 
 {
-	// clear the window to the border color
-    SDL_SetRenderTarget(_renderer, NULL);
-	SDL_SetRenderDrawColor(_renderer, 32, 32, 32, 255);	// border color
-    SDL_RenderClear(_renderer);
+	// restrict updates based on elapsed time
+	const float _delay = 0.01f;
+    static float _acc = fElapsedTime;
+    _acc += fElapsedTime;
+    if (_acc > fElapsedTime + _delay)
+    {
+        _acc -= _delay;
 
-	// do nothing extra anymore
-	// video buffer is being updated via asm
-	// the 6809 CPU should nowbe working
+		// clear the window to the border color
+		SDL_SetRenderTarget(_renderer, NULL);
+		SDL_SetRenderDrawColor(_renderer, 32, 32, 32, 255);	// border color
+		SDL_RenderClear(_renderer);
 
-	// update the display textures
-	_display_extended();
-	_display_standard();
+		// do nothing extra anymore
+		// video buffer is being updated via asm
+		// the 6809 CPU should nowbe working
+
+		// update the display textures
+		_display_extended();
+		_display_standard();
+	}
 }
 void Gfx::OnRender() 
 {
@@ -501,58 +510,66 @@ void Gfx::_decode_dsp_gres()
 	};
 	float real_width = _base_texture_width * (5-_h_scan);
 	float real_height = (_base_texture_width / _aspect) * (5-_v_scan);	
-	//float div = 9 - _std_bpp;		// bpp divisor
 	float div = get_div(_std_bpp);
 	float req_buffer_size = (real_width * real_height) / div;
-	if (req_buffer_size > std_buffer_size)
-		printf ("    ERROR: Buffer Overrun... Making Adjustments\n");
-	while (req_buffer_size > std_buffer_size)
-	{		
-		_std_bpp >>= 1;					// _std_bpp changed
-		if (_std_bpp == 0) break;
-		printf("    -->_std_bpp: %d\n", _std_bpp);
-		//div = 9 - _std_bpp;		// bpp divisor
-		div = get_div(_std_bpp);
-		req_buffer_size = (real_width * real_height) / div;
 
-		// ENCODE THE CHANGES (_std_bpp: XX00.0000)
-		Byte d = data;
-		d &= 0x3f;
-		d |= ((_std_bpp)-1) << 6;
-		bus.write(DSP_GRES, d, true);
-		// set the error bit
-		d = bus.read(DSP_ERR) | 0x80;
-		bus.write(DSP_ERR, d);
-	}
 
-	// bpp error buffer too big
-	if (_std_bpp == 0)	
+	// text mode
+	Byte tm = bus.read(DSP_EXT) & 0b00000100;
+	if (tm == 0)	
 	{
-		printf ("    ERROR: Buffer Overrun... Making Adjustments\n");
-		_std_bpp = 1;	// back to 2-colors
-		// try reducing vertical resolution
-		while (req_buffer_size > std_buffer_size)
-		{
-			_v_scan++;					// _v_scan changed
-			real_height = (_base_texture_width / _aspect) * (5-_v_scan);	
-			printf("    -->real_height: %4.2f\n", real_height);
-			//div = 9 - _std_bpp;		// bpp divisor
-			div = get_div(_std_bpp);
-			req_buffer_size = (real_width * real_height) / div;	
-
-			// ENCODE THE CHANGES (_v_scan: 0000.00XX)
-			Byte d = data;
-			d &= 0xFC;
-			d |= ((_v_scan-1) & 0x03);
-			bus.write(DSP_GRES, d, true);			
-		}
+		req_buffer_size = ((real_width/8) * (real_height/8)) * 2;
+		_std_bpp = 1;
 	}
+	else
+	{
+		// adjust for the bitmap mode
+		if (req_buffer_size > std_buffer_size)
+			printf ("    ERROR: Buffer Overrun... Making Adjustments\n");
+		while (req_buffer_size > std_buffer_size)
+		{		
+			_std_bpp >>= 1;					// _std_bpp changed
+			if (_std_bpp == 0) break;
+			printf("    -->_std_bpp: %d\n", _std_bpp);
+			div = get_div(_std_bpp);
+			req_buffer_size = (real_width * real_height) / div;
+			// ENCODE THE CHANGES (_std_bpp: XX00.0000)
+			Byte d = data;
+			d &= 0x3f;
+			d |= ((_std_bpp)-1) << 6;
+			bus.write(DSP_GRES, d, true);
+			// set the error bit
+			d = bus.read(DSP_ERR) | 0x80;
+			bus.write(DSP_ERR, d);
+		}
+
+		// bpp error buffer too big
+		if (_std_bpp == 0)	
+		{
+			printf ("    ERROR: Buffer Overrun... Making Adjustments\n");
+			_std_bpp = 1;	// back to 2-colors
+			// try reducing vertical resolution
+			while (req_buffer_size > std_buffer_size)
+			{
+				_v_scan++;					// _v_scan changed
+				real_height = (_base_texture_width / _aspect) * (5-_v_scan);	
+				printf("    -->real_height: %4.2f\n", real_height);
+				div = get_div(_std_bpp);
+				req_buffer_size = (real_width * real_height) / div;	
+				// ENCODE THE CHANGES (_v_scan: 0000.00XX)
+				Byte d = data;
+				d &= 0xFC;
+				d |= ((_v_scan-1) & 0x03);
+				bus.write(DSP_GRES, d, true);			
+			}
+		}
+	}	
 
 	// SDL Texture Size
 	_texture_width = (int)real_width;
 	_texture_height = (int)real_height;
 
-	// [DSP_VID_MAX] video buffer end
+	// [STD_VID_MAX] video buffer end
 	_std_vid_max = (SCREEN_BUFFER + (int)req_buffer_size)-1;
 
 	// output debugging text
@@ -627,7 +644,7 @@ void Gfx::_decode_dsp_ext()
 	(_extended_display_mode) ? printf("(TILES)\n") : printf("(BITMAP)\n");
 	printf("  Standard Graphics Enable: %d ", _standard_graphics_enable);
 	(_standard_graphics_enable) ? printf("(ENABLED)\n") : printf("(DISABLED)\n");
-	printf("  Extended Display Mode: %d ", _extended_display_mode);
+	printf("  Standard Display Mode: %d ", _standard_display_mode);
 	(_extended_display_mode) ? printf("(BITMAP)\n") : printf("(TEXT)\n");
 	printf("  Vertical Sync: %d ", _vsync);
 	(_vsync) ? printf("(ON)\n") : printf("(OFF)\n");
@@ -639,80 +656,130 @@ void Gfx::_decode_dsp_ext()
 // helpers
 void Gfx::_display_standard()
 {
+	// there is no palette during the first cycle
 	if (_palette.size()==0)
 		return;
-	// STILL JUST TESTING, NEED PALETTE COLORS
+
 	if (_standard_graphics_enable)
 	{
-		Bus& bus = Bus::Inst();				
-		Word pixel_index = SCREEN_BUFFER;
-		void *pixels;
-		int pitch;
-		if (SDL_LockTexture(_std_texture, NULL, &pixels, &pitch) < 0)
-			Bus::Error("Failed to lock texture: ");	
-		else
+		// graphics mode
+		if (_standard_display_mode)
 		{
-			for (int y = 0; y < _texture_height; y++)
+			Bus& bus = Bus::Inst();				
+			Word pixel_index = SCREEN_BUFFER;
+			void *pixels;
+			int pitch;
+			if (SDL_LockTexture(_std_texture, NULL, &pixels, &pitch) < 0)
+				Bus::Error("Failed to lock texture: ");	
+			else
 			{
-				for (int x = 0; x < _texture_width; )
+				for (int y = 0; y < _texture_height; y++)
 				{
-					// 256 color mode
-					if (_std_bpp == 8)
+					for (int x = 0; x < _texture_width; )
 					{
-						Byte index = bus.read(pixel_index++);
-						_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
-					}
-					// 16 color mode
-					else if (_std_bpp == 4)
-					{
-						Byte data = bus.read(pixel_index++);
-						Byte index = (data >> 4);
-						_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
-						index = (data & 0x0f);
-						_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
-					}
-					// 4 color mode
-					else if (_std_bpp == 2)
-					{
-						Byte data = bus.read(pixel_index++);
-						Byte index = (data >> 6) & 0x03;
-						_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
-						index = (data >> 4) & 0x03;
-						_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
-						index = (data >> 2) & 0x03;
-						_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
-						index = (data >> 0) & 0x03;
-						_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
-					}
-					// 2 color mode
-					else if (_std_bpp == 1)
-					{
-						Byte data = bus.read(pixel_index++);
-						Byte index = (data >> 7) & 1;
-						_setPixel_unlocked(pixels, pitch, x++, y, index, true); 
-						index = (data >> 6) & 1;
-						_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
-						index = (data >> 5) & 1;
-						_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
-						index = (data >> 4) & 1;
-						_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
-						index = (data >> 3) & 1;
-						_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
-						index = (data >> 2) & 1;
-						_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
-						index = (data >> 1) & 1;
-						_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
-						index = (data >> 0) & 1;
-						_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+						// 256 color mode
+						if (_std_bpp == 8)
+						{
+							Byte index = bus.read(pixel_index++);
+							_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+						}
+						// 16 color mode
+						else if (_std_bpp == 4)
+						{
+							Byte data = bus.read(pixel_index++);
+							Byte index = (data >> 4);
+							_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+							index = (data & 0x0f);
+							_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+						}
+						// 4 color mode
+						else if (_std_bpp == 2)
+						{
+							Byte data = bus.read(pixel_index++);
+							Byte index = (data >> 6) & 0x03;
+							_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+							index = (data >> 4) & 0x03;
+							_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+							index = (data >> 2) & 0x03;
+							_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+							index = (data >> 0) & 0x03;
+							_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+						}
+						// 2 color mode
+						else if (_std_bpp == 1)
+						{
+							Byte data = bus.read(pixel_index++);
+							Byte index = (data >> 7) & 1;
+							_setPixel_unlocked(pixels, pitch, x++, y, index, true); 
+							index = (data >> 6) & 1;
+							_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+							index = (data >> 5) & 1;
+							_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+							index = (data >> 4) & 1;
+							_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+							index = (data >> 3) & 1;
+							_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+							index = (data >> 2) & 1;
+							_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+							index = (data >> 1) & 1;
+							_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+							index = (data >> 0) & 1;
+							_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+						}
 					}
 				}
+				SDL_UnlockTexture(_std_texture); 
 			}
-			SDL_UnlockTexture(_std_texture); 
-		}
+		} // end: graphics mode
+		else
+		{ // text mode
+			_updateTextScreen();
+		} // end: text mode
 		SDL_SetRenderTarget(_renderer, _render_target);
-		SDL_RenderCopy(_renderer, _std_texture, NULL, NULL);
+		SDL_RenderCopy(_renderer, _std_texture, NULL, NULL);		
 	}
 }
+
+void Gfx::_updateTextScreen() 
+{
+	Bus& bus = Bus::Inst();
+    void *pixels;
+    int pitch;
+    if (SDL_LockTexture(_std_texture, NULL, &pixels, &pitch) < 0) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't lock texture: %s\n", SDL_GetError());
+        Bus::Error("");
+    }
+    else
+    {
+		Word end = bus.read_word(STD_VID_MAX);
+		Word addr = SCREEN_BUFFER;
+		for (  ; addr <= end; addr+=2)
+		{
+			Byte ch = bus.read(addr, true);
+			Byte at = bus.read(addr+1, true);
+			Byte fg = at >> 4;
+			Byte bg = at & 0x0f;
+			Word index = addr - SCREEN_BUFFER;
+			Byte width = _texture_width / 8;
+			int x = ((index / 2) % width) * 8;
+			int y = ((index / 2) / width) * 8;			
+			for (int v=0; v<8; v++)
+			{    
+				for (int h=0; h<8; h++)
+				{
+					int color = bg;
+					if (_dsp_glyph_data[ch][v] & (1 << 7-h))
+						color = fg;
+					_setPixel_unlocked(pixels, pitch, x+h, y+v, color);   
+				}
+			}
+		}
+
+        SDL_UnlockTexture(_std_texture); 
+    }
+} 
+
+
 void Gfx::_display_extended()
 {
 	// STILL JUST TESTING, NEED PALETTE COLORS

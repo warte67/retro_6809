@@ -58,6 +58,10 @@ class Gfx : public Device
 		bool _standard_graphics_enable = false; // invalid default
 		bool _standard_display_mode = false;		// 0:text, 1:graphics
 
+        // text glyph stuff
+        Byte _dsp_glyph_idx = 0x00;         // DSP_GLYPH_IDX
+        Byte _dsp_glyph_data[256][8]{0};    // DSP_GLYPH_DATA (Customizeable)
+
 		// palette stuff
         union PALETTE {
             Word color;
@@ -79,8 +83,8 @@ class Gfx : public Device
 		// hardware registers
 	protected:
 		Word _std_vid_max = 0x1C00;		// [STD_VID_MAX]
-		Byte _dsp_gres	= 0b11010000;	// defaults
-		Byte _dsp_ext 	= 0b00011101;	// defaults
+		Byte _dsp_gres	= 0b11110101;	// defaults
+		Byte _dsp_ext 	= 0b00001001;	// defaults
         Byte _dsp_err = 0;          
 	
 	private:
@@ -93,7 +97,8 @@ class Gfx : public Device
         void _setPixel_unlocked(void* pixels, int pitch, int x, int y, 
 								Byte color_index, bool bIgnoreAlpha = false);
 
-		void _display_standard();		// TEMPORARY
+		void _display_standard();
+        void _updateTextScreen();       
 		void _display_extended();		// TEMPORARY
 };
 

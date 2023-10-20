@@ -1,4 +1,4 @@
-                      (asm/kernel_f000.a):00001                 INCLUDE "memory_map.asm"
+                      (  kernel_f000.asm):00001                 INCLUDE "memory_map.asm"
                       (   memory_map.asm):00001         ;  **********************************************
                       (   memory_map.asm):00002         ;  * Allocated 64k Memory Mapped System Symbols *
                       (   memory_map.asm):00003         ;  **********************************************
@@ -102,38 +102,38 @@
      FFFC             (   memory_map.asm):00101         HARD_NMI     = $FFFC    ; NMI Hardware Interrupt Vector
      FFFE             (   memory_map.asm):00102         HARD_RESET   = $FFFE    ; RESET Hardware Interrupt Vector
                       (   memory_map.asm):00103         ; END of definitions
-                      (asm/kernel_f000.a):00002         
-                      (asm/kernel_f000.a):00003                 org     $f000   
-                      (asm/kernel_f000.a):00004         
-F000                  (asm/kernel_f000.a):00005         start   
-                      (asm/kernel_f000.a):00006         
-                      (asm/kernel_f000.a):00007         ; fill the screen
-F000 8600             (asm/kernel_f000.a):00008                 lda     #$00
-F002 8E0400           (asm/kernel_f000.a):00009                 ldx     #SCREEN_BUFFER
-F005                  (asm/kernel_f000.a):00010         lp1     
-F005 4C               (asm/kernel_f000.a):00011                 inca
-F006 A780             (asm/kernel_f000.a):00012                 sta     ,x+
-F008 BC1C02           (asm/kernel_f000.a):00013                 cmpx    STD_VID_MAX
-F00B 2FF8             (asm/kernel_f000.a):00014                 ble     lp1
-                      (asm/kernel_f000.a):00015         ; increment the screen
-F00D                  (asm/kernel_f000.a):00016         inc_screen
-F00D 8E0400           (asm/kernel_f000.a):00017                 ldx     #SCREEN_BUFFER
-F010                  (asm/kernel_f000.a):00018         lp2
-F010 6C80             (asm/kernel_f000.a):00019                 inc     ,x+
-F012 BC1C02           (asm/kernel_f000.a):00020                 cmpx    STD_VID_MAX
-F015 2FF9             (asm/kernel_f000.a):00021                 ble     lp2
-                      (asm/kernel_f000.a):00022         
-F017 20F4             (asm/kernel_f000.a):00023                 bra     inc_screen
-                      (asm/kernel_f000.a):00024         
-                      (asm/kernel_f000.a):00025         
-                      (asm/kernel_f000.a):00026         
-                      (asm/kernel_f000.a):00027         
-                      (asm/kernel_f000.a):00028                 org     $FFF0
-FFF0 0000             (asm/kernel_f000.a):00029                 fdb     $0000   ; HARD_RSRVD    Motorola RESERVED Hardware Interrupt Vector
-FFF2 0000             (asm/kernel_f000.a):00030                 fdb     $0000   ; HARD_SWI3     SWI3 Hardware Interrupt Vector
-FFF4 0000             (asm/kernel_f000.a):00031                 fdb     $0000   ; HARD_SWI2     SWI2 Hardware Interrupt Vector
-FFF6 0000             (asm/kernel_f000.a):00032                 fdb     $0000   ; HARD_FIRQ     FIRQ Hardware Interrupt Vector
-FFF8 0000             (asm/kernel_f000.a):00033                 fdb     $0000   ; HARD_IRQ      IRQ Hardware Interrupt Vector
-FFFA 0000             (asm/kernel_f000.a):00034                 fdb     $0000   ; HARD_SWI      SWI / SYS Hardware Interrupt Vector
-FFFC 0000             (asm/kernel_f000.a):00035                 fdb     $0000   ; HARD_NMI      NMI Hardware Interrupt Vector
-FFFE F000             (asm/kernel_f000.a):00036                 fdb     $F000   ; HARD_RESET    RESET Hardware Interrupt Vector
+                      (  kernel_f000.asm):00002         
+                      (  kernel_f000.asm):00003                 org     $f000   
+                      (  kernel_f000.asm):00004         
+F000                  (  kernel_f000.asm):00005         start   
+                      (  kernel_f000.asm):00006         
+                      (  kernel_f000.asm):00007         ; fill the screen
+F000 8600             (  kernel_f000.asm):00008                 lda     #$00
+F002 8E0400           (  kernel_f000.asm):00009                 ldx     #SCREEN_BUFFER
+F005                  (  kernel_f000.asm):00010         lp1     
+F005 4C               (  kernel_f000.asm):00011                 inca
+F006 A780             (  kernel_f000.asm):00012                 sta     ,x+
+F008 BC1C02           (  kernel_f000.asm):00013                 cmpx    STD_VID_MAX
+F00B 2FF8             (  kernel_f000.asm):00014                 ble     lp1
+                      (  kernel_f000.asm):00015         ; increment the screen
+F00D                  (  kernel_f000.asm):00016         inc_screen
+F00D 8E0400           (  kernel_f000.asm):00017                 ldx     #SCREEN_BUFFER
+F010                  (  kernel_f000.asm):00018         lp2
+F010 6C80             (  kernel_f000.asm):00019                 inc     ,x+
+F012 BC1C02           (  kernel_f000.asm):00020                 cmpx    STD_VID_MAX
+F015 2FF9             (  kernel_f000.asm):00021                 ble     lp2
+                      (  kernel_f000.asm):00022         
+F017 20F4             (  kernel_f000.asm):00023                 bra     inc_screen
+                      (  kernel_f000.asm):00024         
+                      (  kernel_f000.asm):00025         
+                      (  kernel_f000.asm):00026         
+                      (  kernel_f000.asm):00027         
+                      (  kernel_f000.asm):00028                 org     $FFF0
+FFF0 0000             (  kernel_f000.asm):00029                 fdb     $0000   ; HARD_RSRVD    Motorola RESERVED Hardware Interrupt Vector
+FFF2 0000             (  kernel_f000.asm):00030                 fdb     $0000   ; HARD_SWI3     SWI3 Hardware Interrupt Vector
+FFF4 0000             (  kernel_f000.asm):00031                 fdb     $0000   ; HARD_SWI2     SWI2 Hardware Interrupt Vector
+FFF6 0000             (  kernel_f000.asm):00032                 fdb     $0000   ; HARD_FIRQ     FIRQ Hardware Interrupt Vector
+FFF8 0000             (  kernel_f000.asm):00033                 fdb     $0000   ; HARD_IRQ      IRQ Hardware Interrupt Vector
+FFFA 0000             (  kernel_f000.asm):00034                 fdb     $0000   ; HARD_SWI      SWI / SYS Hardware Interrupt Vector
+FFFC 0000             (  kernel_f000.asm):00035                 fdb     $0000   ; HARD_NMI      NMI Hardware Interrupt Vector
+FFFE F000             (  kernel_f000.asm):00036                 fdb     $F000   ; HARD_RESET    RESET Hardware Interrupt Vector
