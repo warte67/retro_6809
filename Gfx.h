@@ -59,8 +59,8 @@ class Gfx : public Device
 		bool _standard_display_mode = false;		// 0:text, 1:graphics
 
 		// hardware registers
-		Byte _dsp_gres	= 0b11111111;	// defaults
-		Byte _dsp_ext = 0b01001001;	    // defaults
+		Byte _dsp_gres	= 0b11110000;	// defaults
+		Byte _dsp_ext 	= 0b01101001;	// defaults
         Byte _dsp_err = 0;          
 	
 	private:
@@ -68,7 +68,6 @@ class Gfx : public Device
 		void _decode_dsp_gres();
         void _decode_dsp_ext();
 };
-
 
 #endif //__GFX_H__
 

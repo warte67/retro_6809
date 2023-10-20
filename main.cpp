@@ -30,8 +30,17 @@ int main(int argc, char* argv[])
 	std::cout << "Retro_6809\n\n";
 
 	Bus& bus = Bus::Inst();
+
+	// // testing load_hex()
+	// bus.load_hex("asm/test.hex");
+	// for (Word addr = 0xf000; addr < 0xF007; addr++)
+	// {
+	// 	Byte b = bus.read(addr);
+	// 	printf("0x%04X: 0x%02X\n", addr, b);
+	// }
+	// return 0;
+
 	bus.Run();
-	//Bus::Inst().Run();		// also works	
 
 	return 0;
 }

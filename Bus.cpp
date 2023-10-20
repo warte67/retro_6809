@@ -6,6 +6,7 @@
 
 #include <chrono>
 #include <iostream>
+#include <fstream>
 #include "Bus.h"
 
 Bus::Bus()
@@ -419,7 +420,6 @@ void Bus::Run()
         _onEvent();
         _onRender();      
 		_onPresent();
-
 		//Bus::Error("Automatic Exit");
     }
 	// shutdown the old environment
@@ -428,6 +428,79 @@ void Bus::Run()
 	// one time shutdown	
     _onQuit();
 }
+
+// load_hex helpers
+Byte Bus::_fread_hex_byte(std::ifstream& ifs)
+{
+	char str[3];
+	long l;
+	ifs.get(str[0]);
+	ifs.get(str[1]);
+	str[2] = '\0';	
+	l = strtol(str, NULL, 16);
+	return (Byte)(l & 0xff);	
+}
+Word Bus::_fread_hex_word(std::ifstream& ifs)
+{
+	Word ret;
+	ret = _fread_hex_byte(ifs);
+	ret <<= 8;
+	ret |= _fread_hex_byte(ifs);
+	return ret;				
+}
+void Bus::load_hex(const char* filename)
+{
+	// // lambda to convert integer to hex string
+	// auto hex = [](uint32_t n, uint8_t digits)
+	// {
+	// 	std::string s(digits, '0');
+	// 	for (int i = digits - 1; i >= 0; i--, n >>= 4)
+	// 		s[i] = "0123456789ABCDEF"[n & 0xF];
+	// 	return s;
+	// };
+
+	std::ifstream ifs(filename);
+	if (!ifs.is_open())
+	{
+		printf("UNABLE TO OPEN FILE '%s'\n", filename);		
+		return;
+	}
+	bool done = false;
+	char c;	
+	while (!done)
+	{
+		Byte n, t;
+		Word addr;	
+		Byte b;
+		ifs.get(c);	// skip the leading ":"
+		n = _fread_hex_byte(ifs);		// byte count for this line
+		addr = _fread_hex_word(ifs);	// fetch the begin address		
+		t = _fread_hex_byte(ifs);		// record type
+		if (t == 0x00) 
+		{
+			while (n--) 
+			{
+				b = _fread_hex_byte(ifs);
+				// std::cout << "0x" << hex(addr,4) << ":";
+				// std::cout << "0x" << hex(b, 2) << std::endl;
+				Bus::Inst().write(addr,b,true);
+				++addr;
+			}
+			// Read and discard checksum byte
+			(void)_fread_hex_byte(ifs);	
+			// skip the junk at the end of the line	
+			if (ifs.peek() == '\r')	ifs.get(c);
+			if (ifs.peek() == '\n')	ifs.get(c);
+		}
+		else if (t == 0x01) 
+			done = true;
+	}
+	// close and return
+	ifs.close();
+	
+	return;
+}
+
 
 
 
@@ -440,3 +513,4 @@ void ROM::write(Word offset, Byte data, bool debug)
         if (offset - m_base < m_size)
             m_memory[(Word)(offset - m_base)] = data;
 }
+

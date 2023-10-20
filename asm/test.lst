@@ -1,0 +1,9 @@
+                      (         test.asm):00001                         org             $f000
+                      (         test.asm):00002                 
+F000 8600             (         test.asm):00003         start   lda             #$00
+F002 9700             (         test.asm):00004         lp              sta     $0000
+F004 4C               (         test.asm):00005                         inca
+F005 20FB             (         test.asm):00006                         bra             lp
+                      (         test.asm):00007         
+                      (         test.asm):00008                         org             $fffe
+FFFE F000             (         test.asm):00009                         fdb             $F000           

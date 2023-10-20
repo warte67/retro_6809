@@ -54,6 +54,8 @@ class Bus
         Word read_word(Word offset, bool debug = false);
         void write_word(Word offset, Word data, bool debug = false);   				
 
+		void load_hex(const char* filename);
+
 	private:
 		void _onInit();			// one time init after all devices have been created
 		void _onQuit();			// quit each device prior to app termination
@@ -67,6 +69,10 @@ class Bus
 		// Private Memory Stuff
         int _lastAddress = 0;
         std::vector<Device*> _memoryNodes;		
+
+		// load hex helpers
+		Byte _fread_hex_byte(std::ifstream& ifs);
+		Word _fread_hex_word(std::ifstream& ifs);		
 };    
 
 

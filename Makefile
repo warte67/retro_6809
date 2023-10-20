@@ -8,10 +8,10 @@ OBJ = obj
 OBJ_FILES = Bus.o Device.o Gfx.o main.o
 
 all: $(OBJ_FILES)	 
-	Bus.o: 		./src/Bus.cpp 	./src/Bus.h
-#	main.o: 	main.cpp
-#	Device.o: 	Device.cpp 	Device.h
-#	Gfx.o: 		Gfx.cpp 	Gfx.h
+	Bus.o: 		Bus.cpp 	Bus.h
+	main.o: 	main.cpp
+	Device.o: 	Device.cpp 	Device.h
+	Gfx.o: 		Gfx.cpp 	Gfx.h
 
 # Memory.o: 	Memory.cpp 	Memory.h
 # Mouse.o:	Mouse.cpp 	Mouse.h
