@@ -1,4 +1,3 @@
-
 // memory_map.h
 #ifndef __MEMORY_MAP_H__
 #define __MEMORY_MAP_H__
@@ -26,7 +25,7 @@ SSTACK_TOP   = 0x0300, // Top of the system stack space
 USER_STACK   = 0x0300, 
 USTACK_TOP   = 0x0400, // Top of the user stack space
         
-        // Display Buffer (6K bytes)
+        // Display Buffer
 SCREEN_BUFFER = 0x0400, 
         
         // Device Registers:

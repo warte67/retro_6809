@@ -76,8 +76,9 @@ Bus::Bus()
 	// display buffer 6k bytes
     dev = new RAM("SCREEN_BUFFER");
     dev->DisplayEnum("",0, "");
-    dev->DisplayEnum("",0, "Display Buffer (6K bytes)");
+    dev->DisplayEnum("",0, "Display Buffer");
     addr += Attach(dev, 6*1024);
+
 
 	// start hardware registers
 	dev->DisplayEnum("",0, "");

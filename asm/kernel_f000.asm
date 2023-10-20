@@ -2,8 +2,9 @@
 
 	org	$f000	
 
-; fill the screen
 start	
+
+; fill the screen
 	lda	#$00
 	ldx	#SCREEN_BUFFER
 lp1	
@@ -24,5 +25,12 @@ lp2
 
 
 
-	org	$fffe
-	fdb	$F000	; HARD_RESET
+	org	$FFF0
+	fdb	$0000	; HARD_RSRVD 	Motorola RESERVED Hardware Interrupt Vector
+	fdb	$0000	; HARD_SWI3  	SWI3 Hardware Interrupt Vector
+	fdb	$0000	; HARD_SWI2  	SWI2 Hardware Interrupt Vector
+	fdb	$0000	; HARD_FIRQ  	FIRQ Hardware Interrupt Vector
+	fdb	$0000	; HARD_IRQ   	IRQ Hardware Interrupt Vector
+	fdb	$0000	; HARD_SWI   	SWI / SYS Hardware Interrupt Vector
+	fdb	$0000	; HARD_NMI   	NMI Hardware Interrupt Vector
+	fdb	$F000	; HARD_RESET	RESET Hardware Interrupt Vector

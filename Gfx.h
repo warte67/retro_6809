@@ -32,8 +32,8 @@ class Gfx : public Device
 
 	protected:
         // SDL window stuff	
-		const float _base_texture_width = 128.0f;	// 1024x768 basic screen timing
-       	const int std_buffer_size = 6 * 1024;       // standard buffer size
+		const float _base_texture_width = 128.0f;		// 1024x768 basic screen timing
+       	const int std_buffer_size = 6*1024;    // standard buffer size
 
 		float _window_width = 1280.0f;;	
 		float _window_height = 0;			// invalid default

@@ -19,7 +19,7 @@ SSTACK_TOP   = $0300    ; Top of the system stack space
 USER_STACK   = $0300  
 USTACK_TOP   = $0400    ; Top of the user stack space
         
-          ; Display Buffer (6K bytes)
+          ; Display Buffer
 SCREEN_BUFFER = $0400  
         
           ; Device Registers:
