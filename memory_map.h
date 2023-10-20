@@ -96,8 +96,19 @@ DSP_PAL_CLR  = 0x1C08, //  (Word) Indexed Color Palette Data
         //     Write to DSP_PAL_IDX with the index within the color palette
         //     prior to reading or writing the color data in the DSP_PAL_CLR register.
         
-    // 5110 ($13F6) bytes remaining for additional registers.
-RESERVED     = 0x1C0A, 
+DSP_GLYPH_IDX = 0x1C0A, //  (Byte) Text Glyph Index
+        // DSP_GLYPH_IDX: 0-256
+        // Note: Set this register to index a specific text glyph. Set this value
+        //     prior to updating glyph pixel data.
+        
+DSP_GLYPH_DATA = 0x1C0B, //  (8-Bytes) Text Glyph Pixel Data Array
+        // DSP_GLYPH_DATA: 8 rows of binary encoded glyph pixel data
+        // Note: Each 8x8 text glyph is composed of 8 bytes. The first byte in this 
+        //     array represents the top line of 8 pixels. Each array entry represents
+        //     a row of 8 pixels. 
+        
+    // 5101 ($13ED) bytes remaining for additional registers.
+RESERVED     = 0x1C13, 
         
         // User RAM (32K)
 USER_RAM     = 0x3000, 

@@ -91,31 +91,42 @@
                       (   memory_map.asm):00090                   ;     Write to DSP_PAL_IDX with the index within the color palette
                       (   memory_map.asm):00091                   ;     prior to reading or writing the color data in the DSP_PAL_CLR register.
                       (   memory_map.asm):00092                 
-                      (   memory_map.asm):00093             ; 5110 ($13F6) bytes remaining for additional registers.
-     1C0A             (   memory_map.asm):00094         RESERVED     = $1C0A  
-                      (   memory_map.asm):00095                 
-                      (   memory_map.asm):00096                   ; User RAM (32K)
-     3000             (   memory_map.asm):00097         USER_RAM     = $3000  
-                      (   memory_map.asm):00098                 
-                      (   memory_map.asm):00099                   ; Paged RAM (8K)
-     B000             (   memory_map.asm):00100         PAGED_RAM    = $B000  
-                      (   memory_map.asm):00101                 
-                      (   memory_map.asm):00102                   ; PAGED ROM (8K bytes)
-     D000             (   memory_map.asm):00103         PAGED_ROM    = $D000  
-                      (   memory_map.asm):00104                 
-                      (   memory_map.asm):00105                   ; KERNEL ROM (4K bytes)
-     F000             (   memory_map.asm):00106         KERNEL_ROM   = $F000  
-                      (   memory_map.asm):00107                 
-                      (   memory_map.asm):00108                   ; Hardware Interrupt Vectors:
-     FFF0             (   memory_map.asm):00109         HARD_RSRVD   = $FFF0    ; Motorola RESERVED Hardware Interrupt Vector
-     FFF2             (   memory_map.asm):00110         HARD_SWI3    = $FFF2    ; SWI3 Hardware Interrupt Vector
-     FFF4             (   memory_map.asm):00111         HARD_SWI2    = $FFF4    ; SWI2 Hardware Interrupt Vector
-     FFF6             (   memory_map.asm):00112         HARD_FIRQ    = $FFF6    ; FIRQ Hardware Interrupt Vector
-     FFF8             (   memory_map.asm):00113         HARD_IRQ     = $FFF8    ; IRQ Hardware Interrupt Vector
-     FFFA             (   memory_map.asm):00114         HARD_SWI     = $FFFA    ; SWI / SYS Hardware Interrupt Vector
-     FFFC             (   memory_map.asm):00115         HARD_NMI     = $FFFC    ; NMI Hardware Interrupt Vector
-     FFFE             (   memory_map.asm):00116         HARD_RESET   = $FFFE    ; RESET Hardware Interrupt Vector
-                      (   memory_map.asm):00117         ; END of definitions
+     1C0A             (   memory_map.asm):00093         DSP_GLYPH_IDX = $1C0A    ;  (Byte) Text Glyph Index
+                      (   memory_map.asm):00094                   ; DSP_GLYPH_IDX: 0-256
+                      (   memory_map.asm):00095                   ; Note: Set this register to index a specific text glyph. Set this value
+                      (   memory_map.asm):00096                   ;     prior to updating glyph pixel data.
+                      (   memory_map.asm):00097                 
+     1C0B             (   memory_map.asm):00098         DSP_GLYPH_DATA = $1C0B    ;  (8-Bytes) Text Glyph Pixel Data Array
+                      (   memory_map.asm):00099                   ; DSP_GLYPH_DATA: 8 rows of binary encoded glyph pixel data
+                      (   memory_map.asm):00100                   ; Note: Each 8x8 text glyph is composed of 8 bytes. The first byte in this 
+                      (   memory_map.asm):00101                   ;     array represents the top line of 8 pixels. Each array entry represents
+                      (   memory_map.asm):00102                   ;     a row of 8 pixels. 
+                      (   memory_map.asm):00103                 
+                      (   memory_map.asm):00104             ; 5101 ($13ED) bytes remaining for additional registers.
+     1C13             (   memory_map.asm):00105         RESERVED     = $1C13  
+                      (   memory_map.asm):00106                 
+                      (   memory_map.asm):00107                   ; User RAM (32K)
+     3000             (   memory_map.asm):00108         USER_RAM     = $3000  
+                      (   memory_map.asm):00109                 
+                      (   memory_map.asm):00110                   ; Paged RAM (8K)
+     B000             (   memory_map.asm):00111         PAGED_RAM    = $B000  
+                      (   memory_map.asm):00112                 
+                      (   memory_map.asm):00113                   ; PAGED ROM (8K bytes)
+     D000             (   memory_map.asm):00114         PAGED_ROM    = $D000  
+                      (   memory_map.asm):00115                 
+                      (   memory_map.asm):00116                   ; KERNEL ROM (4K bytes)
+     F000             (   memory_map.asm):00117         KERNEL_ROM   = $F000  
+                      (   memory_map.asm):00118                 
+                      (   memory_map.asm):00119                   ; Hardware Interrupt Vectors:
+     FFF0             (   memory_map.asm):00120         HARD_RSRVD   = $FFF0    ; Motorola RESERVED Hardware Interrupt Vector
+     FFF2             (   memory_map.asm):00121         HARD_SWI3    = $FFF2    ; SWI3 Hardware Interrupt Vector
+     FFF4             (   memory_map.asm):00122         HARD_SWI2    = $FFF4    ; SWI2 Hardware Interrupt Vector
+     FFF6             (   memory_map.asm):00123         HARD_FIRQ    = $FFF6    ; FIRQ Hardware Interrupt Vector
+     FFF8             (   memory_map.asm):00124         HARD_IRQ     = $FFF8    ; IRQ Hardware Interrupt Vector
+     FFFA             (   memory_map.asm):00125         HARD_SWI     = $FFFA    ; SWI / SYS Hardware Interrupt Vector
+     FFFC             (   memory_map.asm):00126         HARD_NMI     = $FFFC    ; NMI Hardware Interrupt Vector
+     FFFE             (   memory_map.asm):00127         HARD_RESET   = $FFFE    ; RESET Hardware Interrupt Vector
+                      (   memory_map.asm):00128         ; END of definitions
                       (asm/kernel_f000.a):00002         
                       (asm/kernel_f000.a):00003                 org     $f000   
                       (asm/kernel_f000.a):00004         
@@ -139,25 +150,36 @@ F00B 2FF8             (asm/kernel_f000.a):00014                 ble     lp1
                       (asm/kernel_f000.a):00022         ;       inca
                       (asm/kernel_f000.a):00023         ;       bra     lp2
                       (asm/kernel_f000.a):00024         
-                      (asm/kernel_f000.a):00025         ; increment the screen
-F00D                  (asm/kernel_f000.a):00026         inc_screen
-F00D 8E0400           (asm/kernel_f000.a):00027                 ldx     #SCREEN_BUFFER
-F010                  (asm/kernel_f000.a):00028         lp3
-F010 6C80             (asm/kernel_f000.a):00029                 inc     ,x+
-F012 BC1C00           (asm/kernel_f000.a):00030                 cmpx    STD_VID_MAX
-F015 2FF9             (asm/kernel_f000.a):00031                 ble     lp3
-                      (asm/kernel_f000.a):00032         
-F017 20F4             (asm/kernel_f000.a):00033                 bra     inc_screen
+                      (asm/kernel_f000.a):00025         ; increment the text glyph bitmaps
+F00D 8600             (asm/kernel_f000.a):00026                 lda     #0
+F00F B71C0A           (asm/kernel_f000.a):00027         lp4     sta     DSP_GLYPH_IDX
+F012 8E1C0B           (asm/kernel_f000.a):00028                 ldx     #DSP_GLYPH_DATA
+F015 6980             (asm/kernel_f000.a):00029         lp_b    rol     ,x+
+F017 8C1C13           (asm/kernel_f000.a):00030                 cmpx    #DSP_GLYPH_DATA+8
+F01A 2DF9             (asm/kernel_f000.a):00031                 blt     lp_b
+F01C 4C               (asm/kernel_f000.a):00032                 inca
+F01D 20F0             (asm/kernel_f000.a):00033                 bra     lp4
                       (asm/kernel_f000.a):00034         
                       (asm/kernel_f000.a):00035         
-                      (asm/kernel_f000.a):00036         
-                      (asm/kernel_f000.a):00037         
-                      (asm/kernel_f000.a):00038                 org     $FFF0
-FFF0 0000             (asm/kernel_f000.a):00039                 fdb     $0000   ; HARD_RSRVD    Motorola RESERVED Hardware Interrupt Vector
-FFF2 0000             (asm/kernel_f000.a):00040                 fdb     $0000   ; HARD_SWI3     SWI3 Hardware Interrupt Vector
-FFF4 0000             (asm/kernel_f000.a):00041                 fdb     $0000   ; HARD_SWI2     SWI2 Hardware Interrupt Vector
-FFF6 0000             (asm/kernel_f000.a):00042                 fdb     $0000   ; HARD_FIRQ     FIRQ Hardware Interrupt Vector
-FFF8 0000             (asm/kernel_f000.a):00043                 fdb     $0000   ; HARD_IRQ      IRQ Hardware Interrupt Vector
-FFFA 0000             (asm/kernel_f000.a):00044                 fdb     $0000   ; HARD_SWI      SWI / SYS Hardware Interrupt Vector
-FFFC 0000             (asm/kernel_f000.a):00045                 fdb     $0000   ; HARD_NMI      NMI Hardware Interrupt Vector
-FFFE F000             (asm/kernel_f000.a):00046                 fdb     $F000   ; HARD_RESET    RESET Hardware Interrupt Vector
+                      (asm/kernel_f000.a):00036         ; increment the screen
+                      (asm/kernel_f000.a):00037         ;inc_screen
+                      (asm/kernel_f000.a):00038         ;       ldx     #SCREEN_BUFFER
+                      (asm/kernel_f000.a):00039         ;lp3
+                      (asm/kernel_f000.a):00040         ;       inc     ,x+
+                      (asm/kernel_f000.a):00041         ;       cmpx    STD_VID_MAX
+                      (asm/kernel_f000.a):00042         ;       ble     lp3
+                      (asm/kernel_f000.a):00043         ;
+                      (asm/kernel_f000.a):00044         ;       bra     inc_screen
+                      (asm/kernel_f000.a):00045         
+                      (asm/kernel_f000.a):00046         
+                      (asm/kernel_f000.a):00047         
+                      (asm/kernel_f000.a):00048         
+                      (asm/kernel_f000.a):00049                 org     $FFF0
+FFF0 0000             (asm/kernel_f000.a):00050                 fdb     $0000   ; HARD_RSRVD    Motorola RESERVED Hardware Interrupt Vector
+FFF2 0000             (asm/kernel_f000.a):00051                 fdb     $0000   ; HARD_SWI3     SWI3 Hardware Interrupt Vector
+FFF4 0000             (asm/kernel_f000.a):00052                 fdb     $0000   ; HARD_SWI2     SWI2 Hardware Interrupt Vector
+FFF6 0000             (asm/kernel_f000.a):00053                 fdb     $0000   ; HARD_FIRQ     FIRQ Hardware Interrupt Vector
+FFF8 0000             (asm/kernel_f000.a):00054                 fdb     $0000   ; HARD_IRQ      IRQ Hardware Interrupt Vector
+FFFA 0000             (asm/kernel_f000.a):00055                 fdb     $0000   ; HARD_SWI      SWI / SYS Hardware Interrupt Vector
+FFFC 0000             (asm/kernel_f000.a):00056                 fdb     $0000   ; HARD_NMI      NMI Hardware Interrupt Vector
+FFFE F000             (asm/kernel_f000.a):00057                 fdb     $F000   ; HARD_RESET    RESET Hardware Interrupt Vector

@@ -25,6 +25,18 @@ Byte Gfx::read(Word offset, bool debug )
         case DSP_PAL_IDX:   	return _dsp_pal_idx;
         case DSP_PAL_CLR+1: 	return (_palette[_dsp_pal_idx].color >> 8) & 0xFF;
         case DSP_PAL_CLR+0: 	return _palette[_dsp_pal_idx].color  & 0xFF;	
+
+        // text glyph definition data registers
+        case DSP_GLYPH_IDX:     return _dsp_glyph_idx;
+        case DSP_GLYPH_DATA+0:  return _dsp_glyph_data[_dsp_glyph_idx][0];
+        case DSP_GLYPH_DATA+1:  return _dsp_glyph_data[_dsp_glyph_idx][1];
+        case DSP_GLYPH_DATA+2:  return _dsp_glyph_data[_dsp_glyph_idx][2];
+        case DSP_GLYPH_DATA+3:  return _dsp_glyph_data[_dsp_glyph_idx][3];
+        case DSP_GLYPH_DATA+4:  return _dsp_glyph_data[_dsp_glyph_idx][4];
+        case DSP_GLYPH_DATA+5:  return _dsp_glyph_data[_dsp_glyph_idx][5];
+        case DSP_GLYPH_DATA+6:  return _dsp_glyph_data[_dsp_glyph_idx][6];
+        case DSP_GLYPH_DATA+7:  return _dsp_glyph_data[_dsp_glyph_idx][7];	
+
 	}
 	return 0xCC;	//data;
 }
@@ -62,45 +74,18 @@ void Gfx::write(Word offset, Byte data, bool debug)
 			_palette[_dsp_pal_idx].color = c | ((Word)data << 8);
 			return; 
 		}
+        // text glyph definition data registers
+        case DSP_GLYPH_IDX: _dsp_glyph_idx = data; return;
+        case DSP_GLYPH_DATA+0:  _dsp_glyph_data[_dsp_glyph_idx][0] = data; return;
+        case DSP_GLYPH_DATA+1:  _dsp_glyph_data[_dsp_glyph_idx][1] = data; return;
+        case DSP_GLYPH_DATA+2:  _dsp_glyph_data[_dsp_glyph_idx][2] = data; return;
+        case DSP_GLYPH_DATA+3:  _dsp_glyph_data[_dsp_glyph_idx][3] = data; return;
+        case DSP_GLYPH_DATA+4:  _dsp_glyph_data[_dsp_glyph_idx][4] = data; return;
+        case DSP_GLYPH_DATA+5:  _dsp_glyph_data[_dsp_glyph_idx][5] = data; return;
+        case DSP_GLYPH_DATA+6:  _dsp_glyph_data[_dsp_glyph_idx][6] = data; return;
+        case DSP_GLYPH_DATA+7:  _dsp_glyph_data[_dsp_glyph_idx][7] = data; return; 		
+	
 	}
-
-
-
-
-	// if (offset == DSP_GRES)
-	// {
-	// 	//printf("Write to DSP_GRES: 0x%02x\n", data);
-	// 	_dsp_gres = data;
-	// 	Bus::Inst().write(DSP_GRES, _dsp_gres, true);
-	// 	Bus::Inst().IsDirty(true);
-	// }
-	// if (offset == DSP_EXT)
-	// {
-	// 	//printf("Write to DSP_EXT: 0x%02x\n", data);
-	// 	_dsp_ext = data;
-	// 	Bus::Inst().write(DSP_EXT, _dsp_ext, true);
-	// 	Bus::Inst().IsDirty(true);
-	// }
-	// if (offset == DSP_ERR)
-	// {
-	// 	// printf("Write to DSP_ERR: 0x%02x\n", data);
-	// 	_dsp_err = data;
-	// 	Bus::Inst().write(DSP_ERR, _dsp_err, true);
-	// }
-    // color palete registers
-	// if (offset == DSP_PAL_IDX)	{ _dsp_pal_idx = data;  return; }
-	// if (offset == DSP_PAL_CLR) 
-	// {
-	// 	Word c = _palette[_dsp_pal_idx].color & 0xff00;
-	// 	_palette[_dsp_pal_idx].color = c | data;
-	// 	return;
-	// }
-	// if (offset == DSP_PAL_CLR+1)
-	// {
-	// 	Word c = _palette[_dsp_pal_idx].color & 0x00ff;
-	// 	_palette[_dsp_pal_idx].color = c | ((Word)data << 8);
-	// 	return; 
-	// }
 
 }
 
@@ -189,6 +174,21 @@ Word Gfx::OnAttach(Word nextAddr)
     DisplayEnum("", 0, "    Write to DSP_PAL_IDX with the index within the color palette");
     DisplayEnum("", 0, "    prior to reading or writing the color data in the DSP_PAL_CLR register.");
     nextAddr += 2;
+
+    DisplayEnum("", 0, "");
+    DisplayEnum("DSP_GLYPH_IDX", nextAddr, " (Byte) Text Glyph Index");
+    DisplayEnum("", 0, "DSP_GLYPH_IDX: 0-256");
+    DisplayEnum("", 0, "Note: Set this register to index a specific text glyph. Set this value");
+    DisplayEnum("", 0, "    prior to updating glyph pixel data.");
+    nextAddr += 1;
+
+    DisplayEnum("", 0, "");
+    DisplayEnum("DSP_GLYPH_DATA", nextAddr, " (8-Bytes) Text Glyph Pixel Data Array");
+    DisplayEnum("", 0, "DSP_GLYPH_DATA: 8 rows of binary encoded glyph pixel data");
+    DisplayEnum("", 0, "Note: Each 8x8 text glyph is composed of 8 bytes. The first byte in this ");
+    DisplayEnum("", 0, "    array represents the top line of 8 pixels. Each array entry represents");
+    DisplayEnum("", 0, "    a row of 8 pixels. ");
+    nextAddr += 8;
 
 
 	// add more gfx registers here
