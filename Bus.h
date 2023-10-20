@@ -7,17 +7,19 @@
 #ifndef __BUS_H__
 #define __BUS_H__
 
+#include <thread>
 #include "types.h"
 #include "Device.h"
 #include "Gfx.h"
+// #include "C6809.h"
+
 
 //#include "Memory.h"		// integrate the memory class into the bus class
 							// and use static read and write:
 							// 		Bus::Read() and Bus::Write()
 
-// // forward declarations:
-// class RAM;
-// class ROM;
+
+
 
 class Bus
 {
@@ -29,13 +31,18 @@ class Bus
 		Gfx* m_gfx = nullptr;
 		int _fps = 0;
 
+
 	public:
 		~Bus();									// destructor
 		Bus(const Bus&) = delete;				// copy constructor
 		Bus(Bus&&) = delete;					// move constructor
 		Bus& operator=(const Bus&) = delete;	// copy assignment operator
 		Bus& operator=(Bus&&) = delete;			// move assignment operator
-		static Bus& Inst() 						{ static Bus inst; return inst; }
+		static Bus& Inst() 						
+		{ 
+			static Bus inst; 
+			return inst; 
+		}
 
 		void Run();
 		void IsDirty(bool _bIsDirty)			{ s_bIsDirty = _bIsDirty; }
@@ -73,6 +80,7 @@ class Bus
 		// load hex helpers
 		Byte _fread_hex_byte(std::ifstream& ifs);
 		Word _fread_hex_word(std::ifstream& ifs);		
+
 };    
 
 

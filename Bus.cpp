@@ -174,15 +174,44 @@ Bus::Bus()
     _onInit();
 
     // start up external threads
-    // ...   
+    // m_cpu = new C6809();  
+	// if (m_cpu == nullptr)
+	// 	Bus::Error("Unable to attach the CPU");
+
+	// else
+	// 	m_thread = std::thread(&Bus::_cpuThread);
 }
+
+// void Bus::_cpuThread()
+// {
+// 	Bus &bus = Bus::Inst();
+//     while (s_bIsRunning)
+//     {
+//         // main CPU clock
+//         using clock = std::chrono::system_clock;
+//         using sec = std::chrono::duration<double, std::nano>;
+//         static auto before_CPU = clock::now();
+//         const sec duration = clock::now() - before_CPU;
+//         if (duration.count() > 500.0f) {		// 1000.f = 1mhz, 500.0f = 2mhz
+//             before_CPU = clock::now();
+//             if (bus._bCpuEnabled)
+//                 bus.m_cpu->clock();
+//         }
+//     }
+// }
+
 
 Bus::~Bus()
 {
 	std::cout << "Bus::~Bus()\n";
 
-    // shutdown external threads
-    // ...	
+    // // shutdown external threads
+	// if (m_cpu)
+    // {
+	// 	// m_thread.join();
+	// 	delete m_cpu;
+	// 	m_cpu = nullptr;
+	// }
 
     // close SDL
     SDL_Quit();
@@ -404,6 +433,10 @@ void Bus::Run()
 	// called after Bus() constructor for each attached device
     _onInit();	
 
+	
+	// m_thread = std::thread(&Bus::_cpuThread);
+
+
     while (s_bIsRunning)
     {
         // create a new environment
@@ -424,6 +457,8 @@ void Bus::Run()
     }
 	// shutdown the old environment
 	_onDeactivate();	
+
+	// m_thread.join();
 
 	// one time shutdown	
     _onQuit();
