@@ -1,4 +1,4 @@
-                      (  kernel_f000.asm):00001                 INCLUDE "memory_map.asm"
+                      (asm/kernel_f000.a):00001                 INCLUDE "memory_map.asm"
                       (   memory_map.asm):00001         ;  **********************************************
                       (   memory_map.asm):00002         ;  * Allocated 64k Memory Mapped System Symbols *
                       (   memory_map.asm):00003         ;  **********************************************
@@ -26,45 +26,45 @@
                       (   memory_map.asm):00025                   ; Device Registers:
      1C00             (   memory_map.asm):00026         HDW_REGS     = $1C00    ; Begin Device Hardware Registers
                       (   memory_map.asm):00027                 
-     1C00             (   memory_map.asm):00028         DSP_GRES     = $1C00    ;  (Byte) Screen Resolution Register
-                      (   memory_map.asm):00029                   ; DSP_GRES: BBRR.HHVV
-                      (   memory_map.asm):00030                   ;     BB:00 = Standard Graphics 1-bpp (2-color mode)
-                      (   memory_map.asm):00031                   ;     BB:01 = Standard Graphics 2-bpp (4-color mode)
-                      (   memory_map.asm):00032                   ;     BB:10 = Standard Graphics 4-bpp (16-color mode)
-                      (   memory_map.asm):00033                   ;     BB:11 = Standard Graphics 8-bpp (256-color mode)
-                      (   memory_map.asm):00034                   ;     RR:00 = 16:9  aspect (1.777778)
-                      (   memory_map.asm):00035                   ;     RR:01 = 16:10 aspect (1.600000)
-                      (   memory_map.asm):00036                   ;     RR:10 = 16:11 aspect (1.454545)
-                      (   memory_map.asm):00037                   ;     RR:11 = 16:12 aspect (1.333333)
-                      (   memory_map.asm):00038                   ;     HH:00 = 4x Horizontal Overscan Multiplier
-                      (   memory_map.asm):00039                   ;     HH:01 = 3x Horizontal Overscan Multiplier
-                      (   memory_map.asm):00040                   ;     HH:10 = 2x Horizontal Overscan Multiplier
-                      (   memory_map.asm):00041                   ;     HH:11 = 1x Horizontal Overscan Multiplier
-                      (   memory_map.asm):00042                   ;     VV:00 = 4x Vertical Overscan Multiplier
-                      (   memory_map.asm):00043                   ;     VV:01 = 3x Vertical Overscan Multiplier
-                      (   memory_map.asm):00044                   ;     VV:10 = 2x Vertical Overscan Multiplier
-                      (   memory_map.asm):00045                   ;     VV:11 = 1x Vertical Overscan Multiplier
-                      (   memory_map.asm):00046                 
-     1C01             (   memory_map.asm):00047         DSP_EXT      = $1C01    ;  (Byte) Extended Graphics Register
-                      (   memory_map.asm):00048                   ; DSP_EXT: ABCD.EFGG
-                      (   memory_map.asm):00049                   ;      AA:00 = Extended Graphics 1bpp (2-color mode) 
-                      (   memory_map.asm):00050                   ;      AA:01 = Extended Graphics 2bpp (4-color mode) 
-                      (   memory_map.asm):00051                   ;      AA:10 = Extended Graphics 4bpp (16-color mode) 
-                      (   memory_map.asm):00052                   ;      AA:11 = Extended Graphics 4bpp (16-color mode) 
-                      (   memory_map.asm):00053                   ;      B:0   = Extended Graphics: DISABLED 
-                      (   memory_map.asm):00054                   ;      B:1   = Extended Graphics: ENABLED 
-                      (   memory_map.asm):00055                   ;      C:0   = Extended Extended Mode: BITMAP 
-                      (   memory_map.asm):00056                   ;      C:1   = Extended Extended Mode: TILES 
-                      (   memory_map.asm):00057                   ;      D:0   = Standard Graphics: DISABLED 
-                      (   memory_map.asm):00058                   ;      D:1   = Standard Graphics: ENABLED 
-                      (   memory_map.asm):00059                   ;      E:0   = Standard Display Mode: TEXT 
-                      (   memory_map.asm):00060                   ;      E:1   = Standard Display Mode: BITMAP 
-                      (   memory_map.asm):00061                   ;      F:0   = VSYNC OFF 
-                      (   memory_map.asm):00062                   ;      F:1   = VSYNC ON 
-                      (   memory_map.asm):00063                   ;      B:0   = Fullscreen Enabled( emulator only ) 
-                      (   memory_map.asm):00064                   ;      B:1   = Windowed Enabled ( emulator only ) 
-                      (   memory_map.asm):00065                 
-     1C02             (   memory_map.asm):00066         STD_VID_MAX  = $1C02    ;  (Word) Standard Video Buffer Max
+     1C00             (   memory_map.asm):00028         STD_VID_MAX  = $1C00    ;  (Word) Standard Video Buffer Max
+                      (   memory_map.asm):00029                 
+     1C02             (   memory_map.asm):00030         DSP_GRES     = $1C02    ;  (Byte) Screen Resolution Register
+                      (   memory_map.asm):00031                   ; DSP_GRES: BBRR.HHVV
+                      (   memory_map.asm):00032                   ;     BB:00 = Standard Graphics 1-bpp (2-color mode)
+                      (   memory_map.asm):00033                   ;     BB:01 = Standard Graphics 2-bpp (4-color mode)
+                      (   memory_map.asm):00034                   ;     BB:10 = Standard Graphics 4-bpp (16-color mode)
+                      (   memory_map.asm):00035                   ;     BB:11 = Standard Graphics 8-bpp (256-color mode)
+                      (   memory_map.asm):00036                   ;     RR:00 = 16:9  aspect (1.777778)
+                      (   memory_map.asm):00037                   ;     RR:01 = 16:10 aspect (1.600000)
+                      (   memory_map.asm):00038                   ;     RR:10 = 16:11 aspect (1.454545)
+                      (   memory_map.asm):00039                   ;     RR:11 = 16:12 aspect (1.333333)
+                      (   memory_map.asm):00040                   ;     HH:00 = 4x Horizontal Overscan Multiplier
+                      (   memory_map.asm):00041                   ;     HH:01 = 3x Horizontal Overscan Multiplier
+                      (   memory_map.asm):00042                   ;     HH:10 = 2x Horizontal Overscan Multiplier
+                      (   memory_map.asm):00043                   ;     HH:11 = 1x Horizontal Overscan Multiplier
+                      (   memory_map.asm):00044                   ;     VV:00 = 4x Vertical Overscan Multiplier
+                      (   memory_map.asm):00045                   ;     VV:01 = 3x Vertical Overscan Multiplier
+                      (   memory_map.asm):00046                   ;     VV:10 = 2x Vertical Overscan Multiplier
+                      (   memory_map.asm):00047                   ;     VV:11 = 1x Vertical Overscan Multiplier
+                      (   memory_map.asm):00048                 
+     1C03             (   memory_map.asm):00049         DSP_EXT      = $1C03    ;  (Byte) Extended Graphics Register
+                      (   memory_map.asm):00050                   ; DSP_EXT: ABCD.EFGG
+                      (   memory_map.asm):00051                   ;      AA:00 = Extended Graphics 1bpp (2-color mode) 
+                      (   memory_map.asm):00052                   ;      AA:01 = Extended Graphics 2bpp (4-color mode) 
+                      (   memory_map.asm):00053                   ;      AA:10 = Extended Graphics 4bpp (16-color mode) 
+                      (   memory_map.asm):00054                   ;      AA:11 = Extended Graphics 4bpp (16-color mode) 
+                      (   memory_map.asm):00055                   ;      B:0   = Extended Graphics: DISABLED 
+                      (   memory_map.asm):00056                   ;      B:1   = Extended Graphics: ENABLED 
+                      (   memory_map.asm):00057                   ;      C:0   = Extended Extended Mode: BITMAP 
+                      (   memory_map.asm):00058                   ;      C:1   = Extended Extended Mode: TILES 
+                      (   memory_map.asm):00059                   ;      D:0   = Standard Graphics: DISABLED 
+                      (   memory_map.asm):00060                   ;      D:1   = Standard Graphics: ENABLED 
+                      (   memory_map.asm):00061                   ;      E:0   = Standard Display Mode: TEXT 
+                      (   memory_map.asm):00062                   ;      E:1   = Standard Display Mode: BITMAP 
+                      (   memory_map.asm):00063                   ;      F:0   = VSYNC OFF 
+                      (   memory_map.asm):00064                   ;      F:1   = VSYNC ON 
+                      (   memory_map.asm):00065                   ;      B:0   = Fullscreen Enabled( emulator only ) 
+                      (   memory_map.asm):00066                   ;      B:1   = Windowed Enabled ( emulator only ) 
                       (   memory_map.asm):00067                 
      1C04             (   memory_map.asm):00068         DSP_ERR      = $1C04    ;  (Byte) Display Sub-System Error Code Register
                       (   memory_map.asm):00069                   ; DSP_ERR: ABCD.EFGH
@@ -77,63 +77,87 @@
                       (   memory_map.asm):00076                   ;      G:0   = Reserved 
                       (   memory_map.asm):00077                   ;      H:0   = Reserved 
                       (   memory_map.asm):00078                 
-                      (   memory_map.asm):00079             ; 5115 ($13FB) bytes remaining for additional registers.
-     1C05             (   memory_map.asm):00080         RESERVED     = $1C05  
+     1C05             (   memory_map.asm):00079         DSP_TXT_COLS = $1C05    ;  (Byte) READ-ONLY Text Screen Columns
+     1C06             (   memory_map.asm):00080         DSP_TXT_ROWS = $1C06    ;  (Byte) READ-ONLY Text Screens Rows
                       (   memory_map.asm):00081                 
-                      (   memory_map.asm):00082                   ; User RAM (32K)
-     3000             (   memory_map.asm):00083         USER_RAM     = $3000  
-                      (   memory_map.asm):00084                 
-                      (   memory_map.asm):00085                   ; Paged RAM (8K)
-     B000             (   memory_map.asm):00086         PAGED_RAM    = $B000  
-                      (   memory_map.asm):00087                 
-                      (   memory_map.asm):00088                   ; PAGED ROM (8K bytes)
-     D000             (   memory_map.asm):00089         PAGED_ROM    = $D000  
-                      (   memory_map.asm):00090                 
-                      (   memory_map.asm):00091                   ; KERNEL ROM (4K bytes)
-     F000             (   memory_map.asm):00092         KERNEL_ROM   = $F000  
-                      (   memory_map.asm):00093                 
-                      (   memory_map.asm):00094                   ; Hardware Interrupt Vectors:
-     FFF0             (   memory_map.asm):00095         HARD_RSRVD   = $FFF0    ; Motorola RESERVED Hardware Interrupt Vector
-     FFF2             (   memory_map.asm):00096         HARD_SWI3    = $FFF2    ; SWI3 Hardware Interrupt Vector
-     FFF4             (   memory_map.asm):00097         HARD_SWI2    = $FFF4    ; SWI2 Hardware Interrupt Vector
-     FFF6             (   memory_map.asm):00098         HARD_FIRQ    = $FFF6    ; FIRQ Hardware Interrupt Vector
-     FFF8             (   memory_map.asm):00099         HARD_IRQ     = $FFF8    ; IRQ Hardware Interrupt Vector
-     FFFA             (   memory_map.asm):00100         HARD_SWI     = $FFFA    ; SWI / SYS Hardware Interrupt Vector
-     FFFC             (   memory_map.asm):00101         HARD_NMI     = $FFFC    ; NMI Hardware Interrupt Vector
-     FFFE             (   memory_map.asm):00102         HARD_RESET   = $FFFE    ; RESET Hardware Interrupt Vector
-                      (   memory_map.asm):00103         ; END of definitions
-                      (  kernel_f000.asm):00002         
-                      (  kernel_f000.asm):00003                 org     $f000   
-                      (  kernel_f000.asm):00004         
-F000                  (  kernel_f000.asm):00005         start   
-                      (  kernel_f000.asm):00006         
-                      (  kernel_f000.asm):00007         ; fill the screen
-F000 8600             (  kernel_f000.asm):00008                 lda     #$00
-F002 8E0400           (  kernel_f000.asm):00009                 ldx     #SCREEN_BUFFER
-F005                  (  kernel_f000.asm):00010         lp1     
-F005 4C               (  kernel_f000.asm):00011                 inca
-F006 A780             (  kernel_f000.asm):00012                 sta     ,x+
-F008 BC1C02           (  kernel_f000.asm):00013                 cmpx    STD_VID_MAX
-F00B 2FF8             (  kernel_f000.asm):00014                 ble     lp1
-                      (  kernel_f000.asm):00015         ; increment the screen
-F00D                  (  kernel_f000.asm):00016         inc_screen
-F00D 8E0400           (  kernel_f000.asm):00017                 ldx     #SCREEN_BUFFER
-F010                  (  kernel_f000.asm):00018         lp2
-F010 6C80             (  kernel_f000.asm):00019                 inc     ,x+
-F012 BC1C02           (  kernel_f000.asm):00020                 cmpx    STD_VID_MAX
-F015 2FF9             (  kernel_f000.asm):00021                 ble     lp2
-                      (  kernel_f000.asm):00022         
-F017 20F4             (  kernel_f000.asm):00023                 bra     inc_screen
-                      (  kernel_f000.asm):00024         
-                      (  kernel_f000.asm):00025         
-                      (  kernel_f000.asm):00026         
-                      (  kernel_f000.asm):00027         
-                      (  kernel_f000.asm):00028                 org     $FFF0
-FFF0 0000             (  kernel_f000.asm):00029                 fdb     $0000   ; HARD_RSRVD    Motorola RESERVED Hardware Interrupt Vector
-FFF2 0000             (  kernel_f000.asm):00030                 fdb     $0000   ; HARD_SWI3     SWI3 Hardware Interrupt Vector
-FFF4 0000             (  kernel_f000.asm):00031                 fdb     $0000   ; HARD_SWI2     SWI2 Hardware Interrupt Vector
-FFF6 0000             (  kernel_f000.asm):00032                 fdb     $0000   ; HARD_FIRQ     FIRQ Hardware Interrupt Vector
-FFF8 0000             (  kernel_f000.asm):00033                 fdb     $0000   ; HARD_IRQ      IRQ Hardware Interrupt Vector
-FFFA 0000             (  kernel_f000.asm):00034                 fdb     $0000   ; HARD_SWI      SWI / SYS Hardware Interrupt Vector
-FFFC 0000             (  kernel_f000.asm):00035                 fdb     $0000   ; HARD_NMI      NMI Hardware Interrupt Vector
-FFFE F000             (  kernel_f000.asm):00036                 fdb     $F000   ; HARD_RESET    RESET Hardware Interrupt Vector
+     1C07             (   memory_map.asm):00082         DSP_PAL_IDX  = $1C07    ;  (Byte) Color Palette Index
+                      (   memory_map.asm):00083                   ; DSP_PAL_IDX: 0-255
+                      (   memory_map.asm):00084                   ; Note: Use this register to set the index into theColor Palette. 
+                      (   memory_map.asm):00085                   ;   Set this value prior referencing color data (DSP_PAL_CLR).
+                      (   memory_map.asm):00086                 
+     1C08             (   memory_map.asm):00087         DSP_PAL_CLR  = $1C08    ;  (Word) Indexed Color Palette Data
+                      (   memory_map.asm):00088                   ; DSP_PAL_CLR: Color Data A4R4G4B4 format
+                      (   memory_map.asm):00089                   ; Note: This is the color data for an individual palette entry.
+                      (   memory_map.asm):00090                   ;     Write to DSP_PAL_IDX with the index within the color palette
+                      (   memory_map.asm):00091                   ;     prior to reading or writing the color data in the DSP_PAL_CLR register.
+                      (   memory_map.asm):00092                 
+                      (   memory_map.asm):00093             ; 5110 ($13F6) bytes remaining for additional registers.
+     1C0A             (   memory_map.asm):00094         RESERVED     = $1C0A  
+                      (   memory_map.asm):00095                 
+                      (   memory_map.asm):00096                   ; User RAM (32K)
+     3000             (   memory_map.asm):00097         USER_RAM     = $3000  
+                      (   memory_map.asm):00098                 
+                      (   memory_map.asm):00099                   ; Paged RAM (8K)
+     B000             (   memory_map.asm):00100         PAGED_RAM    = $B000  
+                      (   memory_map.asm):00101                 
+                      (   memory_map.asm):00102                   ; PAGED ROM (8K bytes)
+     D000             (   memory_map.asm):00103         PAGED_ROM    = $D000  
+                      (   memory_map.asm):00104                 
+                      (   memory_map.asm):00105                   ; KERNEL ROM (4K bytes)
+     F000             (   memory_map.asm):00106         KERNEL_ROM   = $F000  
+                      (   memory_map.asm):00107                 
+                      (   memory_map.asm):00108                   ; Hardware Interrupt Vectors:
+     FFF0             (   memory_map.asm):00109         HARD_RSRVD   = $FFF0    ; Motorola RESERVED Hardware Interrupt Vector
+     FFF2             (   memory_map.asm):00110         HARD_SWI3    = $FFF2    ; SWI3 Hardware Interrupt Vector
+     FFF4             (   memory_map.asm):00111         HARD_SWI2    = $FFF4    ; SWI2 Hardware Interrupt Vector
+     FFF6             (   memory_map.asm):00112         HARD_FIRQ    = $FFF6    ; FIRQ Hardware Interrupt Vector
+     FFF8             (   memory_map.asm):00113         HARD_IRQ     = $FFF8    ; IRQ Hardware Interrupt Vector
+     FFFA             (   memory_map.asm):00114         HARD_SWI     = $FFFA    ; SWI / SYS Hardware Interrupt Vector
+     FFFC             (   memory_map.asm):00115         HARD_NMI     = $FFFC    ; NMI Hardware Interrupt Vector
+     FFFE             (   memory_map.asm):00116         HARD_RESET   = $FFFE    ; RESET Hardware Interrupt Vector
+                      (   memory_map.asm):00117         ; END of definitions
+                      (asm/kernel_f000.a):00002         
+                      (asm/kernel_f000.a):00003                 org     $f000   
+                      (asm/kernel_f000.a):00004         
+F000                  (asm/kernel_f000.a):00005         start   
+                      (asm/kernel_f000.a):00006         
+                      (asm/kernel_f000.a):00007         ; fill the screen
+F000 8600             (asm/kernel_f000.a):00008                 lda     #$00
+F002 8E0400           (asm/kernel_f000.a):00009                 ldx     #SCREEN_BUFFER
+F005                  (asm/kernel_f000.a):00010         lp1     
+F005 4C               (asm/kernel_f000.a):00011                 inca
+F006 A780             (asm/kernel_f000.a):00012                 sta     ,x+
+F008 BC1C00           (asm/kernel_f000.a):00013                 cmpx    STD_VID_MAX
+F00B 2FF8             (asm/kernel_f000.a):00014                 ble     lp1
+                      (asm/kernel_f000.a):00015         
+                      (asm/kernel_f000.a):00016         ; cycle color 0
+                      (asm/kernel_f000.a):00017         ;       lda     #0      
+                      (asm/kernel_f000.a):00018         ;lp2    sta     DSP_PAL_IDX
+                      (asm/kernel_f000.a):00019         ;       ldy     DSP_PAL_CLR
+                      (asm/kernel_f000.a):00020         ;       leay    256,y
+                      (asm/kernel_f000.a):00021         ;       sty     DSP_PAL_CLR
+                      (asm/kernel_f000.a):00022         ;       inca
+                      (asm/kernel_f000.a):00023         ;       bra     lp2
+                      (asm/kernel_f000.a):00024         
+                      (asm/kernel_f000.a):00025         ; increment the screen
+F00D                  (asm/kernel_f000.a):00026         inc_screen
+F00D 8E0400           (asm/kernel_f000.a):00027                 ldx     #SCREEN_BUFFER
+F010                  (asm/kernel_f000.a):00028         lp3
+F010 6C80             (asm/kernel_f000.a):00029                 inc     ,x+
+F012 BC1C00           (asm/kernel_f000.a):00030                 cmpx    STD_VID_MAX
+F015 2FF9             (asm/kernel_f000.a):00031                 ble     lp3
+                      (asm/kernel_f000.a):00032         
+F017 20F4             (asm/kernel_f000.a):00033                 bra     inc_screen
+                      (asm/kernel_f000.a):00034         
+                      (asm/kernel_f000.a):00035         
+                      (asm/kernel_f000.a):00036         
+                      (asm/kernel_f000.a):00037         
+                      (asm/kernel_f000.a):00038                 org     $FFF0
+FFF0 0000             (asm/kernel_f000.a):00039                 fdb     $0000   ; HARD_RSRVD    Motorola RESERVED Hardware Interrupt Vector
+FFF2 0000             (asm/kernel_f000.a):00040                 fdb     $0000   ; HARD_SWI3     SWI3 Hardware Interrupt Vector
+FFF4 0000             (asm/kernel_f000.a):00041                 fdb     $0000   ; HARD_SWI2     SWI2 Hardware Interrupt Vector
+FFF6 0000             (asm/kernel_f000.a):00042                 fdb     $0000   ; HARD_FIRQ     FIRQ Hardware Interrupt Vector
+FFF8 0000             (asm/kernel_f000.a):00043                 fdb     $0000   ; HARD_IRQ      IRQ Hardware Interrupt Vector
+FFFA 0000             (asm/kernel_f000.a):00044                 fdb     $0000   ; HARD_SWI      SWI / SYS Hardware Interrupt Vector
+FFFC 0000             (asm/kernel_f000.a):00045                 fdb     $0000   ; HARD_NMI      NMI Hardware Interrupt Vector
+FFFE F000             (asm/kernel_f000.a):00046                 fdb     $F000   ; HARD_RESET    RESET Hardware Interrupt Vector

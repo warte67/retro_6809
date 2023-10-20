@@ -25,7 +25,9 @@ SCREEN_BUFFER = $0400
           ; Device Registers:
 HDW_REGS     = $1C00    ; Begin Device Hardware Registers
         
-DSP_GRES     = $1C00    ;  (Byte) Screen Resolution Register
+STD_VID_MAX  = $1C00    ;  (Word) Standard Video Buffer Max
+        
+DSP_GRES     = $1C02    ;  (Byte) Screen Resolution Register
           ; DSP_GRES: BBRR.HHVV
           ;     BB:00 = Standard Graphics 1-bpp (2-color mode)
           ;     BB:01 = Standard Graphics 2-bpp (4-color mode)
@@ -44,7 +46,7 @@ DSP_GRES     = $1C00    ;  (Byte) Screen Resolution Register
           ;     VV:10 = 2x Vertical Overscan Multiplier
           ;     VV:11 = 1x Vertical Overscan Multiplier
         
-DSP_EXT      = $1C01    ;  (Byte) Extended Graphics Register
+DSP_EXT      = $1C03    ;  (Byte) Extended Graphics Register
           ; DSP_EXT: ABCD.EFGG
           ;      AA:00 = Extended Graphics 1bpp (2-color mode) 
           ;      AA:01 = Extended Graphics 2bpp (4-color mode) 
@@ -63,8 +65,6 @@ DSP_EXT      = $1C01    ;  (Byte) Extended Graphics Register
           ;      B:0   = Fullscreen Enabled( emulator only ) 
           ;      B:1   = Windowed Enabled ( emulator only ) 
         
-STD_VID_MAX  = $1C02    ;  (Word) Standard Video Buffer Max
-        
 DSP_ERR      = $1C04    ;  (Byte) Display Sub-System Error Code Register
           ; DSP_ERR: ABCD.EFGH
           ;      A:0   = Standard Buffer Overflow 
@@ -76,8 +76,22 @@ DSP_ERR      = $1C04    ;  (Byte) Display Sub-System Error Code Register
           ;      G:0   = Reserved 
           ;      H:0   = Reserved 
         
-    ; 5115 ($13FB) bytes remaining for additional registers.
-RESERVED     = $1C05  
+DSP_TXT_COLS = $1C05    ;  (Byte) READ-ONLY Text Screen Columns
+DSP_TXT_ROWS = $1C06    ;  (Byte) READ-ONLY Text Screens Rows
+        
+DSP_PAL_IDX  = $1C07    ;  (Byte) Color Palette Index
+          ; DSP_PAL_IDX: 0-255
+          ; Note: Use this register to set the index into theColor Palette. 
+          ;   Set this value prior referencing color data (DSP_PAL_CLR).
+        
+DSP_PAL_CLR  = $1C08    ;  (Word) Indexed Color Palette Data
+          ; DSP_PAL_CLR: Color Data A4R4G4B4 format
+          ; Note: This is the color data for an individual palette entry.
+          ;     Write to DSP_PAL_IDX with the index within the color palette
+          ;     prior to reading or writing the color data in the DSP_PAL_CLR register.
+        
+    ; 5110 ($13F6) bytes remaining for additional registers.
+RESERVED     = $1C0A  
         
           ; User RAM (32K)
 USER_RAM     = $3000  

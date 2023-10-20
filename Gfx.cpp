@@ -13,19 +13,19 @@ Byte Gfx::read(Word offset, bool debug )
 {
 	switch (offset)
 	{
-		case STD_VID_MAX:	return _std_vid_max >> 8;
-		case STD_VID_MAX+1:	return _std_vid_max & 0xFF;
-		
-		case DSP_GRES: 		return _dsp_gres;
-		case DSP_EXT:		return _dsp_ext;
-		case DSP_ERR:
-		{
-			Byte err = _dsp_err;
-			_dsp_err = 0;			// reset the error when read
-			return err;
-		} 
-	}
+		case STD_VID_MAX:		return _std_vid_max >> 8;
+		case STD_VID_MAX+1:		return _std_vid_max & 0xFF;		
+		case DSP_GRES: 			return _dsp_gres;
+		case DSP_EXT:			return _dsp_ext;
+		case DSP_ERR:			{ Byte err = _dsp_err;	_dsp_err = 0;	return err; } 
+        case DSP_TXT_COLS:      return _texture_width / 8;      // read-only
+        case DSP_TXT_ROWS:      return _texture_height / 8;     // read-only
 
+        // color palete registers
+        case DSP_PAL_IDX:   	return _dsp_pal_idx;
+        case DSP_PAL_CLR+1: 	return (_palette[_dsp_pal_idx].color >> 8) & 0xFF;
+        case DSP_PAL_CLR+0: 	return _palette[_dsp_pal_idx].color  & 0xFF;	
+	}
 	return 0xCC;	//data;
 }
 
@@ -51,6 +51,21 @@ void Gfx::write(Word offset, Byte data, bool debug)
 		_dsp_err = data;
 		Bus::Inst().write(DSP_ERR, _dsp_err, true);
 	}
+    // color palete registers
+	if (offset == DSP_PAL_IDX)	{ _dsp_pal_idx = data;  return; }
+	if (offset == DSP_PAL_CLR) 
+	{
+		Word c = _palette[_dsp_pal_idx].color & 0xff00;
+		_palette[_dsp_pal_idx].color = c | data;
+		return;
+	}
+	if (offset == DSP_PAL_CLR+1)
+	{
+		Word c = _palette[_dsp_pal_idx].color & 0x00ff;
+		_palette[_dsp_pal_idx].color = c | ((Word)data << 8);
+		return; 
+	}
+
 }
 
 
@@ -58,6 +73,10 @@ Word Gfx::OnAttach(Word nextAddr)
 { 
     int size = 0;
     Word old_addr = nextAddr;
+
+    DisplayEnum("", 0, "");
+    DisplayEnum("STD_VID_MAX", nextAddr, " (Word) Standard Video Buffer Max");
+    nextAddr+=2;
 
     DisplayEnum("", 0, "");
     DisplayEnum("DSP_GRES", nextAddr, " (Byte) Screen Resolution Register");
@@ -102,10 +121,6 @@ Word Gfx::OnAttach(Word nextAddr)
     nextAddr++;
 
     DisplayEnum("", 0, "");
-    DisplayEnum("STD_VID_MAX", nextAddr, " (Word) Standard Video Buffer Max");
-    nextAddr+=2;
-
-    DisplayEnum("", 0, "");
     DisplayEnum("DSP_ERR", nextAddr, " (Byte) Display Sub-System Error Code Register");
     DisplayEnum("", 0, "DSP_ERR: ABCD.EFGH");
     DisplayEnum("", 0, "     A:0   = Standard Buffer Overflow ");
@@ -123,6 +138,21 @@ Word Gfx::OnAttach(Word nextAddr)
     nextAddr += 1;
     DisplayEnum("DSP_TXT_ROWS", nextAddr, " (Byte) READ-ONLY Text Screens Rows");
     nextAddr += 1;
+
+    DisplayEnum("", 0, "");
+    DisplayEnum("DSP_PAL_IDX", nextAddr, " (Byte) Color Palette Index");
+    DisplayEnum("", 0, "DSP_PAL_IDX: 0-255");
+    DisplayEnum("", 0, "Note: Use this register to set the index into theColor Palette. ");
+    DisplayEnum("", 0, "  Set this value prior referencing color data (DSP_PAL_CLR).");
+    nextAddr += 1;
+
+    DisplayEnum("", 0, "");
+    DisplayEnum("DSP_PAL_CLR", nextAddr, " (Word) Indexed Color Palette Data");
+    DisplayEnum("", 0, "DSP_PAL_CLR: Color Data A4R4G4B4 format");
+    DisplayEnum("", 0, "Note: This is the color data for an individual palette entry.");
+    DisplayEnum("", 0, "    Write to DSP_PAL_IDX with the index within the color palette");
+    DisplayEnum("", 0, "    prior to reading or writing the color data in the DSP_PAL_CLR register.");
+    nextAddr += 2;
 
 
 	// add more gfx registers here
@@ -429,6 +459,12 @@ void Gfx::OnUpdate(float fElapsedTime)
 		// do nothing extra anymore
 		// video buffer is being updated via asm
 		// the 6809 CPU should nowbe working
+
+		// // palette test
+		// write(DSP_PAL_IDX, 1);
+		// Word clr = read_word(DSP_PAL_CLR)+1;
+		// write(DSP_PAL_CLR, clr);
+
 
 		// update the display textures
 		_display_extended();

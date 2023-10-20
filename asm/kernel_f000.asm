@@ -12,13 +12,23 @@ lp1
 	sta	,x+
 	cmpx	STD_VID_MAX
 	ble	lp1
+
+; cycle color 0
+;	lda	#0	
+;lp2	sta	DSP_PAL_IDX
+;	ldy	DSP_PAL_CLR
+;	leay	256,y
+;	sty	DSP_PAL_CLR
+;	inca
+;	bra	lp2
+
 ; increment the screen
 inc_screen
 	ldx	#SCREEN_BUFFER
-lp2
+lp3
 	inc	,x+
 	cmpx	STD_VID_MAX
-	ble	lp2
+	ble	lp3
 
 	bra	inc_screen
 
