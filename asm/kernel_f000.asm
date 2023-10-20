@@ -13,7 +13,7 @@ lp1
 	cmpx	STD_VID_MAX
 	ble	lp1
 
-; cycle color 0
+; cycle the palette colors
 ;	lda	#0	
 ;lp2	sta	DSP_PAL_IDX
 ;	ldy	DSP_PAL_CLR
