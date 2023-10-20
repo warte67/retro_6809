@@ -11,20 +11,20 @@
 
 Byte Gfx::read(Word offset, bool debug )
 {
-	if (offset == DSP_GRES)
-		return _dsp_gres;
-	if (offset == DSP_EXT)
-		return _dsp_ext;
-	if (offset == DSP_ERR)
+	switch (offset)
 	{
-		Byte err = _dsp_err;
-		_dsp_err = 0;			// reset the error when read
-		return err;
+		case STD_VID_MAX:	return _std_vid_max >> 8;
+		case STD_VID_MAX+1:	return _std_vid_max & 0xFF;
+		
+		case DSP_GRES: 		return _dsp_gres;
+		case DSP_EXT:		return _dsp_ext;
+		case DSP_ERR:
+		{
+			Byte err = _dsp_err;
+			_dsp_err = 0;			// reset the error when read
+			return err;
+		} 
 	}
-	if (offset == STD_VID_MAX)
-		return _std_vid_max >> 8;
-	if (offset == STD_VID_MAX+1)
-		return _std_vid_max & 0xFF;
 
 	return 0xCC;	//data;
 }
@@ -117,6 +117,12 @@ Word Gfx::OnAttach(Word nextAddr)
     DisplayEnum("", 0, "     G:0   = Reserved ");
     DisplayEnum("", 0, "     H:0   = Reserved ");
 	nextAddr++;
+
+    DisplayEnum("", 0, "");
+    DisplayEnum("DSP_TXT_COLS", nextAddr, " (Byte) READ-ONLY Text Screen Columns");
+    nextAddr += 1;
+    DisplayEnum("DSP_TXT_ROWS", nextAddr, " (Byte) READ-ONLY Text Screens Rows");
+    nextAddr += 1;
 
 
 	// add more gfx registers here

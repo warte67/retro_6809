@@ -82,8 +82,11 @@ DSP_ERR      = 0x1C04, //  (Byte) Display Sub-System Error Code Register
         //      G:0   = Reserved 
         //      H:0   = Reserved 
         
-    // 5115 ($13FB) bytes remaining for additional registers.
-RESERVED     = 0x1C05, 
+DSP_TXT_COLS = 0x1C05, //  (Byte) READ-ONLY Text Screen Columns
+DSP_TXT_ROWS = 0x1C06, //  (Byte) READ-ONLY Text Screens Rows
+        
+    // 5113 ($13F9) bytes remaining for additional registers.
+RESERVED     = 0x1C07, 
         
         // User RAM (32K)
 USER_RAM     = 0x3000, 
@@ -110,3 +113,4 @@ HARD_RESET   = 0xFFFE, // RESET Hardware Interrupt Vector
 
 
 #endif // __MEMORY_MAP_H__
+
