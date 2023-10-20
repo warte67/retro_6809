@@ -18,7 +18,8 @@
 							// and use static read and write:
 							// 		Bus::Read() and Bus::Write()
 
-
+// forward declarations
+//class C6809;
 
 
 class Bus
@@ -30,7 +31,6 @@ class Bus
 		inline static bool s_bIsDirty = true;
 		Gfx* m_gfx = nullptr;
 		int _fps = 0;
-
 
 	public:
 		~Bus();									// destructor
@@ -79,7 +79,7 @@ class Bus
 
 		// load hex helpers
 		Byte _fread_hex_byte(std::ifstream& ifs);
-		Word _fread_hex_word(std::ifstream& ifs);		
+		Word _fread_hex_word(std::ifstream& ifs);	
 
 };    
 

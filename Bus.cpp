@@ -127,7 +127,7 @@ Bus::Bus()
     dev->DisplayEnum("",0, "");
     dev->DisplayEnum("",0xF000, "KERNEL ROM (4K bytes)");
     dev = new ROM("KERNEL_ROM");
-    addr += Attach(dev, 4*1024);      
+    addr += Attach(dev, 4*1024);   
 
 	//printf("ADDR: 0x%04X \n", addr);
 
@@ -173,45 +173,15 @@ Bus::Bus()
     // OnInit()     // call for each attached device
     _onInit();
 
-    // start up external threads
-    // m_cpu = new C6809();  
-	// if (m_cpu == nullptr)
-	// 	Bus::Error("Unable to attach the CPU");
-
-	// else
-	// 	m_thread = std::thread(&Bus::_cpuThread);
+	// load up the memory map
+	load_hex("asm/test.hex");	
+	printf("BUS::read(0xFFFE): 0x%04X\n", read_word(0xFFFE));
 }
-
-// void Bus::_cpuThread()
-// {
-// 	Bus &bus = Bus::Inst();
-//     while (s_bIsRunning)
-//     {
-//         // main CPU clock
-//         using clock = std::chrono::system_clock;
-//         using sec = std::chrono::duration<double, std::nano>;
-//         static auto before_CPU = clock::now();
-//         const sec duration = clock::now() - before_CPU;
-//         if (duration.count() > 500.0f) {		// 1000.f = 1mhz, 500.0f = 2mhz
-//             before_CPU = clock::now();
-//             if (bus._bCpuEnabled)
-//                 bus.m_cpu->clock();
-//         }
-//     }
-// }
 
 
 Bus::~Bus()
 {
 	std::cout << "Bus::~Bus()\n";
-
-    // // shutdown external threads
-	// if (m_cpu)
-    // {
-	// 	// m_thread.join();
-	// 	delete m_cpu;
-	// 	m_cpu = nullptr;
-	// }
 
     // close SDL
     SDL_Quit();
@@ -518,7 +488,7 @@ void Bus::load_hex(const char* filename)
 				b = _fread_hex_byte(ifs);
 				// std::cout << "0x" << hex(addr,4) << ":";
 				// std::cout << "0x" << hex(b, 2) << std::endl;
-				Bus::Inst().write(addr,b,true);
+				write(addr,b,true);
 				++addr;
 			}
 			// Read and discard checksum byte
