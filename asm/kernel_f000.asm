@@ -23,25 +23,25 @@ lp1
 ;	bra	lp2
 
 ; increment the text glyph bitmaps
-	lda	#0
-lp4	sta	DSP_GLYPH_IDX
-	ldx	#DSP_GLYPH_DATA
-lp_b	rol	,x+
-	cmpx	#DSP_GLYPH_DATA+8
-	blt	lp_b
-	inca
-	bra	lp4
+;	lda	#0
+;lp4	sta	DSP_GLYPH_IDX
+;	ldx	#DSP_GLYPH_DATA
+;lp_b	rol	,x+
+;	cmpx	#DSP_GLYPH_DATA+8
+;	blt	lp_b
+;	inca
+;	bra	lp4
 
 
-; increment the screen
-;inc_screen
-;	ldx	#SCREEN_BUFFER
-;lp3
-;	inc	,x+
-;	cmpx	STD_VID_MAX
-;	ble	lp3
-;
-;	bra	inc_screen
+; increment the characters on the screen
+inc_screen
+	ldx	#SCREEN_BUFFER
+lp3
+	inc	,x+
+	cmpx	STD_VID_MAX
+	ble	lp3
+
+	bra	inc_screen
 
 
 

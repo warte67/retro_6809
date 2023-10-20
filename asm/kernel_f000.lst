@@ -151,25 +151,25 @@ F00B 2FF8             (asm/kernel_f000.a):00014                 ble     lp1
                       (asm/kernel_f000.a):00023         ;       bra     lp2
                       (asm/kernel_f000.a):00024         
                       (asm/kernel_f000.a):00025         ; increment the text glyph bitmaps
-F00D 8600             (asm/kernel_f000.a):00026                 lda     #0
-F00F B71C0A           (asm/kernel_f000.a):00027         lp4     sta     DSP_GLYPH_IDX
-F012 8E1C0B           (asm/kernel_f000.a):00028                 ldx     #DSP_GLYPH_DATA
-F015 6980             (asm/kernel_f000.a):00029         lp_b    rol     ,x+
-F017 8C1C13           (asm/kernel_f000.a):00030                 cmpx    #DSP_GLYPH_DATA+8
-F01A 2DF9             (asm/kernel_f000.a):00031                 blt     lp_b
-F01C 4C               (asm/kernel_f000.a):00032                 inca
-F01D 20F0             (asm/kernel_f000.a):00033                 bra     lp4
+                      (asm/kernel_f000.a):00026         ;       lda     #0
+                      (asm/kernel_f000.a):00027         ;lp4    sta     DSP_GLYPH_IDX
+                      (asm/kernel_f000.a):00028         ;       ldx     #DSP_GLYPH_DATA
+                      (asm/kernel_f000.a):00029         ;lp_b   rol     ,x+
+                      (asm/kernel_f000.a):00030         ;       cmpx    #DSP_GLYPH_DATA+8
+                      (asm/kernel_f000.a):00031         ;       blt     lp_b
+                      (asm/kernel_f000.a):00032         ;       inca
+                      (asm/kernel_f000.a):00033         ;       bra     lp4
                       (asm/kernel_f000.a):00034         
                       (asm/kernel_f000.a):00035         
-                      (asm/kernel_f000.a):00036         ; increment the screen
-                      (asm/kernel_f000.a):00037         ;inc_screen
-                      (asm/kernel_f000.a):00038         ;       ldx     #SCREEN_BUFFER
-                      (asm/kernel_f000.a):00039         ;lp3
-                      (asm/kernel_f000.a):00040         ;       inc     ,x+
-                      (asm/kernel_f000.a):00041         ;       cmpx    STD_VID_MAX
-                      (asm/kernel_f000.a):00042         ;       ble     lp3
-                      (asm/kernel_f000.a):00043         ;
-                      (asm/kernel_f000.a):00044         ;       bra     inc_screen
+                      (asm/kernel_f000.a):00036         ; increment the characters on the screen
+F00D                  (asm/kernel_f000.a):00037         inc_screen
+F00D 8E0400           (asm/kernel_f000.a):00038                 ldx     #SCREEN_BUFFER
+F010                  (asm/kernel_f000.a):00039         lp3
+F010 6C80             (asm/kernel_f000.a):00040                 inc     ,x+
+F012 BC1C00           (asm/kernel_f000.a):00041                 cmpx    STD_VID_MAX
+F015 2FF9             (asm/kernel_f000.a):00042                 ble     lp3
+                      (asm/kernel_f000.a):00043         
+F017 20F4             (asm/kernel_f000.a):00044                 bra     inc_screen
                       (asm/kernel_f000.a):00045         
                       (asm/kernel_f000.a):00046         
                       (asm/kernel_f000.a):00047         
