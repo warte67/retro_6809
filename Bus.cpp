@@ -7,6 +7,8 @@
 #include <chrono>
 #include <iostream>
 #include <fstream>
+#include <thread>
+#include "C6809.h"
 #include "Bus.h"
 
 Bus::Bus()
@@ -175,13 +177,48 @@ Bus::Bus()
 
 	// load up the memory map
 	load_hex("asm/test.hex");	
-	printf("BUS::read(0xFFFE): 0x%04X\n", read_word(0xFFFE));
+	// printf("BUS::read(0xFFFE): 0x%04X\n", read_word(0xFFFE));
+
+	// Install the CPU
+	m_cpu = new C6809(this);
+
+	// start the CPU thread
+	m_cpuThread = std::thread(&Bus::_cpuThread);
+	bCpuEnabled = true;
+}
+
+void Bus::_cpuThread()
+{
+    while (s_bIsRunning)
+    {
+        // main CPU clock
+        using clock = std::chrono::system_clock;
+        using sec = std::chrono::duration<double, std::nano>;
+        static auto before_CPU = clock::now();
+        const sec duration = clock::now() - before_CPU;
+        if (duration.count() > 500.0f) {		// 1000.f = 1mhz, 500.0f = 2mhz
+            before_CPU = clock::now();
+            if (bCpuEnabled)
+                m_cpu->clock();
+        }
+    }
 }
 
 
 Bus::~Bus()
 {
 	std::cout << "Bus::~Bus()\n";
+
+	// shutdown the CPU thread
+	m_cpuThread.join();
+
+	// Remove the CPU
+	if (m_cpu)
+	{
+		delete m_cpu;
+		m_cpu = nullptr;
+	}
+
 
     // close SDL
     SDL_Quit();

@@ -19,7 +19,7 @@
 							// 		Bus::Read() and Bus::Write()
 
 // forward declarations
-//class C6809;
+class C6809;
 
 
 class Bus
@@ -31,6 +31,12 @@ class Bus
 		inline static bool s_bIsDirty = true;
 		Gfx* m_gfx = nullptr;
 		int _fps = 0;
+
+		// CPU Stuff
+		inline static C6809* m_cpu = nullptr;
+		inline static void _cpuThread();
+		inline static bool bCpuEnabled = false;
+		std::thread m_cpuThread;
 
 	public:
 		~Bus();									// destructor
