@@ -33,6 +33,8 @@ class Gfx : public Device
         virtual Byte read(Word offset, bool debug = false);
         virtual void write(Word offset, Byte data, bool debug = false);
 
+        Word Attach(IGfxDevice* dev, Word _lastAddress, Word size = 0);
+
         // public accessors
 
 	protected:

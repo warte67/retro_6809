@@ -31,6 +31,9 @@ class Device
         virtual Word read_word(Word offset, bool debug = false);
         virtual void write_word(Word offset, Word data, bool debug = false);  
 
+        // helpers
+        virtual void DisplayEnum(std::string sToken, Word ofs, std::string sComment);
+
         // public accessors
         std::string name() { return _deviceName; }
         Word Base() { return m_base; }
@@ -41,9 +44,6 @@ class Device
         void Name(std::string n) { _deviceName = n; }
         Byte _memory(Word ofs) { return m_memory[ofs]; }
         void _memory(Word ofs, Byte data) { m_memory[ofs] = data; }
-
-        // helpers
-        void DisplayEnum(std::string sToken, Word ofs, std::string sComment);
 
     protected:
         std::string _deviceName = "??DEV??";

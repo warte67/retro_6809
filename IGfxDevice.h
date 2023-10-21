@@ -8,7 +8,7 @@
 
 class Gfx;
 
-class IGfxDevice : Device
+class IGfxDevice : public Device
 {
 public:
 	IGfxDevice(Gfx* _gfx) : m_gfx(_gfx) {}

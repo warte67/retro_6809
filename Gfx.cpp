@@ -190,9 +190,12 @@ Word Gfx::OnAttach(Word nextAddr)
     DisplayEnum("", 0, "    a row of 8 pixels. ");
     nextAddr += 8;
 
+	// add the mouse registers
+	m_mouse = new Mouse(this);
+	nextAddr += Attach(m_mouse, nextAddr);
+	_gfx_devices.push_back(m_mouse);
 
-	// add more gfx registers here
-	// ....
+
 
 	return nextAddr - old_addr;
 }
@@ -386,10 +389,27 @@ void Gfx::OnInit()
     //     addr+=2;
     // }
 
-	// add the Gfx Devices to the _gfx_devices vector
-	m_mouse = new Mouse(this);
-	_gfx_devices.push_back(m_mouse);
+	// init the other graphics devices
+	for (auto& d : _gfx_devices)
+		d->OnInit();
+}
 
+Word Gfx::Attach(IGfxDevice* dev, Word _lastAddress, Word size)
+{
+	if (dev != nullptr)
+	{
+		if (size == 0)
+			size = dev->OnAttach((Word)_lastAddress);
+		else
+			dev->DisplayEnum(dev->Name(), _lastAddress, "");
+		dev->Base(_lastAddress);
+		dev->Size(size);
+		_lastAddress += size;
+		_gfx_devices.push_back(dev);
+	}
+	if (size > 65536)
+		Bus::Error("Memory allocation beyond 64k boundary!");
+	return size;
 }
 
 void Gfx::OnQuit() 
@@ -402,6 +422,10 @@ void Gfx::OnQuit()
 	}
 	// clear the _gfx_devices vector
 	_gfx_devices.clear();
+
+	// run OnQuit() for the other graphics devices
+	for (auto& d : _gfx_devices)
+		d->OnQuit();
 }
 
 void Gfx::OnActivate() 
@@ -439,6 +463,9 @@ void Gfx::OnActivate()
 	_render_target = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_ARGB4444,
 			SDL_TEXTUREACCESS_TARGET, _texture_width, _texture_height);
 
+	// run OnActivate() for the other graphics devices
+	for (auto& d : _gfx_devices)
+		d->OnActivate();
 }
 
 void Gfx::OnDeactivate()
@@ -468,6 +495,10 @@ void Gfx::OnDeactivate()
 		SDL_DestroyWindow(_window);
 		_window = nullptr;
 	}
+
+	// run OnDeactivate() for the other graphics devices
+	for (auto& d : _gfx_devices)
+		d->OnDeactivate();
 }
 
 void Gfx::OnEvent(SDL_Event* evnt) 
@@ -487,6 +518,11 @@ void Gfx::OnEvent(SDL_Event* evnt)
         }
         break; 
 	}	
+
+	// run OnEvent() for the other graphics devices
+	for (auto& d : _gfx_devices)
+		d->OnEvent(evnt);
+
 }
 
 void Gfx::OnUpdate(float fElapsedTime) 
@@ -518,6 +554,10 @@ void Gfx::OnUpdate(float fElapsedTime)
 		_display_extended();
 		_display_standard();
 	}
+
+	// run OnUpdate() for the other graphics devices
+	for (auto& d : _gfx_devices)
+		d->OnUpdate(fElapsedTime);
 }
 void Gfx::OnRender() 
 {
@@ -543,6 +583,10 @@ void Gfx::OnRender()
     };
     // render the background graphics layer
     SDL_RenderCopy(_renderer, _render_target, NULL, &dest);
+
+	// run OnRender() for the other graphics devices
+	for (auto& d : _gfx_devices)
+		d->OnRender();
 }
 
 void Gfx::OnPresent() 
