@@ -191,7 +191,7 @@ Word Gfx::OnAttach(Word nextAddr)
     nextAddr += 8;
 
 	// add the mouse registers
-	m_mouse = new Mouse(this);
+	m_mouse = new GfxMouse(this);
 	nextAddr += Attach(m_mouse, nextAddr);
 	_gfx_devices.push_back(m_mouse);
 

@@ -6,12 +6,12 @@
 #include "types.h"
 #include "Device.h"
 #include "IGfxDevice.h"
-#include "Mouse.h"
+#include "GfxMouse.h"
 
 class Gfx : public Device
 {
 	friend class Bus;
-    friend class Mouse;
+    friend class GfxMouse;
 	
     public:
         Gfx() {  _deviceName = "GFX_DEVICE"; }
@@ -109,7 +109,7 @@ class Gfx : public Device
 		void _display_extended();
 
         // graphics devices based on the IGfxDevice
-        Mouse* m_mouse = nullptr;
+        GfxMouse* m_mouse = nullptr;
         std::vector< IGfxDevice*> _gfx_devices;
 };
 

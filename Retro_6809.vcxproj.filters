@@ -30,7 +30,7 @@
     <ClCompile Include="C6809.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Mouse.cpp">
+    <ClCompile Include="GfxMouse.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -56,7 +56,7 @@
     <ClInclude Include="IGfxDevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Mouse.h">
+    <ClInclude Include="GfxMouse.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

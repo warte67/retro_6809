@@ -160,7 +160,7 @@
     <ClCompile Include="Device.cpp" />
     <ClCompile Include="Gfx.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Mouse.cpp" />
+    <ClCompile Include="GfxMouse.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bus.h" />
@@ -169,7 +169,7 @@
     <ClInclude Include="Gfx.h" />
     <ClInclude Include="IGfxDevice.h" />
     <ClInclude Include="memory_map.h" />
-    <ClInclude Include="Mouse.h" />
+    <ClInclude Include="GfxMouse.h" />
     <ClInclude Include="types.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
