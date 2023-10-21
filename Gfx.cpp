@@ -190,6 +190,13 @@ Word Gfx::OnAttach(Word nextAddr)
     DisplayEnum("", 0, "    a row of 8 pixels. ");
     nextAddr += 8;
 
+	// ADD THE GFX DEVICES:
+
+	// add the debug registers
+	m_debug = new GfxDebug(this);
+	nextAddr += Attach(m_debug, nextAddr);
+	_gfx_devices.push_back(m_debug);
+
 	// add the mouse registers
 	m_mouse = new GfxMouse(this);
 	nextAddr += Attach(m_mouse, nextAddr);

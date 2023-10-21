@@ -1,3 +1,5 @@
+// GfxMouse.cpp
+//
 #include "Bus.h"
 #include "GfxMouse.h"
 
@@ -104,7 +106,7 @@ void GfxMouse::OnUpdate(float fElapsedTime)
 {
     // clear the mouse layer texture
     SDL_SetRenderTarget(m_gfx->_renderer, _mouse_texture);
-    SDL_SetRenderDrawColor(m_gfx->_renderer, 0, 0, 0, 96);   // mouse layer background color
+    SDL_SetRenderDrawColor(m_gfx->_renderer, 0, 0, 0, 0);   // mouse layer background color
     SDL_RenderClear(m_gfx->_renderer);
 
     // clean up

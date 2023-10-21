@@ -24,6 +24,8 @@ class C6809;
 
 class Bus
 {
+	friend class GfxDebug;
+
 	protected:
 		Bus();									// constructor
 		
