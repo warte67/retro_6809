@@ -138,6 +138,6 @@ void GfxDebug::OnRender()
     SDL_RenderCopy(m_gfx->_renderer, _debug_texture, NULL, &dest);
 
 
-    printf("OnRender\n");
+    // printf("OnRender\n");
 
 }
