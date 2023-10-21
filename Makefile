@@ -4,7 +4,7 @@ TARGET = ./bin/main
 FLAGS = -std=c++20 -O2 #-g -V
 LIBS = -lSDL2 -ldl
 OBJ = obj
-OBJ_FILES = Bus.o Device.o Gfx.o C6809.o main.o
+OBJ_FILES = Bus.o Device.o Gfx.o C6809.o Mouse.o main.o
 
 all: $(OBJ_FILES)	 
 	Bus.o: 		Bus.cpp 	Bus.h
@@ -12,6 +12,7 @@ all: $(OBJ_FILES)
 	Device.o: 	Device.cpp 	Device.h
 	Gfx.o: 		Gfx.cpp 	Gfx.h
 	C6809.o:	C6809.cpp	C6809.h
+	Mouse.o:	Mouse.cpp	IGfxDevice.h
 
 all: $(OBJ_FILES)
 	$(CC) $(OBJ_FILES) $(FLAGS) $(LIBS) -o $(TARGET)
