@@ -34,3 +34,16 @@ int main(int argc, char* argv[])
 
 	return 0;
 }
+
+/*******************************************************
+
+	To Do Next:
+
+	1) GfxMouse scale the mouse cursor coordinates to fit
+		the display windowed (sized) / fullscreen as appropriate
+
+	2) ...
+
+
+ *******************************************************/
+
