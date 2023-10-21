@@ -5,7 +5,7 @@
 
 #include "types.h"
 #include "Device.h"
-#include "IgfxDevice.h"
+#include "IGfxDevice.h"
 #include "Mouse.h"
 
 class Gfx : public Device
