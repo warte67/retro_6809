@@ -5,10 +5,13 @@
 
 #include "types.h"
 #include "Device.h"
+#include "IgfxDevice.h"
+#include "Mouse.h"
 
 class Gfx : public Device
 {
 	friend class Bus;
+    friend class Mouse;
 	
     public:
         Gfx() {  _deviceName = "GFX_DEVICE"; }
@@ -29,6 +32,8 @@ class Gfx : public Device
 
         virtual Byte read(Word offset, bool debug = false);
         virtual void write(Word offset, Byte data, bool debug = false);
+
+        // public accessors
 
 	protected:
         // SDL window stuff	
@@ -99,7 +104,11 @@ class Gfx : public Device
 
 		void _display_standard();
         void _updateTextScreen();       
-		void _display_extended();		// TEMPORARY
+		void _display_extended();
+
+        // graphics devices based on the IGfxDevice
+        Mouse* m_mouse = nullptr;
+        std::vector< IGfxDevice*> _gfx_devices;
 };
 
 #endif //__GFX_H__

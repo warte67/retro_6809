@@ -385,12 +385,24 @@ void Gfx::OnInit()
     //     write(addr+1, 0xF0);		// F: yellow
     //     addr+=2;
     // }
+
+	// add the Gfx Devices to the _gfx_devices vector
+	m_mouse = new Mouse(this);
+	_gfx_devices.push_back(m_mouse);
+
 }
 
-
-
-
-void Gfx::OnQuit() {}
+void Gfx::OnQuit() 
+{
+	// remove the mouse device
+	if (m_mouse)
+	{
+		delete m_mouse;
+		m_mouse = nullptr;
+	}
+	// clear the _gfx_devices vector
+	_gfx_devices.clear();
+}
 
 void Gfx::OnActivate() 
 {
