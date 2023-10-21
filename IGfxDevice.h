@@ -29,9 +29,8 @@ public:
 	virtual void OnRender() = 0;
 
 protected:
-
-private:
 	Gfx* m_gfx = nullptr;
+private:
 };
 
 

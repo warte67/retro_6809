@@ -33,6 +33,9 @@ protected:
 	int mouse_y = 0;
 
 private:
+	SDL_Texture* _mouse_texture = nullptr;
+	int _tex_width = 0;
+	int _tex_height = 0;
 
 };
 

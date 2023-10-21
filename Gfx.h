@@ -42,7 +42,7 @@ class Gfx : public Device
 		const float _base_texture_width = 128.0f;		// 1024x768 basic screen timing
        	const int std_buffer_size = 6*1024;    // standard buffer size
 
-		float _window_width = 1280.0f;;	
+		float _window_width = 1280.0f;
 		float _window_height = 0;			// invalid default
 		float _aspect = 1.0f;				// invalid default		
         Uint32 _window_flags = 0;			// invalid default
