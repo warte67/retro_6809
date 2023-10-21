@@ -152,12 +152,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Bus.cpp" />
+    <ClCompile Include="C6809.cpp" />
     <ClCompile Include="Device.cpp" />
     <ClCompile Include="Gfx.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bus.h" />
+    <ClInclude Include="C6809.h" />
     <ClInclude Include="Device.h" />
     <ClInclude Include="Gfx.h" />
     <ClInclude Include="memory_map.h" />
