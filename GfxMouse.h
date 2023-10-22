@@ -29,7 +29,7 @@ public:
 
 protected:
 
-	bool mouse_cursor_enable = false;	//	NEEDS A REGISTER
+	bool mouse_cursor_enable = true;	//	NEEDS A REGISTER
 	int mouse_x = 0;			// horizontal mouse cursor position
 	int mouse_y = 0;			// vertical mouse cursor position
 	char mouse_wheel = 0;		// signed mouse wheel delta
