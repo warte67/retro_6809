@@ -29,8 +29,9 @@ public:
 
 protected:
 
-	int mouse_x = 0;
-	int mouse_y = 0;
+	int mouse_x = 0;			// horizontal mouse cursor position
+	int mouse_y = 0;			// vertical mouse cursor position
+	char mouse_wheel = 0;		// signed mouse wheel delta
 
 private:
 	SDL_Texture* _mouse_texture = nullptr;

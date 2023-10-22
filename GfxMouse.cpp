@@ -12,6 +12,7 @@ Byte GfxMouse::read(Word offset, bool debug)
     case CSR_XPOS + 1:      return mouse_x & 0xFF;
     case CSR_YPOS + 0:      return mouse_y >> 8;
     case CSR_YPOS + 1:      return mouse_y & 0xFF;
+    case CSR_SCROLL:        char d = mouse_wheel; mouse_wheel = 0; return d;
     }
     // return default bit pattern
     return 0xCC; 
@@ -24,6 +25,7 @@ void GfxMouse::write(Word offset, Byte data, bool debug)
     case CSR_XPOS + 1:    mouse_x = (mouse_x & 0xff00) | (data << 0);    break;
     case CSR_YPOS + 0:    mouse_y = (mouse_y & 0x00ff) | (data << 8);    break;
     case CSR_YPOS + 1:    mouse_y = (mouse_y & 0xff00) | (data << 0);    break;
+    case CSR_SCROLL:      mouse_wheel = data;   break;
     }
     // write statically
     Bus::Inst().write(offset, data, true);
@@ -41,9 +43,11 @@ Word GfxMouse::OnAttach(Word nextAddr)
     nextAddr += 2;
     DisplayEnum("CSR_YPOS", nextAddr, " (Word) vertical mouse cursor coordinate");
     nextAddr += 2;
-    
-    // add more IGfxDevices 
-    // ...
+    DisplayEnum("CSR_SCROLL", nextAddr, " (Signed) MouseWheel Scroll: -1, 0, 1");
+    nextAddr += 1;
+
+
+
 
     DisplayEnum("CSR_END", nextAddr, "End Mouse Registers");
 
@@ -115,7 +119,15 @@ void GfxMouse::OnEvent(SDL_Event* evnt)
 
             break;
         }
+        case SDL_MOUSEWHEEL:
+        {
+            write(CSR_SCROLL, evnt->wheel.y);
+            char d = read(CSR_SCROLL);
+            printf("WHEEL: %d\n", d);
+            break;
+        }
     }
+    
 }
 
 void GfxMouse::OnUpdate(float fElapsedTime)
