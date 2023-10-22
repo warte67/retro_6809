@@ -6,7 +6,7 @@
                       (   memory_map.asm):00001         ;  **********************************************
                       (   memory_map.asm):00002         ;  * Allocated 64k Memory Mapped System Symbols *
                       (   memory_map.asm):00003         ;  **********************************************
-     0000             (   memory_map.asm):00004         SOFT_VECTORS = $0000
+     0000             (   memory_map.asm):00004         SOFT_VECTORS equ $0000
                       (   memory_map.asm):00005         
                       (   memory_map.asm):00006                   ; Software Interrupt Vectors:
      0000             (   memory_map.asm):00007         SOFT_RSRVD   = $0000    ; Motorola RESERVED Software Interrupt Vector
