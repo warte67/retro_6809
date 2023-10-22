@@ -5,6 +5,12 @@
 // Notes:  remember to open an extra list window use
 //       chord:  CTRL-K then O
 //
+//	Build: 	make clean
+//			make
+//		
+//		cd asm	
+//		./build.sh kernel_f000
+//
 ////////////////////
 
 #include <iostream>

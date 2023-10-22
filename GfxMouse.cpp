@@ -18,9 +18,9 @@ Byte GfxMouse::read(Word offset, bool debug)
     case CSR_FLAGS:			return button_flags;
     case CSR_BMP_INDX:		return bmp_offset;
     case CSR_BMP_DATA:		return cursor_buffer[bmp_offset / 16][bmp_offset % 16];
-    //case CSR_PAL_INDX:		return m_palette_index;
-    //case CSR_PAL_DATA + 0:  return (_csr_palette[m_palette_index].color) >> 8;
-    //case CSR_PAL_DATA + 1:  return (_csr_palette[m_palette_index].color) & 0xFF;
+    case CSR_PAL_INDX:		return m_palette_index;
+    case CSR_PAL_DATA + 0:  return (_csr_palette[m_palette_index].color) >> 8;
+    case CSR_PAL_DATA + 1:  return (_csr_palette[m_palette_index].color) & 0xFF;
     }
     // return default bit pattern
     return 0xCC; 
@@ -41,17 +41,17 @@ void GfxMouse::write(Word offset, Byte data, bool debug)
         cursor_buffer[bmp_offset / 16][bmp_offset % 16] = data;
         _bCsrIsDirty = true;
         break;
-	//case CSR_PAL_INDX:	m_palette_index = data;	break;
- //   case CSR_PAL_DATA + 0:
- //       _csr_palette[m_palette_index].color =
- //           (_csr_palette[m_palette_index].color & 0x00FF) | (data << 8);
- //       _bCsrIsDirty = true;
- //       break;
- //   case CSR_PAL_DATA + 1:
- //       _csr_palette[m_palette_index].color =
- //           (_csr_palette[m_palette_index].color & 0xFF00) | (data << 0);
- //       _bCsrIsDirty = true;
- //       break;
+	case CSR_PAL_INDX:	m_palette_index = data;	break;
+    case CSR_PAL_DATA + 0:
+        _csr_palette[m_palette_index].color =
+            (_csr_palette[m_palette_index].color & 0x00FF) | (data << 8);
+        _bCsrIsDirty = true;
+        break;
+    case CSR_PAL_DATA + 1:
+        _csr_palette[m_palette_index].color =
+            (_csr_palette[m_palette_index].color & 0xFF00) | (data << 0);
+        _bCsrIsDirty = true;
+        break;
     }
 
 

@@ -45,6 +45,13 @@ lp3
 	cmpx	STD_VID_MAX
 	ble	lp3
 
+	; cycle the cursor color
+	lda	#$F
+	sta	DSP_PAL_IDX
+	ldd	DSP_PAL_CLR
+	addd	#1
+	std	DSP_PAL_CLR
+
 	bra	inc_screen
 
 
