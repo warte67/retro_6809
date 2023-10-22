@@ -12,7 +12,8 @@ Byte GfxMouse::read(Word offset, bool debug)
     case CSR_XPOS + 1:      return mouse_x & 0xFF;
     case CSR_YPOS + 0:      return mouse_y >> 8;
     case CSR_YPOS + 1:      return mouse_y & 0xFF;
-    case CSR_SCROLL:        char d = mouse_wheel; mouse_wheel = 0; return d;
+    case CSR_SCROLL:        { char d = mouse_wheel; mouse_wheel = 0; return d; }
+    case CSR_FLAGS:			return button_flags;
     }
     // return default bit pattern
     return 0xCC; 
@@ -21,11 +22,11 @@ void GfxMouse::write(Word offset, Byte data, bool debug)
 {
     switch (offset)
     {
-    case CSR_XPOS + 0:    mouse_x = (mouse_x & 0x00ff) | (data << 8);    break;
-    case CSR_XPOS + 1:    mouse_x = (mouse_x & 0xff00) | (data << 0);    break;
-    case CSR_YPOS + 0:    mouse_y = (mouse_y & 0x00ff) | (data << 8);    break;
-    case CSR_YPOS + 1:    mouse_y = (mouse_y & 0xff00) | (data << 0);    break;
-    case CSR_SCROLL:      mouse_wheel = data;   break;
+    case CSR_XPOS + 0:      mouse_x = (mouse_x & 0x00ff) | (data << 8);    break;
+    case CSR_XPOS + 1:      mouse_x = (mouse_x & 0xff00) | (data << 0);    break;
+    case CSR_YPOS + 0:      mouse_y = (mouse_y & 0x00ff) | (data << 8);    break;
+    case CSR_YPOS + 1:      mouse_y = (mouse_y & 0xff00) | (data << 0);    break;
+    case CSR_SCROLL:        mouse_wheel = data;   break;
     }
     // write statically
     Bus::Inst().write(offset, data, true);
@@ -45,7 +46,11 @@ Word GfxMouse::OnAttach(Word nextAddr)
     nextAddr += 2;
     DisplayEnum("CSR_SCROLL", nextAddr, " (Signed) MouseWheel Scroll: -1, 0, 1");
     nextAddr += 1;
-
+    DisplayEnum("CSR_FLAGS", nextAddr, " (Byte) mouse button flags:");
+    DisplayEnum("", 0, " CSR_FLAGS:");
+    DisplayEnum("", 0, "      bits 0-5: button states");
+    DisplayEnum("", 0, "      bits 6-7: number of clicks");
+    nextAddr += 1;
 
 
 
@@ -124,6 +129,28 @@ void GfxMouse::OnEvent(SDL_Event* evnt)
             write(CSR_SCROLL, evnt->wheel.y);
             char d = read(CSR_SCROLL);
             printf("WHEEL: %d\n", d);
+            break;
+        }
+        //		CSR_FLAGS = 0x1811,        // (Byte) mouse button flags:
+        //			//      bits 0-5: button states
+        //			//      bits 6-7: number of clicks
+        case SDL_MOUSEBUTTONDOWN:
+        case SDL_MOUSEBUTTONUP:
+        {
+            // update the button flags
+            button_flags = 0;
+            int bitmask = (1 << ((evnt->button.button % 7) - 1));
+            if (evnt->button.state == 0)
+                button_flags &= ~bitmask;
+            else
+            {
+                button_flags |= bitmask;
+                button_flags |= (evnt->button.clicks & 0x03) << 6;
+            }
+            //bus->debug_write(CSR_FLAGS, button_flags);
+            write(CSR_FLAGS, button_flags);
+
+            printf("CSR_FLAGS: 0x%02X\n", read(CSR_FLAGS));
             break;
         }
     }
