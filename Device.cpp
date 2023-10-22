@@ -85,7 +85,7 @@ void Device::DisplayEnum(std::string sToken, Word ofs, std::string sComment)
 			std::string sLabel = sToken;
 			while (sToken.size() < 12)
 				sToken += " ";
-			sToken += " = ";
+			sToken += "    equ   ";
 
 			std::cout << sToken << sN << hex(ofs, 4) << sCMA << sCTK << sComment << std::endl;
 

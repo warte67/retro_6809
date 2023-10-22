@@ -85,7 +85,7 @@ protected:
 			{ 0xFED0 },		// C: yellow
 			{ 0xF85b },		// D: Lt Purple
 			{ 0xF59f },		// E: lt sky
-			{ 0xF000 },		// F: black
+			{ 0xF000 }		// F: black
 	};
 public:
 	Uint8 red(Uint8 index) { Uint8 c = _csr_palette[index].r;  return c; }

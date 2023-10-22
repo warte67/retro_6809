@@ -47,10 +47,10 @@ lp3
 
 	; cycle the cursor color
 	lda	#$F
-	sta	DSP_PAL_IDX
-	ldd	DSP_PAL_CLR
+	sta	CSR_PAL_INDX
+	ldd	CSR_PAL_DATA
 	addd	#1
-	std	DSP_PAL_CLR
+	std	CSR_PAL_DATA
 
 	bra	inc_screen
 
