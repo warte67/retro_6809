@@ -36,6 +36,7 @@ class Gfx : public Device
         virtual void write(Word offset, Byte data, bool debug = false);
 
         Word Attach(IGfxDevice* dev, Word _lastAddress, Word size = 0);
+        Word Attach_Devices(Word _lastAddress);
 
         // public accessors
 

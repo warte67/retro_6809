@@ -11,6 +11,14 @@
 
 Byte Gfx::read(Word offset, bool debug )
 {
+	// handle GfxMouse reads
+	if (offset >= CSR_BEGIN && offset <= CSR_END)
+		return m_mouse->read(offset, debug);
+	// handle GfxDebug reads
+	if (offset >= DBG_BEGIN && offset <= DBG_END)
+		return m_debug->read(offset, debug);
+
+	// handle Gfx Reads
 	switch (offset)
 	{
 		case STD_VID_MAX:		return _std_vid_max >> 8;
@@ -43,6 +51,14 @@ Byte Gfx::read(Word offset, bool debug )
 
 void Gfx::write(Word offset, Byte data, bool debug)
 {
+	// handle GfxMouse writes
+	if (offset >= CSR_BEGIN && offset <= CSR_END) 
+	{ m_mouse->write(offset, data, debug); return; }
+	// handle GfxDebug writes
+	if (offset >= DBG_BEGIN && offset <= DBG_END)
+	{ m_debug->write(offset, data, debug); return; }
+
+	// handle Gfx Writes
 	switch (offset)
 	{
 		case DSP_GRES: 	{
@@ -191,7 +207,7 @@ Word Gfx::OnAttach(Word nextAddr)
     nextAddr += 8;
 
 	// ADD THE GFX DEVICES:
-
+	
 	// add the debug registers
 	m_debug = new GfxDebug(this);
 	nextAddr += Attach(m_debug, nextAddr);
@@ -202,10 +218,31 @@ Word Gfx::OnAttach(Word nextAddr)
 	nextAddr += Attach(m_mouse, nextAddr);
 	_gfx_devices.push_back(m_mouse);
 
-
+	DisplayEnum("GFX_END", nextAddr, "End of GFX Device Registers");
 
 	return nextAddr - old_addr;
 }
+
+Word Gfx::Attach_Devices(Word nextAddr)
+{
+	int size = 0;
+	Word old_addr = nextAddr;
+
+	// add the mouse registers
+	m_mouse = new GfxMouse(this);
+	nextAddr += Attach(m_mouse, nextAddr);
+	_gfx_devices.push_back(m_mouse);
+
+	// add the debug registers
+	m_debug = new GfxDebug(this);
+	nextAddr += Attach(m_debug, nextAddr);
+	_gfx_devices.push_back(m_debug);
+
+	return nextAddr - old_addr;
+}
+
+
+
 
 void Gfx::OnInit() 
 {

@@ -15,7 +15,7 @@ class GfxDebug : public IGfxDevice
 	friend class Gfx;
 
 public:
-	GfxDebug(Gfx* _gfx) : IGfxDevice(_gfx) {}
+	GfxDebug(Gfx* _gfx) : IGfxDevice(_gfx) { _deviceName = "GfxDebug"; }
 	virtual ~GfxDebug() {}
 
 	// virtuals

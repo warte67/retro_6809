@@ -243,13 +243,13 @@ void GfxMouse::OnEvent(SDL_Event* evnt)
 
 void GfxMouse::OnUpdate(float fElapsedTime)
 {
-    //  // TESTING ... 
-    //  write(CSR_PAL_INDX, 1);
-    //  Word c = read_word(CSR_PAL_DATA);
-    //  c++;
-    //  c |= 0xf000;
-    //  write_word(CSR_PAL_DATA, c);
-    //  // END TESTING
+      //    // TESTING ... 
+      //    write(CSR_PAL_INDX, 1);
+      //    Word c = read_word(CSR_PAL_DATA);
+      //    c++;
+      //    c |= 0xf000;
+      //    write_word(CSR_PAL_DATA, c);
+      //    // END TESTING
 
 
 

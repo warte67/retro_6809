@@ -160,8 +160,19 @@ public:
 	Byte fetch_byte() { Byte data = read(PC); PC++; return data; }
 	Word fetch_word() { Word data = read_word(PC); PC += 2; return data; }
 
-	Byte read(Word offset)						{ return m_bus->read(offset); }
-	void write(Word offset, Byte data)			{ m_bus->write(offset, data); }
+	Byte read(Word offset)						
+	{ 
+		if (offset == CSR_PAL_INDX)
+			Byte debug_test = 0;
+		Byte d = m_bus->read(offset);
+		return d; 
+	}
+	void write(Word offset, Byte data)			
+	{ 
+		if (offset == CSR_PAL_INDX)
+			Byte debug_test = 0;
+		m_bus->write(offset, data);
+	}
 	Word read_word(Word offset)					{ return m_bus->read_word(offset); }
 	void write_word(Word offset, Word data)		{ m_bus->write_word(offset, data); }
 
@@ -179,8 +190,8 @@ public:
 	union {
 		Word D;
 		struct {
-			Byte B;
 			Byte A;
+			Byte B;
 		} byte;
 	} acc;
 	Byte& A;

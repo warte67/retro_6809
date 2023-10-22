@@ -89,9 +89,10 @@ Bus::Bus()
 
 
 	// base graphics device
-    dev = new Gfx();    
-    addr += Attach(dev); 
-    m_gfx = dynamic_cast<Gfx*>(dev);   
+    m_gfx = new Gfx();
+    addr += Attach(m_gfx);
+    //m_gfx = dynamic_cast<Gfx*>(dev);
+    //addr += m_gfx->Attach_Devices(addr);
 
 
 

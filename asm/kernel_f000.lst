@@ -6,33 +6,33 @@
                       ;  **********************************************
                       ;  * Allocated 64k Memory Mapped System Symbols *
                       ;  **********************************************
-0000                  SOFT_VECTORS equ   $0000
+0000                  SOFT_VECTORS    equ   $0000
                       
                                 ; Software Interrupt Vectors:
-0000                  SOFT_RSRVD   equ   $0000    ; Motorola RESERVED Software Interrupt Vector
-0002                  SOFT_SWI3    equ   $0002    ; SWI3 Software Interrupt Vector
-0004                  SOFT_SWI2    equ   $0004    ; SWI2 Software Interrupt Vector
-0006                  SOFT_FIRQ    equ   $0006    ; FIRQ Software Interrupt Vector
-0008                  SOFT_IRQ     equ   $0008    ; IRQ Software Interrupt Vector
-000A                  SOFT_SWI     equ   $000A    ; SWI / SYS Software Interrupt Vector
-000C                  SOFT_NMI     equ   $000C    ; NMI Software Interrupt Vector
-000E                  SOFT_RESET   equ   $000E    ; RESET Software Interrupt Vector
+0000                  SOFT_RSRVD      equ   $0000    ; Motorola RESERVED Software Interrupt Vector
+0002                  SOFT_SWI3       equ   $0002    ; SWI3 Software Interrupt Vector
+0004                  SOFT_SWI2       equ   $0004    ; SWI2 Software Interrupt Vector
+0006                  SOFT_FIRQ       equ   $0006    ; FIRQ Software Interrupt Vector
+0008                  SOFT_IRQ        equ   $0008    ; IRQ Software Interrupt Vector
+000A                  SOFT_SWI        equ   $000A    ; SWI / SYS Software Interrupt Vector
+000C                  SOFT_NMI        equ   $000C    ; NMI Software Interrupt Vector
+000E                  SOFT_RESET      equ   $000E    ; RESET Software Interrupt Vector
                       
-0010                  ZERO_PAGE    equ   $0010
-0100                  SYSTEM_STACK equ   $0100
-0300                  SSTACK_TOP   equ   $0300    ; Top of the system stack space
-0300                  USER_STACK   equ   $0300
-0400                  USTACK_TOP   equ   $0400    ; Top of the user stack space
+0010                  ZERO_PAGE       equ   $0010
+0100                  SYSTEM_STACK    equ   $0100
+0300                  SSTACK_TOP      equ   $0300    ; Top of the system stack space
+0300                  USER_STACK      equ   $0300
+0400                  USTACK_TOP      equ   $0400    ; Top of the user stack space
                       
                                 ; Display Buffer
-0400                  SCREEN_BUFFER equ   $0400
+0400                  SCREEN_BUFFER    equ   $0400
                       
                                 ; Device Registers:
-1C00                  HDW_REGS     equ   $1C00    ; Begin Device Hardware Registers
+1C00                  HDW_REGS        equ   $1C00    ; Begin Device Hardware Registers
                       
-1C00                  STD_VID_MAX  equ   $1C00    ;  (Word) Standard Video Buffer Max
+1C00                  STD_VID_MAX     equ   $1C00    ;  (Word) Standard Video Buffer Max
                       
-1C02                  DSP_GRES     equ   $1C02    ;  (Byte) Screen Resolution Register
+1C02                  DSP_GRES        equ   $1C02    ;  (Byte) Screen Resolution Register
                                 ; DSP_GRES: BBRR.HHVV
                                 ;     BB:00 = Standard Graphics 1-bpp (2-color mode)
                                 ;     BB:01 = Standard Graphics 2-bpp (4-color mode)
@@ -51,7 +51,7 @@
                                 ;     VV:10 = 2x Vertical Overscan Multiplier
                                 ;     VV:11 = 1x Vertical Overscan Multiplier
                       
-1C03                  DSP_EXT      equ   $1C03    ;  (Byte) Extended Graphics Register
+1C03                  DSP_EXT         equ   $1C03    ;  (Byte) Extended Graphics Register
                                 ; DSP_EXT: ABCD.EFGG
                                 ;      AA:00 = Extended Graphics 1bpp (2-color mode)
                                 ;      AA:01 = Extended Graphics 2bpp (4-color mode)
@@ -70,7 +70,7 @@
                                 ;      B:0   = Fullscreen Enabled( emulator only )
                                 ;      B:1   = Windowed Enabled ( emulator only )
                       
-1C04                  DSP_ERR      equ   $1C04    ;  (Byte) Display Sub-System Error Code Register
+1C04                  DSP_ERR         equ   $1C04    ;  (Byte) Display Sub-System Error Code Register
                                 ; DSP_ERR: ABCD.EFGH
                                 ;      A:0   = Standard Buffer Overflow
                                 ;      B:0   = Extended Buffer Overflow
@@ -81,86 +81,106 @@
                                 ;      G:0   = Reserved
                                 ;      H:0   = Reserved
                       
-1C05                  DSP_TXT_COLS equ   $1C05    ;  (Byte) READ-ONLY Text Screen Columns
-1C06                  DSP_TXT_ROWS equ   $1C06    ;  (Byte) READ-ONLY Text Screens Rows
+1C05                  DSP_TXT_COLS    equ   $1C05    ;  (Byte) READ-ONLY Text Screen Columns
+1C06                  DSP_TXT_ROWS    equ   $1C06    ;  (Byte) READ-ONLY Text Screens Rows
                       
-1C07                  DSP_PAL_IDX  equ   $1C07    ;  (Byte) Color Palette Index
+1C07                  DSP_PAL_IDX     equ   $1C07    ;  (Byte) Color Palette Index
                                 ; DSP_PAL_IDX: 0-255
                                 ; Note: Use this register to set the index into theColor Palette.
                                 ;   Set this value prior referencing color data (DSP_PAL_CLR).
                       
-1C08                  DSP_PAL_CLR  equ   $1C08    ;  (Word) Indexed Color Palette Data
+1C08                  DSP_PAL_CLR     equ   $1C08    ;  (Word) Indexed Color Palette Data
                                 ; DSP_PAL_CLR: Color Data A4R4G4B4 format
                                 ; Note: This is the color data for an individual palette entry.
                                 ;     Write to DSP_PAL_IDX with the index within the color palette
                                 ;     prior to reading or writing the color data in the DSP_PAL_CLR register.
                       
-1C0A                  DSP_GLYPH_IDX equ   $1C0A    ;  (Byte) Text Glyph Index
+1C0A                  DSP_GLYPH_IDX    equ   $1C0A    ;  (Byte) Text Glyph Index
                                 ; DSP_GLYPH_IDX: 0-256
                                 ; Note: Set this register to index a specific text glyph. Set this value
                                 ;     prior to updating glyph pixel data.
                       
-1C0B                  DSP_GLYPH_DATA equ   $1C0B    ;  (8-Bytes) Text Glyph Pixel Data Array
+1C0B                  DSP_GLYPH_DATA    equ   $1C0B    ;  (8-Bytes) Text Glyph Pixel Data Array
                                 ; DSP_GLYPH_DATA: 8 rows of binary encoded glyph pixel data
                                 ; Note: Each 8x8 text glyph is composed of 8 bytes. The first byte in this
                                 ;     array represents the top line of 8 pixels. Each array entry represents
                                 ;     a row of 8 pixels.
                       
                                 ; Mouse Cursor Hardware Registers:
-1C13                  CSR_BEGIN    equ   $1C13    ;  start of mouse cursor hardware registers
-1C13                  CSR_XPOS     equ   $1C13    ;  (Word) horizontal mouse cursor coordinate
-1C15                  CSR_YPOS     equ   $1C15    ;  (Word) vertical mouse cursor coordinate
-1C17                  CSR_XOFS     equ   $1C17    ;  (Byte) horizontal mouse cursor offset
-1C18                  CSR_YOFS     equ   $1C18    ;  (Byte) vertical mouse cursor offset
-1C19                  CSR_SCROLL   equ   $1C19    ;  (Signed) MouseWheel Scroll: -1, 0, 1
-1C1A                  CSR_FLAGS    equ   $1C1A    ;  (Byte) mouse button flags:
+1C13                  CSR_BEGIN       equ   $1C13    ;  start of mouse cursor hardware registers
+1C13                  CSR_XPOS        equ   $1C13    ;  (Word) horizontal mouse cursor coordinate
+1C15                  CSR_YPOS        equ   $1C15    ;  (Word) vertical mouse cursor coordinate
+1C17                  CSR_XOFS        equ   $1C17    ;  (Byte) horizontal mouse cursor offset
+1C18                  CSR_YOFS        equ   $1C18    ;  (Byte) vertical mouse cursor offset
+1C19                  CSR_SCROLL      equ   $1C19    ;  (Signed) MouseWheel Scroll: -1, 0, 1
+1C1A                  CSR_FLAGS       equ   $1C1A    ;  (Byte) mouse button flags:
                                 ;  CSR_FLAGS:
                                 ;       bits 0-5: button states
                                 ;       bits 6-7: number of clicks
-1C1B                  CSR_BMP_INDX equ   $1C1B    ;  (Byte) mouse cursor bitmap pixel offset
-1C1C                  CSR_BMP_DATA equ   $1C1C    ;  (Byte) mouse cursor bitmap pixel index color
-1C1E                  CSR_PAL_INDX equ   $1C1E    ;  (Byte) mouse cursor color palette index (0-15)
-1C1F                  CSR_PAL_DATA equ   $1C1F    ;  (Word) mouse cursor color palette data RGBA4444
-1C21                  CSR_END      equ   $1C21    ; End Mouse Registers
+1C1B                  CSR_BMP_INDX    equ   $1C1B    ;  (Byte) mouse cursor bitmap pixel offset
+1C1C                  CSR_BMP_DATA    equ   $1C1C    ;  (Byte) mouse cursor bitmap pixel index color
+1C1E                  CSR_PAL_INDX    equ   $1C1E    ;  (Byte) mouse cursor color palette index (0-15)
+1C1F                  CSR_PAL_DATA    equ   $1C1F    ;  (Word) mouse cursor color palette data RGBA4444
+1C21                  CSR_END         equ   $1C21    ; End Mouse Registers
                       
-                          ; 5087 ($13DF) bytes remaining for additional registers.
-1C21                  RESERVED     equ   $1C21
+                                ; Debug Hardware Registers:
+1C21                  DBG_BEGIN       equ   $1C21    ;  start of mouse cursor hardware registers
+1C21                  DBG_TEMP        equ   $1C21    ;  (Byte) Simple Debug test register
+1C22                  DBG_END         equ   $1C22    ; End Debug Registers
+                      
+                          ; 5086 ($13DE) bytes remaining for additional registers.
+1C22                  RESERVED        equ   $1C22
                       
                                 ; User RAM (32K)
-3000                  USER_RAM     equ   $3000
+3000                  USER_RAM        equ   $3000
                       
                                 ; Paged RAM (8K)
-B000                  PAGED_RAM    equ   $B000
+B000                  PAGED_RAM       equ   $B000
                       
                                 ; PAGED ROM (8K bytes)
-D000                  PAGED_ROM    equ   $D000
+D000                  PAGED_ROM       equ   $D000
                       
                                 ; KERNEL ROM (4K bytes)
-F000                  KERNEL_ROM   equ   $F000
+F000                  KERNEL_ROM      equ   $F000
                       
                                 ; Hardware Interrupt Vectors:
-FFF0                  HARD_RSRVD   equ   $FFF0    ; Motorola RESERVED Hardware Interrupt Vector
-FFF2                  HARD_SWI3    equ   $FFF2    ; SWI3 Hardware Interrupt Vector
-FFF4                  HARD_SWI2    equ   $FFF4    ; SWI2 Hardware Interrupt Vector
-FFF6                  HARD_FIRQ    equ   $FFF6    ; FIRQ Hardware Interrupt Vector
-FFF8                  HARD_IRQ     equ   $FFF8    ; IRQ Hardware Interrupt Vector
-FFFA                  HARD_SWI     equ   $FFFA    ; SWI / SYS Hardware Interrupt Vector
-FFFC                  HARD_NMI     equ   $FFFC    ; NMI Hardware Interrupt Vector
-FFFE                  HARD_RESET   equ   $FFFE    ; RESET Hardware Interrupt Vector
+FFF0                  HARD_RSRVD      equ   $FFF0    ; Motorola RESERVED Hardware Interrupt Vector
+FFF2                  HARD_SWI3       equ   $FFF2    ; SWI3 Hardware Interrupt Vector
+FFF4                  HARD_SWI2       equ   $FFF4    ; SWI2 Hardware Interrupt Vector
+FFF6                  HARD_FIRQ       equ   $FFF6    ; FIRQ Hardware Interrupt Vector
+FFF8                  HARD_IRQ        equ   $FFF8    ; IRQ Hardware Interrupt Vector
+FFFA                  HARD_SWI        equ   $FFFA    ; SWI / SYS Hardware Interrupt Vector
+FFFC                  HARD_NMI        equ   $FFFC    ; NMI Hardware Interrupt Vector
+FFFE                  HARD_RESET      equ   $FFFE    ; RESET Hardware Interrupt Vector
                       ; END of definitions
                       
 F000                          org     $f000   
                       
 F000                  start   
                       
+                      ; no-color screen fill
+F000  108E1F00                ldy     #$1f00
+F004  CC001F                  ldd     #$001f          ; LDD loads A and B in wrong order
+                              ;lda    #$00
+                              ;ldb    #$1f
+F007  8E0400                  ldx     #SCREEN_BUFFER
+F00A                  lp0     
+F00A  10AF81                  sty     ,x++            
+                              ;std    ,x++            ; STD stores A and B in correct order
+                              ;sta    ,x+
+                              ;stb    ,x+
+F00D  BC1C00                  cmpx    STD_VID_MAX
+F010  2FF8                    ble     lp0
+F012  20EC                    bra     start
+                      
                       ; fill the screen
-F000  8600                    lda     #$00
-F002  8E0400                  ldx     #SCREEN_BUFFER
-F005                  lp1     
-F005  4C                      inca
-F006  A780                    sta     ,x+
-F008  BC1C00                  cmpx    STD_VID_MAX
-F00B  2FF8                    ble     lp1
+                      ;       lda     #$00
+                      ;       ldx     #SCREEN_BUFFER
+                      ;lp1    
+                      ;       inca
+                      ;       sta     ,x+
+                      ;       cmpx    STD_VID_MAX
+                      ;       ble     lp1
                       
                       ; cycle the palette colors
                       ;       lda     #0      
@@ -183,21 +203,25 @@ F00B  2FF8                    ble     lp1
                       
                       
                       ; increment the characters on the screen
-F00D                  inc_screen
-F00D  8E0400                  ldx     #SCREEN_BUFFER
-F010                  lp3
-F010  6C80                    inc     ,x+
-F012  BC1C00                  cmpx    STD_VID_MAX
-F015  2FF9                    ble     lp3
+F014  8601                    lda     #1
+F016  B71C1E                  sta     CSR_PAL_INDX
                       
-                              ; cycle the cursor color
-F017  860F                    lda     #$F
-F019  B71C1E                  sta     CSR_PAL_INDX
-F01C  FC1C1F                  ldd     CSR_PAL_DATA
-F01F  C30001                  addd    #1
-F022  FD1C1F                  std     CSR_PAL_DATA
+F019                  inc_screen
+F019  8E0400                  ldx     #SCREEN_BUFFER
+F01C                  lp3
+                      ;       ; cycle the cursor color
+                      ;       ldd     CSR_PAL_DATA
+                      ;       addd    #$0001
+                      ;       orb     #$f0            ; full alpha
+                      ;       std     CSR_PAL_DATA
+F01C  CCF0F0                  ldd     #$F0F0
+F01F  FD1C1F                  std     CSR_PAL_DATA
                       
-F025  20E6                    bra     inc_screen
+                              ; increment character and attribute data
+F022  6C81                    inc     ,x++
+F024  BC1C00                  cmpx    STD_VID_MAX
+F027  2FF3                    ble     lp3
+F029  20EE                    bra     inc_screen
                       
                       
                       

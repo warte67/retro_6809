@@ -34,21 +34,16 @@ Word GfxDebug::OnAttach(Word nextAddr)
     int size = 0;
     Word old_addr = nextAddr;
 
- /******
-
     DisplayEnum("", 0, "");
-    DisplayEnum("", 0, "Mouse Cursor Hardware Registers:");
-    DisplayEnum("CSR_BEGIN", nextAddr, " start of mouse cursor hardware registers");
-    DisplayEnum("CSR_XPOS", nextAddr, " (Word) horizontal mouse cursor coordinate");
-    nextAddr += 2;
-    DisplayEnum("CSR_YPOS", nextAddr, " (Word) vertical mouse cursor coordinate");
-    nextAddr += 2;
+    DisplayEnum("", 0, "Debug Hardware Registers:");
+    DisplayEnum("DBG_BEGIN", nextAddr, " start of mouse cursor hardware registers");
+    DisplayEnum("DBG_TEMP", nextAddr, " (Byte) Simple Debug test register");
+    nextAddr += 1;
 
     // add more IGfxDevices 
     // ...
 
-    DisplayEnum("CSR_END", nextAddr, "End Mouse Registers");
-******/
+    DisplayEnum("DBG_END", nextAddr, "End Debug Registers");
 
     return nextAddr - old_addr;
 }

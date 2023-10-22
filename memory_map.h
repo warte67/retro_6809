@@ -1,3 +1,4 @@
+
 // memory_map.h
 #ifndef __MEMORY_MAP_H__
 #define __MEMORY_MAP_H__
@@ -106,7 +107,7 @@ enum MEMMAP
     // Note: Each 8x8 text glyph is composed of 8 bytes. The first byte in this
     //     array represents the top line of 8 pixels. Each array entry represents
     //     a row of 8 pixels.
-
+    
     // Mouse Cursor Hardware Registers:
     CSR_BEGIN = 0x1C13, //  start of mouse cursor hardware registers
     CSR_XPOS = 0x1C13, //  (Word) horizontal mouse cursor coordinate
@@ -124,8 +125,13 @@ enum MEMMAP
     CSR_PAL_DATA = 0x1C1F, //  (Word) mouse cursor color palette data RGBA4444
     CSR_END = 0x1C21, // End Mouse Registers
 
-    // 5087 ($13DF) bytes remaining for additional registers.
-    RESERVED = 0x1C21,
+    // Debug Hardware Registers:
+    DBG_BEGIN = 0x1C21, //  start of mouse cursor hardware registers
+    DBG_TEMP = 0x1C21, //  (Byte) Simple Debug test register
+    DBG_END = 0x1C22, // End Debug Registers
+
+    // 5086 ($13DE) bytes remaining for additional registers.
+    RESERVED = 0x1C22,
 
     // User RAM (32K)
     USER_RAM = 0x3000,
