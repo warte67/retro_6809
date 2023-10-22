@@ -58,6 +58,42 @@ protected:
 		{0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0},
 	};
 
+	// palette stuff
+	union PALETTE {
+		Word color;
+		struct {
+			Uint8 b : 4;
+			Uint8 g : 4;
+			Uint8 r : 4;
+			Uint8 a : 4;
+		};
+	};
+	Byte m_palette_index = 0x00;   // DSP_PAL_IDX
+	std::vector<PALETTE> _csr_palette = {
+			{ 0x0000 },		// 0: transparent black
+			{ 0xFFFF },		// 1: white
+			{ 0xF007 },		// 2: dk blue
+			{ 0xF600 },		// 5: dk red
+			{ 0xF140 },		// 4: dk green
+			{ 0xF840 },		// 3: brown
+			{ 0xF406 },		// 6: purple          
+			{ 0xF046 },		// 7: deep sea           	
+			{ 0xF555 },		// 8: gray
+			{ 0xF22F },		// 9: blue
+			{ 0xFd00 },		// A: red
+			{ 0xF4F6 },		// B: lt green
+			{ 0xFED0 },		// C: yellow
+			{ 0xF85b },		// D: Lt Purple
+			{ 0xF59f },		// E: lt sky
+			{ 0xF000 },		// F: black
+	};
+public:
+	Uint8 red(Uint8 index) { Uint8 c = _csr_palette[index].r;  return c; }
+	Uint8 grn(Uint8 index) { Uint8 c = _csr_palette[index].g;  return c; }
+	Uint8 blu(Uint8 index) { Uint8 c = _csr_palette[index].b;  return c; }
+	Uint8 alf(Uint8 index) { Uint8 c = _csr_palette[index].a;  return c; }
+
+
 private:
 	SDL_Texture* _mouse_texture = nullptr;
 	SDL_Texture* _cursor_texture = nullptr;

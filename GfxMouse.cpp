@@ -18,6 +18,9 @@ Byte GfxMouse::read(Word offset, bool debug)
     case CSR_FLAGS:			return button_flags;
     case CSR_BMP_INDX:		return bmp_offset;
     case CSR_BMP_DATA:		return cursor_buffer[bmp_offset / 16][bmp_offset % 16];
+    //case CSR_PAL_INDX:		return m_palette_index;
+    //case CSR_PAL_DATA + 0:  return (_csr_palette[m_palette_index].color) >> 8;
+    //case CSR_PAL_DATA + 1:  return (_csr_palette[m_palette_index].color) & 0xFF;
     }
     // return default bit pattern
     return 0xCC; 
@@ -38,7 +41,21 @@ void GfxMouse::write(Word offset, Byte data, bool debug)
         cursor_buffer[bmp_offset / 16][bmp_offset % 16] = data;
         _bCsrIsDirty = true;
         break;
+	//case CSR_PAL_INDX:	m_palette_index = data;	break;
+ //   case CSR_PAL_DATA + 0:
+ //       _csr_palette[m_palette_index].color =
+ //           (_csr_palette[m_palette_index].color & 0x00FF) | (data << 8);
+ //       _bCsrIsDirty = true;
+ //       break;
+ //   case CSR_PAL_DATA + 1:
+ //       _csr_palette[m_palette_index].color =
+ //           (_csr_palette[m_palette_index].color & 0xFF00) | (data << 0);
+ //       _bCsrIsDirty = true;
+ //       break;
     }
+
+
+
     // write statically
     Bus::Inst().write(offset, data, true);
 }
@@ -69,6 +86,10 @@ Word GfxMouse::OnAttach(Word nextAddr)
     DisplayEnum("CSR_BMP_INDX", nextAddr, " (Byte) mouse cursor bitmap pixel offset");
     nextAddr += 1;
     DisplayEnum("CSR_BMP_DATA", nextAddr, " (Byte) mouse cursor bitmap pixel index color");
+    nextAddr += 2;
+    DisplayEnum("CSR_PAL_INDX", nextAddr, " (Byte) mouse cursor color palette index (0-15)");
+    nextAddr += 1;
+    DisplayEnum("CSR_PAL_DATA", nextAddr, " (Word) mouse cursor color palette data RGBA4444");
     nextAddr += 2;
 
 
@@ -110,10 +131,10 @@ void GfxMouse::OnActivate()
             for (int v = 0; v < 16; v++)
             {
                 Byte i = cursor_buffer[v][h] & 0x0f;
-                Byte r = m_gfx->red(i);
-                Byte g = m_gfx->grn(i);
-                Byte b = m_gfx->blu(i);
-                Byte a = m_gfx->alf(i);
+                Byte r = red(i);
+                Byte g = grn(i);
+                Byte b = blu(i);
+                Byte a = alf(i);
                 SDL_SetRenderDrawColor(m_gfx->_renderer, r, g, b, a);
                 SDL_RenderDrawPoint(m_gfx->_renderer, h, v);
             }
@@ -234,10 +255,10 @@ void GfxMouse::OnUpdate(float fElapsedTime)
             for (int v = 0; v < 16; v++)
             {
                 Byte i = cursor_buffer[v][h];// &0x0f;
-                Byte r = (m_gfx->red(i) << 4) | m_gfx->red(i);
-                Byte g = (m_gfx->grn(i) << 4) | m_gfx->grn(i);
-                Byte b = (m_gfx->blu(i) << 4) | m_gfx->blu(i);
-                Byte a = (m_gfx->alf(i) << 4) | m_gfx->alf(i);
+                Byte r = (red(i) << 4) | red(i);
+                Byte g = (grn(i) << 4) | grn(i);
+                Byte b = (blu(i) << 4) | blu(i);
+                Byte a = (alf(i) << 4) | alf(i);
                 SDL_SetRenderDrawColor(m_gfx->_renderer, r,g,b,a);
                 //SDL_SetRenderDrawColor(m_gfx->_renderer, r, g, b, a);
                 SDL_RenderDrawPoint(m_gfx->_renderer, h, v);

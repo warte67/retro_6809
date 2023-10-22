@@ -120,10 +120,12 @@ enum MEMMAP
     //       bits 6-7: number of clicks
     CSR_BMP_INDX = 0x1C1B, //  (Byte) mouse cursor bitmap pixel offset
     CSR_BMP_DATA = 0x1C1C, //  (Byte) mouse cursor bitmap pixel index color
-    CSR_END = 0x1C1E, // End Mouse Registers
+    CSR_PAL_INDX = 0x1C1E, //  (Byte) mouse cursor color palette index (0-15)
+    CSR_PAL_DATA = 0x1C1F, //  (Word) mouse cursor color palette data RGBA4444
+    CSR_END = 0x1C21, // End Mouse Registers
 
-    // 5090 ($13E2) bytes remaining for additional registers.
-    RESERVED = 0x1C1E,
+    // 5087 ($13DF) bytes remaining for additional registers.
+    RESERVED = 0x1C21,
 
     // User RAM (32K)
     USER_RAM = 0x3000,
