@@ -139,19 +139,19 @@ void GfxMouse::OnEvent(SDL_Event* evnt)
 {
     switch (evnt->type)
     {
-        //case SDL_WINDOWEVENT:
-        //{
-        //    switch (evnt->window.event)
-        //    {
-        //        case SDL_WINDOWEVENT_LEAVE:
-        //            _bCsrIsVisible = false;
-        //            break;
-        //        case SDL_WINDOWEVENT_ENTER:
-        //            _bCsrIsVisible = true;
-        //            break;
-        //    }
-        //    break;
-        //}
+        case SDL_WINDOWEVENT:
+        {
+            switch (evnt->window.event)
+            {
+                case SDL_WINDOWEVENT_LEAVE:
+                    _bCsrIsVisible = false;
+                    break;
+                case SDL_WINDOWEVENT_ENTER:
+                    _bCsrIsVisible = true;
+                    break;
+            }
+            break;
+        }
         case SDL_MOUSEMOTION:
         {
             // trim mouse coordinates to clipping region
@@ -168,18 +168,17 @@ void GfxMouse::OnEvent(SDL_Event* evnt)
             float w_aspect = (float)dest.w / m_gfx->_texture_width;
             float h_aspect = (float)dest.h / m_gfx->_texture_height;
             int mx = int((evnt->button.x / w_aspect) - (dest.x / w_aspect));
-            if (mx < 0)  mx = 0;
-            if (mx >= m_gfx->_texture_width) mx = (int)m_gfx->_texture_width - 1;
             int my = int((evnt->button.y / h_aspect) - (dest.y / h_aspect));
-            if (my < 0)  my = 0;
-            if (my >= m_gfx->_texture_height) my = (int)m_gfx->_texture_height - 1;
             write_word(CSR_XPOS, mx);
             write_word(CSR_YPOS, my);
             mx = read_word(CSR_XPOS);   // verify
             my = read_word(CSR_YPOS);   // verify
 
+            if (mx >= m_gfx->_texture_width || my >= m_gfx->_texture_height)
+                SDL_ShowCursor(true);
+            else
+                SDL_ShowCursor(false);
             printf("mouse_x: %d   mouse_y:%d\n", mx, my);
-            // printf("h_mouse: %d   v_mouse:%d\n", evnt->button.x, evnt->button.y);
 
             break;
         }
