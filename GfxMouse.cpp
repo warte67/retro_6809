@@ -85,7 +85,8 @@ void GfxMouse::OnQuit() {}
 
 void GfxMouse::OnActivate()
 {
-    SDL_ShowCursor(SDL_DISABLE);
+    if (mouse_cursor_enable)
+        SDL_ShowCursor(SDL_DISABLE);
 
     // mouse layer texture size
     _tex_width = m_gfx->_base_texture_width * 4;
@@ -147,7 +148,8 @@ void GfxMouse::OnEvent(SDL_Event* evnt)
                     _bCsrIsVisible = false;
                     break;
                 case SDL_WINDOWEVENT_ENTER:
-                    _bCsrIsVisible = true;
+                    if (mouse_cursor_enable)
+                        _bCsrIsVisible = true;
                     break;
             }
             break;
@@ -174,11 +176,14 @@ void GfxMouse::OnEvent(SDL_Event* evnt)
             mx = read_word(CSR_XPOS);   // verify
             my = read_word(CSR_YPOS);   // verify
 
-            if (mx >= m_gfx->_texture_width || my >= m_gfx->_texture_height)
-                SDL_ShowCursor(true);
-            else
-                SDL_ShowCursor(false);
-            printf("mouse_x: %d   mouse_y:%d\n", mx, my);
+            if (mouse_cursor_enable)
+            {
+                if (mx >= m_gfx->_texture_width || my >= m_gfx->_texture_height)
+                    SDL_ShowCursor(true);
+                else
+                    SDL_ShowCursor(false);
+            }
+            //printf("mouse_x: %d   mouse_y:%d\n", mx, my);
 
             break;
         }
@@ -239,10 +244,11 @@ void GfxMouse::OnUpdate(float fElapsedTime)
             }
         }
         _bCsrIsDirty = false;
+
         // clear the mouse layer texture
         SDL_SetRenderTarget(m_gfx->_renderer, _mouse_texture);
         SDL_SetRenderDrawColor(m_gfx->_renderer, 0, 0, 0, 0);   // mouse layer background color
-        
+        // render the mouse cursor
         float hs = m_gfx->_h_scan;
         float vs = m_gfx->_v_scan;
         switch (m_gfx->_h_scan)
@@ -273,7 +279,6 @@ void GfxMouse::OnRender()
 {
     if (_bCsrIsVisible == false)
         return;
-
     SDL_SetRenderTarget(m_gfx->_renderer, NULL);
 
     // build the destination rectangle according to current aspect ratio
@@ -281,7 +286,6 @@ void GfxMouse::OnRender()
     int wh = m_gfx->_window_height;
     float fh = (float)m_gfx->_window_height;
     float fw = fh * m_gfx->_aspect;
-
     if (fw > ww)
     {
         fw = ww;
@@ -296,5 +300,4 @@ void GfxMouse::OnRender()
     };
     // render the mouse layer texture
     SDL_RenderCopy(m_gfx->_renderer, _mouse_texture, NULL, &dest);
-
 }

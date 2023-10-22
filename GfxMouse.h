@@ -29,6 +29,7 @@ public:
 
 protected:
 
+	bool mouse_cursor_enable = false;	//	NEEDS A REGISTER
 	int mouse_x = 0;			// horizontal mouse cursor position
 	int mouse_y = 0;			// vertical mouse cursor position
 	char mouse_wheel = 0;		// signed mouse wheel delta
@@ -64,8 +65,8 @@ private:
 	//int _raw_csr_pos_y = 0;		// raw mouse cursor position
 	int _tex_width = 0;
 	int _tex_height = 0;
-	bool _bCsrIsDirty = true;
-	bool _bCsrIsVisible = true;
+	bool _bCsrIsDirty = true;				// internal flag
+	bool _bCsrIsVisible = mouse_cursor_enable;		// internal flag
 };
 
 
