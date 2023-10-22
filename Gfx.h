@@ -92,7 +92,7 @@ class Gfx : public Device
 		// hardware registers
 	protected:
 		Word _std_vid_max = 0x1C00;		// [STD_VID_MAX]
-		Byte _dsp_gres	= 0b11010000;	// defaults
+		Byte _dsp_gres	= 0b11010101;	// defaults
 		Byte _dsp_ext 	= 0b00001001;	// defaults
         Byte _dsp_err = 0;          
 	

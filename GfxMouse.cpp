@@ -124,8 +124,6 @@ void GfxMouse::OnActivate()
     _mouse_texture = SDL_CreateTexture(m_gfx->_renderer, SDL_PIXELFORMAT_ARGB4444,
         SDL_TEXTUREACCESS_TARGET, _tex_width, _tex_height);
     SDL_SetTextureBlendMode(_mouse_texture, SDL_BLENDMODE_BLEND);
-
-
 }
 void GfxMouse::OnDeactivate()
 {
@@ -141,6 +139,19 @@ void GfxMouse::OnEvent(SDL_Event* evnt)
 {
     switch (evnt->type)
     {
+        //case SDL_WINDOWEVENT:
+        //{
+        //    switch (evnt->window.event)
+        //    {
+        //        case SDL_WINDOWEVENT_LEAVE:
+        //            _bCsrIsVisible = false;
+        //            break;
+        //        case SDL_WINDOWEVENT_ENTER:
+        //            _bCsrIsVisible = true;
+        //            break;
+        //    }
+        //    break;
+        //}
         case SDL_MOUSEMOTION:
         {
             // trim mouse coordinates to clipping region
@@ -156,7 +167,6 @@ void GfxMouse::OnEvent(SDL_Event* evnt)
             SDL_Rect dest = { int(ww / 2 - (int)fw / 2), int(wh / 2 - (int)fh / 2), (int)fw, (int)fh };
             float w_aspect = (float)dest.w / m_gfx->_texture_width;
             float h_aspect = (float)dest.h / m_gfx->_texture_height;
-
             int mx = int((evnt->button.x / w_aspect) - (dest.x / w_aspect));
             if (mx < 0)  mx = 0;
             if (mx >= m_gfx->_texture_width) mx = (int)m_gfx->_texture_width - 1;
@@ -169,6 +179,7 @@ void GfxMouse::OnEvent(SDL_Event* evnt)
             my = read_word(CSR_YPOS);   // verify
 
             printf("mouse_x: %d   mouse_y:%d\n", mx, my);
+            // printf("h_mouse: %d   v_mouse:%d\n", evnt->button.x, evnt->button.y);
 
             break;
         }
@@ -216,19 +227,16 @@ void GfxMouse::OnUpdate(float fElapsedTime)
         // build the mouse cursor texture
         for (int h = 0; h < 16; h++)
         {
-            // for (int h = 0; h < 16; h++)
+            for (int v = 0; v < 16; v++)
             {
-                for (int v = 0; v < 16; v++)
-                {
-                    Byte i = cursor_buffer[v][h];// &0x0f;
-                    Byte r = (m_gfx->red(i) << 4) | m_gfx->red(i);
-                    Byte g = (m_gfx->grn(i) << 4) | m_gfx->grn(i);
-                    Byte b = (m_gfx->blu(i) << 4) | m_gfx->blu(i);
-                    Byte a = (m_gfx->alf(i) << 4) | m_gfx->alf(i);
-                    SDL_SetRenderDrawColor(m_gfx->_renderer, r,g,b,a);
-                    //SDL_SetRenderDrawColor(m_gfx->_renderer, r, g, b, a);
-                    SDL_RenderDrawPoint(m_gfx->_renderer, h, v);
-                }
+                Byte i = cursor_buffer[v][h];// &0x0f;
+                Byte r = (m_gfx->red(i) << 4) | m_gfx->red(i);
+                Byte g = (m_gfx->grn(i) << 4) | m_gfx->grn(i);
+                Byte b = (m_gfx->blu(i) << 4) | m_gfx->blu(i);
+                Byte a = (m_gfx->alf(i) << 4) | m_gfx->alf(i);
+                SDL_SetRenderDrawColor(m_gfx->_renderer, r,g,b,a);
+                //SDL_SetRenderDrawColor(m_gfx->_renderer, r, g, b, a);
+                SDL_RenderDrawPoint(m_gfx->_renderer, h, v);
             }
         }
         _bCsrIsDirty = false;
@@ -236,15 +244,25 @@ void GfxMouse::OnUpdate(float fElapsedTime)
         SDL_SetRenderTarget(m_gfx->_renderer, _mouse_texture);
         SDL_SetRenderDrawColor(m_gfx->_renderer, 0, 0, 0, 0);   // mouse layer background color
         
-        Byte hs = m_gfx->_h_scan;
-        Byte vs = m_gfx->_v_scan;
+        float hs = m_gfx->_h_scan;
+        float vs = m_gfx->_v_scan;
+        switch (m_gfx->_h_scan)
+        {
+            case 2:  hs = m_gfx->_h_scan * (2.0f / 3.0f);   break;
+            case 3:  hs = m_gfx->_h_scan * (2.0f / 3.0f);   break;
+        }
+        switch (m_gfx->_v_scan)
+        {
+            case 2:  vs = m_gfx->_v_scan * (2.0f / 3.0f);   break;
+            case 3:  vs = m_gfx->_v_scan * (2.0f / 3.0f);   break;
+        }
+        //printf("_v_scan: %d\n", m_gfx->_v_scan);
         SDL_Rect dst = {
-            ((mouse_x + mouse_x_offset) * hs)+(hs/2),
-            ((mouse_y + mouse_y_offset) * vs)+(vs/2),
+            mouse_x_offset + (int)((float)mouse_x*hs),
+            mouse_y_offset + (int)((float)mouse_y*vs),
             16, 16
         };
         SDL_RenderClear(m_gfx->_renderer);
-
         SDL_RenderCopy(m_gfx->_renderer, _cursor_texture, NULL, &dst);
     }
 
@@ -254,6 +272,9 @@ void GfxMouse::OnUpdate(float fElapsedTime)
 
 void GfxMouse::OnRender()
 {
+    if (_bCsrIsVisible == false)
+        return;
+
     SDL_SetRenderTarget(m_gfx->_renderer, NULL);
 
     // build the destination rectangle according to current aspect ratio
@@ -276,4 +297,5 @@ void GfxMouse::OnRender()
     };
     // render the mouse layer texture
     SDL_RenderCopy(m_gfx->_renderer, _mouse_texture, NULL, &dest);
+
 }

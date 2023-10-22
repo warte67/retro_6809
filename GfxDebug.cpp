@@ -135,7 +135,7 @@ void GfxDebug::OnRender()
         (int)fh
     };
     // render the mouse layer texture
-    //SDL_RenderCopy(m_gfx->_renderer, _debug_texture, NULL, &dest);
+    SDL_RenderCopy(m_gfx->_renderer, _debug_texture, NULL, &dest);
 
 
     // printf("OnRender\n");
