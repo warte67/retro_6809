@@ -1,7 +1,7 @@
 ;  **********************************************
 ;  * Allocated 64k Memory Mapped System Symbols *
 ;  **********************************************
-SOFT_VECTORS = $0000
+SOFT_VECTORS equ $0000
 
           ; Software Interrupt Vectors:
 SOFT_RSRVD   = $0000    ; Motorola RESERVED Software Interrupt Vector

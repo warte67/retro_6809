@@ -10,6 +10,10 @@
 //		
 //		cd asm	
 //		./build.sh kernel_f000
+// 
+//			or
+// 
+//		asm kernel_f000 (on Windows with the asm.bat file)
 //
 ////////////////////
 
