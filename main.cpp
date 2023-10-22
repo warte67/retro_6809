@@ -39,10 +39,7 @@ int main(int argc, char* argv[])
 
 	To Do Next:
 
-	1) GfxMouse - scale the mouse cursor coordinates to fit
-		the display windowed (sized) / fullscreen as appropriate
-
-	2) GfxMouse - Display the mouse cursor pointer
+	1) GfxMouse - Display the mouse cursor pointer
 
 
  *******************************************************/

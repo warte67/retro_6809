@@ -86,17 +86,33 @@ void GfxMouse::OnEvent(SDL_Event* evnt)
     {
         case SDL_MOUSEMOTION:
         {
-            // CSR_XPOS
-            // CSR_YPOS
-            int mx = evnt->button.x;
-            int my = evnt->button.y;
+            // trim mouse coordinates to clipping region
+            int ww, wh;
+            SDL_GetWindowSize(m_gfx->_window, &ww, &wh);
+            float fh = (float)wh;
+            float fw = fh * m_gfx->_aspect;
+            if (fw > ww)
+            {
+                fw = (float)ww;
+                fh = fw / m_gfx->_aspect;
+            }
+            SDL_Rect dest = { int(ww / 2 - (int)fw / 2), int(wh / 2 - (int)fh / 2), (int)fw, (int)fh };
+            float w_aspect = (float)dest.w / m_gfx->_texture_width;
+            float h_aspect = (float)dest.h / m_gfx->_texture_height;
+
+            int mx = int((evnt->button.x / w_aspect) - (dest.x / w_aspect));
+            if (mx < 0)  mx = 0;
+            if (mx >= m_gfx->_texture_width) mx = (int)m_gfx->_texture_width - 1;
+            int my = int((evnt->button.y / h_aspect) - (dest.y / h_aspect));
+            if (my < 0)  my = 0;
+            if (my >= m_gfx->_texture_height) my = (int)m_gfx->_texture_height - 1;
             write_word(CSR_XPOS, mx);
             write_word(CSR_YPOS, my);
+            mx = read_word(CSR_XPOS);   // verify
+            my = read_word(CSR_YPOS);   // verify
 
-            mx = read_word(CSR_XPOS);
-            my = read_word(CSR_YPOS);
+            printf("mouse_x: %d   mouse_y:%d\n", mx, my);
 
-            printf("MX: %5d    MY:%5d\n", mx, my);
             break;
         }
     }
