@@ -395,10 +395,10 @@ Word Bus::read_word(Word offset, bool debug)
 }
 void Bus::write_word(Word offset, Word data, bool debug) 
 {    
-	Byte lsb = (data >> 8) & 0xFF;
-	Byte msb = data & 0xff;
-	write(offset, msb);
-	write(offset + 1, lsb);
+    Byte msb = (data >> 8) & 0xFF;
+    Byte lsb = data & 0xff;
+    write(offset, msb);
+    write(offset + 1, lsb);
 }
 
 

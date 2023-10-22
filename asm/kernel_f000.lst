@@ -158,29 +158,15 @@ F000                          org     $f000
                       
 F000                  start   
                       
-                      ; no-color screen fill
-F000  108E1F00                ldy     #$1f00
-F004  CC001F                  ldd     #$001f          ; LDD loads A and B in wrong order
-                              ;lda    #$00
-                              ;ldb    #$1f
-F007  8E0400                  ldx     #SCREEN_BUFFER
-F00A                  lp0     
-F00A  10AF81                  sty     ,x++            
-                              ;std    ,x++            ; STD stores A and B in correct order
-                              ;sta    ,x+
-                              ;stb    ,x+
-F00D  BC1C00                  cmpx    STD_VID_MAX
-F010  2FF8                    ble     lp0
-F012  20EC                    bra     start
                       
                       ; fill the screen
-                      ;       lda     #$00
-                      ;       ldx     #SCREEN_BUFFER
-                      ;lp1    
-                      ;       inca
-                      ;       sta     ,x+
-                      ;       cmpx    STD_VID_MAX
-                      ;       ble     lp1
+F000  8600                    lda     #$00
+F002  8E0400                  ldx     #SCREEN_BUFFER
+F005                  lp1     
+F005  4C                      inca
+F006  A780                    sta     ,x+
+F008  BC1C00                  cmpx    STD_VID_MAX
+F00B  2FF8                    ble     lp1
                       
                       ; cycle the palette colors
                       ;       lda     #0      
@@ -202,26 +188,31 @@ F012  20EC                    bra     start
                       ;       bra     lp4
                       
                       
-                      ; increment the characters on the screen
-F014  8601                    lda     #1
-F016  B71C1E                  sta     CSR_PAL_INDX
+                      ; ; increment the characters on the screen
+F00D  8601                    lda     #1
+F00F  B71C1E                  sta     CSR_PAL_INDX
                       
-F019                  inc_screen
-F019  8E0400                  ldx     #SCREEN_BUFFER
-F01C                  lp3
-                      ;       ; cycle the cursor color
-                      ;       ldd     CSR_PAL_DATA
-                      ;       addd    #$0001
-                      ;       orb     #$f0            ; full alpha
-                      ;       std     CSR_PAL_DATA
-F01C  CCF0F0                  ldd     #$F0F0
-F01F  FD1C1F                  std     CSR_PAL_DATA
+F012                  inc_screen
+F012  8E0400                  ldx     #SCREEN_BUFFER
+F015                  lp3
+                              ; cycle the cursor color
+F015  FC1C1F                  ldd     CSR_PAL_DATA
+F018  C30001                  addd    #$0001
+F01B  8AF0                    ora     #$f0            ; full alpha
+F01D  FD1C1F                  std     CSR_PAL_DATA
                       
                               ; increment character and attribute data
-F022  6C81                    inc     ,x++
-F024  BC1C00                  cmpx    STD_VID_MAX
-F027  2FF3                    ble     lp3
-F029  20EE                    bra     inc_screen
+F020  6C81                    inc     ,x++
+F022  BC1C00                  cmpx    STD_VID_MAX
+F025  2FEE                    ble     lp3
+                      
+                      
+                      ;       lda     #0
+                      ;       sta     CSR_PAL_INDX
+                      ;       ldd     #$f00f
+                      ;       std     CSR_PAL_DATA
+F027                  inf_loop
+F027  20E9                    bra     inc_screen
                       
                       
                       

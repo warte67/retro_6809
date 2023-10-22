@@ -62,10 +62,10 @@ protected:
 	union PALETTE {
 		Word color;
 		struct {
+			Uint8 b : 4;		// blue
+			Uint8 g : 4;		// green
 			Uint8 r : 4;		// red
 			Uint8 a : 4;		// alpha
-			Uint8 b : 4;		// blue
-			Uint8 g : 4;		// green	
 		};
 	};
 	Byte m_palette_index = 0x00;   // DSP_PAL_IDX

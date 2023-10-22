@@ -190,8 +190,8 @@ public:
 	union {
 		Word D;
 		struct {
-			Byte A;
 			Byte B;
+			Byte A;
 		} byte;
 	} acc;
 	Byte& A;

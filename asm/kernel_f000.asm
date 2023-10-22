@@ -8,29 +8,15 @@
 
 start	
 
-; no-color screen fill
-	ldy	#$1f00
-	ldd	#$001f		; LDD loads A and B in wrong order
-	;lda	#$00
-	;ldb	#$1f
-	ldx	#SCREEN_BUFFER
-lp0	
-	sty	,x++		
-	;std	,x++		; STD stores A and B in correct order
-	;sta	,x+
-	;stb	,x+
-	cmpx	STD_VID_MAX
-	ble	lp0
-	bra	start
 
 ; fill the screen
-;	lda	#$00
-;	ldx	#SCREEN_BUFFER
-;lp1	
-;	inca
-;	sta	,x+
-;	cmpx	STD_VID_MAX
-;	ble	lp1
+	lda	#$00
+	ldx	#SCREEN_BUFFER
+lp1	
+	inca
+	sta	,x+
+	cmpx	STD_VID_MAX
+	ble	lp1
 
 ; cycle the palette colors
 ;	lda	#0	
@@ -52,25 +38,30 @@ lp0
 ;	bra	lp4
 
 
-; increment the characters on the screen
+; ; increment the characters on the screen
 	lda	#1
 	sta	CSR_PAL_INDX
 
 inc_screen
 	ldx	#SCREEN_BUFFER
 lp3
-;	; cycle the cursor color
-;	ldd	CSR_PAL_DATA
-;	addd	#$0001
-;	orb	#$f0		; full alpha
-;	std	CSR_PAL_DATA
-	ldd	#$F0F0
+	; cycle the cursor color
+	ldd	CSR_PAL_DATA
+	addd	#$0001
+	ora	#$f0		; full alpha
 	std	CSR_PAL_DATA
 
 	; increment character and attribute data
 	inc	,x++
 	cmpx	STD_VID_MAX
 	ble	lp3
+
+
+;	lda	#0
+;	sta	CSR_PAL_INDX
+;	ldd	#$f00f
+;	std	CSR_PAL_DATA
+inf_loop
 	bra	inc_screen
 
 
