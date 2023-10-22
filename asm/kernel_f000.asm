@@ -52,7 +52,7 @@ lp3
 	std	CSR_PAL_DATA
 
 	; increment character and attribute data
-	inc	,x++
+	inc	,x+
 	cmpx	STD_VID_MAX
 	ble	lp3
 

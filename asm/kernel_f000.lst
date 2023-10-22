@@ -202,7 +202,7 @@ F01B  8AF0                    ora     #$f0            ; full alpha
 F01D  FD1C1F                  std     CSR_PAL_DATA
                       
                               ; increment character and attribute data
-F020  6C81                    inc     ,x++
+F020  6C80                    inc     ,x+
 F022  BC1C00                  cmpx    STD_VID_MAX
 F025  2FEE                    ble     lp3
                       
