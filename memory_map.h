@@ -111,15 +111,19 @@ enum MEMMAP
     CSR_BEGIN = 0x1C13, //  start of mouse cursor hardware registers
     CSR_XPOS = 0x1C13, //  (Word) horizontal mouse cursor coordinate
     CSR_YPOS = 0x1C15, //  (Word) vertical mouse cursor coordinate
-    CSR_SCROLL = 0x1C17, //  (Signed) MouseWheel Scroll: -1, 0, 1
-    CSR_FLAGS = 0x1C18, //  (Byte) mouse button flags:
+    CSR_XOFS = 0x1C17, //  (Byte) horizontal mouse cursor offset
+    CSR_YOFS = 0x1C18, //  (Byte) vertical mouse cursor offset
+    CSR_SCROLL = 0x1C19, //  (Signed) MouseWheel Scroll: -1, 0, 1
+    CSR_FLAGS = 0x1C1A, //  (Byte) mouse button flags:
     //  CSR_FLAGS:
     //       bits 0-5: button states
     //       bits 6-7: number of clicks
-    CSR_END = 0x1C19, // End Mouse Registers
+    CSR_BMP_INDX = 0x1C1B, //  (Byte) mouse cursor bitmap pixel offset
+    CSR_BMP_DATA = 0x1C1C, //  (Byte) mouse cursor bitmap pixel index color
+    CSR_END = 0x1C1E, // End Mouse Registers
 
-    // 5095 ($13E7) bytes remaining for additional registers.
-    RESERVED = 0x1C19,
+    // 5090 ($13E2) bytes remaining for additional registers.
+    RESERVED = 0x1C1E,
 
     // User RAM (32K)
     USER_RAM = 0x3000,

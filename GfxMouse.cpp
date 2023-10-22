@@ -12,8 +12,12 @@ Byte GfxMouse::read(Word offset, bool debug)
     case CSR_XPOS + 1:      return mouse_x & 0xFF;
     case CSR_YPOS + 0:      return mouse_y >> 8;
     case CSR_YPOS + 1:      return mouse_y & 0xFF;
+    case CSR_XOFS:			return mouse_x_offset;
+    case CSR_YOFS:			return mouse_y_offset;
     case CSR_SCROLL:        { char d = mouse_wheel; mouse_wheel = 0; return d; }
     case CSR_FLAGS:			return button_flags;
+    case CSR_BMP_INDX:		return bmp_offset;
+    case CSR_BMP_DATA:		return cursor_buffer[bmp_offset / 16][bmp_offset % 16];
     }
     // return default bit pattern
     return 0xCC; 
@@ -22,11 +26,18 @@ void GfxMouse::write(Word offset, Byte data, bool debug)
 {
     switch (offset)
     {
-    case CSR_XPOS + 0:      mouse_x = (mouse_x & 0x00ff) | (data << 8);    break;
-    case CSR_XPOS + 1:      mouse_x = (mouse_x & 0xff00) | (data << 0);    break;
-    case CSR_YPOS + 0:      mouse_y = (mouse_y & 0x00ff) | (data << 8);    break;
-    case CSR_YPOS + 1:      mouse_y = (mouse_y & 0xff00) | (data << 0);    break;
-    case CSR_SCROLL:        mouse_wheel = data;   break;
+    case CSR_XPOS + 0:      mouse_x = (mouse_x & 0x00ff) | (data << 8); _bCsrIsDirty = true; break;
+    case CSR_XPOS + 1:      mouse_x = (mouse_x & 0xff00) | (data << 0); _bCsrIsDirty = true; break;
+    case CSR_YPOS + 0:      mouse_y = (mouse_y & 0x00ff) | (data << 8); _bCsrIsDirty = true; break;
+    case CSR_YPOS + 1:      mouse_y = (mouse_y & 0xff00) | (data << 0); _bCsrIsDirty = true; break;
+    case CSR_XOFS:		    mouse_x_offset = data; _bCsrIsDirty = true;	break;
+    case CSR_YOFS:		    mouse_y_offset = data; _bCsrIsDirty = true;	break;
+    case CSR_SCROLL:        mouse_wheel = data;     break;
+    case CSR_BMP_INDX:	    bmp_offset = data;		break;
+    case CSR_BMP_DATA:
+        cursor_buffer[bmp_offset / 16][bmp_offset % 16] = data;
+        _bCsrIsDirty = true;
+        break;
     }
     // write statically
     Bus::Inst().write(offset, data, true);
@@ -44,6 +55,10 @@ Word GfxMouse::OnAttach(Word nextAddr)
     nextAddr += 2;
     DisplayEnum("CSR_YPOS", nextAddr, " (Word) vertical mouse cursor coordinate");
     nextAddr += 2;
+    DisplayEnum("CSR_XOFS", nextAddr, " (Byte) horizontal mouse cursor offset");
+    nextAddr += 1;
+    DisplayEnum("CSR_YOFS", nextAddr, " (Byte) vertical mouse cursor offset");
+    nextAddr += 1;
     DisplayEnum("CSR_SCROLL", nextAddr, " (Signed) MouseWheel Scroll: -1, 0, 1");
     nextAddr += 1;
     DisplayEnum("CSR_FLAGS", nextAddr, " (Byte) mouse button flags:");
@@ -51,6 +66,10 @@ Word GfxMouse::OnAttach(Word nextAddr)
     DisplayEnum("", 0, "      bits 0-5: button states");
     DisplayEnum("", 0, "      bits 6-7: number of clicks");
     nextAddr += 1;
+    DisplayEnum("CSR_BMP_INDX", nextAddr, " (Byte) mouse cursor bitmap pixel offset");
+    nextAddr += 1;
+    DisplayEnum("CSR_BMP_DATA", nextAddr, " (Byte) mouse cursor bitmap pixel index color");
+    nextAddr += 2;
 
 
 
@@ -66,11 +85,40 @@ void GfxMouse::OnQuit() {}
 
 void GfxMouse::OnActivate()
 {
+    SDL_ShowCursor(SDL_DISABLE);
+
     // mouse layer texture size
     _tex_width = m_gfx->_base_texture_width * 4;
     _tex_height = _tex_width / m_gfx->_aspect;
 
     // printf("_tex_width: %d  t_height: %d\n", _tex_width, _tex_height);
+
+    // create the cursor texture
+    if (_cursor_texture == nullptr)
+    {
+        _cursor_texture = SDL_CreateTexture(m_gfx->_renderer, SDL_PIXELFORMAT_RGBA4444,
+            SDL_TEXTUREACCESS_TARGET, 16, 16);
+        SDL_SetTextureBlendMode(_cursor_texture, SDL_BLENDMODE_BLEND);
+        SDL_SetRenderTarget(m_gfx->_renderer, _cursor_texture);
+        SDL_SetRenderDrawColor(m_gfx->_renderer, 0, 0, 0, 0x00);
+        SDL_RenderClear(m_gfx->_renderer);
+        // build the mouse cursor texture
+        for (int h = 0; h < 16; h++)
+        for (int h = 0; h < 16; h++)
+        {
+            for (int v = 0; v < 16; v++)
+            {
+                Byte i = cursor_buffer[v][h] & 0x0f;
+                Byte r = m_gfx->red(i);
+                Byte g = m_gfx->grn(i);
+                Byte b = m_gfx->blu(i);
+                Byte a = m_gfx->alf(i);
+                SDL_SetRenderDrawColor(m_gfx->_renderer, r, g, b, a);
+                SDL_RenderDrawPoint(m_gfx->_renderer, h, v);
+            }
+        }
+        SDL_SetRenderTarget(m_gfx->_renderer, NULL);
+    }
 
     // create the working mouse layer texture
     _mouse_texture = SDL_CreateTexture(m_gfx->_renderer, SDL_PIXELFORMAT_ARGB4444,
@@ -159,10 +207,46 @@ void GfxMouse::OnEvent(SDL_Event* evnt)
 
 void GfxMouse::OnUpdate(float fElapsedTime)
 {
-    // clear the mouse layer texture
-    SDL_SetRenderTarget(m_gfx->_renderer, _mouse_texture);
-    SDL_SetRenderDrawColor(m_gfx->_renderer, 0, 0, 0, 0);   // mouse layer background color
-    SDL_RenderClear(m_gfx->_renderer);
+    // draw the mouse cursor
+    if (_bCsrIsDirty)
+    {
+        SDL_SetRenderTarget(m_gfx->_renderer, _cursor_texture);
+        SDL_SetRenderDrawColor(m_gfx->_renderer, 0, 0, 0, 0x00);
+        SDL_RenderClear(m_gfx->_renderer);
+        // build the mouse cursor texture
+        for (int h = 0; h < 16; h++)
+        {
+            // for (int h = 0; h < 16; h++)
+            {
+                for (int v = 0; v < 16; v++)
+                {
+                    Byte i = cursor_buffer[v][h];// &0x0f;
+                    Byte r = (m_gfx->red(i) << 4) | m_gfx->red(i);
+                    Byte g = (m_gfx->grn(i) << 4) | m_gfx->grn(i);
+                    Byte b = (m_gfx->blu(i) << 4) | m_gfx->blu(i);
+                    Byte a = (m_gfx->alf(i) << 4) | m_gfx->alf(i);
+                    SDL_SetRenderDrawColor(m_gfx->_renderer, r,g,b,a);
+                    //SDL_SetRenderDrawColor(m_gfx->_renderer, r, g, b, a);
+                    SDL_RenderDrawPoint(m_gfx->_renderer, h, v);
+                }
+            }
+        }
+        _bCsrIsDirty = false;
+        // clear the mouse layer texture
+        SDL_SetRenderTarget(m_gfx->_renderer, _mouse_texture);
+        SDL_SetRenderDrawColor(m_gfx->_renderer, 0, 0, 0, 0);   // mouse layer background color
+        
+        Byte hs = m_gfx->_h_scan;
+        Byte vs = m_gfx->_v_scan;
+        SDL_Rect dst = {
+            ((mouse_x + mouse_x_offset) * hs)+(hs/2),
+            ((mouse_y + mouse_y_offset) * vs)+(vs/2),
+            16, 16
+        };
+        SDL_RenderClear(m_gfx->_renderer);
+
+        SDL_RenderCopy(m_gfx->_renderer, _cursor_texture, NULL, &dst);
+    }
 
     // clean up
     SDL_SetRenderTarget(m_gfx->_renderer, NULL);
