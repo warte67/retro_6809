@@ -625,10 +625,6 @@ void Gfx::OnPresent()
 }
 
 
-
-
-
-
 void Gfx::_decode_dsp_gres()
 {
 	// shortcut to the Bus instance and DSP_GRES data
@@ -736,12 +732,16 @@ void Gfx::_decode_dsp_gres()
 	_std_vid_max = (SCREEN_BUFFER + (int)req_buffer_size)-1;
 
 	// output debugging text
+	printf("----====#####################################################====----\n");
 	printf("DSP_GRES decoded:\n");
 	printf("  Aspect Ratio: %f\n", _aspect);
 	printf("  Horizontal Overscan: %dx\n", _h_scan);
 	printf("  Vertical Overscan: %dx\n", _v_scan);
 	printf("  Real Width: %3.2f\n", real_width);
 	printf("  Real Height: %3.2f\n", real_height);
+	printf("  Window Width: %3.2f\n", _window_width);
+	printf("  Window Height: %3.2f\n", _window_height);
+	
 	printf("  Standard Graphics BPP: %d\n", _std_bpp);
 	printf("  Buffer Size: %3.2fK\n", req_buffer_size / 1024.0f);	
 	printf("  Buffer Top: $%04X\n", read_word(STD_VID_MAX));
@@ -786,9 +786,10 @@ void Gfx::_decode_dsp_ext()
 
 	// SDL Window Flags
 	_window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN_DESKTOP;  
+	_window_width = _base_texture_width * 10;
 	if (_windowed)
 	{
-		_window_width = 1280;
+		// _window_width = 1280;
 		_window_height = _window_width / _aspect;
 		_window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
 	}
