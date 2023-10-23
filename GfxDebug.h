@@ -9,6 +9,7 @@
 #include "types.h"
 
 class Gfx;
+class C6809;
 
 class GfxDebug : public IGfxDevice
 {
@@ -19,21 +20,31 @@ public:
 	virtual ~GfxDebug() {}
 
 	// virtuals
-	virtual Byte read(Word offset, bool debug = false);
-	virtual void write(Word offset, Byte data, bool debug = false);
-	virtual Word OnAttach(Word nextAddr);
-	virtual void OnInit();
-	virtual void OnQuit();
-	virtual void OnActivate();
-	virtual void OnDeactivate();
-	virtual void OnEvent(SDL_Event* evnt);
-	virtual void OnUpdate(float fElapsedTime);
-	virtual void OnRender();
+	virtual Byte read(Word offset, bool debug = false) override;
+	virtual void write(Word offset, Byte data, bool debug = false) override;
+	virtual Word OnAttach(Word nextAddr) override;
+	virtual void OnInit() override;
+	virtual void OnQuit() override;
+	virtual void OnActivate() override;
+	virtual void OnDeactivate() override;
+	virtual void OnEvent(SDL_Event* evnt) override;
+	virtual void OnUpdate(float fElapsedTime) override;
+	virtual void OnRender() override;
 
 protected:
 
+	bool _bIsDebugActive = true;
+
+	void OutGlyph(int col, int row, Byte glyph,
+		Byte red = 255, Byte grn = 255, Byte blu = 255, bool bDropShadow = false);
+	int OutText(int col, int row, std::string text,
+		Byte red=255, Byte grn=255, Byte blu=255, bool bDropshadow = false);
+
+	void OnWindowResize();	// called when the viewing window is scaled
+
 private:
 	SDL_Texture* _debug_texture = nullptr;
+	std::vector<SDL_Texture*> glyph_textures;
 	int _tex_width = 0;
 	int _tex_height = 0;
 };

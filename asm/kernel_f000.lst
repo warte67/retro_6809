@@ -165,7 +165,7 @@ F002  8E0400                  ldx     #SCREEN_BUFFER
 F005                  lp1     
 F005  4C                      inca
 F006  A780                    sta     ,x+
-F008  BC1C00                  cmpx    STD_VID_MAX
+F008  8C1C00                  cmpx    #STD_VID_MAX
 F00B  2FF8                    ble     lp1
                       
                       ; cycle the palette colors
@@ -188,7 +188,7 @@ F00B  2FF8                    ble     lp1
                       ;       bra     lp4
                       
                       
-                      ; ; increment the characters on the screen
+                      ; increment the characters on the screen
 F00D  8601                    lda     #1
 F00F  B71C1E                  sta     CSR_PAL_INDX
                       

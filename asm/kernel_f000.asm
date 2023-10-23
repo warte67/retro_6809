@@ -15,7 +15,7 @@ start
 lp1	
 	inca
 	sta	,x+
-	cmpx	STD_VID_MAX
+	cmpx	#STD_VID_MAX
 	ble	lp1
 
 ; cycle the palette colors
@@ -38,7 +38,7 @@ lp1
 ;	bra	lp4
 
 
-; ; increment the characters on the screen
+; increment the characters on the screen
 	lda	#1
 	sta	CSR_PAL_INDX
 

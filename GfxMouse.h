@@ -16,16 +16,16 @@ public:
 	virtual ~GfxMouse() {}
 
 	// virtuals
-	virtual Byte read(Word offset, bool debug = false);
-	virtual void write(Word offset, Byte data, bool debug = false);
-	virtual Word OnAttach(Word nextAddr);
-	virtual void OnInit();
-	virtual void OnQuit();
-	virtual void OnActivate();
-	virtual void OnDeactivate();
-	virtual void OnEvent(SDL_Event* evnt);
-	virtual void OnUpdate(float fElapsedTime);
-	virtual void OnRender();
+	virtual Byte read(Word offset, bool debug = false) override; 
+	virtual void write(Word offset, Byte data, bool debug = false) override;
+	virtual Word OnAttach(Word nextAddr) override;
+	virtual void OnInit() override;
+	virtual void OnQuit() override;
+	virtual void OnActivate() override;
+	virtual void OnDeactivate() override;
+	virtual void OnEvent(SDL_Event* evnt) override;
+	virtual void OnUpdate(float fElapsedTime) override;
+	virtual void OnRender() override;
 
 protected:
 

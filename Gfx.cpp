@@ -211,37 +211,17 @@ Word Gfx::OnAttach(Word nextAddr)
 	// add the debug registers
 	m_debug = new GfxDebug(this);
 	nextAddr += Attach(m_debug, nextAddr);
-	_gfx_devices.push_back(m_debug);
+	//_gfx_devices.push_back(m_debug);
 
 	// add the mouse registers
 	m_mouse = new GfxMouse(this);
 	nextAddr += Attach(m_mouse, nextAddr);
-	_gfx_devices.push_back(m_mouse);
+	//_gfx_devices.push_back(m_mouse);
 
 	DisplayEnum("GFX_END", nextAddr, "End of GFX Device Registers");
 
 	return nextAddr - old_addr;
 }
-
-Word Gfx::Attach_Devices(Word nextAddr)
-{
-	int size = 0;
-	Word old_addr = nextAddr;
-
-	// add the mouse registers
-	m_mouse = new GfxMouse(this);
-	nextAddr += Attach(m_mouse, nextAddr);
-	_gfx_devices.push_back(m_mouse);
-
-	// add the debug registers
-	m_debug = new GfxDebug(this);
-	nextAddr += Attach(m_debug, nextAddr);
-	_gfx_devices.push_back(m_debug);
-
-	return nextAddr - old_addr;
-}
-
-
 
 
 void Gfx::OnInit() 
@@ -558,15 +538,16 @@ void Gfx::OnEvent(SDL_Event* evnt)
                 //         evnt->window.data2);                
                 _window_width = evnt->window.data1;
                 _window_height = evnt->window.data2;
+
+				m_debug->OnWindowResize();
             }
-        }
-        break; 
+			break;
+		}
 	}	
 
 	// run OnEvent() for the other graphics devices
 	for (auto& d : _gfx_devices)
 		d->OnEvent(evnt);
-
 }
 
 void Gfx::OnUpdate(float fElapsedTime) 

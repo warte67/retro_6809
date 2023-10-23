@@ -24,6 +24,7 @@ class C6809;
 
 class Bus
 {
+	friend class Gfx;
 	friend class GfxDebug;
 
 	protected:
@@ -70,6 +71,7 @@ class Bus
         void write_word(Word offset, Word data, bool debug = false);   				
 
 		void load_hex(const char* filename);
+
 
 	private:
 		void _onInit();			// one time init after all devices have been created

@@ -40,40 +40,35 @@ void C6809::clock()
 {
 	// printf("C6809::clock() -- PC:$%04X\n", PC);
 
-	// if (debug)
+	//if (debug->SingleStep())
 	if (true)
 	{
-		//if (debug->SingleStep())
-		// if (false)
-		if (true)
+		if (do_interrupts())
 		{
-			if (do_interrupts())
+			if (cycles == 0)
 			{
-				if (cycles == 0)
-				{
-					// read the opcode
-					opcode = read(PC);
+				// read the opcode
+				opcode = read(PC);
+				PC++;
+				if (opcode == 0x10 || opcode == 0x11) {
+					opcode <<= 8;
+					opcode |= read(PC);
 					PC++;
-					if (opcode == 0x10 || opcode == 0x11) {
-						opcode <<= 8;
-						opcode |= read(PC);
-						PC++;
-					}
-					// seed the cycles
-					cycles = opMap[opcode].cycles;
-					// run the instruction
-					if (this->opMap[opcode].operation)
-						(this->*opMap[opcode].operation)();
-					else
-					{
-						Bus::Error("Invalid Instruction");
-					}
-					// if (!waiting_cwai && !waiting_sync)
-					// 	debug->ContinueSingleStep();
-					return;
 				}
-				cycles--;
+				// seed the cycles
+				cycles = opMap[opcode].cycles;
+				// run the instruction
+				if (this->opMap[opcode].operation)
+					(this->*opMap[opcode].operation)();
+				else
+				{
+					Bus::Error("Invalid Instruction");
+				}
+				// if (!waiting_cwai && !waiting_sync)
+				// 	debug->ContinueSingleStep();
+				return;
 			}
+			cycles--;
 		}
 	}
 }

@@ -155,6 +155,12 @@ void GfxMouse::OnDeactivate()
         SDL_DestroyTexture(_mouse_texture);
         _mouse_texture = nullptr;
     }
+    // destroy the cursor texture
+    if (_cursor_texture)
+    {
+        SDL_DestroyTexture(_cursor_texture);
+        _cursor_texture = nullptr;
+    }
 }
 
 void GfxMouse::OnEvent(SDL_Event* evnt)
@@ -204,7 +210,7 @@ void GfxMouse::OnEvent(SDL_Event* evnt)
                 else
                     SDL_ShowCursor(false);
             }
-            //printf("mouse_x: %d   mouse_y:%d\n", mx, my);
+            // printf("mouse_x: %d   mouse_y:%d\n", mx, my);
 
             break;
         }
