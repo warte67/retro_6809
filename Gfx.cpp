@@ -739,9 +739,6 @@ void Gfx::_decode_dsp_gres()
 	printf("  Vertical Overscan: %dx\n", _v_scan);
 	printf("  Real Width: %3.2f\n", real_width);
 	printf("  Real Height: %3.2f\n", real_height);
-	printf("  Window Width: %3.2f\n", _window_width);
-	printf("  Window Height: %3.2f\n", _window_height);
-	
 	printf("  Standard Graphics BPP: %d\n", _std_bpp);
 	printf("  Buffer Size: %3.2fK\n", req_buffer_size / 1024.0f);	
 	printf("  Buffer Top: $%04X\n", read_word(STD_VID_MAX));
@@ -801,6 +798,8 @@ void Gfx::_decode_dsp_ext()
 
 	// output debugging text
 	printf("DSP_EXT decoded:\n");
+	printf("  Window Width: %3.2f\n", _window_width);
+	printf("  Window Height: %3.2f\n", _window_height);
 	printf("  Extended Graphics BPP: %d\n", _ext_bpp);
 	printf("  Extended Graphics Enable: %d ", _extended_graphics_enable);
 	(_extended_graphics_enable) ? printf("(ENABLED)\n") : printf("(DISABLED)\n");
