@@ -183,19 +183,19 @@ void GfxDebug::OnEvent(SDL_Event* evnt)
             if (evnt->key.keysym.sym == SDLK_PAGEUP)
             {
                 if (SDL_GetModState() & KMOD_SHIFT)
-                {
-                    Byte data = Bus::Inst().read(DSP_GRES);
-                    Byte asp = (data & 0x0C) >> 2;
-                    asp--;
-                    asp = (asp << 2) | (data & 0xF3);
-                    Bus::Inst().write(DSP_GRES, asp);
-                }
-                else
-                {
+                {   // Increase Vertical Overscan
                     Byte data = Bus::Inst().read(DSP_GRES);
                     Byte asp = (data & 0x03) >> 0;
                     asp++;
                     asp = (asp << 0) | (data & 0xFC);
+                    Bus::Inst().write(DSP_GRES, asp);
+                }
+                else
+                {   // Increase Horizontal Overscan
+                    Byte data = Bus::Inst().read(DSP_GRES);
+                    Byte asp = (data & 0x0C) >> 2;
+                    asp++;
+                    asp = (asp << 2) | (data & 0xF3);
                     Bus::Inst().write(DSP_GRES, asp);
                 }
             }
@@ -204,7 +204,7 @@ void GfxDebug::OnEvent(SDL_Event* evnt)
             if (evnt->key.keysym.sym == SDLK_PAGEDOWN)
             {
                 if (SDL_GetModState() & KMOD_SHIFT)
-                {
+                {   // Decrease Vertical Overscan
                     Byte data = Bus::Inst().read(DSP_GRES);
                     Byte asp = (data & 0x03) >> 0;
                     asp--;
@@ -212,15 +212,16 @@ void GfxDebug::OnEvent(SDL_Event* evnt)
                     Bus::Inst().write(DSP_GRES, asp);
                 }
                 else
-                {
+                {   // Decrease Horizontal Overscan
                     Byte data = Bus::Inst().read(DSP_GRES);
                     Byte asp = (data & 0x0C) >> 2;
-                    asp++;
+                    asp--;
                     asp = (asp << 2) | (data & 0xF3);
                     Bus::Inst().write(DSP_GRES, asp);
                 }
             }
-            // standard graphics mode (SDLK_BACKSLASH)
+
+            // standard graphics mode toggle (SDLK_BACKSLASH)
             if (evnt->key.keysym.sym == SDLK_BACKSLASH)
             {
                 Byte data = Bus::Inst().read(DSP_EXT);
