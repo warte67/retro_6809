@@ -178,37 +178,47 @@ void GfxDebug::OnEvent(SDL_Event* evnt)
                 Bus::Inst().write(DSP_GRES, asp);
             }
             // resolution keys
-            if (evnt->key.keysym.sym == SDLK_RIGHT)
+
+
+            if (evnt->key.keysym.sym == SDLK_PAGEUP)
             {
-                Byte data = Bus::Inst().read(DSP_GRES);
-                Byte asp = (data & 0x0C) >> 2;
-                asp--;
-                asp = (asp << 2) | (data & 0xF3);
-                Bus::Inst().write(DSP_GRES, asp);
+                if (SDL_GetModState() & KMOD_SHIFT)
+                {
+                    Byte data = Bus::Inst().read(DSP_GRES);
+                    Byte asp = (data & 0x0C) >> 2;
+                    asp--;
+                    asp = (asp << 2) | (data & 0xF3);
+                    Bus::Inst().write(DSP_GRES, asp);
+                }
+                else
+                {
+                    Byte data = Bus::Inst().read(DSP_GRES);
+                    Byte asp = (data & 0x03) >> 0;
+                    asp++;
+                    asp = (asp << 0) | (data & 0xFC);
+                    Bus::Inst().write(DSP_GRES, asp);
+                }
             }
-            if (evnt->key.keysym.sym == SDLK_LEFT)
+
+
+            if (evnt->key.keysym.sym == SDLK_PAGEDOWN)
             {
-                Byte data = Bus::Inst().read(DSP_GRES);
-                Byte asp = (data & 0x0C) >> 2;
-                asp++;
-                asp = (asp << 2) | (data & 0xF3);
-                Bus::Inst().write(DSP_GRES, asp);
-            }
-            if (evnt->key.keysym.sym == SDLK_UP)
-            {
-                Byte data = Bus::Inst().read(DSP_GRES);
-                Byte asp = (data & 0x03) >> 0;
-                asp--;
-                asp = (asp << 0) | (data & 0xFC);
-                Bus::Inst().write(DSP_GRES, asp);
-            }
-            if (evnt->key.keysym.sym == SDLK_DOWN)
-            {
-                Byte data = Bus::Inst().read(DSP_GRES);
-                Byte asp = (data & 0x03) >> 0;
-                asp++;
-                asp = (asp << 0) | (data & 0xFC);
-                Bus::Inst().write(DSP_GRES, asp);
+                if (SDL_GetModState() & KMOD_SHIFT)
+                {
+                    Byte data = Bus::Inst().read(DSP_GRES);
+                    Byte asp = (data & 0x03) >> 0;
+                    asp--;
+                    asp = (asp << 0) | (data & 0xFC);
+                    Bus::Inst().write(DSP_GRES, asp);
+                }
+                else
+                {
+                    Byte data = Bus::Inst().read(DSP_GRES);
+                    Byte asp = (data & 0x0C) >> 2;
+                    asp++;
+                    asp = (asp << 2) | (data & 0xF3);
+                    Bus::Inst().write(DSP_GRES, asp);
+                }
             }
             // standard graphics mode (SDLK_BACKSLASH)
             if (evnt->key.keysym.sym == SDLK_BACKSLASH)
@@ -219,7 +229,6 @@ void GfxDebug::OnEvent(SDL_Event* evnt)
                 else
                     data |= 0x04;
                 Bus::Inst().write(DSP_EXT, data);
-
             }
 
         } // SDL_KEYDOWN
