@@ -268,7 +268,7 @@ void Bus::_onInit()
 {
 	// std::cout << "void Bus::_onInit()\n";
 
-	for (auto &d : _memoryNodes)
+	for (auto &d : Bus::_memoryNodes)
 		d->OnInit();
 }
 
@@ -276,7 +276,7 @@ void Bus::_onQuit()
 {
 	// std::cout << "void Bus::_onQuit()\n";
 
-	for (auto &d : _memoryNodes)
+	for (auto &d : Bus::_memoryNodes)
 		d->OnQuit();
 }
 
@@ -284,7 +284,7 @@ void Bus::_onDeactivate()
 {
 	// std::cout << "void Bus::_onDeactivate()\n";
 
-	for (auto &d : _memoryNodes)
+	for (auto &d : Bus::_memoryNodes)
 		d->OnDeactivate();
 }
 
@@ -292,7 +292,7 @@ void Bus::_onActivate()
 {
 	//std::cout << "void Bus::_onActivate()\n";
 
-	for (auto &d : _memoryNodes)
+	for (auto &d : Bus::_memoryNodes)
 		d->OnActivate();
 }
 
@@ -339,7 +339,7 @@ void Bus::_onUpdate()
     }    
 
 	// update the devices
-	for (auto &d : _memoryNodes)
+	for (auto &d : Bus::_memoryNodes)
 		d->OnUpdate(fElapsedTime);	
 }
 
@@ -351,7 +351,7 @@ void Bus::_onEvent()
     while (SDL_PollEvent(&evnt))
     {
         // OnEvent(evnt)
-		for (auto &d : _memoryNodes)
+		for (auto &d : Bus::_memoryNodes)
 			d->OnEvent(&evnt);		
 
         switch (evnt.type) {
@@ -378,7 +378,7 @@ void Bus::_onRender()
 {
 	// std::cout << "void Bus::_onRender()\n";
 
-	for (auto &d : _memoryNodes)
+	for (auto &d : Bus::_memoryNodes)
 		d->OnRender();
 }
 
@@ -399,9 +399,58 @@ void Bus::Error(const std::string& sErr)
 // MEMORY RELATED /////////////////////////////////////////////////
 
 
-Byte Bus::read(Word offset, bool debug) 
+
+Byte Bus::Read(Word offset, bool debug)
+{
+    for (auto& a : Bus::_memoryNodes)
+    {
+        if (offset - a->Base() < a->Size())
+        {
+            if (debug)
+                if (offset - a->Base() < a->Size())
+                    return a->_memory((Word)(offset - a->Base()));
+
+            return a->read(offset, debug);
+        }
+    }
+    return 0xCC;
+}
+
+void Bus::Write(Word offset, Byte data, bool debug)
+{
+    for (auto& a : Bus::_memoryNodes)
+    {
+        if (offset - a->Base() < a->Size())
+        {
+            if (debug)
+            {
+                if (offset - a->Base() < a->Size())
+                    a->_memory((Word)(offset - a->Base()), data);
+                return;
+            }
+            a->write(offset, data, debug);
+            return;
+        }
+    }
+}
+Word Bus::Read_Word(Word offset, bool debug)
+{
+    Word ret = (Read(offset) << 8) | Read(offset + 1);
+    return ret;
+}
+void Bus::Write_Word(Word offset, Word data, bool debug)
+{
+    Byte msb = (data >> 8) & 0xFF;
+    Byte lsb = data & 0xff;
+    Write(offset, msb);
+    Write(offset + 1, lsb);
+}
+
+// OLD STYLE READS AND WRITES /////////////////////////////////////////
+
+Byte Bus::_read(Word offset, bool debug) 
 {    
-    for (auto &a : _memoryNodes)
+    for (auto &a : Bus::_memoryNodes)
     {
         if (offset - a->Base() < a->Size())
         {
@@ -415,9 +464,9 @@ Byte Bus::read(Word offset, bool debug)
     return 0xCC;
 }
 
-void Bus::write(Word offset, Byte data, bool debug) 
+void Bus::_write(Word offset, Byte data, bool debug) 
 {
-    for (auto &a : _memoryNodes)
+    for (auto &a : Bus::_memoryNodes)
     {
         if (offset - a->Base() < a->Size())
         {
@@ -432,17 +481,17 @@ void Bus::write(Word offset, Byte data, bool debug)
         }
     }    
 }
-Word Bus::read_word(Word offset, bool debug) 
+Word Bus::_read_word(Word offset, bool debug) 
 {
-	Word ret = (read(offset) << 8) | read(offset + 1);
+	Word ret = (_read(offset) << 8) | _read(offset + 1);
 	return ret;
 }
-void Bus::write_word(Word offset, Word data, bool debug) 
+void Bus::_write_word(Word offset, Word data, bool debug) 
 {    
     Byte msb = (data >> 8) & 0xFF;
     Byte lsb = data & 0xff;
-    write(offset, msb);
-    write(offset + 1, lsb);
+    Bus::Write(offset, msb);
+    Bus::Write(offset + 1, lsb);
 }
 
 
@@ -458,7 +507,7 @@ Word Bus::Attach(Device* dev, Word size)
         dev->Base(_lastAddress);
         dev->Size(size);
         _lastAddress += size;               
-        _memoryNodes.push_back(dev);
+        Bus::_memoryNodes.push_back(dev);
     }
     if (size > 65536)
         Bus::Error("Memory allocation beyond 64k boundary!");
@@ -468,7 +517,7 @@ Word Bus::Attach(Device* dev, Word size)
 void Bus::DumpMemoryMap()
 {
     std::cout << "  Simple Memory Map:\n";
-    for(auto &o : _memoryNodes)
+    for(auto &o : Bus::_memoryNodes)
     {
         printf("    $%04X-$%04X %s\n", 		
             o->Base(), 
@@ -571,7 +620,7 @@ void Bus::load_hex(const char* filename)
 				b = _fread_hex_byte(ifs);
 				// std::cout << "0x" << hex(addr,4) << ":";
 				// std::cout << "0x" << hex(b, 2) << std::endl;
-				write(addr,b,true);
+				Bus::Write(addr, b, true);
 				++addr;
 			}
 			// Read and discard checksum byte

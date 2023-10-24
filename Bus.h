@@ -73,10 +73,17 @@ class Bus
         void ap(int _addr)  { _lastAddress = _addr; }		// move to private as _ap() helper
 		int FPS() { return _fps; }
 
-        Byte read(Word offset, bool debug = false);
-        void write(Word offset, Byte data, bool debug = false);
-        Word read_word(Word offset, bool debug = false);
-        void write_word(Word offset, Word data, bool debug = false);   				
+		// static read and writes
+		static Byte Read(Word offset, bool debug = false);
+		static void Write(Word offset, Byte data, bool debug = false);
+		static Word Read_Word(Word offset, bool debug = false);
+		static void Write_Word(Word offset, Word data, bool debug = false);
+
+		// old stle reads and writes
+        Byte _read(Word offset, bool debug = false);
+        void _write(Word offset, Byte data, bool debug = false);
+        Word _read_word(Word offset, bool debug = false);
+        void _write_word(Word offset, Word data, bool debug = false);   				
 
 		void load_hex(const char* filename);
 
@@ -93,7 +100,7 @@ class Bus
 
 		// Private Memory Stuff
         int _lastAddress = 0;
-        std::vector<Device*> _memoryNodes;		
+        inline static std::vector<Device*> _memoryNodes;		
 
 		// load hex helpers
 		Byte _fread_hex_byte(std::ifstream& ifs);

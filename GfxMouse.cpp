@@ -6,7 +6,7 @@
 
 Byte GfxMouse::read(Word offset, bool debug)
 { 
-    Bus& bus = Bus::Inst();
+    // Bus& bus = Bus::Inst();
     Byte data = 0xCC;
 
     switch (offset)
@@ -25,7 +25,7 @@ Byte GfxMouse::read(Word offset, bool debug)
     case CSR_PAL_DATA + 0:  data = (_csr_palette[m_palette_index].color) >> 8; break;
     case CSR_PAL_DATA + 1:  data = (_csr_palette[m_palette_index].color) & 0xFF; break;
     }
-    bus.write(offset, data, true);
+    Bus::Write(offset, data, true);
     return data;
 }
 void GfxMouse::write(Word offset, Byte data, bool debug)
@@ -56,11 +56,8 @@ void GfxMouse::write(Word offset, Byte data, bool debug)
         _bCsrIsDirty = true;
         break;
     }
-
-
-
     // write statically
-    Bus::Inst().write(offset, data, true);
+    Bus::Write(offset, data, true);
 }
 
 Word GfxMouse::OnAttach(Word nextAddr)

@@ -18,7 +18,7 @@ Byte Gfx::read(Word offset, bool debug )		// is debug completely unused in the c
 	if (offset >= DBG_BEGIN && offset <= DBG_END)
 		return m_debug->read(offset, debug);
 
-	Bus& bus = Bus::Inst();
+	// Bus& bus = Bus::Inst();
 	Byte data = 0xCC;
 
 	// handle Gfx Reads
@@ -60,7 +60,8 @@ Byte Gfx::read(Word offset, bool debug )		// is debug completely unused in the c
 		case DSP_GLYPH_DATA + 7:  data = _dsp_glyph_data[_dsp_glyph_idx][7]; break;
 	}
 
-	bus.write(offset, data, true);
+	//bus.write(offset, data, true);
+	Bus::Write(offset, data, true);
 	return data;	//data;
 }
 
@@ -78,18 +79,18 @@ void Gfx::write(Word offset, Byte data, bool debug)
 	{
 		case SYS_STATE: { 
 			Bus::_sys_state = data;
-			Bus::Inst().write(SYS_STATE, data, true);
+			Bus::Write(SYS_STATE, data, true);
 			return; 
 		}
 		case DSP_GRES: 	{
 			_dsp_gres = data;
-			Bus::Inst().write(DSP_GRES, _dsp_gres, true);
+			Bus::Write(DSP_GRES, _dsp_gres, true);
 			Bus::Inst().IsDirty(true);		
 			return;	
 		}
 		case DSP_EXT:	{
 			_dsp_ext = data;
-			Bus::Inst().write(DSP_EXT, _dsp_ext, true);
+			Bus::Write(DSP_EXT, _dsp_ext, true);
 			Bus::Inst().IsDirty(true);
 			return;
 		}
@@ -648,8 +649,8 @@ void Gfx::OnPresent()
 void Gfx::_decode_dsp_gres()
 {
 	// shortcut to the Bus instance and DSP_GRES data
-	Bus& bus = Bus::Inst();
-	Byte data = bus.read(DSP_GRES);
+	//Bus& bus = Bus::Inst();
+	Byte data = Bus::Read(DSP_GRES);
 
 	// _aspect = Aspect Ratio
 	Byte a = (data >> 4) & 0x03;
@@ -694,7 +695,7 @@ void Gfx::_decode_dsp_gres()
 
 
 	// text mode
-	Byte tm = bus.read(DSP_EXT) & 0b00000100;
+	Byte tm = Bus::Read(DSP_EXT) & 0b00000100;
 	if (tm == 0)	
 	{
 		req_buffer_size = ((real_width/8) * (real_height/8)) * 2;
@@ -716,10 +717,10 @@ void Gfx::_decode_dsp_gres()
 			Byte d = data;
 			d &= 0x3f;
 			d |= ((_std_bpp)-1) << 6;
-			bus.write(DSP_GRES, d, true);
+			Bus::Write(DSP_GRES, d, true);
 			// set the error bit
-			d = bus.read(SYS_STATE) | 0x80;
-			bus.write(SYS_STATE, d);
+			d = Bus::Read(SYS_STATE) | 0x80;
+			Bus::Write(SYS_STATE, d);
 		}
 
 		// bpp error buffer too big
@@ -739,7 +740,7 @@ void Gfx::_decode_dsp_gres()
 				Byte d = data;
 				d &= 0xFC;
 				d |= ((_v_scan-1) & 0x03);
-				bus.write(DSP_GRES, d, true);			
+				Bus::Write(DSP_GRES, d, true);			
 			}
 		}
 	}	
@@ -769,7 +770,7 @@ void Gfx::_decode_dsp_ext()
 {
 	// shortcut to the Bus instance and DSP_EXT data
 	Bus& bus = Bus::Inst();
-	Byte data = bus.read(DSP_EXT);
+	Byte data = Bus::Read(DSP_EXT);
 
 	// _ext_bpp = Extended Graphics Bits_Per_Pixel
 	_ext_bpp = (data >> 6) & 0x03;
@@ -863,13 +864,13 @@ void Gfx::_display_standard()
 						// 256 color mode
 						if (_std_bpp == 8)
 						{
-							Byte index = bus.read(pixel_index++);
+							Byte index = Bus::Read(pixel_index++);
 							_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
 						}
 						// 16 color mode
 						else if (_std_bpp == 4)
 						{
-							Byte data = bus.read(pixel_index++);
+							Byte data = Bus::Read(pixel_index++);
 							Byte index = (data >> 4);
 							_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
 							index = (data & 0x0f);
@@ -878,7 +879,7 @@ void Gfx::_display_standard()
 						// 4 color mode
 						else if (_std_bpp == 2)
 						{
-							Byte data = bus.read(pixel_index++);
+							Byte data = Bus::Read(pixel_index++);
 							Byte index = (data >> 6) & 0x03;
 							_setPixel_unlocked(pixels, pitch, x++, y, index, true);   
 							index = (data >> 4) & 0x03;
@@ -891,7 +892,7 @@ void Gfx::_display_standard()
 						// 2 color mode
 						else if (_std_bpp == 1)
 						{
-							Byte data = bus.read(pixel_index++);
+							Byte data = Bus::Read(pixel_index++);
 							Byte index = (data >> 7) & 1;
 							_setPixel_unlocked(pixels, pitch, x++, y, index, true); 
 							index = (data >> 6) & 1;
@@ -934,12 +935,12 @@ void Gfx::_updateTextScreen()
     }
     else
     {
-		Word end = bus.read_word(STD_VID_MAX);
+		Word end = Bus::Read_Word(STD_VID_MAX);
 		Word addr = SCREEN_BUFFER;
 		for (  ; addr <= end; addr+=2)
 		{
-			Byte ch = bus.read(addr, true);
-			Byte at = bus.read(addr+1, true);
+			Byte ch = Bus::Read(addr, true);
+			Byte at = Bus::Read(addr+1, true);
 			Byte fg = at >> 4;
 			Byte bg = at & 0x0f;
 			Word index = addr - SCREEN_BUFFER;

@@ -8,7 +8,7 @@
 
 Byte GfxDebug::read(Word offset, bool debug)
 {
-    Bus& bus = Bus::Inst();
+    // Bus& bus = Bus::Inst();
     Byte data = 0xCC;
     switch (offset)
     {
@@ -18,12 +18,12 @@ Byte GfxDebug::read(Word offset, bool debug)
     //case CSR_YPOS + 1:      return mouse_y & 0xFF;
     }
     // return default bit pattern
-    bus.write(offset, data, true);
+    Bus::Write(offset, data, true);
     return data;
 }
 void GfxDebug::write(Word offset, Byte data, bool debug)
 {
-    Bus& bus = Bus::Inst();
+    //Bus& bus = Bus::Inst();
     switch (offset)
     {
     //case CSR_XPOS + 0:    mouse_x = (mouse_x & 0x00ff) | (data << 8);    break;
@@ -32,7 +32,7 @@ void GfxDebug::write(Word offset, Byte data, bool debug)
     //case CSR_YPOS + 1:    mouse_y = (mouse_y & 0xff00) | (data << 0);    break;
     }
     // write statically
-    bus.write(offset, data, true);
+    Bus::Write(offset, data, true);
 }
 
 Word GfxDebug::OnAttach(Word nextAddr)
@@ -147,12 +147,12 @@ void GfxDebug::OnEvent(SDL_Event* evnt)
             {
                 if (SDL_GetModState() & KMOD_ALT)
                 {
-                    Byte data = Bus::Inst().read(DSP_EXT);
+                    Byte data = Bus::Read(DSP_EXT);
                     if (m_gfx->_windowed)
                         data &= ~0x01;
                     else
                         data |= 0x01;
-                    Bus::Inst().write(DSP_EXT, data);
+                    Bus::Write(DSP_EXT, data);
                 }
             }
 
@@ -343,10 +343,10 @@ void GfxDebug::DumpMemory(int col, int row, Word addr)
         std::string out = _hex(ofs, 4) + " ";
         if (use_debug_read)
             for (int b = 0; b < 8; b++)
-                out += _hex(bus.read(ofs + b, true), 2) + " ";
+                out += _hex(Bus::Read(ofs + b, true), 2) + " ";
         else
             for (int b = 0; b < 8; b++)
-                out += _hex(bus.read(ofs + b), 2) + " ";
+                out += _hex(Bus::Read(ofs + b), 2) + " ";
 
         c += OutText(col, row + line, out.c_str(), 224, 224, 255);
 
@@ -357,9 +357,9 @@ void GfxDebug::DumpMemory(int col, int row, Word addr)
             {
                 Byte data;
                 if (use_debug_read)
-                    data = bus.read(ofs + b, true);
+                    data = Bus::Read(ofs + b, true);
                 else
-                    data = bus.read(ofs + b);
+                    data = Bus::Read(ofs + b);
                 OutGlyph(c++, row + line, data, 160, 160, 255);
             }
         }
@@ -884,7 +884,7 @@ void GfxDebug::DrawCursor(float fElapsedTime)
         if (csr_y > 20) { ofs -= 160; addr = mem_bank[2]; }
 
 
-        Byte data = bus.read(addr + ofs, true);
+        Byte data = Bus::Read(addr + ofs, true);
         if (digit == 0) num = (data & 0xf0) >> 4;
         if (digit == 1) num = (data & 0x0f) >> 0;
         ch = _hex(num, 1);
@@ -903,8 +903,8 @@ void GfxDebug::_correctMouseCoords(int& mx, int& my)
     // calculate overscan modifiers
     int ox = 2;
     int oy = 2;
-    int h_oscan = (bus.read(DSP_GRES) >> 2) & 0x03;
-    int v_oscan = (bus.read(DSP_GRES) >> 0) & 0x03;
+    int h_oscan = (Bus::Read(DSP_GRES) >> 2) & 0x03;
+    int v_oscan = (Bus::Read(DSP_GRES) >> 0) & 0x03;
     switch (h_oscan)
     {
     case 0: ox = 2; break;
@@ -919,8 +919,8 @@ void GfxDebug::_correctMouseCoords(int& mx, int& my)
     case 2: oy = 6; break;
     case 3: oy = 8; break;
     }
-    mx = bus.read_word(CSR_XPOS) / ox;
-    my = bus.read_word(CSR_YPOS) / oy;
+    mx = Bus::Read_Word(CSR_XPOS) / ox;
+    my = Bus::Read_Word(CSR_YPOS) / oy;
     Uint32 btns = SDL_GetRelativeMouseState(NULL, NULL);
 }
 
@@ -1124,37 +1124,37 @@ void GfxDebug::KeyboardStuff()
     //printf("$%1x\n", ch);
     switch (csr_at)
     {
-    case CSR_AT::CSR_AT_ADDRESS:
-    {
-        Word addr = 0;
-        if (csr_y < 10) addr = mem_bank[0] + ((csr_y - 1) * 8);
-        else if (csr_y < 20) addr = mem_bank[1] + ((csr_y - 11) * 8);
-        else if (csr_y < 30) addr = mem_bank[2] + ((csr_y - 21) * 8);
-        Byte digit = csr_x - 1;
-        if (digit == 0)	addr = (addr & 0x0fff) | (ch << 12);
-        if (digit == 1)	addr = (addr & 0xf0ff) | (ch << 8);
-        if (digit == 2)	addr = (addr & 0xff0f) | (ch << 4);
-        if (digit == 3)	addr = (addr & 0xfff0) | (ch << 0);
-        if (csr_y < 10)			mem_bank[0] = addr - ((csr_y - 1) * 8);
-        else if (csr_y < 20)	mem_bank[1] = addr - ((csr_y - 11) * 8);
-        else if (csr_y < 30)	mem_bank[2] = addr - ((csr_y - 21) * 8);
-        if (csr_x < 5)	while (!CoordIsValid(++csr_x, csr_y));
-        break;
-    }
-    case CSR_AT::CSR_AT_DATA:
-    {
-        Byte ofs = ((csr_x - 5) / 3) + ((csr_y - 1) * 8);
-        Byte digit = ((csr_x + 1) % 3) - 1;
-        Word addr = mem_bank[0];
-        if (csr_y > 10 && csr_y < 20) { ofs -= 80; addr = mem_bank[1]; }
-        if (csr_y > 20) { ofs -= 160; addr = mem_bank[2]; }
-        Byte data = bus.read(addr + ofs,true);
-        if (digit == 0)		data = (data & 0x0f) | (ch << 4);
-        if (digit == 1)		data = (data & 0xf0) | (ch << 0);
-        bus.write(addr + ofs, data);
-        if (csr_x < 28)		while (!CoordIsValid(++csr_x, csr_y));
-        break;
-    }
+        case CSR_AT::CSR_AT_ADDRESS:
+        {
+            Word addr = 0;
+            if (csr_y < 10) addr = mem_bank[0] + ((csr_y - 1) * 8);
+            else if (csr_y < 20) addr = mem_bank[1] + ((csr_y - 11) * 8);
+            else if (csr_y < 30) addr = mem_bank[2] + ((csr_y - 21) * 8);
+            Byte digit = csr_x - 1;
+            if (digit == 0)	addr = (addr & 0x0fff) | (ch << 12);
+            if (digit == 1)	addr = (addr & 0xf0ff) | (ch << 8);
+            if (digit == 2)	addr = (addr & 0xff0f) | (ch << 4);
+            if (digit == 3)	addr = (addr & 0xfff0) | (ch << 0);
+            if (csr_y < 10)			mem_bank[0] = addr - ((csr_y - 1) * 8);
+            else if (csr_y < 20)	mem_bank[1] = addr - ((csr_y - 11) * 8);
+            else if (csr_y < 30)	mem_bank[2] = addr - ((csr_y - 21) * 8);
+            if (csr_x < 5)	while (!CoordIsValid(++csr_x, csr_y));
+            break;
+        }
+        case CSR_AT::CSR_AT_DATA:
+        {
+            Byte ofs = ((csr_x - 5) / 3) + ((csr_y - 1) * 8);
+            Byte digit = ((csr_x + 1) % 3) - 1;
+            Word addr = mem_bank[0];
+            if (csr_y > 10 && csr_y < 20) { ofs -= 80; addr = mem_bank[1]; }
+            if (csr_y > 20) { ofs -= 160; addr = mem_bank[2]; }
+            Byte data = Bus::Read(addr + ofs,true);
+            if (digit == 0)		data = (data & 0x0f) | (ch << 4);
+            if (digit == 1)		data = (data & 0xf0) | (ch << 0);
+            Bus::Write(addr + ofs, data);
+            if (csr_x < 28)		while (!CoordIsValid(++csr_x, csr_y));
+            break;
+        }
     }
 }
 

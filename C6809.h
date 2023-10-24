@@ -164,22 +164,22 @@ public:
 	{ 
 		if (offset == CSR_PAL_INDX)
 			Byte debug_test = 0;
-		Byte d = m_bus->read(offset);
+		Byte d = Bus::Read(offset);
 		return d; 
 	}
 	void write(Word offset, Byte data)			
 	{ 
 		if (offset == CSR_PAL_INDX)
 			Byte debug_test = 0;
-		m_bus->write(offset, data);
+		Bus::Write(offset, data);
 	}
-	Word read_word(Word offset)					{ return m_bus->read_word(offset); }
-	void write_word(Word offset, Word data)		{ m_bus->write_word(offset, data); }
+	Word read_word(Word offset)					{ return Bus::Read_Word(offset); }
+	void write_word(Word offset, Word data)		{ Bus::Write_Word(offset, data); }
 
-	Byte debug_read(Word offset)				{ return m_bus->read(offset, true);}
-	void debug_write(Word offset, Byte data)	{ m_bus->write(offset, data, true); }
-	Word debug_read_word(Word offset)			{ return m_bus->read_word(offset, true); }
-	void debug_write_word(Word offset, Word data) { m_bus->write_word(offset, data, true); }
+	Byte debug_read(Word offset)				{ return Bus::Read(offset, true);}
+	void debug_write(Word offset, Byte data)	{ Bus::Write(offset, data, true); }
+	Word debug_read_word(Word offset)			{ return Bus::Read_Word(offset, true); }
+	void debug_write_word(Word offset, Word data) { Bus::Write_Word(offset, data, true); }
 
 	// Registers
 
