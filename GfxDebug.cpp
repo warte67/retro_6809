@@ -64,7 +64,7 @@ void GfxDebug::OnActivate()
     _tex_height = _tex_width / m_gfx->_aspect;
 
     // create the glyph textures 
-    printf("glyph_textures.size(): %d\n", (int)glyph_textures.size());
+    // printf("glyph_textures.size(): %d\n", (int)glyph_textures.size());
     _onWindowResize();
 
     // create the working debug layer texture

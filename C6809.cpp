@@ -146,6 +146,11 @@ bool C6809::do_interrupts() {
 	else if (waiting_cwai) {
 		return false;
 	}
+	// testing: return to high cycle
+	NMI = true;
+	FIRQ = true;
+	IRQ = true;
+	// testing: end
 
 	// if we got here, then CWAI is no longer in effect
 	waiting_cwai = false;
@@ -317,9 +322,7 @@ Word C6809::idx() {
 		}
 		default:
 		{
-			//bus->Err("Invalid Postbyte");
 			Bus::Error("Invalid Postbyte");
-			//printf("Error: Invalid Postbyte]\n");
 			r = 0;
 		}
 		}
@@ -348,7 +351,6 @@ Word C6809::relw() {
 // invalid addressing mode
 Word C6809::nula()
 {
-	//bus->Err("Invalid Addressing Mode");
 	Bus::Error("Invalid Addressing Mode");
 	return 0;
 }
@@ -358,10 +360,8 @@ Word C6809::nula()
 
 
 void C6809::null() {
-	// bus->Err("Invalid Opcode");
 	Bus::Error("Invalid Opcode");
-	//printf("Error: Invalid Opcode\n");
-}	// invalid opcode
+}
 
 void C6809::abx() { X += B; }
 void C6809::adca() { do_adc(A); }

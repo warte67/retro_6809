@@ -13,7 +13,7 @@
 
 Bus::Bus()
 {
-	std::cout << "Bus::Bus()\n";
+	// std::cout << "Bus::Bus()\n";
 
     if (COMPILE_MEMORY_MAP)
     {
@@ -209,7 +209,7 @@ void Bus::_cpuThread()
 
 Bus::~Bus()
 {
-	std::cout << "Bus::~Bus()\n";
+	// std::cout << "Bus::~Bus()\n";
 
 	// shutdown the CPU thread
 	m_cpuThread.join();
@@ -228,7 +228,7 @@ Bus::~Bus()
 
 void Bus::_onInit() 
 {
-	std::cout << "void Bus::_onInit()\n";
+	// std::cout << "void Bus::_onInit()\n";
 
 	for (auto &d : _memoryNodes)
 		d->OnInit();
@@ -236,7 +236,7 @@ void Bus::_onInit()
 
 void Bus::_onQuit() 
 {
-	std::cout << "void Bus::_onQuit()\n";
+	// std::cout << "void Bus::_onQuit()\n";
 
 	for (auto &d : _memoryNodes)
 		d->OnQuit();
@@ -244,7 +244,7 @@ void Bus::_onQuit()
 
 void Bus::_onDeactivate() 
 {
-	std::cout << "void Bus::_onDeactivate()\n";
+	// std::cout << "void Bus::_onDeactivate()\n";
 
 	for (auto &d : _memoryNodes)
 		d->OnDeactivate();
@@ -252,7 +252,7 @@ void Bus::_onDeactivate()
 
 void Bus::_onActivate() 
 {
-	std::cout << "void Bus::_onActivate()\n";
+	//std::cout << "void Bus::_onActivate()\n";
 
 	for (auto &d : _memoryNodes)
 		d->OnActivate();

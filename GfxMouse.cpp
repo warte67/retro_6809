@@ -221,7 +221,7 @@ void GfxMouse::OnEvent(SDL_Event* evnt)
         {
             write(CSR_SCROLL, evnt->wheel.y);
             char d = read(CSR_SCROLL);
-            printf("WHEEL: %d\n", d);
+            // printf("WHEEL: %d\n", d);
             break;
         }
         //		CSR_FLAGS = 0x1811,        // (Byte) mouse button flags:
@@ -243,7 +243,7 @@ void GfxMouse::OnEvent(SDL_Event* evnt)
             //bus->debug_write(CSR_FLAGS, button_flags);
             write(CSR_FLAGS, button_flags);
 
-            printf("CSR_FLAGS: 0x%02X\n", read(CSR_FLAGS));
+            // printf("CSR_FLAGS: 0x%02X\n", read(CSR_FLAGS));
             break;
         }
     }

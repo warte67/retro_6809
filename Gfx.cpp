@@ -458,7 +458,7 @@ void Gfx::OnQuit()
 
 void Gfx::OnActivate() 
 {
-	printf("void Gfx::OnActivate() \n");
+	// printf("void Gfx::OnActivate() \n");
 
 	// decode the gfx registers
 	_decode_dsp_gres();

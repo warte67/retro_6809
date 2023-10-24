@@ -23,13 +23,13 @@
 
 ; Software Vectors
 	org	$0000	
-VECT_RSRVD	fdb	KRNL_UNDEF	; RESERVED Software Interrupt Vector
-VECT_SWI3 	fdb	KRNL_UNDEF	; SWI3 Software Interrupt Vector
-VECT_SWI2 	fdb	KRNL_UNDEF	; SWI2 Software Interrupt Vector
-VECT_FIRQ 	fdb	KRNL_UNDEF	; FIRQ Software Interrupt Vector
-VECT_IRQ  	fdb	KRNL_UNDEF	; IRQ Software Interrupt Vector
-VECT_SWI  	fdb	KRNL_UNDEF	; SWI / SYS Software Interrupt Vector
-VECT_NMI  	fdb	KRNL_UNDEF	; NMI Software Interrupt Vector
+VECT_RSRVD	fdb	RSRVD_start	; RESERVED Software Interrupt Vector
+VECT_SWI3 	fdb	SWI3_start	; SWI3 Software Interrupt Vector
+VECT_SWI2 	fdb	SWI2_start	; SWI2 Software Interrupt Vector
+VECT_FIRQ 	fdb	FIRQ_start	; FIRQ Software Interrupt Vector
+VECT_IRQ  	fdb	IRQ_start	; IRQ Software Interrupt Vector
+VECT_SWI  	fdb	SWI_start	; SWI / SYS Software Interrupt Vector
+VECT_NMI  	fdb	NMI_start	; NMI Software Interrupt Vector
 VECT_RESET	fdb	kernel_start	; RESET Software Interrupt Vector	
 
 ; Kernel Jump Vector Calls
@@ -42,8 +42,18 @@ KRNL_IRQ  	jmp	[VECT_IRQ  ]
 KRNL_SWI  	jmp	[VECT_SWI  ]
 KRNL_NMI  	jmp	[VECT_NMI  ]
 KRNL_RESET	jmp	[VECT_RESET]
-; a null vector (i.e. an infinate loop)
+
+; a null vectors (i.e. an infinate loop traps for vector testing)
 KRNL_UNDEF	bra	KRNL_UNDEF
+
+RSRVD_start	bra	RSRVD_start
+SWI3_start	bra	SWI3_start
+SWI2_start	bra	SWI2_start
+FIRQ_start	bra	FIRQ_start
+IRQ_start	bra	IRQ_start
+SWI_start	bra	SWI_start
+NMI_start	bra	NMI_start
+RESET_start	bra	RESET_start
 
 
 kernel_start

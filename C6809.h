@@ -32,7 +32,7 @@
 class C6809		//		: public REG
 {
 	// friend class Bus;
-	// friend class GfxDebug;
+	friend class GfxDebug;
 
 public:
 	C6809(Bus* p_bus);
