@@ -1,7 +1,13 @@
-; kernel_f000.asm
-;
-;  ./asm/build.sh asm/kernel_f000
-;
+; *****************************************************************
+; * 	kernel_f000.asm 
+; *
+; *	a.k.a. The Basic Input and Output System (BIOS)
+; *
+; *  	LINUX: 		./asm/build.sh asm/kernel_f000
+; *		or
+; *	WINDOWS:	asm kernel_f000
+; *
+; *****************************************************************	
 	INCLUDE "memory_map.asm"
 
 
@@ -16,7 +22,7 @@ VECT_SWI  	fdb	KRNL_UNDEF	; SWI / SYS Software Interrupt Vector
 VECT_NMI  	fdb	KRNL_UNDEF	; NMI Software Interrupt Vector
 VECT_RESET	fdb	kernel_start	; RESET Software Interrupt Vector	
 
-; Kernel Jump Vectors Calls
+; Kernel Jump Vector Calls
 	org 	KERNEL_ROM	
 KRNL_RSRVD	jmp	[VECT_RSRVD]
 KRNL_SWI3 	jmp	[VECT_SWI3 ]
