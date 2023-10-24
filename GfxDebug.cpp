@@ -135,8 +135,8 @@ void GfxDebug::OnEvent(SDL_Event* evnt)
 {
     Bus& bus = Bus::Inst();
 
-    if (!_bIsDebugActive)
-        return;
+    //if (!_bIsDebugActive)
+    //    return;
 
     switch (evnt->type)
     {
@@ -155,87 +155,6 @@ void GfxDebug::OnEvent(SDL_Event* evnt)
                     Bus::Inst().write(DSP_EXT, data);
                 }
             }
-            if (evnt->key.keysym.sym == SDLK_EQUALS)
-            {
-                Byte data = Bus::Inst().read(DSP_GRES);
-                Byte asp = (data & 0x30) >> 4;
-                asp++;
-                asp = (asp << 4) | (data & 0xCF);
-                Bus::Inst().write(DSP_GRES, asp);
-            }
-            if (evnt->key.keysym.sym == SDLK_MINUS)
-            {
-                Byte data = Bus::Inst().read(DSP_GRES);
-                Byte asp = (data & 0x30) >> 4;
-                asp--;
-                asp = (asp << 4) | (data & 0xCF);
-                Bus::Inst().write(DSP_GRES, asp);
-            }
-            if (evnt->key.keysym.sym == SDLK_LEFTBRACKET)
-            {
-                Byte data = Bus::Inst().read(DSP_GRES);
-                Byte asp = (data & 0xC0) >> 6;
-                asp--;
-                asp = (asp << 6) | (data & 0x3F);
-                Bus::Inst().write(DSP_GRES, asp);
-            }
-            if (evnt->key.keysym.sym == SDLK_RIGHTBRACKET)
-            {
-                Byte data = Bus::Inst().read(DSP_GRES);
-                Byte asp = (data & 0xC0) >> 6;
-                asp++;
-                asp = (asp << 6) | (data & 0x3F);
-                Bus::Inst().write(DSP_GRES, asp);
-            }
-            // resolution keys
-            if (evnt->key.keysym.sym == SDLK_PAGEUP)
-            {
-                if (SDL_GetModState() & KMOD_SHIFT)
-                {   // Increase Vertical Overscan
-                    Byte data = Bus::Inst().read(DSP_GRES);
-                    Byte asp = (data & 0x03) >> 0;
-                    asp++;
-                    asp = (asp << 0) | (data & 0xFC);
-                    Bus::Inst().write(DSP_GRES, asp);
-                }
-                else
-                {   // Increase Horizontal Overscan
-                    Byte data = Bus::Inst().read(DSP_GRES);
-                    Byte asp = (data & 0x0C) >> 2;
-                    asp++;
-                    asp = (asp << 2) | (data & 0xF3);
-                    Bus::Inst().write(DSP_GRES, asp);
-                }
-            }
-            if (evnt->key.keysym.sym == SDLK_PAGEDOWN)
-            {
-                if (SDL_GetModState() & KMOD_SHIFT)
-                {   // Decrease Vertical Overscan
-                    Byte data = Bus::Inst().read(DSP_GRES);
-                    Byte asp = (data & 0x03) >> 0;
-                    asp--;
-                    asp = (asp << 0) | (data & 0xFC);
-                    Bus::Inst().write(DSP_GRES, asp);
-                }
-                else
-                {   // Decrease Horizontal Overscan
-                    Byte data = Bus::Inst().read(DSP_GRES);
-                    Byte asp = (data & 0x0C) >> 2;
-                    asp--;
-                    asp = (asp << 2) | (data & 0xF3);
-                    Bus::Inst().write(DSP_GRES, asp);
-                }
-            }
-            // standard graphics mode toggle (SDLK_BACKSLASH)
-            if (evnt->key.keysym.sym == SDLK_BACKSLASH)
-            {
-                Byte data = Bus::Inst().read(DSP_EXT);
-                if (data & 0x04)
-                    data &= ~0x04;
-                else
-                    data |= 0x04;
-                Bus::Inst().write(DSP_EXT, data);
-            }
 
             // ****************************
             // * Debugger Specific Events *
@@ -253,44 +172,42 @@ void GfxDebug::OnEvent(SDL_Event* evnt)
             // perform debug enabled specific events
             if (_bIsDebugActive)
             {
-                if (evnt->type == SDL_KEYDOWN)
+                if (evnt->key.keysym.sym == SDLK_ESCAPE)
+                    bIsCursorVisible = false;
+                if (bIsCursorVisible)
                 {
-                    if (evnt->key.keysym.sym == SDLK_ESCAPE)
+                    if (evnt->key.keysym.sym == SDLK_LEFT || evnt->key.keysym.sym == SDLK_BACKSPACE)
+                        if (csr_x > 1)
+                            while (!CoordIsValid(--csr_x, csr_y));
+                    if (evnt->key.keysym.sym == SDLK_RIGHT)
+                        if (csr_x < 28)
+                            while (!CoordIsValid(++csr_x, csr_y));
+                    if (evnt->key.keysym.sym == SDLK_UP)
+                    {
+                        if (csr_y == 1)			mem_bank[0] -= 8;
+                        else if (csr_y == 11)	mem_bank[1] -= 8;
+                        else if (csr_y == 21)	mem_bank[2] -= 8;
+                        else if (csr_y > 1)		while (!CoordIsValid(csr_x, --csr_y));
+                    }
+                    if (evnt->key.keysym.sym == SDLK_DOWN)
+                    {
+                        if (csr_y == 9)			mem_bank[0] += 8;
+                        else if (csr_y == 19)	mem_bank[1] += 8;
+                        else if (csr_y == 29)	mem_bank[2] += 8;
+                        else if (csr_y < 30)	while (!CoordIsValid(csr_x, ++csr_y));
+                    }
+                    if (evnt->key.keysym.sym == SDLK_RETURN)
                         bIsCursorVisible = false;
-                    if (bIsCursorVisible)
-                    {
-                        if (evnt->key.keysym.sym == SDLK_LEFT || evnt->key.keysym.sym == SDLK_BACKSPACE)
-                            if (csr_x > 1)
-                                while (!CoordIsValid(--csr_x, csr_y));
-                        if (evnt->key.keysym.sym == SDLK_RIGHT)
-                            if (csr_x < 28)
-                                while (!CoordIsValid(++csr_x, csr_y));
-                        if (evnt->key.keysym.sym == SDLK_UP)
-                        {
-                            if (csr_y == 1)			mem_bank[0] -= 8;
-                            else if (csr_y == 11)	mem_bank[1] -= 8;
-                            else if (csr_y == 21)	mem_bank[2] -= 8;
-                            else if (csr_y > 1)		while (!CoordIsValid(csr_x, --csr_y));
-                        }
-                        if (evnt->key.keysym.sym == SDLK_DOWN)
-                        {
-                            if (csr_y == 9)			mem_bank[0] += 8;
-                            else if (csr_y == 19)	mem_bank[1] += 8;
-                            else if (csr_y == 29)	mem_bank[2] += 8;
-                            else if (csr_y < 30)	while (!CoordIsValid(csr_x, ++csr_y));
-                        }
-                        if (evnt->key.keysym.sym == SDLK_RETURN)
-                            bIsCursorVisible = false;
-                    }
-                    // SPACE advances single step
-                    if (evnt->key.keysym.sym == SDLK_SPACE)
-                    {
-                        bSingleStep = true;
-                        bIsStepPaused = false;
-                        nRegisterBeingEdited.reg = GfxDebug::EDIT_REGISTER::EDIT_NONE;	// cancel any register edits
-                        bMouseWheelActive = false;
-                    }
                 }
+                // SPACE advances single step
+                if (evnt->key.keysym.sym == SDLK_SPACE)
+                {
+                    bSingleStep = true;
+                    bIsStepPaused = false;
+                    nRegisterBeingEdited.reg = GfxDebug::EDIT_REGISTER::EDIT_NONE;	// cancel any register edits
+                    bMouseWheelActive = false;
+                }
+             
             }
             break;
         } // SDL_KEYDOWN
@@ -326,21 +243,23 @@ void GfxDebug::OnUpdate(float fElapsedTime)
         // call update functions
         MouseStuff();
         KeyboardStuff();
-
         DumpMemory(1, 1, mem_bank[0]);
         DumpMemory(1, 11, mem_bank[1]);
         DumpMemory(1, 21, mem_bank[2]);
-
         DrawCpu(39, 1);
         DrawCode(39, 6);
-
         DrawButtons();
         HandleButtons();
-
         DrawBreakpoints();
-
         if (!EditRegister(fElapsedTime))
             DrawCursor(fElapsedTime);
+
+        // instruction text
+        OutText(1, 31, "[SPACE]    Step", 128, 128, 128);
+        OutText(1, 32, "[ALT-X]    Quit", 128, 128, 128);
+        OutText(1, 33, "[ALT-D]  Toggle", 128, 128, 128);
+        OutText(1, 34, "               ", 128, 128, 128);
+        OutText(1, 35, "[ALT-ENTER] Fullscreen / Windowed", 128, 128, 128);
 
         // clean up
         SDL_SetRenderTarget(m_gfx->_renderer, NULL);

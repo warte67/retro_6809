@@ -321,9 +321,10 @@ void Bus::_onEvent()
             break;
         
         case SDL_KEYDOWN:
-            if (evnt.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
+            //if (evnt.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
+            if (evnt.key.keysym.sym == SDLK_x)
             {
-                if (SDL_GetModState() & KMOD_SHIFT)
+                if (SDL_GetModState() & KMOD_ALT)
                     s_bIsRunning = false;
             }
             break;
