@@ -799,7 +799,7 @@ void Gfx::_decode_dsp_ext()
 	_vsync = data & 0b00000010;
 
 	// _windowed = Emulation Mode: 0:FULLSCREEN or 1:WINDOWED 
-	Byte _old = data;
+	bool _old = _windowed;
 	_windowed = data & 0b00000001;
 	if (_windowed != _old)
 		m_debug->bIsCursorVisible = false;
