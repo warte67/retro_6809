@@ -2,6 +2,7 @@
 //
 #include "Bus.h"
 #include "GfxDebug.h"
+#include "C6809.h"
 #include "font8x8_system.h"
 
 
@@ -60,7 +61,7 @@ void GfxDebug::OnActivate()
 
     // create the glyph textures 
     printf("glyph_textures.size(): %d\n", (int)glyph_textures.size());
-    OnWindowResize();
+    _onWindowResize();
 
     // create the working debug layer texture
     _debug_texture = SDL_CreateTexture(m_gfx->_renderer, SDL_PIXELFORMAT_ARGB4444,
@@ -84,7 +85,7 @@ void GfxDebug::OnDeactivate()
     // printf("glyph_textures.size(): %d\n", (int)glyph_textures.size());
 }
 
-void GfxDebug::OnWindowResize()
+void GfxDebug::_onWindowResize()
 {
     // For whatever reason, when the viewing window gets resized, 
     //  the glyphs get corrupted. A hacky workaround solution is to recreate them 
@@ -245,17 +246,41 @@ void GfxDebug::OnUpdate(float fElapsedTime)
     if (!_bIsDebugActive)
         return;
 
-    // clear the debug layer texture
-    SDL_SetRenderTarget(m_gfx->_renderer, _debug_texture);
-    SDL_SetRenderDrawColor(m_gfx->_renderer, 0, 0, 0, 128);   // mouse layer background color
-    SDL_RenderClear(m_gfx->_renderer);
+    // frame rate limit the debug layer updates
+    const float delay = 1.0f / 30.0f;
+    static float delayAcc = fElapsedTime;
+    delayAcc += fElapsedTime;
+    if (delayAcc >= delay)
+    {
+        delayAcc -= delay;
 
-    // render to the debug layer texture
-    OutText(1, 1, "Debug Platform Under Construction...");
-    OutText(1, 2, "Hello World");
+        // clear the debug layer texture
+        SDL_SetRenderTarget(m_gfx->_renderer, _debug_texture);
+        SDL_SetRenderDrawColor(m_gfx->_renderer, 0, 0, 0, 128);   // mouse layer background color
+        SDL_RenderClear(m_gfx->_renderer);
 
-    // clean up
-    SDL_SetRenderTarget(m_gfx->_renderer, NULL);
+        // call update functions
+        //MouseStuff();
+        //KeyboardStuff();
+
+        DumpMemory(1, 1, mem_bank[0]);
+        DumpMemory(1, 11, mem_bank[1]);
+        DumpMemory(1, 21, mem_bank[2]);
+
+        DrawCpu(39, 1);
+        //DrawCode(39, 6);
+
+        //DrawButtons();
+        //HandleButtons();
+
+        //DrawBreakpoints();
+
+        //if (!EditRegister(fElapsedTime))
+        //    DrawCursor(fElapsedTime);
+
+        // clean up
+        SDL_SetRenderTarget(m_gfx->_renderer, NULL);
+    }
 }
 
 void GfxDebug::OnRender()
@@ -311,4 +336,106 @@ int GfxDebug::OutText(int col, int row, std::string text, Byte red, Byte grn, By
     return pos;
 }
 
+std::string GfxDebug::_hex(Uint32 n, Uint8 d)
+{
+    std::string s(d, '0');
+    for (int i = d - 1; i >= 0; i--, n >>= 4)
+        s[i] = "0123456789ABCDEF"[n & 0xF];
+    return s;
+}
 
+void GfxDebug::DumpMemory(int col, int row, Word addr)
+{
+    Bus& bus = Bus::Inst();
+    const bool use_debug_read = false;
+    int line = 0;
+    for (int ofs = addr; ofs < addr + 0x48; ofs += 8)
+    {
+        int c = col;
+        std::string out = _hex(ofs, 4) + " ";
+        if (use_debug_read)
+            for (int b = 0; b < 8; b++)
+                out += _hex(bus.read(ofs + b, true), 2) + " ";
+        else
+            for (int b = 0; b < 8; b++)
+                out += _hex(bus.read(ofs + b), 2) + " ";
+
+        c += OutText(col, row + line, out.c_str(), 224, 224, 255);
+
+        bool characters = true;
+        if (characters)
+        {
+            for (int b = 0; b < 8; b++)
+            {
+                Byte data;
+                if (use_debug_read)
+                    data = bus.read(ofs + b, true);
+                else
+                    data = bus.read(ofs + b);
+                OutGlyph(c++, row + line, data, 160, 160, 255);
+            }
+        }
+        line++;
+    }
+}
+
+
+void GfxDebug::DrawCpu(int x, int y)
+{
+    Bus& bus = Bus::Inst();
+    C6809* cpu = bus.m_cpu;
+
+    int RamX = x, RamY = y;
+    // Condition Codes
+    RamX += OutText(RamX, RamY, "CC($", 64, 255, 64);
+    RamX += OutText(RamX, RamY, _hex(cpu->getCC(), 2).c_str(), 255, 255, 64);
+    RamX += OutText(RamX, RamY, "): ", 64, 255, 64);
+    if (cpu->getCC_E())		RamX += OutText(RamX, RamY, "E", 255, 255, 64);
+    else RamX += OutText(RamX, RamY, "e", 64, 255, 64);
+    if (cpu->getCC_F())		RamX += OutText(RamX, RamY, "F", 255, 255, 64);
+    else RamX += OutText(RamX, RamY, "f", 64, 255, 64);
+    if (cpu->getCC_H())		RamX += OutText(RamX, RamY, "H", 255, 255, 64);
+    else RamX += OutText(RamX, RamY, "h", 64, 255, 64);
+    if (cpu->getCC_I())		RamX += OutText(RamX, RamY, "I", 255, 255, 64);
+    else RamX += OutText(RamX, RamY, "i", 64, 255, 64);
+    if (cpu->getCC_N())		RamX += OutText(RamX, RamY, "N", 255, 255, 64);
+    else RamX += OutText(RamX, RamY, "n", 64, 255, 64);
+    if (cpu->getCC_Z())		RamX += OutText(RamX, RamY, "Z", 255, 255, 64);
+    else RamX += OutText(RamX, RamY, "z", 64, 255, 64);
+    if (cpu->getCC_V())		RamX += OutText(RamX, RamY, "V", 255, 255, 64);
+    else RamX += OutText(RamX, RamY, "v", 64, 255, 64);
+    if (cpu->getCC_C())		RamX += OutText(RamX, RamY, "C", 255, 255, 64);
+    else RamX += OutText(RamX, RamY, "c", 64, 255, 64);
+    RamX = x; RamY++;	// carraige return(ish)
+
+    // D = (A<<8) | B & 0x00FF
+    RamX += OutText(RamX, RamY, "D:$", 64, 255, 64);
+    RamX += OutText(RamX, RamY, _hex(cpu->getD(), 4), 255, 255, 64);
+    RamX += OutText(RamX, RamY, " (A:$", 64, 255, 64);
+    RamX += OutText(RamX, RamY, _hex(cpu->getA(), 2), 255, 255, 64);
+    RamX += OutText(RamX, RamY, " B:$", 64, 255, 64);
+    RamX += OutText(RamX, RamY, _hex(cpu->getB(), 2), 255, 255, 64);
+    RamX += OutText(RamX, RamY, ")", 64, 255, 64);
+    RamX = x; RamY++;	// carraige return(ish)
+
+    // X
+    RamX += OutText(RamX, RamY, " X:$", 64, 255, 64);
+    RamX += OutText(RamX, RamY, _hex(cpu->getX(), 4), 255, 255, 64);
+    // Y
+    RamX += OutText(RamX, RamY, " Y:$", 64, 255, 64);
+    RamX += OutText(RamX, RamY, _hex(cpu->getY(), 4), 255, 255, 64);
+    // U
+    RamX += OutText(RamX, RamY, " U:$", 64, 255, 64);
+    RamX += OutText(RamX, RamY, _hex(cpu->getU(), 4), 255, 255, 64);
+    RamX = x; RamY++;	// carraige return(ish)
+    // PC
+    RamX += OutText(RamX, RamY, "PC:$", 64, 255, 64);
+    RamX += OutText(RamX, RamY, _hex(cpu->getPC(), 4), 255, 255, 64);
+    // S
+    RamX += OutText(RamX, RamY, " S:$", 64, 255, 64);
+    RamX += OutText(RamX, RamY, _hex(cpu->getS(), 4), 255, 255, 64);
+    // DP
+    RamX += OutText(RamX, RamY, " DP:$", 64, 255, 64);
+    RamX += OutText(RamX, RamY, _hex(cpu->getDP(), 2), 255, 255, 64);
+    RamX = x; RamY++;	// carraige return(ish)
+}

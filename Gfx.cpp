@@ -539,7 +539,7 @@ void Gfx::OnEvent(SDL_Event* evnt)
                 _window_width = evnt->window.data1;
                 _window_height = evnt->window.data2;
 
-				m_debug->OnWindowResize();
+				m_debug->_onWindowResize();
             }
 			break;
 		}

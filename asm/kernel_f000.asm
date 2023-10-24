@@ -47,6 +47,9 @@ KRNL_UNDEF	bra	KRNL_UNDEF
 
 
 kernel_start
+		; initialize both stack pointers
+		lds	#SSTACK_TOP
+		ldu	#USTACK_TOP
 ; fill the screen
 	lda	#$00
 	ldx	#SCREEN_BUFFER

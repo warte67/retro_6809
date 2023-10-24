@@ -31,22 +31,28 @@ public:
 	virtual void OnUpdate(float fElapsedTime) override;
 	virtual void OnRender() override;
 
-protected:
-
-	bool _bIsDebugActive = true;
-
 	void OutGlyph(int col, int row, Byte glyph,
 		Byte red = 255, Byte grn = 255, Byte blu = 255, bool bDropShadow = false);
 	int OutText(int col, int row, std::string text,
-		Byte red=255, Byte grn=255, Byte blu=255, bool bDropshadow = false);
+		Byte red = 255, Byte grn = 255, Byte blu = 255, bool bDropshadow = false);
+	void DumpMemory(int col, int row, Word addr);
+	void DrawCpu(int x, int y);
 
-	void OnWindowResize();	// called when the viewing window is scaled
+protected:
+
+	bool _bIsDebugActive = true;
+	
+	// protected helpers
+	void _onWindowResize();	// called when the viewing window is scaled
+	std::string _hex(Uint32 n, Uint8 d);
 
 private:
 	SDL_Texture* _debug_texture = nullptr;
 	std::vector<SDL_Texture*> glyph_textures;
 	int _tex_width = 0;
 	int _tex_height = 0;
+
+	std::vector <Word> mem_bank = { SSTACK_TOP - 0x0048, SCREEN_BUFFER, HDW_REGS };
 };
 
 

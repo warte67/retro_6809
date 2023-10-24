@@ -197,14 +197,17 @@ F020  20FE            KRNL_UNDEF      bra     KRNL_UNDEF
                       
                       
 F022                  kernel_start
+                                      ; initialize both stack pointers
+F022  10CE0300                        lds     #SSTACK_TOP
+F026  CE0400                          ldu     #USTACK_TOP
                       ; fill the screen
-F022  8600                    lda     #$00
-F024  8E0400                  ldx     #SCREEN_BUFFER
-F027                  lp1     
-F027  4C                      inca
-F028  A780                    sta     ,x+
-F02A  8C1C00                  cmpx    #STD_VID_MAX
-F02D  2FF8                    ble     lp1
+F029  8600                    lda     #$00
+F02B  8E0400                  ldx     #SCREEN_BUFFER
+F02E                  lp1     
+F02E  4C                      inca
+F02F  A780                    sta     ,x+
+F031  8C1C00                  cmpx    #STD_VID_MAX
+F034  2FF8                    ble     lp1
                       
                       ; cycle the palette colors
                       ;       lda     #0      
@@ -227,30 +230,30 @@ F02D  2FF8                    ble     lp1
                       
                       
                       ; increment the characters on the screen
-F02F  8601                    lda     #1
-F031  B71C1E                  sta     CSR_PAL_INDX
+F036  8601                    lda     #1
+F038  B71C1E                  sta     CSR_PAL_INDX
                       
-F034                  inc_screen
-F034  8E0400                  ldx     #SCREEN_BUFFER
-F037                  lp3
+F03B                  inc_screen
+F03B  8E0400                  ldx     #SCREEN_BUFFER
+F03E                  lp3
                               ; cycle the cursor color
-F037  FC1C1F                  ldd     CSR_PAL_DATA
-F03A  C30001                  addd    #$0001
-F03D  8AF0                    ora     #$f0            ; full alpha
-F03F  FD1C1F                  std     CSR_PAL_DATA
+F03E  FC1C1F                  ldd     CSR_PAL_DATA
+F041  C30001                  addd    #$0001
+F044  8AF0                    ora     #$f0            ; full alpha
+F046  FD1C1F                  std     CSR_PAL_DATA
                       
                               ; increment character and attribute data
-F042  6C80                    inc     ,x+
-F044  BC1C00                  cmpx    STD_VID_MAX
-F047  2FEE                    ble     lp3
+F049  6C80                    inc     ,x+
+F04B  BC1C00                  cmpx    STD_VID_MAX
+F04E  2FEE                    ble     lp3
                       
                       
                       ;       lda     #0
                       ;       sta     CSR_PAL_INDX
                       ;       ldd     #$f00f
                       ;       std     CSR_PAL_DATA
-F049                  inf_loop
-F049  20E9                    bra     inc_screen
+F050                  inf_loop
+F050  20E9                    bra     inc_screen
                       
                       
                       ; ROM Based Hardware Vectors
