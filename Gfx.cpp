@@ -28,13 +28,14 @@ Byte Gfx::read(Word offset, bool debug )		// is debug completely unused in the c
 		case STD_VID_MAX+1:		data = _std_vid_max & 0xFF; break;
 
 		case SYS_STATE: {
-			Byte err = bus._sys_state & 0xF0;
-			bus._sys_state &= 0x0F;
-			data = bus._sys_state | err; 
+			// Byte err = bus._sys_state & 0xF0;
+			Byte err = Bus::_sys_state & 0xF0;
+			Bus::_sys_state &= 0x0F;
+			data = Bus::_sys_state | err; 
 			break;
 		}
-		case SYS_SPEED + 0:		data = bus._sys_cpu_speed >> 8; break;
-		case SYS_SPEED + 1:		data = bus._sys_cpu_speed & 0xFF; break;	
+		case SYS_SPEED + 0:		data = Bus::_sys_cpu_speed >> 8; break;
+		case SYS_SPEED + 1:		data = Bus::_sys_cpu_speed & 0xFF; break;
 
 		case DSP_GRES: 			data = _dsp_gres; break;
 		case DSP_EXT:			data = _dsp_ext; break;
@@ -76,8 +77,8 @@ void Gfx::write(Word offset, Byte data, bool debug)
 	switch (offset)
 	{
 		case SYS_STATE: { 
-			// m_bus->_sys_state = data;  
-			// Bus::Inst().write(SYS_STATE, data, true);
+			Bus::_sys_state = data;
+			Bus::Inst().write(SYS_STATE, data, true);
 			return; 
 		}
 		case DSP_GRES: 	{

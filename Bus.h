@@ -39,8 +39,8 @@ class Bus
 		int _avg_cpu_clock = 0;
 
 		// Bus CPU clock registers (Uses the Gfx Device register block)
-		Byte _sys_state = 0x0D;			// SYS_STATE	(R/W Byte) register
-		Word _sys_cpu_speed = 0;			// SYS_SPEED	(Read Byte) register
+		inline static Byte _sys_state = 0x0D;			// SYS_STATE	(R/W Byte) register
+		inline static Word _sys_cpu_speed = 0;			// SYS_SPEED	(Read Byte) register
 
 		// CPU Stuff
 		inline static C6809* m_cpu = nullptr;
