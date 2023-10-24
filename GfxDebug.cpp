@@ -93,9 +93,6 @@ void GfxDebug::_onWindowResize()
     //  the glyphs get corrupted. A hacky workaround solution is to recreate them 
     //  when this happens. Need a better understanding of whats really happening.
 
-    if (!_bIsDebugActive)
-        return;
-
     // destroy the glyph textures
     for (auto& a : glyph_textures)
         SDL_DestroyTexture(a);
@@ -131,10 +128,7 @@ void GfxDebug::_onWindowResize()
 
 void GfxDebug::OnEvent(SDL_Event* evnt)
 {
-    //if (!_bIsDebugActive)
-    //    return;
-
-    switch (evnt->type)
+     switch (evnt->type)
     {
         case SDL_KEYDOWN:
         {
