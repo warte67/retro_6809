@@ -17,7 +17,8 @@ class Gfx : public Device
     friend class GfxMouse;
 	
     public:
-        Gfx() {  _deviceName = "GFX_DEVICE"; }
+        Gfx() { _deviceName = "GFX_DEVICE"; }
+        Gfx(Bus* _bus) { _deviceName = "GFX_DEVICE";  m_bus = _bus; }
         //Gfx(std::string sName) { _deviceName = sName; }
         // virtual ~Device() {}
 
@@ -98,6 +99,8 @@ class Gfx : public Device
 		Byte _dsp_gres	= 0b11000101;	// defaults
 		Byte _dsp_ext 	= 0b00001001;	// defaults
         Byte _dsp_err = 0;          
+
+        Bus* m_bus = nullptr;
 
         // graphics devices based on the IGfxDevice
         GfxDebug* m_debug = nullptr;

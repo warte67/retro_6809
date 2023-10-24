@@ -26,9 +26,19 @@ Byte Gfx::read(Word offset, bool debug )		// is debug completely unused in the c
 	{
 		case STD_VID_MAX:		data = _std_vid_max >> 8; break;
 		case STD_VID_MAX+1:		data = _std_vid_max & 0xFF; break;
+
+		case SYS_STATE: {
+			Byte err = bus._sys_state & 0xF0;
+			bus._sys_state &= 0x0F;
+			data = bus._sys_state | err; 
+			break;
+		}
+		case SYS_SPEED + 0:		data = bus._sys_cpu_speed >> 8; break;
+		case SYS_SPEED + 1:		data = bus._sys_cpu_speed & 0xFF; break;	
+
 		case DSP_GRES: 			data = _dsp_gres; break;
 		case DSP_EXT:			data = _dsp_ext; break;
-		case DSP_ERR:			{ Byte err = _dsp_err;	_dsp_err = 0;	data = err; break;} 
+		// case DSP_ERR:			{ Byte err = _dsp_err;	_dsp_err = 0;	data = err; break;} 
 		case DSP_TXT_COLS:      data = _texture_width / 8; break;
 		case DSP_TXT_ROWS:      data = _texture_height / 8; break;
 
@@ -47,7 +57,6 @@ Byte Gfx::read(Word offset, bool debug )		// is debug completely unused in the c
         case DSP_GLYPH_DATA+5:  data = _dsp_glyph_data[_dsp_glyph_idx][5]; break;
         case DSP_GLYPH_DATA+6:  data = _dsp_glyph_data[_dsp_glyph_idx][6]; break;
 		case DSP_GLYPH_DATA + 7:  data = _dsp_glyph_data[_dsp_glyph_idx][7]; break;
-
 	}
 
 	bus.write(offset, data, true);
@@ -66,6 +75,11 @@ void Gfx::write(Word offset, Byte data, bool debug)
 	// handle Gfx Writes
 	switch (offset)
 	{
+		case SYS_STATE: { 
+			m_bus->_sys_state = data;  
+			Bus::Inst().write(SYS_STATE, data, true);
+			return; 
+		}
 		case DSP_GRES: 	{
 			_dsp_gres = data;
 			Bus::Inst().write(DSP_GRES, _dsp_gres, true);
@@ -76,11 +90,6 @@ void Gfx::write(Word offset, Byte data, bool debug)
 			_dsp_ext = data;
 			Bus::Inst().write(DSP_EXT, _dsp_ext, true);
 			Bus::Inst().IsDirty(true);
-			return;
-		}
-		case DSP_ERR:	{
-			_dsp_err = data;
-			Bus::Inst().write(DSP_ERR, _dsp_err, true);
 			return;
 		}
 		// color palete registers
@@ -122,10 +131,10 @@ Word Gfx::OnAttach(Word nextAddr)
 	DisplayEnum("", 0, "");
 	DisplayEnum("SYS_STATE", nextAddr, " (Byte) System State Register");
 	DisplayEnum("", 0, "DSP_GRES: ABCD.SSSS");
-	DisplayEnum("", 0, "     A:0   = Standard Buffer Overflow ");
-	DisplayEnum("", 0, "     B:0   = Extended Buffer Overflow ");
-	DisplayEnum("", 0, "     C:0   = Reserved ");
-	DisplayEnum("", 0, "     D:0   = Reserved ");
+	DisplayEnum("", 0, "     A:0   = Error: Standard Buffer Overflow ");
+	DisplayEnum("", 0, "     B:0   = Error: Extended Buffer Overflow ");
+	DisplayEnum("", 0, "     C:0   = Error: Reserved ");
+	DisplayEnum("", 0, "     D:0   = Error: Reserved ");
 	DisplayEnum("", 0, "     S:$0  = CPU Clock  25 khz.");
 	DisplayEnum("", 0, "     S:$1  = CPU Clock  50 khz.");
 	DisplayEnum("", 0, "     S:$2  = CPU Clock 100 khz.");
@@ -145,16 +154,7 @@ Word Gfx::OnAttach(Word nextAddr)
 	nextAddr++;
 
 	DisplayEnum("", 0, "");
-	DisplayEnum("DSP_ERR", nextAddr, " (Byte) Display Sub-System Error Code Register");
-	DisplayEnum("", 0, "DSP_ERR: ABCD.EFGH");
-	DisplayEnum("", 0, "     A:0   = Standard Buffer Overflow ");
-	DisplayEnum("", 0, "     B:0   = Extended Buffer Overflow ");
-	DisplayEnum("", 0, "     C:0   = Reserved ");
-	DisplayEnum("", 0, "     D:0   = Reserved ");
-	nextAddr++;
-
-	DisplayEnum("", 0, "");
-	DisplayEnum("SYS_SPEED", nextAddr, " (Word) Approximate CPU Clock Speed");
+	DisplayEnum("SYS_SPEED", nextAddr, " (Word) Approx. Average CPU Clock Speed");
 	nextAddr+=2;
 
     DisplayEnum("", 0, "");
@@ -717,8 +717,8 @@ void Gfx::_decode_dsp_gres()
 			d |= ((_std_bpp)-1) << 6;
 			bus.write(DSP_GRES, d, true);
 			// set the error bit
-			d = bus.read(DSP_ERR) | 0x80;
-			bus.write(DSP_ERR, d);
+			d = bus.read(SYS_STATE) | 0x80;
+			bus.write(SYS_STATE, d);
 		}
 
 		// bpp error buffer too big
@@ -1065,3 +1065,4 @@ void Gfx::_setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_i
         }
     }    
 }
+

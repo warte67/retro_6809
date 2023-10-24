@@ -89,7 +89,7 @@ Bus::Bus()
 
 
 	// base graphics device
-    m_gfx = new Gfx();
+    m_gfx = new Gfx(this);
     addr += Attach(m_gfx);
     //m_gfx = dynamic_cast<Gfx*>(dev);
     //addr += m_gfx->Attach_Devices(addr);
@@ -330,9 +330,9 @@ void Bus::_onUpdate()
 		sTitle += "  FPS: ";
 		sTitle += std::to_string(_fps);
 
-        _sys_cpu_khz = (int)(1.0f / (_avg_cpu_cycle_time / 1000000.0f));
+        _sys_cpu_speed = (int)(1.0f / (_avg_cpu_cycle_time / 1000000.0f));
 
-        sTitle += "   CPU_SPEED: " + std::to_string(_sys_cpu_khz) + " khz.";
+        sTitle += "   CPU_SPEED: " + std::to_string(_sys_cpu_speed) + " khz.";
 		if (m_gfx)
 			if (m_gfx->_window)
 				 SDL_SetWindowTitle(m_gfx->_window, sTitle.c_str());

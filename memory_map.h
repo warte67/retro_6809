@@ -1,4 +1,3 @@
-
 // memory_map.h
 #ifndef __MEMORY_MAP_H__
 #define __MEMORY_MAP_H__
@@ -34,7 +33,32 @@ enum MEMMAP
 
     STD_VID_MAX = 0x1C00, //  (Word) Standard Video Buffer Max
 
-    DSP_GRES = 0x1C02, //  (Byte) Screen Resolution Register
+    SYS_STATE = 0x1C02, //  (Byte) System State Register
+    // DSP_GRES: ABCD.SSSS
+    //      A:0   = Error: Standard Buffer Overflow
+    //      B:0   = Error: Extended Buffer Overflow
+    //      C:0   = Error: Reserved
+    //      D:0   = Error: Reserved
+    //      S:$0  = CPU Clock  25 khz.
+    //      S:$1  = CPU Clock  50 khz.
+    //      S:$2  = CPU Clock 100 khz.
+    //      S:$3  = CPU Clock 200 khz.
+    //      S:$4  = CPU Clock 333 khz.
+    //      S:$5  = CPU Clock 416 khz.
+    //      S:$6  = CPU Clock 500 khz.
+    //      S:$7  = CPU Clock 625 khz.
+    //      S:$8  = CPU Clock 769 khz.
+    //      S:$9  = CPU Clock 833 khz.
+    //      S:$A  = CPU Clock 1.0 mhz.
+    //      S:$B  = CPU Clock 1.4 mhz.
+    //      S:$C  = CPU Clock 2.0 mhz.
+    //      S:$D  = CPU Clock 3.3 mhz.
+    //      S:$E  = CPU Clock 5.0 mhz.
+    //      S:$F  = CPU Clock ~10.0 mhz. (unmetered)
+
+    SYS_SPEED = 0x1C03, //  (Word) Approx. Average CPU Clock Speed
+
+    DSP_GRES = 0x1C05, //  (Byte) Screen Resolution Register
     // DSP_GRES: BBRR.HHVV
     //     BB:00 = Standard Graphics 1-bpp (2-color mode)
     //     BB:01 = Standard Graphics 2-bpp (4-color mode)
@@ -53,7 +77,7 @@ enum MEMMAP
     //     VV:10 = 2x Vertical Overscan Multiplier
     //     VV:11 = 1x Vertical Overscan Multiplier
 
-    DSP_EXT = 0x1C03, //  (Byte) Extended Graphics Register
+    DSP_EXT = 0x1C06, //  (Byte) Extended Graphics Register
     // DSP_EXT: ABCD.EFGG
     //      AA:00 = Extended Graphics 1bpp (2-color mode)
     //      AA:01 = Extended Graphics 2bpp (4-color mode)
@@ -72,66 +96,56 @@ enum MEMMAP
     //      B:0   = Fullscreen Enabled( emulator only )
     //      B:1   = Windowed Enabled ( emulator only )
 
-    DSP_ERR = 0x1C04, //  (Byte) Display Sub-System Error Code Register
-    // DSP_ERR: ABCD.EFGH
-    //      A:0   = Standard Buffer Overflow
-    //      B:0   = Extended Buffer Overflow
-    //      C:0   = Reserved
-    //      D:0   = Reserved
-    //      E:0   = Reserved
-    //      F:0   = Reserved
-    //      G:0   = Reserved
-    //      H:0   = Reserved
+    DSP_TXT_COLS = 0x1C07, //  (Byte) READ-ONLY Text Screen Columns
+    DSP_TXT_ROWS = 0x1C08, //  (Byte) READ-ONLY Text Screens Rows
 
-    DSP_TXT_COLS = 0x1C05, //  (Byte) READ-ONLY Text Screen Columns
-    DSP_TXT_ROWS = 0x1C06, //  (Byte) READ-ONLY Text Screens Rows
-
-    DSP_PAL_IDX = 0x1C07, //  (Byte) Color Palette Index
+    DSP_PAL_IDX = 0x1C09, //  (Byte) Color Palette Index
     // DSP_PAL_IDX: 0-255
     // Note: Use this register to set the index into theColor Palette.
     //   Set this value prior referencing color data (DSP_PAL_CLR).
 
-    DSP_PAL_CLR = 0x1C08, //  (Word) Indexed Color Palette Data
+    DSP_PAL_CLR = 0x1C0A, //  (Word) Indexed Color Palette Data
     // DSP_PAL_CLR: Color Data A4R4G4B4 format
     // Note: This is the color data for an individual palette entry.
     //     Write to DSP_PAL_IDX with the index within the color palette
     //     prior to reading or writing the color data in the DSP_PAL_CLR register.
 
-    DSP_GLYPH_IDX = 0x1C0A, //  (Byte) Text Glyph Index
+    DSP_GLYPH_IDX = 0x1C0C, //  (Byte) Text Glyph Index
     // DSP_GLYPH_IDX: 0-256
     // Note: Set this register to index a specific text glyph. Set this value
     //     prior to updating glyph pixel data.
 
-    DSP_GLYPH_DATA = 0x1C0B, //  (8-Bytes) Text Glyph Pixel Data Array
+    DSP_GLYPH_DATA = 0x1C0D, //  (8-Bytes) Text Glyph Pixel Data Array
     // DSP_GLYPH_DATA: 8 rows of binary encoded glyph pixel data
     // Note: Each 8x8 text glyph is composed of 8 bytes. The first byte in this
     //     array represents the top line of 8 pixels. Each array entry represents
     //     a row of 8 pixels.
-    
+
+    // Debug Hardware Registers:
+    DBG_BEGIN = 0x1C15, //  start of mouse cursor hardware registers
+    DBG_TEMP = 0x1C15, //  (Byte) Simple Debug test register
+    DBG_END = 0x1C16, // End Debug Registers
+
     // Mouse Cursor Hardware Registers:
-    CSR_BEGIN = 0x1C13, //  start of mouse cursor hardware registers
-    CSR_XPOS = 0x1C13, //  (Word) horizontal mouse cursor coordinate
-    CSR_YPOS = 0x1C15, //  (Word) vertical mouse cursor coordinate
-    CSR_XOFS = 0x1C17, //  (Byte) horizontal mouse cursor offset
-    CSR_YOFS = 0x1C18, //  (Byte) vertical mouse cursor offset
-    CSR_SCROLL = 0x1C19, //  (Signed) MouseWheel Scroll: -1, 0, 1
-    CSR_FLAGS = 0x1C1A, //  (Byte) mouse button flags:
+    CSR_BEGIN = 0x1C16, //  start of mouse cursor hardware registers
+    CSR_XPOS = 0x1C16, //  (Word) horizontal mouse cursor coordinate
+    CSR_YPOS = 0x1C18, //  (Word) vertical mouse cursor coordinate
+    CSR_XOFS = 0x1C1A, //  (Byte) horizontal mouse cursor offset
+    CSR_YOFS = 0x1C1B, //  (Byte) vertical mouse cursor offset
+    CSR_SCROLL = 0x1C1C, //  (Signed) MouseWheel Scroll: -1, 0, 1
+    CSR_FLAGS = 0x1C1D, //  (Byte) mouse button flags:
     //  CSR_FLAGS:
     //       bits 0-5: button states
     //       bits 6-7: number of clicks
-    CSR_BMP_INDX = 0x1C1B, //  (Byte) mouse cursor bitmap pixel offset
-    CSR_BMP_DATA = 0x1C1C, //  (Byte) mouse cursor bitmap pixel index color
-    CSR_PAL_INDX = 0x1C1E, //  (Byte) mouse cursor color palette index (0-15)
-    CSR_PAL_DATA = 0x1C1F, //  (Word) mouse cursor color palette data RGBA4444
-    CSR_END = 0x1C21, // End Mouse Registers
+    CSR_BMP_INDX = 0x1C1E, //  (Byte) mouse cursor bitmap pixel offset
+    CSR_BMP_DATA = 0x1C1F, //  (Byte) mouse cursor bitmap pixel index color
+    CSR_PAL_INDX = 0x1C21, //  (Byte) mouse cursor color palette index (0-15)
+    CSR_PAL_DATA = 0x1C22, //  (Word) mouse cursor color palette data RGBA4444
+    CSR_END = 0x1C24, // End Mouse Registers
+    GFX_END = 0x1C24, // End of GFX Device Registers
 
-    // Debug Hardware Registers:
-    DBG_BEGIN = 0x1C21, //  start of mouse cursor hardware registers
-    DBG_TEMP = 0x1C21, //  (Byte) Simple Debug test register
-    DBG_END = 0x1C22, // End Debug Registers
-
-    // 5086 ($13DE) bytes remaining for additional registers.
-    RESERVED = 0x1C22,
+    // 5084 ($13DC) bytes remaining for additional registers.
+    RESERVED = 0x1C24,
 
     // User RAM (32K)
     USER_RAM = 0x3000,
