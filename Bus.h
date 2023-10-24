@@ -24,6 +24,7 @@ class C6809;
 
 class Bus
 {
+	friend class C6809;
 	friend class Gfx;
 	friend class GfxDebug;
 

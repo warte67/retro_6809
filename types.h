@@ -32,7 +32,8 @@
 
 
 // constants
-// const Byte DEFAULT_MOUSE_SIZE = 8;
+const bool ENABLE_DEBUG = true;
+const bool DEBUG_SINGLE_STEP = ENABLE_DEBUG;	// false;
 
 
 

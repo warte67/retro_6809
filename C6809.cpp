@@ -11,7 +11,7 @@
 #include "types.h"
 #include "Bus.h"
 #include "C6809.h"
-// #include "GfxDebug.h"
+#include "GfxDebug.h"
 
 C6809::C6809(Bus* p_bus) : A(acc.byte.A = 0), B(acc.byte.B = 0), D(acc.D = 0)
 {
@@ -39,9 +39,12 @@ C6809::~C6809()
 void C6809::clock()
 {
 	// printf("C6809::clock() -- PC:$%04X\n", PC);
+	Bus& bus = Bus::Inst();
+	Gfx* gfx = bus.m_gfx;
+	GfxDebug* debug = gfx->m_debug;
 
-	//if (debug->SingleStep())
-	if (true)
+	if (debug->SingleStep())
+	//if (true)
 	{
 		if (do_interrupts())
 		{
@@ -64,8 +67,8 @@ void C6809::clock()
 				{
 					Bus::Error("Invalid Instruction");
 				}
-				// if (!waiting_cwai && !waiting_sync)
-				// 	debug->ContinueSingleStep();
+				 if (!waiting_cwai && !waiting_sync)
+				 	debug->ContinueSingleStep();
 				return;
 			}
 			cycles--;

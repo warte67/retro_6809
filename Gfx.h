@@ -12,6 +12,7 @@
 class Gfx : public Device
 {
 	friend class Bus;
+    friend class C6809;
     friend class GfxDebug;
     friend class GfxMouse;
 	
@@ -95,7 +96,11 @@ class Gfx : public Device
 		Byte _dsp_gres	= 0b11000101;	// defaults
 		Byte _dsp_ext 	= 0b00001001;	// defaults
         Byte _dsp_err = 0;          
-	
+
+        // graphics devices based on the IGfxDevice
+        GfxDebug* m_debug = nullptr;
+        GfxMouse* m_mouse = nullptr;
+
 	private:
 		// helpers
 		void _decode_dsp_gres();
@@ -109,10 +114,6 @@ class Gfx : public Device
 		void _display_standard();
         void _updateTextScreen();       
 		void _display_extended();
-
-        // graphics devices based on the IGfxDevice
-        GfxDebug* m_debug = nullptr;
-        GfxMouse* m_mouse = nullptr;
         std::vector< IGfxDevice*> _gfx_devices;
 };
 
