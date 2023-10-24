@@ -62,8 +62,8 @@ class Bus
 		}
 
 		void Run();
-		void IsDirty(bool _bIsDirty)			{ s_bIsDirty = _bIsDirty; }
-		void IsRunning(bool _bIsRunning)		{ s_bIsRunning = _bIsRunning; }
+		static void IsDirty(bool _bIsDirty)			{ s_bIsDirty = _bIsDirty; }
+		static void IsRunning(bool _bIsRunning)		{ s_bIsRunning = _bIsRunning; }
 		static void Error(const std::string& sErr);
 
 		// Public Memory Stuff
@@ -77,13 +77,7 @@ class Bus
 		static Byte Read(Word offset, bool debug = false);
 		static void Write(Word offset, Byte data, bool debug = false);
 		static Word Read_Word(Word offset, bool debug = false);
-		static void Write_Word(Word offset, Word data, bool debug = false);
-
-		// old stle reads and writes
-        Byte _read(Word offset, bool debug = false);
-        void _write(Word offset, Byte data, bool debug = false);
-        Word _read_word(Word offset, bool debug = false);
-        void _write_word(Word offset, Word data, bool debug = false);   				
+		static void Write_Word(Word offset, Word data, bool debug = false);	
 
 		void load_hex(const char* filename);
 

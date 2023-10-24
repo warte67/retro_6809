@@ -18,7 +18,6 @@ Byte Gfx::read(Word offset, bool debug )		// is debug completely unused in the c
 	if (offset >= DBG_BEGIN && offset <= DBG_END)
 		return m_debug->read(offset, debug);
 
-	// Bus& bus = Bus::Inst();
 	Byte data = 0xCC;
 
 	// handle Gfx Reads
@@ -85,13 +84,13 @@ void Gfx::write(Word offset, Byte data, bool debug)
 		case DSP_GRES: 	{
 			_dsp_gres = data;
 			Bus::Write(DSP_GRES, _dsp_gres, true);
-			Bus::Inst().IsDirty(true);		
+			Bus::IsDirty(true);		
 			return;	
 		}
 		case DSP_EXT:	{
 			_dsp_ext = data;
 			Bus::Write(DSP_EXT, _dsp_ext, true);
-			Bus::Inst().IsDirty(true);
+			Bus::IsDirty(true);
 			return;
 		}
 		// color palete registers
@@ -649,7 +648,6 @@ void Gfx::OnPresent()
 void Gfx::_decode_dsp_gres()
 {
 	// shortcut to the Bus instance and DSP_GRES data
-	//Bus& bus = Bus::Inst();
 	Byte data = Bus::Read(DSP_GRES);
 
 	// _aspect = Aspect Ratio
@@ -769,7 +767,6 @@ void Gfx::_decode_dsp_gres()
 void Gfx::_decode_dsp_ext()
 {
 	// shortcut to the Bus instance and DSP_EXT data
-	Bus& bus = Bus::Inst();
 	Byte data = Bus::Read(DSP_EXT);
 
 	// _ext_bpp = Extended Graphics Bits_Per_Pixel
@@ -849,7 +846,6 @@ void Gfx::_display_standard()
 		// graphics mode
 		if (_standard_display_mode)
 		{
-			Bus& bus = Bus::Inst();				
 			Word pixel_index = SCREEN_BUFFER;
 			void *pixels;
 			int pitch;
@@ -926,7 +922,6 @@ void Gfx::_display_standard()
 
 void Gfx::_updateTextScreen() 
 {
-	Bus& bus = Bus::Inst();
     void *pixels;
     int pitch;
     if (SDL_LockTexture(_std_texture, NULL, &pixels, &pitch) < 0) {

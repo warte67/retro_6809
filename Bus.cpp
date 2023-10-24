@@ -446,54 +446,6 @@ void Bus::Write_Word(Word offset, Word data, bool debug)
     Write(offset + 1, lsb);
 }
 
-// OLD STYLE READS AND WRITES /////////////////////////////////////////
-
-Byte Bus::_read(Word offset, bool debug) 
-{    
-    for (auto &a : Bus::_memoryNodes)
-    {
-        if (offset - a->Base() < a->Size())
-        {
-			if (debug)
-				if (offset - a->Base() < a->Size())
-					return a->_memory((Word)(offset - a->Base()));	
-
-            return a->read(offset, debug);
-        }
-    }
-    return 0xCC;
-}
-
-void Bus::_write(Word offset, Byte data, bool debug) 
-{
-    for (auto &a : Bus::_memoryNodes)
-    {
-        if (offset - a->Base() < a->Size())
-        {
-			if (debug)
-			{
-				if (offset - a->Base() < a->Size())
-					a->_memory((Word)(offset - a->Base()), data);	
-				return;
-			}
-            a->write(offset, data, debug);
-            return;
-        }
-    }    
-}
-Word Bus::_read_word(Word offset, bool debug) 
-{
-	Word ret = (_read(offset) << 8) | _read(offset + 1);
-	return ret;
-}
-void Bus::_write_word(Word offset, Word data, bool debug) 
-{    
-    Byte msb = (data >> 8) & 0xFF;
-    Byte lsb = data & 0xff;
-    Bus::Write(offset, msb);
-    Bus::Write(offset + 1, lsb);
-}
-
 
 
 Word Bus::Attach(Device* dev, Word size) 

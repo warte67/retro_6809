@@ -8,7 +8,6 @@
 
 Byte GfxDebug::read(Word offset, bool debug)
 {
-    // Bus& bus = Bus::Inst();
     Byte data = 0xCC;
     switch (offset)
     {
@@ -23,7 +22,6 @@ Byte GfxDebug::read(Word offset, bool debug)
 }
 void GfxDebug::write(Word offset, Byte data, bool debug)
 {
-    //Bus& bus = Bus::Inst();
     switch (offset)
     {
     //case CSR_XPOS + 0:    mouse_x = (mouse_x & 0x00ff) | (data << 8);    break;
@@ -133,8 +131,6 @@ void GfxDebug::_onWindowResize()
 
 void GfxDebug::OnEvent(SDL_Event* evnt)
 {
-    Bus& bus = Bus::Inst();
-
     //if (!_bIsDebugActive)
     //    return;
 
@@ -334,7 +330,6 @@ std::string GfxDebug::_hex(Uint32 n, Uint8 d)
 
 void GfxDebug::DumpMemory(int col, int row, Word addr)
 {
-    Bus& bus = Bus::Inst();
     const bool use_debug_read = false;
     int line = 0;
     for (int ofs = addr; ofs < addr + 0x48; ofs += 8)
@@ -370,8 +365,7 @@ void GfxDebug::DumpMemory(int col, int row, Word addr)
 
 void GfxDebug::DrawCpu(int x, int y)
 {
-    Bus& bus = Bus::Inst();
-    C6809* cpu = bus.m_cpu;
+    C6809* cpu = Bus::Inst().m_cpu;
 
     int RamX = x, RamY = y;
     // Condition Codes
@@ -430,8 +424,7 @@ void GfxDebug::DrawCpu(int x, int y)
 
 void GfxDebug::DrawCode(int col, int row)
 {
-    Bus& bus = Bus::Inst();
-    C6809* cpu = bus.m_cpu;
+    C6809* cpu = Bus::Inst().m_cpu;
 
     std::string code = "";
     int line = 0;
@@ -535,8 +528,7 @@ void GfxDebug::DrawCode(int col, int row)
 
 void GfxDebug::DrawButtons()
 {
-    Bus& bus = Bus::Inst();
-    C6809* cpu = bus.m_cpu;
+    C6809* cpu = Bus::Inst().m_cpu;
 
     // change the run/stop according to the single step state
     if (bSingleStep)
@@ -588,8 +580,7 @@ void GfxDebug::DrawButtons()
 
 void GfxDebug::DrawBreakpoints()
 {
-    Bus& bus = Bus::Inst();
-    C6809* cpu = bus.m_cpu;
+    C6809* cpu = Bus::Inst().m_cpu;
 
     int x = 56, y = 33;		// y <= 38
     Uint8 ci = 0x0C;
@@ -641,11 +632,7 @@ void GfxDebug::DrawBreakpoints()
 
 void GfxDebug::HandleButtons()
 {
-    Bus& bus = Bus::Inst();
-    C6809* cpu = bus.m_cpu;
-
-    //int mx = bus.read_word(CSR_XPOS) / 8;
-    //int my = bus.read_word(CSR_YPOS) / 8;
+    C6809* cpu = Bus::Inst().m_cpu;
     int mx, my;
     _correctMouseCoords(mx, my);
     Uint32 btns = SDL_GetRelativeMouseState(NULL, NULL);
@@ -681,9 +668,7 @@ bool GfxDebug::SingleStep()
 }
 
 void GfxDebug::ContinueSingleStep() {
-    Bus& bus = Bus::Inst();
-    C6809* cpu = bus.m_cpu;
-
+    C6809* cpu = Bus::Inst().m_cpu;
     // if breakpoint reached... enable singlestep
     if (mapBreakpoints[cpu->getPC()] == true)
     {
@@ -722,8 +707,7 @@ bool GfxDebug::EditRegister(float fElapsedTime)
     if (nRegisterBeingEdited.reg == EDIT_REGISTER::EDIT_NONE)
         return false;
 
-    Bus& bus = Bus::Inst();
-    C6809* cpu = bus.m_cpu;
+    C6809* cpu = Bus::Inst().m_cpu;
 
     static float delay = 0.0625f;
     static float delayAcc = fElapsedTime;
@@ -846,15 +830,11 @@ bool GfxDebug::EditRegister(float fElapsedTime)
 void GfxDebug::DrawCursor(float fElapsedTime)
 {
     if (!bIsCursorVisible)	return;
-
-    Bus& bus = Bus::Inst();
-    C6809* cpu = bus.m_cpu;
-
+    
+    C6809* cpu = Bus::Inst().m_cpu;
     std::string ch = " ";
-
     // output the cursor
     OutGlyph(csr_x, csr_y, 0x8f, rand() % 256, rand() % 256, rand() % 256, true);
-
     // which character is under the cursor?
     switch (csr_at)
     {
@@ -898,8 +878,6 @@ void GfxDebug::DrawCursor(float fElapsedTime)
 
 void GfxDebug::_correctMouseCoords(int& mx, int& my)
 {
-    Bus& bus = Bus::Inst();
-
     // calculate overscan modifiers
     int ox = 2;
     int oy = 2;
@@ -926,9 +904,7 @@ void GfxDebug::_correctMouseCoords(int& mx, int& my)
 
 void GfxDebug::MouseStuff()
 {
-    Bus& bus = Bus::Inst();
-    C6809* cpu = bus.m_cpu;
-
+    C6809* cpu = Bus::Inst().m_cpu;
     int mx, my;
     _correctMouseCoords(mx, my);
     Uint32 btns = SDL_GetRelativeMouseState(NULL, NULL);
@@ -1086,8 +1062,7 @@ void GfxDebug::KeyboardStuff()
 {
     if (!bIsCursorVisible)	return;
 
-    Bus& bus = Bus::Inst();
-    C6809* cpu = bus.m_cpu;
+    C6809* cpu = Bus::Inst().m_cpu;
 
 
     SDL_Keycode hx[] = { SDL_SCANCODE_0, SDL_SCANCODE_1, SDL_SCANCODE_2, SDL_SCANCODE_3,
@@ -1121,7 +1096,6 @@ void GfxDebug::KeyboardStuff()
 
     if (!bKeyPressed)	return;
 
-    //printf("$%1x\n", ch);
     switch (csr_at)
     {
         case CSR_AT::CSR_AT_ADDRESS:
@@ -1210,9 +1184,7 @@ void GfxDebug::cbClearBreaks()
 }
 void GfxDebug::cbReset()
 {
-    Bus& bus = Bus::Inst();
-    C6809* cpu = bus.m_cpu;
-
+    C6809* cpu = Bus::Inst().m_cpu;
     cpu->reset();
     mousewheel_offset = 0;
     bMouseWheelActive = false;
@@ -1221,25 +1193,19 @@ void GfxDebug::cbReset()
 }
 void GfxDebug::cbNMI()
 {
-    Bus& bus = Bus::Inst();
-    C6809* cpu = bus.m_cpu;
-
+    C6809* cpu = Bus::Inst().m_cpu;
     cpu->nmi();
     bIsStepPaused = false;
 }
 void GfxDebug::cbIRQ()
 {
-    Bus& bus = Bus::Inst();
-    C6809* cpu = bus.m_cpu;
-
+    C6809* cpu = Bus::Inst().m_cpu;
     cpu->irq();
     bIsStepPaused = false;
 }
 void GfxDebug::cbFIRQ()
-{
-    Bus& bus = Bus::Inst();
-    C6809* cpu = bus.m_cpu;
-
+{    
+    C6809* cpu = Bus::Inst().m_cpu;
     cpu->firq();
     bIsStepPaused = false;
 }
@@ -1252,9 +1218,6 @@ void GfxDebug::cbRunStop()
 }
 void GfxDebug::cbHide()
 {
-    Bus& bus = Bus::Inst();
-    C6809* cpu = bus.m_cpu;
-
     bMouseWheelActive = false;
     bSingleStep = false;
     bIsStepPaused = bSingleStep;

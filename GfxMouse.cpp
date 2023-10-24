@@ -6,7 +6,6 @@
 
 Byte GfxMouse::read(Word offset, bool debug)
 { 
-    // Bus& bus = Bus::Inst();
     Byte data = 0xCC;
 
     switch (offset)
