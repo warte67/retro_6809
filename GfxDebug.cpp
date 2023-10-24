@@ -8,6 +8,8 @@
 
 Byte GfxDebug::read(Word offset, bool debug)
 {
+    Bus& bus = Bus::Inst();
+    Byte data = 0xCC;
     switch (offset)
     {
     //case CSR_XPOS + 0:      return mouse_x >> 8;
@@ -16,10 +18,12 @@ Byte GfxDebug::read(Word offset, bool debug)
     //case CSR_YPOS + 1:      return mouse_y & 0xFF;
     }
     // return default bit pattern
-    return 0xCC;
+    bus.write(offset, data, true);
+    return data;
 }
 void GfxDebug::write(Word offset, Byte data, bool debug)
 {
+    Bus& bus = Bus::Inst();
     switch (offset)
     {
     //case CSR_XPOS + 0:    mouse_x = (mouse_x & 0x00ff) | (data << 8);    break;
@@ -28,7 +32,7 @@ void GfxDebug::write(Word offset, Byte data, bool debug)
     //case CSR_YPOS + 1:    mouse_y = (mouse_y & 0xff00) | (data << 0);    break;
     }
     // write statically
-    Bus::Inst().write(offset, data, true);
+    bus.write(offset, data, true);
 }
 
 Word GfxDebug::OnAttach(Word nextAddr)
@@ -130,6 +134,9 @@ void GfxDebug::_onWindowResize()
 void GfxDebug::OnEvent(SDL_Event* evnt)
 {
     Bus& bus = Bus::Inst();
+
+    if (!_bIsDebugActive)
+        return;
 
     switch (evnt->type)
     {
@@ -284,12 +291,13 @@ void GfxDebug::OnEvent(SDL_Event* evnt)
                         bMouseWheelActive = false;
                     }
                 }
-                if (evnt->type == SDL_MOUSEWHEEL)
-                    mouse_wheel = evnt->wheel.y;
             }
-
-
+            break;
         } // SDL_KEYDOWN
+
+        case SDL_MOUSEWHEEL:
+            mouse_wheel = evnt->wheel.y;
+            break;
     }
 }
 
@@ -312,12 +320,12 @@ void GfxDebug::OnUpdate(float fElapsedTime)
 
         // clear the debug layer texture
         SDL_SetRenderTarget(m_gfx->_renderer, _debug_texture);
-        SDL_SetRenderDrawColor(m_gfx->_renderer, 0, 0, 0, 128);   // mouse layer background color
+        SDL_SetRenderDrawColor(m_gfx->_renderer, 0, 0, 0, 160);   // debug layer background color
         SDL_RenderClear(m_gfx->_renderer);
 
         // call update functions
-        //MouseStuff();
-        //KeyboardStuff();
+        MouseStuff();
+        KeyboardStuff();
 
         DumpMemory(1, 1, mem_bank[0]);
         DumpMemory(1, 11, mem_bank[1]);
@@ -712,8 +720,10 @@ void GfxDebug::HandleButtons()
     Bus& bus = Bus::Inst();
     C6809* cpu = bus.m_cpu;
 
-    int mx = bus.read_word(CSR_XPOS) / 8;
-    int my = bus.read_word(CSR_YPOS) / 8;
+    //int mx = bus.read_word(CSR_XPOS) / 8;
+    //int my = bus.read_word(CSR_YPOS) / 8;
+    int mx, my;
+    _correctMouseCoords(mx, my);
     Uint32 btns = SDL_GetRelativeMouseState(NULL, NULL);
 
     static bool last_LMB = false;
@@ -914,7 +924,7 @@ void GfxDebug::DrawCursor(float fElapsedTime)
     if (!bIsCursorVisible)	return;
 
     Bus& bus = Bus::Inst();
-    //C6809* cpu = bus.m_cpu;
+    C6809* cpu = bus.m_cpu;
 
     std::string ch = " ";
 
@@ -962,6 +972,267 @@ void GfxDebug::DrawCursor(float fElapsedTime)
     OutGlyph(csr_x, csr_y, ch[0], 0, 0, 0, false);
 }
 
+void GfxDebug::_correctMouseCoords(int& mx, int& my)
+{
+    Bus& bus = Bus::Inst();
+
+    // calculate overscan modifiers
+    int ox = 2;
+    int oy = 2;
+    int h_oscan = (bus.read(DSP_GRES) >> 2) & 0x03;
+    int v_oscan = (bus.read(DSP_GRES) >> 0) & 0x03;
+    switch (h_oscan)
+    {
+    case 0: ox = 2; break;
+    case 1: ox = 4; break;
+    case 2: ox = 6; break;
+    case 3: ox = 8; break;
+    }
+    switch (v_oscan)
+    {
+    case 0: oy = 2; break;
+    case 1: oy = 4; break;
+    case 2: oy = 6; break;
+    case 3: oy = 8; break;
+    }
+    mx = bus.read_word(CSR_XPOS) / ox;
+    my = bus.read_word(CSR_YPOS) / oy;
+    Uint32 btns = SDL_GetRelativeMouseState(NULL, NULL);
+}
+
+void GfxDebug::MouseStuff()
+{
+    Bus& bus = Bus::Inst();
+    C6809* cpu = bus.m_cpu;
+
+    int mx, my;
+    _correctMouseCoords(mx, my);
+    Uint32 btns = SDL_GetRelativeMouseState(NULL, NULL);
+
+    // mouse wheel
+    if (mouse_wheel)
+    {
+        // scroll memory banks
+        if (mx > 0 && mx < 29)
+        {
+            if (my > 0 && my < 10)	mem_bank[0] -= mouse_wheel * 8;
+            if (my > 10 && my < 20)	mem_bank[1] -= mouse_wheel * 8;
+            if (my > 20 && my < 30)	mem_bank[2] -= mouse_wheel * 8;
+            bIsCursorVisible = false;
+        }
+        // Scroll the Code
+        if (mx > 38 && mx < 64 && my > 5 && my < 30)
+        {
+            if (bMouseWheelActive == false)
+            {
+                mousewheel_offset = -25;
+                bMouseWheelActive = true;
+            }
+            bSingleStep = true;	// scrollwheel enters into single step mode
+            nRegisterBeingEdited.reg = GfxDebug::EDIT_REGISTER::EDIT_NONE;	// cancel any register edits
+            mousewheel_offset -= mouse_wheel * 1;		// slow scroll
+            if (SDL_GetModState() & KMOD_CTRL)	// is CTRL down?
+                mousewheel_offset -= mouse_wheel * 3;	// faster scroll			
+        }
+        // scroll the break point display window (bottom right corner)
+        if (mx >= 55 && my >= 33)
+        {
+            // printf("mouse_wheel: %d\n", mouse_wheel);
+            mw_brk_offset -= mouse_wheel;
+        }
+
+        // reset the wheel
+        mouse_wheel = 0;
+    }
+
+    // left mouse button clicked?
+    static bool last_LMB = false;
+    if ((btns & 1) && !last_LMB)
+    {
+        // left-clicked on breakpoint
+        if (mx >= 55 && my >= 33)
+        {
+            int index = (my - 33) + mw_brk_offset;
+            // build a vector of active breakpoints
+            std::vector<Word> breakpoints;
+            for (auto& bp : mapBreakpoints)
+                if (bp.second)
+                    breakpoints.push_back(bp.first);
+            if (index < breakpoints.size())
+                printf("LEFT CLICK: $%04X\n", breakpoints[index]);
+            //mapBreakpoints[breakpoints[index]] = false;
+        }
+
+        // click to select
+        if (btns & 1)
+        {
+            if (CoordIsValid(mx, my))
+            {
+                csr_x = mx;
+                csr_y = my;
+                bIsCursorVisible = true;
+            }
+            else
+                bIsCursorVisible = false;
+            //printf("MX:%d  MY:%d\n", mx, my);
+        }
+        // condition code clicked?
+        if (my == 1)
+        {
+            if (mx == 48) cpu->setCC_E(!cpu->getCC_E());
+            if (mx == 49) cpu->setCC_F(!cpu->getCC_F());
+            if (mx == 50) cpu->setCC_H(!cpu->getCC_H());
+            if (mx == 51) cpu->setCC_I(!cpu->getCC_I());
+            if (mx == 52) cpu->setCC_N(!cpu->getCC_N());
+            if (mx == 53) cpu->setCC_Z(!cpu->getCC_Z());
+            if (mx == 54) cpu->setCC_V(!cpu->getCC_V());
+            if (mx == 55) cpu->setCC_C(!cpu->getCC_C());
+        }
+        // Register Clicked?
+        bool bFound = false;
+        for (auto& a : register_info)
+        {
+            if (a.y_pos == my && mx >= a.x_min && mx <= a.x_max)
+            {
+                // begin editing a register
+                nRegisterBeingEdited.reg = a.reg;
+                nRegisterBeingEdited.value = a.value;
+                nRegisterBeingEdited.y_pos = a.y_pos;
+                nRegisterBeingEdited.x_min = a.x_min;
+                nRegisterBeingEdited.x_max = a.x_max;
+                csr_x = mx;
+                csr_y = my;
+                bFound = true;
+            }
+        }
+        if (!bFound)
+            nRegisterBeingEdited.reg = EDIT_NONE;
+        // left-click on code line toggles breakpoint
+        if (mx > 38 && mx < 64 && my > 5 && my < 30 && bSingleStep)
+        {
+            Word offset = sDisplayedAsm[my - 6];
+            (mapBreakpoints[offset]) ?
+                mapBreakpoints[offset] = false :
+                mapBreakpoints[offset] = true;
+        }
+    }
+    last_LMB = (btns & 1);
+    // right mouse button clicked
+    static bool last_RMB = false;
+    if (btns & 4 && !last_RMB)
+    {
+        // right-clicked on breakpoint
+        if (mx >= 55 && my >= 33)
+        {
+            int index = (my - 33) + mw_brk_offset;
+            // build a vector of active breakpoints
+            std::vector<Word> breakpoints;
+            for (auto& bp : mapBreakpoints)
+                if (bp.second)
+                    breakpoints.push_back(bp.first);
+            if (index < breakpoints.size())
+            {
+                //printf("RIGHT CLICK: $%04X\n", breakpoints[index]);
+                mapBreakpoints[breakpoints[index]] = false;
+            }
+        }
+
+        // on PC register
+        if (my == 4 && mx > 42 && mx < 47)
+        {
+            bSingleStep = !bSingleStep;
+            if (!bSingleStep)
+                nRegisterBeingEdited.reg = GfxDebug::EDIT_REGISTER::EDIT_NONE;	// cancel any register edits
+        }
+        // right-click on code line toggles breakpoint and resumes execution
+        if (mx > 38 && mx < 64 && my > 5 && my < 30 && bSingleStep)
+        {
+            Word offset = sDisplayedAsm[my - 6];
+            (mapBreakpoints[offset]) ?
+                mapBreakpoints[offset] = false :
+                mapBreakpoints[offset] = true;
+            if (mapBreakpoints[offset] == true)
+                bSingleStep = false;
+        }
+    }
+    last_RMB = (btns & 4);
+}
+
+void GfxDebug::KeyboardStuff()
+{
+    if (!bIsCursorVisible)	return;
+
+    Bus& bus = Bus::Inst();
+    C6809* cpu = bus.m_cpu;
+
+
+    SDL_Keycode hx[] = { SDL_SCANCODE_0, SDL_SCANCODE_1, SDL_SCANCODE_2, SDL_SCANCODE_3,
+                         SDL_SCANCODE_4, SDL_SCANCODE_5, SDL_SCANCODE_6, SDL_SCANCODE_7,
+                         SDL_SCANCODE_8, SDL_SCANCODE_9, SDL_SCANCODE_A, SDL_SCANCODE_B,
+                         SDL_SCANCODE_C, SDL_SCANCODE_D, SDL_SCANCODE_E, SDL_SCANCODE_F };
+    char k[] = { '0', '1', '2', '3', '4', '5', '6', '7',
+                 '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+    char d[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+    static bool state[16] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+    const Uint8* keybfr = SDL_GetKeyboardState(NULL);
+
+    // check for valid key presses
+    bool bKeyPressed = false;
+    Byte ch = 0;
+    for (int t = 0; t < 16; t++)
+    {
+        if (state[t] == 0 && keybfr[hx[t]])
+        {
+            state[t] = 1;
+            bKeyPressed = true;
+            ch = d[t];
+            // printf("%c\n", k[t]);
+        }
+        // reset the key
+        if (state[t] == 1 && !keybfr[hx[t]])	state[t] = 0;
+    }
+
+    // respond to [DEL]
+    // ...
+
+    if (!bKeyPressed)	return;
+
+    //printf("$%1x\n", ch);
+    switch (csr_at)
+    {
+    case CSR_AT::CSR_AT_ADDRESS:
+    {
+        Word addr = 0;
+        if (csr_y < 10) addr = mem_bank[0] + ((csr_y - 1) * 8);
+        else if (csr_y < 20) addr = mem_bank[1] + ((csr_y - 11) * 8);
+        else if (csr_y < 30) addr = mem_bank[2] + ((csr_y - 21) * 8);
+        Byte digit = csr_x - 1;
+        if (digit == 0)	addr = (addr & 0x0fff) | (ch << 12);
+        if (digit == 1)	addr = (addr & 0xf0ff) | (ch << 8);
+        if (digit == 2)	addr = (addr & 0xff0f) | (ch << 4);
+        if (digit == 3)	addr = (addr & 0xfff0) | (ch << 0);
+        if (csr_y < 10)			mem_bank[0] = addr - ((csr_y - 1) * 8);
+        else if (csr_y < 20)	mem_bank[1] = addr - ((csr_y - 11) * 8);
+        else if (csr_y < 30)	mem_bank[2] = addr - ((csr_y - 21) * 8);
+        if (csr_x < 5)	while (!CoordIsValid(++csr_x, csr_y));
+        break;
+    }
+    case CSR_AT::CSR_AT_DATA:
+    {
+        Byte ofs = ((csr_x - 5) / 3) + ((csr_y - 1) * 8);
+        Byte digit = ((csr_x + 1) % 3) - 1;
+        Word addr = mem_bank[0];
+        if (csr_y > 10 && csr_y < 20) { ofs -= 80; addr = mem_bank[1]; }
+        if (csr_y > 20) { ofs -= 160; addr = mem_bank[2]; }
+        Byte data = bus.read(addr + ofs,true);
+        if (digit == 0)		data = (data & 0x0f) | (ch << 4);
+        if (digit == 1)		data = (data & 0xf0) | (ch << 0);
+        bus.write(addr + ofs, data);
+        if (csr_x < 28)		while (!CoordIsValid(++csr_x, csr_y));
+        break;
+    }
+    }
+}
 
 
 

@@ -9,7 +9,7 @@
 
 // extern const Byte font8x8_system[256][8];
 
-Byte Gfx::read(Word offset, bool debug )
+Byte Gfx::read(Word offset, bool debug )		// is debug completely unused in the call?
 {
 	// handle GfxMouse reads
 	if (offset >= CSR_BEGIN && offset <= CSR_END)
@@ -18,35 +18,40 @@ Byte Gfx::read(Word offset, bool debug )
 	if (offset >= DBG_BEGIN && offset <= DBG_END)
 		return m_debug->read(offset, debug);
 
+	Bus& bus = Bus::Inst();
+	Byte data = 0xCC;
+
 	// handle Gfx Reads
 	switch (offset)
 	{
-		case STD_VID_MAX:		return _std_vid_max >> 8;
-		case STD_VID_MAX+1:		return _std_vid_max & 0xFF;		
-		case DSP_GRES: 			return _dsp_gres;
-		case DSP_EXT:			return _dsp_ext;
-		case DSP_ERR:			{ Byte err = _dsp_err;	_dsp_err = 0;	return err; } 
-        case DSP_TXT_COLS:      return _texture_width / 8;      // read-only
-        case DSP_TXT_ROWS:      return _texture_height / 8;     // read-only
+		case STD_VID_MAX:		data = _std_vid_max >> 8; break;
+		case STD_VID_MAX+1:		data = _std_vid_max & 0xFF; break;
+		case DSP_GRES: 			data = _dsp_gres; break;
+		case DSP_EXT:			data = _dsp_ext; break;
+		case DSP_ERR:			{ Byte err = _dsp_err;	_dsp_err = 0;	data = err; break;} 
+		case DSP_TXT_COLS:      data = _texture_width / 8; break;
+		case DSP_TXT_ROWS:      data = _texture_height / 8; break;
 
         // color palete registers
-        case DSP_PAL_IDX:   	return _dsp_pal_idx;
-        case DSP_PAL_CLR+1: 	return (_palette[_dsp_pal_idx].color >> 8) & 0xFF;
-        case DSP_PAL_CLR+0: 	return _palette[_dsp_pal_idx].color  & 0xFF;	
+		case DSP_PAL_IDX:   	data = _dsp_pal_idx; break;
+		case DSP_PAL_CLR + 1: 	data = (_palette[_dsp_pal_idx].color >> 8) & 0xFF; break;
+		case DSP_PAL_CLR + 0: 	data = _palette[_dsp_pal_idx].color & 0xFF; break;
 
         // text glyph definition data registers
-        case DSP_GLYPH_IDX:     return _dsp_glyph_idx;
-        case DSP_GLYPH_DATA+0:  return _dsp_glyph_data[_dsp_glyph_idx][0];
-        case DSP_GLYPH_DATA+1:  return _dsp_glyph_data[_dsp_glyph_idx][1];
-        case DSP_GLYPH_DATA+2:  return _dsp_glyph_data[_dsp_glyph_idx][2];
-        case DSP_GLYPH_DATA+3:  return _dsp_glyph_data[_dsp_glyph_idx][3];
-        case DSP_GLYPH_DATA+4:  return _dsp_glyph_data[_dsp_glyph_idx][4];
-        case DSP_GLYPH_DATA+5:  return _dsp_glyph_data[_dsp_glyph_idx][5];
-        case DSP_GLYPH_DATA+6:  return _dsp_glyph_data[_dsp_glyph_idx][6];
-        case DSP_GLYPH_DATA+7:  return _dsp_glyph_data[_dsp_glyph_idx][7];	
+        case DSP_GLYPH_IDX:     data = _dsp_glyph_idx; break;
+        case DSP_GLYPH_DATA+0:  data = _dsp_glyph_data[_dsp_glyph_idx][0]; break;
+        case DSP_GLYPH_DATA+1:  data = _dsp_glyph_data[_dsp_glyph_idx][1]; break;
+        case DSP_GLYPH_DATA+2:  data = _dsp_glyph_data[_dsp_glyph_idx][2]; break;
+        case DSP_GLYPH_DATA+3:  data = _dsp_glyph_data[_dsp_glyph_idx][3]; break;
+        case DSP_GLYPH_DATA+4:  data = _dsp_glyph_data[_dsp_glyph_idx][4]; break;
+        case DSP_GLYPH_DATA+5:  data = _dsp_glyph_data[_dsp_glyph_idx][5]; break;
+        case DSP_GLYPH_DATA+6:  data = _dsp_glyph_data[_dsp_glyph_idx][6]; break;
+		case DSP_GLYPH_DATA + 7:  data = _dsp_glyph_data[_dsp_glyph_idx][7]; break;
 
 	}
-	return 0xCC;	//data;
+
+	bus.write(offset, data, true);
+	return data;	//data;
 }
 
 void Gfx::write(Word offset, Byte data, bool debug)
@@ -102,7 +107,6 @@ void Gfx::write(Word offset, Byte data, bool debug)
         case DSP_GLYPH_DATA+7:  _dsp_glyph_data[_dsp_glyph_idx][7] = data; return; 		
 	
 	}
-
 }
 
 

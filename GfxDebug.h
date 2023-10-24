@@ -49,6 +49,9 @@ public:
 	void ContinueSingleStep();
 	bool CoordIsValid(int x, int y);
 
+	void MouseStuff();
+	void KeyboardStuff();
+
 
 
 protected:
@@ -58,6 +61,8 @@ protected:
 	// protected helpers
 	void _onWindowResize();	// called when the viewing window is scaled
 	std::string _hex(Uint32 n, Uint8 d);
+	void _correctMouseCoords(int& mx, int& my);
+
 
 	enum CSR_AT {
 		CSR_AT_NONE, CSR_AT_ADDRESS, CSR_AT_DATA, CSR_AT_REGISTER

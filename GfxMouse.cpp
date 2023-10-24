@@ -6,24 +6,27 @@
 
 Byte GfxMouse::read(Word offset, bool debug)
 { 
+    Bus& bus = Bus::Inst();
+    Byte data = 0xCC;
+
     switch (offset)
     {
-    case CSR_XPOS + 0:      return mouse_x >> 8;
-    case CSR_XPOS + 1:      return mouse_x & 0xFF;
-    case CSR_YPOS + 0:      return mouse_y >> 8;
-    case CSR_YPOS + 1:      return mouse_y & 0xFF;
-    case CSR_XOFS:			return mouse_x_offset;
-    case CSR_YOFS:			return mouse_y_offset;
-    case CSR_SCROLL:        { char d = mouse_wheel; mouse_wheel = 0; return d; }
-    case CSR_FLAGS:			return button_flags;
-    case CSR_BMP_INDX:		return bmp_offset;
-    case CSR_BMP_DATA:		return cursor_buffer[bmp_offset / 16][bmp_offset % 16];
-    case CSR_PAL_INDX:		return m_palette_index & 0x0f;
-    case CSR_PAL_DATA + 0:  return (_csr_palette[m_palette_index].color) >> 8;
-    case CSR_PAL_DATA + 1:  return (_csr_palette[m_palette_index].color) & 0xFF;
+    case CSR_XPOS + 0:      data = mouse_x >> 8; break;
+    case CSR_XPOS + 1:      data = mouse_x & 0xFF; break;
+    case CSR_YPOS + 0:      data = mouse_y >> 8; break;
+    case CSR_YPOS + 1:      data = mouse_y & 0xFF; break;
+    case CSR_XOFS:			data = mouse_x_offset; break;
+    case CSR_YOFS:			data = mouse_y_offset; break;
+    case CSR_SCROLL:        { data = mouse_wheel; mouse_wheel = 0; break; }
+    case CSR_FLAGS:			data = button_flags; break;
+    case CSR_BMP_INDX:		data = bmp_offset; break;
+    case CSR_BMP_DATA:		data = cursor_buffer[bmp_offset / 16][bmp_offset % 16]; break;
+    case CSR_PAL_INDX:		data = m_palette_index & 0x0f; break;
+    case CSR_PAL_DATA + 0:  data = (_csr_palette[m_palette_index].color) >> 8; break;
+    case CSR_PAL_DATA + 1:  data = (_csr_palette[m_palette_index].color) & 0xFF; break;
     }
-    // return default bit pattern
-    return 0xCC; 
+    bus.write(offset, data, true);
+    return data;
 }
 void GfxMouse::write(Word offset, Byte data, bool debug)
 {
