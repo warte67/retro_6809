@@ -319,10 +319,10 @@ void Bus::_onUpdate()
     frame_count++;
     frame_acc += fElapsedTime;    
 
-    if (frame_acc > 1.0f + fElapsedTime)
+    if (frame_acc > 0.25f + fElapsedTime)
     {
-        frame_acc -= 1.0f;
-		_fps = frame_count;
+        frame_acc -= 0.25f;
+		_fps = frame_count * 4;
 		frame_count = 0;
 
 		// clean this up (get rid of the requirement for th GFX friend class Bus bullshit)

@@ -123,3 +123,39 @@ inf_loop
 		fdb	KRNL_SWI    	; HARD_SWI         SWI / SYS Hardware Interrupt Vector
 		fdb	KRNL_NMI    	; HARD_NMI         NMI Hardware Interrupt Vector
 		fdb	KRNL_RESET 	; HARD_RESET       RESET Hardware Interrupt Vector
+
+
+; *****************************************************************
+;
+;   Text Mode Control Characters ($00 - $1f):
+; $00  00000000  Null character
+; $01  00000001  Set Default Character #		
+; $02  00000010  Set Attribute #			
+; $03  00000011  Set FG Color #				
+; $04  00000100  Set BG Color #				
+; $05  00000101  Position Cursor To Column #		
+; $06  00000110  Position Cursor To Row #		
+; $07  00000111  Bell, Alert
+; $08  00001000  Backspace
+; $09  00001001  Horizontal Tab; $0A  00001010  [No Operation]				
+; $0B  00001011  					
+; $0C  00001100  Clear Screen To Default Character	
+; $0D  00001101  Carriage Return (ENTER); $0E  00001110  					
+; $0F  00001111  					
+; $10  00010000  Scroll Up				
+; $11  00010001  Scroll Down				
+; $12  00010010  Scroll Left				
+; $13  00010011  Scroll Right				
+; $14  00010100  Cursor Up				
+; $15  00010101  Cursor Down				
+; $16  00010110  Cursor Left				
+; $17  00010111  Cursor Right				
+; $18  00011000  Home Cursor				
+; $19  00011001  Hide Cursor				
+; $1A  00011010  Show Cursor				
+; $1B  00011011  [Escape]; $1C  00011100  					
+; $1D  00011101  					
+; $1E  00011110  					
+; $1F  00011111  Uncontrolled Character ($00-1f)	
+;
+; *****************************************************************
