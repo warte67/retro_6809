@@ -19,6 +19,7 @@ class Gfx : public Device
     public:
         Gfx() { _deviceName = "GFX_DEVICE"; }
         Gfx(Bus* _bus) { _deviceName = "GFX_DEVICE";  m_bus = _bus; }
+        
         //Gfx(std::string sName) { _deviceName = sName; }
         // virtual ~Device() {}
 
