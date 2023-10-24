@@ -1,7 +1,23 @@
-                      ; kernel_f000.asm
-                      ;
-                      ;  ./asm/build.sh asm/kernel_f000
-                      ;
+                      ; ***********************************************************************
+                      ; *     kernel_f000.asm                                                 *
+                      ; *                                                                     *
+                      ; *     a.k.a. The Basic Input and Output System (BIOS)                 *
+                      ; ***********************************************************************
+                      ; *                                                                     *
+                      ; *     LINUX:          ./asm/build.sh asm/kernel_f000                  *
+                      ; *             or                                                      *       
+                      ; *     WINDOWS:        asm kernel_f000                                 *
+                      ; *                                                                     *
+                      ; *     build.sh:                                                       *
+                      ; *             #!/bin/bash                                             *
+                      ; *             #lwasm -9 test.asm --format=ihex -otest.hex -ltest.lst  *
+                      ; *             echo "lwasm -9 $1.asm --format=ihex -o$1.hex -l$1.lst"  *
+                      ; *             lwasm -9 $1.asm --format=ihex -o$1.hex -l$1.lst         *
+                      ; *                                                                     *
+                      ; *     asm.bat:                                                        *
+                      ; *             @set arg1=%1                                            *
+                      ; *             asm6809 -H -9 %arg1%.asm -o %arg1%.hex -l %arg1%.lst    *
+                      ; ***********************************************************************
 0000                          INCLUDE "memory_map.asm"
                       ;  **********************************************
                       ;  * Allocated 64k Memory Mapped System Symbols *
@@ -166,7 +182,7 @@ FFFE                  HARD_RESET      equ   $FFFE    ; RESET Hardware Interrupt 
 000C  F020            VECT_NMI        fdb     KRNL_UNDEF      ; NMI Software Interrupt Vector
 000E  F022            VECT_RESET      fdb     kernel_start    ; RESET Software Interrupt Vector       
                       
-                      ; Kernel Jump Vectors Calls
+                      ; Kernel Jump Vector Calls
 F000                          org     KERNEL_ROM      
 F000  6E9F0000        KRNL_RSRVD      jmp     [VECT_RSRVD]
 F004  6E9F0002        KRNL_SWI3       jmp     [VECT_SWI3 ]

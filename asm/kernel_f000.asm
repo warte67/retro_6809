@@ -1,13 +1,23 @@
-; *****************************************************************
-; * 	kernel_f000.asm 
-; *
-; *	a.k.a. The Basic Input and Output System (BIOS)
-; *
-; *  	LINUX: 		./asm/build.sh asm/kernel_f000
-; *		or
-; *	WINDOWS:	asm kernel_f000
-; *
-; *****************************************************************	
+; ***********************************************************************
+; * 	kernel_f000.asm 						*
+; *									*
+; *	a.k.a. The Basic Input and Output System (BIOS)			*
+; ***********************************************************************
+; *									*
+; *  	LINUX: 		./asm/build.sh asm/kernel_f000			*
+; *		or							*	
+; *	WINDOWS:	asm kernel_f000					*
+; *									*
+; *	build.sh:							*
+; *		#!/bin/bash						*
+; *		#lwasm -9 test.asm --format=ihex -otest.hex -ltest.lst	*
+; *		echo "lwasm -9 $1.asm --format=ihex -o$1.hex -l$1.lst"	*
+; *		lwasm -9 $1.asm --format=ihex -o$1.hex -l$1.lst		*
+; *									*
+; *	asm.bat:							*
+; *     	@set arg1=%1						*
+; *     	asm6809 -H -9 %arg1%.asm -o %arg1%.hex -l %arg1%.lst	*
+; ***********************************************************************
 	INCLUDE "memory_map.asm"
 
 
