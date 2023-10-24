@@ -76,8 +76,8 @@ void Gfx::write(Word offset, Byte data, bool debug)
 	switch (offset)
 	{
 		case SYS_STATE: { 
-			m_bus->_sys_state = data;  
-			Bus::Inst().write(SYS_STATE, data, true);
+			// m_bus->_sys_state = data;  
+			// Bus::Inst().write(SYS_STATE, data, true);
 			return; 
 		}
 		case DSP_GRES: 	{
