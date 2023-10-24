@@ -18,7 +18,7 @@
                       ; *             @set arg1=%1                                            *
                       ; *             asm6809 -H -9 %arg1%.asm -o %arg1%.hex -l %arg1%.lst    *
                       ; ***********************************************************************
-0000                          INCLUDE "memory_map.asm"
+0000                                  INCLUDE "memory_map.asm"
                       ;  **********************************************
                       ;  * Allocated 64k Memory Mapped System Symbols *
                       ;  **********************************************
@@ -170,109 +170,106 @@ FFFC                  HARD_NMI        equ   $FFFC    ; NMI Hardware Interrupt Ve
 FFFE                  HARD_RESET      equ   $FFFE    ; RESET Hardware Interrupt Vector
                       ; END of definitions
                       
-                      
                       ; Software Vectors
 0000                          org     $0000   
-0000  F022            VECT_RSRVD      fdb     RSRVD_start     ; RESERVED Software Interrupt Vector
+0000  F022            VECT_RSRVD      fdb     RSRVD_start     ; This will likely be used as the EXEC vector
 0002  F024            VECT_SWI3       fdb     SWI3_start      ; SWI3 Software Interrupt Vector
 0004  F026            VECT_SWI2       fdb     SWI2_start      ; SWI2 Software Interrupt Vector
 0006  F028            VECT_FIRQ       fdb     FIRQ_start      ; FIRQ Software Interrupt Vector
 0008  F02A            VECT_IRQ        fdb     IRQ_start       ; IRQ Software Interrupt Vector
 000A  F02C            VECT_SWI        fdb     SWI_start       ; SWI / SYS Software Interrupt Vector
-000C  F02E            VECT_NMI        fdb     NMI_start       ; NMI Software Interrupt Vector
-000E  F032            VECT_RESET      fdb     kernel_start    ; RESET Software Interrupt Vector       
-                      
-                      ; Kernel Jump Vector Calls
-F000                          org     KERNEL_ROM      
-F000  6E9F0000        KRNL_RSRVD      jmp     [VECT_RSRVD]
-F004  6E9F0002        KRNL_SWI3       jmp     [VECT_SWI3 ]
-F008  6E9F0004        KRNL_SWI2       jmp     [VECT_SWI2 ]
-F00C  6E9F0006        KRNL_FIRQ       jmp     [VECT_FIRQ ]
-F010  6E9F0008        KRNL_IRQ        jmp     [VECT_IRQ  ]
-F014  6E9F000A        KRNL_SWI        jmp     [VECT_SWI  ]
-F018  6E9F000C        KRNL_NMI        jmp     [VECT_NMI  ]
-F01C  6E9F000E        KRNL_RESET      jmp     [VECT_RESET]
+000C  F02E            VECT_NMI        fdb     NMI_start       ; NMI Software Interrupt Vector 
+000E  F032            VECT_RESET      fdb     kernel_start    ; RESET Software Interrupt Vecto        r       
+                              
+                      ; Kernel Jump Vector Calls      
+F000                          org     KERNEL_ROM              
+F000  6E9F0000        KRNL_RSRVD      jmp     [VECT_RSRVD]    ; This will likely be used as t he EXEC vector
+F004  6E9F0002        KRNL_SWI3       jmp     [VECT_SWI3 ]    ; SWI3 Software Interrupt Vector        
+F008  6E9F0004        KRNL_SWI2       jmp     [VECT_SWI2 ]    ; SWI2 Software Interrupt Vector
+F00C  6E9F0006        KRNL_FIRQ       jmp     [VECT_FIRQ ]    ; FIRQ Software Interrupt Vector
+F010  6E9F0008        KRNL_IRQ        jmp     [VECT_IRQ  ]    ; IRQ Software Interrupt Vector
+F014  6E9F000A        KRNL_SWI        jmp     [VECT_SWI  ]    ; SWI / SYS Software Interrupt Vector
+F018  6E9F000C        KRNL_NMI        jmp     [VECT_NMI  ]    ; NMI Software Interrupt Vector
+F01C  6E9F000E        KRNL_RESET      jmp     [VECT_RESET]    ; RESET Software Interrupt Vector       
                       
                       ; a null vectors (i.e. an infinate loop traps for vector testing)
 F020  20FE            KRNL_UNDEF      bra     KRNL_UNDEF
                       
-F022  20FE            RSRVD_start     bra     RSRVD_start
-F024  20FE            SWI3_start      bra     SWI3_start
-F026  20FE            SWI2_start      bra     SWI2_start
-F028  20FE            FIRQ_start      bra     FIRQ_start
-F02A  20FE            IRQ_start       bra     IRQ_start
-F02C  20FE            SWI_start       bra     SWI_start
-F02E  20FE            NMI_start       bra     NMI_start
-F030  20FE            RESET_start     bra     RESET_start
-                      
+F022  20FE            RSRVD_start     bra     RSRVD_start     ; EXEC program
+F024  20FE            SWI3_start      bra     SWI3_start      ; SWI3 Implementation
+F026  20FE            SWI2_start      bra     SWI2_start      ; SWI2 Implementation
+F028  20FE            FIRQ_start      bra     FIRQ_start      ; FIRQ Implementation
+F02A  20FE            IRQ_start       bra     IRQ_start       ; IRQ Implementation
+F02C  20FE            SWI_start       bra     SWI_start       ; SWI / SYS Implementation
+F02E  20FE            NMI_start       bra     NMI_start       ; NMI Implementation
+F030  20FE            RESET_start     bra     RESET_start     ; RESET Implementation
                       
 F032                  kernel_start
                                       ; initialize both stack pointers
 F032  10CE0300                        lds     #SSTACK_TOP
 F036  CE0400                          ldu     #USTACK_TOP
                       ; fill the screen
-F039  8600                    lda     #$00
-F03B  8E0400                  ldx     #SCREEN_BUFFER
+F039  8600                            lda     #$00
+F03B  8E0400                          ldx     #SCREEN_BUFFER
 F03E                  lp1     
-F03E  4C                      inca
-F03F  A780                    sta     ,x+
-F041  8C1C00                  cmpx    #STD_VID_MAX
-F044  2FF8                    ble     lp1
+F03E  4C                              inca
+F03F  A780                            sta     ,x+
+F041  8C1C00                          cmpx    #STD_VID_MAX
+F044  2FF8                            ble     lp1
                       
                       ; cycle the palette colors
-                      ;       lda     #0      
-                      ;lp2    sta     DSP_PAL_IDX
-                      ;       ldy     DSP_PAL_CLR
-                      ;       leay    256,y
-                      ;       sty     DSP_PAL_CLR
-                      ;       inca
-                      ;       bra     lp2
+                      ;               lda     #0      
+                      ;lp2            sta     DSP_PAL_IDX
+                      ;               ldy     DSP_PAL_CLR
+                      ;               leay    256,y
+                      ;               sty     DSP_PAL_CLR
+                      ;               inca
+                      ;               bra     lp2
                       
                       ; increment the text glyph bitmaps
-                      ;       lda     #0
-                      ;lp4    sta     DSP_GLYPH_IDX
-                      ;       ldx     #DSP_GLYPH_DATA
-                      ;lp_b   rol     ,x+
-                      ;       cmpx    #DSP_GLYPH_DATA+8
-                      ;       blt     lp_b
-                      ;       inca
-                      ;       bra     lp4
+                      ;               lda     #0
+                      ;lp4            sta     DSP_GLYPH_IDX
+                      ;               ldx     #DSP_GLYPH_DATA
+                      ;lp_b           rol     ,x+
+                      ;               cmpx    #DSP_GLYPH_DATA+8
+                      ;               blt     lp_b
+                      ;               inca
+                      ;               bra     lp4
                       
                       
                       ; increment the characters on the screen
-F046  8601                    lda     #1
-F048  B71C1E                  sta     CSR_PAL_INDX
+F046  8601                            lda     #1
+F048  B71C1E                          sta     CSR_PAL_INDX
                       
 F04B                  inc_screen
-F04B  8E0400                  ldx     #SCREEN_BUFFER
+F04B  8E0400                          ldx     #SCREEN_BUFFER
 F04E                  lp3
                               ; cycle the cursor color
-F04E  FC1C1F                  ldd     CSR_PAL_DATA
-F051  C30001                  addd    #$0001
-F054  8AF0                    ora     #$f0            ; full alpha
-F056  FD1C1F                  std     CSR_PAL_DATA
+F04E  FC1C1F                          ldd     CSR_PAL_DATA
+F051  C30001                          addd    #$0001
+F054  8AF0                            ora     #$f0            ; full alpha
+F056  FD1C1F                          std     CSR_PAL_DATA
                       
                               ; increment character and attribute data
-F059  6C80                    inc     ,x+
-F05B  BC1C00                  cmpx    STD_VID_MAX
-F05E  2FEE                    ble     lp3
+F059  6C80                            inc     ,x+
+F05B  BC1C00                          cmpx    STD_VID_MAX
+F05E  2FEE                            ble     lp3
                       
-                      
-                      ;       lda     #0
-                      ;       sta     CSR_PAL_INDX
-                      ;       ldd     #$f00f
-                      ;       std     CSR_PAL_DATA
+                      ;               lda     #0
+                      ;               sta     CSR_PAL_INDX
+                      ;               ldd     #$f00f
+                      ;               std     CSR_PAL_DATA
 F060                  inf_loop
-F060  20E9                    bra     inc_screen
+F060  20E9                            bra     inc_screen
                       
                       
                       ; ROM Based Hardware Vectors
-FFF0                          org     $FFF0
-FFF0  F000                    fdb     KRNL_RSRVD      ; HARD_RSRVD       RESERVED Hardware Interrupt Vector
-FFF2  F004                    fdb     KRNL_SWI3       ; HARD_SWI3        SWI3 Hardware Interrupt Vector
-FFF4  F008                    fdb     KRNL_SWI2       ; HARD_SWI2        SWI2 Hardware Interrupt Vector
-FFF6  F00C                    fdb     KRNL_FIRQ       ; HARD_FIRQ        FIRQ Hardware Interrupt Vector
-FFF8  F010                    fdb     KRNL_IRQ        ; HARD_IRQ         IRQ Hardware Interrupt Vector
-FFFA  F014                    fdb     KRNL_SWI        ; HARD_SWI         SWI / SYS Hardware Interrupt Vector
-FFFC  F018                    fdb     KRNL_NMI        ; HARD_NMI         NMI Hardware Interrupt Vector
-FFFE  F01C                    fdb     KRNL_RESET      ; HARD_RESET       RESET Hardware Interrupt Vector
+FFF0                                  org     $FFF0
+FFF0  F000                            fdb     KRNL_RSRVD      ; HARD_RSRVD       RESERVED Hardware Interrupt Vector
+FFF2  F004                            fdb     KRNL_SWI3       ; HARD_SWI3        SWI3 Hardware Interrupt Vector
+FFF4  F008                            fdb     KRNL_SWI2       ; HARD_SWI2        SWI2 Hardware Interrupt Vector
+FFF6  F00C                            fdb     KRNL_FIRQ       ; HARD_FIRQ        FIRQ Hardware Interrupt Vector
+FFF8  F010                            fdb     KRNL_IRQ        ; HARD_IRQ         IRQ Hardware Interrupt Vector
+FFFA  F014                            fdb     KRNL_SWI        ; HARD_SWI         SWI / SYS Hardware Interrupt Vector
+FFFC  F018                            fdb     KRNL_NMI        ; HARD_NMI         NMI Hardware Interrupt Vector
+FFFE  F01C                            fdb     KRNL_RESET      ; HARD_RESET       RESET Hardware Interrupt Vector

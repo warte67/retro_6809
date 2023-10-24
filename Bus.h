@@ -35,6 +35,7 @@ class Bus
 		inline static bool s_bIsDirty = true;
 		Gfx* m_gfx = nullptr;
 		int _fps = 0;
+		float _avg_cpu_cycle_time = 0.0f;
 
 		// CPU Stuff
 		inline static C6809* m_cpu = nullptr;
