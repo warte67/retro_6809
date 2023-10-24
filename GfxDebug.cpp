@@ -168,6 +168,11 @@ void GfxDebug::OnEvent(SDL_Event* evnt)
                     _bIsDebugActive = !_bIsDebugActive;
                     bMouseWheelActive = false;
                 }
+                if (evnt->key.keysym.sym == SDLK_r)
+                {
+                    bSingleStep = !bSingleStep;
+                    bMouseWheelActive = false;
+                }
             }
             // perform debug enabled specific events
             if (_bIsDebugActive)
@@ -257,9 +262,9 @@ void GfxDebug::OnUpdate(float fElapsedTime)
         // instruction text
         OutText(1, 31, "[SPACE]    Step", 128, 128, 128);
         OutText(1, 32, "[ALT-X]    Quit", 128, 128, 128);
-        OutText(1, 33, "[ALT-D]  Toggle", 128, 128, 128);
-        OutText(1, 34, "               ", 128, 128, 128);
-        OutText(1, 35, "[ALT-ENTER] Fullscreen / Windowed", 128, 128, 128);
+        OutText(1, 33, "[ALT-D] ~ Debug", 128, 128, 128);
+        OutText(1, 34, "[ALT-R] RunStop", 128, 128, 128);
+        OutText(1, 35, "[ALT-ENTER] Toggles between Fullscreen and Windowed", 128, 128, 128);
 
         // clean up
         SDL_SetRenderTarget(m_gfx->_renderer, NULL);

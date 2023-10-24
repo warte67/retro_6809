@@ -449,7 +449,7 @@ void C6809::daa()
 	CC.bit.C |= btst(t, 8);
 	A = (Byte)t;
 	CC.bit.N = btst(A, 7);
-	CC.bit.Z = !A;
+	CC.bit.Z = (bool)!A;
 }
 void C6809::deca() { do_dec(A); }
 void C6809::decb() { do_dec(B); }
@@ -658,7 +658,7 @@ void C6809::sbca() { do_sbc(A); }
 void C6809::sbcb() { do_sbc(B); }
 void C6809::sex() {
 	CC.bit.N = btst(B, 7);
-	CC.bit.Z = !B;
+	CC.bit.Z = (bool)!B;
 	A = CC.bit.N ? 255 : 0;
 }
 void C6809::sta() { do_st(A); }
@@ -856,7 +856,7 @@ void C6809::do_adc(Byte& x) {
 	x = wt & 0xff;
 	CC.bit.V ^= CC.bit.C;
 	CC.bit.N = btst(x, 7);
-	CC.bit.Z = !x;
+	CC.bit.Z = (bool)!x;
 }
 void C6809::do_add(Byte& x) {
 	Word data = (this->*opMap[opcode].addrmode)();
@@ -871,7 +871,7 @@ void C6809::do_add(Byte& x) {
 	x = wt & 0xff;
 	CC.bit.V ^= CC.bit.C;
 	CC.bit.N = btst(x, 7);
-	CC.bit.Z = !x;
+	CC.bit.Z = (bool)!x;
 }
 void C6809::do_add(Word& x) {
 	Word data = (this->*opMap[opcode].addrmode)();
@@ -893,7 +893,7 @@ void C6809::do_and(Byte& x) {
 	x = x & read(data);
 	//	x = x & fetch_byte();	// post;
 	CC.bit.N = btst(x, 7);
-	CC.bit.Z = !x;
+	CC.bit.Z = (bool)!x;
 	CC.bit.V = 0;
 }
 void C6809::do_asl(Byte& x)
@@ -902,7 +902,7 @@ void C6809::do_asl(Byte& x)
 	CC.bit.V = btst(x, 7) ^ btst(x, 6);
 	x <<= 1;
 	CC.bit.N = btst(x, 7);
-	CC.bit.Z = !x;
+	CC.bit.Z = (bool)!x;
 }
 void C6809::do_asr(Byte& x) {
 	CC.bit.C = btst(x, 0);
@@ -910,7 +910,7 @@ void C6809::do_asr(Byte& x) {
 	if ((CC.bit.N = btst(x, 6)) != 0) {
 		bset(x, 7);
 	}
-	CC.bit.Z = !x;
+	CC.bit.Z = (bool)!x;
 }
 void C6809::do_bit(Byte& x)
 {
@@ -919,7 +919,7 @@ void C6809::do_bit(Byte& x)
 	//Byte t = x & fetch_byte();	// post;
 	CC.bit.N = btst(t, 7);
 	CC.bit.V = 0;
-	CC.bit.Z = !t;
+	CC.bit.Z = (bool)!t;
 }
 void C6809::do_clr(Byte& x)
 {
@@ -950,27 +950,27 @@ void C6809::do_com(Byte& x) {
 	CC.bit.C = 1;
 	CC.bit.V = 0;
 	CC.bit.N = btst(x, 7);
-	CC.bit.Z = !x;
+	CC.bit.Z = (bool)!x;
 }
 void C6809::do_dec(Byte& x) {
 	CC.bit.V = (x == 0x80);
 	x = x - 1;
 	CC.bit.N = btst(x, 7);
-	CC.bit.Z = !x;
+	CC.bit.Z = (bool)!x;
 }
 void C6809::do_eor(Byte& x) {
 	Word addr_abs = (this->*opMap[opcode].addrmode)();
 	x = x ^ read(addr_abs);
 	CC.bit.V = 0;
 	CC.bit.N = btst(x, 7);
-	CC.bit.Z = !x;
+	CC.bit.Z = (bool)!x;
 }
 void C6809::do_inc(Byte& x)
 {
 	CC.bit.V = (x == 0x7f);
 	x = x + 1;
 	CC.bit.N = btst(x, 7);
-	CC.bit.Z = !x;
+	CC.bit.Z = (bool)!x;
 }
 void C6809::do_ld(Byte& x)
 {
@@ -978,7 +978,7 @@ void C6809::do_ld(Byte& x)
 	x = read(addr_abs);
 	CC.bit.N = btst(x, 7);
 	CC.bit.V = 0;
-	CC.bit.Z = !x;
+	CC.bit.Z = (bool)!x;
 }
 void C6809::do_ld(Word& x)
 {
@@ -993,7 +993,7 @@ void C6809::do_lsr(Byte& x)
 	CC.bit.C = btst(x, 0);
 	x >>= 1;
 	CC.bit.N = 0;
-	CC.bit.Z = !x;
+	CC.bit.Z = (bool)!x;
 }
 void C6809::do_neg(Byte& x)
 {
@@ -1002,7 +1002,7 @@ void C6809::do_neg(Byte& x)
 	CC.bit.C = btst((Word)t, 8);
 	CC.bit.N = btst((Byte)t, 7);
 	x = t & 0xff;
-	CC.bit.Z = !x;
+	CC.bit.Z = (bool)!x;
 }
 void C6809::do_or(Byte& x)
 {
@@ -1010,7 +1010,7 @@ void C6809::do_or(Byte& x)
 	x = x | read(addr_abs);
 	CC.bit.V = 0;
 	CC.bit.N = btst(x, 7);
-	CC.bit.Z = !x;
+	CC.bit.Z = (bool)!x;
 }
 void C6809::do_rol(Byte& x)
 {
@@ -1020,7 +1020,7 @@ void C6809::do_rol(Byte& x)
 	x = x << 1;
 	if (oc) bset(x, 0);
 	CC.bit.N = btst(x, 7);
-	CC.bit.Z = !x;
+	CC.bit.Z = (bool)!x;
 }
 void C6809::do_ror(Byte& x)
 {
@@ -1029,7 +1029,7 @@ void C6809::do_ror(Byte& x)
 	x = x >> 1;
 	if (oc) bset(x, 7);
 	CC.bit.N = btst(x, 7);
-	CC.bit.Z = !x;
+	CC.bit.Z = (bool)!x;
 	++cycles;
 }
 void C6809::do_sbc(Byte& x) {
@@ -1040,7 +1040,7 @@ void C6809::do_sbc(Byte& x) {
 	CC.bit.C = btst((Word)t, 8);
 	CC.bit.N = btst((Byte)t, 7);
 	x = t & 0xff;
-	CC.bit.Z = !x;
+	CC.bit.Z = (bool)!x;
 }
 void C6809::do_st(Byte x)
 {
@@ -1049,7 +1049,7 @@ void C6809::do_st(Byte x)
 	write(addr, x);
 	CC.bit.V = 0;
 	CC.bit.N = btst(x, 7);
-	CC.bit.Z = !x;
+	CC.bit.Z = (bool)!x;
 }
 void C6809::do_st(Word x)
 {
@@ -1068,7 +1068,7 @@ void C6809::do_sub(Byte& x) {
 	CC.bit.C = btst((Word)t, 8);
 	CC.bit.N = btst((Byte)t, 7);
 	x = t & 0xff;
-	CC.bit.Z = !x;
+	CC.bit.Z = (bool)!x;
 }
 void C6809::do_sub(Word& x) {
 	Word addr_abs = (this->*opMap[opcode].addrmode)();
@@ -1084,7 +1084,7 @@ void C6809::do_sub(Word& x) {
 void C6809::do_tst(Byte& x) {
 	CC.bit.V = 0;
 	CC.bit.N = btst(x, 7);
-	CC.bit.Z = !x;
+	CC.bit.Z = (bool)!x;
 }
 void C6809::do_br(bool test) {
 	if (test)
