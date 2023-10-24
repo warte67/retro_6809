@@ -163,6 +163,7 @@ void GfxDebug::OnEvent(SDL_Event* evnt)
                 {
                     _bIsDebugActive = !_bIsDebugActive;
                     bMouseWheelActive = false;
+                    bIsCursorVisible = false;
                 }
                 if (evnt->key.keysym.sym == SDLK_r)
                 {

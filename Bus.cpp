@@ -435,15 +435,15 @@ void Bus::Write(Word offset, Byte data, bool debug)
 }
 Word Bus::Read_Word(Word offset, bool debug)
 {
-    Word ret = (Read(offset) << 8) | Read(offset + 1);
+    Word ret = (Bus::Read(offset) << 8) | Bus::Read(offset + 1);
     return ret;
 }
 void Bus::Write_Word(Word offset, Word data, bool debug)
 {
     Byte msb = (data >> 8) & 0xFF;
     Byte lsb = data & 0xff;
-    Write(offset, msb);
-    Write(offset + 1, lsb);
+    Bus::Write(offset, msb);
+    Bus::Write(offset + 1, lsb);
 }
 
 

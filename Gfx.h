@@ -82,6 +82,10 @@ class Gfx : public Device
                 Uint8 g : 4;
                 Uint8 r : 4;
                 Uint8 a : 4;
+                //Uint8 r : 4;
+                //Uint8 a : 4;
+                //Uint8 b : 4;
+                //Uint8 g : 4;
             };
         };
         Byte _dsp_pal_idx = 0x00;   // DSP_PAL_IDX
