@@ -4,11 +4,33 @@
 ;
 	INCLUDE "memory_map.asm"
 
-	org	$f000	
 
-start	
+; Software Vectors
+	org	$0000	
+VECT_RSRVD	fdb	KRNL_UNDEF	; RESERVED Software Interrupt Vector
+VECT_SWI3 	fdb	KRNL_UNDEF	; SWI3 Software Interrupt Vector
+VECT_SWI2 	fdb	KRNL_UNDEF	; SWI2 Software Interrupt Vector
+VECT_FIRQ 	fdb	KRNL_UNDEF	; FIRQ Software Interrupt Vector
+VECT_IRQ  	fdb	KRNL_UNDEF	; IRQ Software Interrupt Vector
+VECT_SWI  	fdb	KRNL_UNDEF	; SWI / SYS Software Interrupt Vector
+VECT_NMI  	fdb	KRNL_UNDEF	; NMI Software Interrupt Vector
+VECT_RESET	fdb	kernel_start	; RESET Software Interrupt Vector	
+
+; Kernel Jump Vectors Calls
+	org 	KERNEL_ROM	
+KRNL_RSRVD	jmp	[VECT_RSRVD]
+KRNL_SWI3 	jmp	[VECT_SWI3 ]
+KRNL_SWI2 	jmp	[VECT_SWI2 ]
+KRNL_FIRQ 	jmp	[VECT_FIRQ ]
+KRNL_IRQ  	jmp	[VECT_IRQ  ]
+KRNL_SWI  	jmp	[VECT_SWI  ]
+KRNL_NMI  	jmp	[VECT_NMI  ]
+KRNL_RESET	jmp	[VECT_RESET]
+; a null vector (i.e. an infinate loop)
+KRNL_UNDEF	bra	KRNL_UNDEF
 
 
+kernel_start
 ; fill the screen
 	lda	#$00
 	ldx	#SCREEN_BUFFER
@@ -65,14 +87,13 @@ inf_loop
 	bra	inc_screen
 
 
-
-
+; ROM Based Hardware Vectors
 	org	$FFF0
-	fdb	$0000	; HARD_RSRVD 	Motorola RESERVED Hardware Interrupt Vector
-	fdb	$0000	; HARD_SWI3  	SWI3 Hardware Interrupt Vector
-	fdb	$0000	; HARD_SWI2  	SWI2 Hardware Interrupt Vector
-	fdb	$0000	; HARD_FIRQ  	FIRQ Hardware Interrupt Vector
-	fdb	$0000	; HARD_IRQ   	IRQ Hardware Interrupt Vector
-	fdb	$0000	; HARD_SWI   	SWI / SYS Hardware Interrupt Vector
-	fdb	$0000	; HARD_NMI   	NMI Hardware Interrupt Vector
-	fdb	$F000	; HARD_RESET	RESET Hardware Interrupt Vector
+	fdb	KRNL_RSRVD	; HARD_RSRVD       RESERVED Hardware Interrupt Vector
+	fdb	KRNL_SWI3  	; HARD_SWI3        SWI3 Hardware Interrupt Vector
+	fdb	KRNL_SWI2  	; HARD_SWI2        SWI2 Hardware Interrupt Vector
+	fdb	KRNL_FIRQ  	; HARD_FIRQ        FIRQ Hardware Interrupt Vector
+	fdb	KRNL_IRQ    	; HARD_IRQ         IRQ Hardware Interrupt Vector
+	fdb	KRNL_SWI    	; HARD_SWI         SWI / SYS Hardware Interrupt Vector
+	fdb	KRNL_NMI    	; HARD_NMI         NMI Hardware Interrupt Vector
+	fdb	KRNL_RESET 	; HARD_RESET       RESET Hardware Interrupt Vector
