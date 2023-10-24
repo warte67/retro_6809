@@ -100,6 +100,7 @@ class Gfx : public Device
 		Byte _dsp_ext 	= 0b00001001;	// defaults
         Byte _dsp_err = 0;          
 
+        // Hack: have to grant a pointer to the Gfx write to Bus variable
         Bus* m_bus = nullptr;
 
         // graphics devices based on the IGfxDevice
