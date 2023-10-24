@@ -201,19 +201,27 @@ void Bus::_cpuThread()
 
         // 1000.f = 1mhz, 500.0f = 2mhz, etc...
         float cycle_time = 8000.0f;     // in nanohertz
-        int cpu_speed = Bus::Inst().m_gfx->_sys_state;
+        int cpu_speed = Bus::Inst()._sys_state;
         switch (cpu_speed)
         {
-        case 0: break;      // unmetered (depends on host computers speed)
-        case 1: cycle_time = 16000.0f;  break;      // 62.5 khz
-        case 2: cycle_time = 8000.0f;   break;      // 125 khz
-        case 3: cycle_time = 4000.0f;   break;      // 250 khz
-        case 4: cycle_time = 2000.0f;   break;      // 500 khz
-        case 5: cycle_time = 1000.0f;   break;      // 1 mhz
-        case 6: cycle_time = 500.0f;    break;      // 2 mhz
-        case 7: cycle_time = 250.0f;    break;      // 4 mhz (ish)
+            case 0x00: cycle_time = 39900.0f;   break;      // 25 khz
+            case 0x01: cycle_time = 19900.0f;   break;      // 50 khz
+            case 0x02: cycle_time = 9900.0f;    break;      // 100 khz
+            case 0x03: cycle_time = 4900.0f;    break;      // 200 khz
+            case 0x04: cycle_time = 2900.0f;    break;      // 333 khz
+            case 0x05: cycle_time = 2300.0f;    break;      // 416 khz
+            case 0x06: cycle_time = 1900.0f;    break;      // 500 khz
+            case 0x07: cycle_time = 1500.0f;    break;      // 625 khz
+            case 0x08: cycle_time = 1200.0f;    break;      // 769 khz
+            case 0x09: cycle_time = 1100.0f;    break;      // 833 khz
+            case 0x0A: cycle_time = 900.0f;     break;      // 1.0 mhz
+            case 0x0B: cycle_time = 600.0f;     break;      // 1.4 mhz
+            case 0x0C: cycle_time = 400.0f;     break;      // 2.0 mhz
+            case 0x0D: cycle_time = 200.0f;     break;      // 3.3 mhz
+            case 0x0E: cycle_time = 100.0f;     break;      // 5 mhz
+            case 0x0F: cycle_time = 0.0f;       break;      // Unmetered (10 mhz)
         }
-        if (cpu_speed)
+        //if (cpu_speed)
         {
             if (duration.count() > cycle_time)
             {
@@ -221,20 +229,18 @@ void Bus::_cpuThread()
                 if (bCpuEnabled)
                 {
                     m_cpu->clock();
-
                     Bus::Inst()._avg_cpu_cycle_time = duration.count();
                 }
             }
         }
-        else
-        {
-            if (bCpuEnabled)
-            {
-                m_cpu->clock();
-
-                Bus::Inst()._avg_cpu_cycle_time = duration.count();
-            }
-        }
+        //else
+        //{
+        //    if (bCpuEnabled)
+        //    {
+        //        m_cpu->clock();
+        //        Bus::Inst()._avg_cpu_cycle_time = duration.count();
+        //    }
+        //}
     }
 }
 
@@ -323,7 +329,10 @@ void Bus::_onUpdate()
 		std::string sTitle = "Retro 6809";
 		sTitle += "  FPS: ";
 		sTitle += std::to_string(_fps);
-        sTitle += "   CPU_SPEED: " + std::to_string((int)_avg_cpu_cycle_time);
+
+        _sys_cpu_khz = (int)(1.0f / (_avg_cpu_cycle_time / 1000000.0f));
+
+        sTitle += "   CPU_SPEED: " + std::to_string(_sys_cpu_khz) + " khz.";
 		if (m_gfx)
 			if (m_gfx->_window)
 				 SDL_SetWindowTitle(m_gfx->_window, sTitle.c_str());

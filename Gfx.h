@@ -92,7 +92,7 @@ class Gfx : public Device
 
 		// hardware registers
 	protected:
-        Byte _sys_state = 0x06;            // system state
+        //Byte _sys_state = 0x0F;            // system state
 
 		Word _std_vid_max = 0x1C00;		// [STD_VID_MAX]
 		Byte _dsp_gres	= 0b11000101;	// defaults

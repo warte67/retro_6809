@@ -36,6 +36,11 @@ class Bus
 		Gfx* m_gfx = nullptr;
 		int _fps = 0;
 		float _avg_cpu_cycle_time = 0.0f;
+		int _avg_cpu_clock = 0;
+
+		// Bus CPU clock registers (Uses the Gfx Device register block)
+		Byte _sys_state = 0x0D;			// SYS_STATE	(R/W Byte) register
+		Word _sys_cpu_khz = 0;			// SYS_SPEED	(Read Byte) register
 
 		// CPU Stuff
 		inline static C6809* m_cpu = nullptr;

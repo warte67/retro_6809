@@ -119,6 +119,44 @@ Word Gfx::OnAttach(Word nextAddr)
     DisplayEnum("STD_VID_MAX", nextAddr, " (Word) Standard Video Buffer Max");
     nextAddr+=2;
 
+	DisplayEnum("", 0, "");
+	DisplayEnum("SYS_STATE", nextAddr, " (Byte) System State Register");
+	DisplayEnum("", 0, "DSP_GRES: ABCD.SSSS");
+	DisplayEnum("", 0, "     A:0   = Standard Buffer Overflow ");
+	DisplayEnum("", 0, "     B:0   = Extended Buffer Overflow ");
+	DisplayEnum("", 0, "     C:0   = Reserved ");
+	DisplayEnum("", 0, "     D:0   = Reserved ");
+	DisplayEnum("", 0, "     S:$0  = CPU Clock  25 khz.");
+	DisplayEnum("", 0, "     S:$1  = CPU Clock  50 khz.");
+	DisplayEnum("", 0, "     S:$2  = CPU Clock 100 khz.");
+	DisplayEnum("", 0, "     S:$3  = CPU Clock 200 khz.");
+	DisplayEnum("", 0, "     S:$4  = CPU Clock 333 khz.");
+	DisplayEnum("", 0, "     S:$5  = CPU Clock 416 khz.");
+	DisplayEnum("", 0, "     S:$6  = CPU Clock 500 khz.");
+	DisplayEnum("", 0, "     S:$7  = CPU Clock 625 khz.");
+	DisplayEnum("", 0, "     S:$8  = CPU Clock 769 khz.");
+	DisplayEnum("", 0, "     S:$9  = CPU Clock 833 khz.");
+	DisplayEnum("", 0, "     S:$A  = CPU Clock 1.0 mhz.");
+	DisplayEnum("", 0, "     S:$B  = CPU Clock 1.4 mhz.");
+	DisplayEnum("", 0, "     S:$C  = CPU Clock 2.0 mhz.");
+	DisplayEnum("", 0, "     S:$D  = CPU Clock 3.3 mhz.");
+	DisplayEnum("", 0, "     S:$E  = CPU Clock 5.0 mhz.");
+	DisplayEnum("", 0, "     S:$F  = CPU Clock ~10.0 mhz. (unmetered)");
+	nextAddr++;
+
+	DisplayEnum("", 0, "");
+	DisplayEnum("DSP_ERR", nextAddr, " (Byte) Display Sub-System Error Code Register");
+	DisplayEnum("", 0, "DSP_ERR: ABCD.EFGH");
+	DisplayEnum("", 0, "     A:0   = Standard Buffer Overflow ");
+	DisplayEnum("", 0, "     B:0   = Extended Buffer Overflow ");
+	DisplayEnum("", 0, "     C:0   = Reserved ");
+	DisplayEnum("", 0, "     D:0   = Reserved ");
+	nextAddr++;
+
+	DisplayEnum("", 0, "");
+	DisplayEnum("SYS_SPEED", nextAddr, " (Word) Approximate CPU Clock Speed");
+	nextAddr+=2;
+
     DisplayEnum("", 0, "");
     DisplayEnum("DSP_GRES", nextAddr, " (Byte) Screen Resolution Register");
     DisplayEnum("", 0, "DSP_GRES: BBRR.HHVV");
@@ -160,19 +198,6 @@ Word Gfx::OnAttach(Word nextAddr)
     DisplayEnum("", 0, "     B:0   = Fullscreen Enabled( emulator only ) ");
     DisplayEnum("", 0, "     B:1   = Windowed Enabled ( emulator only ) ");
     nextAddr++;
-
-    DisplayEnum("", 0, "");
-    DisplayEnum("DSP_ERR", nextAddr, " (Byte) Display Sub-System Error Code Register");
-    DisplayEnum("", 0, "DSP_ERR: ABCD.EFGH");
-    DisplayEnum("", 0, "     A:0   = Standard Buffer Overflow ");
-    DisplayEnum("", 0, "     B:0   = Extended Buffer Overflow ");
-    DisplayEnum("", 0, "     C:0   = Reserved ");
-    DisplayEnum("", 0, "     D:0   = Reserved ");
-    DisplayEnum("", 0, "     E:0   = Reserved ");
-    DisplayEnum("", 0, "     F:0   = Reserved ");
-    DisplayEnum("", 0, "     G:0   = Reserved ");
-    DisplayEnum("", 0, "     H:0   = Reserved ");
-	nextAddr++;
 
     DisplayEnum("", 0, "");
     DisplayEnum("DSP_TXT_COLS", nextAddr, " (Byte) READ-ONLY Text Screen Columns");
@@ -572,12 +597,6 @@ void Gfx::OnUpdate(float fElapsedTime)
 		// do nothing extra anymore
 		// video buffer is being updated via asm
 		// the 6809 CPU should nowbe working
-
-		// // palette test
-		// write(DSP_PAL_IDX, 1);
-		// Word clr = read_word(DSP_PAL_CLR)+1;
-		// write(DSP_PAL_CLR, clr);
-
 
 		// update the display textures
 		_display_extended();
