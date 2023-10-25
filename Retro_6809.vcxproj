@@ -160,6 +160,7 @@
     <ClCompile Include="Device.cpp" />
     <ClCompile Include="Gfx.cpp" />
     <ClCompile Include="GfxDebug.cpp" />
+    <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="GfxMouse.cpp" />
   </ItemGroup>
@@ -170,9 +171,11 @@
     <ClInclude Include="Gfx.h" />
     <ClInclude Include="GfxDebug.h" />
     <ClInclude Include="IGfxDevice.h" />
+    <ClInclude Include="Keyboard.h" />
     <ClInclude Include="memory_map.h" />
     <ClInclude Include="GfxMouse.h" />
     <ClInclude Include="types.h" />
+    <ClInclude Include="XK_Keycodes.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

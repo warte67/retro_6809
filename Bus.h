@@ -20,6 +20,7 @@
 
 // forward declarations
 class C6809;
+class Keyboard;
 
 
 class Bus
@@ -27,13 +28,16 @@ class Bus
 	friend class C6809;
 	friend class Gfx;
 	friend class GfxDebug;
+	friend class Keyboard;
 
 	protected:
 		Bus();									// constructor
-		
+
+		Gfx* m_gfx = nullptr;
+		inline static Keyboard* m_keyboard = nullptr;
+
 		inline static bool s_bIsRunning = true;
 		inline static bool s_bIsDirty = true;
-		Gfx* m_gfx = nullptr;
 		int _fps = 0;
 		float _avg_cpu_cycle_time = 0.0f;
 		int _avg_cpu_clock = 0;

@@ -10,6 +10,7 @@
 #include <thread>
 #include "C6809.h"
 #include "Bus.h"
+#include "Keyboard.h"
 
 Bus::Bus()
 {
@@ -94,7 +95,9 @@ Bus::Bus()
     //m_gfx = dynamic_cast<Gfx*>(dev);
     //addr += m_gfx->Attach_Devices(addr);
 
-
+    // Keyboard Device
+    m_keyboard = new Keyboard();
+    addr += Attach(m_keyboard);
 
 
 

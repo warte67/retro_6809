@@ -159,8 +159,17 @@
 1C24                  CSR_END         equ   $1C24    ; End Mouse Registers
 1C24                  GFX_END         equ   $1C24    ; End of GFX Device Registers
                       
-                          ; 5084 ($13DC) bytes remaining for additional registers.
-1C24                  RESERVED        equ   $1C24
+1C24                  KEY_BEGIN       equ   $1C24    ; Start of the Keyboard Register space
+1C24                  CHAR_Q_LEN      equ   $1C24    ;   (Byte) # of characters waiting in queue        (Read Only)
+1C25                  CHAR_SCAN       equ   $1C25    ;   (Byte) read next character in queue (not popped when read)
+1C26                  CHAR_POP        equ   $1C26    ;   (Byte) read next character in queue (not popped when read)
+1C27                  XKEY_BUFFER     equ   $1C27    ;   (128 bits) 16 bytes for XK_KEY data buffer     (Read Only)
+1C37                  EDT_BFR_CSR     equ   $1C37    ;   (Byte) cursor position within edit buffer     (Read/Write)
+1C38                  EDT_BUFFER      equ   $1C38    ;   (256 Bytes) line editing character buffer     (Read/Write)
+1D38                  KEY_END         equ   $1D38    ; End of the Keyboard Register space
+                      
+                          ; 4808 ($12C8) bytes remaining for additional registers.
+1D38                  RESERVED        equ   $1D38
                       
                                 ; User RAM (32K)
 3000                  USER_RAM        equ   $3000

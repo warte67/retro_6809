@@ -11,10 +11,12 @@
 
 class Gfx;
 class C6809;
+class Keyboard;
 
 class GfxDebug : public IGfxDevice
 {
 	friend class Gfx;
+	friend class Keyboard;
 
 public:
 	GfxDebug(Gfx* _gfx) : IGfxDevice(_gfx) { _deviceName = "GfxDebug"; }
@@ -52,11 +54,9 @@ public:
 	void MouseStuff();
 	void KeyboardStuff();
 
-
-
 protected:
 
-	bool _bIsDebugActive = ENABLE_DEBUG;
+	inline static bool _bIsDebugActive = ENABLE_DEBUG;
 	
 	// protected helpers
 	void _onWindowResize();	// called when the viewing window is scaled

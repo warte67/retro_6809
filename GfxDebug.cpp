@@ -11,12 +11,12 @@ Byte GfxDebug::read(Word offset, bool debug)
     Byte data = 0xCC;
     switch (offset)
     {
-    //case CSR_XPOS + 0:      return mouse_x >> 8;
-    //case CSR_XPOS + 1:      return mouse_x & 0xFF;
-    //case CSR_YPOS + 0:      return mouse_y >> 8;
-    //case CSR_YPOS + 1:      return mouse_y & 0xFF;
+    //case CSR_XPOS + 0:      data = mouse_x >> 8;
+    //case CSR_XPOS + 1:      data = mouse_x & 0xFF;
+    //case CSR_YPOS + 0:      data = mouse_y >> 8;
+    //case CSR_YPOS + 1:      data = mouse_y & 0xFF;
     }
-    // return default bit pattern
+    // update and return
     Bus::Write(offset, data, true);
     return data;
 }

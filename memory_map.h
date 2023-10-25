@@ -7,168 +7,178 @@ enum MEMMAP
     //  **********************************************
     //  * Allocated 64k Memory Mapped System Symbols *
     //  **********************************************
-    SOFT_VECTORS = 0x0000,
+SOFT_VECTORS = 0x0000,
 
-    // Software Interrupt Vectors:
-    SOFT_RSRVD = 0x0000, // Motorola RESERVED Software Interrupt Vector
-    SOFT_SWI3 = 0x0002, // SWI3 Software Interrupt Vector
-    SOFT_SWI2 = 0x0004, // SWI2 Software Interrupt Vector
-    SOFT_FIRQ = 0x0006, // FIRQ Software Interrupt Vector
-    SOFT_IRQ = 0x0008, // IRQ Software Interrupt Vector
-    SOFT_SWI = 0x000A, // SWI / SYS Software Interrupt Vector
-    SOFT_NMI = 0x000C, // NMI Software Interrupt Vector
-    SOFT_RESET = 0x000E, // RESET Software Interrupt Vector
+        // Software Interrupt Vectors:
+SOFT_RSRVD   = 0x0000, // Motorola RESERVED Software Interrupt Vector
+SOFT_SWI3    = 0x0002, // SWI3 Software Interrupt Vector
+SOFT_SWI2    = 0x0004, // SWI2 Software Interrupt Vector
+SOFT_FIRQ    = 0x0006, // FIRQ Software Interrupt Vector
+SOFT_IRQ     = 0x0008, // IRQ Software Interrupt Vector
+SOFT_SWI     = 0x000A, // SWI / SYS Software Interrupt Vector
+SOFT_NMI     = 0x000C, // NMI Software Interrupt Vector
+SOFT_RESET   = 0x000E, // RESET Software Interrupt Vector
 
-    ZERO_PAGE = 0x0010,
-    SYSTEM_STACK = 0x0100,
-    SSTACK_TOP = 0x0300, // Top of the system stack space
-    USER_STACK = 0x0300,
-    USTACK_TOP = 0x0400, // Top of the user stack space
+ZERO_PAGE    = 0x0010,
+SYSTEM_STACK = 0x0100,
+SSTACK_TOP   = 0x0300, // Top of the system stack space
+USER_STACK   = 0x0300,
+USTACK_TOP   = 0x0400, // Top of the user stack space
 
-    // Display Buffer
-    SCREEN_BUFFER = 0x0400,
+        // Display Buffer
+SCREEN_BUFFER = 0x0400,
 
-    // Device Registers:
-    HDW_REGS = 0x1C00, // Begin Device Hardware Registers
+        // Device Registers:
+HDW_REGS     = 0x1C00, // Begin Device Hardware Registers
 
-    STD_VID_MAX = 0x1C00, //  (Word) Standard Video Buffer Max
+STD_VID_MAX  = 0x1C00, //  (Word) Standard Video Buffer Max
 
-    SYS_STATE = 0x1C02, //  (Byte) System State Register
-    // DSP_GRES: ABCD.SSSS
-    //      A:0   = Error: Standard Buffer Overflow
-    //      B:0   = Error: Extended Buffer Overflow
-    //      C:0   = Error: Reserved
-    //      D:0   = Error: Reserved
-    //      S:$0  = CPU Clock  25 khz.
-    //      S:$1  = CPU Clock  50 khz.
-    //      S:$2  = CPU Clock 100 khz.
-    //      S:$3  = CPU Clock 200 khz.
-    //      S:$4  = CPU Clock 333 khz.
-    //      S:$5  = CPU Clock 416 khz.
-    //      S:$6  = CPU Clock 500 khz.
-    //      S:$7  = CPU Clock 625 khz.
-    //      S:$8  = CPU Clock 769 khz.
-    //      S:$9  = CPU Clock 833 khz.
-    //      S:$A  = CPU Clock 1.0 mhz.
-    //      S:$B  = CPU Clock 1.4 mhz.
-    //      S:$C  = CPU Clock 2.0 mhz.
-    //      S:$D  = CPU Clock 3.3 mhz.
-    //      S:$E  = CPU Clock 5.0 mhz.
-    //      S:$F  = CPU Clock ~10.0 mhz. (unmetered)
+SYS_STATE    = 0x1C02, //  (Byte) System State Register
+        // DSP_GRES: ABCD.SSSS
+        //      A:0   = Error: Standard Buffer Overflow
+        //      B:0   = Error: Extended Buffer Overflow
+        //      C:0   = Error: Reserved
+        //      D:0   = Error: Reserved
+        //      S:$0  = CPU Clock  25 khz.
+        //      S:$1  = CPU Clock  50 khz.
+        //      S:$2  = CPU Clock 100 khz.
+        //      S:$3  = CPU Clock 200 khz.
+        //      S:$4  = CPU Clock 333 khz.
+        //      S:$5  = CPU Clock 416 khz.
+        //      S:$6  = CPU Clock 500 khz.
+        //      S:$7  = CPU Clock 625 khz.
+        //      S:$8  = CPU Clock 769 khz.
+        //      S:$9  = CPU Clock 833 khz.
+        //      S:$A  = CPU Clock 1.0 mhz.
+        //      S:$B  = CPU Clock 1.4 mhz.
+        //      S:$C  = CPU Clock 2.0 mhz.
+        //      S:$D  = CPU Clock 3.3 mhz.
+        //      S:$E  = CPU Clock 5.0 mhz.
+        //      S:$F  = CPU Clock ~10.0 mhz. (unmetered)
 
-    SYS_SPEED = 0x1C03, //  (Word) Approx. Average CPU Clock Speed
+SYS_SPEED    = 0x1C03, //  (Word) Approx. Average CPU Clock Speed
 
-    DSP_GRES = 0x1C05, //  (Byte) Screen Resolution Register
-    // DSP_GRES: BBRR.HHVV
-    //     BB:00 = Standard Graphics 1-bpp (2-color mode)
-    //     BB:01 = Standard Graphics 2-bpp (4-color mode)
-    //     BB:10 = Standard Graphics 4-bpp (16-color mode)
-    //     BB:11 = Standard Graphics 8-bpp (256-color mode)
-    //     RR:00 = 16:9  aspect (1.777778)
-    //     RR:01 = 16:10 aspect (1.600000)
-    //     RR:10 = 16:11 aspect (1.454545)
-    //     RR:11 = 16:12 aspect (1.333333)
-    //     HH:00 = 4x Horizontal Overscan Multiplier
-    //     HH:01 = 3x Horizontal Overscan Multiplier
-    //     HH:10 = 2x Horizontal Overscan Multiplier
-    //     HH:11 = 1x Horizontal Overscan Multiplier
-    //     VV:00 = 4x Vertical Overscan Multiplier
-    //     VV:01 = 3x Vertical Overscan Multiplier
-    //     VV:10 = 2x Vertical Overscan Multiplier
-    //     VV:11 = 1x Vertical Overscan Multiplier
+DSP_GRES     = 0x1C05, //  (Byte) Screen Resolution Register
+        // DSP_GRES: BBRR.HHVV
+        //     BB:00 = Standard Graphics 1-bpp (2-color mode)
+        //     BB:01 = Standard Graphics 2-bpp (4-color mode)
+        //     BB:10 = Standard Graphics 4-bpp (16-color mode)
+        //     BB:11 = Standard Graphics 8-bpp (256-color mode)
+        //     RR:00 = 16:9  aspect (1.777778)
+        //     RR:01 = 16:10 aspect (1.600000)
+        //     RR:10 = 16:11 aspect (1.454545)
+        //     RR:11 = 16:12 aspect (1.333333)
+        //     HH:00 = 4x Horizontal Overscan Multiplier
+        //     HH:01 = 3x Horizontal Overscan Multiplier
+        //     HH:10 = 2x Horizontal Overscan Multiplier
+        //     HH:11 = 1x Horizontal Overscan Multiplier
+        //     VV:00 = 4x Vertical Overscan Multiplier
+        //     VV:01 = 3x Vertical Overscan Multiplier
+        //     VV:10 = 2x Vertical Overscan Multiplier
+        //     VV:11 = 1x Vertical Overscan Multiplier
 
-    DSP_EXT = 0x1C06, //  (Byte) Extended Graphics Register
-    // DSP_EXT: ABCD.EFGG
-    //      AA:00 = Extended Graphics 1bpp (2-color mode)
-    //      AA:01 = Extended Graphics 2bpp (4-color mode)
-    //      AA:10 = Extended Graphics 4bpp (16-color mode)
-    //      AA:11 = Extended Graphics 4bpp (16-color mode)
-    //      B:0   = Extended Graphics: DISABLED
-    //      B:1   = Extended Graphics: ENABLED
-    //      C:0   = Extended Extended Mode: BITMAP
-    //      C:1   = Extended Extended Mode: TILES
-    //      D:0   = Standard Graphics: DISABLED
-    //      D:1   = Standard Graphics: ENABLED
-    //      E:0   = Standard Display Mode: TEXT
-    //      E:1   = Standard Display Mode: BITMAP
-    //      F:0   = VSYNC OFF
-    //      F:1   = VSYNC ON
-    //      B:0   = Fullscreen Enabled( emulator only )
-    //      B:1   = Windowed Enabled ( emulator only )
+DSP_EXT      = 0x1C06, //  (Byte) Extended Graphics Register
+        // DSP_EXT: ABCD.EFGG
+        //      AA:00 = Extended Graphics 1bpp (2-color mode)
+        //      AA:01 = Extended Graphics 2bpp (4-color mode)
+        //      AA:10 = Extended Graphics 4bpp (16-color mode)
+        //      AA:11 = Extended Graphics 4bpp (16-color mode)
+        //      B:0   = Extended Graphics: DISABLED
+        //      B:1   = Extended Graphics: ENABLED
+        //      C:0   = Extended Extended Mode: BITMAP
+        //      C:1   = Extended Extended Mode: TILES
+        //      D:0   = Standard Graphics: DISABLED
+        //      D:1   = Standard Graphics: ENABLED
+        //      E:0   = Standard Display Mode: TEXT
+        //      E:1   = Standard Display Mode: BITMAP
+        //      F:0   = VSYNC OFF
+        //      F:1   = VSYNC ON
+        //      B:0   = Fullscreen Enabled( emulator only )
+        //      B:1   = Windowed Enabled ( emulator only )
 
-    DSP_TXT_COLS = 0x1C07, //  (Byte) READ-ONLY Text Screen Columns
-    DSP_TXT_ROWS = 0x1C08, //  (Byte) READ-ONLY Text Screens Rows
+DSP_TXT_COLS = 0x1C07, //  (Byte) READ-ONLY Text Screen Columns
+DSP_TXT_ROWS = 0x1C08, //  (Byte) READ-ONLY Text Screens Rows
 
-    DSP_PAL_IDX = 0x1C09, //  (Byte) Color Palette Index
-    // DSP_PAL_IDX: 0-255
-    // Note: Use this register to set the index into theColor Palette.
-    //   Set this value prior referencing color data (DSP_PAL_CLR).
+DSP_PAL_IDX  = 0x1C09, //  (Byte) Color Palette Index
+        // DSP_PAL_IDX: 0-255
+        // Note: Use this register to set the index into theColor Palette.
+        //   Set this value prior referencing color data (DSP_PAL_CLR).
 
-    DSP_PAL_CLR = 0x1C0A, //  (Word) Indexed Color Palette Data
-    // DSP_PAL_CLR: Color Data A4R4G4B4 format
-    // Note: This is the color data for an individual palette entry.
-    //     Write to DSP_PAL_IDX with the index within the color palette
-    //     prior to reading or writing the color data in the DSP_PAL_CLR register.
+DSP_PAL_CLR  = 0x1C0A, //  (Word) Indexed Color Palette Data
+        // DSP_PAL_CLR: Color Data A4R4G4B4 format
+        // Note: This is the color data for an individual palette entry.
+        //     Write to DSP_PAL_IDX with the index within the color palette
+        //     prior to reading or writing the color data in the DSP_PAL_CLR register.
 
-    DSP_GLYPH_IDX = 0x1C0C, //  (Byte) Text Glyph Index
-    // DSP_GLYPH_IDX: 0-256
-    // Note: Set this register to index a specific text glyph. Set this value
-    //     prior to updating glyph pixel data.
+DSP_GLYPH_IDX = 0x1C0C, //  (Byte) Text Glyph Index
+        // DSP_GLYPH_IDX: 0-256
+        // Note: Set this register to index a specific text glyph. Set this value
+        //     prior to updating glyph pixel data.
 
-    DSP_GLYPH_DATA = 0x1C0D, //  (8-Bytes) Text Glyph Pixel Data Array
-    // DSP_GLYPH_DATA: 8 rows of binary encoded glyph pixel data
-    // Note: Each 8x8 text glyph is composed of 8 bytes. The first byte in this
-    //     array represents the top line of 8 pixels. Each array entry represents
-    //     a row of 8 pixels.
+DSP_GLYPH_DATA = 0x1C0D, //  (8-Bytes) Text Glyph Pixel Data Array
+        // DSP_GLYPH_DATA: 8 rows of binary encoded glyph pixel data
+        // Note: Each 8x8 text glyph is composed of 8 bytes. The first byte in this
+        //     array represents the top line of 8 pixels. Each array entry represents
+        //     a row of 8 pixels.
 
-    // Debug Hardware Registers:
-    DBG_BEGIN = 0x1C15, //  start of mouse cursor hardware registers
-    DBG_TEMP = 0x1C15, //  (Byte) Simple Debug test register
-    DBG_END = 0x1C16, // End Debug Registers
+        // Debug Hardware Registers:
+DBG_BEGIN    = 0x1C15, //  start of mouse cursor hardware registers
+DBG_TEMP     = 0x1C15, //  (Byte) Simple Debug test register
+DBG_END      = 0x1C16, // End Debug Registers
 
-    // Mouse Cursor Hardware Registers:
-    CSR_BEGIN = 0x1C16, //  start of mouse cursor hardware registers
-    CSR_XPOS = 0x1C16, //  (Word) horizontal mouse cursor coordinate
-    CSR_YPOS = 0x1C18, //  (Word) vertical mouse cursor coordinate
-    CSR_XOFS = 0x1C1A, //  (Byte) horizontal mouse cursor offset
-    CSR_YOFS = 0x1C1B, //  (Byte) vertical mouse cursor offset
-    CSR_SCROLL = 0x1C1C, //  (Signed) MouseWheel Scroll: -1, 0, 1
-    CSR_FLAGS = 0x1C1D, //  (Byte) mouse button flags:
-    //  CSR_FLAGS:
-    //       bits 0-5: button states
-    //       bits 6-7: number of clicks
-    CSR_BMP_INDX = 0x1C1E, //  (Byte) mouse cursor bitmap pixel offset
-    CSR_BMP_DATA = 0x1C1F, //  (Byte) mouse cursor bitmap pixel index color
-    CSR_PAL_INDX = 0x1C21, //  (Byte) mouse cursor color palette index (0-15)
-    CSR_PAL_DATA = 0x1C22, //  (Word) mouse cursor color palette data RGBA4444
-    CSR_END = 0x1C24, // End Mouse Registers
-    GFX_END = 0x1C24, // End of GFX Device Registers
+        // Mouse Cursor Hardware Registers:
+CSR_BEGIN    = 0x1C16, //  start of mouse cursor hardware registers
+CSR_XPOS     = 0x1C16, //  (Word) horizontal mouse cursor coordinate
+CSR_YPOS     = 0x1C18, //  (Word) vertical mouse cursor coordinate
+CSR_XOFS     = 0x1C1A, //  (Byte) horizontal mouse cursor offset
+CSR_YOFS     = 0x1C1B, //  (Byte) vertical mouse cursor offset
+CSR_SCROLL   = 0x1C1C, //  (Signed) MouseWheel Scroll: -1, 0, 1
+CSR_FLAGS    = 0x1C1D, //  (Byte) mouse button flags:
+        //  CSR_FLAGS:
+        //       bits 0-5: button states
+        //       bits 6-7: number of clicks
+CSR_BMP_INDX = 0x1C1E, //  (Byte) mouse cursor bitmap pixel offset
+CSR_BMP_DATA = 0x1C1F, //  (Byte) mouse cursor bitmap pixel index color
+CSR_PAL_INDX = 0x1C21, //  (Byte) mouse cursor color palette index (0-15)
+CSR_PAL_DATA = 0x1C22, //  (Word) mouse cursor color palette data RGBA4444
+CSR_END      = 0x1C24, // End Mouse Registers
+GFX_END      = 0x1C24, // End of GFX Device Registers
 
-    // 5084 ($13DC) bytes remaining for additional registers.
-    RESERVED = 0x1C24,
+KEY_BEGIN    = 0x1C24, // Start of the Keyboard Register space
+CHAR_Q_LEN   = 0x1C24, //   (Byte) # of characters waiting in queue        (Read Only)
+CHAR_SCAN    = 0x1C25, //   (Byte) read next character in queue (not popped when read)
+CHAR_POP     = 0x1C26, //   (Byte) read next character in queue (not popped when read)
+XKEY_BUFFER  = 0x1C27, //   (128 bits) 16 bytes for XK_KEY data buffer     (Read Only)
+EDT_BFR_CSR  = 0x1C37, //   (Byte) cursor position within edit buffer     (Read/Write)
+EDT_BUFFER   = 0x1C38, //   (256 Bytes) line editing character buffer     (Read/Write)
+KEY_END      = 0x1D38, // End of the Keyboard Register space
 
-    // User RAM (32K)
-    USER_RAM = 0x3000,
+    // 4808 ($12C8) bytes remaining for additional registers.
+RESERVED     = 0x1D38,
 
-    // Paged RAM (8K)
-    PAGED_RAM = 0xB000,
+        // User RAM (32K)
+USER_RAM     = 0x3000,
 
-    // PAGED ROM (8K bytes)
-    PAGED_ROM = 0xD000,
+        // Paged RAM (8K)
+PAGED_RAM    = 0xB000,
 
-    // KERNEL ROM (4K bytes)
-    KERNEL_ROM = 0xF000,
+        // PAGED ROM (8K bytes)
+PAGED_ROM    = 0xD000,
 
-    // Hardware Interrupt Vectors:
-    HARD_RSRVD = 0xFFF0, // Motorola RESERVED Hardware Interrupt Vector
-    HARD_SWI3 = 0xFFF2, // SWI3 Hardware Interrupt Vector
-    HARD_SWI2 = 0xFFF4, // SWI2 Hardware Interrupt Vector
-    HARD_FIRQ = 0xFFF6, // FIRQ Hardware Interrupt Vector
-    HARD_IRQ = 0xFFF8, // IRQ Hardware Interrupt Vector
-    HARD_SWI = 0xFFFA, // SWI / SYS Hardware Interrupt Vector
-    HARD_NMI = 0xFFFC, // NMI Hardware Interrupt Vector
-    HARD_RESET = 0xFFFE, // RESET Hardware Interrupt Vector
+        // KERNEL ROM (4K bytes)
+KERNEL_ROM   = 0xF000,
+
+        // Hardware Interrupt Vectors:
+HARD_RSRVD   = 0xFFF0, // Motorola RESERVED Hardware Interrupt Vector
+HARD_SWI3    = 0xFFF2, // SWI3 Hardware Interrupt Vector
+HARD_SWI2    = 0xFFF4, // SWI2 Hardware Interrupt Vector
+HARD_FIRQ    = 0xFFF6, // FIRQ Hardware Interrupt Vector
+HARD_IRQ     = 0xFFF8, // IRQ Hardware Interrupt Vector
+HARD_SWI     = 0xFFFA, // SWI / SYS Hardware Interrupt Vector
+HARD_NMI     = 0xFFFC, // NMI Hardware Interrupt Vector
+HARD_RESET   = 0xFFFE, // RESET Hardware Interrupt Vector
 };  // END: enum MEMMAP
 
 
 #endif // __MEMORY_MAP_H__
+

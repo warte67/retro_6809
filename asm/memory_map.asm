@@ -138,8 +138,17 @@ CSR_PAL_DATA    equ   $1C22    ;  (Word) mouse cursor color palette data RGBA444
 CSR_END         equ   $1C24    ; End Mouse Registers
 GFX_END         equ   $1C24    ; End of GFX Device Registers
 
-    ; 5084 ($13DC) bytes remaining for additional registers.
-RESERVED        equ   $1C24
+KEY_BEGIN       equ   $1C24    ; Start of the Keyboard Register space
+CHAR_Q_LEN      equ   $1C24    ;   (Byte) # of characters waiting in queue        (Read Only)
+CHAR_SCAN       equ   $1C25    ;   (Byte) read next character in queue (not popped when read)
+CHAR_POP        equ   $1C26    ;   (Byte) read next character in queue (not popped when read)
+XKEY_BUFFER     equ   $1C27    ;   (128 bits) 16 bytes for XK_KEY data buffer     (Read Only)
+EDT_BFR_CSR     equ   $1C37    ;   (Byte) cursor position within edit buffer     (Read/Write)
+EDT_BUFFER      equ   $1C38    ;   (256 Bytes) line editing character buffer     (Read/Write)
+KEY_END         equ   $1D38    ; End of the Keyboard Register space
+
+    ; 4808 ($12C8) bytes remaining for additional registers.
+RESERVED        equ   $1D38
 
           ; User RAM (32K)
 USER_RAM        equ   $3000
