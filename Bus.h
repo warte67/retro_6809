@@ -45,6 +45,11 @@ class Bus
 		// Bus CPU clock registers (Uses the Gfx Device register block)
 		inline static Byte _sys_state = 0x01;			// SYS_STATE	(R/W Byte) register
 		inline static Word _sys_cpu_speed = 0;			// SYS_SPEED	(Read Byte) register
+		inline static Byte _clock_div = 0;				// SYS_CLOCK_DIV (Byte) 60 hz Clock Divider  (Read Only) 
+		inline static Word _clock_timer = 0;			// SYS_TIMER	(R/W Word) increments at 0.46875 hz
+
+		Byte clock_div(Byte& cl_div, int bit);
+		void clockDivider();
 
 		// CPU Stuff
 		inline static C6809* m_cpu = nullptr;

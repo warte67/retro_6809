@@ -94,15 +94,11 @@ class Gfx : public Device
 
 		// hardware registers
 	protected:
-        //Byte _sys_state = 0x0F;            // system state
 
-		Word _std_vid_max = 0x1C00;		// [STD_VID_MAX]
+        Word _std_vid_max = 0x1C00;		// [STD_VID_MAX]
 		Byte _dsp_gres	= 0b11000101;	// defaults
 		Byte _dsp_ext 	= 0b11001001;	// defaults
         Byte _dsp_err = 0;          
-
-        //// Hack: have to grant a pointer to the Gfx write to Bus variable
-        //Bus* m_bus = nullptr;
 
         // graphics devices based on the IGfxDevice
         GfxDebug* m_debug = nullptr;

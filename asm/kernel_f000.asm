@@ -29,12 +29,19 @@ VECT_FIRQ 	fdb	FIRQ_start	; FIRQ Software Interrupt Vector
 VECT_IRQ  	fdb	IRQ_start	; IRQ Software Interrupt Vector
 VECT_SWI  	fdb	SWI_start	; SWI / SYS Software Interrupt Vector
 VECT_NMI  	fdb	NMI_start	; NMI Software Interrupt Vector	
-VECT_RESET	fdb	kernel_start	; RESET Software Interrupt Vecto	r	
+VECT_RESET	fdb	kernel_start	; RESET Software Interrupt Vecto	
+
+; kernel call vectors
+;CHROUT_VECT	fdb	char_out_main	; CHROUT Software Vector
 	
 
 ; system zero-page variables
-cursor_attrib	fcb	$e4;
-cursor_addr	fdb	$0000;
+CSR_ATTR	fcb	$B4;		; current cursor attribute
+CSR_ADDR	fdb	$0000;		; current cursor address in screen memory
+CSR_COL		fcb	$00;		; current cursor column
+CSR_ROW		fcb	$00;		; current cursor row
+TXT_ATTR	fcb	$B4		; current text color attribute
+EDLIN_ANCH	fdb	$0000;		; line edit text anchor address
 var1		fcb	0;
 var2		fcb	0;
 
@@ -91,7 +98,6 @@ kernel_start
 ;      S:$D  = CPU Clock 3.3 mhz.
 ;      S:$E  = CPU Clock 5.0 mhz.
 ;      S:$F  = CPU Clock ~10.0 mhz. (unmetered)
-
 		lda	#$0A
 		sta	SYS_STATE
 
@@ -112,7 +118,6 @@ kernel_start
 ;	    VV:01 = 3x Vertical Overscan Multiplier
 ;	    VV:10 = 2x Vertical Overscan Multiplier
 ;	    VV:11 = 1x Vertical Overscan Multiplier
-
 		lda	#$CA
 		sta	DSP_GRES
 
@@ -133,40 +138,58 @@ kernel_start
 ;      F:1   = VSYNC ON
 ;      B:0   = Fullscreen Enabled( emulator only )
 ;      B:1   = Windowed Enabled ( emulator only )
-
 		lda	#$C9
 		sta	DSP_EXT
 
+	; begin the display
+		jsr	cls
+		ldx	#prompt0		
+		jsr	line_out	
+		ldx	#prompt1
+		jsr	line_out	
+		ldx	#ready_prompt		
+		jsr	line_out	
+1
+		jsr	line_edit
+		bra	1b
 
-	; clear out the text buffer
-cls		
-		ldx	#SCREEN_BUFFER
-		ldd	#$20B4
-1		std	,x++
-		cmpx	#STD_VID_MAX
-		blt	1b
-
-2		bsr	line_edit
-		
-		bra	cls
+;	; infinite loop
+;inf_loop	bra	inf_loop
 
 
 ; output the line edit buffer
 line_edit
-		clr	EDT_BUFFER
-
+		lda	#$ff		; 'true'
+		sta	EDT_ENABLE	; enable the hardware line editor sub-system
+		clr	EDT_BUFFER	; null the start of the edit buffer
+		ldd	CSR_ADDR	; fetch the current cursor address
+		std	EDLIN_ANCH	; store it as the anchor
 6	; check for ENTER press
 		lda	CHAR_SCAN	; scan for a character waiting in the queue
 		cmpa	#$0d		; is it the ENTER key?
 		bne	0f		; nope, continue to render the text line editor
 		lda	CHAR_POP	; pop the ENTER from the queue before returning
 		ldd	#$20b4		; load a colored space
-		std	[cursor_addr]	; overrite the last colored cursor
+		std	[CSR_ADDR]	; overrite the last colored cursor
+		; home the cursor
+		clr	CSR_COL		; CSR_COL = 0
+		inc	CSR_ROW		; CSR_ROW = 0
+		lda	CSR_ROW		; A - CSR_ROW
+		cmpa	DSP_TXT_ROWS	; last line?
+		blt	7f		; nope, recalc the new cursor address
+		dec	CSR_ROW		; decrement CSR_ROW
+		jsr	std_text_scroll	; scroll the text buffer
+7	; recalculate the cursor address based on CSR_ROW and CSR_COL
+		jsr 	cursor_address	; find CSR_ADDR based on CSR_ROW and CSR_COL
+		stx	CSR_ADDR	; store the new CSR_ADDR
+		clr	EDT_ENABLE	; disable the hardware line editor sub-system
 		rts			; return from the line editor subroutine
-0	; begine the line edit routine
-		ldu	#SCREEN_BUFFER	; reserve the start of the standard buffer
+0	; begin the line edit routine
+		; ldu	#SCREEN_BUFFER	; reserve the start of the display buffer
+		; ldu	EDLIN_ANCH	; reserve the start of the display buffer
 		ldy	#EDT_BUFFER	; start of the character line edit buffer
-		ldx	#SCREEN_BUFFER	; point to the start of the display buffer
+		; ldx	#SCREEN_BUFFER	; point to the start of the display buffer
+		ldx	EDLIN_ANCH	; point to the start of the display buffer
 		lda	EDT_BFR_CSR	; fetch the cursor position
 		pshs	a		; save it on the stack as a local variable	
 		bne	1f		; cursor position is not zero, begin text
@@ -203,25 +226,255 @@ line_edit
 		bra	5b		; continue until the line is finished
 
 flash_the_cursor
-		pshs	a,b,u		; save these on the stack
-		lda	cursor_attrib	; load the next cursor color
+		pshs	a,b,x,u		; save these on the stack
+		ldu	EDLIN_ANCH	; point to the edline start of line anchor
+		lda	SYS_TIMER+1	; load the LSB of the system timer
+		anda	#$07		; only concerned with these bits
+		bne	1f		; if non-zero, skip color change
+		lda	CSR_ATTR	; load the next cursor color
 		inca			; increment it
 		anda	#$0f		; mask off the foreground color
 		ora	#$f0		; foreground 15 = opaque black
-		sta	cursor_attrib	; store the new attribute
+		sta	CSR_ATTR	; store the new attribute
 		ldb	EDT_BFR_CSR	; load the cursor position
 		lslb			; skip the attribue
 		incb			; increment the attribute color
 		sta	b, u		; update the characters color
 		decb			; now index the character
 		leau	b,u		; load that characters address
-		stu	cursor_addr	; store it on the zero-page
-		puls	a,b,u		; pop these off the stack
+		stu	CSR_ADDR	; store it on the zero-page
+1	; clean up and return	
+		puls	a,b,x,u		; pop these off the stack
 		rts			; return when done
 
 
+line_out	; Display a null terminated string pointed to by X
+		; begining at CSR_ROW and CSR_COL.
+		pshs	a,x		; store the working registers
+1	; line out main loop
+		lda	,x+		; load the next character to display
+		beq	2f		; skip if at null-terminator
+		bmi	2f		; skip if high bit is set
+		jsr	char_out	; output this character
+		bra	1b		
+2	; clean up and return
+		puls	a,x		; restore the working registers
+		rts			; return from subroutine
 
 
+
+char_out	; output a formatted text character based on A
+		; jsr	[CHROUT_VECT]
+char_out_main	; the main CHROUT routine
+		pshs	d,x
+
+		cmpa	#$20		; is a printable character $20 - $ff
+		bge	1f		; yup, go print it
+		cmpa	#$0a		; line feed ?
+		bne	2f		; no, skip to next
+		jsr 	csr_new_line	; perform a new line
+2	; skip to end
+		bra	0f		; just skip everything
+1	; output a printable character $20 - $ff
+		jsr	cursor_address	; X = CSR_ADDR		
+		ldb	TXT_ATTR	; fetch the default color attribute
+		std	,x		; store it on screen
+		inc	CSR_COL		; increase the cursors column
+		; handle line wrap and scrolling
+		lda	CSR_COL		; load cursor column
+		cmpa	DSP_TXT_COLS	; compare with max displayed columns
+		bge	1f		; if greater or equal
+		bra	0f		; skip and return
+1	; if (CSR_COL >= DSP_TXT_COLS)
+		clr	CSR_COL		; clear CSR_COL
+		inc	CSR_ROW		; increment CSR_ROW
+		lda	CSR_ROW		; load CSR_ROWS
+		cmpa	DSP_TXT_ROWS	; if (CSR_ROW < DSP_TXT_ROWS)
+		blt	0f		; 	clean up and return
+		jsr 	std_text_scroll	; scroll the text screen
+		dec	CSR_ROW		; CSR_ROW--
+0	; clean up and return
+		puls	d,x		; restore the working registers
+		rts			; return
+
+	
+cls	; clear out the text buffer	
+		pshs	d, x		; store the working registers
+		clr	CSR_COL		; cursor column = 0
+		clr	CSR_ROW		; cursor row = 0
+		jsr 	cursor_address	; X = cursor address based on CSR_COL and CSR_ROW
+		ldx	#SCREEN_BUFFER	; point to the start of the text buffer
+		lda	#$20		; set next character to space
+		ldb	TXT_ATTR	; load the characters color
+1	; cls main loop	
+		std	,x++		; store the space with its color attribute
+		cmpx	#STD_VID_MAX	; are we at the end of the text buffer?
+		blt	1b		; 	loop if not
+		puls	d, x		; restore the working registers
+		rts			; return
+
+
+csr_new_line	; perform a line-feed and a carriage return with scrolling
+		pshs	a, x		; store the working registers
+		clr	CSR_COL		; set cursor column to zero
+		inc	CSR_ROW		; increment the cursor row
+		lda	CSR_ROW		; A = cursor row
+		cmpa	DSP_TXT_ROWS	; skip if the current cursor row
+		blt	1f		;   is less than the max rows
+		dec	CSR_ROW		; decrease the cursors row
+		jsr	std_text_scroll	; scroll the text up one line
+1	; recalculate the cursor address based on CSR_ROW and CSR_COL
+		jsr 	cursor_address	; X = CSR_ADDR based on CSR_ROW and CSR_COL
+		stx	CSR_ADDR	; update CSR_ADDR 
+		puls	a,x		; restore the working registers
+		rts			; return from the line editor subroutine
+
+
+
+std_text_scroll	; scroll the standard text screen up one line
+		pshs	d, x, y		; store the working registers
+		ldy	#SCREEN_BUFFER	; Y = start of the standard video buffer
+		ldb	DSP_TXT_COLS	; B = number of displayed text columns
+		lslb			; B = B * 2 -- account for the attribute byte
+		ldx	#SCREEN_BUFFER	; X = start of the standard video buffer
+		leax	b,x		; X = one line down
+1	; scroll up one line
+		ldd	,x++		; load character at X 
+		std	,y++		; store it at Y
+		cmpx	STD_VID_MAX	; at the end of the display?
+		blt	1b		; loop if not
+	; fill the bottom line with spaces
+		ldx	#SCREEN_BUFFER	; X = start of the standard video buffer
+		ldb	DSP_TXT_ROWS	; B = number of displayed rows
+		decb			; B = B - 1  last line
+		lslb			; B = B * 1 -- account for the attribute byte
+		lda	DSP_TXT_COLS	; A = number of displayed text columns
+		mul			; D = A * B
+		leax	d,x		; X = the start of the bottom row
+		lda	#$20		; load up default space character
+		ldb	TXT_ATTR	; and the default color
+2	; store the character with its color attribute
+		std	,x++		; store the space at X
+		cmpx	STD_VID_MAX	; at the end of the text buffer
+		blt	2b		; loop if not
+	; return
+		puls	d,x,y		; restore the working registers
+		rts
+
+
+cursor_address	; Update CSR_ADDR and return the cursor address in X 
+		; based on CSR_COL and CSR_ROW.
+		pshs	d		; store used registers
+		ldx	#SCREEN_BUFFER	; start of the standard video buffer
+		lda	CSR_ROW		; A = current cursor row
+		ldb	DSP_TXT_COLS	; B = number of columns displayed
+		lslb			; B = B * 2 -- account for the attribute byte
+		mul			; D = A * B
+		leax	d,x		; X = D + X		
+		ldb	CSR_COL		; B = current cursor column
+		lslb			; B = B * 2 -- account for the attribute byte
+		leax	b,x		; X = B + X
+		stx	CSR_ADDR	; store the cursor address
+		puls	d		; restore used registers
+		rts			; return
+
+
+
+
+
+;	; output the line edit buffer
+;	line_edit
+;			clr	EDT_BUFFER
+;			ldd	CSR_ADDR
+;			std	EDLIN_ANCH
+;	
+;	6	; check for ENTER press
+;			lda	CHAR_SCAN	; scan for a character waiting in the queue
+;			cmpa	#$0d		; is it the ENTER key?
+;			bne	0f		; nope, continue to render the text line editor
+;			lda	CHAR_POP	; pop the ENTER from the queue before returning
+;			ldd	#$20b4		; load a colored space
+;			std	[CSR_ADDR]	; overrite the last colored cursor
+;			; home the cursor
+;			clr	CSR_COL
+;			inc	CSR_ROW
+;			lda	CSR_ROW
+;			cmpa	DSP_TXT_ROWS
+;			blt	7f
+;			dec	CSR_ROW
+;			jsr	std_text_scroll
+;	7	; recalculate the cursor address based on CSR_ROW and CSR_COL
+;			jsr 	cursor_address
+;			stx	CSR_ADDR		
+;			rts			; return from the line editor subroutine
+;	0	; begine the line edit routine
+;			; ldu	#SCREEN_BUFFER	; reserve the start of the display buffer
+;			; ldu	EDLIN_ANCH	; reserve the start of the display buffer
+;			ldy	#EDT_BUFFER	; start of the character line edit buffer
+;			; ldx	#SCREEN_BUFFER	; point to the start of the display buffer
+;			ldx	EDLIN_ANCH	; point to the start of the display buffer
+;			lda	EDT_BFR_CSR	; fetch the cursor position
+;			pshs	a		; save it on the stack as a local variable	
+;			bne	1f		; cursor position is not zero, begin text
+;			lda	,y		; load the first character in the buffer
+;			bne	4f		; if its not zero, display the cursor
+;	1	; start of the line
+;			lda	EDT_BFR_CSR	; load the cursor position
+;			beq	3f		; if theres no character, display the cursor
+;	2	; display up to the cursor position
+;			lda	,y+		; fetch a character from the edit buffer
+;			beq	3f		; null character (end of line)
+;			ldb	#$B4		; color attribute
+;			std	,x++		; display the character with its color	
+;			dec	0,s		; decrease the local cursor position
+;			beq	4f		; brach if the cursor is over a character
+;			bra	2b		; continue displaying characters
+;	3	; cursor at end of the line
+;			puls	a		; repair the stack
+;			lda	#$20		; load a space
+;			sta	,x++		; display the space
+;			bsr	flash_the_cursor	
+;			bra	6b		; loop and display changes in the edit buffer
+;	4	; cursor over a character
+;			puls	a		; clean up the stack
+;			lda	,y+		; load the next character from the buffer
+;			sta	,x++		; ignore the attribute
+;		; flash the cursor
+;			bsr	flash_the_cursor
+;	5	; finish the line
+;			lda	,y+		; load the next character from the buffer
+;			beq	6b		; loop back to the top if done
+;			ldb	#$b4		; load the basic screen attribute
+;			std	,x++		; display the next character with its color
+;			bra	5b		; continue until the line is finished
+;	
+;	flash_the_cursor
+;			pshs	a,b,x,u		; save these on the stack
+;			ldu	EDLIN_ANCH	; point to the edline start of line anchor
+;			lda	SYS_TIMER+1	; load the LSB of the system timer
+;			anda	#$07		; only concerned with these bits
+;			bne	1f		; if non-zero, skip color change
+;			lda	CSR_ATTR	; load the next cursor color
+;			inca			; increment it
+;			anda	#$0f		; mask off the foreground color
+;			ora	#$f0		; foreground 15 = opaque black
+;			sta	CSR_ATTR	; store the new attribute
+;			ldb	EDT_BFR_CSR	; load the cursor position
+;			lslb			; skip the attribue
+;			incb			; increment the attribute color
+;			sta	b, u		; update the characters color
+;			decb			; now index the character
+;			leau	b,u		; load that characters address
+;			stu	CSR_ADDR	; store it on the zero-page
+;	1	; clean up and return	
+;			puls	a,b,x,u		; pop these off the stack
+;			rts			; return when done
+
+
+			org	$fe00
+prompt0			fcn	"Retro 6809 v0.1\n"
+prompt1			fcn	"Copyright (C) 2023 By Jay Faries\n\n"
+ready_prompt		fcn	"Ready\n"
 
 
 

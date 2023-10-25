@@ -64,15 +64,15 @@ Bus::Bus()
     dev = new RAM("ZERO_PAGE");
     addr += Attach(dev, 256 - 16);	
 
+    // user stack 256 bytes
+    dev = new RAM("USER_STACK");
+    addr += Attach(dev, 256);
+    dev->DisplayEnum("USTACK_TOP", 0x0200, "Top of the user stack space");
+
 	// system stack 512 bytes
     dev = new RAM("SYSTEM_STACK");
     addr += Attach(dev, 512);  
-    dev->DisplayEnum("SSTACK_TOP",0x0300, "Top of the system stack space");  	
-
-	// user stack 256 bytes
-    dev = new RAM("USER_STACK");
-    addr += Attach(dev, 256);  
-    dev->DisplayEnum("USTACK_TOP",0x0400, "Top of the user stack space");  	
+    dev->DisplayEnum("SSTACK_TOP",0x0400, "Top of the system stack space");  	
 
 	// display buffer 6k bytes
     dev = new RAM("SCREEN_BUFFER");
@@ -302,6 +302,9 @@ void Bus::_onActivate()
 void Bus::_onUpdate() 
 {
 	// std::cout << "void Bus::_onUpdate()\n";
+
+    // update the clock divider
+    clockDivider();
 
 	// Handle Timing
     static std::chrono::time_point<std::chrono::system_clock> tp1 = std::chrono::system_clock::now();
@@ -592,6 +595,71 @@ void Bus::load_hex(const char* filename)
 	
 	return;
 }
+
+Byte Bus::clock_div(Byte& cl_div, int bit)
+{
+    if (bit > 7)    bit = 7;
+    double count[] =
+    { // pulse width:   // frequency:
+        8.33333,        // 60 hz
+        16.66667,       // 30 hz
+        33.33333,       // 15 hz
+        66.66667,       // 7.5 hz
+        133.33333,      // 3.75 hz
+        266.66667,      // 1.875 hz
+        533.33333,      // 0.9375 hz
+        1066.66667,     // 0.46875
+    };
+
+    using clock = std::chrono::system_clock;
+    using sec = std::chrono::duration<double, std::milli>;
+    static auto before0 = clock::now();
+    static auto before1 = clock::now();
+    static auto before2 = clock::now();
+    static auto before3 = clock::now();
+    static auto before4 = clock::now();
+    static auto before5 = clock::now();
+    static auto before6 = clock::now();
+    static auto before7 = clock::now();
+    static auto before = clock::now();
+    switch (bit)
+    {
+    case 0: before = before0; break;
+    case 1: before = before1; break;
+    case 2: before = before2; break;
+    case 3: before = before3; break;
+    case 4: before = before4; break;
+    case 5: before = before5; break;
+    case 6: before = before6; break;
+    case 7: before = before7; break;
+    }
+    const sec duration = clock::now() - before;
+    if (duration.count() > count[bit])
+    {
+        before = clock::now();
+        switch (bit)
+        {
+        case 0: before0 = clock::now();   _clock_timer++;  break;
+        case 1: before1 = clock::now();  break;
+        case 2: before2 = clock::now();  break;
+        case 3: before3 = clock::now();  break;
+        case 4: before4 = clock::now();  break;
+        case 5: before5 = clock::now();  break;
+        case 6: before6 = clock::now();  break;
+        case 7: before7 = clock::now();  break;
+        }
+        cl_div = (cl_div & (0x01 << bit)) ? cl_div & ~(0x01 << bit) : cl_div | (0x01 << bit);
+    }
+    return cl_div;
+}
+
+void Bus::clockDivider()
+{
+    // static Byte cl_div = 0;
+    for (int bit = 0; bit < 8; bit++)
+        clock_div(_clock_div, bit);
+}
+
 
 
 

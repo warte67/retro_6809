@@ -35,6 +35,9 @@ Byte Gfx::read(Word offset, bool debug )		// is debug completely unused in the c
 		}
 		case SYS_SPEED + 0:		data = Bus::_sys_cpu_speed >> 8; break;
 		case SYS_SPEED + 1:		data = Bus::_sys_cpu_speed & 0xFF; break;
+		case SYS_CLOCK_DIV:		data = Bus::_clock_div; break;
+		case SYS_TIMER + 0:		data = Bus::_clock_timer >> 8; break;
+		case SYS_TIMER + 1:		data = Bus::_clock_timer & 0x0f; break;
 
 		case DSP_GRES: 			data = _dsp_gres; break;
 		case DSP_EXT:			data = _dsp_ext; break;
@@ -78,6 +81,14 @@ void Gfx::write(Word offset, Byte data, bool debug)
 	{
 		case SYS_STATE: { 
 			Bus::_sys_state = data;
+			break;
+		}
+		case SYS_TIMER + 0: {
+			Bus::_clock_timer = (data << 8) | (Bus::_clock_timer & 0x0f);
+			break;
+		}
+		case SYS_TIMER + 1: {
+			Bus::_clock_timer = (data << 0) | (Bus::_clock_timer & 0xf0);
 			break;
 		}
 		case DSP_GRES: 	{
@@ -159,6 +170,23 @@ Word Gfx::OnAttach(Word nextAddr)
 	DisplayEnum("", 0, "");
 	DisplayEnum("SYS_SPEED", nextAddr, " (Word) Approx. Average CPU Clock Speed");
 	nextAddr+=2;
+
+	DisplayEnum("", 0, "");
+	DisplayEnum("SYS_CLOCK_DIV", nextAddr, " (Byte) 60 hz Clock Divider Register (Read Only) ");
+	DisplayEnum("", 0, "SYS_CLOCK_DIV: ABCD.SSSS");
+	DisplayEnum("", 0, "     bit 7: 0.46875 hz");
+	DisplayEnum("", 0, "     bit 6: 0.9375 hz");
+	DisplayEnum("", 0, "     bit 5: 1.875 hz");
+	DisplayEnum("", 0, "     bit 4: 3.75 hz");
+	DisplayEnum("", 0, "     bit 3: 7.5 hz");
+	DisplayEnum("", 0, "     bit 2: 15.0 hz");
+	DisplayEnum("", 0, "     bit 1: 30.0 hz");
+	DisplayEnum("", 0, "     bit 0: 60.0 hz");
+	nextAddr++;
+
+	DisplayEnum("", 0, "");
+	DisplayEnum("SYS_TIMER", nextAddr, " (Word) Increments at 0.46875 hz");
+	nextAddr += 2;
 
     DisplayEnum("", 0, "");
     DisplayEnum("DSP_GRES", nextAddr, " (Byte) Screen Resolution Register");

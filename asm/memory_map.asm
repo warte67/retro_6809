@@ -14,10 +14,10 @@ SOFT_NMI        equ   $000C    ; NMI Software Interrupt Vector
 SOFT_RESET      equ   $000E    ; RESET Software Interrupt Vector
 
 ZERO_PAGE       equ   $0010
-SYSTEM_STACK    equ   $0100
-SSTACK_TOP      equ   $0300    ; Top of the system stack space
-USER_STACK      equ   $0300
-USTACK_TOP      equ   $0400    ; Top of the user stack space
+USER_STACK      equ   $0100
+USTACK_TOP      equ   $0200    ; Top of the user stack space
+SYSTEM_STACK    equ   $0200
+SSTACK_TOP      equ   $0400    ; Top of the system stack space
 
           ; Display Buffer
 SCREEN_BUFFER    equ   $0400
@@ -52,7 +52,20 @@ SYS_STATE       equ   $1C02    ;  (Byte) System State Register
 
 SYS_SPEED       equ   $1C03    ;  (Word) Approx. Average CPU Clock Speed
 
-DSP_GRES        equ   $1C05    ;  (Byte) Screen Resolution Register
+SYS_CLOCK_DIV    equ   $1C05    ;  (Byte) 60 hz Clock Divider Register (Read Only)
+          ; SYS_CLOCK_DIV: ABCD.SSSS
+          ;      bit 7: 0.46875 hz
+          ;      bit 6: 0.9375 hz
+          ;      bit 5: 1.875 hz
+          ;      bit 4: 3.75 hz
+          ;      bit 3: 7.5 hz
+          ;      bit 2: 15.0 hz
+          ;      bit 1: 30.0 hz
+          ;      bit 0: 60.0 hz
+
+SYS_TIMER       equ   $1C06    ;  (Word) Increments at 0.46875 hz
+
+DSP_GRES        equ   $1C08    ;  (Byte) Screen Resolution Register
           ; DSP_GRES: BBRR.HHVV
           ;     BB:00 = Standard Graphics 1-bpp (2-color mode)
           ;     BB:01 = Standard Graphics 2-bpp (4-color mode)
@@ -71,7 +84,7 @@ DSP_GRES        equ   $1C05    ;  (Byte) Screen Resolution Register
           ;     VV:10 = 2x Vertical Overscan Multiplier
           ;     VV:11 = 1x Vertical Overscan Multiplier
 
-DSP_EXT         equ   $1C06    ;  (Byte) Extended Graphics Register
+DSP_EXT         equ   $1C09    ;  (Byte) Extended Graphics Register
           ; DSP_EXT: ABCD.EFGG
           ;      AA:00 = Extended Graphics 1bpp (2-color mode)
           ;      AA:01 = Extended Graphics 2bpp (4-color mode)
@@ -90,65 +103,66 @@ DSP_EXT         equ   $1C06    ;  (Byte) Extended Graphics Register
           ;      B:0   = Fullscreen Enabled( emulator only )
           ;      B:1   = Windowed Enabled ( emulator only )
 
-DSP_TXT_COLS    equ   $1C07    ;  (Byte) READ-ONLY Text Screen Columns
-DSP_TXT_ROWS    equ   $1C08    ;  (Byte) READ-ONLY Text Screens Rows
+DSP_TXT_COLS    equ   $1C0A    ;  (Byte) READ-ONLY Text Screen Columns
+DSP_TXT_ROWS    equ   $1C0B    ;  (Byte) READ-ONLY Text Screens Rows
 
-DSP_PAL_IDX     equ   $1C09    ;  (Byte) Color Palette Index
+DSP_PAL_IDX     equ   $1C0C    ;  (Byte) Color Palette Index
           ; DSP_PAL_IDX: 0-255
           ; Note: Use this register to set the index into theColor Palette.
           ;   Set this value prior referencing color data (DSP_PAL_CLR).
 
-DSP_PAL_CLR     equ   $1C0A    ;  (Word) Indexed Color Palette Data
+DSP_PAL_CLR     equ   $1C0D    ;  (Word) Indexed Color Palette Data
           ; DSP_PAL_CLR: Color Data A4R4G4B4 format
           ; Note: This is the color data for an individual palette entry.
           ;     Write to DSP_PAL_IDX with the index within the color palette
           ;     prior to reading or writing the color data in the DSP_PAL_CLR register.
 
-DSP_GLYPH_IDX    equ   $1C0C    ;  (Byte) Text Glyph Index
+DSP_GLYPH_IDX    equ   $1C0F    ;  (Byte) Text Glyph Index
           ; DSP_GLYPH_IDX: 0-256
           ; Note: Set this register to index a specific text glyph. Set this value
           ;     prior to updating glyph pixel data.
 
-DSP_GLYPH_DATA    equ   $1C0D    ;  (8-Bytes) Text Glyph Pixel Data Array
+DSP_GLYPH_DATA    equ   $1C10    ;  (8-Bytes) Text Glyph Pixel Data Array
           ; DSP_GLYPH_DATA: 8 rows of binary encoded glyph pixel data
           ; Note: Each 8x8 text glyph is composed of 8 bytes. The first byte in this
           ;     array represents the top line of 8 pixels. Each array entry represents
           ;     a row of 8 pixels.
 
           ; Debug Hardware Registers:
-DBG_BEGIN       equ   $1C15    ;  start of mouse cursor hardware registers
-DBG_TEMP        equ   $1C15    ;  (Byte) Simple Debug test register
-DBG_END         equ   $1C16    ; End Debug Registers
+DBG_BEGIN       equ   $1C18    ;  start of mouse cursor hardware registers
+DBG_TEMP        equ   $1C18    ;  (Byte) Simple Debug test register
+DBG_END         equ   $1C19    ; End Debug Registers
 
           ; Mouse Cursor Hardware Registers:
-CSR_BEGIN       equ   $1C16    ;  start of mouse cursor hardware registers
-CSR_XPOS        equ   $1C16    ;  (Word) horizontal mouse cursor coordinate
-CSR_YPOS        equ   $1C18    ;  (Word) vertical mouse cursor coordinate
-CSR_XOFS        equ   $1C1A    ;  (Byte) horizontal mouse cursor offset
-CSR_YOFS        equ   $1C1B    ;  (Byte) vertical mouse cursor offset
-CSR_SCROLL      equ   $1C1C    ;  (Signed) MouseWheel Scroll: -1, 0, 1
-CSR_FLAGS       equ   $1C1D    ;  (Byte) mouse button flags:
+CSR_BEGIN       equ   $1C19    ;  start of mouse cursor hardware registers
+CSR_XPOS        equ   $1C19    ;  (Word) horizontal mouse cursor coordinate
+CSR_YPOS        equ   $1C1B    ;  (Word) vertical mouse cursor coordinate
+CSR_XOFS        equ   $1C1D    ;  (Byte) horizontal mouse cursor offset
+CSR_YOFS        equ   $1C1E    ;  (Byte) vertical mouse cursor offset
+CSR_SCROLL      equ   $1C1F    ;  (Signed) MouseWheel Scroll: -1, 0, 1
+CSR_FLAGS       equ   $1C20    ;  (Byte) mouse button flags:
           ;  CSR_FLAGS:
           ;       bits 0-5: button states
           ;       bits 6-7: number of clicks
-CSR_BMP_INDX    equ   $1C1E    ;  (Byte) mouse cursor bitmap pixel offset
-CSR_BMP_DATA    equ   $1C1F    ;  (Byte) mouse cursor bitmap pixel index color
-CSR_PAL_INDX    equ   $1C21    ;  (Byte) mouse cursor color palette index (0-15)
-CSR_PAL_DATA    equ   $1C22    ;  (Word) mouse cursor color palette data RGBA4444
-CSR_END         equ   $1C24    ; End Mouse Registers
-GFX_END         equ   $1C24    ; End of GFX Device Registers
+CSR_BMP_INDX    equ   $1C21    ;  (Byte) mouse cursor bitmap pixel offset
+CSR_BMP_DATA    equ   $1C22    ;  (Byte) mouse cursor bitmap pixel index color
+CSR_PAL_INDX    equ   $1C24    ;  (Byte) mouse cursor color palette index (0-15)
+CSR_PAL_DATA    equ   $1C25    ;  (Word) mouse cursor color palette data RGBA4444
+CSR_END         equ   $1C27    ; End Mouse Registers
+GFX_END         equ   $1C27    ; End of GFX Device Registers
 
-KEY_BEGIN       equ   $1C24    ; Start of the Keyboard Register space
-CHAR_Q_LEN      equ   $1C24    ;   (Byte) # of characters waiting in queue        (Read Only)
-CHAR_SCAN       equ   $1C25    ;   (Byte) read next character in queue (not popped when read)
-CHAR_POP        equ   $1C26    ;   (Byte) read next character in queue (not popped when read)
-XKEY_BUFFER     equ   $1C27    ;   (128 bits) 16 bytes for XK_KEY data buffer     (Read Only)
-EDT_BFR_CSR     equ   $1C37    ;   (Byte) cursor position within edit buffer     (Read/Write)
-EDT_BUFFER      equ   $1C38    ;   line editing character buffer                 (Read/Write)
-KEY_END         equ   $1C78    ; End of the Keyboard Register space
+KEY_BEGIN       equ   $1C27    ; Start of the Keyboard Register space
+CHAR_Q_LEN      equ   $1C27    ;   (Byte) # of characters waiting in queue        (Read Only)
+CHAR_SCAN       equ   $1C28    ;   (Byte) read next character in queue (not popped when read)
+CHAR_POP        equ   $1C29    ;   (Byte) read next character in queue (not popped when read)
+XKEY_BUFFER     equ   $1C2A    ;   (128 bits) 16 bytes for XK_KEY data buffer     (Read Only)
+EDT_BFR_CSR     equ   $1C3A    ;   (Byte) cursor position within edit buffer     (Read/Write)
+EDT_ENABLE      equ   $1C3B    ;   (Byte) line editor enable flag     (Read/Write)
+EDT_BUFFER      equ   $1C3C    ;   line editing character buffer                 (Read/Write)
+KEY_END         equ   $1C7C    ; End of the Keyboard Register space
 
-    ; 5000 ($1388) bytes remaining for additional registers.
-RESERVED        equ   $1C78
+    ; 4996 ($1384) bytes remaining for additional registers.
+RESERVED        equ   $1C7C
 
           ; User RAM (32K)
 USER_RAM        equ   $3000
@@ -172,3 +186,4 @@ HARD_SWI        equ   $FFFA    ; SWI / SYS Hardware Interrupt Vector
 HARD_NMI        equ   $FFFC    ; NMI Hardware Interrupt Vector
 HARD_RESET      equ   $FFFE    ; RESET Hardware Interrupt Vector
 ; END of definitions
+

@@ -29,6 +29,7 @@ Byte Keyboard::read(Word offset, bool debug)
 				data = charPopQueue();
 			break;
 		case EDT_BFR_CSR:	data = edt_bfr_csr; break;
+		case EDT_ENABLE:	data = _line_editor_enable; break;
 		case EDT_BUFFER:	break;		 
 	}
 	if (offset >= XKEY_BUFFER && offset < XKEY_BUFFER + 16)
@@ -54,6 +55,7 @@ void Keyboard::write(Word offset, Byte data, bool debug)
 		//case CHAR_POP:		break;
 		case EDT_BFR_CSR:	edt_bfr_csr = data; break;
 		// case EDT_BUFFER:	break;
+		case EDT_ENABLE: _line_editor_enable = data; break;
 	}
 	if (offset >= XKEY_BUFFER && offset < XKEY_BUFFER + 16)
 	{
@@ -102,6 +104,9 @@ Word Keyboard::OnAttach(Word nextAddr)
 	nextAddr += 16;
 
 	DisplayEnum("EDT_BFR_CSR", nextAddr, "  (Byte) cursor position within edit buffer     (Read/Write)");
+	nextAddr += 1;
+
+	DisplayEnum("EDT_ENABLE", nextAddr, "  (Byte) line editor enable flag                 (Read/Write)");
 	nextAddr += 1;
 
 	DisplayEnum("EDT_BUFFER",  nextAddr, "  line editing character buffer                 (Read/Write)");
@@ -479,6 +484,8 @@ void Keyboard::OnEvent(SDL_Event* evnt) {
 void Keyboard::OnUpdate(float fElapsedTime) 
 {
 	// basic keyboard buffer character line editor
+	if (!_line_editor_enable)
+		return;
 	
 	if (Bus::Read(CHAR_SCAN))
 	{
@@ -512,9 +519,9 @@ void Keyboard::OnUpdate(float fElapsedTime)
 		}
 		else if (c == XKeyToAscii(XKey::BACKSPACE))
 		{
+			Bus::Read(CHAR_POP);
 			if (edt_bfr_csr > 0)
 			{
-				Bus::Read(CHAR_POP);
 				std::string _right = _str_edt_buffer.substr(edt_bfr_csr);
 				_str_edt_buffer = _str_edt_buffer.substr(0, edt_bfr_csr - 1);
 				_str_edt_buffer += _right;
