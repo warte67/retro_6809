@@ -34,6 +34,7 @@ VECT_RESET	fdb	kernel_start	; RESET Software Interrupt Vecto	r
 
 ; system zero-page variables
 cursor_attrib	fcb	$e4;
+cursor_addr	fdb	$0000;
 var1		fcb	0;
 var2		fcb	0;
 
@@ -145,8 +146,8 @@ cls
 		cmpx	#STD_VID_MAX
 		blt	1b
 
-		bsr	line_edit
-
+2		bsr	line_edit
+		
 		bra	cls
 
 
@@ -157,8 +158,11 @@ line_edit
 6	; check for ENTER press
 		lda	CHAR_SCAN	; scan for a character waiting in the queue
 		cmpa	#$0d		; is it the ENTER key?
-		bne	0f		; nope, continue on
-		rts			; return when ENTER is pressed
+		bne	0f		; nope, continue to render the text line editor
+		lda	CHAR_POP	; pop the ENTER from the queue before returning
+		ldd	#$20b4		; load a colored space
+		std	[cursor_addr]	; overrite the last colored cursor
+		rts			; return from the line editor subroutine
 0	; begine the line edit routine
 		ldu	#SCREEN_BUFFER	; reserve the start of the standard buffer
 		ldy	#EDT_BUFFER	; start of the character line edit buffer
@@ -199,6 +203,7 @@ line_edit
 		bra	5b		; continue until the line is finished
 
 flash_the_cursor
+		pshs	a,b,u		; save these on the stack
 		lda	cursor_attrib	; load the next cursor color
 		inca			; increment it
 		anda	#$0f		; mask off the foreground color
@@ -208,54 +213,11 @@ flash_the_cursor
 		lslb			; skip the attribue
 		incb			; increment the attribute color
 		sta	b, u		; update the characters color
+		decb			; now index the character
+		leau	b,u		; load that characters address
+		stu	cursor_addr	; store it on the zero-page
+		puls	a,b,u		; pop these off the stack
 		rts			; return when done
-
-
-
-
-;	; simply echo the edit buffer with a cursor
-;out_edt_buffer
-;		ldu	#SCREEN_BUFFER
-;		ldx	#SCREEN_BUFFER
-;		ldy	#EDT_BUFFER
-;		lda	#$e4
-;		sta	cursor_attrib
-;		lda	,y
-;		beq	2f
-;1
-;		ldb	#$B4
-;		lda	,y+
-;		beq	out_edt_buffer
-;		std	,x
-;		lda	cursor_attrib
-;		inca
-;		anda	#$0f
-;		ora	#$f0
-;		sta	cursor_attrib
-;		ldb	EDT_BFR_CSR
-;		lslb
-;		incb
-;		sta	b, u			; flash the cursor		
-;		leax	2,x
-;		bne	1b
-;		bra	1b			; out_edt_buffer
-;2
-;		lda	cursor_attrib
-;		inca
-;		anda	#$0f
-;		ora	#$f0
-;		sta	var1
-;		ldb	EDT_BFR_CSR
-;		lslb
-;		incb
-;		sta	b, u			; flash the cursor		
-;		bra	1b			;out_edt_buffer
-
-		
-inf_loop	bra	inf_loop
-
-
-
 
 
 

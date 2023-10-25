@@ -208,8 +208,9 @@ FFFE                  HARD_RESET      equ   $FFFE    ; RESET Hardware Interrupt 
                       
                       ; system zero-page variables
 0010  E4              cursor_attrib   fcb     $e4;
-0011  00              var1            fcb     0;
-0012  00              var2            fcb     0;
+0011  0000            cursor_addr     fdb     $0000;
+0013  00              var1            fcb     0;
+0014  00              var2            fcb     0;
                       
                       
                       
@@ -319,8 +320,8 @@ F04E  ED81            1               std     ,x++
 F050  8C1C00                          cmpx    #STD_VID_MAX
 F053  2DF9                            blt     1b
                       
-F055  8D02                            bsr     line_edit
-                      
+F055  8D02            2               bsr     line_edit
+                                      
 F057  20EF                            bra     cls
                       
                       
@@ -331,105 +332,66 @@ F059  7F1C38                          clr     EDT_BUFFER
 F05C                  6       ; check for ENTER press
 F05C  B61C25                          lda     CHAR_SCAN       ; scan for a character waiting in the queue
 F05F  810D                            cmpa    #$0d            ; is it the ENTER key?
-F061  2601                            bne     0f              ; nope, continue on
-F063  39                              rts                     ; return when ENTER is pressed
-F064                  0       ; begine the line edit routine
-F064  CE0400                          ldu     #SCREEN_BUFFER  ; reserve the start of the standard buffer
-F067  108E1C38                        ldy     #EDT_BUFFER     ; start of the character line edit buffer
-F06B  8E0400                          ldx     #SCREEN_BUFFER  ; point to the start of the display buffer
-F06E  B61C37                          lda     EDT_BFR_CSR     ; fetch the cursor position
-F071  3402                            pshs    a               ; save it on the stack as a local variable      
-F073  2604                            bne     1f              ; cursor position is not zero, begin text
-F075  A6A4                            lda     ,y              ; load the first character in the buffer
-F077  261D                            bne     4f              ; if its not zero, display the cursor
-F079                  1       ; start of the line
-F079  B61C37                          lda     EDT_BFR_CSR     ; load the cursor position
-F07C  270E                            beq     3f              ; if theres no character, display the cursor
-F07E                  2       ; display up to the cursor position
-F07E  A6A0                            lda     ,y+             ; fetch a character from the edit buffer
-F080  270A                            beq     3f              ; null character (end of line)
-F082  C6B4                            ldb     #$B4            ; color attribute
-F084  ED81                            std     ,x++            ; display the character with its color  
-F086  6AE4                            dec     0,s             ; decrease the local cursor position
-F088  270C                            beq     4f              ; brach if the cursor is over a character
-F08A  20F2                            bra     2b              ; continue displaying characters
-F08C                  3       ; cursor at end of the line
-F08C  3502                            puls    a               ; repair the stack
-F08E  8620                            lda     #$20            ; load a space
-F090  A781                            sta     ,x++            ; display the space
-F092  8D14                            bsr     flash_the_cursor        
-F094  20C6                            bra     6b              ; loop and display changes in the edit buffer
-F096                  4       ; cursor over a character
-F096  3502                            puls    a               ; clean up the stack
-F098  A6A0                            lda     ,y+             ; load the next character from the buffer
-F09A  A781                            sta     ,x++            ; ignore the attribute
+F061  260B                            bne     0f              ; nope, continue to render the text line editor
+F063  B61C26                          lda     CHAR_POP        ; pop the ENTER from the queue before returning
+F066  CC20B4                          ldd     #$20b4          ; load a colored space
+F069  ED9F0011                        std     [cursor_addr]   ; overrite the last colored cursor
+F06D  39                              rts                     ; return from the line editor subroutine
+F06E                  0       ; begine the line edit routine
+F06E  CE0400                          ldu     #SCREEN_BUFFER  ; reserve the start of the standard buffer
+F071  108E1C38                        ldy     #EDT_BUFFER     ; start of the character line edit buffer
+F075  8E0400                          ldx     #SCREEN_BUFFER  ; point to the start of the display buffer
+F078  B61C37                          lda     EDT_BFR_CSR     ; fetch the cursor position
+F07B  3402                            pshs    a               ; save it on the stack as a local variable      
+F07D  2604                            bne     1f              ; cursor position is not zero, begin text
+F07F  A6A4                            lda     ,y              ; load the first character in the buffer
+F081  261D                            bne     4f              ; if its not zero, display the cursor
+F083                  1       ; start of the line
+F083  B61C37                          lda     EDT_BFR_CSR     ; load the cursor position
+F086  270E                            beq     3f              ; if theres no character, display the cursor
+F088                  2       ; display up to the cursor position
+F088  A6A0                            lda     ,y+             ; fetch a character from the edit buffer
+F08A  270A                            beq     3f              ; null character (end of line)
+F08C  C6B4                            ldb     #$B4            ; color attribute
+F08E  ED81                            std     ,x++            ; display the character with its color  
+F090  6AE4                            dec     0,s             ; decrease the local cursor position
+F092  270C                            beq     4f              ; brach if the cursor is over a character
+F094  20F2                            bra     2b              ; continue displaying characters
+F096                  3       ; cursor at end of the line
+F096  3502                            puls    a               ; repair the stack
+F098  8620                            lda     #$20            ; load a space
+F09A  A781                            sta     ,x++            ; display the space
+F09C  8D14                            bsr     flash_the_cursor        
+F09E  20BC                            bra     6b              ; loop and display changes in the edit buffer
+F0A0                  4       ; cursor over a character
+F0A0  3502                            puls    a               ; clean up the stack
+F0A2  A6A0                            lda     ,y+             ; load the next character from the buffer
+F0A4  A781                            sta     ,x++            ; ignore the attribute
                               ; flash the cursor
-F09C  8D0A                            bsr     flash_the_cursor
-F09E                  5       ; finish the line
-F09E  A6A0                            lda     ,y+             ; load the next character from the buffer
-F0A0  27BA                            beq     6b              ; loop back to the top if done
-F0A2  C6B4                            ldb     #$b4            ; load the basic screen attribute
-F0A4  ED81                            std     ,x++            ; display the next character with its color
-F0A6  20F6                            bra     5b              ; continue until the line is finished
+F0A6  8D0A                            bsr     flash_the_cursor
+F0A8                  5       ; finish the line
+F0A8  A6A0                            lda     ,y+             ; load the next character from the buffer
+F0AA  27B0                            beq     6b              ; loop back to the top if done
+F0AC  C6B4                            ldb     #$b4            ; load the basic screen attribute
+F0AE  ED81                            std     ,x++            ; display the next character with its color
+F0B0  20F6                            bra     5b              ; continue until the line is finished
                       
-F0A8                  flash_the_cursor
-F0A8  B60010                          lda     cursor_attrib   ; load the next cursor color
-F0AB  4C                              inca                    ; increment it
-F0AC  840F                            anda    #$0f            ; mask off the foreground color
-F0AE  8AF0                            ora     #$f0            ; foreground 15 = opaque black
-F0B0  B70010                          sta     cursor_attrib   ; store the new attribute
-F0B3  F61C37                          ldb     EDT_BFR_CSR     ; load the cursor position
-F0B6  58                              lslb                    ; skip the attribue
-F0B7  5C                              incb                    ; increment the attribute color
-F0B8  A7C5                            sta     b, u            ; update the characters color
-F0BA  39                              rts                     ; return when done
-                      
-                      
-                      
-                      
-                      ;       ; simply echo the edit buffer with a cursor
-                      ;out_edt_buffer
-                      ;               ldu     #SCREEN_BUFFER
-                      ;               ldx     #SCREEN_BUFFER
-                      ;               ldy     #EDT_BUFFER
-                      ;               lda     #$e4
-                      ;               sta     cursor_attrib
-                      ;               lda     ,y
-                      ;               beq     2f
-                      ;1
-                      ;               ldb     #$B4
-                      ;               lda     ,y+
-                      ;               beq     out_edt_buffer
-                      ;               std     ,x
-                      ;               lda     cursor_attrib
-                      ;               inca
-                      ;               anda    #$0f
-                      ;               ora     #$f0
-                      ;               sta     cursor_attrib
-                      ;               ldb     EDT_BFR_CSR
-                      ;               lslb
-                      ;               incb
-                      ;               sta     b, u                    ; flash the cursor              
-                      ;               leax    2,x
-                      ;               bne     1b
-                      ;               bra     1b                      ; out_edt_buffer
-                      ;2
-                      ;               lda     cursor_attrib
-                      ;               inca
-                      ;               anda    #$0f
-                      ;               ora     #$f0
-                      ;               sta     var1
-                      ;               ldb     EDT_BFR_CSR
-                      ;               lslb
-                      ;               incb
-                      ;               sta     b, u                    ; flash the cursor              
-                      ;               bra     1b                      ;out_edt_buffer
-                      
-                                      
-F0BB  20FE            inf_loop        bra     inf_loop
-                      
-                      
-                      
+F0B2                  flash_the_cursor
+F0B2  3446                            pshs    a,b,u           ; save these on the stack
+F0B4  B60010                          lda     cursor_attrib   ; load the next cursor color
+F0B7  4C                              inca                    ; increment it
+F0B8  840F                            anda    #$0f            ; mask off the foreground color
+F0BA  8AF0                            ora     #$f0            ; foreground 15 = opaque black
+F0BC  B70010                          sta     cursor_attrib   ; store the new attribute
+F0BF  F61C37                          ldb     EDT_BFR_CSR     ; load the cursor position
+F0C2  58                              lslb                    ; skip the attribue
+F0C3  5C                              incb                    ; increment the attribute color
+F0C4  A7C5                            sta     b, u            ; update the characters color
+F0C6  5A                              decb                    ; now index the character
+F0C7  33C5                            leau    b,u             ; load that characters address
+F0C9  FF0011                          stu     cursor_addr     ; store it on the zero-page
+F0CC  3546                            puls    a,b,u           ; pop these off the stack
+F0CE  39                              rts                     ; return when done
                       
                       
                       
