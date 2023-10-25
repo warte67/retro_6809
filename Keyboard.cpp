@@ -349,6 +349,10 @@ void Keyboard::OnInit()
 		{ XKey::F12, 0x8b, 0x9b },	// not yet used
 	};
 
+	// clear the edit buffer
+	for (auto& b : editBuffer)
+		b = 0;
+
 	_bWasInit = true;
 }
 void Keyboard::OnQuit() 

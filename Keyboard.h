@@ -67,7 +67,7 @@ protected:
 
 		- Create an internal Line Editor
 			- add a line editor enable register flag
-				- or simply alway edit the buffer.  i.e. clear before use
+				- or simply edit the buffer.  i.e. clear before use
 			- manipulate the editBuffer[] using edt_bfr_csr positioned cursor
 			- implement all basic line editing keys
 				- [LEFT ARROW], [RIGHT ARROW] moves the cursor
