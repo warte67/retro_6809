@@ -37,24 +37,11 @@ int main(int argc, char* argv[])
 		// __ANDROID__
 	} // END IF clear screen
 
-	std::cout << "Retro_6809\n\n";
+	// std::cout << "Retro_6809\n\n";
 
 	Bus& bus = Bus::Inst();
 	bus.Run();
 
 	return 0;
 }
-
-/*******************************************************
-
-	To Do Next:
-
-	1) GfxMouse - build a register for mouse_cursor_enable
-					- also include a flag for debug_enable
-					- should this be a Gfx register or one each for GfxMouse and GfxDebug?
-	2) GfxMouse - add an independant 16-color pallete for the mouse cursor
-	3) GfxMouse - remove the full sized mouse layer.  just use the cursor texture
-
-
- *******************************************************/
 

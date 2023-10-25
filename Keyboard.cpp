@@ -14,6 +14,7 @@
 Byte Keyboard::read(Word offset, bool debug) 
 {
 	Byte data = 0xCC;	// default unassigned memory
+
 	switch (offset)
 	{
 		case CHAR_Q_LEN:	data = charQueueLen();	break;
@@ -33,10 +34,10 @@ Byte Keyboard::read(Word offset, bool debug)
 	if (offset >= XKEY_BUFFER && offset < XKEY_BUFFER + 16)
 		data = m_memory[offset - m_base];
 	// this is just a raw read from the edit buffer
-	if (offset >= EDT_BUFFER && offset < EDT_BUFFER + 256)
+	if (offset >= EDT_BUFFER && offset < EDT_BUFFER + 64)
 	{
 		Word index = offset - EDT_BUFFER;
-		if (index > 255)	index = 255;
+		if (index > 64)	index = 64;
 		data = editBuffer[index];
 	}
 
@@ -59,10 +60,10 @@ void Keyboard::write(Word offset, Byte data, bool debug)
 		// Just pass through... write the data as is
 	}
 	// this is just a raw write to the edit buffer
-	if (offset >= EDT_BUFFER && offset < EDT_BUFFER + 256)
+	if (offset >= EDT_BUFFER && offset < EDT_BUFFER + 64)
 	{
 		Word index = offset - EDT_BUFFER;
-		if (index > 255)	index = 255;
+		if (index > 64)	index = 64;
 		editBuffer[index] = data;
 	}
 
@@ -95,8 +96,8 @@ Word Keyboard::OnAttach(Word nextAddr)
 	DisplayEnum("EDT_BFR_CSR", nextAddr, "  (Byte) cursor position within edit buffer     (Read/Write)");
 	nextAddr += 1;
 
-	DisplayEnum("EDT_BUFFER",  nextAddr, "  (256 Bytes) line editing character buffer     (Read/Write)");
-	nextAddr += 256;
+	DisplayEnum("EDT_BUFFER",  nextAddr, "  (64 Bytes) line editing character buffer     (Read/Write)");
+	nextAddr += 64;
 
 	DisplayEnum("KEY_END", nextAddr, "End of the Keyboard Register space");
 	nextAddr += 0;

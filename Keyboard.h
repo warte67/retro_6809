@@ -51,7 +51,7 @@ protected:
 	std::map<XKey::XK, int> keyMap;
 	std::vector<std::tuple<XKey::XK, char, char>> xkToAsciiMap;
 	std::queue <Byte> charQueue;		// ascii character queue
-	std::array <Byte, 256> editBuffer;	// internal line edit character buffer
+	std::array <Byte, 64> editBuffer;	// internal line edit character buffer
 	Byte edt_bfr_csr = 0;				// internal edit character buffer cursor position
 
 protected:
@@ -61,3 +61,21 @@ protected:
 
 #endif	// __KEYBOARD_H__
 
+/*******************************
+
+	To Do:
+
+		- Create an internal Line Editor
+			- add a line editor enable register flag
+			- manipulate the editBuffer[] using edt_bfr_csr positioned cursor
+			- implement all basic line editing keys
+				- [LEFT ARROW], [RIGHT ARROW] moves the cursor
+				- [BACK] removes the character to the left of the cursor
+				- [DEL] removes the character under the cursor
+				- [HOME] moves the cursor to the start of the line
+				- [END] moves the cursor to the end fo the line
+				- (always in "insert" mode)
+
+
+
+********************************/ 

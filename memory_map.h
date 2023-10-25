@@ -150,11 +150,11 @@ CHAR_SCAN    = 0x1C25, //   (Byte) read next character in queue (not popped when
 CHAR_POP     = 0x1C26, //   (Byte) read next character in queue (not popped when read)
 XKEY_BUFFER  = 0x1C27, //   (128 bits) 16 bytes for XK_KEY data buffer     (Read Only)
 EDT_BFR_CSR  = 0x1C37, //   (Byte) cursor position within edit buffer     (Read/Write)
-EDT_BUFFER   = 0x1C38, //   (256 Bytes) line editing character buffer     (Read/Write)
-KEY_END      = 0x1D38, // End of the Keyboard Register space
+EDT_BUFFER   = 0x1C38, //   (64 Bytes) line editing character buffer     (Read/Write)
+KEY_END      = 0x1C78, // End of the Keyboard Register space
 
-    // 4808 ($12C8) bytes remaining for additional registers.
-RESERVED     = 0x1D38,
+    // 5000 ($1388) bytes remaining for additional registers.
+RESERVED     = 0x1C78,
 
         // User RAM (32K)
 USER_RAM     = 0x3000,
@@ -181,4 +181,3 @@ HARD_RESET   = 0xFFFE, // RESET Hardware Interrupt Vector
 
 
 #endif // __MEMORY_MAP_H__
-
