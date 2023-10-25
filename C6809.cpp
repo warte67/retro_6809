@@ -1014,7 +1014,7 @@ void C6809::do_or(Byte& x)
 }
 void C6809::do_rol(Byte& x)
 {
-	int	oc = CC.bit.C;
+	bool oc = CC.bit.C;
 	CC.bit.V = btst(x, 7) ^ btst(x, 6);
 	CC.bit.C = btst(x, 7);
 	x = x << 1;
@@ -1024,7 +1024,7 @@ void C6809::do_rol(Byte& x)
 }
 void C6809::do_ror(Byte& x)
 {
-	int	oc = CC.bit.C;
+	bool oc = CC.bit.C;
 	CC.bit.C = btst(x, 0);
 	x = x >> 1;
 	if (oc) bset(x, 7);

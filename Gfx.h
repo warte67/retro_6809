@@ -82,10 +82,6 @@ class Gfx : public Device
                 Uint8 g : 4;
                 Uint8 r : 4;
                 Uint8 a : 4;
-                //Uint8 r : 4;
-                //Uint8 a : 4;
-                //Uint8 b : 4;
-                //Uint8 g : 4;
             };
         };
         Byte _dsp_pal_idx = 0x00;   // DSP_PAL_IDX
@@ -102,7 +98,7 @@ class Gfx : public Device
 
 		Word _std_vid_max = 0x1C00;		// [STD_VID_MAX]
 		Byte _dsp_gres	= 0b11000101;	// defaults
-		Byte _dsp_ext 	= 0b00001001;	// defaults
+		Byte _dsp_ext 	= 0b11001001;	// defaults
         Byte _dsp_err = 0;          
 
         //// Hack: have to grant a pointer to the Gfx write to Bus variable
@@ -153,7 +149,7 @@ class Gfx : public Device
     //     AA:00 = Extended Graphics 1bpp (2-color mode) 
     //     AA:01 = Extended Graphics 2bpp (4-color mode) 
     //     AA:10 = Extended Graphics 4bpp (16-color mode) 
-    //     AA:11 = Extended Graphics 4bpp (16-color mode) 
+    //     AA:11 = Extended Graphics 8bpp (256-color mode) 
     //     B:0   = Extended Graphics: DISABLED 
     //     B:1   = Extended Graphics: ENABLED 
     //     C:0   = Extended Mode: BITMAP

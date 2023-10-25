@@ -31,7 +31,7 @@ public:
 	virtual void OnActivate() override;
 	virtual void OnDeactivate() override;
 	virtual void OnEvent(SDL_Event* evnt) override;
-	//virtual void OnUpdate(float fElapsedTime) override;
+	virtual void OnUpdate(float fElapsedTime) override;
 	//virtual void OnRender() override;
 
 	virtual Byte read(Word offset, bool debug = false) override;
@@ -51,8 +51,9 @@ protected:
 	std::map<XKey::XK, int> keyMap;
 	std::vector<std::tuple<XKey::XK, char, char>> xkToAsciiMap;
 	std::queue <Byte> charQueue;		// ascii character queue
-	std::array <Byte, 64> editBuffer;	// internal line edit character buffer
+	std::array <Byte, EDIT_BUFFER_SIZE> editBuffer;	// internal line edit character buffer
 	Byte edt_bfr_csr = 0;				// internal edit character buffer cursor position
+	std::string _str_edt_buffer = "";
 
 protected:
 	bool _bWasInit = false;

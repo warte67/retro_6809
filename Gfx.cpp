@@ -133,7 +133,7 @@ Word Gfx::OnAttach(Word nextAddr)
 
 	DisplayEnum("", 0, "");
 	DisplayEnum("SYS_STATE", nextAddr, " (Byte) System State Register");
-	DisplayEnum("", 0, "DSP_GRES: ABCD.SSSS");
+	DisplayEnum("", 0, "SYS_STATE: ABCD.SSSS");
 	DisplayEnum("", 0, "     A:0   = Error: Standard Buffer Overflow ");
 	DisplayEnum("", 0, "     B:0   = Error: Extended Buffer Overflow ");
 	DisplayEnum("", 0, "     C:0   = Error: Reserved ");

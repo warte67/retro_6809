@@ -1,3 +1,5 @@
+
+
 // memory_map.h
 #ifndef __MEMORY_MAP_H__
 #define __MEMORY_MAP_H__
@@ -34,7 +36,7 @@ HDW_REGS     = 0x1C00, // Begin Device Hardware Registers
 STD_VID_MAX  = 0x1C00, //  (Word) Standard Video Buffer Max
 
 SYS_STATE    = 0x1C02, //  (Byte) System State Register
-        // DSP_GRES: ABCD.SSSS
+        // SYS_STATE: ABCD.SSSS
         //      A:0   = Error: Standard Buffer Overflow
         //      B:0   = Error: Extended Buffer Overflow
         //      C:0   = Error: Reserved
@@ -150,7 +152,7 @@ CHAR_SCAN    = 0x1C25, //   (Byte) read next character in queue (not popped when
 CHAR_POP     = 0x1C26, //   (Byte) read next character in queue (not popped when read)
 XKEY_BUFFER  = 0x1C27, //   (128 bits) 16 bytes for XK_KEY data buffer     (Read Only)
 EDT_BFR_CSR  = 0x1C37, //   (Byte) cursor position within edit buffer     (Read/Write)
-EDT_BUFFER   = 0x1C38, //   (64 Bytes) line editing character buffer     (Read/Write)
+EDT_BUFFER   = 0x1C38, //   line editing character buffer                 (Read/Write)
 KEY_END      = 0x1C78, // End of the Keyboard Register space
 
     // 5000 ($1388) bytes remaining for additional registers.
@@ -181,3 +183,4 @@ HARD_RESET   = 0xFFFE, // RESET Hardware Interrupt Vector
 
 
 #endif // __MEMORY_MAP_H__
+

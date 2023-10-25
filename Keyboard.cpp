@@ -34,10 +34,10 @@ Byte Keyboard::read(Word offset, bool debug)
 	if (offset >= XKEY_BUFFER && offset < XKEY_BUFFER + 16)
 		data = m_memory[offset - m_base];
 	// this is just a raw read from the edit buffer
-	if (offset >= EDT_BUFFER && offset < EDT_BUFFER + 64)
+	if (offset >= EDT_BUFFER && offset < EDT_BUFFER + EDIT_BUFFER_SIZE)
 	{
 		Word index = offset - EDT_BUFFER;
-		if (index > 64)	index = 64;
+		if (index >= EDIT_BUFFER_SIZE)	index = EDIT_BUFFER_SIZE-1;
 		data = editBuffer[index];
 	}
 
@@ -49,22 +49,30 @@ void Keyboard::write(Word offset, Byte data, bool debug)
 {
 	switch (offset)
 	{
-		case CHAR_Q_LEN:	break;
-		case CHAR_SCAN:		break;
-		case CHAR_POP:		break;
-		case EDT_BFR_CSR:	break;
-		case EDT_BUFFER:	break;
+		//case CHAR_Q_LEN:	break;
+		//case CHAR_SCAN:		break;
+		//case CHAR_POP:		break;
+		case EDT_BFR_CSR:	edt_bfr_csr = data; break;
+		// case EDT_BUFFER:	break;
 	}
 	if (offset >= XKEY_BUFFER && offset < XKEY_BUFFER + 16)
 	{
 		// Just pass through... write the data as is
 	}
 	// this is just a raw write to the edit buffer
-	if (offset >= EDT_BUFFER && offset < EDT_BUFFER + 64)
+	if (offset >= EDT_BUFFER && offset < EDT_BUFFER + EDIT_BUFFER_SIZE)
 	{
 		Word index = offset - EDT_BUFFER;
-		if (index > 64)	index = 64;
+		if (index >= EDIT_BUFFER_SIZE)	index = EDIT_BUFFER_SIZE-1;
 		editBuffer[index] = data;
+	}
+	// a null write to EDT_BUFFER resets the buffer
+	if (offset == EDT_BUFFER)
+	{
+		edt_bfr_csr = 0;
+		_str_edt_buffer = "";
+		for (auto& a : editBuffer)
+			a = 0;
 	}
 
 	// write statically
@@ -96,8 +104,8 @@ Word Keyboard::OnAttach(Word nextAddr)
 	DisplayEnum("EDT_BFR_CSR", nextAddr, "  (Byte) cursor position within edit buffer     (Read/Write)");
 	nextAddr += 1;
 
-	DisplayEnum("EDT_BUFFER",  nextAddr, "  (64 Bytes) line editing character buffer     (Read/Write)");
-	nextAddr += 64;
+	DisplayEnum("EDT_BUFFER",  nextAddr, "  line editing character buffer                 (Read/Write)");
+	nextAddr += EDIT_BUFFER_SIZE;
 
 	DisplayEnum("KEY_END", nextAddr, "End of the Keyboard Register space");
 	nextAddr += 0;
@@ -468,7 +476,98 @@ void Keyboard::OnEvent(SDL_Event* evnt) {
 
 
 
-//void Keyboard::OnUpdate(float fElapsedTime) {}
+void Keyboard::OnUpdate(float fElapsedTime) 
+{
+	// basic keyboard buffer character line editor
+	
+	if (Bus::Read(CHAR_SCAN))
+	{
+		Byte c = Bus::Read(CHAR_SCAN);
+		auto itr = _str_edt_buffer.begin() + edt_bfr_csr;
+		Byte Cols = Bus::Read(DSP_TXT_COLS);
+
+		if (c == XKeyToAscii(XKey::LEFT))
+		{
+			Bus::Read(CHAR_POP);
+			if (edt_bfr_csr > 0)
+				edt_bfr_csr--;
+		}
+		else if (c == XKeyToAscii(XKey::RIGHT))
+		{
+			Bus::Read(CHAR_POP);
+			if (edt_bfr_csr < _str_edt_buffer.size())
+				edt_bfr_csr++;
+		}
+		else if (c == XKeyToAscii(XKey::UP))
+		{
+			Bus::Read(CHAR_POP);
+			if (edt_bfr_csr > Cols)
+				edt_bfr_csr -= Cols;
+		}
+		else if (c == XKeyToAscii(XKey::DOWN))
+		{
+			Bus::Read(CHAR_POP);
+			if (edt_bfr_csr + Cols < _str_edt_buffer.size())
+				edt_bfr_csr += Cols;
+		}
+		else if (c == XKeyToAscii(XKey::BACKSPACE))
+		{
+			if (edt_bfr_csr > 0)
+			{
+				Bus::Read(CHAR_POP);
+				std::string _right = _str_edt_buffer.substr(edt_bfr_csr);
+				_str_edt_buffer = _str_edt_buffer.substr(0, edt_bfr_csr - 1);
+				_str_edt_buffer += _right;
+				edt_bfr_csr--;
+			}
+		}
+		else if (c == XKeyToAscii(XKey::DELETE))
+		{
+			Bus::Read(CHAR_POP);
+			if (edt_bfr_csr < _str_edt_buffer.size())
+			{
+				std::string _right = _str_edt_buffer.substr(edt_bfr_csr + 1);
+				_str_edt_buffer = _str_edt_buffer.substr(0, edt_bfr_csr);
+				_str_edt_buffer += _right;
+			}
+		}
+		else if (c == XKeyToAscii(XKey::END))
+		{
+			Bus::Read(CHAR_POP);
+			edt_bfr_csr = _str_edt_buffer.size();
+		}
+		else if (c == XKeyToAscii(XKey::HOME))
+		{
+			Bus::Read(CHAR_POP);
+			edt_bfr_csr = 0;
+		}
+		else if (c>=0x20 && c<128)
+		{
+			if (_str_edt_buffer.size() < editBuffer.size()-1)
+			{
+				Bus::Read(CHAR_POP);
+				_str_edt_buffer.insert(itr, c);
+				edt_bfr_csr++;
+			}
+		}
+	}
+
+	editBuffer.at(0) = ' ';
+	Word i = 0;
+	for (auto& a : _str_edt_buffer)
+		editBuffer.at(i++) = a;
+	editBuffer.at(i) = ' ';
+
+//	// copy _edt_buffer to the editBuffer
+//	for (int i=0; i< EDIT_BUFFER_SIZE; i++)
+//		editBuffer.at(i) = (Byte)' ';
+//	//editBuffer.at(EDIT_BUFFER_SIZE-1) = 0;
+//	int index = 0;
+//	for (auto& a : _str_edt_buffer)
+//		editBuffer[index++] = a;
+
+}
+
 //void Keyboard::OnRender() {}
 
 int Keyboard::charQueueLen() { return charQueue.size(); }

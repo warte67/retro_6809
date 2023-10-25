@@ -28,7 +28,7 @@ HDW_REGS        equ   $1C00    ; Begin Device Hardware Registers
 STD_VID_MAX     equ   $1C00    ;  (Word) Standard Video Buffer Max
 
 SYS_STATE       equ   $1C02    ;  (Byte) System State Register
-          ; DSP_GRES: ABCD.SSSS
+          ; SYS_STATE: ABCD.SSSS
           ;      A:0   = Error: Standard Buffer Overflow
           ;      B:0   = Error: Extended Buffer Overflow
           ;      C:0   = Error: Reserved
@@ -144,7 +144,7 @@ CHAR_SCAN       equ   $1C25    ;   (Byte) read next character in queue (not popp
 CHAR_POP        equ   $1C26    ;   (Byte) read next character in queue (not popped when read)
 XKEY_BUFFER     equ   $1C27    ;   (128 bits) 16 bytes for XK_KEY data buffer     (Read Only)
 EDT_BFR_CSR     equ   $1C37    ;   (Byte) cursor position within edit buffer     (Read/Write)
-EDT_BUFFER      equ   $1C38    ;   (64 Bytes) line editing character buffer     (Read/Write)
+EDT_BUFFER      equ   $1C38    ;   line editing character buffer                 (Read/Write)
 KEY_END         equ   $1C78    ; End of the Keyboard Register space
 
     ; 5000 ($1388) bytes remaining for additional registers.
@@ -172,4 +172,3 @@ HARD_SWI        equ   $FFFA    ; SWI / SYS Hardware Interrupt Vector
 HARD_NMI        equ   $FFFC    ; NMI Hardware Interrupt Vector
 HARD_RESET      equ   $FFFE    ; RESET Hardware Interrupt Vector
 ; END of definitions
-

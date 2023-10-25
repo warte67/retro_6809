@@ -224,17 +224,17 @@ public:
 	// HELPER FUNCTIONS
 
 	// 8 bit operations
-	bool btst(Byte x, int n) { return (x & (1 << n)) ? true : false; }
+	bool btst(Byte x, int n) { bool ret = (x & (1 << n)); return ret; }
 	void bset(Byte& x, int n) { x |= (1 << n); }
 	void bclr(Byte& x, int n) { x &= ~(1 << n); }
 
 	// 16 bit operations
-	bool btst(Word x, int n) { return (x & (1 << n)) ? true : false; }
+	bool btst(Word x, int n) { bool ret = (x & (1 << n)); return ret; }
 	void bset(Word& x, int n) { x |= (1 << n); }
 	void bclr(Word& x, int n) { x &= ~(1 << n); }
 
 	// 32 bit operations
-	bool btst(DWord x, int n) { return (x & (1L << n)) ? true : false; }
+	bool btst(DWord x, int n) { bool ret = (x & (1L << n)); return ret; }
 	void bset(DWord& x, int n) { x |= (1L << n); }
 	void bclr(DWord& x, int n) { x &= ~(1L << n); }
 
