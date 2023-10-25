@@ -165,11 +165,11 @@
 1C26                  CHAR_POP        equ   $1C26    ;   (Byte) read next character in queue (not popped when read)
 1C27                  XKEY_BUFFER     equ   $1C27    ;   (128 bits) 16 bytes for XK_KEY data buffer     (Read Only)
 1C37                  EDT_BFR_CSR     equ   $1C37    ;   (Byte) cursor position within edit buffer     (Read/Write)
-1C38                  EDT_BUFFER      equ   $1C38    ;   (256 Bytes) line editing character buffer     (Read/Write)
-1D38                  KEY_END         equ   $1D38    ; End of the Keyboard Register space
+1C38                  EDT_BUFFER      equ   $1C38    ;   (64 Bytes) line editing character buffer     (Read/Write)
+1C78                  KEY_END         equ   $1C78    ; End of the Keyboard Register space
                       
-                          ; 4808 ($12C8) bytes remaining for additional registers.
-1D38                  RESERVED        equ   $1D38
+                          ; 5000 ($1388) bytes remaining for additional registers.
+1C78                  RESERVED        equ   $1C78
                       
                                 ; User RAM (32K)
 3000                  USER_RAM        equ   $3000
@@ -193,6 +193,7 @@ FFFA                  HARD_SWI        equ   $FFFA    ; SWI / SYS Hardware Interr
 FFFC                  HARD_NMI        equ   $FFFC    ; NMI Hardware Interrupt Vector
 FFFE                  HARD_RESET      equ   $FFFE    ; RESET Hardware Interrupt Vector
                       ; END of definitions
+                      
                       
                       ; Software Vectors
 0000                          org     $0000   

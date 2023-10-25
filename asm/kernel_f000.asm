@@ -111,7 +111,7 @@ lp3
 ;		std	CSR_PAL_DATA
 
 	; pop the next character from the keyboard queue
-	; proceed to infinate loop if the [q] key was pressed
+	; proceed to infinate loop if the [q] key was pressed1
 		lda	CHAR_POP
 		cmpa	#'q'
 		bne	inc_screen
