@@ -13,7 +13,7 @@
 
 Byte Keyboard::read(Word offset, bool debug) 
 {
-	Byte data = 0x00;	// default unassigned memory
+	Byte data = 0xCC;	// default unassigned memory
 	switch (offset)
 	{
 		case CHAR_Q_LEN:	data = charQueueLen();	break;

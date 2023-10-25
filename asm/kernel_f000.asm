@@ -109,8 +109,15 @@ lp3
 ;		sta	CSR_PAL_INDX
 ;		ldd	#$f00f
 ;		std	CSR_PAL_DATA
+
+	; pop the next character from the keyboard queue
+	; proceed to infinate loop if the [q] key was pressed
+		lda	CHAR_POP
+		cmpa	#'q'
+		bne	inc_screen
+
 inf_loop
-		bra	inc_screen
+		bra	inf_loop
 
 
 ; ROM Based Hardware Vectors

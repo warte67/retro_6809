@@ -283,8 +283,15 @@ F05E  2FEE                            ble     lp3
                       ;               sta     CSR_PAL_INDX
                       ;               ldd     #$f00f
                       ;               std     CSR_PAL_DATA
-F060                  inf_loop
-F060  20E9                            bra     inc_screen
+                      
+                              ; pop the next character from the keyboard queue
+                              ; proceed to infinate loop if the [q] key was pressed
+F060  B61C26                          lda     CHAR_POP
+F063  8171                            cmpa    #'q'
+F065  26E4                            bne     inc_screen
+                      
+F067                  inf_loop
+F067  20FE                            bra     inf_loop
                       
                       
                       ; ROM Based Hardware Vectors
