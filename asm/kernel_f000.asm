@@ -42,6 +42,7 @@ CSR_COL		fcb	$00;		; current cursor column
 CSR_ROW		fcb	$00;		; current cursor row
 TXT_ATTR	fcb	$B4		; current text color attribute
 EDLIN_ANCH	fdb	$0000;		; line edit text anchor address
+CMD_LN_TOKEN	fcb	$00;		; current command line token
 var1		fcb	0;
 var2		fcb	0;
 
@@ -147,14 +148,38 @@ kernel_start
 		jsr	line_out	
 		ldx	#prompt1
 		jsr	line_out	
+1
 		ldx	#ready_prompt		
 		jsr	line_out	
-1
-		jsr	line_edit
+
+		jsr	line_edit	
+		jsr	decode_command_line	
 		bra	1b
 
-;	; infinite loop
-;inf_loop	bra	inf_loop
+command_table	fcs	"CLS"		; 1
+		fcs	"LOAD"		; 2
+		fcs	"EXEC"		; 3
+		fcs	"RESET"		; 4
+		fcb	0		; 0 = non-entry or invalid command
+
+decode_command_line	
+		pshs	A, X, Y
+		jsr	crunch_command_line
+
+		puls	A, X, Y
+		rts
+
+crunch_command_line	; crunch the command line
+		; 	on return:
+		; 	A = tokenized command
+		;	X points to argument 1
+		;	Y points to argument 2
+		;jsr	command_token
+		rts
+
+
+
+
 
 
 ; output the line edit buffer
