@@ -211,7 +211,7 @@ FFFE                  HARD_RESET      equ   $FFFE    ; RESET Hardware Interrupt 
                       
                       ; Software Vectors
 0000                          org     $0000   
-0000  F022            VECT_RSRVD      fdb     RSRVD_start     ; This will likely be used as the EXEC vector
+0000  F022            VECT_EXEC       fdb     EXEC_start      ; This will likely be used as the EXEC vector
 0002  F024            VECT_SWI3       fdb     SWI3_start      ; SWI3 Software Interrupt Vector
 0004  F026            VECT_SWI2       fdb     SWI2_start      ; SWI2 Software Interrupt Vector
 0006  F028            VECT_FIRQ       fdb     FIRQ_start      ; FIRQ Software Interrupt Vector
@@ -232,15 +232,15 @@ FFFE                  HARD_RESET      equ   $FFFE    ; RESET Hardware Interrupt 
 0015  B4              TXT_ATTR        fcb     $B4             ; current text color attribute
 0016  0000            EDLIN_ANCH      fdb     $0000;          ; line edit text anchor address
 0018  00              CMD_LN_TOKEN    fcb     $00;            ; current command line token
-0019  00              var1            fcb     0;
-001A  00              var2            fcb     0;
+0019  00              var1            fcb     0;              ; 
+001A  00              var2            fcb     0;              ;
                       
                       
                       
                       
                       ; Kernel Jump Vector Calls      
 F000                          org     KERNEL_ROM              
-F000  6E9F0000        KRNL_RSRVD      jmp     [VECT_RSRVD]    ; This will likely be used as t he EXEC vector
+F000  6E9F0000        KRNL_EXEC       jmp     [VECT_EXEC]     ; This will likely be used as t he EXEC vector
 F004  6E9F0002        KRNL_SWI3       jmp     [VECT_SWI3 ]    ; SWI3 Software Interrupt Vector        
 F008  6E9F0004        KRNL_SWI2       jmp     [VECT_SWI2 ]    ; SWI2 Software Interrupt Vector
 F00C  6E9F0006        KRNL_FIRQ       jmp     [VECT_FIRQ ]    ; FIRQ Software Interrupt Vector
@@ -252,7 +252,8 @@ F01C  6E9F000E        KRNL_RESET      jmp     [VECT_RESET]    ; RESET Software I
                       ; a null vectors (i.e. an infinate loop traps for vector testing)
 F020  20FE            KRNL_UNDEF      bra     KRNL_UNDEF
                       
-F022  20FE            RSRVD_start     bra     RSRVD_start     ; EXEC program
+                      ; default subs
+F022  20FE            EXEC_start      bra     EXEC_start      ; EXEC program
 F024  20FE            SWI3_start      bra     SWI3_start      ; SWI3 Implementation
 F026  20FE            SWI2_start      bra     SWI2_start      ; SWI2 Implementation
 F028  20FE            FIRQ_start      bra     FIRQ_start      ; FIRQ Implementation
@@ -332,39 +333,182 @@ F043  86C9                            lda     #$C9
 F045  B71C09                          sta     DSP_EXT
                       
                               ; begin the display
-F048  BDF16F                          jsr     cls
+F048  BDF2A6                          jsr     cls
 F04B  8EFE00                          ldx     #prompt0                
-F04E  BDF124                          jsr     line_out        
+F04E  BDF25B                          jsr     line_out        
 F051  8EFE11                          ldx     #prompt1
-F054  BDF124                          jsr     line_out        
+F054  BDF25B                          jsr     line_out        
 F057                  1
 F057  8EFE34                          ldx     #ready_prompt           
-F05A  BDF124                          jsr     line_out        
+F05A  BDF25B                          jsr     line_out        
                       
-F05D  BDF07F                          jsr     line_edit       
-F060  BDF076                          jsr     decode_command_line     
+F05D  BDF1B6                          jsr     line_edit       
+F060  BDF102                          jsr     decode_command_line     
 F063  20F2                            bra     1b
                       
-F065  434CD3          command_table   fcs     "CLS"           ; 1
-F068  4C4F41C4                        fcs     "LOAD"          ; 2
-F06C  455845C3                        fcs     "EXEC"          ; 3
-F070  52455345D4                      fcs     "RESET"         ; 4
-F075  00                              fcb     0               ; 0 = non-entry or invalid command
+F065  636C7300        command_table   fcn     "cls"           ; #
+F069  6C6F616400                      fcn     "load"          ; #
+F06E  6578656300                      fcn     "exec"          ; #
+F073  726573657400                    fcn     "reset"         ; #
+F079  FF                              fcb     $FF             ; $FF = end of list
+F07A                  command_vector_table
+F07A  F10D                            fdb     do_cls
+F07C  F111                            fdb     do_load
+F07E  F118                            fdb     do_exec
+F080  F11D                            fdb     do_reset
                       
-F076                  decode_command_line     
-F076  3432                            pshs    A, X, Y
-F078  BDF07E                          jsr     crunch_command_line
+F082  436F6D6D616E642077617320666F756E642E0A00 str_eq          fcn     "Command was found.\n";
+F096  436F6D6D616E6420776173204E4F5420666F756E642E0A00 str_not_eq      fcn     "Command was NOT found.\n";
                       
-F07B  3532                            puls    A, X, Y
-F07D  39                              rts
+                      ; test strings
+F0AE  434C5320636F6D6D616E64206973737565640A00 str_cls_test    fcn     "CLS command issued\n"
+F0C2  4C4F414420636F6D6D616E64206973737565640A00 str_load_test   fcn     "LOAD command issued\n"
+F0D7  4558454320636F6D6D616E64206973737565640A00 str_exec_test   fcn     "EXEC command issued\n"
+F0EC  524553455420636F6D6D616E64206973737565640A00 str_reset_test  fcn     "RESET command issued\n"
                       
-F07E                  crunch_command_line     ; crunch the command line
+F102                  decode_command_line
+F102  BDF121                          jsr     decode_command_token
+F105  12                              nop                     ; A should now be the command index (VERIFIED)
+F106  48                              lsla
+F107  8EF07A                          ldx     #command_vector_table           
+F10A  AD96                            jsr     [a,x]           
+F10C  39                              rts
+                      
+                      
+F10D                  do_cls
+                                      ;ldx    #str_cls_test
+                                      ;jsr    line_out
+                      
+                                      ; TODO: Decode Argument ONE (color attribute in hex $FB)
+                                      ; ...
+                      
+F10D  BDF2A6                          jsr     cls             
+F110  39                              rts
+                                      
+F111                  do_load
+                                      ; TODO: Decode Argument ONE (required: "filename.hex")
+                                      ; ...
+                      
+F111  8EF0C2                          ldx     #str_load_test
+F114  BDF25B                          jsr     line_out
+F117  39                              rts
+                                      
+F118                  do_exec
+                                      ; TODO: Decode Argument ONE (optional: new exec address in hex)
+                                      ; ...
+                      
+                      
+                                      ;ldx    #str_exec_test
+                                      ;jsr    line_out
+F118  AD9F0000                        jsr     [VECT_EXEC]
+F11C  39                              rts
+                      
+F11D                  do_reset
+                                      ;ldx    #str_reset_test
+                                      ;jsr    line_out
+F11D  6E9F000E                        jmp     [VECT_RESET]
+                                      ; rts
+                      
+F121                  decode_command_token
+F121  3430                            pshs    X, Y
+                              ; initial initialization
+F123  4F                              clra                    ; clear the token ID
+F124  3402                            pshs    A               ;       store it locally @ 0,S 
+F126  108EF065                        ldy     #command_table
+F12A                  dct_0
+F12A  8E1C3C                          ldx     #EDT_BUFFER
+F12D  BDF157                          jsr     str_cmp_nmz
+F130  271A                            beq     dct_cmd_found
+                              ; not found at this entry in the table
+                              
+F132  8E1C3C                          ldx     #EDT_BUFFER     ; reset X to the start of the edit buffer
+F135                  dct_1   ; progress Y to the next entry
+F135  A6A0                            lda     ,y+
+F137  81FF                            cmpa    #$ff            ; end of list?
+F139  2604                            bne     dct_2           ;       no, continue
+F13B  A7E4                            sta     0,S             ; store the end-of-list as token ID
+F13D  2008                            bra     dct_cmd_not_found       ; cleanup and restore
+F13F                  dct_2   
+F13F  8100                            cmpa    #$00            ; is it a null-terminator?
+F141  26F2                            bne     dct_1           ; nope not yet, loop
+F143  6CE4                            inc     0,S             ; increment the token ID
+F145  20E3                            bra     dct_0           ; loop to start checking the next entry
+                      
+F147                  dct_cmd_not_found
+F147  8EF096                          ldx     #str_not_eq
+F14A  2003                            bra     dct_output
+F14C                  dct_cmd_found   ; command was found in the table
+F14C  8EF082                          ldx     #str_eq
+F14F                  dct_output      ; output the status string
+F14F  BDF25B                          jsr     line_out
+F152                  dct_done        ; clean up and return
+F152  3502                            puls    A
+F154  3530                            puls    X, Y
+F156  39                              rts
+                      
+                      
+F157                  str_cmp_nmz     ; compare two null/space/"-terminated strings
                                       ;       on return:
                                       ;       A = tokenized command
                                       ;       X points to argument 1
                                       ;       Y points to argument 2
-                                      ;jsr    command_token
-F07E  39                              rts
+                                      ;       returns: compare condition in the Z and N condition flags
+F157  3434                            pshs    B,X,Y           ; store the working registers
+F159  8600                            lda     #0              ; clear the token flag
+F15B  3402                            pshs    A               ;       and store it locally @ 0,S
+F15D                  str_cmp_loop    ; is the string 1 character a terminator?
+F15D  A684                            lda     ,x              ; fetch a character from the first string
+F15F  2726                            beq     str1_cmp_term   ; is a null-terminator? verify other string
+F161  8120                            cmpa    #' '            ; is it a space character?
+F163  2722                            beq     str1_cmp_term   ; branch to verify other strings termination
+F165  8122                            cmpa    #'"'            ; is it a double quote?
+F167  271E                            beq     str1_cmp_term   ; branch to verify other strings termination
+F169  810D                            cmpa    #$0d            ; is it an ENTER character?
+F16B  271A                            beq     str1_cmp_term   ; branch to verify other strings termination
+                                      ; is the string 2 character a terminator?
+F16D  E6A4                            ldb     ,y              ; fetch a character from the second string
+F16F  2728                            beq     str2_cmp_term   ; is a null-terminator? verify other string
+F171  C120                            cmpb    #' '            ; is it a space character?
+F173  2724                            beq     str2_cmp_term   ; branch to verify other strings termination
+F175  C122                            cmpb    #'"'            ; is it a double-quote character?
+F177  2720                            beq     str2_cmp_term   ; branch to verify other strings termination
+F179  C10D                            cmpb    #$0d            ; is it an ENTER character?
+F17B  271C                            beq     str2_cmp_term   ; branch to verify other strings termination
+F17D                  str_cmp_equal   ; are characters are same, loop
+F17D  8A20                            ora     #$20            ; A to lowercase
+F17F  3001                            leax    1,x             ; increment X
+F181  A1A0                            cmpa    ,y+             ; compare characters and increment Y
+F183  27D8                            beq     str_cmp_loop    ; loop if characters are equal
+F185  2024                            bra     str_cmp_differ  ; loop finished, not equal
+F187                  str1_cmp_term   ; string 1 has terminated, check string 2 termination
+F187  E6A4                            ldb     ,y              ; load a character from the second string
+F189  2724                            beq     str_cmp_done    ; is it a null-terminator? strings are equal
+F18B  C120                            cmpb    #' '            ; is it a SPACE terminator?
+F18D  2720                            beq     str_cmp_done    ;       strings are equal
+F18F  C122                            cmpb    #'"'            ; is it a double-quote terminator?
+F191  271C                            beq     str_cmp_done    ;       strings are equal
+F193  C10D                            cmpb    #$0d            ; is it an ENTER terminator?
+F195  2718                            beq     str_cmp_done    ;       strings are equal
+F197  2012                            bra     str_cmp_differ  ; otherwise, strings are different
+F199                  str2_cmp_term   ; string 2 has terminated, check string 1 for termination
+F199  A684                            lda     ,x              ; load a character from the first string
+F19B  2712                            beq     str_cmp_done    ; is it a null-terminator? strings are equal
+F19D  8120                            cmpa    #' '            ; is it SPACE terminator?
+F19F  270E                            beq     str_cmp_done    ;       strings are equal
+F1A1  8122                            cmpa    #'"'            ; is it a double-space terminator?
+F1A3  270A                            beq     str_cmp_done    ;       strings are equal
+F1A5  810D                            cmpa    #$0d            ; is it an ENTER terminator?
+F1A7  2706                            beq     str_cmp_done    ;       strings are equal
+F1A9  2000                            bra     str_cmp_differ  ; otherwise, strings are different
+                                      ; characters differ, drop out
+F1AB  86FF            str_cmp_differ  lda     #$ff            ; set the token flag
+F1AD  A7E4                            sta     0,S             ;       store it locally @ 0,S
+F1AF                  str_cmp_done    ; done comparing the two strings
+                                      ; tst   0,S             ; set the CC appropriate to the local flag (0,S)
+F1AF  3502                            puls    A               ; correct the stack
+F1B1  3534                            puls    B,X,Y           ; restore the working registers
+F1B3  8100                            cmpa    #$00
+F1B5  39                              rts                     ; return
                       
                       
                       
@@ -372,330 +516,241 @@ F07E  39                              rts
                       
                       
                       ; output the line edit buffer
-F07F                  line_edit
-F07F  86FF                            lda     #$ff            ; 'true'
-F081  B71C3B                          sta     EDT_ENABLE      ; enable the hardware line editor sub-system
-F084  7F1C3C                          clr     EDT_BUFFER      ; null the start of the edit buffer
-F087  FC0011                          ldd     CSR_ADDR        ; fetch the current cursor address
-F08A  FD0016                          std     EDLIN_ANCH      ; store it as the anchor
-F08D                  6       ; check for ENTER press
-F08D  B61C28                          lda     CHAR_SCAN       ; scan for a character waiting in the queue
-F090  810D                            cmpa    #$0d            ; is it the ENTER key?
-F092  2628                            bne     0f              ; nope, continue to render the text line editor
-F094  B61C29                          lda     CHAR_POP        ; pop the ENTER from the queue before returning
-F097  CC20B4                          ldd     #$20b4          ; load a colored space
-F09A  ED9F0011                        std     [CSR_ADDR]      ; overrite the last colored cursor
+F1B6                  line_edit
+F1B6  86FF                            lda     #$ff            ; 'true'
+F1B8  B71C3B                          sta     EDT_ENABLE      ; enable the hardware line editor sub-system
+F1BB  7F1C3C                          clr     EDT_BUFFER      ; null the start of the edit buffer
+F1BE  FC0011                          ldd     CSR_ADDR        ; fetch the current cursor address
+F1C1  FD0016                          std     EDLIN_ANCH      ; store it as the anchor
+F1C4                  6       ; check for ENTER press
+F1C4  B61C28                          lda     CHAR_SCAN       ; scan for a character waiting in the queue
+F1C7  810D                            cmpa    #$0d            ; is it the ENTER key?
+F1C9  2628                            bne     0f              ; nope, continue to render the text line editor
+F1CB  B61C29                          lda     CHAR_POP        ; pop the ENTER from the queue before returning
+F1CE  CC20B4                          ldd     #$20b4          ; load a colored space
+F1D1  ED9F0011                        std     [CSR_ADDR]      ; overrite the last colored cursor
                                       ; home the cursor
-F09E  7F0013                          clr     CSR_COL         ; CSR_COL = 0
-F0A1  7C0014                          inc     CSR_ROW         ; CSR_ROW = 0
-F0A4  B60014                          lda     CSR_ROW         ; A - CSR_ROW
-F0A7  B11C0B                          cmpa    DSP_TXT_ROWS    ; last line?
-F0AA  2D06                            blt     7f              ; nope, recalc the new cursor address
-F0AC  7A0014                          dec     CSR_ROW         ; decrement CSR_ROW
-F0AF  BDF1AB                          jsr     std_text_scroll ; scroll the text buffer
-F0B2                  7       ; recalculate the cursor address based on CSR_ROW and CSR_COL
-F0B2  BDF1E0                          jsr     cursor_address  ; find CSR_ADDR based on CSR_ROW and CSR_COL
-F0B5  BF0011                          stx     CSR_ADDR        ; store the new CSR_ADDR
-F0B8  7F1C3B                          clr     EDT_ENABLE      ; disable the hardware line editor sub-system
-F0BB  39                              rts                     ; return from the line editor subroutine
-F0BC                  0       ; begin the line edit routine
+F1D5  7F0013                          clr     CSR_COL         ; CSR_COL = 0
+F1D8  7C0014                          inc     CSR_ROW         ; CSR_ROW = 0
+F1DB  B60014                          lda     CSR_ROW         ; A - CSR_ROW
+F1DE  B11C0B                          cmpa    DSP_TXT_ROWS    ; last line?
+F1E1  2D06                            blt     7f              ; nope, recalc the new cursor address
+F1E3  7A0014                          dec     CSR_ROW         ; decrement CSR_ROW
+F1E6  BDF2E2                          jsr     std_text_scroll ; scroll the text buffer
+F1E9                  7       ; recalculate the cursor address based on CSR_ROW and CSR_COL
+F1E9  BDF317                          jsr     cursor_address  ; find CSR_ADDR based on CSR_ROW and CSR_COL
+F1EC  BF0011                          stx     CSR_ADDR        ; store the new CSR_ADDR
+F1EF  7F1C3B                          clr     EDT_ENABLE      ; disable the hardware line editor sub-system
+F1F2  39                              rts                     ; return from the line editor subroutine
+F1F3                  0       ; begin the line edit routine
                                       ; ldu   #SCREEN_BUFFER  ; reserve the start of the display buffer
                                       ; ldu   EDLIN_ANCH      ; reserve the start of the display buffer
-F0BC  108E1C3C                        ldy     #EDT_BUFFER     ; start of the character line edit buffer
+F1F3  108E1C3C                        ldy     #EDT_BUFFER     ; start of the character line edit buffer
                                       ; ldx   #SCREEN_BUFFER  ; point to the start of the display buffer
-F0C0  BE0016                          ldx     EDLIN_ANCH      ; point to the start of the display buffer
-F0C3  B61C3A                          lda     EDT_BFR_CSR     ; fetch the cursor position
-F0C6  3402                            pshs    a               ; save it on the stack as a local variable      
-F0C8  2604                            bne     1f              ; cursor position is not zero, begin text
-F0CA  A6A4                            lda     ,y              ; load the first character in the buffer
-F0CC  261D                            bne     4f              ; if its not zero, display the cursor
-F0CE                  1       ; start of the line
-F0CE  B61C3A                          lda     EDT_BFR_CSR     ; load the cursor position
-F0D1  270E                            beq     3f              ; if theres no character, display the cursor
-F0D3                  2       ; display up to the cursor position
-F0D3  A6A0                            lda     ,y+             ; fetch a character from the edit buffer
-F0D5  270A                            beq     3f              ; null character (end of line)
-F0D7  C6B4                            ldb     #$B4            ; color attribute
-F0D9  ED81                            std     ,x++            ; display the character with its color  
-F0DB  6AE4                            dec     0,s             ; decrease the local cursor position
-F0DD  270C                            beq     4f              ; brach if the cursor is over a character
-F0DF  20F2                            bra     2b              ; continue displaying characters
-F0E1                  3       ; cursor at end of the line
-F0E1  3502                            puls    a               ; repair the stack
-F0E3  8620                            lda     #$20            ; load a space
-F0E5  A781                            sta     ,x++            ; display the space
-F0E7  8D14                            bsr     flash_the_cursor        
-F0E9  20A2                            bra     6b              ; loop and display changes in the edit buffer
-F0EB                  4       ; cursor over a character
-F0EB  3502                            puls    a               ; clean up the stack
-F0ED  A6A0                            lda     ,y+             ; load the next character from the buffer
-F0EF  A781                            sta     ,x++            ; ignore the attribute
+F1F7  BE0016                          ldx     EDLIN_ANCH      ; point to the start of the display buffer
+F1FA  B61C3A                          lda     EDT_BFR_CSR     ; fetch the cursor position
+F1FD  3402                            pshs    a               ; save it on the stack as a local variable      
+F1FF  2604                            bne     1f              ; cursor position is not zero, begin text
+F201  A6A4                            lda     ,y              ; load the first character in the buffer
+F203  261D                            bne     4f              ; if its not zero, display the cursor
+F205                  1       ; start of the line
+F205  B61C3A                          lda     EDT_BFR_CSR     ; load the cursor position
+F208  270E                            beq     3f              ; if theres no character, display the cursor
+F20A                  2       ; display up to the cursor position
+F20A  A6A0                            lda     ,y+             ; fetch a character from the edit buffer
+F20C  270A                            beq     3f              ; null character (end of line)
+F20E  C6B4                            ldb     #$B4            ; color attribute
+F210  ED81                            std     ,x++            ; display the character with its color  
+F212  6AE4                            dec     0,s             ; decrease the local cursor position
+F214  270C                            beq     4f              ; brach if the cursor is over a character
+F216  20F2                            bra     2b              ; continue displaying characters
+F218                  3       ; cursor at end of the line
+F218  3502                            puls    a               ; repair the stack
+F21A  8620                            lda     #$20            ; load a space
+F21C  A781                            sta     ,x++            ; display the space
+F21E  8D14                            bsr     flash_the_cursor        
+F220  20A2                            bra     6b              ; loop and display changes in the edit buffer
+F222                  4       ; cursor over a character
+F222  3502                            puls    a               ; clean up the stack
+F224  A6A0                            lda     ,y+             ; load the next character from the buffer
+F226  A781                            sta     ,x++            ; ignore the attribute
                               ; flash the cursor
-F0F1  8D0A                            bsr     flash_the_cursor
-F0F3                  5       ; finish the line
-F0F3  A6A0                            lda     ,y+             ; load the next character from the buffer
-F0F5  2796                            beq     6b              ; loop back to the top if done
-F0F7  C6B4                            ldb     #$b4            ; load the basic screen attribute
-F0F9  ED81                            std     ,x++            ; display the next character with its color
-F0FB  20F6                            bra     5b              ; continue until the line is finished
+F228  8D0A                            bsr     flash_the_cursor
+F22A                  5       ; finish the line
+F22A  A6A0                            lda     ,y+             ; load the next character from the buffer
+F22C  2796                            beq     6b              ; loop back to the top if done
+F22E  C6B4                            ldb     #$b4            ; load the basic screen attribute
+F230  ED81                            std     ,x++            ; display the next character with its color
+F232  20F6                            bra     5b              ; continue until the line is finished
                       
-F0FD                  flash_the_cursor
-F0FD  3456                            pshs    a,b,x,u         ; save these on the stack
-F0FF  FE0016                          ldu     EDLIN_ANCH      ; point to the edline start of line anchor
-F102  B61C07                          lda     SYS_TIMER+1     ; load the LSB of the system timer
-F105  8407                            anda    #$07            ; only concerned with these bits
-F107  2618                            bne     1f              ; if non-zero, skip color change
-F109  B60010                          lda     CSR_ATTR        ; load the next cursor color
-F10C  4C                              inca                    ; increment it
-F10D  840F                            anda    #$0f            ; mask off the foreground color
-F10F  8AF0                            ora     #$f0            ; foreground 15 = opaque black
-F111  B70010                          sta     CSR_ATTR        ; store the new attribute
-F114  F61C3A                          ldb     EDT_BFR_CSR     ; load the cursor position
-F117  58                              lslb                    ; skip the attribue
-F118  5C                              incb                    ; increment the attribute color
-F119  A7C5                            sta     b, u            ; update the characters color
-F11B  5A                              decb                    ; now index the character
-F11C  33C5                            leau    b,u             ; load that characters address
-F11E  FF0011                          stu     CSR_ADDR        ; store it on the zero-page
-F121                  1       ; clean up and return   
-F121  3556                            puls    a,b,x,u         ; pop these off the stack
-F123  39                              rts                     ; return when done
+F234                  flash_the_cursor
+F234  3456                            pshs    a,b,x,u         ; save these on the stack
+F236  FE0016                          ldu     EDLIN_ANCH      ; point to the edline start of line anchor
+F239  B61C07                          lda     SYS_TIMER+1     ; load the LSB of the system timer
+F23C  8407                            anda    #$07            ; only concerned with these bits
+F23E  2618                            bne     1f              ; if non-zero, skip color change
+F240  B60010                          lda     CSR_ATTR        ; load the next cursor color
+F243  4C                              inca                    ; increment it
+F244  840F                            anda    #$0f            ; mask off the foreground color
+F246  8AF0                            ora     #$f0            ; foreground 15 = opaque black
+F248  B70010                          sta     CSR_ATTR        ; store the new attribute
+F24B  F61C3A                          ldb     EDT_BFR_CSR     ; load the cursor position
+F24E  58                              lslb                    ; skip the attribue
+F24F  5C                              incb                    ; increment the attribute color
+F250  A7C5                            sta     b, u            ; update the characters color
+F252  5A                              decb                    ; now index the character
+F253  33C5                            leau    b,u             ; load that characters address
+F255  FF0011                          stu     CSR_ADDR        ; store it on the zero-page
+F258                  1       ; clean up and return   
+F258  3556                            puls    a,b,x,u         ; pop these off the stack
+F25A  39                              rts                     ; return when done
                       
                       
-F124                  line_out        ; Display a null terminated string pointed to by X
+F25B                  line_out        ; Display a null terminated string pointed to by X
                                       ; begining at CSR_ROW and CSR_COL.
-F124  3412                            pshs    a,x             ; store the working registers
-F126                  1       ; line out main loop
-F126  A680                            lda     ,x+             ; load the next character to display
-F128  2707                            beq     2f              ; skip if at null-terminator
-F12A  2B05                            bmi     2f              ; skip if high bit is set
-F12C  BDF134                          jsr     char_out        ; output this character
-F12F  20F5                            bra     1b              
-F131                  2       ; clean up and return
-F131  3512                            puls    a,x             ; restore the working registers
-F133  39                              rts                     ; return from subroutine
+F25B  3412                            pshs    a,x             ; store the working registers
+F25D                  1       ; line out main loop
+F25D  A680                            lda     ,x+             ; load the next character to display
+F25F  2707                            beq     2f              ; skip if at null-terminator
+F261  2B05                            bmi     2f              ; skip if high bit is set
+F263  BDF26B                          jsr     char_out        ; output this character
+F266  20F5                            bra     1b              
+F268                  2       ; clean up and return
+F268  3512                            puls    a,x             ; restore the working registers
+F26A  39                              rts                     ; return from subroutine
                       
                       
                       
-F134                  char_out        ; output a formatted text character based on A
+F26B                  char_out        ; output a formatted text character based on A
                                       ; jsr   [CHROUT_VECT]
-F134                  char_out_main   ; the main CHROUT routine
-F134  3416                            pshs    d,x
+F26B                  char_out_main   ; the main CHROUT routine
+F26B  3416                            pshs    d,x
                       
-F136  8120                            cmpa    #$20            ; is a printable character $20 - $ff
-F138  2C09                            bge     1f              ; yup, go print it
-F13A  810A                            cmpa    #$0a            ; line feed ?
-F13C  2603                            bne     2f              ; no, skip to next
-F13E  BDF18C                          jsr     csr_new_line    ; perform a new line
-F141                  2       ; skip to end
-F141  2029                            bra     0f              ; just skip everything
-F143                  1       ; output a printable character $20 - $ff
-F143  BDF1E0                          jsr     cursor_address  ; X = CSR_ADDR          
-F146  F60015                          ldb     TXT_ATTR        ; fetch the default color attribute
-F149  ED84                            std     ,x              ; store it on screen
-F14B  7C0013                          inc     CSR_COL         ; increase the cursors column
+F26D  8120                            cmpa    #$20            ; is a printable character $20 - $ff
+F26F  2C09                            bge     1f              ; yup, go print it
+F271  810A                            cmpa    #$0a            ; line feed ?
+F273  2603                            bne     2f              ; no, skip to next
+F275  BDF2C3                          jsr     csr_new_line    ; perform a new line
+F278                  2       ; skip to end
+F278  2029                            bra     0f              ; just skip everything
+F27A                  1       ; output a printable character $20 - $ff
+F27A  BDF317                          jsr     cursor_address  ; X = CSR_ADDR          
+F27D  F60015                          ldb     TXT_ATTR        ; fetch the default color attribute
+F280  ED84                            std     ,x              ; store it on screen
+F282  7C0013                          inc     CSR_COL         ; increase the cursors column
                                       ; handle line wrap and scrolling
-F14E  B60013                          lda     CSR_COL         ; load cursor column
-F151  B11C0A                          cmpa    DSP_TXT_COLS    ; compare with max displayed columns
-F154  2C02                            bge     1f              ; if greater or equal
-F156  2014                            bra     0f              ; skip and return
-F158                  1       ; if (CSR_COL >= DSP_TXT_COLS)
-F158  7F0013                          clr     CSR_COL         ; clear CSR_COL
-F15B  7C0014                          inc     CSR_ROW         ; increment CSR_ROW
-F15E  B60014                          lda     CSR_ROW         ; load CSR_ROWS
-F161  B11C0B                          cmpa    DSP_TXT_ROWS    ; if (CSR_ROW < DSP_TXT_ROWS)
-F164  2D06                            blt     0f              ;       clean up and return
-F166  BDF1AB                          jsr     std_text_scroll ; scroll the text screen
-F169  7A0014                          dec     CSR_ROW         ; CSR_ROW--
-F16C                  0       ; clean up and return
-F16C  3516                            puls    d,x             ; restore the working registers
-F16E  39                              rts                     ; return
+F285  B60013                          lda     CSR_COL         ; load cursor column
+F288  B11C0A                          cmpa    DSP_TXT_COLS    ; compare with max displayed columns
+F28B  2C02                            bge     1f              ; if greater or equal
+F28D  2014                            bra     0f              ; skip and return
+F28F                  1       ; if (CSR_COL >= DSP_TXT_COLS)
+F28F  7F0013                          clr     CSR_COL         ; clear CSR_COL
+F292  7C0014                          inc     CSR_ROW         ; increment CSR_ROW
+F295  B60014                          lda     CSR_ROW         ; load CSR_ROWS
+F298  B11C0B                          cmpa    DSP_TXT_ROWS    ; if (CSR_ROW < DSP_TXT_ROWS)
+F29B  2D06                            blt     0f              ;       clean up and return
+F29D  BDF2E2                          jsr     std_text_scroll ; scroll the text screen
+F2A0  7A0014                          dec     CSR_ROW         ; CSR_ROW--
+F2A3                  0       ; clean up and return
+F2A3  3516                            puls    d,x             ; restore the working registers
+F2A5  39                              rts                     ; return
                       
                               
-F16F                  cls     ; clear out the text buffer     
-F16F  3416                            pshs    d, x            ; store the working registers
-F171  7F0013                          clr     CSR_COL         ; cursor column = 0
-F174  7F0014                          clr     CSR_ROW         ; cursor row = 0
-F177  BDF1E0                          jsr     cursor_address  ; X = cursor address based on CSR_COL and CSR_ROW
-F17A  8E0400                          ldx     #SCREEN_BUFFER  ; point to the start of the text buffer
-F17D  8620                            lda     #$20            ; set next character to space
-F17F  F60015                          ldb     TXT_ATTR        ; load the characters color
-F182                  1       ; cls main loop 
-F182  ED81                            std     ,x++            ; store the space with its color attribute
-F184  8C1C00                          cmpx    #STD_VID_MAX    ; are we at the end of the text buffer?
-F187  2DF9                            blt     1b              ;       loop if not
-F189  3516                            puls    d, x            ; restore the working registers
-F18B  39                              rts                     ; return
+F2A6                  cls     ; clear out the text buffer     
+F2A6  3416                            pshs    d, x            ; store the working registers
+F2A8  7F0013                          clr     CSR_COL         ; cursor column = 0
+F2AB  7F0014                          clr     CSR_ROW         ; cursor row = 0
+F2AE  BDF317                          jsr     cursor_address  ; X = cursor address based on CSR_COL and CSR_ROW
+F2B1  8E0400                          ldx     #SCREEN_BUFFER  ; point to the start of the text buffer
+F2B4  8620                            lda     #$20            ; set next character to space
+F2B6  F60015                          ldb     TXT_ATTR        ; load the characters color
+F2B9                  1       ; cls main loop 
+F2B9  ED81                            std     ,x++            ; store the space with its color attribute
+F2BB  8C1C00                          cmpx    #STD_VID_MAX    ; are we at the end of the text buffer?
+F2BE  2DF9                            blt     1b              ;       loop if not
+F2C0  3516                            puls    d, x            ; restore the working registers
+F2C2  39                              rts                     ; return
                       
                       
-F18C                  csr_new_line    ; perform a line-feed and a carriage return with scrolling
-F18C  3412                            pshs    a, x            ; store the working registers
-F18E  7F0013                          clr     CSR_COL         ; set cursor column to zero
-F191  7C0014                          inc     CSR_ROW         ; increment the cursor row
-F194  B60014                          lda     CSR_ROW         ; A = cursor row
-F197  B11C0B                          cmpa    DSP_TXT_ROWS    ; skip if the current cursor row
-F19A  2D06                            blt     1f              ;   is less than the max rows
-F19C  7A0014                          dec     CSR_ROW         ; decrease the cursors row
-F19F  BDF1AB                          jsr     std_text_scroll ; scroll the text up one line
-F1A2                  1       ; recalculate the cursor address based on CSR_ROW and CSR_COL
-F1A2  BDF1E0                          jsr     cursor_address  ; X = CSR_ADDR based on CSR_ROW and CSR_COL
-F1A5  BF0011                          stx     CSR_ADDR        ; update CSR_ADDR 
-F1A8  3512                            puls    a,x             ; restore the working registers
-F1AA  39                              rts                     ; return from the line editor subroutine
+F2C3                  csr_new_line    ; perform a line-feed and a carriage return with scrolling
+F2C3  3412                            pshs    a, x            ; store the working registers
+F2C5  7F0013                          clr     CSR_COL         ; set cursor column to zero
+F2C8  7C0014                          inc     CSR_ROW         ; increment the cursor row
+F2CB  B60014                          lda     CSR_ROW         ; A = cursor row
+F2CE  B11C0B                          cmpa    DSP_TXT_ROWS    ; skip if the current cursor row
+F2D1  2D06                            blt     1f              ;   is less than the max rows
+F2D3  7A0014                          dec     CSR_ROW         ; decrease the cursors row
+F2D6  BDF2E2                          jsr     std_text_scroll ; scroll the text up one line
+F2D9                  1       ; recalculate the cursor address based on CSR_ROW and CSR_COL
+F2D9  BDF317                          jsr     cursor_address  ; X = CSR_ADDR based on CSR_ROW and CSR_COL
+F2DC  BF0011                          stx     CSR_ADDR        ; update CSR_ADDR 
+F2DF  3512                            puls    a,x             ; restore the working registers
+F2E1  39                              rts                     ; return from the line editor subroutine
                       
                       
                       
-F1AB                  std_text_scroll ; scroll the standard text screen up one line
-F1AB  3436                            pshs    d, x, y         ; store the working registers
-F1AD  108E0400                        ldy     #SCREEN_BUFFER  ; Y = start of the standard video buffer
-F1B1  F61C0A                          ldb     DSP_TXT_COLS    ; B = number of displayed text columns
-F1B4  58                              lslb                    ; B = B * 2 -- account for the attribute byte
-F1B5  8E0400                          ldx     #SCREEN_BUFFER  ; X = start of the standard video buffer
-F1B8  3085                            leax    b,x             ; X = one line down
-F1BA                  1       ; scroll up one line
-F1BA  EC81                            ldd     ,x++            ; load character at X 
-F1BC  EDA1                            std     ,y++            ; store it at Y
-F1BE  BC1C00                          cmpx    STD_VID_MAX     ; at the end of the display?
-F1C1  2DF7                            blt     1b              ; loop if not
+F2E2                  std_text_scroll ; scroll the standard text screen up one line
+F2E2  3436                            pshs    d, x, y         ; store the working registers
+F2E4  108E0400                        ldy     #SCREEN_BUFFER  ; Y = start of the standard video buffer
+F2E8  F61C0A                          ldb     DSP_TXT_COLS    ; B = number of displayed text columns
+F2EB  58                              lslb                    ; B = B * 2 -- account for the attribute byte
+F2EC  8E0400                          ldx     #SCREEN_BUFFER  ; X = start of the standard video buffer
+F2EF  3085                            leax    b,x             ; X = one line down
+F2F1                  1       ; scroll up one line
+F2F1  EC81                            ldd     ,x++            ; load character at X 
+F2F3  EDA1                            std     ,y++            ; store it at Y
+F2F5  BC1C00                          cmpx    STD_VID_MAX     ; at the end of the display?
+F2F8  2DF7                            blt     1b              ; loop if not
                               ; fill the bottom line with spaces
-F1C3  8E0400                          ldx     #SCREEN_BUFFER  ; X = start of the standard video buffer
-F1C6  F61C0B                          ldb     DSP_TXT_ROWS    ; B = number of displayed rows
-F1C9  5A                              decb                    ; B = B - 1  last line
-F1CA  58                              lslb                    ; B = B * 1 -- account for the attribute byte
-F1CB  B61C0A                          lda     DSP_TXT_COLS    ; A = number of displayed text columns
-F1CE  3D                              mul                     ; D = A * B
-F1CF  308B                            leax    d,x             ; X = the start of the bottom row
-F1D1  8620                            lda     #$20            ; load up default space character
-F1D3  F60015                          ldb     TXT_ATTR        ; and the default color
-F1D6                  2       ; store the character with its color attribute
-F1D6  ED81                            std     ,x++            ; store the space at X
-F1D8  BC1C00                          cmpx    STD_VID_MAX     ; at the end of the text buffer
-F1DB  2DF9                            blt     2b              ; loop if not
+F2FA  8E0400                          ldx     #SCREEN_BUFFER  ; X = start of the standard video buffer
+F2FD  F61C0B                          ldb     DSP_TXT_ROWS    ; B = number of displayed rows
+F300  5A                              decb                    ; B = B - 1  last line
+F301  58                              lslb                    ; B = B * 1 -- account for the attribute byte
+F302  B61C0A                          lda     DSP_TXT_COLS    ; A = number of displayed text columns
+F305  3D                              mul                     ; D = A * B
+F306  308B                            leax    d,x             ; X = the start of the bottom row
+F308  8620                            lda     #$20            ; load up default space character
+F30A  F60015                          ldb     TXT_ATTR        ; and the default color
+F30D                  2       ; store the character with its color attribute
+F30D  ED81                            std     ,x++            ; store the space at X
+F30F  BC1C00                          cmpx    STD_VID_MAX     ; at the end of the text buffer
+F312  2DF9                            blt     2b              ; loop if not
                               ; return
-F1DD  3536                            puls    d,x,y           ; restore the working registers
-F1DF  39                              rts
+F314  3536                            puls    d,x,y           ; restore the working registers
+F316  39                              rts
                       
                       
-F1E0                  cursor_address  ; Update CSR_ADDR and return the cursor address in X 
+F317                  cursor_address  ; Update CSR_ADDR and return the cursor address in X 
                                       ; based on CSR_COL and CSR_ROW.
-F1E0  3406                            pshs    d               ; store used registers
-F1E2  8E0400                          ldx     #SCREEN_BUFFER  ; start of the standard video buffer
-F1E5  B60014                          lda     CSR_ROW         ; A = current cursor row
-F1E8  F61C0A                          ldb     DSP_TXT_COLS    ; B = number of columns displayed
-F1EB  58                              lslb                    ; B = B * 2 -- account for the attribute byte
-F1EC  3D                              mul                     ; D = A * B
-F1ED  308B                            leax    d,x             ; X = D + X             
-F1EF  F60013                          ldb     CSR_COL         ; B = current cursor column
-F1F2  58                              lslb                    ; B = B * 2 -- account for the attribute byte
-F1F3  3085                            leax    b,x             ; X = B + X
-F1F5  BF0011                          stx     CSR_ADDR        ; store the cursor address
-F1F8  3506                            puls    d               ; restore used registers
-F1FA  39                              rts                     ; return
+F317  3406                            pshs    d               ; store used registers
+F319  8E0400                          ldx     #SCREEN_BUFFER  ; start of the standard video buffer
+F31C  B60014                          lda     CSR_ROW         ; A = current cursor row
+F31F  F61C0A                          ldb     DSP_TXT_COLS    ; B = number of columns displayed
+F322  58                              lslb                    ; B = B * 2 -- account for the attribute byte
+F323  3D                              mul                     ; D = A * B
+F324  308B                            leax    d,x             ; X = D + X             
+F326  F60013                          ldb     CSR_COL         ; B = current cursor column
+F329  58                              lslb                    ; B = B * 2 -- account for the attribute byte
+F32A  3085                            leax    b,x             ; X = B + X
+F32C  BF0011                          stx     CSR_ADDR        ; store the cursor address
+F32F  3506                            puls    d               ; restore used registers
+F331  39                              rts                     ; return
                       
                       
                       
                       
                       
-                      ;       ; output the line edit buffer
-                      ;       line_edit
-                      ;                       clr     EDT_BUFFER
-                      ;                       ldd     CSR_ADDR
-                      ;                       std     EDLIN_ANCH
-                      ;       
-                      ;       6       ; check for ENTER press
-                      ;                       lda     CHAR_SCAN       ; scan for a character waiting in the queue
-                      ;                       cmpa    #$0d            ; is it the ENTER key?
-                      ;                       bne     0f              ; nope, continue to render the text line editor
-                      ;                       lda     CHAR_POP        ; pop the ENTER from the queue before returning
-                      ;                       ldd     #$20b4          ; load a colored space
-                      ;                       std     [CSR_ADDR]      ; overrite the last colored cursor
-                      ;                       ; home the cursor
-                      ;                       clr     CSR_COL
-                      ;                       inc     CSR_ROW
-                      ;                       lda     CSR_ROW
-                      ;                       cmpa    DSP_TXT_ROWS
-                      ;                       blt     7f
-                      ;                       dec     CSR_ROW
-                      ;                       jsr     std_text_scroll
-                      ;       7       ; recalculate the cursor address based on CSR_ROW and CSR_COL
-                      ;                       jsr     cursor_address
-                      ;                       stx     CSR_ADDR                
-                      ;                       rts                     ; return from the line editor subroutine
-                      ;       0       ; begine the line edit routine
-                      ;                       ; ldu   #SCREEN_BUFFER  ; reserve the start of the display buffer
-                      ;                       ; ldu   EDLIN_ANCH      ; reserve the start of the display buffer
-                      ;                       ldy     #EDT_BUFFER     ; start of the character line edit buffer
-                      ;                       ; ldx   #SCREEN_BUFFER  ; point to the start of the display buffer
-                      ;                       ldx     EDLIN_ANCH      ; point to the start of the display buffer
-                      ;                       lda     EDT_BFR_CSR     ; fetch the cursor position
-                      ;                       pshs    a               ; save it on the stack as a local variable      
-                      ;                       bne     1f              ; cursor position is not zero, begin text
-                      ;                       lda     ,y              ; load the first character in the buffer
-                      ;                       bne     4f              ; if its not zero, display the cursor
-                      ;       1       ; start of the line
-                      ;                       lda     EDT_BFR_CSR     ; load the cursor position
-                      ;                       beq     3f              ; if theres no character, display the cursor
-                      ;       2       ; display up to the cursor position
-                      ;                       lda     ,y+             ; fetch a character from the edit buffer
-                      ;                       beq     3f              ; null character (end of line)
-                      ;                       ldb     #$B4            ; color attribute
-                      ;                       std     ,x++            ; display the character with its color  
-                      ;                       dec     0,s             ; decrease the local cursor position
-                      ;                       beq     4f              ; brach if the cursor is over a character
-                      ;                       bra     2b              ; continue displaying characters
-                      ;       3       ; cursor at end of the line
-                      ;                       puls    a               ; repair the stack
-                      ;                       lda     #$20            ; load a space
-                      ;                       sta     ,x++            ; display the space
-                      ;                       bsr     flash_the_cursor        
-                      ;                       bra     6b              ; loop and display changes in the edit buffer
-                      ;       4       ; cursor over a character
-                      ;                       puls    a               ; clean up the stack
-                      ;                       lda     ,y+             ; load the next character from the buffer
-                      ;                       sta     ,x++            ; ignore the attribute
-                      ;               ; flash the cursor
-                      ;                       bsr     flash_the_cursor
-                      ;       5       ; finish the line
-                      ;                       lda     ,y+             ; load the next character from the buffer
-                      ;                       beq     6b              ; loop back to the top if done
-                      ;                       ldb     #$b4            ; load the basic screen attribute
-                      ;                       std     ,x++            ; display the next character with its color
-                      ;                       bra     5b              ; continue until the line is finished
-                      ;       
-                      ;       flash_the_cursor
-                      ;                       pshs    a,b,x,u         ; save these on the stack
-                      ;                       ldu     EDLIN_ANCH      ; point to the edline start of line anchor
-                      ;                       lda     SYS_TIMER+1     ; load the LSB of the system timer
-                      ;                       anda    #$07            ; only concerned with these bits
-                      ;                       bne     1f              ; if non-zero, skip color change
-                      ;                       lda     CSR_ATTR        ; load the next cursor color
-                      ;                       inca                    ; increment it
-                      ;                       anda    #$0f            ; mask off the foreground color
-                      ;                       ora     #$f0            ; foreground 15 = opaque black
-                      ;                       sta     CSR_ATTR        ; store the new attribute
-                      ;                       ldb     EDT_BFR_CSR     ; load the cursor position
-                      ;                       lslb                    ; skip the attribue
-                      ;                       incb                    ; increment the attribute color
-                      ;                       sta     b, u            ; update the characters color
-                      ;                       decb                    ; now index the character
-                      ;                       leau    b,u             ; load that characters address
-                      ;                       stu     CSR_ADDR        ; store it on the zero-page
-                      ;       1       ; clean up and return   
-                      ;                       puls    a,b,x,u         ; pop these off the stack
-                      ;                       rts                     ; return when done
-                      
-                      
-FE00                                          org     $fe00
-FE00  526574726F20363830392076302E310A00 prompt0                 fcn     "Retro 6809 v0.1\n"
-FE11  436F70797269676874202843292032303233204279204A6179204661726965730A0A00 prompt1                 fcn     "Copyright (C) 2023 By Jay Faries\n\n"
-FE34  52656164790A00  ready_prompt            fcn     "Ready\n"
+FE00                                  org     $fe00
+FE00  526574726F20363830392076302E310A00 prompt0         fcn     "Retro 6809 v0.1\n"
+FE11  436F70797269676874202843292032303233204279204A6179204661726965730A0A00 prompt1         fcn     "Copyright (C) 2023 By Jay Faries\n\n"
+FE34  52656164790A00  ready_prompt    fcn     "Ready\n"
                       
                       
                       
                       
                       ; ROM Based Hardware Vectors
 FFF0                                  org     $FFF0
-FFF0  F000                            fdb     KRNL_RSRVD      ; HARD_RSRVD       RESERVED Hardware Interrupt Vector
+FFF0  F000                            fdb     KRNL_EXEC       ; HARD_RSRVD       EXEC Interrupt Vector
 FFF2  F004                            fdb     KRNL_SWI3       ; HARD_SWI3        SWI3 Hardware Interrupt Vector
 FFF4  F008                            fdb     KRNL_SWI2       ; HARD_SWI2        SWI2 Hardware Interrupt Vector
 FFF6  F00C                            fdb     KRNL_FIRQ       ; HARD_FIRQ        FIRQ Hardware Interrupt Vector

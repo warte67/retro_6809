@@ -22,7 +22,7 @@
 
 ; Software Vectors
 	org	$0000	
-VECT_RSRVD	fdb	RSRVD_start	; This will likely be used as the EXEC vector
+VECT_EXEC	fdb	EXEC_start	; This will likely be used as the EXEC vector
 VECT_SWI3 	fdb	SWI3_start	; SWI3 Software Interrupt Vector
 VECT_SWI2 	fdb	SWI2_start	; SWI2 Software Interrupt Vector
 VECT_FIRQ 	fdb	FIRQ_start	; FIRQ Software Interrupt Vector
@@ -43,15 +43,15 @@ CSR_ROW		fcb	$00;		; current cursor row
 TXT_ATTR	fcb	$B4		; current text color attribute
 EDLIN_ANCH	fdb	$0000;		; line edit text anchor address
 CMD_LN_TOKEN	fcb	$00;		; current command line token
-var1		fcb	0;
-var2		fcb	0;
+var1		fcb	0;		; 
+var2		fcb	0;		;
 
 
 
 
 ; Kernel Jump Vector Calls	
 	org 	KERNEL_ROM		
-KRNL_RSRVD	jmp	[VECT_RSRVD]	; This will likely be used as t	he EXEC vector
+KRNL_EXEC	jmp	[VECT_EXEC]	; This will likely be used as t	he EXEC vector
 KRNL_SWI3 	jmp	[VECT_SWI3 ]	; SWI3 Software Interrupt Vector	
 KRNL_SWI2 	jmp	[VECT_SWI2 ]	; SWI2 Software Interrupt Vector
 KRNL_FIRQ 	jmp	[VECT_FIRQ ]	; FIRQ Software Interrupt Vector
@@ -63,7 +63,8 @@ KRNL_RESET	jmp	[VECT_RESET]	; RESET Software Interrupt Vector
 ; a null vectors (i.e. an infinate loop traps for vector testing)
 KRNL_UNDEF	bra	KRNL_UNDEF
 
-RSRVD_start	bra	RSRVD_start	; EXEC program
+; default subs
+EXEC_start	bra	EXEC_start	; EXEC program
 SWI3_start	bra	SWI3_start	; SWI3 Implementation
 SWI2_start	bra	SWI2_start	; SWI2 Implementation
 FIRQ_start	bra	FIRQ_start	; FIRQ Implementation
@@ -156,26 +157,169 @@ kernel_start
 		jsr	decode_command_line	
 		bra	1b
 
-command_table	fcs	"CLS"		; 1
-		fcs	"LOAD"		; 2
-		fcs	"EXEC"		; 3
-		fcs	"RESET"		; 4
-		fcb	0		; 0 = non-entry or invalid command
+command_table	fcn	"cls"		; #
+		fcn	"load"		; #
+		fcn	"exec"		; #
+		fcn	"reset"		; #
+		fcb	$FF		; $FF = end of list
+command_vector_table
+		fdb	do_cls
+		fdb	do_load
+		fdb	do_exec
+		fdb	do_reset
 
-decode_command_line	
-		pshs	A, X, Y
-		jsr	crunch_command_line
+str_eq		fcn	"Command was found.\n";
+str_not_eq	fcn	"Command was NOT found.\n";
 
-		puls	A, X, Y
+; test strings
+str_cls_test	fcn	"CLS command issued\n"
+str_load_test	fcn	"LOAD command issued\n"
+str_exec_test	fcn	"EXEC command issued\n"
+str_reset_test	fcn	"RESET command issued\n"
+
+decode_command_line
+		jsr	decode_command_token
+		nop			; A should now be the command index (VERIFIED)
+		lsla
+		ldx	#command_vector_table		
+		jsr	[a,x]		
 		rts
 
-crunch_command_line	; crunch the command line
+
+do_cls
+		;ldx	#str_cls_test
+		;jsr	line_out
+
+		; TODO: Decode Argument ONE (color attribute in hex $FB)
+		; ...
+
+		jsr	cls		
+		rts
+		
+do_load
+		; TODO: Decode Argument ONE (required: "filename.hex")
+		; ...
+
+		ldx	#str_load_test
+		jsr	line_out
+		rts
+		
+do_exec
+		; TODO: Decode Argument ONE (optional: new exec address in hex)
+		; ...
+
+
+		;ldx	#str_exec_test
+		;jsr	line_out
+		jsr	[VECT_EXEC]
+		rts
+
+do_reset
+		;ldx	#str_reset_test
+		;jsr	line_out
+		jmp	[VECT_RESET]
+		; rts
+
+decode_command_token
+		pshs	X, Y
+	; initial initialization
+		clra			; clear the token ID
+		pshs	A		; 	store it locally @ 0,S 
+		ldy	#command_table
+dct_0
+		ldx	#EDT_BUFFER
+		jsr	str_cmp_nmz
+		beq	dct_cmd_found
+	; not found at this entry in the table
+	
+		ldx	#EDT_BUFFER	; reset X to the start of the edit buffer
+dct_1	; progress Y to the next entry
+		lda	,y+
+		cmpa	#$ff		; end of list?
+		bne	dct_2		; 	no, continue
+		sta	0,S		; store the end-of-list as token ID
+		bra	dct_cmd_not_found	; cleanup and restore
+dct_2	
+		cmpa	#$00		; is it a null-terminator?
+		bne	dct_1		; nope not yet, loop
+		inc	0,S		; increment the token ID
+		bra	dct_0		; loop to start checking the next entry
+
+dct_cmd_not_found
+		ldx	#str_not_eq
+		bra	dct_output
+dct_cmd_found	; command was found in the table
+		ldx	#str_eq
+dct_output	; output the status string
+		jsr	line_out
+dct_done	; clean up and return
+		puls	A
+		puls	X, Y
+		rts
+
+
+str_cmp_nmz	; compare two null/space/"-terminated strings
 		; 	on return:
 		; 	A = tokenized command
 		;	X points to argument 1
 		;	Y points to argument 2
-		;jsr	command_token
-		rts
+		;	returns: compare condition in the Z and N condition flags
+		pshs	B,X,Y		; store the working registers
+		lda	#0		; clear the token flag
+		pshs	A		; 	and store it locally @ 0,S
+str_cmp_loop	; is the string 1 character a terminator?
+		lda	,x		; fetch a character from the first string
+		beq	str1_cmp_term	; is a null-terminator? verify other string
+		cmpa	#' '		; is it a space character?
+		beq	str1_cmp_term	; branch to verify other strings termination
+		cmpa	#'"'		; is it a double quote?
+		beq	str1_cmp_term	; branch to verify other strings termination
+		cmpa	#$0d		; is it an ENTER character?
+		beq	str1_cmp_term	; branch to verify other strings termination
+		; is the string 2 character a terminator?
+		ldb	,y		; fetch a character from the second string
+		beq	str2_cmp_term	; is a null-terminator? verify other string
+		cmpb	#' '		; is it a space character?
+		beq	str2_cmp_term	; branch to verify other strings termination
+		cmpb	#'"'		; is it a double-quote character?
+		beq	str2_cmp_term	; branch to verify other strings termination
+		cmpb	#$0d		; is it an ENTER character?
+		beq	str2_cmp_term	; branch to verify other strings termination
+str_cmp_equal	; are characters are same, loop
+		ora	#$20		; A to lowercase
+		leax	1,x		; increment X
+		cmpa	,y+		; compare characters and increment Y
+		beq	str_cmp_loop	; loop if characters are equal
+		bra	str_cmp_differ	; loop finished, not equal
+str1_cmp_term	; string 1 has terminated, check string 2 termination
+		ldb	,y		; load a character from the second string
+		beq	str_cmp_done	; is it a null-terminator? strings are equal
+		cmpb	#' '		; is it a SPACE terminator?
+		beq	str_cmp_done	;	strings are equal
+		cmpb	#'"'		; is it a double-quote terminator?
+		beq	str_cmp_done	;	strings are equal
+		cmpb	#$0d		; is it an ENTER terminator?
+		beq	str_cmp_done	;	strings are equal
+		bra	str_cmp_differ	; otherwise, strings are different
+str2_cmp_term	; string 2 has terminated, check string 1 for termination
+		lda	,x		; load a character from the first string
+		beq	str_cmp_done	; is it a null-terminator? strings are equal
+		cmpa	#' '		; is it SPACE terminator?
+		beq	str_cmp_done	;	strings are equal
+		cmpa	#'"'		; is it a double-space terminator?
+		beq	str_cmp_done	;	strings are equal
+		cmpa	#$0d		; is it an ENTER terminator?
+		beq	str_cmp_done	; 	strings are equal
+		bra	str_cmp_differ	; otherwise, strings are different
+		; characters differ, drop out
+str_cmp_differ	lda	#$ff		; set the token flag
+		sta	0,S		; 	store it locally @ 0,S
+str_cmp_done	; done comparing the two strings
+		; tst	0,S		; set the CC appropriate to the local flag (0,S)
+		puls	A		; correct the stack
+		puls	B,X,Y		; restore the working registers
+		cmpa	#$00
+		rts			; return
 
 
 
@@ -407,106 +551,17 @@ cursor_address	; Update CSR_ADDR and return the cursor address in X
 
 
 
-;	; output the line edit buffer
-;	line_edit
-;			clr	EDT_BUFFER
-;			ldd	CSR_ADDR
-;			std	EDLIN_ANCH
-;	
-;	6	; check for ENTER press
-;			lda	CHAR_SCAN	; scan for a character waiting in the queue
-;			cmpa	#$0d		; is it the ENTER key?
-;			bne	0f		; nope, continue to render the text line editor
-;			lda	CHAR_POP	; pop the ENTER from the queue before returning
-;			ldd	#$20b4		; load a colored space
-;			std	[CSR_ADDR]	; overrite the last colored cursor
-;			; home the cursor
-;			clr	CSR_COL
-;			inc	CSR_ROW
-;			lda	CSR_ROW
-;			cmpa	DSP_TXT_ROWS
-;			blt	7f
-;			dec	CSR_ROW
-;			jsr	std_text_scroll
-;	7	; recalculate the cursor address based on CSR_ROW and CSR_COL
-;			jsr 	cursor_address
-;			stx	CSR_ADDR		
-;			rts			; return from the line editor subroutine
-;	0	; begine the line edit routine
-;			; ldu	#SCREEN_BUFFER	; reserve the start of the display buffer
-;			; ldu	EDLIN_ANCH	; reserve the start of the display buffer
-;			ldy	#EDT_BUFFER	; start of the character line edit buffer
-;			; ldx	#SCREEN_BUFFER	; point to the start of the display buffer
-;			ldx	EDLIN_ANCH	; point to the start of the display buffer
-;			lda	EDT_BFR_CSR	; fetch the cursor position
-;			pshs	a		; save it on the stack as a local variable	
-;			bne	1f		; cursor position is not zero, begin text
-;			lda	,y		; load the first character in the buffer
-;			bne	4f		; if its not zero, display the cursor
-;	1	; start of the line
-;			lda	EDT_BFR_CSR	; load the cursor position
-;			beq	3f		; if theres no character, display the cursor
-;	2	; display up to the cursor position
-;			lda	,y+		; fetch a character from the edit buffer
-;			beq	3f		; null character (end of line)
-;			ldb	#$B4		; color attribute
-;			std	,x++		; display the character with its color	
-;			dec	0,s		; decrease the local cursor position
-;			beq	4f		; brach if the cursor is over a character
-;			bra	2b		; continue displaying characters
-;	3	; cursor at end of the line
-;			puls	a		; repair the stack
-;			lda	#$20		; load a space
-;			sta	,x++		; display the space
-;			bsr	flash_the_cursor	
-;			bra	6b		; loop and display changes in the edit buffer
-;	4	; cursor over a character
-;			puls	a		; clean up the stack
-;			lda	,y+		; load the next character from the buffer
-;			sta	,x++		; ignore the attribute
-;		; flash the cursor
-;			bsr	flash_the_cursor
-;	5	; finish the line
-;			lda	,y+		; load the next character from the buffer
-;			beq	6b		; loop back to the top if done
-;			ldb	#$b4		; load the basic screen attribute
-;			std	,x++		; display the next character with its color
-;			bra	5b		; continue until the line is finished
-;	
-;	flash_the_cursor
-;			pshs	a,b,x,u		; save these on the stack
-;			ldu	EDLIN_ANCH	; point to the edline start of line anchor
-;			lda	SYS_TIMER+1	; load the LSB of the system timer
-;			anda	#$07		; only concerned with these bits
-;			bne	1f		; if non-zero, skip color change
-;			lda	CSR_ATTR	; load the next cursor color
-;			inca			; increment it
-;			anda	#$0f		; mask off the foreground color
-;			ora	#$f0		; foreground 15 = opaque black
-;			sta	CSR_ATTR	; store the new attribute
-;			ldb	EDT_BFR_CSR	; load the cursor position
-;			lslb			; skip the attribue
-;			incb			; increment the attribute color
-;			sta	b, u		; update the characters color
-;			decb			; now index the character
-;			leau	b,u		; load that characters address
-;			stu	CSR_ADDR	; store it on the zero-page
-;	1	; clean up and return	
-;			puls	a,b,x,u		; pop these off the stack
-;			rts			; return when done
-
-
-			org	$fe00
-prompt0			fcn	"Retro 6809 v0.1\n"
-prompt1			fcn	"Copyright (C) 2023 By Jay Faries\n\n"
-ready_prompt		fcn	"Ready\n"
+		org	$fe00
+prompt0		fcn	"Retro 6809 v0.1\n"
+prompt1		fcn	"Copyright (C) 2023 By Jay Faries\n\n"
+ready_prompt	fcn	"Ready\n"
 
 
 
 
 ; ROM Based Hardware Vectors
 		org	$FFF0
-		fdb	KRNL_RSRVD	; HARD_RSRVD       RESERVED Hardware Interrupt Vector
+		fdb	KRNL_EXEC	; HARD_RSRVD       EXEC Interrupt Vector
 		fdb	KRNL_SWI3  	; HARD_SWI3        SWI3 Hardware Interrupt Vector
 		fdb	KRNL_SWI2  	; HARD_SWI2        SWI2 Hardware Interrupt Vector
 		fdb	KRNL_FIRQ  	; HARD_FIRQ        FIRQ Hardware Interrupt Vector
