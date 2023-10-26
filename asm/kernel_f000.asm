@@ -157,28 +157,37 @@ kernel_start
 		jsr	decode_command_line	
 		bra	1b
 
-command_table	fcn	"cls"		; #
-		fcn	"load"		; #
-		fcn	"exec"		; #
-		fcn	"reset"		; #
+command_table	fcn	"cls"		; #0
+		fcn	"color"		; #1
+		fcn	"load"		; #2
+		fcn	"exec"		; #3
+		fcn	"reset"		; #4
 		fcb	$FF		; $FF = end of list
 command_vector_table
 		fdb	do_cls
+		fdb	do_color
 		fdb	do_load
 		fdb	do_exec
 		fdb	do_reset
 
-str_eq		fcn	"Command was found.\n";
-str_not_eq	fcn	"Command was NOT found.\n";
+str_eq		fcn	" ";
+errstr_syntax	fcn	"ERROR: Syntax\n";
 
 ; test strings
 str_cls_test	fcn	"CLS command issued\n"
+str_color_test	fcn	"COLOR command issued\n"
 str_load_test	fcn	"LOAD command issued\n"
 str_exec_test	fcn	"EXEC command issued\n"
 str_reset_test	fcn	"RESET command issued\n"
 
 decode_command_line
 		jsr	decode_command_token
+		cmpa	#$ff		; command not found
+		beq	dcl_command_not_found		
+		bra	dcl_command_found
+dcl_command_not_found
+		rts
+dcl_command_found
 		nop			; A should now be the command index (VERIFIED)
 		lsla
 		ldx	#command_vector_table		
@@ -195,6 +204,15 @@ do_cls
 
 		jsr	cls		
 		rts
+
+do_color
+		ldx	#str_color_test
+		jsr	line_out
+		; TODO: Decode Argument ONE (color attribute in hex $FB)
+		; ...
+
+		;jsr	cls		
+		rts
 		
 do_load
 		; TODO: Decode Argument ONE (required: "filename.hex")
@@ -207,11 +225,9 @@ do_load
 do_exec
 		; TODO: Decode Argument ONE (optional: new exec address in hex)
 		; ...
-
-
-		;ldx	#str_exec_test
-		;jsr	line_out
-		jsr	[VECT_EXEC]
+		ldx	#str_exec_test
+		jsr	line_out
+		;jsr	[VECT_EXEC]
 		rts
 
 do_reset
@@ -246,10 +262,11 @@ dct_2
 		bra	dct_0		; loop to start checking the next entry
 
 dct_cmd_not_found
-		ldx	#str_not_eq
+		ldx	#errstr_syntax
 		bra	dct_output
 dct_cmd_found	; command was found in the table
-		ldx	#str_eq
+		;ldx	#str_eq
+		bra	dct_done
 dct_output	; output the status string
 		jsr	line_out
 dct_done	; clean up and return
