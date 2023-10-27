@@ -290,22 +290,22 @@ void Gfx::OnInit()
 	if (_palette.size() == 0)
 	{
 		std::vector<PALETTE> ref = {
-			{ 0x0000 },		// 0: transparent black
-			{ 0xFFFF },		// 1: white
+			{ 0xF000 },		// 0: black
+			{ 0xF555 },		// 1: dk gray
 			{ 0xF007 },		// 2: dk blue
-			{ 0xF600 },		// 5: dk red
+			{ 0xF600 },		// 3: dk red
 			{ 0xF140 },		// 4: dk green
-			{ 0xF840 },		// 3: brown
+			{ 0xF840 },		// 5: brown
 			{ 0xF406 },		// 6: purple          
 			{ 0xF046 },		// 7: deep sea           	
-			{ 0xF555 },		// 8: gray
+			{ 0xF888 },		// 8: lt gray
 			{ 0xF22F },		// 9: blue
 			{ 0xFd00 },		// A: red
 			{ 0xF4F6 },		// B: lt green
 			{ 0xFED0 },		// C: yellow
 			{ 0xF85b },		// D: Lt Purple
 			{ 0xF59f },		// E: lt sky
-			{ 0xF000 },		// F: black
+			{ 0xFFFF },		// F: white
 
 			// { 0xF057 },		// 4: dk cyan
 			// { 0xF050 },		// 3: dk green

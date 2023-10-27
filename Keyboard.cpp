@@ -398,6 +398,9 @@ void Keyboard::OnEvent(SDL_Event* evnt) {
 			SDL_Scancode sdl_scancode = evnt->key.keysym.scancode;
 			Byte sdl_sym = evnt->key.keysym.sym;
 			XKey::XK xkey = TranslateSDLtoXKey(sdl_scancode);
+
+			_doEditBuffer(XKeyToAscii(xkey));
+
 			// find the register that should contain the bit
 			Word reg = xkey / 8;
 			Byte bit = this->read(XKEY_BUFFER + reg) | (1 << (xkey % 8));
@@ -479,6 +482,93 @@ void Keyboard::OnEvent(SDL_Event* evnt) {
 	}
 }
 
+void Keyboard::_doEditBuffer(char xkey)
+{
+	// basic keyboard buffer character line editor
+	if (!_line_editor_enable)
+		return;
+
+	// if (Bus::Read(CHAR_SCAN))
+	{
+		Byte c = xkey;
+		auto itr = _str_edt_buffer.begin() + edt_bfr_csr;
+		Byte Cols = Bus::Read(DSP_TXT_COLS);
+
+		if (c == XKeyToAscii(XKey::LEFT))
+		{
+			// Bus::Read(CHAR_POP);
+			if (edt_bfr_csr > 0)
+				edt_bfr_csr--;
+		}
+		else if (c == XKeyToAscii(XKey::RIGHT))
+		{
+			// Bus::Read(CHAR_POP);
+			if (edt_bfr_csr < _str_edt_buffer.size())
+				edt_bfr_csr++;
+		}
+		else if (c == XKeyToAscii(XKey::UP))
+		{
+			// Bus::Read(CHAR_POP);
+			if (edt_bfr_csr > Cols)
+				edt_bfr_csr -= Cols;
+		}
+		else if (c == XKeyToAscii(XKey::DOWN))
+		{
+			// Bus::Read(CHAR_POP);
+			if (edt_bfr_csr + Cols < _str_edt_buffer.size())
+				edt_bfr_csr += Cols;
+		}
+		else if (c == XKeyToAscii(XKey::BACKSPACE))
+		{
+			// Bus::Read(CHAR_POP);
+			if (edt_bfr_csr > 0)
+			{
+				std::string _right = _str_edt_buffer.substr(edt_bfr_csr);
+				_str_edt_buffer = _str_edt_buffer.substr(0, edt_bfr_csr - 1);
+				_str_edt_buffer += _right;
+				edt_bfr_csr--;
+			}
+		}
+		else if (c == XKeyToAscii(XKey::DELETE))
+		{
+			// Bus::Read(CHAR_POP);
+			if (edt_bfr_csr < _str_edt_buffer.size())
+			{
+				std::string _right = _str_edt_buffer.substr(edt_bfr_csr + 1);
+				_str_edt_buffer = _str_edt_buffer.substr(0, edt_bfr_csr);
+				_str_edt_buffer += _right;
+			}
+		}
+		else if (c == XKeyToAscii(XKey::END))
+		{
+			// Bus::Read(CHAR_POP);
+			edt_bfr_csr = _str_edt_buffer.size();
+		}
+		else if (c == XKeyToAscii(XKey::HOME))
+		{
+			// Bus::Read(CHAR_POP);
+			edt_bfr_csr = 0;
+		}
+		else if (c >= 0x20 && c < 128)
+		{
+			if (_str_edt_buffer.size() < editBuffer.size() - 1)
+			{
+				// Bus::Read(CHAR_POP);
+				_str_edt_buffer.insert(itr, c);
+				edt_bfr_csr++;
+			}
+		}
+	}
+
+	editBuffer.at(0) = ' ';
+	//for (auto &a : editBuffer)
+	//	a = 0;
+	Word i = 0;
+	for (auto& a : _str_edt_buffer)
+		editBuffer.at(i++) = a;
+	editBuffer.at(i) = ' ';
+}
+
 
 
 void Keyboard::OnUpdate(float fElapsedTime) 
@@ -486,7 +576,11 @@ void Keyboard::OnUpdate(float fElapsedTime)
 	// basic keyboard buffer character line editor
 	if (!_line_editor_enable)
 		return;
-	
+
+	// retrofit this to not use the keyboard queue whatsoever
+	// strictly use the SDL event keys instead
+
+/*******************
 	if (Bus::Read(CHAR_SCAN))
 	{
 		Byte c = Bus::Read(CHAR_SCAN);
@@ -565,14 +659,7 @@ void Keyboard::OnUpdate(float fElapsedTime)
 		editBuffer.at(i++) = a;
 	editBuffer.at(i) = ' ';
 
-//	// copy _edt_buffer to the editBuffer
-//	for (int i=0; i< EDIT_BUFFER_SIZE; i++)
-//		editBuffer.at(i) = (Byte)' ';
-//	//editBuffer.at(EDIT_BUFFER_SIZE-1) = 0;
-//	int index = 0;
-//	for (auto& a : _str_edt_buffer)
-//		editBuffer[index++] = a;
-
+*************************/
 }
 
 //void Keyboard::OnRender() {}

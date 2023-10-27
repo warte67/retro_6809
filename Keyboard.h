@@ -58,6 +58,8 @@ protected:
 
 protected:
 	bool _bWasInit = false;
+
+	void _doEditBuffer(char  xkey);
 };
 
 

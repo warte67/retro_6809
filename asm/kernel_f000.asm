@@ -144,6 +144,10 @@ kernel_start
 		sta	DSP_EXT
 
 	; begin the display
+		lda	#$B4		; default character color attribute
+		sta	CSR_ATTR
+		sta	TXT_ATTR
+
 		jsr	cls
 		ldx	#prompt0		
 		jsr	line_out	
@@ -171,7 +175,7 @@ command_vector_table
 		fdb	do_reset
 
 str_eq		fcn	" ";
-errstr_syntax	fcn	"ERROR: Syntax\n";
+err_str_syntax	fcn	"ERROR: Syntax\n";
 
 ; test strings
 str_cls_test	fcn	"CLS command issued\n"
@@ -181,48 +185,51 @@ str_exec_test	fcn	"EXEC command issued\n"
 str_reset_test	fcn	"RESET command issued\n"
 
 decode_command_line
-		jsr	decode_command_token
-		cmpa	#$ff		; command not found
-		beq	dcl_command_not_found		
-		bra	dcl_command_found
-dcl_command_not_found
-		rts
+		jsr	decode_command_token	; A = index of the command being issued
+		cmpa	#$ff			; command not found?
+		beq	dcl_command_not_found	; simply return if command wasn't found
+		bra	dcl_command_found	; branch to command was found
+dcl_command_not_found	; command wasnt found
+		rts				; return from subroutine
 dcl_command_found
-		nop			; A should now be the command index (VERIFIED)
-		lsla
-		ldx	#command_vector_table		
-		jsr	[a,x]		
-		rts
-
+		lsla				; A = A*2.. addjust index two byte address
+		ldx	#command_vector_table	; load the start of the command vector table
+		jsr	[a,x]			; call the command funnction
+		rts				; return from subroutine
 
 do_cls
-		;ldx	#str_cls_test
-		;jsr	line_out
-
-		; TODO: Decode Argument ONE (color attribute in hex $FB)
-		; ...
-
-		jsr	cls		
+		jsr	arg1_8bit_attrib
+		bne	1f
+		;sta	TXT_ATTR	; remove TXT_ATTR from arg1_8bit_attrib and write it here
+		jsr	cls
+		bra	0f
+1	; syntax error
+		ldx	#err_str_syntax		; set string to ERROR: Syntax
+		jsr	line_out		; output the string
+0	; clean up and return
 		rts
 
-do_color
-		ldx	#str_color_test
-		jsr	line_out
-		; TODO: Decode Argument ONE (color attribute in hex $FB)
-		; ...
 
-		;jsr	cls		
+do_color	; COLOR $##
+		jsr	arg1_8bit_attrib
+		bne	1f
+		;sta	TXT_ATTR	; remove TXT_ATTR from arg1_8bit_attrib and write it here
+		bra	0f
+1	; syntax error
+		ldx	#err_str_syntax		; set string to ERROR: Syntax
+		jsr	line_out		; output the string
+0	; clean up and return
 		rts
+
 		
-do_load
+do_load		; LOAD "filename"
 		; TODO: Decode Argument ONE (required: "filename.hex")
 		; ...
-
 		ldx	#str_load_test
 		jsr	line_out
 		rts
 		
-do_exec
+do_exec		; EXEC $####
 		; TODO: Decode Argument ONE (optional: new exec address in hex)
 		; ...
 		ldx	#str_exec_test
@@ -230,49 +237,140 @@ do_exec
 		;jsr	[VECT_EXEC]
 		rts
 
-do_reset
+do_reset	; RESET
 		;ldx	#str_reset_test
 		;jsr	line_out
 		jmp	[VECT_RESET]
 		; rts
 
+
+decode_16bit_hex_digit
+	; decode the LSB of the A accumilator into a value from 0-15
+	; return B = 0-15   or $ff for invalid
+		pshs	B		; store the working registers
+		tfr	A, B		; transfer input A to working value B
+		subb	#'0'		; subtract the ascii value of 0
+		cmpb	#$09		; compare it to 9
+		bgt	1f		; if its greater than 9 it's garbage
+		bra	0f		; otherwise its's valid 
+1	; check for alpha character
+		tfr	A, B		; transfer input A to working value B
+		orb	#$20		; force alpha character to lowercase
+		cmpb	#'f'		; if the character is greater than F
+		bgt	2f		;	it's invalid
+		subb	#'a'-10		; convert ascii to numeric value
+		bra	0f		; we're done, clean and return
+2	; invalid character
+		puls	B		; restore the stack
+		lda	#$ff		; load $ff as an error code
+		rts			; return from subroutine
+0	; clean up and return
+		tfr	B, A		; return the result to A
+		puls	B		; restore the stack		
+		rts			; return from subroutine
+
+
+; TODO:  This sub needs to be generalized; read arg1 as a raw hex number
+;		remove the TXT_ATTRIB stuff
+;
+arg1_8bit_attrib
+	; returns in A the 2-digit hexidecimal value
+	;	Z flag set if valid
+	;	Z flag clear if invalid
+		; Decode Argument ONE (color attribute in hex $FB)
+		pshs 	B,X			; store the working registers
+		jsr	decode_command_to_first_argument	; position X at the start of ARG1
+		; default CMD with no argument
+		lda	,x+			; laod the first character of the arg1
+		beq	1f			; if its a NULL, just do the CLS and return
+		cmpa	#'$'			; if its a $
+		beq	2f			; check for a valid 8-bit hex value
+3	; syntax error	(This could become its own standalone subroutine)
+		andcc	#$FB			; clear the Z bit
+		bra	0f			; clean up and return
+2	; CMD $## = CMD with 8-bit hexidecimal argument
+		ldb	2,x			; load two bytes in from the start of arg1
+		beq	3b			; 	single digit hex is a syntax error
+		cmpb	#' '			; check fo a space
+		bne	3b			;	single digit hex is a syntax error
+4	; X now points to space terminated ARG 1
+		clra				; clear the local variable 
+		pshs	A			; local in 0,S		
+		lda	,x+			; fetch the next character
+		bsr	decode_16bit_hex_digit	; convert hex nibble to values 0-15
+		lsla				; shift left one bit
+		lsla				; shift left one bit
+		lsla				; shift left one bit
+		lsla				; should now be most significant nibble
+		sta	0,S			; update the local
+		lda	,x+			; load the next character
+		bsr	decode_16bit_hex_digit	; convert the hex nibble to value 0-15
+		ora	0,S			; or it with the local
+		sta	0,S			; and update the lcoal
+		puls	A			; A = the local variable
+		sta	TXT_ATTR		; store the new value in the TXT_ATTR
+1	; CMD and return	
+		orcc	#$04			; set the Z bit
+0	; clean up and return		
+		puls	B,X			; restore the working registers
+		rts				; return from subroutine
+
 decode_command_token
-		pshs	X, Y
+	; Return:
+	;	A = Token ID
+	;	A = $FF command not found
+	;	X = start of first argument
+		pshs	B,X,Y
 	; initial initialization
 		clra			; clear the token ID
 		pshs	A		; 	store it locally @ 0,S 
-		ldy	#command_table
-dct_0
-		ldx	#EDT_BUFFER
-		jsr	str_cmp_nmz
-		beq	dct_cmd_found
-	; not found at this entry in the table
-	
+		ldy	#command_table	; load the start of the command table
+dct_0	; main loop
+		ldx	#EDT_BUFFER	; load the start of the edit buffer
+		jsr	str_cmp_nmz	; tokenize the command
+		beq	dct_cmd_found	; command was found
+	; not found at this entry in the table	
 		ldx	#EDT_BUFFER	; reset X to the start of the edit buffer
 dct_1	; progress Y to the next entry
-		lda	,y+
+		lda	,y+		; load character in the list entry
 		cmpa	#$ff		; end of list?
 		bne	dct_2		; 	no, continue
 		sta	0,S		; store the end-of-list as token ID
 		bra	dct_cmd_not_found	; cleanup and restore
-dct_2	
+dct_2	; loop conditions
 		cmpa	#$00		; is it a null-terminator?
 		bne	dct_1		; nope not yet, loop
 		inc	0,S		; increment the token ID
 		bra	dct_0		; loop to start checking the next entry
-
 dct_cmd_not_found
-		ldx	#errstr_syntax
-		bra	dct_output
+		ldx	#err_str_syntax	; load address of the "ERROR: Syntax" string
+		bra	dct_output	; go output the syntax error string
 dct_cmd_found	; command was found in the table
-		;ldx	#str_eq
-		bra	dct_done
+		bra	dct_done	; skip to routine done
 dct_output	; output the status string
-		jsr	line_out
+		jsr	line_out	; output the syntax error
 dct_done	; clean up and return
+		puls	A		; clean up the stack, Token ID in A
+		puls	B,X,Y		; restore the working registers
+		rts			; return from subroutine
+
+decode_command_to_first_argument
+	; look for the first ' ' or '$' character to start ARG1
+	; null character is end
+		pshs	A
+		ldx	#EDT_BUFFER	; point to the start of the edit buffer
+1
+		lda	,x+		; fetch next character from the buffer
+		beq	dctfa_done	; branch if null-terminator?
+		cmpa	#' '
+		beq	dctfa_done
+		cmpa	#'$'
+		beq	dctfa_done
+		bra	1b
+dctfa_done
 		puls	A
-		puls	X, Y
 		rts
+
 
 
 str_cmp_nmz	; compare two null/space/"-terminated strings
@@ -345,17 +443,24 @@ str_cmp_done	; done comparing the two strings
 
 ; output the line edit buffer
 line_edit
+;	; clear out the input queue
+;		lda	CHAR_Q_LEN
+;		beq	8f
+;9		lda	CHAR_POP
+;		bne	9b
+;8
 		lda	#$ff		; 'true'
 		sta	EDT_ENABLE	; enable the hardware line editor sub-system
 		clr	EDT_BUFFER	; null the start of the edit buffer
 		ldd	CSR_ADDR	; fetch the current cursor address
 		std	EDLIN_ANCH	; store it as the anchor
 6	; check for ENTER press
-		lda	CHAR_SCAN	; scan for a character waiting in the queue
+		lda	CHAR_POP	; scan for a character waiting in the queue
 		cmpa	#$0d		; is it the ENTER key?
 		bne	0f		; nope, continue to render the text line editor
-		lda	CHAR_POP	; pop the ENTER from the queue before returning
-		ldd	#$20b4		; load a colored space
+		; lda	CHAR_POP	; pop the ENTER from the queue before returning
+		lda	#$20		; load a space
+		ldb	TXT_ATTR	; with color
 		std	[CSR_ADDR]	; overrite the last colored cursor
 		; home the cursor
 		clr	CSR_COL		; CSR_COL = 0
@@ -387,7 +492,7 @@ line_edit
 2	; display up to the cursor position
 		lda	,y+		; fetch a character from the edit buffer
 		beq	3f		; null character (end of line)
-		ldb	#$B4		; color attribute
+		ldb	TXT_ATTR	; color attribute
 		std	,x++		; display the character with its color	
 		dec	0,s		; decrease the local cursor position
 		beq	4f		; brach if the cursor is over a character
@@ -407,7 +512,7 @@ line_edit
 5	; finish the line
 		lda	,y+		; load the next character from the buffer
 		beq	6b		; loop back to the top if done
-		ldb	#$b4		; load the basic screen attribute
+		ldb	TXT_ATTR	; load the basic screen attribute
 		std	,x++		; display the next character with its color
 		bra	5b		; continue until the line is finished
 
