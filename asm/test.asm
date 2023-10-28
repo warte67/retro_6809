@@ -6,12 +6,13 @@
 		org	$3000
 start		
 
-		lda	#$FF
-		sta	DSP_EXT
+		* lda	#$FF
+		* sta	DSP_EXT
+		* lda	#$0E	
+		* sta	SYS_STATE
+
 		lda	#$c5
 		sta	TXT_ATTR
-		lda	#$0E	
-		sta	SYS_STATE
 
 		ldx	#test_str
 		jsr	line_out

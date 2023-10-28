@@ -39,18 +39,12 @@ public:
 	~C6809();
 	void Init();
 
-	// static Byte OnCallback(Word ofs, Byte data, bool bWasRead);
-	// static Word MapDevice(MemoryMap* memmap, Word offset);
+	inline static bool s_bHalted = false;
 
+	
 	std::string disasm(Word addr, Word& next);	// returns standard string containing instruction pointed to by addr
 
 	// overridden members
-
-	//Byte read(Word ofs) override { return bus->read(ofs); }
-	//void write(Word ofs, Byte data) override { bus->write(ofs, data); }
-	//Word read_word(Word ofs) override { return bus->read_word(ofs); }
-	//void write_word(Word ofs, Word data) override { bus->write_word(ofs, data); }
-
 	void clock(); // this one doesnt need to inherit from device
 
 	// pin states
@@ -59,10 +53,6 @@ public:
 	void firq(); // true to false transition triggers FIRQ
 
 	void reset();
-
-	// debug related
-
-	// void InitDebug(Debug* ptrDebug) { debug = ptrDebug; }
 
 	// getters and setters
 

@@ -120,7 +120,7 @@ CHAR_SCAN	equ	7208
 KRNL_SWI3	equ	61444
 HARD_SWI	equ	65530
 KRNL_SWI2	equ	61448
-test_str	equ	12323
+test_str	equ	12313
 DBG_END	equ	7193
 do_cls	equ	61784
 dct_output	equ	62191

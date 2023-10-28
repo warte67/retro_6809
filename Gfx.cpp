@@ -972,6 +972,7 @@ void Gfx::_updateTextScreen()
 {
     void *pixels;
     int pitch;
+
     if (SDL_LockTexture(_std_texture, NULL, &pixels, &pitch) < 0) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't lock texture: %s\n", SDL_GetError());
         Bus::Error("");
@@ -1001,7 +1002,6 @@ void Gfx::_updateTextScreen()
 				}
 			}
 		}
-
         SDL_UnlockTexture(_std_texture); 
     }
 } 

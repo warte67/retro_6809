@@ -43,8 +43,10 @@ void C6809::clock()
 	Gfx* gfx = bus.m_gfx;
 	GfxDebug* debug = gfx->m_debug;
 
+	if (s_bHalted)
+		return;
+
 	if (debug->SingleStep())
-	//if (true)
 	{
 		if (do_interrupts())
 		{
