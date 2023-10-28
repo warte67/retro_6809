@@ -15,7 +15,7 @@
 #include "memory_map.h"
 
 // Generate a memory map definition file?
-#define COMPILE_MEMORY_MAP      false
+#define COMPILE_MEMORY_MAP      true
 #define MEMORY_MAP_OUTPUT_CPP   true
 
 

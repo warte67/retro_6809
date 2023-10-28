@@ -11,6 +11,7 @@
 #include "C6809.h"
 #include "Bus.h"
 #include "Keyboard.h"
+#include "FileIO.h"
 
 Bus::Bus()
 {
@@ -64,10 +65,16 @@ Bus::Bus()
     dev = new RAM("ZERO_PAGE");
     addr += Attach(dev, 256 - 16);	
 
-    // user stack 256 bytes
-    dev = new RAM("USER_STACK");
+    // file input buffer
+    // dev = new RAM("FIO_BUFFER");
+    dev = new RAM("FIO_BUFFER");
     addr += Attach(dev, 256);
-    dev->DisplayEnum("USTACK_TOP", 0x0200, "Top of the user stack space");
+    dev->DisplayEnum("FIO_BFR_TOP", 0x01FF, "Top of the File Input/Output Buffer");
+
+    //// user stack 256 bytes
+    //dev = new RAM("USER_STACK");
+    //addr += Attach(dev, 256);
+    //dev->DisplayEnum("USTACK_TOP", 0x0300, "Top of the user stack space");
 
 	// system stack 512 bytes
     dev = new RAM("SYSTEM_STACK");
@@ -79,7 +86,6 @@ Bus::Bus()
     dev->DisplayEnum("",0, "");
     dev->DisplayEnum("",0, "Display Buffer");
     addr += Attach(dev, 6*1024);
-
 
 	// start hardware registers
 	dev->DisplayEnum("",0, "");
@@ -98,6 +104,12 @@ Bus::Bus()
     // Keyboard Device
     m_keyboard = new Keyboard();
     addr += Attach(m_keyboard);
+
+    // FileIO Device
+    dev = new FileIO();
+    addr += Attach(dev);
+
+
 
 
 

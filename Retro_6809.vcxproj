@@ -158,6 +158,7 @@
     <ClCompile Include="Bus.cpp" />
     <ClCompile Include="C6809.cpp" />
     <ClCompile Include="Device.cpp" />
+    <ClCompile Include="FileIO.cpp" />
     <ClCompile Include="Gfx.cpp" />
     <ClCompile Include="GfxDebug.cpp" />
     <ClCompile Include="Keyboard.cpp" />
@@ -168,6 +169,7 @@
     <ClInclude Include="Bus.h" />
     <ClInclude Include="C6809.h" />
     <ClInclude Include="Device.h" />
+    <ClInclude Include="FileIO.h" />
     <ClInclude Include="Gfx.h" />
     <ClInclude Include="GfxDebug.h" />
     <ClInclude Include="IGfxDevice.h" />

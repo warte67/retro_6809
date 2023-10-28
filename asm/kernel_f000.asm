@@ -77,7 +77,7 @@ RESET_start	bra	RESET_start	; RESET Implementation
 kernel_start
 	; initialize both stack pointers
 		lds	#SSTACK_TOP
-		ldu	#USTACK_TOP
+		ldu	#SSTACK_TOP
 
 ; SYS_STATE: ABCD.SSSS
 ;      A:0   = Error: Standard Buffer Overflow
