@@ -1048,7 +1048,7 @@ F4A6  39                              rts                     ; return
                       
                       
 FE00                                  org     $fe00
-FE00  526574726F20363830392076302E31200A00 prompt0         fcn     "Retro 6809 v0.1 \n"
+FE00  526574726F20363830392076302E32200A00 prompt0         fcn     "Retro 6809 v0.2 \n"
 FE12  456D756C61746F7220636F6D70696C6564206F6E2000 prompt1         fcn     "Emulator compiled on "
 FE28  436F70797269676874202843292032303233204279204A6179204661726965730A0A00 prompt2         fcn     "Copyright (C) 2023 By Jay Faries\n\n"
 FE4B  52656164790A00  ready_prompt    fcn     "Ready\n"

@@ -804,7 +804,7 @@ cursor_address	; Update CSR_ADDR and return the cursor address in X
 
 
 		org	$fe00
-prompt0		fcn	"Retro 6809 v0.1 \n"
+prompt0		fcn	"Retro 6809 v0.2 \n"
 prompt1		fcn	"Emulator compiled on "
 prompt2		fcn	"Copyright (C) 2023 By Jay Faries\n\n"
 ready_prompt	fcn	"Ready\n"
