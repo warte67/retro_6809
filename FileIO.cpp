@@ -169,8 +169,8 @@ void FileIO::_cmd_system_shutdown()
 void FileIO::_cmd_system_load_comilation_date()
 {
     //printf("FileIO: COMPILE DATE Command Received\n");
-    dir_data = __DATE__;
-    //printf("Compilation Date: %s\n", dir_data.c_str());
+    filePath = __DATE__;
+    printf("Compilation Date: %s\n", dir_data.c_str());
 }
 
 void FileIO::_cmd_new_file_stream()
