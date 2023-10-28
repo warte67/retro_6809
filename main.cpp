@@ -45,3 +45,19 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
+/**** KNOWN BUGS **********************************************
+
+	1) When starting with DEBUG_SINGLE_STEP = false
+		GfxDebug Mouse Coordinates are wrong
+
+		SOLVED! Added calls to:
+			_decode_dsp_gres() in Write to DSP_GRES
+			_decode_dsp_ext() in Write to DSP_EXT
+
+	2) Typing in Debug mode also sends keys to the main program
+
+		PARTIALLY SOLVED! Added to Keyboard::OnEvent()
+			if (GfxDebug::_bIsDebugActive)
+				return;
+
+ **** KNOWN BUGS **********************************************/

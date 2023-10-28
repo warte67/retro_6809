@@ -57,6 +57,8 @@ public:
 protected:
 
 	inline static bool _bIsDebugActive = ENABLE_DEBUG;
+	inline static bool bSingleStep = DEBUG_SINGLE_STEP;	// false;
+
 	
 	// protected helpers
 	void _onWindowResize();	// called when the viewing window is scaled
@@ -147,7 +149,6 @@ private:
 	int csr_y = 0;
 	int csr_at = CSR_AT::CSR_AT_NONE;
 	char mouse_wheel = 0;
-	bool bSingleStep = DEBUG_SINGLE_STEP;	// false;
 	bool bIsStepPaused = true;
 	bool bIsCursorVisible = false;
 	Word mousewheel_offset = 0;		// applies to code scroll

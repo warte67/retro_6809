@@ -93,11 +93,13 @@ void Gfx::write(Word offset, Byte data, bool debug)
 		}
 		case DSP_GRES: 	{
 			_dsp_gres = data;
+			_decode_dsp_gres();
 			Bus::IsDirty(true);		
 			break;
 		}
 		case DSP_EXT:	{
 			_dsp_ext = data;
+			_decode_dsp_ext();
 			Bus::IsDirty(true);
 			break;
 		}

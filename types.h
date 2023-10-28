@@ -32,7 +32,7 @@
 
 
 // constants
-const bool ENABLE_DEBUG = true;
+const bool ENABLE_DEBUG = false;
 const bool DEBUG_SINGLE_STEP = ENABLE_DEBUG;	// false;
 const Byte EDIT_BUFFER_SIZE = 64;       // 64 is tested
 

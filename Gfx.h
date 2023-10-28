@@ -61,8 +61,8 @@ class Gfx : public Device
 		SDL_Renderer* _renderer = nullptr;	// invalid default
 		Byte _ext_bpp = 0;					// invalid default
 		Byte _std_bpp = 0;					// invalid default
-		Byte _h_scan = 0;			// invalid default
-		Byte _v_scan = 0;			// invalid default
+		Byte _h_scan = 0;			        // invalid default
+		Byte _v_scan = 0;			        // invalid default
 		bool _vsync = false;
 		bool _windowed = false;
 		bool _extended_graphics_enable = false;

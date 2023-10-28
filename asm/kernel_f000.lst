@@ -474,7 +474,7 @@ F174                  0       ; clean up and return
 F174  39                              rts
                       
                                       
-F175                  do_load         ; LOAD "filename"
+F175                  do_load         ; LOAD "file_name"
                                       ; TODO: Decode Argument ONE (required: "filename.hex")
                                       ; ...
 F175  8EF0DB                          ldx     #str_load_test
@@ -501,7 +501,7 @@ F18A  BDF33F                          jsr     line_out
                                       ;jsr    [VECT_DIR]
 F18D  39                              rts
                       
-F18E                  do_chdir        ; CHDIR
+F18E                  do_chdir        ; CHDIR  "directory_path"
 F18E  8EF12F                          ldx     #str_chdir_test
 F191  BDF33F                          jsr     line_out
                                       ;jsr    [VECT_CHDIR]
