@@ -654,7 +654,7 @@ flash_the_cursor
 		lda	CSR_ATTR	; load the next cursor color
 		inca			; increment it
 		anda	#$0f		; mask off the foreground color
-		ora	#$f0		; foreground 15 = opaque black
+		;ora	#$f0		; foreground 15 = opaque black
 		sta	CSR_ATTR	; store the new attribute
 		ldb	EDT_BFR_CSR	; load the cursor position
 		lslb			; skip the attribue
