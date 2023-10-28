@@ -245,15 +245,7 @@ void FileIO::_cmd_load_hex_file()
 
     #ifdef _WIN32
         std::string chdir = filePath + "/";
-    // #else
-    //     #ifdef __linux__
-    //         // remove trailing spaces
-    //         filePath = filePath.substr(0, filePath.size()-2);
-    //     #endif
     #endif
-
-    
-
 
     std::ifstream ifs(filePath);
     std::filesystem::path f{ filePath.c_str()};
