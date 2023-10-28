@@ -170,34 +170,32 @@ FIO_ERR_FLAGS    equ   $1C7C    ; (Byte) File IO error flags
           ;      D:  end of file
           ;      E:  buffer overrun
           ;      F:  wrong file type
-          ;      G:  too many file streams
+          ;      G:  invalid command
           ;      H:  incorrect file stream
 FIO_COMMAND     equ   $1C7D    ; (Byte) OnWrite, execute a file command
           ;      $00:  Reset/Null
-          ;      $00:  SYSTEM: Shutdown
-          ;      $00:  SYSTEM: Load Compilation Date
-          ;      $00:  New File Stream
-          ;      $00:  Open File
-          ;      $00:  Is File Open? (returns FIO_ERR_FLAGS bit-5)
-          ;      $00:  Close File
-          ;      $00:  Read Byte
-          ;      $00:  Write Byte
-          ;      $00:  Load Hex Format File
-          ;      $00:  Get File Length
-          ;      $00:  Load Binary File to address FIO_BFRADR
-          ;      $00:  Save Binary File FIO_BFRLEN bytes from FIO_BFRADR
-          ;      $00:  List Directory
-          ;      $00:  Make Directory
-          ;      $00:  Change Directory
-          ;      $00:  Rename Directory
-          ;      $00:  Remove Directory
-          ;      $00:  Delete File
-          ;      $00:  Rename file
-          ;      $00:  Copy File
-          ;      $00:  Seek Start
-          ;      $00:  Seek End
-          ;      $00:  Set Seek Position
-          ;      $00:  Get Seek Position
+          ;      $01:  SYSTEM: Shutdown
+          ;      $02:  SYSTEM: Load Compilation Date
+          ;      $03:  New File Stream
+          ;      $04:  Open File
+          ;      $05:  Is File Open? (returns FIO_ERR_FLAGS bit-5)
+          ;      $06:  Close File
+          ;      $07:  Read Byte
+          ;      $08:  Write Byte
+          ;      $09:  Load Hex Format File
+          ;      $0A:  Get File Length
+          ;      $0B:  List Directory
+          ;      $0C:  Make Directory
+          ;      $0D:  Change Directory
+          ;      $0E:  Rename Directory
+          ;      $0F:  Remove Directory
+          ;      $10:  Delete File
+          ;      $11:  Rename file
+          ;      $12:  Copy File
+          ;      $13:  Seek Start
+          ;      $14:  Seek End
+          ;      $15:  Set Seek Position
+          ;      $16:  Get Seek Position
 FIO_STREAM      equ   $1C7E    ; (Byte) current file stream index (0-15)
 FIO_MODE        equ   $1C7F    ; (Byte) Flags describing the I/O mode for the file
           ; FIO_MODE: 00AB.CDEF  (indexed by FIO_STREAM)
@@ -219,8 +217,8 @@ FIO_DIR_DATA    equ   $1C88    ; (Byte) a series of null-terminated filenames
           ;             $0a-terminated. The list itself is null-terminated.
 FIO_END         equ   $1C89    ; End of the FileIO register space
 
-    ; 4996 ($1384) bytes remaining for additional registers.
-RESERVED        equ   $1C7C
+    ; 4983 ($1377) bytes remaining for additional registers.
+RESERVED        equ   $1C89
 
           ; User RAM (32K)
 USER_RAM        equ   $3000

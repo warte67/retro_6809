@@ -54,6 +54,7 @@ public:
 	void MouseStuff();
 	void KeyboardStuff();
 
+
 protected:
 
 	inline static bool _bIsDebugActive = ENABLE_DEBUG;

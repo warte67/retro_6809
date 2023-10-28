@@ -21,6 +21,7 @@
 // forward declarations
 class C6809;
 class Keyboard;
+class FileIO;
 
 
 class Bus
@@ -29,6 +30,7 @@ class Bus
 	friend class Gfx;
 	friend class GfxDebug;
 	friend class Keyboard;
+	friend class FileIO;
 
 	protected:
 		Bus();									// constructor

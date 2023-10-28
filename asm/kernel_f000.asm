@@ -151,7 +151,23 @@ kernel_start
 		jsr	cls
 		ldx	#prompt0		
 		jsr	line_out	
+
 		ldx	#prompt1
+		jsr	line_out	
+
+		; fetch compilation date
+		lda	#$02
+		sta	FIO_COMMAND
+0		lda	FIO_PATH_DATA
+		beq	2f
+		jsr	char_out
+		bra	0b
+
+2		lda	#$0a
+		jsr	char_out
+
+
+		ldx	#prompt2
 		jsr	line_out	
 1
 		ldx	#ready_prompt		
@@ -168,6 +184,7 @@ command_table	fcn	"cls"		; #0
 		fcn	"reset"		; #4
 		fcn	"dir"		; #5
 		fcn	"chdir"		; #6
+		fcn	"exit"		; #7
 		fcb	$FF		; $FF = end of list
 command_vector_table
 		fdb	do_cls
@@ -177,6 +194,7 @@ command_vector_table
 		fdb	do_reset
 		fdb	do_dir
 		fdb	do_chdir
+		fdb	do_exit
 
 str_eq		fcn	" ";
 err_str_syntax	fcn	"ERROR: Syntax\n";
@@ -189,6 +207,7 @@ str_exec_test	fcn	"EXEC command issued\n"
 str_reset_test	fcn	"RESET command issued\n"
 str_dir_test	fcn	"DIR command issued\n"
 str_chdir_test	fcn	"CHDIR command issued\n"
+str_exit_test	fcn	"EXIT command issued\n"
 
 decode_command_line
 		jsr	decode_command_token	; A = index of the command being issued
@@ -231,6 +250,33 @@ do_color	; COLOR $##
 do_load		; LOAD "file_name"
 		; TODO: Decode Argument ONE (required: "filename.hex")
 		; ...
+;	; BEGIN TEST 
+;	; 1) FIO_PATH_POS cleared to reset the path string
+;	; 2) FIO_PATH_DATA add characters to the path string	
+;	; 3) copy the result to the FIO_BUFFER	
+;
+;	; write path data to FIO_PATH_DATA
+;				clr	FIO_PATH_POS
+;				ldx	#str_load_test
+;1				lda	,x+
+;				sta	FIO_PATH_DATA
+;				bne	1b
+;						;lda	#3
+;						;sta	FIO_PATH_POS
+;						;lda	#'X'
+;						;sta	FIO_PATH_DATA
+;						;lda	#'Y'
+;						;sta	FIO_PATH_DATA
+;						;lda	#'Z'
+;						;sta	FIO_PATH_DATA
+;	; read path data from FIO_PATH_DATA and write it to the FIO_BUFFER
+;				clr	FIO_PATH_POS
+;				ldx	#FIO_BUFFER
+;2				lda	FIO_PATH_DATA
+;				sta	,x+
+;				bne	2b
+;	; END TEST		
+
 		ldx	#str_load_test
 		jsr	line_out
 		rts
@@ -244,14 +290,27 @@ do_exec		; EXEC $####
 		rts
 
 do_reset	; RESET
-		;ldx	#str_reset_test
-		;jsr	line_out
+		;clr	FIO_COMMAND
+		;rts
 		jmp	[VECT_RESET]
 		; rts
 
 do_dir		; DIR
-		ldx	#str_dir_test
-		jsr	line_out
+		jsr	decode_command_find_arg_1
+		nop	; X should point to the start of the first argument			
+
+		; copy argument 1 to the FIO_BUFFER
+		ldy	#FIO_BUFFER
+1		lda	,x+
+		sta	,y+
+		bne	1b
+		nop	; argument one should now be copied to the FIO_BUFFER		
+
+		lda	#$0B	; COMMAND: List Directory
+		sta	FIO_COMMAND
+
+		;ldx	#str_dir_test
+		;jsr	line_out
 		;jsr	[VECT_DIR]
 		rts
 
@@ -260,7 +319,25 @@ do_chdir	; CHDIR  "directory_path"
 		jsr	line_out
 		;jsr	[VECT_CHDIR]
 		rts
-		
+
+do_exit		; EXIT  "directory_path"
+		ldx	#str_exit_test
+		jsr	line_out
+		lda	#$01
+		sta	FIO_COMMAND
+		;jsr	[VECT_CHDIR]
+		rts
+
+decode_command_find_arg_1	; position X to the start of the first argument
+		pshs	A		; store the working registers
+		ldx	#EDT_BUFFER	; point to the start of the edit buffer
+1		lda	,x+		; load a character from the edit buffer
+		beq	2f		; cleanup and return if its a null-terminator
+		cmpa	#' '		; is it a SPACE character?
+		bne	1b		; no, continue searching
+2		puls	A		; restore the working registers
+		rts			; return
+
 
 
 decode_16bit_hex_digit
@@ -693,8 +770,9 @@ cursor_address	; Update CSR_ADDR and return the cursor address in X
 
 
 		org	$fe00
-prompt0		fcn	"Retro 6809 v0.1\n"
-prompt1		fcn	"Copyright (C) 2023 By Jay Faries\n\n"
+prompt0		fcn	"Retro 6809 v0.1 \n"
+prompt1		fcn	"Emulator compiled on "
+prompt2		fcn	"Copyright (C) 2023 By Jay Faries\n\n"
 ready_prompt	fcn	"Ready\n"
 
 
