@@ -70,12 +70,9 @@ SWI2_start	bra	SWI2_start	; SWI2 Implementation
 FIRQ_start	bra	FIRQ_start	; FIRQ Implementation
 IRQ_start	bra	IRQ_start	; IRQ Implementation
 SWI_start	bra	SWI_start	; SWI / SYS Implementation
-NMI_start	bra	NMI_handler	; NMI Implementation
+NMI_start	bra	NMI_start	; NMI Implementation
 RESET_start	bra	RESET_start	; RESET Implementation
 
-NMI_handler	; NMI is called when overscan change is made
-		jsr	cls	
-		rti
 
 
 kernel_start
