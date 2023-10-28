@@ -166,6 +166,8 @@ command_table	fcn	"cls"		; #0
 		fcn	"load"		; #2
 		fcn	"exec"		; #3
 		fcn	"reset"		; #4
+		fcn	"dir"		; #5
+		fcn	"chdir"		; #6
 		fcb	$FF		; $FF = end of list
 command_vector_table
 		fdb	do_cls
@@ -173,6 +175,8 @@ command_vector_table
 		fdb	do_load
 		fdb	do_exec
 		fdb	do_reset
+		fdb	do_dir
+		fdb	do_chdir
 
 str_eq		fcn	" ";
 err_str_syntax	fcn	"ERROR: Syntax\n";
@@ -183,6 +187,8 @@ str_color_test	fcn	"COLOR command issued\n"
 str_load_test	fcn	"LOAD command issued\n"
 str_exec_test	fcn	"EXEC command issued\n"
 str_reset_test	fcn	"RESET command issued\n"
+str_dir_test	fcn	"DIR command issued\n"
+str_chdir_test	fcn	"CHDIR command issued\n"
 
 decode_command_line
 		jsr	decode_command_token	; A = index of the command being issued
@@ -222,7 +228,7 @@ do_color	; COLOR $##
 		rts
 
 		
-do_load		; LOAD "filename"
+do_load		; LOAD "file_name"
 		; TODO: Decode Argument ONE (required: "filename.hex")
 		; ...
 		ldx	#str_load_test
@@ -242,6 +248,19 @@ do_reset	; RESET
 		;jsr	line_out
 		jmp	[VECT_RESET]
 		; rts
+
+do_dir		; DIR
+		ldx	#str_dir_test
+		jsr	line_out
+		;jsr	[VECT_DIR]
+		rts
+
+do_chdir	; CHDIR  "directory_path"
+		ldx	#str_chdir_test
+		jsr	line_out
+		;jsr	[VECT_CHDIR]
+		rts
+		
 
 
 decode_16bit_hex_digit

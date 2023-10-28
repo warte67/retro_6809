@@ -22,8 +22,8 @@ SOFT_NMI     = 0x000C, // NMI Software Interrupt Vector
 SOFT_RESET   = 0x000E, // RESET Software Interrupt Vector
 
 ZERO_PAGE    = 0x0010,
-USER_STACK   = 0x0100,
-USTACK_TOP   = 0x0200, // Top of the user stack space
+FIO_BUFFER   = 0x0100,
+FIO_BFR_TOP  = 0x01FF, // Top of the File Input/Output Buffer
 SYSTEM_STACK = 0x0200,
 SSTACK_TOP   = 0x0400, // Top of the system stack space
 
@@ -165,9 +165,67 @@ CHAR_SCAN    = 0x1C28, //   (Byte) read next character in queue (not popped when
 CHAR_POP     = 0x1C29, //   (Byte) read next character in queue (not popped when read)
 XKEY_BUFFER  = 0x1C2A, //   (128 bits) 16 bytes for XK_KEY data buffer     (Read Only)
 EDT_BFR_CSR  = 0x1C3A, //   (Byte) cursor position within edit buffer     (Read/Write)
-EDT_ENABLE   = 0x1C3B, //   (Byte) line editor enable flag     (Read/Write)
+EDT_ENABLE   = 0x1C3B, //   (Byte) line editor enable flag                 (Read/Write)
 EDT_BUFFER   = 0x1C3C, //   line editing character buffer                 (Read/Write)
 KEY_END      = 0x1C7C, // End of the Keyboard Register space
+
+FIO_BEGIN    = 0x1C7C, // Start of the FileIO register space
+FIO_ERR_FLAGS = 0x1C7C, // (Byte) File IO error flags
+        // FIO_ERR_FLAGS: ABCD.EFGH
+        //      A:  file was not found
+        //      B:  directory was not found
+        //      C:  file not open
+        //      D:  end of file
+        //      E:  buffer overrun
+        //      F:  wrong file type
+        //      G:  too many file streams
+        //      H:  incorrect file stream
+FIO_COMMAND  = 0x1C7D, // (Byte) OnWrite, execute a file command
+        //      $00:  Reset/Null
+        //      $00:  SYSTEM: Shutdown
+        //      $00:  SYSTEM: Load Compilation Date
+        //      $00:  New File Stream
+        //      $00:  Open File
+        //      $00:  Is File Open? (returns FIO_ERR_FLAGS bit-5)
+        //      $00:  Close File
+        //      $00:  Read Byte
+        //      $00:  Write Byte
+        //      $00:  Load Hex Format File
+        //      $00:  Get File Length
+        //      $00:  Load Binary File to address FIO_BFRADR
+        //      $00:  Save Binary File FIO_BFRLEN bytes from FIO_BFRADR
+        //      $00:  List Directory
+        //      $00:  Make Directory
+        //      $00:  Change Directory
+        //      $00:  Rename Directory
+        //      $00:  Remove Directory
+        //      $00:  Delete File
+        //      $00:  Rename file
+        //      $00:  Copy File
+        //      $00:  Seek Start
+        //      $00:  Seek End
+        //      $00:  Set Seek Position
+        //      $00:  Get Seek Position
+FIO_STREAM   = 0x1C7E, // (Byte) current file stream index (0-15)
+FIO_MODE     = 0x1C7F, // (Byte) Flags describing the I/O mode for the file
+        // FIO_MODE: 00AB.CDEF  (indexed by FIO_STREAM)
+        //      A:  INPUT - File open for reading
+        //      B:  OUTPUT - File open for writing
+        //      C:  BINARY - 1: Binary Mode, 0: Text Mode
+        //      D:  AT_END - Output starts at the end of the file
+        //      E:  APPEND - All output happens at end of the file
+        //      F:  TRUNC - discard all previous file data
+FIO_SEEKPOS  = 0x1C80, // (DWord) file seek position
+FIO_IODATA   = 0x1C84, // (Byte) input / output character
+FIO_PATH_LEN = 0x1C85, // (Byte) length of the filepath
+FIO_PATH_POS = 0x1C86, // (Byte) character position within the filepath
+FIO_PATH_DATA = 0x1C87, // (Byte) data at the character position of the path
+FIO_DIR_DATA = 0x1C88, // (Byte) a series of null-terminated filenames
+        //     NOTES: Current read-position is reset to the beginning following a
+        //             List Directory command. The read-position is automatically
+        //             advanced on read from this register. Each filename is
+        //             $0a-terminated. The list itself is null-terminated.
+FIO_END      = 0x1C89, // End of the FileIO register space
 
     // 4996 ($1384) bytes remaining for additional registers.
 RESERVED     = 0x1C7C,
@@ -197,4 +255,3 @@ HARD_RESET   = 0xFFFE, // RESET Hardware Interrupt Vector
 
 
 #endif // __MEMORY_MAP_H__
-

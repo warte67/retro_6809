@@ -14,8 +14,8 @@ SOFT_NMI        equ   $000C    ; NMI Software Interrupt Vector
 SOFT_RESET      equ   $000E    ; RESET Software Interrupt Vector
 
 ZERO_PAGE       equ   $0010
-USER_STACK      equ   $0100
-USTACK_TOP      equ   $0200    ; Top of the user stack space
+FIO_BUFFER      equ   $0100
+FIO_BFR_TOP     equ   $01FF    ; Top of the File Input/Output Buffer
 SYSTEM_STACK    equ   $0200
 SSTACK_TOP      equ   $0400    ; Top of the system stack space
 
@@ -157,9 +157,67 @@ CHAR_SCAN       equ   $1C28    ;   (Byte) read next character in queue (not popp
 CHAR_POP        equ   $1C29    ;   (Byte) read next character in queue (not popped when read)
 XKEY_BUFFER     equ   $1C2A    ;   (128 bits) 16 bytes for XK_KEY data buffer     (Read Only)
 EDT_BFR_CSR     equ   $1C3A    ;   (Byte) cursor position within edit buffer     (Read/Write)
-EDT_ENABLE      equ   $1C3B    ;   (Byte) line editor enable flag     (Read/Write)
+EDT_ENABLE      equ   $1C3B    ;   (Byte) line editor enable flag                 (Read/Write)
 EDT_BUFFER      equ   $1C3C    ;   line editing character buffer                 (Read/Write)
 KEY_END         equ   $1C7C    ; End of the Keyboard Register space
+
+FIO_BEGIN       equ   $1C7C    ; Start of the FileIO register space
+FIO_ERR_FLAGS    equ   $1C7C    ; (Byte) File IO error flags
+          ; FIO_ERR_FLAGS: ABCD.EFGH
+          ;      A:  file was not found
+          ;      B:  directory was not found
+          ;      C:  file not open
+          ;      D:  end of file
+          ;      E:  buffer overrun
+          ;      F:  wrong file type
+          ;      G:  too many file streams
+          ;      H:  incorrect file stream
+FIO_COMMAND     equ   $1C7D    ; (Byte) OnWrite, execute a file command
+          ;      $00:  Reset/Null
+          ;      $00:  SYSTEM: Shutdown
+          ;      $00:  SYSTEM: Load Compilation Date
+          ;      $00:  New File Stream
+          ;      $00:  Open File
+          ;      $00:  Is File Open? (returns FIO_ERR_FLAGS bit-5)
+          ;      $00:  Close File
+          ;      $00:  Read Byte
+          ;      $00:  Write Byte
+          ;      $00:  Load Hex Format File
+          ;      $00:  Get File Length
+          ;      $00:  Load Binary File to address FIO_BFRADR
+          ;      $00:  Save Binary File FIO_BFRLEN bytes from FIO_BFRADR
+          ;      $00:  List Directory
+          ;      $00:  Make Directory
+          ;      $00:  Change Directory
+          ;      $00:  Rename Directory
+          ;      $00:  Remove Directory
+          ;      $00:  Delete File
+          ;      $00:  Rename file
+          ;      $00:  Copy File
+          ;      $00:  Seek Start
+          ;      $00:  Seek End
+          ;      $00:  Set Seek Position
+          ;      $00:  Get Seek Position
+FIO_STREAM      equ   $1C7E    ; (Byte) current file stream index (0-15)
+FIO_MODE        equ   $1C7F    ; (Byte) Flags describing the I/O mode for the file
+          ; FIO_MODE: 00AB.CDEF  (indexed by FIO_STREAM)
+          ;      A:  INPUT - File open for reading
+          ;      B:  OUTPUT - File open for writing
+          ;      C:  BINARY - 1: Binary Mode, 0: Text Mode
+          ;      D:  AT_END - Output starts at the end of the file
+          ;      E:  APPEND - All output happens at end of the file
+          ;      F:  TRUNC - discard all previous file data
+FIO_SEEKPOS     equ   $1C80    ; (DWord) file seek position
+FIO_IODATA      equ   $1C84    ; (Byte) input / output character
+FIO_PATH_LEN    equ   $1C85    ; (Byte) length of the filepath
+FIO_PATH_POS    equ   $1C86    ; (Byte) character position within the filepath
+FIO_PATH_DATA    equ   $1C87    ; (Byte) data at the character position of the path
+FIO_DIR_DATA    equ   $1C88    ; (Byte) a series of null-terminated filenames
+          ;     NOTES: Current read-position is reset to the beginning following a
+          ;             List Directory command. The read-position is automatically
+          ;             advanced on read from this register. Each filename is
+          ;             $0a-terminated. The list itself is null-terminated.
+FIO_END         equ   $1C89    ; End of the FileIO register space
 
     ; 4996 ($1384) bytes remaining for additional registers.
 RESERVED        equ   $1C7C
@@ -186,4 +244,3 @@ HARD_SWI        equ   $FFFA    ; SWI / SYS Hardware Interrupt Vector
 HARD_NMI        equ   $FFFC    ; NMI Hardware Interrupt Vector
 HARD_RESET      equ   $FFFE    ; RESET Hardware Interrupt Vector
 ; END of definitions
-
