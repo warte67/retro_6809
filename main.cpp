@@ -60,4 +60,8 @@ int main(int argc, char* argv[])
 			if (GfxDebug::_bIsDebugActive)
 				return;
 
+	3) ALT-D is still being sent to the command line when returning
+		from the debugger using the alt-d keystroke.
+
+
  **** KNOWN BUGS **********************************************/
