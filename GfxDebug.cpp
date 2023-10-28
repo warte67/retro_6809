@@ -41,11 +41,22 @@ Word GfxDebug::OnAttach(Word nextAddr)
     DisplayEnum("", 0, "");
     DisplayEnum("", 0, "Debug Hardware Registers:");
     DisplayEnum("DBG_BEGIN", nextAddr, " start of mouse cursor hardware registers");
+
+
+
+
     DisplayEnum("DBG_TEMP", nextAddr, " (Byte) Simple Debug test register");
     nextAddr += 1;
-
-    // add more IGfxDevices 
-    // ...
+    //DBG_BRK_ADDR = 0x1828,        // (Word) Address of current breakpoint
+    //    DBG_FLAGS = 0x182a,        // (Byte) Debug Specific Hardware Flags
+    //    //      bit 7: Debug Enable
+    //    //      bit 6: Single Step Enable
+    //    //      bit 5: clear all breakpoints
+    //    //      bit 4: Toggle Breakpoint at DEBUG_BRK_ADDRESS
+    //    //      bit 3: FIRQ  (on low to high edge)
+    //    //      bit 2: IRQ   (on low to high edge)
+    //    //      bit 1: NMI   (on low to high edge)
+    //    //      bit 0: RESET (on low to high edge)
 
     DisplayEnum("DBG_END", nextAddr, "End Debug Registers");
 
