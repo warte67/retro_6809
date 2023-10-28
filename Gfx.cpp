@@ -4,6 +4,7 @@
 ////////
 
 #include "Bus.h"
+#include "C6809.h"
 #include "Gfx.h"
 #include "font8x8_system.h"
 
@@ -213,7 +214,7 @@ Word Gfx::OnAttach(Word nextAddr)
 
     DisplayEnum("", 0, "");
     DisplayEnum("DSP_EXT", nextAddr, " (Byte) Extended Graphics Register");
-    DisplayEnum("", 0, "DSP_EXT: ABCD.EFGG");
+    DisplayEnum("", 0, "DSP_EXT: AABC.DEFG");
     DisplayEnum("", 0, "     AA:00 = Extended Graphics 1bpp (2-color mode) ");
     DisplayEnum("", 0, "     AA:01 = Extended Graphics 2bpp (4-color mode) ");
     DisplayEnum("", 0, "     AA:10 = Extended Graphics 4bpp (16-color mode) ");
@@ -228,8 +229,8 @@ Word Gfx::OnAttach(Word nextAddr)
     DisplayEnum("", 0, "     E:1   = Standard Display Mode: BITMAP ");
     DisplayEnum("", 0, "     F:0   = VSYNC OFF ");
     DisplayEnum("", 0, "     F:1   = VSYNC ON ");
-    DisplayEnum("", 0, "     B:0   = Fullscreen Enabled( emulator only ) ");
-    DisplayEnum("", 0, "     B:1   = Windowed Enabled ( emulator only ) ");
+    DisplayEnum("", 0, "     G:0   = Fullscreen Enabled( emulator only ) ");
+    DisplayEnum("", 0, "     G:1   = Windowed Enabled ( emulator only ) ");
     nextAddr++;
 
     DisplayEnum("", 0, "");
@@ -693,10 +694,22 @@ void Gfx::_decode_dsp_gres()
 	}
 
 	// _h_scan = Horizontal Overscan Multiplier
+	static Byte s_old_h_scan = _h_scan;
 	_h_scan = (3-((data >> 2) & 0x03))+1;
+	if (s_old_h_scan != _h_scan)
+	{
+		s_old_h_scan = _h_scan;
+		//Bus::m_cpu->nmi();
+	}
 
 	// _v_scan = Vertical Overscan Multiplier
+	static Byte s_old_v_scan = _v_scan;
 	_v_scan = (3-((data >> 0) & 0x03))+1;
+	if (s_old_v_scan != _v_scan)
+	{
+		s_old_v_scan = _v_scan;
+		//Bus::m_cpu->nmi();
+	}
 
 	// _std_bpp = Standard Graphics Bits-Per-Pixel
 	_std_bpp = (data >> 6) & 0x03;

@@ -399,6 +399,11 @@ void Keyboard::OnEvent(SDL_Event* evnt) {
 	{
 		case SDL_KEYDOWN:
 		{
+			// BUG-FIX/WORKAROUND the d that appears after exiting debug
+			if (evnt->key.keysym.sym == SDLK_d && (SDL_GetModState() & KMOD_ALT))
+				return;
+
+
 			SDL_Scancode sdl_scancode = evnt->key.keysym.scancode;
 			Byte sdl_sym = evnt->key.keysym.sym;
 			XKey::XK xkey = TranslateSDLtoXKey(sdl_scancode);

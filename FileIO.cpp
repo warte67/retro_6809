@@ -30,30 +30,48 @@ Byte FileIO::read(Word offset, bool debug)
         case FIO_ERR_FLAGS: data = fio_err_flags;  break;
         case FIO_PATH_LEN:  data = dir_data.size(); break;
         case FIO_PATH_POS:  
-            data = dir_data_pos;
-            if (data >= dir_data.size())
-                data = dir_data.size() - 1;
-            if (dir_data.size() == 0)
+        {
+            data = path_char_pos;
+            if (data >= filePath.size())
+                data = filePath.size() - 1;
+            if (filePath.size() == 0)
                 data = 0;
             break;
+        }
         case FIO_PATH_DATA:
         {
             data = 0;
-            if (dir_data.size() > 0)
+            if (filePath.size() > 0)
             {
-                if (dir_data_pos < dir_data.size())
+                if (path_char_pos < filePath.size())
                 {
-                    data = (Byte)dir_data.substr(dir_data_pos, 1).at(0);
+                    data = (Byte)filePath.substr(path_char_pos, 1).at(0);
                     //printf("dir_data: %s\n", dir_data.c_str());
                     //printf("Character @ %d: %c \n", dir_data_pos, data);
-                    if (dir_data_pos <= dir_data.size())
-                        dir_data_pos++;
+                    if (path_char_pos <= filePath.size())
+                        path_char_pos++;
                 }
                 else
                 {
-                    dir_data = "";
+                    filePath = "";
                     data = 0;
                 }
+            }
+            break;
+        }
+        case FIO_DIR_DATA: // (Byte) a series of $0a--terminated filenames
+        {
+            data = 0;
+            if (dir_data_pos < dir_data.size())
+            {
+                data = (Byte)dir_data.substr(dir_data_pos, 1).at(0);
+                if (dir_data_pos <= dir_data.size())
+                    dir_data_pos++;
+            }
+            else
+            {
+                dir_data = "";
+                data = 0;
             }
             break;
         }
@@ -72,25 +90,25 @@ void FileIO::write(Word offset, Byte data, bool debug)
     {
         case FIO_ERR_FLAGS: fio_err_flags = data; break;
         case FIO_PATH_POS:  
-            if (data >= dir_data.size())
-                data = dir_data.size() - 1;
-            dir_data_pos = data;
+            if (data >= filePath.size())
+                data = filePath.size() - 1;
+            path_char_pos = data;
             break;
         case FIO_PATH_DATA:
         {
-            if (dir_data_pos == 0)
+            if (path_char_pos == 0)
             {
-                dir_data = "";
-                dir_data_pos = 0;
+                filePath = "";
+                path_char_pos = 0;
 
-                dir_data += data;
-                dir_data_pos++;
+                filePath += data;
+                path_char_pos++;
             }
             else
             {
-                dir_data = dir_data.substr(0, dir_data_pos);
-                dir_data += data;
-                dir_data_pos++;
+                filePath = filePath.substr(0, path_char_pos);
+                filePath += data;
+                path_char_pos++;
             }
             break;
         }
@@ -136,7 +154,7 @@ void FileIO::write(Word offset, Byte data, bool debug)
 
 void FileIO::_cmd_reset()
 {
-    printf("FileIO: RESET Command Received\n");
+    //printf("FileIO: RESET Command Received\n");
     if (Bus::m_cpu)
         Bus::m_cpu->reset();
 }
@@ -150,9 +168,9 @@ void FileIO::_cmd_system_shutdown()
 
 void FileIO::_cmd_system_load_comilation_date()
 {
-    printf("FileIO: COMPILE DATE Command Received\n");
+    //printf("FileIO: COMPILE DATE Command Received\n");
     dir_data = __DATE__;
-    printf("Compilation Date: %s\n", dir_data.c_str());
+    //printf("Compilation Date: %s\n", dir_data.c_str());
 }
 
 void FileIO::_cmd_new_file_stream()
@@ -189,18 +207,28 @@ void FileIO::_cmd_get_file_length()
 
 void FileIO::_cmd_list_directory()
 {
-    // printf("filepath: %s\n", filePath.c_str());
-    std::string path = std::filesystem::current_path().generic_string();
-    printf("DIR: %s\n", path.c_str());
+    // int FILENAME_LENGTH = 24;
+    int FILENAME_LENGTH = Bus::Read(DSP_TXT_COLS)/2;
+    //if (FILENAME_LENGTH < 24)
+    //    FILENAME_LENGTH *= 2;
 
+    std::string path = std::filesystem::current_path().generic_string();
     std::string arg1 = "";
     for (int i = FIO_BUFFER; i <= FIO_BFR_TOP; i++)
-        if ((char)Bus::Read(i) != ' ')
+        if ((char)Bus::Read(i) != ' ' && (char)Bus::Read(i) != 0)
             arg1 += (char)Bus::Read(i);
-    printf("dir argument: \"%s\"\n", arg1.c_str());
-
     std::vector<std::string> _files;
-
+    std::string fp = path;
+    std::string file = "";
+    std::string ext = "";
+    int dot = arg1.find('.');
+    if (dot)
+    {
+        file = arg1.substr(0, dot);
+        ext = arg1.substr(dot + 1);
+    }
+    // all files
+    if (arg1.size() == 0 || (file == "*" && ext == "*"))   // no arg1 or arg1 = "*.*"
     {
         for (const auto& entry : std::filesystem::directory_iterator(path))
         {
@@ -209,29 +237,124 @@ void FileIO::_cmd_list_directory()
             {
                 dir << "[" << entry.path().filename().generic_string() << "]";
                 std::string stDir = dir.str();
-                while (stDir.size() < 16)
+                while (stDir.size() < FILENAME_LENGTH)
                     stDir = stDir + " ";
-
                 //std::cout << stDir << std::endl;
                 _files.push_back(stDir);
             }
+        }
+        for (const auto& entry : std::filesystem::directory_iterator(path))
+        {
+            std::stringstream dir;
             if (entry.is_regular_file())
             {
                 dir << entry.path().filename().generic_string();
                 std::string stDir = dir.str();
-                while (stDir.size() < 16)
+                while (stDir.size() < FILENAME_LENGTH)
                     stDir = stDir + " ";
-
                 std::cout << stDir << std::endl;
                 _files.push_back(stDir);
             }
         }
     }
+    else if (ext == "*" || file == "*")
+    {
+        std::stringstream dir;
+        if (ext == "*")
+        {
+            for (const auto& entry : std::filesystem::directory_iterator(path))
+            {
+                std::string strFile = entry.path().filename().string();
+                strFile = strFile.substr(0, strFile.find('.'));
+                std::stringstream dir;
+                if (entry.is_regular_file() && file == strFile)
+                {
+                    dir << entry.path().filename().generic_string();
+                    std::string stDir = dir.str();
+                    while (stDir.size() < FILENAME_LENGTH)
+                        stDir = stDir + " ";
+                    _files.push_back(stDir);
+                }
+            }
+        }
+        else if (file == "*")
+        {
+            for (const auto& entry : std::filesystem::directory_iterator(path))
+            {
+                std::string strExt = entry.path().extension().filename().string();
+                if (strExt.find('.') == 0)
+                    strExt = strExt.substr(1);
+                std::stringstream dir;
+                if (entry.is_regular_file() && ext == strExt)
+                {
+                    dir << entry.path().filename().generic_string();
+                    std::string stDir = dir.str();
+                    while (stDir.size() < FILENAME_LENGTH)
+                        stDir = stDir + " ";
+                    _files.push_back(stDir);
+                }
+            }
+        }
+    }
+    else if (arg1 == "[]") // all directories
+    {
+        for (const auto& entry : std::filesystem::directory_iterator(path))
+        {
+            if (entry.is_directory())
+            {
+                std::stringstream dir;
+                dir << "[" << entry.path().filename().generic_string() << "]";
+                std::string stDir = dir.str();
+                while (stDir.size() < FILENAME_LENGTH)
+                    stDir = stDir + " ";
+                _files.push_back(stDir);
+            }
+        }
+    }
+    else // directories and exact matches
+    {
+        for (const auto& entry : std::filesystem::directory_iterator(path))
+        {
+            std::string strExt = entry.path().extension().filename().string();
+            if (strExt.find('.') == 0)
+                strExt = strExt.substr(1);
+            std::string strFile = entry.path().filename().string();
+            strFile = strFile.substr(0, strFile.find('.'));
+            std::stringstream dir;
+            if (entry.is_directory() && file == strFile)
+            {
+                dir << "[" << entry.path().filename().generic_string() << "]";
+                std::string stDir = dir.str();
+                while (stDir.size() < FILENAME_LENGTH)
+                    stDir = stDir + " ";
+                _files.push_back(stDir);
+            }
+            if (file == strFile && ext == strExt)
+            {
+                dir << entry.path().filename().generic_string();
+                std::string stDir = dir.str();
+                while (stDir.size() < FILENAME_LENGTH)
+                    stDir = stDir + " ";
+                _files.push_back(stDir);
+            }
+        }
+    }
+    //for (auto& f : _files)
+    //    std::cout << f << std::endl;
 
-    //std::sort(_files.begin(), _files.end());
+    // clear the FIO_BUFFER
+    for (int i = FIO_BUFFER; i <= FIO_BFR_TOP; i++)
+        Bus::Write(i, 0);
+    // build the directory list string
+    dir_data = "";
     for (auto& f : _files)
-        std::cout << f << std::endl;
-
+    {
+        dir_data += f;
+        //dir_data += 0x0a;
+    }
+    //dir_data += '/0';
+    //printf("%s", dir_data.c_str());
+    dir_data_pos = 0;        
 }
 
 void FileIO::_cmd_make_directory()

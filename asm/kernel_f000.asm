@@ -70,8 +70,12 @@ SWI2_start	bra	SWI2_start	; SWI2 Implementation
 FIRQ_start	bra	FIRQ_start	; FIRQ Implementation
 IRQ_start	bra	IRQ_start	; IRQ Implementation
 SWI_start	bra	SWI_start	; SWI / SYS Implementation
-NMI_start	bra	NMI_start	; NMI Implementation
+NMI_start	bra	NMI_handler	; NMI Implementation
 RESET_start	bra	RESET_start	; RESET Implementation
+
+NMI_handler	; NMI is called when overscan change is made
+		jsr	cls	
+		rti
 
 
 kernel_start
@@ -100,7 +104,7 @@ kernel_start
 ;      S:$D  = CPU Clock 3.3 mhz.
 ;      S:$E  = CPU Clock 5.0 mhz.
 ;      S:$F  = CPU Clock ~10.0 mhz. (unmetered)
-		lda	#$0A
+		lda	#$09
 		sta	SYS_STATE
 
 ;	DSP_GRES: BBRR.HHVV
@@ -120,7 +124,7 @@ kernel_start
 ;	    VV:01 = 3x Vertical Overscan Multiplier
 ;	    VV:10 = 2x Vertical Overscan Multiplier
 ;	    VV:11 = 1x Vertical Overscan Multiplier
-		lda	#$CA
+		lda	#$CE	; $CA
 		sta	DSP_GRES
 
 ; DSP_EXT: ABCD.EFGG
@@ -162,37 +166,41 @@ kernel_start
 		beq	2f
 		jsr	char_out
 		bra	0b
-
 2		lda	#$0a
 		jsr	char_out
-
-
 		ldx	#prompt2
-		jsr	line_out	
-1
-		ldx	#ready_prompt		
-		jsr	line_out	
+		jsr	line_out
 
+main_user_input_loop
+		ldx	#ready_prompt		
+		jsr	line_out
+1
 		jsr	line_edit	
 		jsr	decode_command_line	
-		bra	1b
+		cmpa	#$fe	; just pressed enter, skip the ready prompt
+		beq	1b
+		bra	main_user_input_loop
 
-command_table	fcn	"cls"		; #0
-		fcn	"color"		; #1
-		fcn	"load"		; #2
-		fcn	"exec"		; #3
-		fcn	"reset"		; #4
-		fcn	"dir"		; #5
-		fcn	"chdir"		; #6
-		fcn	"exit"		; #7
+command_table	fcn	" "		; #0
+		fcn	"cls"		; #1
+		fcn	"color"		; #2
+		fcn	"load"		; #3
+		fcn	"exec"		; #4
+		fcn	"reset"		; #5
+		fcn	"dir"		; #6
+		fcn	"cd"		; #7
+		fcn	"chdir"		; #8
+		fcn	"exit"		; #9
 		fcb	$FF		; $FF = end of list
 command_vector_table
+		fdb	do_nothing
 		fdb	do_cls
 		fdb	do_color
 		fdb	do_load
 		fdb	do_exec
 		fdb	do_reset
 		fdb	do_dir
+		fdb	do_chdir
 		fdb	do_chdir
 		fdb	do_exit
 
@@ -221,6 +229,10 @@ dcl_command_found
 		ldx	#command_vector_table	; load the start of the command vector table
 		jsr	[a,x]			; call the command funnction
 		rts				; return from subroutine
+
+do_nothing	
+		lda	#$fe	; did nothing
+		rts
 
 do_cls
 		jsr	arg1_8bit_attrib
@@ -308,6 +320,15 @@ do_dir		; DIR
 
 		lda	#$0B	; COMMAND: List Directory
 		sta	FIO_COMMAND
+		; output the result
+2		lda	FIO_DIR_DATA
+		beq	3f
+		jsr	char_out
+		bra	2b
+3		lda	#$0a
+		jsr	char_out
+
+
 
 		;ldx	#str_dir_test
 		;jsr	line_out
@@ -614,6 +635,18 @@ line_edit
 
 flash_the_cursor
 		pshs	a,b,x,u		; save these on the stack
+	; check to see if the cursor is below the visible screen
+	; this can happen if the overscan registers have changed
+	; when it does happen, simply clean up the stack
+	; and jmp to the main input loop
+		ldu	CSR_ADDR
+		cmpu	STD_VID_MAX
+		blt	0f
+		jsr	cls
+		puls	d,x,u
+		puls	x,u
+		jmp	main_user_input_loop
+0	; continue normally
 		ldu	EDLIN_ANCH	; point to the edline start of line anchor
 		lda	SYS_TIMER+1	; load the LSB of the system timer
 		anda	#$07		; only concerned with these bits
@@ -722,8 +755,12 @@ std_text_scroll	; scroll the standard text screen up one line
 		pshs	d, x, y		; store the working registers
 		ldy	#SCREEN_BUFFER	; Y = start of the standard video buffer
 		ldb	DSP_TXT_COLS	; B = number of displayed text columns
-		lslb			; B = B * 2 -- account for the attribute byte
+		;lslb			; B = B * 2 -- account for the attribute byte
 		ldx	#SCREEN_BUFFER	; X = start of the standard video buffer
+		; B can become negative in the 4x horizontal overscan modes
+		; 	instead of shifting B left and using it to index once
+		;       simply load effective address twice
+		leax	b,x		; X = one line down
 		leax	b,x		; X = one line down
 1	; scroll up one line
 		ldd	,x++		; load character at X 

@@ -88,7 +88,7 @@ private:
 
     Byte fio_err_flags = 0;     // error flags
 
-    Byte path_char_index = 0;   // active character position within the file path string
+    Byte path_char_pos = 0;   // active character position within the file path string
     std::string filePath = "";  // the current file path
 
     int dir_data_pos = 0;     // position within the dir_data string

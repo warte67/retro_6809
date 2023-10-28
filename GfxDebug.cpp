@@ -882,29 +882,58 @@ void GfxDebug::DrawCursor(float fElapsedTime)
 }
 
 void GfxDebug::_correctMouseCoords(int& mx, int& my)
-{
-    // calculate overscan modifiers
-    int ox = 2;
-    int oy = 2;
-    int h_oscan = (Bus::Read(DSP_GRES) >> 2) & 0x03;
-    int v_oscan = (Bus::Read(DSP_GRES) >> 0) & 0x03;
-    switch (h_oscan)
+{ 
+    SDL_GetMouseState(&mx, &my);
+    int ww, wh;
+    SDL_GetWindowSize(m_gfx->_window, &ww, &wh);
+    float fh = (float)wh;
+    float fw = fh * m_gfx->_aspect;
+    if (fw > ww)
     {
-    case 0: ox = 2; break;
-    case 1: ox = 4; break;
-    case 2: ox = 6; break;
-    case 3: ox = 8; break;
+        fw = (float)ww;
+        fh = fw / m_gfx->_aspect;
     }
-    switch (v_oscan)
-    {
-    case 0: oy = 2; break;
-    case 1: oy = 4; break;
-    case 2: oy = 6; break;
-    case 3: oy = 8; break;
-    }
-    mx = Bus::Read_Word(CSR_XPOS) / ox;
-    my = Bus::Read_Word(CSR_YPOS) / oy;
-    Uint32 btns = SDL_GetRelativeMouseState(NULL, NULL);
+    int tw = m_gfx->_texture_width;
+    int th = tw / m_gfx->_aspect;
+    SDL_Rect dest = { int(ww / 2 - (int)fw / 2), int(wh / 2 - (int)fh / 2), (int)fw, (int)fh };
+    float w_aspect = (float)dest.w / tw;    // m_gfx->_texture_width;
+    float h_aspect = (float)dest.h / th;    // m_gfx->_texture_height;
+    mx = int((mx / w_aspect) - (dest.x / w_aspect));
+    my = int((my / h_aspect) - (dest.y / h_aspect));
+
+    mx /= 8;
+    my /= 8;
+
+    //printf("TW:%d  TH:%d   MX:%d   MY:%d\n",
+    //    tw,
+    //    th,
+    //    mx, my);
+
+    return;
+
+
+    //// calculate overscan modifiers
+    //int ox = 2;
+    //int oy = 2;
+    //int h_oscan = (Bus::Read(DSP_GRES) >> 2) & 0x03;
+    //int v_oscan = (Bus::Read(DSP_GRES) >> 0) & 0x03;
+    //switch (h_oscan)
+    //{
+    //case 0: ox = 2; break;
+    //case 1: ox = 4; break;
+    //case 2: ox = 6; break;
+    //case 3: ox = 8; break;
+    //}
+    //switch (v_oscan)
+    //{
+    //case 0: oy = 2; break;
+    //case 1: oy = 4; break;
+    //case 2: oy = 6; break;
+    //case 3: oy = 8; break;
+    //}
+    //mx = Bus::Read_Word(CSR_XPOS) / ox;
+    //my = Bus::Read_Word(CSR_YPOS) / oy;
+    //Uint32 btns = SDL_GetRelativeMouseState(NULL, NULL);
 }
 
 void GfxDebug::MouseStuff()

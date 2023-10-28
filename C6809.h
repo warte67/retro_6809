@@ -31,7 +31,7 @@
 
 class C6809		//		: public REG
 {
-	// friend class Bus;
+	friend class Bus;
 	friend class GfxDebug;
 
 public:

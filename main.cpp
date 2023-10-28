@@ -47,21 +47,17 @@ int main(int argc, char* argv[])
 
 /**** KNOWN BUGS **********************************************
 
-	1) When starting with DEBUG_SINGLE_STEP = false
-		GfxDebug Mouse Coordinates are wrong
+	1) when changing to a graphics mode, the mouse cursor is once
+		again getting messed up in Debug Mode. 
 
-		SOLVED! Added calls to:
-			_decode_dsp_gres() in Write to DSP_GRES
-			_decode_dsp_ext() in Write to DSP_EXT
+		Oversight: The debug mode is set to a fixed resolution. MX and MY
+			in GfxDebug::_correctMouseCoords(int& mx, int& my) are adjusted
+			to a changing graphics mode. Need to adjust MX and MY to
+			the actual graphics mode. 
+			
+			Add new DMX and DMY for the debug screen.
 
-	2) Typing in Debug mode also sends keys to the main program
-
-		PARTIALLY SOLVED! Added to Keyboard::OnEvent()
-			if (GfxDebug::_bIsDebugActive)
-				return;
-
-	3) ALT-D is still being sent to the command line when returning
-		from the debugger using the alt-d keystroke.
+	2) cursor timing is still a bit bugged with pass through 
 
 
  **** KNOWN BUGS **********************************************/

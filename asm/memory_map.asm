@@ -85,7 +85,7 @@ DSP_GRES        equ   $1C08    ;  (Byte) Screen Resolution Register
           ;     VV:11 = 1x Vertical Overscan Multiplier
 
 DSP_EXT         equ   $1C09    ;  (Byte) Extended Graphics Register
-          ; DSP_EXT: ABCD.EFGG
+          ; DSP_EXT: AABC.DEFG
           ;      AA:00 = Extended Graphics 1bpp (2-color mode)
           ;      AA:01 = Extended Graphics 2bpp (4-color mode)
           ;      AA:10 = Extended Graphics 4bpp (16-color mode)
@@ -100,8 +100,8 @@ DSP_EXT         equ   $1C09    ;  (Byte) Extended Graphics Register
           ;      E:1   = Standard Display Mode: BITMAP
           ;      F:0   = VSYNC OFF
           ;      F:1   = VSYNC ON
-          ;      B:0   = Fullscreen Enabled( emulator only )
-          ;      B:1   = Windowed Enabled ( emulator only )
+          ;      G:0   = Fullscreen Enabled( emulator only )
+          ;      G:1   = Windowed Enabled ( emulator only )
 
 DSP_TXT_COLS    equ   $1C0A    ;  (Byte) READ-ONLY Text Screen Columns
 DSP_TXT_ROWS    equ   $1C0B    ;  (Byte) READ-ONLY Text Screens Rows
