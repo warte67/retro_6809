@@ -202,8 +202,114 @@ void FileIO::_cmd_write_byte()
 {
 }
 
+
+
+// load_hex helpers
+Byte FileIO::_fread_hex_byte(std::ifstream& ifs)
+{
+    char str[3];
+    long l;
+    ifs.get(str[0]);
+    ifs.get(str[1]);
+    str[2] = '\0';
+    l = strtol(str, NULL, 16);
+    return (Byte)(l & 0xff);
+}
+Word FileIO::_fread_hex_word(std::ifstream& ifs)
+{
+    Word ret;
+    ret = _fread_hex_byte(ifs);
+    ret <<= 8;
+    ret |= _fread_hex_byte(ifs);
+    return ret;
+}
+
 void FileIO::_cmd_load_hex_file()
 {
+    // // lambda to convert integer to hex string
+    // auto hex = [](uint32_t n, uint8_t digits)
+    // {
+    // 	std::string s(digits, '0');
+    // 	for (int i = digits - 1; i >= 0; i--, n >>= 4)
+    // 		s[i] = "0123456789ABCDEF"[n & 0xF];
+    // 	return s;
+    // };
+
+    std::ifstream ifs(filePath);
+    std::filesystem::path f{ filePath.c_str()};
+    if (!std::filesystem::exists(f))
+    {
+        printf("File '%s' Not Found\n", f.filename().string().c_str());
+        Byte errData = Bus::Read(FIO_ERR_FLAGS);
+        errData |= 0x80;     // file was not found
+        Bus::Write(FIO_ERR_FLAGS, errData);
+        ifs.close();
+        return;
+    }
+    // does this have a .hex extenion?
+    // (wrong file type)
+    std::string strExt = f.filename().extension().string();
+    if (strExt != ".hex" && strExt != ".hex ")
+    {
+        printf("EXTENSION: %s\n", strExt.c_str());
+
+        Byte errData = Bus::Read(FIO_ERR_FLAGS);
+        errData |= 0x04;     // (wrong file type)
+        Bus::Write(FIO_ERR_FLAGS, errData);
+        ifs.close();
+        return;
+    }
+ 
+    if (!ifs.is_open())
+    {
+        printf("UNABLE TO OPEN FILE '%s'\n", f.filename().string().c_str());
+        Byte errData = Bus::Read(FIO_ERR_FLAGS);
+        errData |= 0x20;     // file not open
+        Bus::Write(FIO_ERR_FLAGS, errData);
+        ifs.close();
+        return;
+    }
+    bool done = false;
+    char c;
+    while (!done)
+    {
+        Byte n, t;
+        Word addr;
+        Byte b;
+        ifs.get(c);	// test the leading ":"
+        if (c != ':')
+        {
+            //printf(": not found\n");
+            ifs.close();
+            Byte errData = Bus::Read(FIO_ERR_FLAGS);
+            errData |= 0x04;     // (wrong file type)
+            Bus::Write(FIO_ERR_FLAGS, errData);
+            return;
+        }
+        n = _fread_hex_byte(ifs);		// byte count for this line
+        addr = _fread_hex_word(ifs);	// fetch the begin address		
+        t = _fread_hex_byte(ifs);		// record type
+        if (t == 0x00)
+        {
+            while (n--)
+            {
+                b = _fread_hex_byte(ifs);
+                // std::cout << "0x" << hex(addr,4) << ":";
+                // std::cout << "0x" << hex(b, 2) << std::endl;
+                Bus::Write(addr, b, true);
+                ++addr;
+            }
+            // Read and discard checksum byte
+            (void)_fread_hex_byte(ifs);
+            // skip the junk at the end of the line	
+            if (ifs.peek() == '\r')	ifs.get(c);
+            if (ifs.peek() == '\n')	ifs.get(c);
+        }
+        else if (t == 0x01)
+            done = true;
+    }
+    // close and return
+    ifs.close();
 }
 
 void FileIO::_cmd_get_file_length()
@@ -356,40 +462,6 @@ void FileIO::_cmd_list_directory()
             }
         }
     }
-    //else // directories and exact matches
-    //{
-    //    for (const auto& entry : std::filesystem::directory_iterator(path))
-    //    {
-    //        std::string strExt = entry.path().extension().filename().string();
-    //        if (strExt.find('.') == 0)
-    //            strExt = strExt.substr(1);
-    //        std::string strFile = entry.path().filename().string();
-    //        strFile = strFile.substr(0, strFile.find('.'));
-    //        std::stringstream dir;
-    //        if (entry.is_directory() && file == strFile)
-    //        {
-    //            dir << "[" << entry.path().filename().generic_string() << "]";
-    //            std::string stDir = dir.str();
-    //            while (stDir.size() < FILENAME_LENGTH)
-    //                stDir = stDir + " ";
-    //            _files.push_back(stDir);
-    //        }
-    //        if (file == strFile && ext == strExt)
-    //        {
-    //            dir << entry.path().filename().generic_string();
-    //            std::string stDir = dir.str();
-    //            while (stDir.size() < FILENAME_LENGTH)
-    //                stDir = stDir + " ";
-    //            _files.push_back(stDir);
-    //        }
-    //    }
-    //}
-    
-
-    // std::sort(_files.begin(), _files.end());
-
-    //for (auto& f : _files)
-    //    std::cout << f << std::endl;
 
     // clear the FIO_BUFFER
     for (int i = FIO_BUFFER; i <= FIO_BFR_TOP; i++)
@@ -420,7 +492,7 @@ void FileIO::_cmd_change_directory()
         data &= ~0x40;
         Bus::Write(FIO_ERR_FLAGS, data);
         fio_err_flags = data;
-        std::filesystem::current_path(chdir);  // change dir
+        std::filesystem::current_path(chdir);
     }
     else
     {

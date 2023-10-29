@@ -22,7 +22,7 @@
 
 ; Software Vectors
 	org	$0000	
-VECT_EXEC	fdb	EXEC_start	; This will likely be used as the EXEC vector
+VECT_EXEC	fdb	$0000		; This will likely be used as the EXEC vector
 VECT_SWI3 	fdb	SWI3_start	; SWI3 Software Interrupt Vector
 VECT_SWI2 	fdb	SWI2_start	; SWI2 Software Interrupt Vector
 VECT_FIRQ 	fdb	FIRQ_start	; FIRQ Software Interrupt Vector
@@ -64,7 +64,7 @@ KRNL_RESET	jmp	[VECT_RESET]	; RESET Software Interrupt Vector
 KRNL_UNDEF	bra	KRNL_UNDEF
 
 ; default subs
-EXEC_start	bra	EXEC_start	; EXEC program
+;EXEC_start	bra	EXEC_start	; EXEC program
 SWI3_start	bra	SWI3_start	; SWI3 Implementation
 SWI2_start	bra	SWI2_start	; SWI2 Implementation
 FIRQ_start	bra	FIRQ_start	; FIRQ Implementation
@@ -78,71 +78,20 @@ RESET_start	bra	RESET_start	; RESET Implementation
 kernel_start
 	; initialize both stack pointers
 		lds	#SSTACK_TOP
+		ldu	#0
+		stu	VECT_EXEC
 		ldu	#SSTACK_TOP
 
-; SYS_STATE: ABCD.SSSS
-;      A:0   = Error: Standard Buffer Overflow
-;      B:0   = Error: Extended Buffer Overflow
-;      C:0   = Error: Reserved
-;      D:0   = Error: Reserved
-;      S:$0  = CPU Clock  25 khz.
-;      S:$1  = CPU Clock  50 khz.
-;      S:$2  = CPU Clock 100 khz.
-;      S:$3  = CPU Clock 200 khz.
-;      S:$4  = CPU Clock 333 khz.
-;      S:$5  = CPU Clock 416 khz.
-;      S:$6  = CPU Clock 500 khz.
-;      S:$7  = CPU Clock 625 khz.
-;      S:$8  = CPU Clock 769 khz.
-;      S:$9  = CPU Clock 833 khz.
-;      S:$A  = CPU Clock 1.0 mhz.
-;      S:$B  = CPU Clock 1.4 mhz.
-;      S:$C  = CPU Clock 2.0 mhz.
-;      S:$D  = CPU Clock 3.3 mhz.
-;      S:$E  = CPU Clock 5.0 mhz.
-;      S:$F  = CPU Clock ~10.0 mhz. (unmetered)
 		lda	#$09
 		sta	SYS_STATE
 
-;	DSP_GRES: BBRR.HHVV
-;	    BB:00 = Standard Graphics 1-bpp (2-color mode)	
-;	    BB:01 = Standard Graphics 2-bpp (4-color mode)	
-;	    BB:10 = Standard Graphics 4-bpp (16-color mode)	
-;	    BB:11 = Standard Graphics 8-bpp (256-color mode)	
-;	    RR:00 = 16 / 9  	Aspect:
-;	    RR:01 = 16 / 10	Aspect:
-;	    RR:10 = 16 / 11	Aspect:
-;	    RR:11 = 16 / 12	Aspect:
-;	    HH:00 = 4x Horizontal Overscan Multiplier
-;	    HH:01 = 3x Horizontal Overscan Multiplier
-;	    HH:10 = 2x Horizontal Overscan Multiplier
-;	    HH:11 = 1x Horizontal Overscan Multiplier
-;	    VV:00 = 4x Vertical Overscan Multiplier
-;	    VV:01 = 3x Vertical Overscan Multiplier
-;	    VV:10 = 2x Vertical Overscan Multiplier
-;	    VV:11 = 1x Vertical Overscan Multiplier
 		lda	#$CE	; $CA
 		sta	DSP_GRES
 
-; DSP_EXT: ABCD.EFGG
-;      AA:00 = Extended Graphics 1bpp (2-color mode)
-;      AA:01 = Extended Graphics 2bpp (4-color mode)
-;      AA:10 = Extended Graphics 4bpp (16-color mode)
-;      AA:11 = Extended Graphics 4bpp (16-color mode)
-;      B:0   = Extended Graphics: DISABLED
-;      B:1   = Extended Graphics: ENABLED
-;      C:0   = Extended Extended Mode: BITMAP
-;      C:1   = Extended Extended Mode: TILES
-;      D:0   = Standard Graphics: DISABLED
-;      D:1   = Standard Graphics: ENABLED
-;      E:0   = Standard Display Mode: TEXT
-;      E:1   = Standard Display Mode: BITMAP
-;      F:0   = VSYNC OFF
-;      F:1   = VSYNC ON
-;      B:0   = Fullscreen Enabled( emulator only )
-;      B:1   = Windowed Enabled ( emulator only )
 		lda	#$C9
 		sta	DSP_EXT
+
+		
 
 	; begin the display
 		lda	#$B4		; default character color attribute
@@ -202,18 +151,21 @@ command_vector_table
 		fdb	do_exit
 
 str_eq		fcn	" ";
-err_str_syntax	fcn	"ERROR: Syntax\n";
-err_str_dir_nf	fcn	"ERROR: Directory Not Found\n";
+err_syntax	fcn	"ERROR: Syntax\n";
+err_dir_nf	fcn	"ERROR: Directory Not Found\n";
+err_file_nf	fcn	"ERROR: File Not Found\n";
+err_file_no	fcn	"ERROR: File Not Open\n";
+err_wrong_file_type	fcn	"ERROR: Wrong File Type\n"
 
-; test strings
-str_cls_test	fcn	"CLS command issued\n"
-str_color_test	fcn	"COLOR command issued\n"
-str_load_test	fcn	"LOAD command issued\n"
-str_exec_test	fcn	"EXEC command issued\n"
-str_reset_test	fcn	"RESET command issued\n"
-str_dir_test	fcn	"DIR command issued\n"
-str_chdir_test	fcn	"CHDIR command issued\n"
-str_exit_test	fcn	"EXIT command issued\n"
+* ; test strings
+* str_cls_test	fcn	"CLS command issued\n"
+* str_color_test	fcn	"COLOR command issued\n"
+* str_load_test	fcn	"LOAD command issued\n"
+* str_exec_test	fcn	"EXEC command issued\n"
+* str_reset_test	fcn	"RESET command issued\n"
+* str_dir_test	fcn	"DIR command issued\n"
+* str_chdir_test	fcn	"CHDIR command issued\n"
+* str_exit_test	fcn	"EXIT command issued\n"
 
 decode_command_line
 		jsr	decode_command_token	; A = index of the command being issued
@@ -239,7 +191,7 @@ do_cls
 		jsr	cls
 		bra	0f
 1	; syntax error
-		ldx	#err_str_syntax		; set string to ERROR: Syntax
+		ldx	#err_syntax		; set string to ERROR: Syntax
 		jsr	line_out		; output the string
 0	; clean up and return
 		rts
@@ -251,52 +203,86 @@ do_color	; COLOR $##
 		;sta	TXT_ATTR	; remove TXT_ATTR from arg1_8bit_attrib and write it here
 		bra	0f
 1	; syntax error
-		ldx	#err_str_syntax		; set string to ERROR: Syntax
+		ldx	#err_syntax		; set string to ERROR: Syntax
 		jsr	line_out		; output the string
 0	; clean up and return
 		rts
 
-		
+	
 do_load		; LOAD "file_name"
-		; TODO: Decode Argument ONE (required: "filename.hex")
-		; ...
-;	; BEGIN TEST 
-;	; 1) FIO_PATH_POS cleared to reset the path string
-;	; 2) FIO_PATH_DATA add characters to the path string	
-;	; 3) copy the result to the FIO_BUFFER	
-;
-;	; write path data to FIO_PATH_DATA
-;				clr	FIO_PATH_POS
-;				ldx	#str_load_test
-;1				lda	,x+
-;				sta	FIO_PATH_DATA
-;				bne	1b
-;						;lda	#3
-;						;sta	FIO_PATH_POS
-;						;lda	#'X'
-;						;sta	FIO_PATH_DATA
-;						;lda	#'Y'
-;						;sta	FIO_PATH_DATA
-;						;lda	#'Z'
-;						;sta	FIO_PATH_DATA
-;	; read path data from FIO_PATH_DATA and write it to the FIO_BUFFER
-;				clr	FIO_PATH_POS
-;				ldx	#FIO_BUFFER
-;2				lda	FIO_PATH_DATA
-;				sta	,x+
-;				bne	2b
-;	; END TEST		
 
-		ldx	#str_load_test
+		clr	FIO_PATH_POS	; reset the file path cursor position
+		jsr	decode_command_find_arg_1
+		nop	; X should point to the start of the first argument			
+		;ldx	#EDT_BUFFER
+1
+		lda	,x+
+		sta	FIO_PATH_DATA
+		bne	1b
+
+		lda	#FC_LOADHEX
+		sta	FIO_COMMAND	
+
+		lda	FIO_ERR_FLAGS
+		cmpa	#$80
+		beq	2f		; file not found	
+		cmpa	#$20
+		beq	4f		; file not open
+		cmpa	#$04		
+		beq	5f		; wrong file type
+		bra	3f
+5	; wrong file type
+		ldx	#err_wrong_file_type
 		jsr	line_out
+		bra	3f
+4	; file not open
+		ldx	#err_file_no
+		jsr	line_out
+		bra	3f
+2	; file not found
+		ldx	#err_file_nf
+		jsr	line_out
+3
 		rts
+
+
+
 		
 do_exec		; EXEC $####
-		; TODO: Decode Argument ONE (optional: new exec address in hex)
-		; ...
-		ldx	#str_exec_test
-		jsr	line_out
-		;jsr	[VECT_EXEC]
+
+	; save the system settings
+		lda	DSP_GRES
+		pshs	A
+		lda	DSP_EXT
+		pshs	A
+		lda	TXT_ATTR
+		pshs	A
+		lda	SYS_STATE
+		pshs	A
+
+	; EXEC
+		ldd	#0	
+		cmpd	VECT_EXEC
+		beq	3f
+		jsr	[VECT_EXEC]
+3
+	; restore the system settings
+		puls	A
+		sta	SYS_STATE
+
+		puls	A
+		sta	TXT_ATTR
+
+		puls	A
+		cmpa	DSP_EXT
+		beq	1f
+		sta	DSP_EXT
+1		
+		puls	A
+		cmpa	DSP_GRES
+		beq	2f
+		sta	DSP_GRES
+2
 		rts
 
 do_reset	; RESET
@@ -345,7 +331,7 @@ do_chdir	; CHDIR  "directory_path"
 		lda	FIO_ERR_FLAGS
 		anda	#$40
 		beq	2f
-		ldx	#err_str_dir_nf
+		ldx	#err_dir_nf
 		jsr	line_out
 		clr	FIO_ERR_FLAGS
 2	;
@@ -361,8 +347,8 @@ do_chdir	; CHDIR  "directory_path"
 		rts
 
 do_exit		; EXIT  "directory_path"
-		ldx	#str_exit_test
-		jsr	line_out
+		* ldx	#str_exit_test
+		* jsr	line_out
 		lda	#FC_SHUTDOWN
 		sta	FIO_COMMAND
 		;jsr	[VECT_CHDIR]
@@ -479,7 +465,7 @@ dct_2	; loop conditions
 		inc	0,S		; increment the token ID
 		bra	dct_0		; loop to start checking the next entry
 dct_cmd_not_found
-		ldx	#err_str_syntax	; load address of the "ERROR: Syntax" string
+		ldx	#err_syntax	; load address of the "ERROR: Syntax" string
 		bra	dct_output	; go output the syntax error string
 dct_cmd_found	; command was found in the table
 		bra	dct_done	; skip to routine done

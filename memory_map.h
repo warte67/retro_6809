@@ -10,7 +10,7 @@ enum MEMMAP
 SOFT_VECTORS = 0x0000,
 
         // Software Interrupt Vectors:
-SOFT_RSRVD   = 0x0000, // Motorola RESERVED Software Interrupt Vector
+SOFT_EXEC    = 0x0000, // Exec Software Interrupt Vector
 SOFT_SWI3    = 0x0002, // SWI3 Software Interrupt Vector
 SOFT_SWI2    = 0x0004, // SWI2 Software Interrupt Vector
 SOFT_FIRQ    = 0x0006, // FIRQ Software Interrupt Vector
@@ -170,12 +170,12 @@ KEY_END      = 0x1C7C, // End of the Keyboard Register space
 FIO_BEGIN    = 0x1C7C, // Start of the FileIO register space
 FIO_ERR_FLAGS = 0x1C7C, // (Byte) File IO error flags
         // FIO_ERR_FLAGS: ABCD.EFGH
-        //      A:  file was not found
+        //      A:  file was not found ($80)
         //      B:  directory was not found
-        //      C:  file not open
+        //      C:  file not open ($20)
         //      D:  end of file
         //      E:  buffer overrun
-        //      F:  wrong file type
+        //      F:  wrong file type ($04)
         //      G:  invalid command
         //      H:  incorrect file stream
 
@@ -245,7 +245,7 @@ PAGED_ROM    = 0xD000,
 KERNEL_ROM   = 0xF000,
 
         // Hardware Interrupt Vectors:
-HARD_RSRVD   = 0xFFF0, // Motorola RESERVED Hardware Interrupt Vector
+HARD_EXEC    = 0xFFF0, // EXEC Hardware Interrupt Vector
 HARD_SWI3    = 0xFFF2, // SWI3 Hardware Interrupt Vector
 HARD_SWI2    = 0xFFF4, // SWI2 Hardware Interrupt Vector
 HARD_FIRQ    = 0xFFF6, // FIRQ Hardware Interrupt Vector

@@ -4,7 +4,7 @@
 SOFT_VECTORS    equ   $0000
 
           ; Software Interrupt Vectors:
-SOFT_RSRVD      equ   $0000    ; Motorola RESERVED Software Interrupt Vector
+SOFT_EXEC       equ   $0000    ; EXEC Software Interrupt Vector
 SOFT_SWI3       equ   $0002    ; SWI3 Software Interrupt Vector
 SOFT_SWI2       equ   $0004    ; SWI2 Software Interrupt Vector
 SOFT_FIRQ       equ   $0006    ; FIRQ Software Interrupt Vector
@@ -239,7 +239,7 @@ PAGED_ROM       equ   $D000
 KERNEL_ROM      equ   $F000
 
           ; Hardware Interrupt Vectors:
-HARD_RSRVD      equ   $FFF0    ; Motorola RESERVED Hardware Interrupt Vector
+HARD_EXEC       equ   $FFF0    ; EXEC Hardware Interrupt Vector
 HARD_SWI3       equ   $FFF2    ; SWI3 Hardware Interrupt Vector
 HARD_SWI2       equ   $FFF4    ; SWI2 Hardware Interrupt Vector
 HARD_FIRQ       equ   $FFF6    ; FIRQ Hardware Interrupt Vector

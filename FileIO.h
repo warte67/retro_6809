@@ -62,7 +62,8 @@ protected:
     void _cmd_set_seek_position();
     void _cmd_get_seek_position();
 
-
+    Byte _fread_hex_byte(std::ifstream& ifs);
+    Word _fread_hex_word(std::ifstream& ifs);
 
     //enum FMODE
     //{

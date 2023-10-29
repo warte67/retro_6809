@@ -51,7 +51,7 @@ Bus::Bus()
 	int addr = Attach(dev, 16);
     dev->DisplayEnum("",0, "");
     dev->DisplayEnum("",0,"Software Interrupt Vectors:");
-    dev->DisplayEnum("SOFT_RSRVD",0x0000, "Motorola RESERVED Software Interrupt Vector");
+    dev->DisplayEnum("SOFT_EXEC", 0x0000, "Exec Software Interrupt Vector");
     dev->DisplayEnum("SOFT_SWI3", 0x0002, "SWI3 Software Interrupt Vector");
     dev->DisplayEnum("SOFT_SWI2", 0x0004, "SWI2 Software Interrupt Vector");
     dev->DisplayEnum("SOFT_FIRQ", 0x0006, "FIRQ Software Interrupt Vector");
@@ -153,7 +153,7 @@ Bus::Bus()
 	// ROM VECTORS
     dev->DisplayEnum("",0, "");
     dev->DisplayEnum("",0,"Hardware Interrupt Vectors:");
-    dev->DisplayEnum("HARD_RSRVD",0xfff0, "Motorola RESERVED Hardware Interrupt Vector");
+    dev->DisplayEnum("HARD_EXEC", 0xfff0, "EXEC Hardware Interrupt Vector");
     dev->DisplayEnum("HARD_SWI3", 0xfff2, "SWI3 Hardware Interrupt Vector");
     dev->DisplayEnum("HARD_SWI2", 0xfff4, "SWI2 Hardware Interrupt Vector");
     dev->DisplayEnum("HARD_FIRQ", 0xfff6, "FIRQ Hardware Interrupt Vector");
