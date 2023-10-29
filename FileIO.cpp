@@ -241,14 +241,6 @@ void FileIO::_cmd_load_hex_file()
      // remove any trailing spaces
      while (filePath.substr(filePath.size()-2,1) == " ")
          filePath = filePath.substr(0, filePath.size()-2);
-<<<<<<< HEAD
-=======
-     printf("filePath: %s\n", filePath.c_str());
-
-    #ifdef _WIN32
-        std::string chdir = filePath + "/";
-    #endif
->>>>>>> 0e98eb2bb8badcb8fd0221b15d85b5a936ce031b
 
     std::ifstream ifs(filePath);
     std::filesystem::path f{ filePath.c_str()};
