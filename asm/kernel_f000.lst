@@ -332,7 +332,7 @@ F034  CE0000                          ldu     #0
 F037  FF0000                          stu     VECT_EXEC
 F03A  CE0400                          ldu     #SSTACK_TOP
                       
-F03D  8609                            lda     #$09
+F03D  860C                            lda     #$0C
 F03F  B71C02                          sta     SYS_STATE
                       
 F042  86CE                            lda     #$CE    ; $CA

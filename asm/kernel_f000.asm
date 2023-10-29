@@ -82,7 +82,7 @@ kernel_start
 		stu	VECT_EXEC
 		ldu	#SSTACK_TOP
 
-		lda	#$09
+		lda	#$0C
 		sta	SYS_STATE
 
 		lda	#$CE	; $CA

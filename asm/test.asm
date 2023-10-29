@@ -5,11 +5,17 @@
 
 		org	$3000
 start		
-
-		lda	#$FF
-		sta	DSP_EXT
+		; crank the CPU speed some
 		lda	#$0E	
 		sta	SYS_STATE
+		; set DSP_GRES
+		lda	#$80
+		sta	DSP_GRES
+		; set DSP_EXT
+		lda	DSP_EXT
+		anda	#0b00000011
+		ora	#0b10001100
+		sta	DSP_EXT
 
 		lda	#$c5
 		sta	TXT_ATTR

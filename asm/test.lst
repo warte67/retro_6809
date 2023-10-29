@@ -197,28 +197,34 @@ F018                  KRNL_NMI        equ     61464
                       
 3000                                  org     $3000
 3000                  start           
+                                      ; crank the CPU speed some
+3000  860E                            lda     #$0E    
+3002  B71C02                          sta     SYS_STATE
+                                      ; set DSP_GRES
+3005  8680                            lda     #$80
+3007  B71C08                          sta     DSP_GRES
+                                      ; set DSP_EXT
+300A  B61C09                          lda     DSP_EXT
+300D  8403                            anda    #0b00000011
+300F  8A8C                            ora     #0b10001100
+3011  B71C09                          sta     DSP_EXT
                       
-3000  86FF                            lda     #$FF
-3002  B71C09                          sta     DSP_EXT
-3005  860E                            lda     #$0E    
-3007  B71C02                          sta     SYS_STATE
+3014  86C5                            lda     #$c5
+3016  B70015                          sta     TXT_ATTR
                       
-300A  86C5                            lda     #$c5
-300C  B70015                          sta     TXT_ATTR
+3019  8E302D                          ldx     #test_str
+301C  BDF423                          jsr     line_out
                       
-300F  8E3023                          ldx     #test_str
-3012  BDF423                          jsr     line_out
-                      
-3015                  1       ; wait for a key press
-3015  B61C27                          lda     CHAR_Q_LEN
-3018  27FB                            beq     1b
-301A                  2       ; clean up the queue
-301A  B61C28                          lda     CHAR_SCAN
-301D  2603                            bne     3f
-301F  B61C29                          lda     CHAR_POP
-3022                  3       ; clean up and return
-3022  39                              rts
+301F                  1       ; wait for a key press
+301F  B61C27                          lda     CHAR_Q_LEN
+3022  27FB                            beq     1b
+3024                  2       ; clean up the queue
+3024  B61C28                          lda     CHAR_SCAN
+3027  2603                            bne     3f
+3029  B61C29                          lda     CHAR_POP
+302C                  3       ; clean up and return
+302C  39                              rts
                       
                       
                       
-3023  0A546573743A202048656C6C6F20576F726C640A70726573732061206B657920746F20657869742E2E2E0A0A00 test_str        fcn     "\nTest:  Hello World\npress a key to exit...\n\n";
+302D  0A546573743A202048656C6C6F20576F726C640A70726573732061206B657920746F20657869742E2E2E0A0A00 test_str        fcn     "\nTest:  Hello World\npress a key to exit...\n\n";
