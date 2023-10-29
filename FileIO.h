@@ -51,6 +51,7 @@ protected:
     void _cmd_list_directory();
     void _cmd_make_directory();
     void _cmd_change_directory();
+    void _cmd_get_current_path();
     void _cmd_rename_directory();
     void _cmd_remove_directory();
     void _cmd_delete_file();

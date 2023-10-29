@@ -172,30 +172,35 @@ FIO_ERR_FLAGS    equ   $1C7C    ; (Byte) File IO error flags
           ;      F:  wrong file type
           ;      G:  invalid command
           ;      H:  incorrect file stream
-FIO_COMMAND     equ   $1C7D    ; (Byte) OnWrite, execute a file command
-          ;      $00:  Reset/Null
-          ;      $01:  SYSTEM: Shutdown
-          ;      $02:  SYSTEM: Load Compilation Date
-          ;      $03:  New File Stream
-          ;      $04:  Open File
-          ;      $05:  Is File Open? (returns FIO_ERR_FLAGS bit-5)
-          ;      $06:  Close File
-          ;      $07:  Read Byte
-          ;      $08:  Write Byte
-          ;      $09:  Load Hex Format File
-          ;      $0A:  Get File Length
-          ;      $0B:  List Directory
-          ;      $0C:  Make Directory
-          ;      $0D:  Change Directory
-          ;      $0E:  Rename Directory
-          ;      $0F:  Remove Directory
-          ;      $10:  Delete File
-          ;      $11:  Rename file
-          ;      $12:  Copy File
-          ;      $13:  Seek Start
-          ;      $14:  Seek End
-          ;      $15:  Set Seek Position
-          ;      $16:  Get Seek Position
+
+FIO_COMMAND     equ   $1C7D    ; (Byte) OnWrite, execute a file command (FC_<cmd>)
+          ; Begin FIO_COMMANDS
+FC_RESET        equ   $0000    ;        Reset
+FC_SHUTDOWN     equ   $0001    ;        SYSTEM: Shutdown
+FC_COMPDATE     equ   $0002    ;        SYSTEM: Load Compilation Date
+FC_NEWFILE      equ   $0003    ;      * New File Stream
+FC_OPENFILE     equ   $0004    ;      * Open File
+FC_ISOPEN       equ   $0005    ;      *Is File Open ? (returns FIO_ERR_FLAGS bit - 5)
+FC_CLOSEFILE    equ   $0006    ;      * Close File
+FC_READBYTE     equ   $0007    ;      * Read Byte (into FIO_IOBYTE)
+FC_WRITEBYTE    equ   $0008    ;      * Write Byte (from FIO_IOBYTE)
+FC_LOADHEX      equ   $0009    ;      * Load Hex Format File
+FC_GETLENGTH    equ   $000A    ;      * Get File Length (into FIO_IOWORD)
+FC_LISTDIR      equ   $000B    ;        List Directory
+FC_MAKEDIR      equ   $000C    ;      * Make Directory
+FC_CHANGEDIR    equ   $000D    ;        Change Directory
+FC_GETPATH      equ   $000E    ;        Fetch Current Path
+FC_REN_DIR      equ   $000F    ;      * Rename Directory
+FC_DEL_DIR      equ   $0010    ;      * Delete Directory
+FC_DEL_FILE     equ   $0011    ;      * Delete File
+FC_REN_FILE     equ   $0012    ;      * Rename file
+FC_COPYFILE     equ   $0013    ;      * Copy File
+FC_SEEKSTART    equ   $0014    ;      * Seek Start
+FC_SEEKEND      equ   $0015    ;      * Seek End
+FC_SET_SEEK     equ   $0016    ;      * Set Seek Position (from FIO_IOWORD)
+FC_GET_SEEK     equ   $0017    ;      * Get Seek Position (into FIO_IOWORD)
+          ; End FIO_COMMANDS
+
 FIO_STREAM      equ   $1C7E    ; (Byte) current file stream index (0-15)
 FIO_MODE        equ   $1C7F    ; (Byte) Flags describing the I/O mode for the file
           ; FIO_MODE: 00AB.CDEF  (indexed by FIO_STREAM)
@@ -206,19 +211,20 @@ FIO_MODE        equ   $1C7F    ; (Byte) Flags describing the I/O mode for the fi
           ;      E:  APPEND - All output happens at end of the file
           ;      F:  TRUNC - discard all previous file data
 FIO_SEEKPOS     equ   $1C80    ; (DWord) file seek position
-FIO_IODATA      equ   $1C84    ; (Byte) input / output character
-FIO_PATH_LEN    equ   $1C85    ; (Byte) length of the filepath
-FIO_PATH_POS    equ   $1C86    ; (Byte) character position within the filepath
-FIO_PATH_DATA    equ   $1C87    ; (Byte) data at the character position of the path
-FIO_DIR_DATA    equ   $1C88    ; (Byte) a series of null-terminated filenames
+FIO_IOBYTE      equ   $1C84    ; (Byte) input / output character
+FIO_IOWORD      equ   $1C85    ; (Byte) input / output character
+FIO_PATH_LEN    equ   $1C86    ; (Byte) length of the filepath
+FIO_PATH_POS    equ   $1C87    ; (Byte) character position within the filepath
+FIO_PATH_DATA    equ   $1C88    ; (Byte) data at the character position of the path
+FIO_DIR_DATA    equ   $1C89    ; (Byte) a series of null-terminated filenames
           ;     NOTES: Current read-position is reset to the beginning following a
           ;             List Directory command. The read-position is automatically
           ;             advanced on read from this register. Each filename is
           ;             $0a-terminated. The list itself is null-terminated.
-FIO_END         equ   $1C89    ; End of the FileIO register space
+FIO_END         equ   $1C8A    ; End of the FileIO register space
 
-    ; 4983 ($1377) bytes remaining for additional registers.
-RESERVED        equ   $1C89
+    ; 4982 ($1376) bytes remaining for additional registers.
+RESERVED        equ   $1C8A
 
           ; User RAM (32K)
 USER_RAM        equ   $3000

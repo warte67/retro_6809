@@ -27,7 +27,13 @@ Byte FileIO::read(Word offset, bool debug)
 
     switch (offset)
     {
-        case FIO_ERR_FLAGS: data = fio_err_flags;  break;
+        case FIO_ERR_FLAGS: 
+        {
+            Byte d = data;
+            data = fio_err_flags;  
+            fio_err_flags = 0;
+            break;
+        }
         case FIO_PATH_LEN:  data = dir_data.size(); break;
         case FIO_PATH_POS:  
         {
@@ -46,8 +52,6 @@ Byte FileIO::read(Word offset, bool debug)
                 if (path_char_pos < filePath.size())
                 {
                     data = (Byte)filePath.substr(path_char_pos, 1).at(0);
-                    //printf("dir_data: %s\n", dir_data.c_str());
-                    //printf("Character @ %d: %c \n", dir_data_pos, data);
                     if (path_char_pos <= filePath.size())
                         path_char_pos++;
                 }
@@ -90,7 +94,7 @@ void FileIO::write(Word offset, Byte data, bool debug)
     {
         case FIO_ERR_FLAGS: fio_err_flags = data; break;
         case FIO_PATH_POS:  
-            if (data >= filePath.size())
+            if (data > filePath.size())
                 data = filePath.size() - 1;
             path_char_pos = data;
             break;
@@ -131,16 +135,17 @@ void FileIO::write(Word offset, Byte data, bool debug)
                 case 0x0A: _cmd_get_file_length();               break;        
                 case 0x0B: _cmd_list_directory();                break;    
                 case 0x0C: _cmd_make_directory();                break;        
-                case 0x0D: _cmd_change_directory();              break;            
-                case 0x0E: _cmd_rename_directory();              break;    
-                case 0x0F: _cmd_remove_directory();              break;    
-                case 0x10: _cmd_delete_file();                   break;
-                case 0x11: _cmd_rename_file();                   break;
-                case 0x12: _cmd_copy_file();                     break;
-                case 0x13: _cmd_seek_start();                    break;    
-                case 0x14: _cmd_seek_end();                      break;
-                case 0x15: _cmd_set_seek_position();             break;    
-                case 0x16: _cmd_get_seek_position();             break;    
+                case 0x0D: _cmd_change_directory();              break;
+                case 0x0E: _cmd_get_current_path();              break;
+                case 0x0F: _cmd_rename_directory();              break;
+                case 0x10: _cmd_remove_directory();              break;    
+                case 0x11: _cmd_delete_file();                   break;
+                case 0x12: _cmd_rename_file();                   break;
+                case 0x13: _cmd_copy_file();                     break;
+                case 0x14: _cmd_seek_start();                    break;    
+                case 0x15: _cmd_seek_end();                      break;
+                case 0x16: _cmd_set_seek_position();             break;    
+                case 0x17: _cmd_get_seek_position();             break;    
                 default:
                     data = fio_err_flags | 0x02;    // invalid command
                     break;
@@ -170,7 +175,7 @@ void FileIO::_cmd_system_load_comilation_date()
 {
     //printf("FileIO: COMPILE DATE Command Received\n");
     filePath = __DATE__;
-    printf("Compilation Date: %s\n", dir_data.c_str());
+    // printf("Compilation Date: %s\n", dir_data.c_str());
 }
 
 void FileIO::_cmd_new_file_stream()
@@ -218,6 +223,7 @@ void FileIO::_cmd_list_directory()
         if ((char)Bus::Read(i) != ' ' && (char)Bus::Read(i) != 0)
             arg1 += (char)Bus::Read(i);
     std::vector<std::string> _files;
+
     std::string fp = path;
     std::string file = "";
     std::string ext = "";
@@ -348,12 +354,10 @@ void FileIO::_cmd_list_directory()
     // build the directory list string
     dir_data = "";
     for (auto& f : _files)
-    {
         dir_data += f;
-        //dir_data += 0x0a;
-    }
-    //dir_data += '/0';
-    //printf("%s", dir_data.c_str());
+    // add the path at the end
+    dir_data += "\n";
+    dir_data += path;
     dir_data_pos = 0;        
 }
 
@@ -363,6 +367,33 @@ void FileIO::_cmd_make_directory()
 
 void FileIO::_cmd_change_directory()
 {
+    //printf("Change Directory To: %s\n", filePath.c_str());
+    if (filePath.size() == 0)   return;
+    std::string chdir = filePath + "/";
+    if (std::filesystem::exists(chdir))
+    {
+        //printf("Directory Found\n");
+        Byte data = Bus::Read(FIO_ERR_FLAGS);
+        data &= ~0x40;
+        Bus::Write(FIO_ERR_FLAGS, data);
+        fio_err_flags = data;
+        std::filesystem::current_path(chdir);  // change dir
+    }
+    else
+    {
+        //printf("ERROR: Directory Not Found!\n");
+        Byte data = Bus::Read(FIO_ERR_FLAGS);
+        data |= 0x40;
+        Bus::Write(FIO_ERR_FLAGS, data);
+        fio_err_flags = data;
+    }
+}
+
+void FileIO::_cmd_get_current_path()
+{
+    printf("FileIO::_cmd_get_current_path()\n");
+    path_char_pos = 0;
+    filePath = std::filesystem::current_path().string() + "\n";
 }
 
 void FileIO::_cmd_rename_directory()
@@ -423,31 +454,37 @@ Word FileIO::OnAttach(Word nextAddr)
     DisplayEnum("", 0, "     H:  incorrect file stream");
     nextAddr += 1;
 
-    DisplayEnum("FIO_COMMAND", nextAddr, "(Byte) OnWrite, execute a file command");
-    DisplayEnum("", 0, "     $00:  Reset/Null");
-    DisplayEnum("", 0, "     $01:  SYSTEM: Shutdown");
-    DisplayEnum("", 0, "     $02:  SYSTEM: Load Compilation Date");
-    DisplayEnum("", 0, "     $03:  New File Stream");
-    DisplayEnum("", 0, "     $04:  Open File");
-    DisplayEnum("", 0, "     $05:  Is File Open? (returns FIO_ERR_FLAGS bit-5)");
-    DisplayEnum("", 0, "     $06:  Close File");
-    DisplayEnum("", 0, "     $07:  Read Byte");
-    DisplayEnum("", 0, "     $08:  Write Byte");
-    DisplayEnum("", 0, "     $09:  Load Hex Format File");
-    DisplayEnum("", 0, "     $0A:  Get File Length");
-    DisplayEnum("", 0, "     $0B:  List Directory");
-    DisplayEnum("", 0, "     $0C:  Make Directory");
-    DisplayEnum("", 0, "     $0D:  Change Directory");
-    DisplayEnum("", 0, "     $0E:  Rename Directory");
-    DisplayEnum("", 0, "     $0F:  Remove Directory");
-    DisplayEnum("", 0, "     $10:  Delete File");
-    DisplayEnum("", 0, "     $11:  Rename file");
-    DisplayEnum("", 0, "     $12:  Copy File");
-    DisplayEnum("", 0, "     $13:  Seek Start");
-    DisplayEnum("", 0, "     $14:  Seek End");
-    DisplayEnum("", 0, "     $15:  Set Seek Position"); // std::streampos?
-    DisplayEnum("", 0, "     $16:  Get Seek Position"); // std::streampos?
+    DisplayEnum("", 0, "");
+    DisplayEnum("FIO_COMMAND", nextAddr, "(Byte) OnWrite, execute a file command (FC_<cmd>)");
     nextAddr += 1;
+    Byte enumID = 0;
+    DisplayEnum("", 0, "Begin FIO_COMMANDS");
+    DisplayEnum("FC_RESET",     enumID++, "       Reset");
+    DisplayEnum("FC_SHUTDOWN",  enumID++, "       SYSTEM: Shutdown");
+    DisplayEnum("FC_COMPDATE",  enumID++, "       SYSTEM: Load Compilation Date");
+    DisplayEnum("FC_NEWFILE",   enumID++, "     * New File Stream");
+    DisplayEnum("FC_OPENFILE",  enumID++, "     * Open File");
+    DisplayEnum("FC_ISOPEN",    enumID++, "     *Is File Open ? (returns FIO_ERR_FLAGS bit - 5)");
+    DisplayEnum("FC_CLOSEFILE", enumID++, "     * Close File");
+    DisplayEnum("FC_READBYTE",  enumID++, "     * Read Byte (into FIO_IOBYTE)");
+    DisplayEnum("FC_WRITEBYTE", enumID++, "     * Write Byte (from FIO_IOBYTE)");
+    DisplayEnum("FC_LOADHEX",   enumID++, "     * Load Hex Format File");
+    DisplayEnum("FC_GETLENGTH", enumID++, "     * Get File Length (into FIO_IOWORD)");
+    DisplayEnum("FC_LISTDIR",   enumID++, "       List Directory");
+    DisplayEnum("FC_MAKEDIR",   enumID++, "     * Make Directory");
+    DisplayEnum("FC_CHANGEDIR", enumID++, "       Change Directory");
+    DisplayEnum("FC_GETPATH",   enumID++, "       Fetch Current Path");
+    DisplayEnum("FC_REN_DIR",   enumID++, "     * Rename Directory");
+    DisplayEnum("FC_DEL_DIR",   enumID++, "     * Delete Directory");
+    DisplayEnum("FC_DEL_FILE",  enumID++, "     * Delete File");
+    DisplayEnum("FC_REN_FILE",  enumID++, "     * Rename file");
+    DisplayEnum("FC_COPYFILE",  enumID++, "     * Copy File");
+    DisplayEnum("FC_SEEKSTART", enumID++, "     * Seek Start");
+    DisplayEnum("FC_SEEKEND",   enumID++, "     * Seek End");
+    DisplayEnum("FC_SET_SEEK",  enumID++, "     * Set Seek Position (from FIO_IOWORD)");
+    DisplayEnum("FC_GET_SEEK",  enumID++, "     * Get Seek Position (into FIO_IOWORD)");
+    DisplayEnum("", 0, "End FIO_COMMANDS");
+    DisplayEnum("", 0, "");
 
     DisplayEnum("FIO_STREAM", nextAddr, "(Byte) current file stream index (0-15)");
     nextAddr += 1;
@@ -465,7 +502,10 @@ Word FileIO::OnAttach(Word nextAddr)
     DisplayEnum("FIO_SEEKPOS", nextAddr, "(DWord) file seek position");
     nextAddr += 4;
 
-    DisplayEnum("FIO_IODATA", nextAddr, "(Byte) input / output character");
+    DisplayEnum("FIO_IOBYTE", nextAddr, "(Byte) input / output character");
+    nextAddr += 1;
+
+    DisplayEnum("FIO_IOWORD", nextAddr, "(Byte) input / output character");
     nextAddr += 1;
 
     DisplayEnum("FIO_PATH_LEN", nextAddr, "(Byte) length of the filepath");

@@ -157,7 +157,7 @@ kernel_start
 		jsr	line_out	
 
 		; fetch compilation date
-		lda	#$02
+		lda	#FC_COMPDATE
 		sta	FIO_COMMAND
 0		lda	FIO_PATH_DATA
 		beq	2f
@@ -203,6 +203,7 @@ command_vector_table
 
 str_eq		fcn	" ";
 err_str_syntax	fcn	"ERROR: Syntax\n";
+err_str_dir_nf	fcn	"ERROR: Directory Not Found\n";
 
 ; test strings
 str_cls_test	fcn	"CLS command issued\n"
@@ -299,7 +300,8 @@ do_exec		; EXEC $####
 		rts
 
 do_reset	; RESET
-		;clr	FIO_COMMAND
+		;lda	#FC_RESET
+		;sta	FIO_COMMAND
 		;rts
 		jmp	[VECT_RESET]
 		; rts
@@ -315,33 +317,53 @@ do_dir		; DIR
 		bne	1b
 		nop	; argument one should now be copied to the FIO_BUFFER		
 
-		lda	#$0B	; COMMAND: List Directory
-		sta	FIO_COMMAND
-		; output the result
-2		lda	FIO_DIR_DATA
+		lda	#FC_LISTDIR	; COMMAND: List Directory
+		sta	FIO_COMMAND		
+2	; output the result
+		lda	FIO_DIR_DATA
 		beq	3f
 		jsr	char_out
 		bra	2b
-3		lda	#$0a
+3	; send a new line character
+		lda	#$0a
 		jsr	char_out
-
-
-
-		;ldx	#str_dir_test
-		;jsr	line_out
-		;jsr	[VECT_DIR]
+	; cleanup and retrun
 		rts
 
 do_chdir	; CHDIR  "directory_path"
-		ldx	#str_chdir_test
+		jsr	decode_command_find_arg_1
+		nop	; X should point to the start of the first argument
+		clr	FIO_PATH_POS	; reset the cursor position in the file path
+1	; 
+		lda	,x+
+		sta	FIO_PATH_DATA
+		bne	1b
+		lda	#FC_CHANGEDIR
+		sta	FIO_COMMAND
+		bra	2f
+	; check for errors		
+		lda	FIO_ERR_FLAGS
+		anda	#$40
+		beq	2f
+		ldx	#err_str_dir_nf
 		jsr	line_out
-		;jsr	[VECT_CHDIR]
+		clr	FIO_ERR_FLAGS
+2	;
+		lda	#FC_GETPATH
+		sta	FIO_COMMAND
+		jsr	char_out	
+3	;
+		lda	FIO_PATH_DATA
+		beq	4f
+		jsr	char_out
+		bra	3b		
+4	; cleanup and return	
 		rts
 
 do_exit		; EXIT  "directory_path"
 		ldx	#str_exit_test
 		jsr	line_out
-		lda	#$01
+		lda	#FC_SHUTDOWN
 		sta	FIO_COMMAND
 		;jsr	[VECT_CHDIR]
 		rts

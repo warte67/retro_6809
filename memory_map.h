@@ -1,5 +1,3 @@
-
-
 // memory_map.h
 #ifndef __MEMORY_MAP_H__
 #define __MEMORY_MAP_H__
@@ -180,30 +178,35 @@ FIO_ERR_FLAGS = 0x1C7C, // (Byte) File IO error flags
         //      F:  wrong file type
         //      G:  invalid command
         //      H:  incorrect file stream
-FIO_COMMAND  = 0x1C7D, // (Byte) OnWrite, execute a file command
-        //      $00:  Reset/Null
-        //      $01:  SYSTEM: Shutdown
-        //      $02:  SYSTEM: Load Compilation Date
-        //      $03:  New File Stream
-        //      $04:  Open File
-        //      $05:  Is File Open? (returns FIO_ERR_FLAGS bit-5)
-        //      $06:  Close File
-        //      $07:  Read Byte
-        //      $08:  Write Byte
-        //      $09:  Load Hex Format File
-        //      $0A:  Get File Length
-        //      $0B:  List Directory
-        //      $0C:  Make Directory
-        //      $0D:  Change Directory
-        //      $0E:  Rename Directory
-        //      $0F:  Remove Directory
-        //      $10:  Delete File
-        //      $11:  Rename file
-        //      $12:  Copy File
-        //      $13:  Seek Start
-        //      $14:  Seek End
-        //      $15:  Set Seek Position
-        //      $16:  Get Seek Position
+
+FIO_COMMAND  = 0x1C7D, // (Byte) OnWrite, execute a file command (FC_<cmd>)
+        // Begin FIO_COMMANDS
+FC_RESET     = 0x0000, //        Reset
+FC_SHUTDOWN  = 0x0001, //        SYSTEM: Shutdown
+FC_COMPDATE  = 0x0002, //        SYSTEM: Load Compilation Date
+FC_NEWFILE   = 0x0003, //      * New File Stream
+FC_OPENFILE  = 0x0004, //      * Open File
+FC_ISOPEN    = 0x0005, //      *Is File Open ? (returns FIO_ERR_FLAGS bit - 5)
+FC_CLOSEFILE = 0x0006, //      * Close File
+FC_READBYTE  = 0x0007, //      * Read Byte (into FIO_IOBYTE)
+FC_WRITEBYTE = 0x0008, //      * Write Byte (from FIO_IOBYTE)
+FC_LOADHEX   = 0x0009, //      * Load Hex Format File
+FC_GETLENGTH = 0x000A, //      * Get File Length (into FIO_IOWORD)
+FC_LISTDIR   = 0x000B, //        List Directory
+FC_MAKEDIR   = 0x000C, //      * Make Directory
+FC_CHANGEDIR = 0x000D, //        Change Directory
+FC_GETPATH   = 0x000E, //        Fetch Current Path
+FC_REN_DIR   = 0x000F, //      * Rename Directory
+FC_DEL_DIR   = 0x0010, //      * Delete Directory
+FC_DEL_FILE  = 0x0011, //      * Delete File
+FC_REN_FILE  = 0x0012, //      * Rename file
+FC_COPYFILE  = 0x0013, //      * Copy File
+FC_SEEKSTART = 0x0014, //      * Seek Start
+FC_SEEKEND   = 0x0015, //      * Seek End
+FC_SET_SEEK  = 0x0016, //      * Set Seek Position (from FIO_IOWORD)
+FC_GET_SEEK  = 0x0017, //      * Get Seek Position (into FIO_IOWORD)
+        // End FIO_COMMANDS
+
 FIO_STREAM   = 0x1C7E, // (Byte) current file stream index (0-15)
 FIO_MODE     = 0x1C7F, // (Byte) Flags describing the I/O mode for the file
         // FIO_MODE: 00AB.CDEF  (indexed by FIO_STREAM)
@@ -214,19 +217,20 @@ FIO_MODE     = 0x1C7F, // (Byte) Flags describing the I/O mode for the file
         //      E:  APPEND - All output happens at end of the file
         //      F:  TRUNC - discard all previous file data
 FIO_SEEKPOS  = 0x1C80, // (DWord) file seek position
-FIO_IODATA   = 0x1C84, // (Byte) input / output character
-FIO_PATH_LEN = 0x1C85, // (Byte) length of the filepath
-FIO_PATH_POS = 0x1C86, // (Byte) character position within the filepath
-FIO_PATH_DATA = 0x1C87, // (Byte) data at the character position of the path
-FIO_DIR_DATA = 0x1C88, // (Byte) a series of null-terminated filenames
+FIO_IOBYTE   = 0x1C84, // (Byte) input / output character
+FIO_IOWORD   = 0x1C85, // (Byte) input / output character
+FIO_PATH_LEN = 0x1C86, // (Byte) length of the filepath
+FIO_PATH_POS = 0x1C87, // (Byte) character position within the filepath
+FIO_PATH_DATA = 0x1C88, // (Byte) data at the character position of the path
+FIO_DIR_DATA = 0x1C89, // (Byte) a series of null-terminated filenames
         //     NOTES: Current read-position is reset to the beginning following a
         //             List Directory command. The read-position is automatically
         //             advanced on read from this register. Each filename is
         //             $0a-terminated. The list itself is null-terminated.
-FIO_END      = 0x1C89, // End of the FileIO register space
+FIO_END      = 0x1C8A, // End of the FileIO register space
 
-    // 4983 ($1377) bytes remaining for additional registers.
-RESERVED     = 0x1C89,
+    // 4982 ($1376) bytes remaining for additional registers.
+RESERVED     = 0x1C8A,
 
         // User RAM (32K)
 USER_RAM     = 0x3000,
