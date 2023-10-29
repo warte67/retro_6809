@@ -633,8 +633,10 @@ void Gfx::OnUpdate(float fElapsedTime)
 		// the 6809 CPU should nowbe working
 
 		// update the display textures
-		_display_extended();
-		_display_standard();
+		C6809::s_bHalted = true;
+			_display_extended();
+			_display_standard();
+		C6809::s_bHalted = false;
 	}
 
 	// run OnUpdate() for the other graphics devices

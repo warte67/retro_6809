@@ -6,10 +6,10 @@
 		org	$3000
 start		
 
-		* lda	#$FF
-		* sta	DSP_EXT
-		* lda	#$0E	
-		* sta	SYS_STATE
+		lda	#$FF
+		sta	DSP_EXT
+		lda	#$0E	
+		sta	SYS_STATE
 
 		lda	#$c5
 		sta	TXT_ATTR
