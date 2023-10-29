@@ -238,10 +238,10 @@ void FileIO::_cmd_load_hex_file()
     //printf("Change Directory To: %s\n", filePath.c_str());
     if (filePath.size() == 0)   return;
 
-    // // remove any trailing spaces
-    // while (filePath.substr(filePath.size()-1,1) == " ")
-    //     filePath = filePath.substr(0, filePath.size()-2);
-    // printf("filePath: %s\n", filePath.c_str());
+     // remove any trailing spaces
+     while (filePath.substr(filePath.size()-2,1) == " ")
+         filePath = filePath.substr(0, filePath.size()-2);
+     printf("filePath: %s\n", filePath.c_str());
 
     #ifdef _WIN32
         std::string chdir = filePath + "/";
