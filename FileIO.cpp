@@ -241,19 +241,6 @@ void FileIO::_cmd_load_hex_file()
      // remove any trailing spaces
      while (filePath.substr(filePath.size()-2,1) == " ")
          filePath = filePath.substr(0, filePath.size()-2);
-     printf("filePath: %s\n", filePath.c_str());
-
-    #ifdef _WIN32
-        std::string chdir = filePath + "/";
-    // #else
-    //     #ifdef __linux__
-    //         // remove trailing spaces
-    //         filePath = filePath.substr(0, filePath.size()-2);
-    //     #endif
-    #endif
-
-    
-
 
     std::ifstream ifs(filePath);
     std::filesystem::path f{ filePath.c_str()};
@@ -504,15 +491,12 @@ void FileIO::_cmd_change_directory()
 {
     //printf("Change Directory To: %s\n", filePath.c_str());
     if (filePath.size() == 0)   return;
-    #ifdef _WIN32
-        std::string chdir = filePath + "/";
-    #else
-        #ifdef __linux__
-            std::string chdir = filePath;
-            // remove trailing spaces
-            chdir = chdir.substr(0, chdir.size()-2);
-        #endif
-    #endif
+
+    // remove any trailing spaces
+    while (filePath.substr(filePath.size() - 2, 1) == " ")
+        filePath = filePath.substr(0, filePath.size() - 2);
+
+    std::string chdir = filePath;
     
     if (std::filesystem::exists(chdir))
     {
