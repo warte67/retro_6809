@@ -210,12 +210,12 @@ void FileIO::_cmd_get_file_length()
 {
 }
 
+
 void FileIO::_cmd_list_directory()
 {
     // int FILENAME_LENGTH = 24;
     int FILENAME_LENGTH = Bus::Read(DSP_TXT_COLS)/2;
-    //if (FILENAME_LENGTH < 24)
-    //    FILENAME_LENGTH *= 2;
+    const int SIZE_LENGTH = 8;
 
     std::string path = std::filesystem::current_path().generic_string();
     std::string arg1 = "";
@@ -239,81 +239,88 @@ void FileIO::_cmd_list_directory()
         for (const auto& entry : std::filesystem::directory_iterator(path))
         {
             std::stringstream dir;
+            std::stringstream ssFile;
+            std::string size = "";
             if (entry.is_directory())
             {
                 dir << "[" << entry.path().filename().generic_string() << "]";
-                std::string stDir = dir.str();
-                while (stDir.size() < FILENAME_LENGTH)
-                    stDir = stDir + " ";
-                //std::cout << stDir << std::endl;
-                _files.push_back(stDir);
+                size = "[DIR]";
             }
-        }
-        for (const auto& entry : std::filesystem::directory_iterator(path))
-        {
-            std::stringstream dir;
-            if (entry.is_regular_file())
+            else
             {
                 dir << entry.path().filename().generic_string();
-                std::string stDir = dir.str();
-                while (stDir.size() < FILENAME_LENGTH)
-                    stDir = stDir + " ";
-                std::cout << stDir << std::endl;
-                _files.push_back(stDir);
+                size += std::to_string(entry.file_size());
             }
+            while (size.size() < SIZE_LENGTH)
+                size = " " + size;
+            ssFile << size << " " << dir.str() << std::endl;
+            _files.push_back(ssFile.str());
         }
     }
     else if (ext == "*" || file == "*")
     {
-        std::stringstream dir;
-        if (ext == "*")
+        if (file == "*")
         {
             for (const auto& entry : std::filesystem::directory_iterator(path))
             {
-                std::string strFile = entry.path().filename().string();
-                strFile = strFile.substr(0, strFile.find('.'));
                 std::stringstream dir;
-                if (entry.is_regular_file() && file == strFile)
-                {
-                    dir << entry.path().filename().generic_string();
-                    std::string stDir = dir.str();
-                    while (stDir.size() < FILENAME_LENGTH)
-                        stDir = stDir + " ";
-                    _files.push_back(stDir);
-                }
-            }
-        }
-        else if (file == "*")
-        {
-            for (const auto& entry : std::filesystem::directory_iterator(path))
-            {
+                std::stringstream ssFile;
+                std::string size = "";
                 std::string strExt = entry.path().extension().filename().string();
                 if (strExt.find('.') == 0)
                     strExt = strExt.substr(1);
-                std::stringstream dir;
                 if (entry.is_regular_file() && ext == strExt)
                 {
                     dir << entry.path().filename().generic_string();
-                    std::string stDir = dir.str();
-                    while (stDir.size() < FILENAME_LENGTH)
-                        stDir = stDir + " ";
-                    _files.push_back(stDir);
+                    size += std::to_string(entry.file_size());
+                    while (size.size() < SIZE_LENGTH)
+                        size = " " + size;
+                    ssFile << size << " " << dir.str() << std::endl;
+                    _files.push_back(ssFile.str());
+                }
+            }
+        }        
+        else if (ext == "*")
+        {
+            for (const auto& entry : std::filesystem::directory_iterator(path))
+            {
+                std::stringstream dir;
+                std::stringstream ssFile;
+                std::string size = "";
+                std::string strFile = entry.path().filename().string();
+                strFile = strFile.substr(0, strFile.find('.'));
+                if (entry.is_regular_file() && file == strFile)
+                {
+                    dir << entry.path().filename().generic_string();
+                    size += std::to_string(entry.file_size());
+                    while (size.size() < SIZE_LENGTH)
+                        size = " " + size;
+                    ssFile << size << " " << dir.str() << std::endl;
+                    _files.push_back(ssFile.str());
                 }
             }
         }
     }
-    else if (arg1 == "[]") // all directories
+    else if (arg1 == "[]")  // all directories
     {
         for (const auto& entry : std::filesystem::directory_iterator(path))
         {
-            if (entry.is_directory())
+            std::stringstream dir;
+            std::stringstream ssFile;
+            std::string size = "";
+            std::string strFile = entry.path().filename().string();
+            strFile = strFile.substr(0, strFile.find('.'));
+            std::string strExt = entry.path().extension().filename().string();
+            if (strExt.find('.') == 0)
+                strExt = strExt.substr(1);
+            if (entry.is_directory())// && file == strFile)// && ext == strExt)
             {
-                std::stringstream dir;
                 dir << "[" << entry.path().filename().generic_string() << "]";
-                std::string stDir = dir.str();
-                while (stDir.size() < FILENAME_LENGTH)
-                    stDir = stDir + " ";
-                _files.push_back(stDir);
+                size = "[DIR]";
+                while (size.size() < SIZE_LENGTH)
+                    size = " " + size;
+                ssFile << size << " " << dir.str() << std::endl;
+                _files.push_back(ssFile.str());
             }
         }
     }
@@ -321,30 +328,66 @@ void FileIO::_cmd_list_directory()
     {
         for (const auto& entry : std::filesystem::directory_iterator(path))
         {
+            std::stringstream dir;
+            std::stringstream ssFile;
+            std::string size = "";
+            std::string strFile = entry.path().filename().string();
+            strFile = strFile.substr(0, strFile.find('.'));
             std::string strExt = entry.path().extension().filename().string();
             if (strExt.find('.') == 0)
                 strExt = strExt.substr(1);
-            std::string strFile = entry.path().filename().string();
-            strFile = strFile.substr(0, strFile.find('.'));
-            std::stringstream dir;
             if (entry.is_directory() && file == strFile)
             {
                 dir << "[" << entry.path().filename().generic_string() << "]";
-                std::string stDir = dir.str();
-                while (stDir.size() < FILENAME_LENGTH)
-                    stDir = stDir + " ";
-                _files.push_back(stDir);
+                size = "[DIR]";
+                while (size.size() < SIZE_LENGTH)
+                    size = " " + size;
+                ssFile << size << " " << dir.str() << std::endl;
+                _files.push_back(ssFile.str());
             }
-            if (file == strFile && ext == strExt)
+            else if (file == strFile && ext == strExt)
             {
                 dir << entry.path().filename().generic_string();
-                std::string stDir = dir.str();
-                while (stDir.size() < FILENAME_LENGTH)
-                    stDir = stDir + " ";
-                _files.push_back(stDir);
+                size += std::to_string(entry.file_size());
+                while (size.size() < SIZE_LENGTH)
+                    size = " " + size;
+                ssFile << size << " " << dir.str() << std::endl;
+                _files.push_back(ssFile.str());
             }
         }
     }
+    //else // directories and exact matches
+    //{
+    //    for (const auto& entry : std::filesystem::directory_iterator(path))
+    //    {
+    //        std::string strExt = entry.path().extension().filename().string();
+    //        if (strExt.find('.') == 0)
+    //            strExt = strExt.substr(1);
+    //        std::string strFile = entry.path().filename().string();
+    //        strFile = strFile.substr(0, strFile.find('.'));
+    //        std::stringstream dir;
+    //        if (entry.is_directory() && file == strFile)
+    //        {
+    //            dir << "[" << entry.path().filename().generic_string() << "]";
+    //            std::string stDir = dir.str();
+    //            while (stDir.size() < FILENAME_LENGTH)
+    //                stDir = stDir + " ";
+    //            _files.push_back(stDir);
+    //        }
+    //        if (file == strFile && ext == strExt)
+    //        {
+    //            dir << entry.path().filename().generic_string();
+    //            std::string stDir = dir.str();
+    //            while (stDir.size() < FILENAME_LENGTH)
+    //                stDir = stDir + " ";
+    //            _files.push_back(stDir);
+    //        }
+    //    }
+    //}
+    
+
+    // std::sort(_files.begin(), _files.end());
+
     //for (auto& f : _files)
     //    std::cout << f << std::endl;
 
