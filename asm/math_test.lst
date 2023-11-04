@@ -313,7 +313,7 @@ F433                  char_out        equ     62515
                       
 304B                  st_4
                                       ; perform a math operation
-304B  8610                            lda     #MOP_FMOD
+304B  8633                            lda     #MOP_NEARBYINT
 304D  B71CA8                          sta     MATH_OPERATION
                       
                                       ; display ACR (result)

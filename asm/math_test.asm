@@ -49,7 +49,7 @@ st_3		lda	,x+
 
 st_4
 		; perform a math operation
-		lda	#MOP_FMOD
+		lda	#MOP_NEARBYINT
 		sta	MATH_OPERATION
 
 		; display ACR (result)

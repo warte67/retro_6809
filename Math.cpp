@@ -161,11 +161,123 @@ void Math::write(Word offset, Byte data, bool debug)
             case MOP_DIVIDE: {
                 _update_regs_from_float((aca_float / acb_float),
                     acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
-
             case MOP_FMOD: {
                 _update_regs_from_float(std::fmod(aca_float, acb_float),
                     acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
-
+            case MOP_REMAINDER: {
+                _update_regs_from_float(std::remainder(aca_float, acb_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_FMAX: {
+                _update_regs_from_float(std::fmax(aca_float, acb_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_FMIN: {
+                _update_regs_from_float(std::fmin(aca_float, acb_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_FDIM: {
+                _update_regs_from_float(std::fdim(aca_float, acb_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_EXP: {
+                _update_regs_from_float(std::exp(aca_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_EXP2: {
+                _update_regs_from_float(std::exp2(aca_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_EXPM1: {
+                _update_regs_from_float(std::expm1(aca_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_LOG: {
+                _update_regs_from_float(std::log(aca_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_LOG10: {
+                _update_regs_from_float(std::log10(aca_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_LOG2: {
+                _update_regs_from_float(std::log2(aca_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_LOG1P: {
+                _update_regs_from_float(std::log1p(aca_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_SQRT: {
+                _update_regs_from_float(std::sqrt(aca_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_CBRT: {
+                _update_regs_from_float(std::cbrt(aca_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_HYPOT: {
+                _update_regs_from_float(std::hypot(aca_float, acb_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_POW: {
+                _update_regs_from_float(std::pow(aca_float, acb_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_SIN: {
+                _update_regs_from_float(std::sin(aca_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_COS: {
+                _update_regs_from_float(std::cos(aca_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_TAN: {
+                _update_regs_from_float(std::tan(aca_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_ASIN: {
+                _update_regs_from_float(std::asin(aca_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_ACOS: {
+                _update_regs_from_float(std::acos(aca_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_ATAN: {
+                _update_regs_from_float(std::atan(aca_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_ATAN2: {
+                _update_regs_from_float(std::atan2(aca_float, acb_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_COSH: {
+                _update_regs_from_float(std::acosh(aca_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_ATANH: {
+                _update_regs_from_float(std::atanh(aca_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_ERF: {
+                _update_regs_from_float(std::erf(aca_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_ERFC: {
+                _update_regs_from_float(std::erfc(aca_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_LGAMMA: {
+                _update_regs_from_float(std::lgamma(aca_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_TGAMMA: {
+                _update_regs_from_float(std::tgamma(aca_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_CEIL: {
+                _update_regs_from_float(std::ceil(aca_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_FLOOR: {
+                _update_regs_from_float(std::floor(aca_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_TRUNC: {
+                _update_regs_from_float(std::trunc(aca_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_ROUND: {
+                _update_regs_from_float(std::round(aca_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_LROUND: {
+                _update_regs_from_float(std::lround(aca_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_NEARBYINT: {
+                _update_regs_from_float(std::nearbyint(aca_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_ILOGB: {
+                _update_regs_from_float(std::ilogb(aca_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_LOGB: {
+                _update_regs_from_float(std::logb(aca_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_NEXTAFTER: {
+                _update_regs_from_float(std::nextafter(aca_float, acb_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
+            case MOP_COPYSIGN: {
+                _update_regs_from_float(std::copysign(aca_float, acb_float),
+                    acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
         }
     }
 	Bus::Write(offset, data, true);
@@ -322,7 +434,7 @@ Word Math::OnAttach(Word nextAddr)
     DisplayEnum("MOP_DIVIDE",       enumID++, "       ACR = ACA / ACB");
     DisplayEnum("MOP_FMOD",         enumID++, "       ACR = std::fmod(ACA, ACB);");
     DisplayEnum("MOP_REMAINDER",    enumID++, "       ACR = std::remainder(ACA, ACB);");
-    DisplayEnum("MOP_FMAX",         enumID++, "       ACR = std::std::fmax(ACA, ACB);");
+    DisplayEnum("MOP_FMAX",         enumID++, "       ACR = std::fmax(ACA, ACB);");
     DisplayEnum("MOP_FMIN",         enumID++, "       ACR = std::fmin(ACA, ACB);");
     DisplayEnum("MOP_FDIM",         enumID++, "       ACR = std::fdim(ACA, ACB);");
     DisplayEnum("MOP_EXP",          enumID++, "       ACR = std::exp(ACA);");
@@ -358,7 +470,7 @@ Word Math::OnAttach(Word nextAddr)
     DisplayEnum("MOP_NEARBYINT",    enumID++, "       ACR = std::nearbyint(ACA);");
     DisplayEnum("MOP_ILOGB",        enumID++, "       ACR = std::ilogb(ACA);");
     DisplayEnum("MOP_LOGB",         enumID++, "       ACR = std::logb(ACA);");
-    DisplayEnum("MOP_NETAFTER",     enumID++, "       ACR = std::nextafter(ACA, ACB);");
+    DisplayEnum("MOP_NEXTAFTER",    enumID++, "       ACR = std::nextafter(ACA, ACB);");
     DisplayEnum("MOP_COPYSIGN",     enumID++, "       ACR = std::copysign(ACA, ACB);");
     DisplayEnum("MOP_LASTOP",       enumID-1, "       last implemented math operation ");
 
