@@ -273,58 +273,73 @@ F433                  char_out        equ     62515
 3000  860E                            lda     #$0E    
 3002  B71C02                          sta     SYS_STATE
                       
-                                      ; write float string into ACA
-3005  7F1C8A                          clr     MATH_ACA_POS
-3008  8E3068                          ldx     #test_aca_string
-300B  A680            st_1            lda     ,x+
-300D  B71C8B                          sta     MATH_ACA_DATA
-3010  2704                            beq     st_2
-3012  2B02                            bmi     st_2
-3014  20F5                            bra     st_1
-3016                  st_2
-                                      ; write float string into ACB
-3016  7F1C94                          clr     MATH_ACB_POS
-3019  8E306C                          ldx     #test_acb_string
-301C  A680            st_3            lda     ,x+
-301E  B71C95                          sta     MATH_ACB_DATA
-3021  2704                            beq     3f
-3023  2B02                            bmi     3f
-3025  20F5                            bra     st_3
+                      *               ; write float string into ACA
+                      *               clr     MATH_ACA_POS
+                      *               ldx     #test_aca_string
+                      * st_1          lda     ,x+
+                      *               sta     MATH_ACA_DATA
+                      *               beq     st_2
+                      *               bmi     st_2
+                      *               bra     st_1
+                      * st_2
+                      *               ; write float string into ACB
+                      *               clr     MATH_ACB_POS
+                      *               ldx     #test_acb_string
+                      * st_3          lda     ,x+
+                      *               sta     MATH_ACB_DATA
+                      *               beq     3f
+                      *               bmi     3f
+                      *               bra     st_3
+                      
+                                      ;
+3005  CC0000                          ldd     #$0000
+3008  FD1C90                          std     MATH_ACA_INT
+300B  CC0145                          ldd     #$0145
+300E  FD1C92                          std     MATH_ACA_INT+2  
+                                      ;
+3011  CC0000                          ldd     #$0000
+3014  FD1C9A                          std     MATH_ACB_INT
+3017  CC0010                          ldd     #$0010
+301A  FD1C9C                          std     MATH_ACB_INT+2
+                                      ;
+                      
+                                      
+                      
                       
                                       ; display ACA
-3027  7F1C8A          3               clr     MATH_ACA_POS
-302A  B61C8B          1               lda     MATH_ACA_DATA
-302D  2705                            beq     2f
-302F  BDF433                          jsr     char_out
-3032  20F6                            bra     1b
-3034                  2
-3034  860A                            lda     #$0a
-3036  BDF433                          jsr     char_out
+301D  7F1C8A          3               clr     MATH_ACA_POS
+3020  B61C8B          1               lda     MATH_ACA_DATA
+3023  2705                            beq     2f
+3025  BDF433                          jsr     char_out
+3028  20F6                            bra     1b
+302A                  2
+302A  860A                            lda     #$0a
+302C  BDF433                          jsr     char_out
                       
                                       ; display ACB
-3039  7F1C94                          clr     MATH_ACB_POS
-303C  B61C95          1               lda     MATH_ACB_DATA
-303F  2705                            beq     2f
-3041  BDF433                          jsr     char_out
-3044  20F6                            bra     1b
-3046                  2
-3046  860A                            lda     #$0a
-3048  BDF433                          jsr     char_out
+302F  7F1C94                          clr     MATH_ACB_POS
+3032  B61C95          1               lda     MATH_ACB_DATA
+3035  2705                            beq     2f
+3037  BDF433                          jsr     char_out
+303A  20F6                            bra     1b
+303C                  2
+303C  860A                            lda     #$0a
+303E  BDF433                          jsr     char_out
                       
-304B                  st_4
+3041                  st_4
                                       ; perform a math operation
-304B  8633                            lda     #MOP_NEARBYINT
-304D  B71CA8                          sta     MATH_OPERATION
+3041  860F                            lda     #MOP_DIVIDE
+3043  B71CA8                          sta     MATH_OPERATION
                       
                                       ; display ACR (result)
-3050  7F1C9E                          clr     MATH_ACR_POS
-3053  B61C9F          1               lda     MATH_ACR_DATA
-3056  2705                            beq     2f
-3058  BDF433                          jsr     char_out
-305B  20F6                            bra     1b
-305D                  2
-305D  860A                            lda     #$0a
-305F  BDF433                          jsr     char_out
+3046  7F1C9E                          clr     MATH_ACR_POS
+3049  B61C9F          1               lda     MATH_ACR_DATA
+304C  2705                            beq     2f
+304E  BDF433                          jsr     char_out
+3051  20F6                            bra     1b
+3053                  2
+3053  860A                            lda     #$0a
+3055  BDF433                          jsr     char_out
                       
                       
                       
@@ -339,19 +354,19 @@ F433                  char_out        equ     62515
                       * st_6
                       *               jsr     line_out
                       
-3062                  done    ; clean up and return
-3062  860A                            lda     #$0a
-3064  BDF433                          jsr     char_out
-3067  39                              rts
+3058                  done    ; clean up and return
+3058  860A                            lda     #$0a
+305A  BDF433                          jsr     char_out
+305D  39                              rts
                       
                       
                       
                       
-3068  352E3300        test_aca_string fcn     "5.3"
-306C  332E31343135323900 test_acb_string fcn     "3.141529"
-3075  5452554500      str_true        fcn     "TRUE"
-307A  46414C534500    str_false       fcn     "FALSE"
-3080  40              test_raw        fcb     $40
-3081  49                              fcb     $49
-3082  0E                              fcb     $0e
-3083  D0                              fcb     $d0
+305E  352E3300        test_aca_string fcn     "5.3"
+3062  332E31343135323900 test_acb_string fcn     "3.141529"
+306B  5452554500      str_true        fcn     "TRUE"
+3070  46414C534500    str_false       fcn     "FALSE"
+3076  40              test_raw        fcb     $40
+3077  49                              fcb     $49
+3078  0E                              fcb     $0e
+3079  D0                              fcb     $d0

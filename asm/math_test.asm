@@ -9,23 +9,38 @@ start
 		lda	#$0E	
 		sta	SYS_STATE
 
-		; write float string into ACA
-		clr	MATH_ACA_POS
-		ldx	#test_aca_string
-st_1		lda	,x+
-		sta	MATH_ACA_DATA
-		beq	st_2
-		bmi	st_2
-		bra	st_1
-st_2
-		; write float string into ACB
-		clr	MATH_ACB_POS
-		ldx	#test_acb_string
-st_3		lda	,x+
-		sta	MATH_ACB_DATA
-		beq	3f
-		bmi	3f
-		bra	st_3
+* 		; write float string into ACA
+* 		clr	MATH_ACA_POS
+* 		ldx	#test_aca_string
+* st_1		lda	,x+
+* 		sta	MATH_ACA_DATA
+* 		beq	st_2
+* 		bmi	st_2
+* 		bra	st_1
+* st_2
+* 		; write float string into ACB
+* 		clr	MATH_ACB_POS
+* 		ldx	#test_acb_string
+* st_3		lda	,x+
+* 		sta	MATH_ACB_DATA
+* 		beq	3f
+* 		bmi	3f
+* 		bra	st_3
+
+		;
+		ldd	#$0000
+		std	MATH_ACA_INT
+		ldd	#$0145
+		std	MATH_ACA_INT+2	
+		;
+		ldd	#$0000
+		std	MATH_ACB_INT
+		ldd	#$0010
+		std	MATH_ACB_INT+2
+		;
+
+		
+
 
 		; display ACA
 3		clr	MATH_ACA_POS
@@ -49,7 +64,7 @@ st_3		lda	,x+
 
 st_4
 		; perform a math operation
-		lda	#MOP_NEARBYINT
+		lda	#MOP_DIVIDE
 		sta	MATH_OPERATION
 
 		; display ACR (result)

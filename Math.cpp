@@ -482,7 +482,6 @@ Word Math::OnAttach(Word nextAddr)
 void Math::OnInit()
 {
     //printf("Math::OnInit()\n");
-
     srand(time(NULL));
 }
 
