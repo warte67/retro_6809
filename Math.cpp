@@ -10,16 +10,86 @@
 #include "Bus.h"
 #include "Math.h"
 
-
-
 Byte Math::read(Word offset, bool debug)
 {
 	Byte data = 0xCC;
 
+    // read ACA
+    if (offset >= MATH_ACA_POS && offset < MATH_ACB_POS)
+    {
+        data = _read_acc(offset, MATH_ACA_POS,
+            aca_pos, aca_data, aca_raw, aca_int);
+    }
+
+    // read ACB
+    if (offset >= MATH_ACB_POS && offset < MATH_ACR_POS)
+    {
+        data = _read_acc(offset, MATH_ACB_POS,
+            acb_pos, acb_data, acb_raw, acb_int);
+    }
+
+    // read ACR
+    if (offset >= MATH_ACR_POS && offset < MATH_OPERATION)
+    {
+        data = _read_acc(offset, MATH_ACR_POS,
+            acr_pos, acr_data, acr_raw, acr_int);
+    }
+    
+    // read the last math operation used
+    if (offset == MATH_OPERATION)
+        data = math_operation;
 
 	Bus::Write(offset, data, true);
 	return data;
-}
+} // END: Math::read()
+
+Byte Math::_read_acc(Word offset, Word reg,
+    Byte& _pos, std::string& _data, DWord& _raw, DWord& _int)
+{
+    Byte data = 0xCC;
+    // bounds checking
+    if (offset < reg || offset > reg + 9)   return data;
+
+    if (offset == reg)              // MATH_ACx_POS
+    {
+        data = _pos;
+        if (data >= _data.size())
+            data = _data.size() - 1;
+        if (_data.size() == 0)
+            data = 0;
+    }
+    else if (offset == reg + 1)     // MATH_ACx_DATA
+    {
+        data = 0;
+        if (_data.size() > 0)
+        {
+            if (_pos < _data.size())
+            {
+                data = (Byte)_data.substr(_pos, 1).at(0);
+                if (_pos <= _data.size())
+                    _pos++;
+            }
+            else
+            {
+                _data = "";
+                data = 0;
+            }
+        }
+    }
+    // MATH_ACx_RAW
+    else if (offset == reg + 2) { data = (_raw >> 24) & 0xff; }
+    else if (offset == reg + 3) { data = (_raw >> 16) & 0xff; }
+    else if (offset == reg + 4) { data = (_raw >> 8) & 0xff; }
+    else if (offset == reg + 5) { data = (_raw >> 0) & 0xff; }
+    // MATH_ACx_INT
+    else if (offset == reg + 6) { data = (_int >> 24) & 0xff; }
+    else if (offset == reg + 7) { data = (_int >> 16) & 0xff; }
+    else if (offset == reg + 8) { data = (_int >> 8) & 0xff; }
+    else if (offset == reg + 9) { data = (_int >> 0) & 0xff; }
+
+    return data;
+}   // END Math::_read_acc()
+
 
 void Math::write(Word offset, Byte data, bool debug)
 {
