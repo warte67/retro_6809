@@ -164,6 +164,7 @@
     <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="GfxMouse.cpp" />
+    <ClCompile Include="Math.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bus.h" />
@@ -174,6 +175,7 @@
     <ClInclude Include="GfxDebug.h" />
     <ClInclude Include="IGfxDevice.h" />
     <ClInclude Include="Keyboard.h" />
+    <ClInclude Include="Math.h" />
     <ClInclude Include="memory_map.h" />
     <ClInclude Include="GfxMouse.h" />
     <ClInclude Include="types.h" />

@@ -83,7 +83,7 @@ void Device::DisplayEnum(std::string sToken, Word ofs, std::string sComment)
 		else
 		{
 			std::string sLabel = sToken;
-			while (sToken.size() < 12)
+			while (sToken.size() < 16)
 				sToken += " ";
 			
 			if (MEMORY_MAP_OUTPUT_CPP)

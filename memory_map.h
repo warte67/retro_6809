@@ -7,33 +7,33 @@ enum MEMMAP
     //  **********************************************
     //  * Allocated 64k Memory Mapped System Symbols *
     //  **********************************************
-SOFT_VECTORS = 0x0000,
+SOFT_VECTORS     = 0x0000,
 
         // Software Interrupt Vectors:
-SOFT_EXEC    = 0x0000, // Exec Software Interrupt Vector
-SOFT_SWI3    = 0x0002, // SWI3 Software Interrupt Vector
-SOFT_SWI2    = 0x0004, // SWI2 Software Interrupt Vector
-SOFT_FIRQ    = 0x0006, // FIRQ Software Interrupt Vector
-SOFT_IRQ     = 0x0008, // IRQ Software Interrupt Vector
-SOFT_SWI     = 0x000A, // SWI / SYS Software Interrupt Vector
-SOFT_NMI     = 0x000C, // NMI Software Interrupt Vector
-SOFT_RESET   = 0x000E, // RESET Software Interrupt Vector
+SOFT_EXEC        = 0x0000, // Exec Software Interrupt Vector
+SOFT_SWI3        = 0x0002, // SWI3 Software Interrupt Vector
+SOFT_SWI2        = 0x0004, // SWI2 Software Interrupt Vector
+SOFT_FIRQ        = 0x0006, // FIRQ Software Interrupt Vector
+SOFT_IRQ         = 0x0008, // IRQ Software Interrupt Vector
+SOFT_SWI         = 0x000A, // SWI / SYS Software Interrupt Vector
+SOFT_NMI         = 0x000C, // NMI Software Interrupt Vector
+SOFT_RESET       = 0x000E, // RESET Software Interrupt Vector
 
-ZERO_PAGE    = 0x0010,
-FIO_BUFFER   = 0x0100,
-FIO_BFR_TOP  = 0x01FF, // Top of the File Input/Output Buffer
-SYSTEM_STACK = 0x0200,
-SSTACK_TOP   = 0x0400, // Top of the system stack space
+ZERO_PAGE        = 0x0010,
+FIO_BUFFER       = 0x0100,
+FIO_BFR_TOP      = 0x01FF, // Top of the File Input/Output Buffer
+SYSTEM_STACK     = 0x0200,
+SSTACK_TOP       = 0x0400, // Top of the system stack space
 
         // Display Buffer
-SCREEN_BUFFER = 0x0400,
+SCREEN_BUFFER    = 0x0400,
 
         // Device Registers:
-HDW_REGS     = 0x1C00, // Begin Device Hardware Registers
+HDW_REGS         = 0x1C00, // Begin Device Hardware Registers
 
-STD_VID_MAX  = 0x1C00, //  (Word) Standard Video Buffer Max
+STD_VID_MAX      = 0x1C00, //  (Word) Standard Video Buffer Max
 
-SYS_STATE    = 0x1C02, //  (Byte) System State Register
+SYS_STATE        = 0x1C02, //  (Byte) System State Register
         // SYS_STATE: ABCD.SSSS
         //      A:0   = Error: Standard Buffer Overflow
         //      B:0   = Error: Extended Buffer Overflow
@@ -56,9 +56,9 @@ SYS_STATE    = 0x1C02, //  (Byte) System State Register
         //      S:$E  = CPU Clock 5.0 mhz.
         //      S:$F  = CPU Clock ~10.0 mhz. (unmetered)
 
-SYS_SPEED    = 0x1C03, //  (Word) Approx. Average CPU Clock Speed
+SYS_SPEED        = 0x1C03, //  (Word) Approx. Average CPU Clock Speed
 
-SYS_CLOCK_DIV = 0x1C05, //  (Byte) 60 hz Clock Divider Register (Read Only)
+SYS_CLOCK_DIV    = 0x1C05, //  (Byte) 60 hz Clock Divider Register (Read Only)
         // SYS_CLOCK_DIV: ABCD.SSSS
         //      bit 7: 0.46875 hz
         //      bit 6: 0.9375 hz
@@ -69,9 +69,9 @@ SYS_CLOCK_DIV = 0x1C05, //  (Byte) 60 hz Clock Divider Register (Read Only)
         //      bit 1: 30.0 hz
         //      bit 0: 60.0 hz
 
-SYS_TIMER    = 0x1C06, //  (Word) Increments at 0.46875 hz
+SYS_TIMER        = 0x1C06, //  (Word) Increments at 0.46875 hz
 
-DSP_GRES     = 0x1C08, //  (Byte) Screen Resolution Register
+DSP_GRES         = 0x1C08, //  (Byte) Screen Resolution Register
         // DSP_GRES: BBRR.HHVV
         //     BB:00 = Standard Graphics 1-bpp (2-color mode)
         //     BB:01 = Standard Graphics 2-bpp (4-color mode)
@@ -90,7 +90,7 @@ DSP_GRES     = 0x1C08, //  (Byte) Screen Resolution Register
         //     VV:10 = 2x Vertical Overscan Multiplier
         //     VV:11 = 1x Vertical Overscan Multiplier
 
-DSP_EXT      = 0x1C09, //  (Byte) Extended Graphics Register
+DSP_EXT          = 0x1C09, //  (Byte) Extended Graphics Register
         // DSP_EXT: AABC.DEFG
         //      AA:00 = Extended Graphics 1bpp (2-color mode)
         //      AA:01 = Extended Graphics 2bpp (4-color mode)
@@ -109,106 +109,106 @@ DSP_EXT      = 0x1C09, //  (Byte) Extended Graphics Register
         //      G:0   = Fullscreen Enabled( emulator only )
         //      G:1   = Windowed Enabled ( emulator only )
 
-DSP_TXT_COLS = 0x1C0A, //  (Byte) READ-ONLY Text Screen Columns
-DSP_TXT_ROWS = 0x1C0B, //  (Byte) READ-ONLY Text Screens Rows
+DSP_TXT_COLS     = 0x1C0A, //  (Byte) READ-ONLY Text Screen Columns
+DSP_TXT_ROWS     = 0x1C0B, //  (Byte) READ-ONLY Text Screens Rows
 
-DSP_PAL_IDX  = 0x1C0C, //  (Byte) Color Palette Index
+DSP_PAL_IDX      = 0x1C0C, //  (Byte) Color Palette Index
         // DSP_PAL_IDX: 0-255
         // Note: Use this register to set the index into theColor Palette.
         //   Set this value prior referencing color data (DSP_PAL_CLR).
 
-DSP_PAL_CLR  = 0x1C0D, //  (Word) Indexed Color Palette Data
+DSP_PAL_CLR      = 0x1C0D, //  (Word) Indexed Color Palette Data
         // DSP_PAL_CLR: Color Data A4R4G4B4 format
         // Note: This is the color data for an individual palette entry.
         //     Write to DSP_PAL_IDX with the index within the color palette
         //     prior to reading or writing the color data in the DSP_PAL_CLR register.
 
-DSP_GLYPH_IDX = 0x1C0F, //  (Byte) Text Glyph Index
+DSP_GLYPH_IDX    = 0x1C0F, //  (Byte) Text Glyph Index
         // DSP_GLYPH_IDX: 0-256
         // Note: Set this register to index a specific text glyph. Set this value
         //     prior to updating glyph pixel data.
 
-DSP_GLYPH_DATA = 0x1C10, //  (8-Bytes) Text Glyph Pixel Data Array
+DSP_GLYPH_DATA   = 0x1C10, //  (8-Bytes) Text Glyph Pixel Data Array
         // DSP_GLYPH_DATA: 8 rows of binary encoded glyph pixel data
         // Note: Each 8x8 text glyph is composed of 8 bytes. The first byte in this
         //     array represents the top line of 8 pixels. Each array entry represents
         //     a row of 8 pixels.
 
         // Debug Hardware Registers:
-DBG_BEGIN    = 0x1C18, //  start of mouse cursor hardware registers
-DBG_TEMP     = 0x1C18, //  (Byte) Simple Debug test register
-DBG_END      = 0x1C19, // End Debug Registers
+DBG_BEGIN        = 0x1C18, //  start of mouse cursor hardware registers
+DBG_TEMP         = 0x1C18, //  (Byte) Simple Debug test register
+DBG_END          = 0x1C19, // End Debug Registers
 
         // Mouse Cursor Hardware Registers:
-CSR_BEGIN    = 0x1C19, //  start of mouse cursor hardware registers
-CSR_XPOS     = 0x1C19, //  (Word) horizontal mouse cursor coordinate
-CSR_YPOS     = 0x1C1B, //  (Word) vertical mouse cursor coordinate
-CSR_XOFS     = 0x1C1D, //  (Byte) horizontal mouse cursor offset
-CSR_YOFS     = 0x1C1E, //  (Byte) vertical mouse cursor offset
-CSR_SCROLL   = 0x1C1F, //  (Signed) MouseWheel Scroll: -1, 0, 1
-CSR_FLAGS    = 0x1C20, //  (Byte) mouse button flags:
+CSR_BEGIN        = 0x1C19, //  start of mouse cursor hardware registers
+CSR_XPOS         = 0x1C19, //  (Word) horizontal mouse cursor coordinate
+CSR_YPOS         = 0x1C1B, //  (Word) vertical mouse cursor coordinate
+CSR_XOFS         = 0x1C1D, //  (Byte) horizontal mouse cursor offset
+CSR_YOFS         = 0x1C1E, //  (Byte) vertical mouse cursor offset
+CSR_SCROLL       = 0x1C1F, //  (Signed) MouseWheel Scroll: -1, 0, 1
+CSR_FLAGS        = 0x1C20, //  (Byte) mouse button flags:
         //  CSR_FLAGS:
         //       bits 0-5: button states
         //       bits 6-7: number of clicks
-CSR_BMP_INDX = 0x1C21, //  (Byte) mouse cursor bitmap pixel offset
-CSR_BMP_DATA = 0x1C22, //  (Byte) mouse cursor bitmap pixel index color
-CSR_PAL_INDX = 0x1C24, //  (Byte) mouse cursor color palette index (0-15)
-CSR_PAL_DATA = 0x1C25, //  (Word) mouse cursor color palette data RGBA4444
-CSR_END      = 0x1C27, // End Mouse Registers
-GFX_END      = 0x1C27, // End of GFX Device Registers
+CSR_BMP_INDX     = 0x1C21, //  (Byte) mouse cursor bitmap pixel offset
+CSR_BMP_DATA     = 0x1C22, //  (Byte) mouse cursor bitmap pixel index color
+CSR_PAL_INDX     = 0x1C24, //  (Byte) mouse cursor color palette index (0-15)
+CSR_PAL_DATA     = 0x1C25, //  (Word) mouse cursor color palette data RGBA4444
+CSR_END          = 0x1C27, // End Mouse Registers
+GFX_END          = 0x1C27, // End of GFX Device Registers
 
-KEY_BEGIN    = 0x1C27, // Start of the Keyboard Register space
-CHAR_Q_LEN   = 0x1C27, //   (Byte) # of characters waiting in queue        (Read Only)
-CHAR_SCAN    = 0x1C28, //   (Byte) read next character in queue (not popped when read)
-CHAR_POP     = 0x1C29, //   (Byte) read next character in queue (not popped when read)
-XKEY_BUFFER  = 0x1C2A, //   (128 bits) 16 bytes for XK_KEY data buffer     (Read Only)
-EDT_BFR_CSR  = 0x1C3A, //   (Byte) cursor position within edit buffer     (Read/Write)
-EDT_ENABLE   = 0x1C3B, //   (Byte) line editor enable flag                 (Read/Write)
-EDT_BUFFER   = 0x1C3C, //   line editing character buffer                 (Read/Write)
-KEY_END      = 0x1C7C, // End of the Keyboard Register space
+KEY_BEGIN        = 0x1C27, // Start of the Keyboard Register space
+CHAR_Q_LEN       = 0x1C27, //   (Byte) # of characters waiting in queue        (Read Only)
+CHAR_SCAN        = 0x1C28, //   (Byte) read next character in queue (not popped when read)
+CHAR_POP         = 0x1C29, //   (Byte) read next character in queue (not popped when read)
+XKEY_BUFFER      = 0x1C2A, //   (128 bits) 16 bytes for XK_KEY data buffer     (Read Only)
+EDT_BFR_CSR      = 0x1C3A, //   (Byte) cursor position within edit buffer     (Read/Write)
+EDT_ENABLE       = 0x1C3B, //   (Byte) line editor enable flag                 (Read/Write)
+EDT_BUFFER       = 0x1C3C, //   line editing character buffer                 (Read/Write)
+KEY_END          = 0x1C7C, // End of the Keyboard Register space
 
-FIO_BEGIN    = 0x1C7C, // Start of the FileIO register space
-FIO_ERR_FLAGS = 0x1C7C, // (Byte) File IO error flags
+FIO_BEGIN        = 0x1C7C, // Start of the FileIO register space
+FIO_ERR_FLAGS    = 0x1C7C, // (Byte) File IO error flags
         // FIO_ERR_FLAGS: ABCD.EFGH
-        //      A:  file was not found ($80)
+        //      A:  file was not found
         //      B:  directory was not found
-        //      C:  file not open ($20)
+        //      C:  file not open
         //      D:  end of file
         //      E:  buffer overrun
-        //      F:  wrong file type ($04)
+        //      F:  wrong file type
         //      G:  invalid command
         //      H:  incorrect file stream
 
-FIO_COMMAND  = 0x1C7D, // (Byte) OnWrite, execute a file command (FC_<cmd>)
+FIO_COMMAND      = 0x1C7D, // (Byte) OnWrite, execute a file command (FC_<cmd>)
         // Begin FIO_COMMANDS
-FC_RESET     = 0x0000, //        Reset
-FC_SHUTDOWN  = 0x0001, //        SYSTEM: Shutdown
-FC_COMPDATE  = 0x0002, //        SYSTEM: Load Compilation Date
-FC_NEWFILE   = 0x0003, //      * New File Stream
-FC_OPENFILE  = 0x0004, //      * Open File
-FC_ISOPEN    = 0x0005, //      *Is File Open ? (returns FIO_ERR_FLAGS bit - 5)
-FC_CLOSEFILE = 0x0006, //      * Close File
-FC_READBYTE  = 0x0007, //      * Read Byte (into FIO_IOBYTE)
-FC_WRITEBYTE = 0x0008, //      * Write Byte (from FIO_IOBYTE)
-FC_LOADHEX   = 0x0009, //      * Load Hex Format File
-FC_GETLENGTH = 0x000A, //      * Get File Length (into FIO_IOWORD)
-FC_LISTDIR   = 0x000B, //        List Directory
-FC_MAKEDIR   = 0x000C, //      * Make Directory
-FC_CHANGEDIR = 0x000D, //        Change Directory
-FC_GETPATH   = 0x000E, //        Fetch Current Path
-FC_REN_DIR   = 0x000F, //      * Rename Directory
-FC_DEL_DIR   = 0x0010, //      * Delete Directory
-FC_DEL_FILE  = 0x0011, //      * Delete File
-FC_REN_FILE  = 0x0012, //      * Rename file
-FC_COPYFILE  = 0x0013, //      * Copy File
-FC_SEEKSTART = 0x0014, //      * Seek Start
-FC_SEEKEND   = 0x0015, //      * Seek End
-FC_SET_SEEK  = 0x0016, //      * Set Seek Position (from FIO_IOWORD)
-FC_GET_SEEK  = 0x0017, //      * Get Seek Position (into FIO_IOWORD)
+FC_RESET         = 0x0000, //        Reset
+FC_SHUTDOWN      = 0x0001, //        SYSTEM: Shutdown
+FC_COMPDATE      = 0x0002, //        SYSTEM: Load Compilation Date
+FC_NEWFILE       = 0x0003, //      * New File Stream
+FC_OPENFILE      = 0x0004, //      * Open File
+FC_ISOPEN        = 0x0005, //      *Is File Open ? (returns FIO_ERR_FLAGS bit - 5)
+FC_CLOSEFILE     = 0x0006, //      * Close File
+FC_READBYTE      = 0x0007, //      * Read Byte (into FIO_IOBYTE)
+FC_WRITEBYTE     = 0x0008, //      * Write Byte (from FIO_IOBYTE)
+FC_LOADHEX       = 0x0009, //      * Load Hex Format File
+FC_GETLENGTH     = 0x000A, //      * Get File Length (into FIO_IOWORD)
+FC_LISTDIR       = 0x000B, //        List Directory
+FC_MAKEDIR       = 0x000C, //      * Make Directory
+FC_CHANGEDIR     = 0x000D, //        Change Directory
+FC_GETPATH       = 0x000E, //        Fetch Current Path
+FC_REN_DIR       = 0x000F, //      * Rename Directory
+FC_DEL_DIR       = 0x0010, //      * Delete Directory
+FC_DEL_FILE      = 0x0011, //      * Delete File
+FC_REN_FILE      = 0x0012, //      * Rename file
+FC_COPYFILE      = 0x0013, //      * Copy File
+FC_SEEKSTART     = 0x0014, //      * Seek Start
+FC_SEEKEND       = 0x0015, //      * Seek End
+FC_SET_SEEK      = 0x0016, //      * Set Seek Position (from FIO_IOWORD)
+FC_GET_SEEK      = 0x0017, //      * Get Seek Position (into FIO_IOWORD)
         // End FIO_COMMANDS
 
-FIO_STREAM   = 0x1C7E, // (Byte) current file stream index (0-15)
-FIO_MODE     = 0x1C7F, // (Byte) Flags describing the I/O mode for the file
+FIO_STREAM       = 0x1C7E, // (Byte) current file stream index (0-15)
+FIO_MODE         = 0x1C7F, // (Byte) Flags describing the I/O mode for the file
         // FIO_MODE: 00AB.CDEF  (indexed by FIO_STREAM)
         //      A:  INPUT - File open for reading
         //      B:  OUTPUT - File open for writing
@@ -216,44 +216,121 @@ FIO_MODE     = 0x1C7F, // (Byte) Flags describing the I/O mode for the file
         //      D:  AT_END - Output starts at the end of the file
         //      E:  APPEND - All output happens at end of the file
         //      F:  TRUNC - discard all previous file data
-FIO_SEEKPOS  = 0x1C80, // (DWord) file seek position
-FIO_IOBYTE   = 0x1C84, // (Byte) input / output character
-FIO_IOWORD   = 0x1C85, // (Byte) input / output character
-FIO_PATH_LEN = 0x1C86, // (Byte) length of the filepath
-FIO_PATH_POS = 0x1C87, // (Byte) character position within the filepath
-FIO_PATH_DATA = 0x1C88, // (Byte) data at the character position of the path
-FIO_DIR_DATA = 0x1C89, // (Byte) a series of null-terminated filenames
+FIO_SEEKPOS      = 0x1C80, // (DWord) file seek position
+FIO_IOBYTE       = 0x1C84, // (Byte) input / output character
+FIO_IOWORD       = 0x1C85, // (Byte) input / output character
+FIO_PATH_LEN     = 0x1C86, // (Byte) length of the filepath
+FIO_PATH_POS     = 0x1C87, // (Byte) character position within the filepath
+FIO_PATH_DATA    = 0x1C88, // (Byte) data at the character position of the path
+FIO_DIR_DATA     = 0x1C89, // (Byte) a series of null-terminated filenames
         //     NOTES: Current read-position is reset to the beginning following a
         //             List Directory command. The read-position is automatically
         //             advanced on read from this register. Each filename is
         //             $0a-terminated. The list itself is null-terminated.
-FIO_END      = 0x1C8A, // End of the FileIO register space
+FIO_END          = 0x1C8A, // End of the FileIO register space
 
-    // 4982 ($1376) bytes remaining for additional registers.
-RESERVED     = 0x1C8A,
+        // Math Co-Processor Hardware Registers:
+MATH_BEGIN       = 0x1C8A, //  start of math co-processor  hardware registers
+MATH_ACA_POS     = 0x1C8A, //  (Byte) character position within the ACA float string
+MATH_ACA_DATA    = 0x1C8B, //  (Byte) ACA float string character port
+MATH_ACA_RAW     = 0x1C8C, //  (4-Bytes) ACA raw float data
+MATH_ACA_INT     = 0x1C90, //  (4-Bytes) ACA integer data
+MATH_ACB_POS     = 0x1C94, //  (Byte) character position within the ACB float string
+MATH_ACB_DATA    = 0x1C95, //  (Byte) ACB float string character port
+MATH_ACB_RAW     = 0x1C96, //  (4-Bytes) ACB raw float data
+MATH_ACB_INT     = 0x1C9A, //  (4-Bytes) ACB integer data
+MATH_ACR_POS     = 0x1C9E, //  (Byte) character position within the ACR float string
+MATH_ACR_DATA    = 0x1C9F, //  (Byte) ACR float string character port
+MATH_ACR_RAW     = 0x1CA0, //  (4-Bytes) ACR raw float data
+MATH_ACR_INT     = 0x1CA4, //  (4-Bytes) ACR integer data
+MATH_OPERATION   = 0x1CA8, //  (Byte) Operation 'command' to be issued
+        // Begin MATH_OPERATION's (MOPS)
+MOP_RANDOM       = 0x0000, //        ACA, ACB, and ACR are set to randomized values
+MOP_IS_EQUAL     = 0x0001, //        (bool)ACR = (ACA == ACB)
+MOP_IS_NOT_EQUAL = 0x0002, //        (bool)ACR = (ACA != ACB)
+MOP_IS_LESS      = 0x0003, //        (bool)ACR = std::isless(ACA, ACB);
+MOP_IS_GREATER   = 0x0004, //        (bool)ACR = std::isgreater(ACA, ACB);
+MOP_IS_LTE       = 0x0005, //        (bool)ACR = std::islessequal(ACA, ACB);
+MOP_IS_GTE       = 0x0006, //        (bool)ACR = std::islessgreater(ACA, ACB);
+MOP_IS_FINITE    = 0x0007, //        (bool)ACR = std::isfinite(ACA);
+MOP_IS_INF       = 0x0008, //        (bool)ACR = std::isinf(ACA);
+MOP_NAN          = 0x0009, //        (bool)ACR = std::isnan(ACA);
+MOP_NORMAL       = 0x000A, //        (bool)ACR = std::isnormal(ACA);
+MOP_SIGNBIT      = 0x000B, //        (bool)ACR = std::signbit(ACA);
+MOP_SUBTRACT     = 0x000C, //        ACR = ACA - ACB
+MOP_ADD          = 0x000D, //        ACR = ACA + ACB
+MOP_MULTIPLY     = 0x000E, //        ACR = ACA * ACB
+MOP_DIVIDE       = 0x000F, //        ACR = ACA / ACB
+MOP_FMOD         = 0x0010, //        ACR = std::fmod(ACA, ACB);
+MOP_REMAINDER    = 0x0011, //        ACR = std::remainder(ACA, ACB);
+MOP_FMAX         = 0x0012, //        ACR = std::std::fmax(ACA, ACB);
+MOP_FMIN         = 0x0013, //        ACR = std::fmin(ACA, ACB);
+MOP_FDIM         = 0x0014, //        ACR = std::fdim(ACA, ACB);
+MOP_EXP          = 0x0015, //        ACR = std::exp(ACA);
+MOP_EXP2         = 0x0016, //        ACR = std::exp2(ACA);
+MOP_EXPM1        = 0x0017, //        ACR = std::expm1(ACA);
+MOP_LOG          = 0x0018, //        ACR = std::log(ACA);
+MOP_LOG10        = 0x0019, //        ACR = std::log10(ACA);
+MOP_LOG2         = 0x001A, //        ACR = std::log2(ACA);
+MOP_LOG1P        = 0x001B, //        ACR = std::log1p(ACA);
+MOP_SQRT         = 0x001C, //        ACR = std::sqrt(ACA);
+MOP_CBRT         = 0x001D, //        ACR = std::cbrt(ACA);
+MOP_HYPOT        = 0x001E, //        ACR = std::hypot(ACA, ACB);
+MOP_POW          = 0x001F, //        ACR = std::pow(ACA, ACB);
+MOP_SIN          = 0x0020, //        ACR = std::sin(ACA);
+MOP_COS          = 0x0021, //        ACR = std::cos(ACA);
+MOP_TAN          = 0x0022, //        ACR = std::tan(ACA);
+MOP_ASIN         = 0x0023, //        ACR = std::asin(ACA);
+MOP_ACOS         = 0x0024, //        ACR = std::acos(ACA);
+MOP_ATAN         = 0x0025, //        ACR = std::atan(ACA);
+MOP_ATAN2        = 0x0026, //        ACR = std::atan2(ACA, ACB);
+MOP_SINH         = 0x0027, //        ACR = std::sinh(ACA);
+MOP_COSH         = 0x0028, //        ACR = std::acosh(ACA);
+MOP_ATANH        = 0x0029, //        ACR = std::atanh(ACA);
+MOP_ERF          = 0x002A, //        ACR = std::erf(ACA);
+MOP_ERFC         = 0x002B, //        ACR = std::erfc(ACA);
+MOP_LGAMMA       = 0x002C, //        ACR = std::lgamma(ACA);
+MOP_TGAMMA       = 0x002D, //        ACR = std::tgamma(ACA);
+MOP_CEIL         = 0x002E, //        ACR = std::ceil(ACA);
+MOP_FLOOR        = 0x002F, //        ACR = std::floor(ACA);
+MOP_TRUNC        = 0x0030, //        ACR = std::trunc(ACA);
+MOP_ROUND        = 0x0031, //        ACR = std::round(ACA);
+MOP_LROUND       = 0x0032, //        ACR = std::lround(ACA);
+MOP_NEARBYINT    = 0x0033, //        ACR = std::nearbyint(ACA);
+MOP_ILOGB        = 0x0034, //        ACR = std::ilogb(ACA);
+MOP_LOGB         = 0x0035, //        ACR = std::logb(ACA);
+MOP_NETAFTER     = 0x0036, //        ACR = std::nextafter(ACA, ACB);
+MOP_COPYSIGN     = 0x0037, //        ACR = std::copysign(ACA, ACB);
+MOP_LASTOP       = 0x0037, //        last implemented math operation
+        // End MATH_OPERATION's (MOPS)
+MATH_END         = 0x1CA9, // end of math co-processor registers
+
+    // 4951 ($1357) bytes remaining for additional registers.
+RESERVED         = 0x1CA9,
 
         // User RAM (32K)
-USER_RAM     = 0x3000,
+USER_RAM         = 0x3000,
 
         // Paged RAM (8K)
-PAGED_RAM    = 0xB000,
+PAGED_RAM        = 0xB000,
 
         // PAGED ROM (8K bytes)
-PAGED_ROM    = 0xD000,
+PAGED_ROM        = 0xD000,
 
         // KERNEL ROM (4K bytes)
-KERNEL_ROM   = 0xF000,
+KERNEL_ROM       = 0xF000,
 
         // Hardware Interrupt Vectors:
-HARD_EXEC    = 0xFFF0, // EXEC Hardware Interrupt Vector
-HARD_SWI3    = 0xFFF2, // SWI3 Hardware Interrupt Vector
-HARD_SWI2    = 0xFFF4, // SWI2 Hardware Interrupt Vector
-HARD_FIRQ    = 0xFFF6, // FIRQ Hardware Interrupt Vector
-HARD_IRQ     = 0xFFF8, // IRQ Hardware Interrupt Vector
-HARD_SWI     = 0xFFFA, // SWI / SYS Hardware Interrupt Vector
-HARD_NMI     = 0xFFFC, // NMI Hardware Interrupt Vector
-HARD_RESET   = 0xFFFE, // RESET Hardware Interrupt Vector
+HARD_EXEC        = 0xFFF0, // EXEC Hardware Interrupt Vector
+HARD_SWI3        = 0xFFF2, // SWI3 Hardware Interrupt Vector
+HARD_SWI2        = 0xFFF4, // SWI2 Hardware Interrupt Vector
+HARD_FIRQ        = 0xFFF6, // FIRQ Hardware Interrupt Vector
+HARD_IRQ         = 0xFFF8, // IRQ Hardware Interrupt Vector
+HARD_SWI         = 0xFFFA, // SWI / SYS Hardware Interrupt Vector
+HARD_NMI         = 0xFFFC, // NMI Hardware Interrupt Vector
+HARD_RESET       = 0xFFFE, // RESET Hardware Interrupt Vector
 };  // END: enum MEMMAP
 
 
 #endif // __MEMORY_MAP_H__
+

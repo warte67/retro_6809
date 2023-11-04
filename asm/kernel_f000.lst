@@ -22,33 +22,33 @@
                       ;  **********************************************
                       ;  * Allocated 64k Memory Mapped System Symbols *
                       ;  **********************************************
-0000                  SOFT_VECTORS    equ   $0000
+0000                  SOFT_VECTORS        equ   $0000
                       
                                 ; Software Interrupt Vectors:
-0000                  SOFT_EXEC       equ   $0000    ; EXEC Software Interrupt Vector
-0002                  SOFT_SWI3       equ   $0002    ; SWI3 Software Interrupt Vector
-0004                  SOFT_SWI2       equ   $0004    ; SWI2 Software Interrupt Vector
-0006                  SOFT_FIRQ       equ   $0006    ; FIRQ Software Interrupt Vector
-0008                  SOFT_IRQ        equ   $0008    ; IRQ Software Interrupt Vector
-000A                  SOFT_SWI        equ   $000A    ; SWI / SYS Software Interrupt Vector
-000C                  SOFT_NMI        equ   $000C    ; NMI Software Interrupt Vector
-000E                  SOFT_RESET      equ   $000E    ; RESET Software Interrupt Vector
+0000                  SOFT_EXEC           equ   $0000    ; Exec Software Interrupt Vector
+0002                  SOFT_SWI3           equ   $0002    ; SWI3 Software Interrupt Vector
+0004                  SOFT_SWI2           equ   $0004    ; SWI2 Software Interrupt Vector
+0006                  SOFT_FIRQ           equ   $0006    ; FIRQ Software Interrupt Vector
+0008                  SOFT_IRQ            equ   $0008    ; IRQ Software Interrupt Vector
+000A                  SOFT_SWI            equ   $000A    ; SWI / SYS Software Interrupt Vector
+000C                  SOFT_NMI            equ   $000C    ; NMI Software Interrupt Vector
+000E                  SOFT_RESET          equ   $000E    ; RESET Software Interrupt Vector
                       
-0010                  ZERO_PAGE       equ   $0010
-0100                  FIO_BUFFER      equ   $0100
-01FF                  FIO_BFR_TOP     equ   $01FF    ; Top of the File Input/Output Buffer
-0200                  SYSTEM_STACK    equ   $0200
-0400                  SSTACK_TOP      equ   $0400    ; Top of the system stack space
+0010                  ZERO_PAGE           equ   $0010
+0100                  FIO_BUFFER          equ   $0100
+01FF                  FIO_BFR_TOP         equ   $01FF    ; Top of the File Input/Output Buffer
+0200                  SYSTEM_STACK        equ   $0200
+0400                  SSTACK_TOP          equ   $0400    ; Top of the system stack space
                       
                                 ; Display Buffer
-0400                  SCREEN_BUFFER    equ   $0400
+0400                  SCREEN_BUFFER       equ   $0400
                       
                                 ; Device Registers:
-1C00                  HDW_REGS        equ   $1C00    ; Begin Device Hardware Registers
+1C00                  HDW_REGS            equ   $1C00    ; Begin Device Hardware Registers
                       
-1C00                  STD_VID_MAX     equ   $1C00    ;  (Word) Standard Video Buffer Max
+1C00                  STD_VID_MAX         equ   $1C00    ;  (Word) Standard Video Buffer Max
                       
-1C02                  SYS_STATE       equ   $1C02    ;  (Byte) System State Register
+1C02                  SYS_STATE           equ   $1C02    ;  (Byte) System State Register
                                 ; SYS_STATE: ABCD.SSSS
                                 ;      A:0   = Error: Standard Buffer Overflow
                                 ;      B:0   = Error: Extended Buffer Overflow
@@ -71,9 +71,9 @@
                                 ;      S:$E  = CPU Clock 5.0 mhz.
                                 ;      S:$F  = CPU Clock ~10.0 mhz. (unmetered)
                       
-1C03                  SYS_SPEED       equ   $1C03    ;  (Word) Approx. Average CPU Clock Speed
+1C03                  SYS_SPEED           equ   $1C03    ;  (Word) Approx. Average CPU Clock Speed
                       
-1C05                  SYS_CLOCK_DIV    equ   $1C05    ;  (Byte) 60 hz Clock Divider Register (Read Only)
+1C05                  SYS_CLOCK_DIV       equ   $1C05    ;  (Byte) 60 hz Clock Divider Register (Read Only)
                                 ; SYS_CLOCK_DIV: ABCD.SSSS
                                 ;      bit 7: 0.46875 hz
                                 ;      bit 6: 0.9375 hz
@@ -84,9 +84,9 @@
                                 ;      bit 1: 30.0 hz
                                 ;      bit 0: 60.0 hz
                       
-1C06                  SYS_TIMER       equ   $1C06    ;  (Word) Increments at 0.46875 hz
+1C06                  SYS_TIMER           equ   $1C06    ;  (Word) Increments at 0.46875 hz
                       
-1C08                  DSP_GRES        equ   $1C08    ;  (Byte) Screen Resolution Register
+1C08                  DSP_GRES            equ   $1C08    ;  (Byte) Screen Resolution Register
                                 ; DSP_GRES: BBRR.HHVV
                                 ;     BB:00 = Standard Graphics 1-bpp (2-color mode)
                                 ;     BB:01 = Standard Graphics 2-bpp (4-color mode)
@@ -105,7 +105,7 @@
                                 ;     VV:10 = 2x Vertical Overscan Multiplier
                                 ;     VV:11 = 1x Vertical Overscan Multiplier
                       
-1C09                  DSP_EXT         equ   $1C09    ;  (Byte) Extended Graphics Register
+1C09                  DSP_EXT             equ   $1C09    ;  (Byte) Extended Graphics Register
                                 ; DSP_EXT: AABC.DEFG
                                 ;      AA:00 = Extended Graphics 1bpp (2-color mode)
                                 ;      AA:01 = Extended Graphics 2bpp (4-color mode)
@@ -124,66 +124,66 @@
                                 ;      G:0   = Fullscreen Enabled( emulator only )
                                 ;      G:1   = Windowed Enabled ( emulator only )
                       
-1C0A                  DSP_TXT_COLS    equ   $1C0A    ;  (Byte) READ-ONLY Text Screen Columns
-1C0B                  DSP_TXT_ROWS    equ   $1C0B    ;  (Byte) READ-ONLY Text Screens Rows
+1C0A                  DSP_TXT_COLS        equ   $1C0A    ;  (Byte) READ-ONLY Text Screen Columns
+1C0B                  DSP_TXT_ROWS        equ   $1C0B    ;  (Byte) READ-ONLY Text Screens Rows
                       
-1C0C                  DSP_PAL_IDX     equ   $1C0C    ;  (Byte) Color Palette Index
+1C0C                  DSP_PAL_IDX         equ   $1C0C    ;  (Byte) Color Palette Index
                                 ; DSP_PAL_IDX: 0-255
                                 ; Note: Use this register to set the index into theColor Palette.
                                 ;   Set this value prior referencing color data (DSP_PAL_CLR).
                       
-1C0D                  DSP_PAL_CLR     equ   $1C0D    ;  (Word) Indexed Color Palette Data
+1C0D                  DSP_PAL_CLR         equ   $1C0D    ;  (Word) Indexed Color Palette Data
                                 ; DSP_PAL_CLR: Color Data A4R4G4B4 format
                                 ; Note: This is the color data for an individual palette entry.
                                 ;     Write to DSP_PAL_IDX with the index within the color palette
                                 ;     prior to reading or writing the color data in the DSP_PAL_CLR register.
                       
-1C0F                  DSP_GLYPH_IDX    equ   $1C0F    ;  (Byte) Text Glyph Index
+1C0F                  DSP_GLYPH_IDX       equ   $1C0F    ;  (Byte) Text Glyph Index
                                 ; DSP_GLYPH_IDX: 0-256
                                 ; Note: Set this register to index a specific text glyph. Set this value
                                 ;     prior to updating glyph pixel data.
                       
-1C10                  DSP_GLYPH_DATA    equ   $1C10    ;  (8-Bytes) Text Glyph Pixel Data Array
+1C10                  DSP_GLYPH_DATA      equ   $1C10    ;  (8-Bytes) Text Glyph Pixel Data Array
                                 ; DSP_GLYPH_DATA: 8 rows of binary encoded glyph pixel data
                                 ; Note: Each 8x8 text glyph is composed of 8 bytes. The first byte in this
                                 ;     array represents the top line of 8 pixels. Each array entry represents
                                 ;     a row of 8 pixels.
                       
                                 ; Debug Hardware Registers:
-1C18                  DBG_BEGIN       equ   $1C18    ;  start of mouse cursor hardware registers
-1C18                  DBG_TEMP        equ   $1C18    ;  (Byte) Simple Debug test register
-1C19                  DBG_END         equ   $1C19    ; End Debug Registers
+1C18                  DBG_BEGIN           equ   $1C18    ;  start of mouse cursor hardware registers
+1C18                  DBG_TEMP            equ   $1C18    ;  (Byte) Simple Debug test register
+1C19                  DBG_END             equ   $1C19    ; End Debug Registers
                       
                                 ; Mouse Cursor Hardware Registers:
-1C19                  CSR_BEGIN       equ   $1C19    ;  start of mouse cursor hardware registers
-1C19                  CSR_XPOS        equ   $1C19    ;  (Word) horizontal mouse cursor coordinate
-1C1B                  CSR_YPOS        equ   $1C1B    ;  (Word) vertical mouse cursor coordinate
-1C1D                  CSR_XOFS        equ   $1C1D    ;  (Byte) horizontal mouse cursor offset
-1C1E                  CSR_YOFS        equ   $1C1E    ;  (Byte) vertical mouse cursor offset
-1C1F                  CSR_SCROLL      equ   $1C1F    ;  (Signed) MouseWheel Scroll: -1, 0, 1
-1C20                  CSR_FLAGS       equ   $1C20    ;  (Byte) mouse button flags:
+1C19                  CSR_BEGIN           equ   $1C19    ;  start of mouse cursor hardware registers
+1C19                  CSR_XPOS            equ   $1C19    ;  (Word) horizontal mouse cursor coordinate
+1C1B                  CSR_YPOS            equ   $1C1B    ;  (Word) vertical mouse cursor coordinate
+1C1D                  CSR_XOFS            equ   $1C1D    ;  (Byte) horizontal mouse cursor offset
+1C1E                  CSR_YOFS            equ   $1C1E    ;  (Byte) vertical mouse cursor offset
+1C1F                  CSR_SCROLL          equ   $1C1F    ;  (Signed) MouseWheel Scroll: -1, 0, 1
+1C20                  CSR_FLAGS           equ   $1C20    ;  (Byte) mouse button flags:
                                 ;  CSR_FLAGS:
                                 ;       bits 0-5: button states
                                 ;       bits 6-7: number of clicks
-1C21                  CSR_BMP_INDX    equ   $1C21    ;  (Byte) mouse cursor bitmap pixel offset
-1C22                  CSR_BMP_DATA    equ   $1C22    ;  (Byte) mouse cursor bitmap pixel index color
-1C24                  CSR_PAL_INDX    equ   $1C24    ;  (Byte) mouse cursor color palette index (0-15)
-1C25                  CSR_PAL_DATA    equ   $1C25    ;  (Word) mouse cursor color palette data RGBA4444
-1C27                  CSR_END         equ   $1C27    ; End Mouse Registers
-1C27                  GFX_END         equ   $1C27    ; End of GFX Device Registers
+1C21                  CSR_BMP_INDX        equ   $1C21    ;  (Byte) mouse cursor bitmap pixel offset
+1C22                  CSR_BMP_DATA        equ   $1C22    ;  (Byte) mouse cursor bitmap pixel index color
+1C24                  CSR_PAL_INDX        equ   $1C24    ;  (Byte) mouse cursor color palette index (0-15)
+1C25                  CSR_PAL_DATA        equ   $1C25    ;  (Word) mouse cursor color palette data RGBA4444
+1C27                  CSR_END             equ   $1C27    ; End Mouse Registers
+1C27                  GFX_END             equ   $1C27    ; End of GFX Device Registers
                       
-1C27                  KEY_BEGIN       equ   $1C27    ; Start of the Keyboard Register space
-1C27                  CHAR_Q_LEN      equ   $1C27    ;   (Byte) # of characters waiting in queue        (Read Only)
-1C28                  CHAR_SCAN       equ   $1C28    ;   (Byte) read next character in queue (not popped when read)
-1C29                  CHAR_POP        equ   $1C29    ;   (Byte) read next character in queue (not popped when read)
-1C2A                  XKEY_BUFFER     equ   $1C2A    ;   (128 bits) 16 bytes for XK_KEY data buffer     (Read Only)
-1C3A                  EDT_BFR_CSR     equ   $1C3A    ;   (Byte) cursor position within edit buffer     (Read/Write)
-1C3B                  EDT_ENABLE      equ   $1C3B    ;   (Byte) line editor enable flag                 (Read/Write)
-1C3C                  EDT_BUFFER      equ   $1C3C    ;   line editing character buffer                 (Read/Write)
-1C7C                  KEY_END         equ   $1C7C    ; End of the Keyboard Register space
+1C27                  KEY_BEGIN           equ   $1C27    ; Start of the Keyboard Register space
+1C27                  CHAR_Q_LEN          equ   $1C27    ;   (Byte) # of characters waiting in queue        (Read Only)
+1C28                  CHAR_SCAN           equ   $1C28    ;   (Byte) read next character in queue (not popped when read)
+1C29                  CHAR_POP            equ   $1C29    ;   (Byte) read next character in queue (not popped when read)
+1C2A                  XKEY_BUFFER         equ   $1C2A    ;   (128 bits) 16 bytes for XK_KEY data buffer     (Read Only)
+1C3A                  EDT_BFR_CSR         equ   $1C3A    ;   (Byte) cursor position within edit buffer     (Read/Write)
+1C3B                  EDT_ENABLE          equ   $1C3B    ;   (Byte) line editor enable flag                 (Read/Write)
+1C3C                  EDT_BUFFER          equ   $1C3C    ;   line editing character buffer                 (Read/Write)
+1C7C                  KEY_END             equ   $1C7C    ; End of the Keyboard Register space
                       
-1C7C                  FIO_BEGIN       equ   $1C7C    ; Start of the FileIO register space
-1C7C                  FIO_ERR_FLAGS    equ   $1C7C    ; (Byte) File IO error flags
+1C7C                  FIO_BEGIN           equ   $1C7C    ; Start of the FileIO register space
+1C7C                  FIO_ERR_FLAGS       equ   $1C7C    ; (Byte) File IO error flags
                                 ; FIO_ERR_FLAGS: ABCD.EFGH
                                 ;      A:  file was not found
                                 ;      B:  directory was not found
@@ -194,36 +194,36 @@
                                 ;      G:  invalid command
                                 ;      H:  incorrect file stream
                       
-1C7D                  FIO_COMMAND     equ   $1C7D    ; (Byte) OnWrite, execute a file command (FC_<cmd>)
+1C7D                  FIO_COMMAND         equ   $1C7D    ; (Byte) OnWrite, execute a file command (FC_<cmd>)
                                 ; Begin FIO_COMMANDS
-0000                  FC_RESET        equ   $0000    ;        Reset
-0001                  FC_SHUTDOWN     equ   $0001    ;        SYSTEM: Shutdown
-0002                  FC_COMPDATE     equ   $0002    ;        SYSTEM: Load Compilation Date
-0003                  FC_NEWFILE      equ   $0003    ;      * New File Stream
-0004                  FC_OPENFILE     equ   $0004    ;      * Open File
-0005                  FC_ISOPEN       equ   $0005    ;      *Is File Open ? (returns FIO_ERR_FLAGS bit - 5)
-0006                  FC_CLOSEFILE    equ   $0006    ;      * Close File
-0007                  FC_READBYTE     equ   $0007    ;      * Read Byte (into FIO_IOBYTE)
-0008                  FC_WRITEBYTE    equ   $0008    ;      * Write Byte (from FIO_IOBYTE)
-0009                  FC_LOADHEX      equ   $0009    ;      * Load Hex Format File
-000A                  FC_GETLENGTH    equ   $000A    ;      * Get File Length (into FIO_IOWORD)
-000B                  FC_LISTDIR      equ   $000B    ;        List Directory
-000C                  FC_MAKEDIR      equ   $000C    ;      * Make Directory
-000D                  FC_CHANGEDIR    equ   $000D    ;        Change Directory
-000E                  FC_GETPATH      equ   $000E    ;        Fetch Current Path
-000F                  FC_REN_DIR      equ   $000F    ;      * Rename Directory
-0010                  FC_DEL_DIR      equ   $0010    ;      * Delete Directory
-0011                  FC_DEL_FILE     equ   $0011    ;      * Delete File
-0012                  FC_REN_FILE     equ   $0012    ;      * Rename file
-0013                  FC_COPYFILE     equ   $0013    ;      * Copy File
-0014                  FC_SEEKSTART    equ   $0014    ;      * Seek Start
-0015                  FC_SEEKEND      equ   $0015    ;      * Seek End
-0016                  FC_SET_SEEK     equ   $0016    ;      * Set Seek Position (from FIO_IOWORD)
-0017                  FC_GET_SEEK     equ   $0017    ;      * Get Seek Position (into FIO_IOWORD)
+0000                  FC_RESET            equ   $0000    ;        Reset
+0001                  FC_SHUTDOWN         equ   $0001    ;        SYSTEM: Shutdown
+0002                  FC_COMPDATE         equ   $0002    ;        SYSTEM: Load Compilation Date
+0003                  FC_NEWFILE          equ   $0003    ;      * New File Stream
+0004                  FC_OPENFILE         equ   $0004    ;      * Open File
+0005                  FC_ISOPEN           equ   $0005    ;      *Is File Open ? (returns FIO_ERR_FLAGS bit - 5)
+0006                  FC_CLOSEFILE        equ   $0006    ;      * Close File
+0007                  FC_READBYTE         equ   $0007    ;      * Read Byte (into FIO_IOBYTE)
+0008                  FC_WRITEBYTE        equ   $0008    ;      * Write Byte (from FIO_IOBYTE)
+0009                  FC_LOADHEX          equ   $0009    ;      * Load Hex Format File
+000A                  FC_GETLENGTH        equ   $000A    ;      * Get File Length (into FIO_IOWORD)
+000B                  FC_LISTDIR          equ   $000B    ;        List Directory
+000C                  FC_MAKEDIR          equ   $000C    ;      * Make Directory
+000D                  FC_CHANGEDIR        equ   $000D    ;        Change Directory
+000E                  FC_GETPATH          equ   $000E    ;        Fetch Current Path
+000F                  FC_REN_DIR          equ   $000F    ;      * Rename Directory
+0010                  FC_DEL_DIR          equ   $0010    ;      * Delete Directory
+0011                  FC_DEL_FILE         equ   $0011    ;      * Delete File
+0012                  FC_REN_FILE         equ   $0012    ;      * Rename file
+0013                  FC_COPYFILE         equ   $0013    ;      * Copy File
+0014                  FC_SEEKSTART        equ   $0014    ;      * Seek Start
+0015                  FC_SEEKEND          equ   $0015    ;      * Seek End
+0016                  FC_SET_SEEK         equ   $0016    ;      * Set Seek Position (from FIO_IOWORD)
+0017                  FC_GET_SEEK         equ   $0017    ;      * Get Seek Position (into FIO_IOWORD)
                                 ; End FIO_COMMANDS
                       
-1C7E                  FIO_STREAM      equ   $1C7E    ; (Byte) current file stream index (0-15)
-1C7F                  FIO_MODE        equ   $1C7F    ; (Byte) Flags describing the I/O mode for the file
+1C7E                  FIO_STREAM          equ   $1C7E    ; (Byte) current file stream index (0-15)
+1C7F                  FIO_MODE            equ   $1C7F    ; (Byte) Flags describing the I/O mode for the file
                                 ; FIO_MODE: 00AB.CDEF  (indexed by FIO_STREAM)
                                 ;      A:  INPUT - File open for reading
                                 ;      B:  OUTPUT - File open for writing
@@ -231,43 +231,119 @@
                                 ;      D:  AT_END - Output starts at the end of the file
                                 ;      E:  APPEND - All output happens at end of the file
                                 ;      F:  TRUNC - discard all previous file data
-1C80                  FIO_SEEKPOS     equ   $1C80    ; (DWord) file seek position
-1C84                  FIO_IOBYTE      equ   $1C84    ; (Byte) input / output character
-1C85                  FIO_IOWORD      equ   $1C85    ; (Byte) input / output character
-1C86                  FIO_PATH_LEN    equ   $1C86    ; (Byte) length of the filepath
-1C87                  FIO_PATH_POS    equ   $1C87    ; (Byte) character position within the filepath
-1C88                  FIO_PATH_DATA    equ   $1C88    ; (Byte) data at the character position of the path
-1C89                  FIO_DIR_DATA    equ   $1C89    ; (Byte) a series of null-terminated filenames
+1C80                  FIO_SEEKPOS         equ   $1C80    ; (DWord) file seek position
+1C84                  FIO_IOBYTE          equ   $1C84    ; (Byte) input / output character
+1C85                  FIO_IOWORD          equ   $1C85    ; (Byte) input / output character
+1C86                  FIO_PATH_LEN        equ   $1C86    ; (Byte) length of the filepath
+1C87                  FIO_PATH_POS        equ   $1C87    ; (Byte) character position within the filepath
+1C88                  FIO_PATH_DATA       equ   $1C88    ; (Byte) data at the character position of the path
+1C89                  FIO_DIR_DATA        equ   $1C89    ; (Byte) a series of null-terminated filenames
                                 ;     NOTES: Current read-position is reset to the beginning following a
                                 ;             List Directory command. The read-position is automatically
                                 ;             advanced on read from this register. Each filename is
                                 ;             $0a-terminated. The list itself is null-terminated.
-1C8A                  FIO_END         equ   $1C8A    ; End of the FileIO register space
+1C8A                  FIO_END             equ   $1C8A    ; End of the FileIO register space
                       
-                          ; 4982 ($1376) bytes remaining for additional registers.
-1C8A                  RESERVED        equ   $1C8A
+                                ; Math Co-Processor Hardware Registers:
+1C8A                  MATH_BEGIN          equ   $1C8A    ;  start of math co-processor  hardware registers
+1C8A                  MATH_ACA_POS        equ   $1C8A    ;  (Byte) character position within the ACA float string
+1C8B                  MATH_ACA_DATA       equ   $1C8B    ;  (Byte) ACA float string character port
+1C8C                  MATH_ACA_RAW        equ   $1C8C    ;  (4-Bytes) ACA raw float data
+1C90                  MATH_ACA_INT        equ   $1C90    ;  (4-Bytes) ACA integer data
+1C94                  MATH_ACB_POS        equ   $1C94    ;  (Byte) character position within the ACB float string
+1C95                  MATH_ACB_DATA       equ   $1C95    ;  (Byte) ACB float string character port
+1C96                  MATH_ACB_RAW        equ   $1C96    ;  (4-Bytes) ACB raw float data
+1C9A                  MATH_ACB_INT        equ   $1C9A    ;  (4-Bytes) ACB integer data
+1C9E                  MATH_ACR_POS        equ   $1C9E    ;  (Byte) character position within the ACR float string
+1C9F                  MATH_ACR_DATA       equ   $1C9F    ;  (Byte) ACR float string character port
+1CA0                  MATH_ACR_RAW        equ   $1CA0    ;  (4-Bytes) ACR raw float data
+1CA4                  MATH_ACR_INT        equ   $1CA4    ;  (4-Bytes) ACR integer data
+1CA8                  MATH_OPERATION      equ   $1CA8    ;  (Byte) Operation 'command' to be issued
+                                ; Begin MATH_OPERATION's (MOPS)
+0000                  MOP_RANDOM          equ   $0000    ;        ACA, ACB, and ACR are set to randomized values
+0001                  MOP_IS_EQUAL        equ   $0001    ;        (bool)ACR = (ACA == ACB)
+0002                  MOP_IS_NOT_EQUAL    equ   $0002    ;        (bool)ACR = (ACA != ACB)
+0003                  MOP_IS_LESS         equ   $0003    ;        (bool)ACR = std::isless(ACA, ACB);
+0004                  MOP_IS_GREATER      equ   $0004    ;        (bool)ACR = std::isgreater(ACA, ACB);
+0005                  MOP_IS_LTE          equ   $0005    ;        (bool)ACR = std::islessequal(ACA, ACB);
+0006                  MOP_IS_GTE          equ   $0006    ;        (bool)ACR = std::islessgreater(ACA, ACB);
+0007                  MOP_IS_FINITE       equ   $0007    ;        (bool)ACR = std::isfinite(ACA);
+0008                  MOP_IS_INF          equ   $0008    ;        (bool)ACR = std::isinf(ACA);
+0009                  MOP_NAN             equ   $0009    ;        (bool)ACR = std::isnan(ACA);
+000A                  MOP_NORMAL          equ   $000A    ;        (bool)ACR = std::isnormal(ACA);
+000B                  MOP_SIGNBIT         equ   $000B    ;        (bool)ACR = std::signbit(ACA);
+000C                  MOP_SUBTRACT        equ   $000C    ;        ACR = ACA - ACB
+000D                  MOP_ADD             equ   $000D    ;        ACR = ACA + ACB
+000E                  MOP_MULTIPLY        equ   $000E    ;        ACR = ACA * ACB
+000F                  MOP_DIVIDE          equ   $000F    ;        ACR = ACA / ACB
+0010                  MOP_FMOD            equ   $0010    ;        ACR = std::fmod(ACA, ACB);
+0011                  MOP_REMAINDER       equ   $0011    ;        ACR = std::remainder(ACA, ACB);
+0012                  MOP_FMAX            equ   $0012    ;        ACR = std::std::fmax(ACA, ACB);
+0013                  MOP_FMIN            equ   $0013    ;        ACR = std::fmin(ACA, ACB);
+0014                  MOP_FDIM            equ   $0014    ;        ACR = std::fdim(ACA, ACB);
+0015                  MOP_EXP             equ   $0015    ;        ACR = std::exp(ACA);
+0016                  MOP_EXP2            equ   $0016    ;        ACR = std::exp2(ACA);
+0017                  MOP_EXPM1           equ   $0017    ;        ACR = std::expm1(ACA);
+0018                  MOP_LOG             equ   $0018    ;        ACR = std::log(ACA);
+0019                  MOP_LOG10           equ   $0019    ;        ACR = std::log10(ACA);
+001A                  MOP_LOG2            equ   $001A    ;        ACR = std::log2(ACA);
+001B                  MOP_LOG1P           equ   $001B    ;        ACR = std::log1p(ACA);
+001C                  MOP_SQRT            equ   $001C    ;        ACR = std::sqrt(ACA);
+001D                  MOP_CBRT            equ   $001D    ;        ACR = std::cbrt(ACA);
+001E                  MOP_HYPOT           equ   $001E    ;        ACR = std::hypot(ACA, ACB);
+001F                  MOP_POW             equ   $001F    ;        ACR = std::pow(ACA, ACB);
+0020                  MOP_SIN             equ   $0020    ;        ACR = std::sin(ACA);
+0021                  MOP_COS             equ   $0021    ;        ACR = std::cos(ACA);
+0022                  MOP_TAN             equ   $0022    ;        ACR = std::tan(ACA);
+0023                  MOP_ASIN            equ   $0023    ;        ACR = std::asin(ACA);
+0024                  MOP_ACOS            equ   $0024    ;        ACR = std::acos(ACA);
+0025                  MOP_ATAN            equ   $0025    ;        ACR = std::atan(ACA);
+0026                  MOP_ATAN2           equ   $0026    ;        ACR = std::atan2(ACA, ACB);
+0027                  MOP_SINH            equ   $0027    ;        ACR = std::sinh(ACA);
+0028                  MOP_COSH            equ   $0028    ;        ACR = std::acosh(ACA);
+0029                  MOP_ATANH           equ   $0029    ;        ACR = std::atanh(ACA);
+002A                  MOP_ERF             equ   $002A    ;        ACR = std::erf(ACA);
+002B                  MOP_ERFC            equ   $002B    ;        ACR = std::erfc(ACA);
+002C                  MOP_LGAMMA          equ   $002C    ;        ACR = std::lgamma(ACA);
+002D                  MOP_TGAMMA          equ   $002D    ;        ACR = std::tgamma(ACA);
+002E                  MOP_CEIL            equ   $002E    ;        ACR = std::ceil(ACA);
+002F                  MOP_FLOOR           equ   $002F    ;        ACR = std::floor(ACA);
+0030                  MOP_TRUNC           equ   $0030    ;        ACR = std::trunc(ACA);
+0031                  MOP_ROUND           equ   $0031    ;        ACR = std::round(ACA);
+0032                  MOP_LROUND          equ   $0032    ;        ACR = std::lround(ACA);
+0033                  MOP_NEARBYINT       equ   $0033    ;        ACR = std::nearbyint(ACA);
+0034                  MOP_ILOGB           equ   $0034    ;        ACR = std::ilogb(ACA);
+0035                  MOP_LOGB            equ   $0035    ;        ACR = std::logb(ACA);
+0036                  MOP_NETAFTER        equ   $0036    ;        ACR = std::nextafter(ACA, ACB);
+0037                  MOP_COPYSIGN        equ   $0037    ;        ACR = std::copysign(ACA, ACB);
+0037                  MOP_LASTOP          equ   $0037    ;        last implemented math operation
+                                ; End MATH_OPERATION's (MOPS)
+1CA9                  MATH_END            equ   $1CA9    ; end of math co-processor registers
+                      
+                          ; 4951 ($1357) bytes remaining for additional registers.
+1CA9                  RESERVED            equ   $1CA9
                       
                                 ; User RAM (32K)
-3000                  USER_RAM        equ   $3000
+3000                  USER_RAM            equ   $3000
                       
                                 ; Paged RAM (8K)
-B000                  PAGED_RAM       equ   $B000
+B000                  PAGED_RAM           equ   $B000
                       
                                 ; PAGED ROM (8K bytes)
-D000                  PAGED_ROM       equ   $D000
+D000                  PAGED_ROM           equ   $D000
                       
                                 ; KERNEL ROM (4K bytes)
-F000                  KERNEL_ROM      equ   $F000
+F000                  KERNEL_ROM          equ   $F000
                       
                                 ; Hardware Interrupt Vectors:
-FFF0                  HARD_EXEC       equ   $FFF0    ; EXEC Hardware Interrupt Vector
-FFF2                  HARD_SWI3       equ   $FFF2    ; SWI3 Hardware Interrupt Vector
-FFF4                  HARD_SWI2       equ   $FFF4    ; SWI2 Hardware Interrupt Vector
-FFF6                  HARD_FIRQ       equ   $FFF6    ; FIRQ Hardware Interrupt Vector
-FFF8                  HARD_IRQ        equ   $FFF8    ; IRQ Hardware Interrupt Vector
-FFFA                  HARD_SWI        equ   $FFFA    ; SWI / SYS Hardware Interrupt Vector
-FFFC                  HARD_NMI        equ   $FFFC    ; NMI Hardware Interrupt Vector
-FFFE                  HARD_RESET      equ   $FFFE    ; RESET Hardware Interrupt Vector
+FFF0                  HARD_EXEC           equ   $FFF0    ; EXEC Hardware Interrupt Vector
+FFF2                  HARD_SWI3           equ   $FFF2    ; SWI3 Hardware Interrupt Vector
+FFF4                  HARD_SWI2           equ   $FFF4    ; SWI2 Hardware Interrupt Vector
+FFF6                  HARD_FIRQ           equ   $FFF6    ; FIRQ Hardware Interrupt Vector
+FFF8                  HARD_IRQ            equ   $FFF8    ; IRQ Hardware Interrupt Vector
+FFFA                  HARD_SWI            equ   $FFFA    ; SWI / SYS Hardware Interrupt Vector
+FFFC                  HARD_NMI            equ   $FFFC    ; NMI Hardware Interrupt Vector
+FFFE                  HARD_RESET          equ   $FFFE    ; RESET Hardware Interrupt Vector
                       ; END of definitions
                       
                       ; Software Vectors

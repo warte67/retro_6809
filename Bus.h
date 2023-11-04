@@ -31,6 +31,7 @@ class Bus
 	friend class GfxDebug;
 	friend class Keyboard;
 	friend class FileIO;
+	friend class Math;
 
 	protected:
 		Bus();									// constructor

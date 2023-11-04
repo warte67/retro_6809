@@ -12,6 +12,7 @@
 #include "Bus.h"
 #include "Keyboard.h"
 #include "FileIO.h"
+#include "Math.h"
 
 Bus::Bus()
 {
@@ -109,6 +110,10 @@ Bus::Bus()
     dev = new FileIO();
     addr += Attach(dev);
 
+    // Math Device
+    dev = new Math();
+    addr += Attach(dev);
+
 
 
 
@@ -189,17 +194,11 @@ Bus::Bus()
         Bus::Error("Error initializing SDL!");
     }    
 
-    // OnInit()     // call for each attached device
-    _onInit();
-
 	// load up the memory map
 	load_hex("asm/kernel_f000.hex");	
-	// printf("BUS::read(0xFFFE): 0x%04X\n", read_word(0xFFFE));
 
 	// Install the CPU
 	m_cpu = new C6809(this);
-
-	// start the CPU thread
 	m_cpuThread = std::thread(&Bus::_cpuThread);
 	bCpuEnabled = true;
 }
