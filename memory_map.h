@@ -246,62 +246,63 @@ MATH_ACR_INT     = 0x1CA4, //  (4-Bytes) ACR integer data
 MATH_OPERATION   = 0x1CA8, //  (Byte) Operation 'command' to be issued
         // Begin MATH_OPERATION's (MOPS)
 MOP_RANDOM       = 0x0000, //        ACA, ACB, and ACR are set to randomized values
-MOP_IS_EQUAL     = 0x0001, //        (bool)ACR = (ACA == ACB)
-MOP_IS_NOT_EQUAL = 0x0002, //        (bool)ACR = (ACA != ACB)
-MOP_IS_LESS      = 0x0003, //        (bool)ACR = std::isless(ACA, ACB);
-MOP_IS_GREATER   = 0x0004, //        (bool)ACR = std::isgreater(ACA, ACB);
-MOP_IS_LTE       = 0x0005, //        (bool)ACR = std::islessequal(ACA, ACB);
-MOP_IS_GTE       = 0x0006, //        (bool)ACR = std::islessgreater(ACA, ACB);
-MOP_IS_FINITE    = 0x0007, //        (bool)ACR = std::isfinite(ACA);
-MOP_IS_INF       = 0x0008, //        (bool)ACR = std::isinf(ACA);
-MOP_IS_NAN       = 0x0009, //        (bool)ACR = std::isnan(ACA);
-MOP_IS_NORMAL    = 0x000A, //        (bool)ACR = std::isnormal(ACA);
-MOP_SIGNBIT      = 0x000B, //        (bool)ACR = std::signbit(ACA);
-MOP_SUBTRACT     = 0x000C, //        ACR = ACA - ACB
-MOP_ADD          = 0x000D, //        ACR = ACA + ACB
-MOP_MULTIPLY     = 0x000E, //        ACR = ACA * ACB
-MOP_DIVIDE       = 0x000F, //        ACR = ACA / ACB
-MOP_FMOD         = 0x0010, //        ACR = std::fmod(ACA, ACB);
-MOP_REMAINDER    = 0x0011, //        ACR = std::remainder(ACA, ACB);
-MOP_FMAX         = 0x0012, //        ACR = std::fmax(ACA, ACB);
-MOP_FMIN         = 0x0013, //        ACR = std::fmin(ACA, ACB);
-MOP_FDIM         = 0x0014, //        ACR = std::fdim(ACA, ACB);
-MOP_EXP          = 0x0015, //        ACR = std::exp(ACA);
-MOP_EXP2         = 0x0016, //        ACR = std::exp2(ACA);
-MOP_EXPM1        = 0x0017, //        ACR = std::expm1(ACA);
-MOP_LOG          = 0x0018, //        ACR = std::log(ACA);
-MOP_LOG10        = 0x0019, //        ACR = std::log10(ACA);
-MOP_LOG2         = 0x001A, //        ACR = std::log2(ACA);
-MOP_LOG1P        = 0x001B, //        ACR = std::log1p(ACA);
-MOP_SQRT         = 0x001C, //        ACR = std::sqrt(ACA);
-MOP_CBRT         = 0x001D, //        ACR = std::cbrt(ACA);
-MOP_HYPOT        = 0x001E, //        ACR = std::hypot(ACA, ACB);
-MOP_POW          = 0x001F, //        ACR = std::pow(ACA, ACB);
-MOP_SIN          = 0x0020, //        ACR = std::sin(ACA);
-MOP_COS          = 0x0021, //        ACR = std::cos(ACA);
-MOP_TAN          = 0x0022, //        ACR = std::tan(ACA);
-MOP_ASIN         = 0x0023, //        ACR = std::asin(ACA);
-MOP_ACOS         = 0x0024, //        ACR = std::acos(ACA);
-MOP_ATAN         = 0x0025, //        ACR = std::atan(ACA);
-MOP_ATAN2        = 0x0026, //        ACR = std::atan2(ACA, ACB);
-MOP_SINH         = 0x0027, //        ACR = std::sinh(ACA);
-MOP_COSH         = 0x0028, //        ACR = std::acosh(ACA);
-MOP_ATANH        = 0x0029, //        ACR = std::atanh(ACA);
-MOP_ERF          = 0x002A, //        ACR = std::erf(ACA);
-MOP_ERFC         = 0x002B, //        ACR = std::erfc(ACA);
-MOP_LGAMMA       = 0x002C, //        ACR = std::lgamma(ACA);
-MOP_TGAMMA       = 0x002D, //        ACR = std::tgamma(ACA);
-MOP_CEIL         = 0x002E, //        ACR = std::ceil(ACA);
-MOP_FLOOR        = 0x002F, //        ACR = std::floor(ACA);
-MOP_TRUNC        = 0x0030, //        ACR = std::trunc(ACA);
-MOP_ROUND        = 0x0031, //        ACR = std::round(ACA);
-MOP_LROUND       = 0x0032, //        ACR = std::lround(ACA);
-MOP_NEARBYINT    = 0x0033, //        ACR = std::nearbyint(ACA);
-MOP_ILOGB        = 0x0034, //        ACR = std::ilogb(ACA);
-MOP_LOGB         = 0x0035, //        ACR = std::logb(ACA);
-MOP_NEXTAFTER    = 0x0036, //        ACR = std::nextafter(ACA, ACB);
-MOP_COPYSIGN     = 0x0037, //        ACR = std::copysign(ACA, ACB);
-MOP_LASTOP       = 0x0037, //        last implemented math operation
+MOP_RND_SEED     = 0x0001, //        ACA seeds the pseudo-random number generator
+MOP_IS_EQUAL     = 0x0002, //        (bool)ACR = (ACA == ACB)
+MOP_IS_NOT_EQUAL = 0x0003, //        (bool)ACR = (ACA != ACB)
+MOP_IS_LESS      = 0x0004, //        (bool)ACR = std::isless(ACA, ACB);
+MOP_IS_GREATER   = 0x0005, //        (bool)ACR = std::isgreater(ACA, ACB);
+MOP_IS_LTE       = 0x0006, //        (bool)ACR = std::islessequal(ACA, ACB);
+MOP_IS_GTE       = 0x0007, //        (bool)ACR = std::islessgreater(ACA, ACB);
+MOP_IS_FINITE    = 0x0008, //        (bool)ACR = std::isfinite(ACA);
+MOP_IS_INF       = 0x0009, //        (bool)ACR = std::isinf(ACA);
+MOP_IS_NAN       = 0x000A, //        (bool)ACR = std::isnan(ACA);
+MOP_IS_NORMAL    = 0x000B, //        (bool)ACR = std::isnormal(ACA);
+MOP_SIGNBIT      = 0x000C, //        (bool)ACR = std::signbit(ACA);
+MOP_SUBTRACT     = 0x000D, //        ACR = ACA - ACB
+MOP_ADD          = 0x000E, //        ACR = ACA + ACB
+MOP_MULTIPLY     = 0x000F, //        ACR = ACA * ACB
+MOP_DIVIDE       = 0x0010, //        ACR = ACA / ACB
+MOP_FMOD         = 0x0011, //        ACR = std::fmod(ACA, ACB);
+MOP_REMAINDER    = 0x0012, //        ACR = std::remainder(ACA, ACB);
+MOP_FMAX         = 0x0013, //        ACR = std::fmax(ACA, ACB);
+MOP_FMIN         = 0x0014, //        ACR = std::fmin(ACA, ACB);
+MOP_FDIM         = 0x0015, //        ACR = std::fdim(ACA, ACB);
+MOP_EXP          = 0x0016, //        ACR = std::exp(ACA);
+MOP_EXP2         = 0x0017, //        ACR = std::exp2(ACA);
+MOP_EXPM1        = 0x0018, //        ACR = std::expm1(ACA);
+MOP_LOG          = 0x0019, //        ACR = std::log(ACA);
+MOP_LOG10        = 0x001A, //        ACR = std::log10(ACA);
+MOP_LOG2         = 0x001B, //        ACR = std::log2(ACA);
+MOP_LOG1P        = 0x001C, //        ACR = std::log1p(ACA);
+MOP_SQRT         = 0x001D, //        ACR = std::sqrt(ACA);
+MOP_CBRT         = 0x001E, //        ACR = std::cbrt(ACA);
+MOP_HYPOT        = 0x001F, //        ACR = std::hypot(ACA, ACB);
+MOP_POW          = 0x0020, //        ACR = std::pow(ACA, ACB);
+MOP_SIN          = 0x0021, //        ACR = std::sin(ACA);
+MOP_COS          = 0x0022, //        ACR = std::cos(ACA);
+MOP_TAN          = 0x0023, //        ACR = std::tan(ACA);
+MOP_ASIN         = 0x0024, //        ACR = std::asin(ACA);
+MOP_ACOS         = 0x0025, //        ACR = std::acos(ACA);
+MOP_ATAN         = 0x0026, //        ACR = std::atan(ACA);
+MOP_ATAN2        = 0x0027, //        ACR = std::atan2(ACA, ACB);
+MOP_SINH         = 0x0028, //        ACR = std::sinh(ACA);
+MOP_COSH         = 0x0029, //        ACR = std::acosh(ACA);
+MOP_ATANH        = 0x002A, //        ACR = std::atanh(ACA);
+MOP_ERF          = 0x002B, //        ACR = std::erf(ACA);
+MOP_ERFC         = 0x002C, //        ACR = std::erfc(ACA);
+MOP_LGAMMA       = 0x002D, //        ACR = std::lgamma(ACA);
+MOP_TGAMMA       = 0x002E, //        ACR = std::tgamma(ACA);
+MOP_CEIL         = 0x002F, //        ACR = std::ceil(ACA);
+MOP_FLOOR        = 0x0030, //        ACR = std::floor(ACA);
+MOP_TRUNC        = 0x0031, //        ACR = std::trunc(ACA);
+MOP_ROUND        = 0x0032, //        ACR = std::round(ACA);
+MOP_LROUND       = 0x0033, //        ACR = std::lround(ACA);
+MOP_NEARBYINT    = 0x0034, //        ACR = std::nearbyint(ACA);
+MOP_ILOGB        = 0x0035, //        ACR = std::ilogb(ACA);
+MOP_LOGB         = 0x0036, //        ACR = std::logb(ACA);
+MOP_NEXTAFTER    = 0x0037, //        ACR = std::nextafter(ACA, ACB);
+MOP_COPYSIGN     = 0x0038, //        ACR = std::copysign(ACA, ACB);
+MOP_LASTOP       = 0x0038, //        last implemented math operation
         // End MATH_OPERATION's (MOPS)
 MATH_END         = 0x1CA9, // end of math co-processor registers
 

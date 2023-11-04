@@ -197,6 +197,9 @@ Bus::Bus()
 	// load up the memory map
 	load_hex("asm/kernel_f000.hex");	
 
+    // called before the CPU thread starts running
+    _onInit();
+
 	// Install the CPU
 	m_cpu = new C6809(this);
 	m_cpuThread = std::thread(&Bus::_cpuThread);
@@ -240,6 +243,7 @@ void Bus::_cpuThread()
             if (duration.count() > cycle_time)
             {
                 before_CPU = clock::now();
+                //if (!C6809::s_bHalted)
                 if (bCpuEnabled)
                 {
                     m_cpu->clock();
@@ -502,11 +506,7 @@ void Bus::DumpMemoryMap()
 void Bus::Run()
 {
 	// called after Bus() constructor for each attached device
-    _onInit();	
-
-	
-	// m_thread = std::thread(&Bus::_cpuThread);
-
+    // _onInit();	
 
     while (s_bIsRunning)
     {

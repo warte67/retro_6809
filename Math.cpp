@@ -125,6 +125,9 @@ void Math::write(Word offset, Byte data, bool debug)
         {
             case MOP_RANDOM:
             {
+                srand(math_random_seed);
+                math_random_seed = rand();
+
                 _update_regs_from_float(((float)rand() / (RAND_MAX)),
                     aca_float, aca_pos, aca_string, aca_raw, aca_int);
                 aca_int = rand() << 16 | rand();
@@ -134,6 +137,12 @@ void Math::write(Word offset, Byte data, bool debug)
                 _update_regs_from_float(((float)rand() / (RAND_MAX)),
                     acr_float, acr_pos, acr_string, acr_raw, acr_int);
                 acr_int = rand() << 16 | rand();
+                break;
+            }
+            case MOP_RND_SEED:
+            {
+                math_random_seed = aca_int;
+                srand(math_random_seed);
                 break;
             }
             case MOP_IS_EQUAL:      { acr_int = (bool)(aca_float == acb_float); break; }
@@ -417,6 +426,7 @@ Word Math::OnAttach(Word nextAddr)
     Byte enumID = 0;
     DisplayEnum("", 0, "Begin MATH_OPERATION's (MOPS)");
     DisplayEnum("MOP_RANDOM",       enumID++, "       ACA, ACB, and ACR are set to randomized values");
+    DisplayEnum("MOP_RND_SEED",     enumID++, "       MATH_ACA_INT seeds the pseudo-random number generator");
     DisplayEnum("MOP_IS_EQUAL",     enumID++, "       (bool)ACR = (ACA == ACB)");
     DisplayEnum("MOP_IS_NOT_EQUAL", enumID++, "       (bool)ACR = (ACA != ACB)");
     DisplayEnum("MOP_IS_LESS",      enumID++, "       (bool)ACR = std::isless(ACA, ACB);");
@@ -482,12 +492,12 @@ Word Math::OnAttach(Word nextAddr)
 void Math::OnInit()
 {
     //printf("Math::OnInit()\n");
-    srand(time(NULL));
+    math_random_seed = (DWord)std::time(NULL);
 }
 
 void Math::OnQuit()
 {
-    // printf("Math::OnQuit()\n");
+    //printf("Math::OnQuit()\n");
 }
 
 

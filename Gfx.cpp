@@ -38,7 +38,7 @@ Byte Gfx::read(Word offset, bool debug )		// is debug completely unused in the c
 		case SYS_SPEED + 1:		data = Bus::_sys_cpu_speed & 0xFF; break;
 		case SYS_CLOCK_DIV:		data = Bus::_clock_div; break;
 		case SYS_TIMER + 0:		data = Bus::_clock_timer >> 8; break;
-		case SYS_TIMER + 1:		data = Bus::_clock_timer & 0x0f; break;
+		case SYS_TIMER + 1:		data = Bus::_clock_timer & 0xff; break;
 
 		case DSP_GRES: 			data = _dsp_gres; break;
 		case DSP_EXT:			data = _dsp_ext; break;
@@ -633,10 +633,13 @@ void Gfx::OnUpdate(float fElapsedTime)
 		// the 6809 CPU should nowbe working
 
 		// update the display textures
-		C6809::s_bHalted = true;
+		if (Bus::bCpuEnabled)
+		{
+			Bus::bCpuEnabled = false;
 			_display_extended();
 			_display_standard();
-		C6809::s_bHalted = false;
+			Bus::bCpuEnabled = true;
+		}
 	}
 
 	// run OnUpdate() for the other graphics devices

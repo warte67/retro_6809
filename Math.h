@@ -57,6 +57,8 @@ protected:
 
 	// MATH_OPERATION
 	Byte math_operation = 0;	// Operation 'command' 
+	DWord math_random_seed = 0;	// random seed
+
 
 	// HELPERS
 	Byte _read_acc(Word offset, Word reg, Byte& _pos, 

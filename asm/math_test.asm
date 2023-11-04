@@ -64,7 +64,15 @@ start
 
 st_4
 		; perform a math operation
-		lda	#MOP_DIVIDE
+		* clr 	MATH_ACA_INT+0
+		* clr 	MATH_ACA_INT+1
+		* clr 	MATH_ACA_INT+2
+		* clr 	MATH_ACA_INT+3
+		* inc 	MATH_ACA_INT+3
+		* lda	#MOP_RND_SEED
+		* sta	MATH_OPERATION
+
+		lda	#MOP_RANDOM
 		sta	MATH_OPERATION
 
 		; display ACR (result)

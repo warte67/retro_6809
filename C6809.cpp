@@ -27,6 +27,8 @@ C6809::C6809(Bus* p_bus) : A(acc.byte.A = 0), B(acc.byte.B = 0), D(acc.D = 0)
 	bool IRQ = true;
 	bool FIRQ = true;
 
+	// C6809::s_bHalted = true;
+
 	Init();
 	reset();
 }
@@ -43,8 +45,8 @@ void C6809::clock()
 	Gfx* gfx = bus.m_gfx;
 	GfxDebug* debug = gfx->m_debug;
 
-	if (s_bHalted)
-		return;
+	// if (s_bHalted)	return;
+	// if (s_bHalted)	return;
 
 	if (debug->SingleStep())
 	{

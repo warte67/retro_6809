@@ -39,7 +39,7 @@ public:
 	~C6809();
 	void Init();
 
-	inline static bool s_bHalted = false;
+	//inline static bool s_bHalted = true;
 
 	
 	std::string disasm(Word addr, Word& next);	// returns standard string containing instruction pointed to by addr
