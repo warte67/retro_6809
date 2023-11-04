@@ -252,10 +252,10 @@ MOP_IS_LESS      = 0x0003, //        (bool)ACR = std::isless(ACA, ACB);
 MOP_IS_GREATER   = 0x0004, //        (bool)ACR = std::isgreater(ACA, ACB);
 MOP_IS_LTE       = 0x0005, //        (bool)ACR = std::islessequal(ACA, ACB);
 MOP_IS_GTE       = 0x0006, //        (bool)ACR = std::islessgreater(ACA, ACB);
-MOP_IS_FINITE    = 0x0007, //        (bool)ACR = std::isfinite(ACA);
+MOP_IS_FINITE    = 0x0007, //        (bool)ACR = std::isfinite(ACA); 
 MOP_IS_INF       = 0x0008, //        (bool)ACR = std::isinf(ACA);
-MOP_NAN          = 0x0009, //        (bool)ACR = std::isnan(ACA);
-MOP_NORMAL       = 0x000A, //        (bool)ACR = std::isnormal(ACA);
+MOP_IS_NAN          = 0x0009, //        (bool)ACR = std::isnan(ACA);
+MOP_IS_NORMAL       = 0x000A, //        (bool)ACR = std::isnormal(ACA);
 MOP_SIGNBIT      = 0x000B, //        (bool)ACR = std::signbit(ACA);
 MOP_SUBTRACT     = 0x000C, //        ACR = ACA - ACB
 MOP_ADD          = 0x000D, //        ACR = ACA + ACB
