@@ -852,14 +852,23 @@ void Gfx::_decode_dsp_ext()
 	if (_windowed != _old)
 		m_debug->bIsCursorVisible = false;
 
-	// SDL Window Flags
-	_window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN_DESKTOP;  
+	// SDL Window Flags	
+	// _window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN_DESKTOP;  
 	_window_width = _base_texture_width * 10;
 	if (_windowed)
 	{
 		// _window_width = 1280;
 		_window_height = _window_width / _aspect;
 		_window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
+	}
+	else
+	{
+		// Screen Size
+		SDL_DisplayMode DM;
+		SDL_GetCurrentDisplayMode(0, &DM);
+		_window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN_DESKTOP;  
+		_window_width = DM.w;
+		_window_height = DM.h;
 	}
 
 	// SDL Renderer Flags
