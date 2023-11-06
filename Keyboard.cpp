@@ -391,8 +391,8 @@ void Keyboard::OnEvent(SDL_Event* evnt) {
 	// printf("void Keyboard::OnEvent(SDL_Event* evnt)\n");
 
 	// ignore SDL events if the debugger is active
-	if (GfxDebug::_bIsDebugActive)
-		return;
+	//if (GfxDebug::_bIsDebugActive)
+	//	return;
 
 	SDL_Keymod km = SDL_GetModState();
 	switch (evnt->type)
