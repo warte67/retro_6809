@@ -138,24 +138,10 @@ void GfxDebug::_onWindowResize()
 
 void GfxDebug::OnEvent(SDL_Event* evnt)
 {
-     switch (evnt->type)
+    switch (evnt->type)
     {
-        case SDL_KEYDOWN:
+        case SDL_KEYDOWN: 
         {
-            // toggle fullscreen/windowed
-            if (evnt->key.keysym.sym == SDLK_RETURN)
-            {
-                if (SDL_GetModState() & KMOD_ALT)
-                {
-                    Byte data = Bus::Read(DSP_EXT);
-                    if (m_gfx->_windowed)
-                        data &= ~0x01;
-                    else
-                        data |= 0x01;
-                    Bus::Write(DSP_EXT, data);
-                }
-            }
-
             // ****************************
             // * Debugger Specific Events *
             // ****************************
@@ -221,6 +207,24 @@ void GfxDebug::OnEvent(SDL_Event* evnt)
         case SDL_MOUSEWHEEL:
             mouse_wheel = evnt->wheel.y;
             break;
+
+        case SDL_KEYUP:
+        {
+            // toggle fullscreen/windowed 
+            if (evnt->key.keysym.sym == SDLK_RETURN)
+            {
+                if (SDL_GetModState() & KMOD_ALT)
+                {
+                    Byte data = Bus::Read(DSP_EXT);
+                    if (m_gfx->_windowed)
+                        data &= ~0x01;
+                    else
+                        data |= 0x01;
+                    Bus::Write(DSP_EXT, data);
+                }
+            }    
+            break;        
+        }
     }
 }
 

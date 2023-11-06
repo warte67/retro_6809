@@ -497,75 +497,82 @@ void Keyboard::_doEditBuffer(char xkey)
 	if (!_line_editor_enable)
 		return;
 
-	// if (Bus::Read(CHAR_SCAN))
-	{
-		Byte c = xkey;
-		auto itr = _str_edt_buffer.begin() + edt_bfr_csr;
-		Byte Cols = Bus::Read(DSP_TXT_COLS);
+	// ignore line editting if the debugger is active
+	if (GfxDebug::_bIsDebugActive)
+		return;		
 
-		if (c == XKeyToAscii(XKey::LEFT))
+	// ignore keypresses when CTRL or ALT is used
+	SDL_Keymod km = SDL_GetModState();
+	if ((km & KMOD_ALT) || (km & KMOD_CTRL))
+		return;
+
+
+	Byte c = xkey;
+	auto itr = _str_edt_buffer.begin() + edt_bfr_csr;
+	Byte Cols = Bus::Read(DSP_TXT_COLS);
+
+	if (c == XKeyToAscii(XKey::LEFT))
+	{
+		// Bus::Read(CHAR_POP);
+		if (edt_bfr_csr > 0)
+			edt_bfr_csr--;
+	}
+	else if (c == XKeyToAscii(XKey::RIGHT))
+	{
+		// Bus::Read(CHAR_POP);
+		if (edt_bfr_csr < _str_edt_buffer.size())
+			edt_bfr_csr++;
+	}
+	else if (c == XKeyToAscii(XKey::UP))
+	{
+		// Bus::Read(CHAR_POP);
+		if (edt_bfr_csr > Cols)
+			edt_bfr_csr -= Cols;
+	}
+	else if (c == XKeyToAscii(XKey::DOWN))
+	{
+		// Bus::Read(CHAR_POP);
+		if (edt_bfr_csr + Cols < _str_edt_buffer.size())
+			edt_bfr_csr += Cols;
+	}
+	else if (c == XKeyToAscii(XKey::BACKSPACE))
+	{
+		// Bus::Read(CHAR_POP);
+		if (edt_bfr_csr > 0)
+		{
+			std::string _right = _str_edt_buffer.substr(edt_bfr_csr);
+			_str_edt_buffer = _str_edt_buffer.substr(0, edt_bfr_csr - 1);
+			_str_edt_buffer += _right;
+			edt_bfr_csr--;
+		}
+	}
+	else if (c == XKeyToAscii(XKey::DELETE))
+	{
+		// Bus::Read(CHAR_POP);
+		if (edt_bfr_csr < _str_edt_buffer.size())
+		{
+			std::string _right = _str_edt_buffer.substr(edt_bfr_csr + 1);
+			_str_edt_buffer = _str_edt_buffer.substr(0, edt_bfr_csr);
+			_str_edt_buffer += _right;
+		}
+	}
+	else if (c == XKeyToAscii(XKey::END))
+	{
+		// Bus::Read(CHAR_POP);
+		edt_bfr_csr = _str_edt_buffer.size();
+	}
+	else if (c == XKeyToAscii(XKey::HOME))
+	{
+		// Bus::Read(CHAR_POP);
+		edt_bfr_csr = 0;
+	}
+	else if (c >= 0x20 && c < 128)
+	{
+		if (_str_edt_buffer.size() < editBuffer.size() - 1)
 		{
 			// Bus::Read(CHAR_POP);
-			if (edt_bfr_csr > 0)
-				edt_bfr_csr--;
-		}
-		else if (c == XKeyToAscii(XKey::RIGHT))
-		{
-			// Bus::Read(CHAR_POP);
-			if (edt_bfr_csr < _str_edt_buffer.size())
-				edt_bfr_csr++;
-		}
-		else if (c == XKeyToAscii(XKey::UP))
-		{
-			// Bus::Read(CHAR_POP);
-			if (edt_bfr_csr > Cols)
-				edt_bfr_csr -= Cols;
-		}
-		else if (c == XKeyToAscii(XKey::DOWN))
-		{
-			// Bus::Read(CHAR_POP);
-			if (edt_bfr_csr + Cols < _str_edt_buffer.size())
-				edt_bfr_csr += Cols;
-		}
-		else if (c == XKeyToAscii(XKey::BACKSPACE))
-		{
-			// Bus::Read(CHAR_POP);
-			if (edt_bfr_csr > 0)
-			{
-				std::string _right = _str_edt_buffer.substr(edt_bfr_csr);
-				_str_edt_buffer = _str_edt_buffer.substr(0, edt_bfr_csr - 1);
-				_str_edt_buffer += _right;
-				edt_bfr_csr--;
-			}
-		}
-		else if (c == XKeyToAscii(XKey::DELETE))
-		{
-			// Bus::Read(CHAR_POP);
-			if (edt_bfr_csr < _str_edt_buffer.size())
-			{
-				std::string _right = _str_edt_buffer.substr(edt_bfr_csr + 1);
-				_str_edt_buffer = _str_edt_buffer.substr(0, edt_bfr_csr);
-				_str_edt_buffer += _right;
-			}
-		}
-		else if (c == XKeyToAscii(XKey::END))
-		{
-			// Bus::Read(CHAR_POP);
-			edt_bfr_csr = _str_edt_buffer.size();
-		}
-		else if (c == XKeyToAscii(XKey::HOME))
-		{
-			// Bus::Read(CHAR_POP);
-			edt_bfr_csr = 0;
-		}
-		else if (c >= 0x20 && c < 128)
-		{
-			if (_str_edt_buffer.size() < editBuffer.size() - 1)
-			{
-				// Bus::Read(CHAR_POP);
-				_str_edt_buffer.insert(itr, c);
-				edt_bfr_csr++;
-			}
+			_str_edt_buffer.insert(itr, c);
+			edt_bfr_csr++;
 		}
 	}
 
