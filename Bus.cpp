@@ -11,6 +11,7 @@
 #include "C6809.h"
 #include "Bus.h"
 #include "Keyboard.h"
+#include "Gamepad.h"
 #include "FileIO.h"
 #include "Math.h"
 
@@ -93,18 +94,17 @@ Bus::Bus()
     dev->DisplayEnum("",0, "Device Registers:");
     dev->DisplayEnum("HDW_REGS", addr, "Begin Device Hardware Registers");
 
-
-
-
 	// base graphics device
     m_gfx = new Gfx();
     addr += Attach(m_gfx);
-    //m_gfx = dynamic_cast<Gfx*>(dev);
-    //addr += m_gfx->Attach_Devices(addr);
 
     // Keyboard Device
     m_keyboard = new Keyboard();
     addr += Attach(m_keyboard);
+
+    // Gamepad Controller Device
+    dev = new Gamepad();
+    addr += Attach(dev);
 
     // FileIO Device
     dev = new FileIO();
@@ -113,6 +113,9 @@ Bus::Bus()
     // Math Device
     dev = new Math();
     addr += Attach(dev);
+
+    // More Devices?
+    // ...
 
 
 
@@ -277,6 +280,9 @@ Bus::~Bus()
 		m_cpu = nullptr;
 	}
 
+    // delete the attached devices
+    for (auto& d : Bus::_memoryNodes)
+        delete d;
 
     // close SDL
     SDL_Quit();

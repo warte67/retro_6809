@@ -182,8 +182,28 @@
 1C3C                  EDT_BUFFER          equ   $1C3C    ;   line editing character buffer                 (Read/Write)
 1C7C                  KEY_END             equ   $1C7C    ; End of the Keyboard Register space
                       
-1C7C                  FIO_BEGIN           equ   $1C7C    ; Start of the FileIO register space
-1C7C                  FIO_ERR_FLAGS       equ   $1C7C    ; (Byte) File IO error flags
+1C7C                  JOYS_BEGIN          equ   $1C7C    ; Start of the Game Controller Register space
+1C7C                  JOYS_1_BTN          equ   $1C7C    ;   (Word) button bits: room for up to 16 buttons  (realtime)
+1C7E                  JOYS_1_DBND         equ   $1C7E    ;   (Byte) PAD 1 analog deadband; default is 5   (read/write)
+1C7F                  JOYS_1_LTX          equ   $1C7F    ;   (char) PAD 1 LThumb-X position (-128 _ +127)   (realtime)
+1C80                  JOYS_1_LTY          equ   $1C80    ;   (char) PAD 1 LThumb-Y position (-128 _ +127)   (realtime)
+1C81                  JOYS_1_RTX          equ   $1C81    ;   (char) PAD 1 RThumb-X position (-128 _ +127)   (realtime)
+1C82                  JOYS_1_RTY          equ   $1C82    ;   (char) PAD 1 RThumb-Y position (-128 _ +127)   (realtime)
+1C83                  JOYS_1_Z1           equ   $1C83    ;   (char) PAD 1 left analog trigger (0 - 127)     (realtime)
+1C84                  JOYS_1_Z2           equ   $1C84    ;   (char) PAD 1 right analog trigger (0 - 127)    (realtime)
+                      
+1C85                  JOYS_2_BTN          equ   $1C85    ;   (Word) button bits: room for up to 16 buttons  (realtime)
+1C87                  JOYS_2_DBND         equ   $1C87    ;   (Byte) PAD 2 analog deadband; default is 5   (read/write)
+1C88                  JOYS_2_LTX          equ   $1C88    ;   (char) PAD 2 LThumb-X position (-128 _ +127)   (realtime)
+1C89                  JOYS_2_LTY          equ   $1C89    ;   (char) PAD 2 LThumb-Y position (-128 _ +127)   (realtime)
+1C8A                  JOYS_2_RTX          equ   $1C8A    ;   (char) PAD 2 RThumb-X position (-128 _ +127)   (realtime)
+1C8B                  JOYS_2_RTY          equ   $1C8B    ;   (char) PAD 2 RThumb-Y position (-128 _ +127)   (realtime)
+1C8C                  JOYS_2_Z1           equ   $1C8C    ;   (char) PAD 2 left analog trigger (0 - 127)     (realtime)
+1C8D                  JOYS_2_Z2           equ   $1C8D    ;   (char) PAD 2 right analog trigger (0 - 127)    (realtime)
+1C8E                  JOYS_END            equ   $1C8E    ; End of the Game Controller Register space
+                      
+1C8E                  FIO_BEGIN           equ   $1C8E    ; Start of the FileIO register space
+1C8E                  FIO_ERR_FLAGS       equ   $1C8E    ; (Byte) File IO error flags
                                 ; FIO_ERR_FLAGS: ABCD.EFGH
                                 ;      A:  file was not found
                                 ;      B:  directory was not found
@@ -194,7 +214,7 @@
                                 ;      G:  invalid command
                                 ;      H:  incorrect file stream
                       
-1C7D                  FIO_COMMAND         equ   $1C7D    ; (Byte) OnWrite, execute a file command (FC_<cmd>)
+1C8F                  FIO_COMMAND         equ   $1C8F    ; (Byte) OnWrite, execute a file command (FC_<cmd>)
                                 ; Begin FIO_COMMANDS
 0000                  FC_RESET            equ   $0000    ;        Reset
 0001                  FC_SHUTDOWN         equ   $0001    ;        SYSTEM: Shutdown
@@ -222,8 +242,8 @@
 0017                  FC_GET_SEEK         equ   $0017    ;      * Get Seek Position (into FIO_IOWORD)
                                 ; End FIO_COMMANDS
                       
-1C7E                  FIO_STREAM          equ   $1C7E    ; (Byte) current file stream index (0-15)
-1C7F                  FIO_MODE            equ   $1C7F    ; (Byte) Flags describing the I/O mode for the file
+1C90                  FIO_STREAM          equ   $1C90    ; (Byte) current file stream index (0-15)
+1C91                  FIO_MODE            equ   $1C91    ; (Byte) Flags describing the I/O mode for the file
                                 ; FIO_MODE: 00AB.CDEF  (indexed by FIO_STREAM)
                                 ;      A:  INPUT - File open for reading
                                 ;      B:  OUTPUT - File open for writing
@@ -231,37 +251,37 @@
                                 ;      D:  AT_END - Output starts at the end of the file
                                 ;      E:  APPEND - All output happens at end of the file
                                 ;      F:  TRUNC - discard all previous file data
-1C80                  FIO_SEEKPOS         equ   $1C80    ; (DWord) file seek position
-1C84                  FIO_IOBYTE          equ   $1C84    ; (Byte) input / output character
-1C85                  FIO_IOWORD          equ   $1C85    ; (Byte) input / output character
-1C86                  FIO_PATH_LEN        equ   $1C86    ; (Byte) length of the filepath
-1C87                  FIO_PATH_POS        equ   $1C87    ; (Byte) character position within the filepath
-1C88                  FIO_PATH_DATA       equ   $1C88    ; (Byte) data at the character position of the path
-1C89                  FIO_DIR_DATA        equ   $1C89    ; (Byte) a series of null-terminated filenames
+1C92                  FIO_SEEKPOS         equ   $1C92    ; (DWord) file seek position
+1C96                  FIO_IOBYTE          equ   $1C96    ; (Byte) input / output character
+1C97                  FIO_IOWORD          equ   $1C97    ; (Byte) input / output character
+1C98                  FIO_PATH_LEN        equ   $1C98    ; (Byte) length of the filepath
+1C99                  FIO_PATH_POS        equ   $1C99    ; (Byte) character position within the filepath
+1C9A                  FIO_PATH_DATA       equ   $1C9A    ; (Byte) data at the character position of the path
+1C9B                  FIO_DIR_DATA        equ   $1C9B    ; (Byte) a series of null-terminated filenames
                                 ;     NOTES: Current read-position is reset to the beginning following a
                                 ;             List Directory command. The read-position is automatically
                                 ;             advanced on read from this register. Each filename is
                                 ;             $0a-terminated. The list itself is null-terminated.
-1C8A                  FIO_END             equ   $1C8A    ; End of the FileIO register space
+1C9C                  FIO_END             equ   $1C9C    ; End of the FileIO register space
                       
                                 ; Math Co-Processor Hardware Registers:
-1C8A                  MATH_BEGIN          equ   $1C8A    ;  start of math co-processor  hardware registers
-1C8A                  MATH_ACA_POS        equ   $1C8A    ;  (Byte) character position within the ACA float string
-1C8B                  MATH_ACA_DATA       equ   $1C8B    ;  (Byte) ACA float string character port
-1C8C                  MATH_ACA_RAW        equ   $1C8C    ;  (4-Bytes) ACA raw float data
-1C90                  MATH_ACA_INT        equ   $1C90    ;  (4-Bytes) ACA integer data
-1C94                  MATH_ACB_POS        equ   $1C94    ;  (Byte) character position within the ACB float string
-1C95                  MATH_ACB_DATA       equ   $1C95    ;  (Byte) ACB float string character port
-1C96                  MATH_ACB_RAW        equ   $1C96    ;  (4-Bytes) ACB raw float data
-1C9A                  MATH_ACB_INT        equ   $1C9A    ;  (4-Bytes) ACB integer data
-1C9E                  MATH_ACR_POS        equ   $1C9E    ;  (Byte) character position within the ACR float string
-1C9F                  MATH_ACR_DATA       equ   $1C9F    ;  (Byte) ACR float string character port
-1CA0                  MATH_ACR_RAW        equ   $1CA0    ;  (4-Bytes) ACR raw float data
-1CA4                  MATH_ACR_INT        equ   $1CA4    ;  (4-Bytes) ACR integer data
-1CA8                  MATH_OPERATION      equ   $1CA8    ;  (Byte) Operation 'command' to be issued
+1C9C                  MATH_BEGIN          equ   $1C9C    ;  start of math co-processor  hardware registers
+1C9C                  MATH_ACA_POS        equ   $1C9C    ;  (Byte) character position within the ACA float string
+1C9D                  MATH_ACA_DATA       equ   $1C9D    ;  (Byte) ACA float string character port
+1C9E                  MATH_ACA_RAW        equ   $1C9E    ;  (4-Bytes) ACA raw float data
+1CA2                  MATH_ACA_INT        equ   $1CA2    ;  (4-Bytes) ACA integer data
+1CA6                  MATH_ACB_POS        equ   $1CA6    ;  (Byte) character position within the ACB float string
+1CA7                  MATH_ACB_DATA       equ   $1CA7    ;  (Byte) ACB float string character port
+1CA8                  MATH_ACB_RAW        equ   $1CA8    ;  (4-Bytes) ACB raw float data
+1CAC                  MATH_ACB_INT        equ   $1CAC    ;  (4-Bytes) ACB integer data
+1CB0                  MATH_ACR_POS        equ   $1CB0    ;  (Byte) character position within the ACR float string
+1CB1                  MATH_ACR_DATA       equ   $1CB1    ;  (Byte) ACR float string character port
+1CB2                  MATH_ACR_RAW        equ   $1CB2    ;  (4-Bytes) ACR raw float data
+1CB6                  MATH_ACR_INT        equ   $1CB6    ;  (4-Bytes) ACR integer data
+1CBA                  MATH_OPERATION      equ   $1CBA    ;  (Byte) Operation 'command' to be issued
                                 ; Begin MATH_OPERATION's (MOPS)
 0000                  MOP_RANDOM          equ   $0000    ;        ACA, ACB, and ACR are set to randomized values
-0001                  MOP_RND_SEED        equ   $0001    ;        seeds the pseudo-random number generator
+0001                  MOP_RND_SEED        equ   $0001    ;        MATH_ACA_INT seeds the pseudo-random number generator
 0002                  MOP_IS_EQUAL        equ   $0002    ;        (bool)ACR = (ACA == ACB)
 0003                  MOP_IS_NOT_EQUAL    equ   $0003    ;        (bool)ACR = (ACA != ACB)
 0004                  MOP_IS_LESS         equ   $0004    ;        (bool)ACR = std::isless(ACA, ACB);
@@ -319,10 +339,10 @@
 0038                  MOP_COPYSIGN        equ   $0038    ;        ACR = std::copysign(ACA, ACB);
 0038                  MOP_LASTOP          equ   $0038    ;        last implemented math operation
                                 ; End MATH_OPERATION's (MOPS)
-1CA9                  MATH_END            equ   $1CA9    ; end of math co-processor registers
+1CBB                  MATH_END            equ   $1CBB    ; end of math co-processor registers
                       
-                          ; 4951 ($1357) bytes remaining for additional registers.
-1CA9                  RESERVED            equ   $1CA9
+                          ; 4933 ($1345) bytes remaining for additional registers.
+1CBB                  RESERVED            equ   $1CBB
                       
                                 ; User RAM (32K)
 3000                  USER_RAM            equ   $3000
@@ -434,8 +454,8 @@ F060  BDF423                          jsr     line_out
                       
                                       ; fetch compilation date
 F063  8602                            lda     #FC_COMPDATE
-F065  B71C7D                          sta     FIO_COMMAND
-F068  B61C88          0               lda     FIO_PATH_DATA
+F065  B71C8F                          sta     FIO_COMMAND
+F068  B61C9A          0               lda     FIO_PATH_DATA
 F06B  2705                            beq     2f
 F06D  BDF433                          jsr     char_out
 F070  20F6                            bra     0b
@@ -538,19 +558,19 @@ F176  39                              rts
                               
 F177                  do_load         ; LOAD "file_name"
                       
-F177  7F1C87                          clr     FIO_PATH_POS    ; reset the file path cursor position
+F177  7F1C99                          clr     FIO_PATH_POS    ; reset the file path cursor position
 F17A  BDF258                          jsr     decode_command_find_arg_1
 F17D  12                              nop     ; X should point to the start of the first argument                     
                                       ;ldx    #EDT_BUFFER
 F17E                  1
 F17E  A680                            lda     ,x+
-F180  B71C88                          sta     FIO_PATH_DATA
+F180  B71C9A                          sta     FIO_PATH_DATA
 F183  26F9                            bne     1b
                       
 F185  8609                            lda     #FC_LOADHEX
-F187  B71C7D                          sta     FIO_COMMAND     
+F187  B71C8F                          sta     FIO_COMMAND     
                       
-F18A  B61C7C                          lda     FIO_ERR_FLAGS
+F18A  B61C8E                          lda     FIO_ERR_FLAGS
 F18D  8180                            cmpa    #$80
 F18F  271A                            beq     2f              ; file not found        
 F191  8120                            cmpa    #$20
@@ -631,9 +651,9 @@ F202  26FA                            bne     1b
 F204  12                              nop     ; argument one should now be copied to the FIO_BUFFER           
                       
 F205  860B                            lda     #FC_LISTDIR     ; COMMAND: List Directory
-F207  B71C7D                          sta     FIO_COMMAND             
+F207  B71C8F                          sta     FIO_COMMAND             
 F20A                  2       ; output the result
-F20A  B61C89                          lda     FIO_DIR_DATA
+F20A  B61C9B                          lda     FIO_DIR_DATA
 F20D  2705                            beq     3f
 F20F  BDF433                          jsr     char_out
 F212  20F6                            bra     2b
@@ -646,27 +666,27 @@ F219  39                              rts
 F21A                  do_chdir        ; CHDIR  "directory_path"
 F21A  BDF258                          jsr     decode_command_find_arg_1
 F21D  12                              nop     ; X should point to the start of the first argument
-F21E  7F1C87                          clr     FIO_PATH_POS    ; reset the cursor position in the file path
+F21E  7F1C99                          clr     FIO_PATH_POS    ; reset the cursor position in the file path
 F221                  1       ; 
 F221  A680                            lda     ,x+
-F223  B71C88                          sta     FIO_PATH_DATA
+F223  B71C9A                          sta     FIO_PATH_DATA
 F226  26F9                            bne     1b
 F228  860D                            lda     #FC_CHANGEDIR
-F22A  B71C7D                          sta     FIO_COMMAND
+F22A  B71C8F                          sta     FIO_COMMAND
 F22D  2010                            bra     2f
                               ; check for errors              
-F22F  B61C7C                          lda     FIO_ERR_FLAGS
+F22F  B61C8E                          lda     FIO_ERR_FLAGS
 F232  8440                            anda    #$40
 F234  2709                            beq     2f
 F236  8EF0E3                          ldx     #err_dir_nf
 F239  BDF423                          jsr     line_out
-F23C  7F1C7C                          clr     FIO_ERR_FLAGS
+F23C  7F1C8E                          clr     FIO_ERR_FLAGS
 F23F                  2       ;
 F23F  860E                            lda     #FC_GETPATH
-F241  B71C7D                          sta     FIO_COMMAND
+F241  B71C8F                          sta     FIO_COMMAND
 F244  BDF433                          jsr     char_out        
 F247                  3       ;
-F247  B61C88                          lda     FIO_PATH_DATA
+F247  B61C9A                          lda     FIO_PATH_DATA
 F24A  2705                            beq     4f
 F24C  BDF433                          jsr     char_out
 F24F  20F6                            bra     3b              
@@ -677,7 +697,7 @@ F252                  do_exit         ; EXIT  "directory_path"
                                       * ldx   #str_exit_test
                                       * jsr   line_out
 F252  8601                            lda     #FC_SHUTDOWN
-F254  B71C7D                          sta     FIO_COMMAND
+F254  B71C8F                          sta     FIO_COMMAND
                                       ;jsr    [VECT_CHDIR]
 F257  39                              rts
                       

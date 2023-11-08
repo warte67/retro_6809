@@ -159,6 +159,7 @@
     <ClCompile Include="C6809.cpp" />
     <ClCompile Include="Device.cpp" />
     <ClCompile Include="FileIO.cpp" />
+    <ClCompile Include="Gamepad.cpp" />
     <ClCompile Include="Gfx.cpp" />
     <ClCompile Include="GfxDebug.cpp" />
     <ClCompile Include="Keyboard.cpp" />
@@ -171,6 +172,7 @@
     <ClInclude Include="C6809.h" />
     <ClInclude Include="Device.h" />
     <ClInclude Include="FileIO.h" />
+    <ClInclude Include="Gamepad.h" />
     <ClInclude Include="Gfx.h" />
     <ClInclude Include="GfxDebug.h" />
     <ClInclude Include="IGfxDevice.h" />

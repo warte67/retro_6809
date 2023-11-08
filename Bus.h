@@ -30,6 +30,7 @@ class Bus
 	friend class Gfx;
 	friend class GfxDebug;
 	friend class Keyboard;
+	friend class Gamepad;
 	friend class FileIO;
 	friend class Math;
 

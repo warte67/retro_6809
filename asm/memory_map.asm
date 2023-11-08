@@ -161,8 +161,28 @@ EDT_ENABLE          equ   $1C3B    ;   (Byte) line editor enable flag           
 EDT_BUFFER          equ   $1C3C    ;   line editing character buffer                 (Read/Write)
 KEY_END             equ   $1C7C    ; End of the Keyboard Register space
 
-FIO_BEGIN           equ   $1C7C    ; Start of the FileIO register space
-FIO_ERR_FLAGS       equ   $1C7C    ; (Byte) File IO error flags
+JOYS_BEGIN          equ   $1C7C    ; Start of the Game Controller Register space
+JOYS_1_BTN          equ   $1C7C    ;   (Word) button bits: room for up to 16 buttons  (realtime)
+JOYS_1_DBND         equ   $1C7E    ;   (Byte) PAD 1 analog deadband; default is 5   (read/write)
+JOYS_1_LTX          equ   $1C7F    ;   (char) PAD 1 LThumb-X position (-128 _ +127)   (realtime)
+JOYS_1_LTY          equ   $1C80    ;   (char) PAD 1 LThumb-Y position (-128 _ +127)   (realtime)
+JOYS_1_RTX          equ   $1C81    ;   (char) PAD 1 RThumb-X position (-128 _ +127)   (realtime)
+JOYS_1_RTY          equ   $1C82    ;   (char) PAD 1 RThumb-Y position (-128 _ +127)   (realtime)
+JOYS_1_Z1           equ   $1C83    ;   (char) PAD 1 left analog trigger (0 - 127)     (realtime)
+JOYS_1_Z2           equ   $1C84    ;   (char) PAD 1 right analog trigger (0 - 127)    (realtime)
+
+JOYS_2_BTN          equ   $1C85    ;   (Word) button bits: room for up to 16 buttons  (realtime)
+JOYS_2_DBND         equ   $1C87    ;   (Byte) PAD 2 analog deadband; default is 5   (read/write)
+JOYS_2_LTX          equ   $1C88    ;   (char) PAD 2 LThumb-X position (-128 _ +127)   (realtime)
+JOYS_2_LTY          equ   $1C89    ;   (char) PAD 2 LThumb-Y position (-128 _ +127)   (realtime)
+JOYS_2_RTX          equ   $1C8A    ;   (char) PAD 2 RThumb-X position (-128 _ +127)   (realtime)
+JOYS_2_RTY          equ   $1C8B    ;   (char) PAD 2 RThumb-Y position (-128 _ +127)   (realtime)
+JOYS_2_Z1           equ   $1C8C    ;   (char) PAD 2 left analog trigger (0 - 127)     (realtime)
+JOYS_2_Z2           equ   $1C8D    ;   (char) PAD 2 right analog trigger (0 - 127)    (realtime)
+JOYS_END            equ   $1C8E    ; End of the Game Controller Register space
+
+FIO_BEGIN           equ   $1C8E    ; Start of the FileIO register space
+FIO_ERR_FLAGS       equ   $1C8E    ; (Byte) File IO error flags
           ; FIO_ERR_FLAGS: ABCD.EFGH
           ;      A:  file was not found
           ;      B:  directory was not found
@@ -173,7 +193,7 @@ FIO_ERR_FLAGS       equ   $1C7C    ; (Byte) File IO error flags
           ;      G:  invalid command
           ;      H:  incorrect file stream
 
-FIO_COMMAND         equ   $1C7D    ; (Byte) OnWrite, execute a file command (FC_<cmd>)
+FIO_COMMAND         equ   $1C8F    ; (Byte) OnWrite, execute a file command (FC_<cmd>)
           ; Begin FIO_COMMANDS
 FC_RESET            equ   $0000    ;        Reset
 FC_SHUTDOWN         equ   $0001    ;        SYSTEM: Shutdown
@@ -201,8 +221,8 @@ FC_SET_SEEK         equ   $0016    ;      * Set Seek Position (from FIO_IOWORD)
 FC_GET_SEEK         equ   $0017    ;      * Get Seek Position (into FIO_IOWORD)
           ; End FIO_COMMANDS
 
-FIO_STREAM          equ   $1C7E    ; (Byte) current file stream index (0-15)
-FIO_MODE            equ   $1C7F    ; (Byte) Flags describing the I/O mode for the file
+FIO_STREAM          equ   $1C90    ; (Byte) current file stream index (0-15)
+FIO_MODE            equ   $1C91    ; (Byte) Flags describing the I/O mode for the file
           ; FIO_MODE: 00AB.CDEF  (indexed by FIO_STREAM)
           ;      A:  INPUT - File open for reading
           ;      B:  OUTPUT - File open for writing
@@ -210,37 +230,37 @@ FIO_MODE            equ   $1C7F    ; (Byte) Flags describing the I/O mode for th
           ;      D:  AT_END - Output starts at the end of the file
           ;      E:  APPEND - All output happens at end of the file
           ;      F:  TRUNC - discard all previous file data
-FIO_SEEKPOS         equ   $1C80    ; (DWord) file seek position
-FIO_IOBYTE          equ   $1C84    ; (Byte) input / output character
-FIO_IOWORD          equ   $1C85    ; (Byte) input / output character
-FIO_PATH_LEN        equ   $1C86    ; (Byte) length of the filepath
-FIO_PATH_POS        equ   $1C87    ; (Byte) character position within the filepath
-FIO_PATH_DATA       equ   $1C88    ; (Byte) data at the character position of the path
-FIO_DIR_DATA        equ   $1C89    ; (Byte) a series of null-terminated filenames
+FIO_SEEKPOS         equ   $1C92    ; (DWord) file seek position
+FIO_IOBYTE          equ   $1C96    ; (Byte) input / output character
+FIO_IOWORD          equ   $1C97    ; (Byte) input / output character
+FIO_PATH_LEN        equ   $1C98    ; (Byte) length of the filepath
+FIO_PATH_POS        equ   $1C99    ; (Byte) character position within the filepath
+FIO_PATH_DATA       equ   $1C9A    ; (Byte) data at the character position of the path
+FIO_DIR_DATA        equ   $1C9B    ; (Byte) a series of null-terminated filenames
           ;     NOTES: Current read-position is reset to the beginning following a
           ;             List Directory command. The read-position is automatically
           ;             advanced on read from this register. Each filename is
           ;             $0a-terminated. The list itself is null-terminated.
-FIO_END             equ   $1C8A    ; End of the FileIO register space
+FIO_END             equ   $1C9C    ; End of the FileIO register space
 
           ; Math Co-Processor Hardware Registers:
-MATH_BEGIN          equ   $1C8A    ;  start of math co-processor  hardware registers
-MATH_ACA_POS        equ   $1C8A    ;  (Byte) character position within the ACA float string
-MATH_ACA_DATA       equ   $1C8B    ;  (Byte) ACA float string character port
-MATH_ACA_RAW        equ   $1C8C    ;  (4-Bytes) ACA raw float data
-MATH_ACA_INT        equ   $1C90    ;  (4-Bytes) ACA integer data
-MATH_ACB_POS        equ   $1C94    ;  (Byte) character position within the ACB float string
-MATH_ACB_DATA       equ   $1C95    ;  (Byte) ACB float string character port
-MATH_ACB_RAW        equ   $1C96    ;  (4-Bytes) ACB raw float data
-MATH_ACB_INT        equ   $1C9A    ;  (4-Bytes) ACB integer data
-MATH_ACR_POS        equ   $1C9E    ;  (Byte) character position within the ACR float string
-MATH_ACR_DATA       equ   $1C9F    ;  (Byte) ACR float string character port
-MATH_ACR_RAW        equ   $1CA0    ;  (4-Bytes) ACR raw float data
-MATH_ACR_INT        equ   $1CA4    ;  (4-Bytes) ACR integer data
-MATH_OPERATION      equ   $1CA8    ;  (Byte) Operation 'command' to be issued
+MATH_BEGIN          equ   $1C9C    ;  start of math co-processor  hardware registers
+MATH_ACA_POS        equ   $1C9C    ;  (Byte) character position within the ACA float string
+MATH_ACA_DATA       equ   $1C9D    ;  (Byte) ACA float string character port
+MATH_ACA_RAW        equ   $1C9E    ;  (4-Bytes) ACA raw float data
+MATH_ACA_INT        equ   $1CA2    ;  (4-Bytes) ACA integer data
+MATH_ACB_POS        equ   $1CA6    ;  (Byte) character position within the ACB float string
+MATH_ACB_DATA       equ   $1CA7    ;  (Byte) ACB float string character port
+MATH_ACB_RAW        equ   $1CA8    ;  (4-Bytes) ACB raw float data
+MATH_ACB_INT        equ   $1CAC    ;  (4-Bytes) ACB integer data
+MATH_ACR_POS        equ   $1CB0    ;  (Byte) character position within the ACR float string
+MATH_ACR_DATA       equ   $1CB1    ;  (Byte) ACR float string character port
+MATH_ACR_RAW        equ   $1CB2    ;  (4-Bytes) ACR raw float data
+MATH_ACR_INT        equ   $1CB6    ;  (4-Bytes) ACR integer data
+MATH_OPERATION      equ   $1CBA    ;  (Byte) Operation 'command' to be issued
           ; Begin MATH_OPERATION's (MOPS)
 MOP_RANDOM          equ   $0000    ;        ACA, ACB, and ACR are set to randomized values
-MOP_RND_SEED        equ   $0001    ;        seeds the pseudo-random number generator
+MOP_RND_SEED        equ   $0001    ;        MATH_ACA_INT seeds the pseudo-random number generator
 MOP_IS_EQUAL        equ   $0002    ;        (bool)ACR = (ACA == ACB)
 MOP_IS_NOT_EQUAL    equ   $0003    ;        (bool)ACR = (ACA != ACB)
 MOP_IS_LESS         equ   $0004    ;        (bool)ACR = std::isless(ACA, ACB);
@@ -298,10 +318,10 @@ MOP_NEXTAFTER       equ   $0037    ;        ACR = std::nextafter(ACA, ACB);
 MOP_COPYSIGN        equ   $0038    ;        ACR = std::copysign(ACA, ACB);
 MOP_LASTOP          equ   $0038    ;        last implemented math operation
           ; End MATH_OPERATION's (MOPS)
-MATH_END            equ   $1CA9    ; end of math co-processor registers
+MATH_END            equ   $1CBB    ; end of math co-processor registers
 
-    ; 4951 ($1357) bytes remaining for additional registers.
-RESERVED            equ   $1CA9
+    ; 4933 ($1345) bytes remaining for additional registers.
+RESERVED            equ   $1CBB
 
           ; User RAM (32K)
 USER_RAM            equ   $3000

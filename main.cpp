@@ -47,17 +47,8 @@ int main(int argc, char* argv[])
 
 /**** KNOWN BUGS **********************************************
 
-	1) when changing to a graphics mode, the mouse cursor is once
-		again getting messed up in Debug Mode. 
 
-		Oversight: The debug mode is set to a fixed resolution. MX and MY
-			in GfxDebug::_correctMouseCoords(int& mx, int& my) are adjusted
-			to a changing graphics mode. Need to adjust MX and MY to
-			the actual graphics mode. 
-			
-			Add new DMX and DMY for the debug screen.
 
-	2) cursor timing is still a bit bugged with pass through 
 
 
  **** KNOWN BUGS **********************************************/
