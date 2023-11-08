@@ -70,6 +70,10 @@ int main(int argc, char* argv[])
 			high. Update textures only when they change and only
 			at a maximum rate.
 
+		- keep in mind that ultimately the PI Pico display 
+			routines will have to be rendered on a per scan-line
+			basis. 
+
 	2) Remove the EDT_BUFFER from the Keyboard object. Instead 
 		of limiting the keyboard line input buffer to 64 bytes
 		in hardware register space, allow for a 255 byte line 
