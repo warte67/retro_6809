@@ -3,6 +3,8 @@
 // 
 ////////
 
+#include <iostream>
+
 #include "Bus.h"
 #include "C6809.h"
 #include "Gfx.h"
@@ -628,16 +630,20 @@ void Gfx::OnUpdate(float fElapsedTime)
 		SDL_SetRenderDrawColor(_renderer, 32, 32, 32, 255);	// border color
 		SDL_RenderClear(_renderer);
 
-		// do nothing extra anymore
-		// video buffer is being updated via asm
-		// the 6809 CPU should nowbe working
-
 		// update the display textures
 		if (Bus::bCpuEnabled)
 		{
 			Bus::bCpuEnabled = false;
+
+			//using clock = std::chrono::system_clock;
+			//auto _start = clock::now();
+
 			_display_extended();
 			_display_standard();
+
+			//auto _dur = _start - clock::now();
+			//std::cout << "TIME: " << _dur.count() << std::endl;
+
 			Bus::bCpuEnabled = true;
 		}
 	}
@@ -995,24 +1001,24 @@ void Gfx::_updateTextScreen()
     {
 		Word end = Bus::Read_Word(STD_VID_MAX);
 		Word addr = SCREEN_BUFFER;
-		for (  ; addr <= end; addr+=2)
+		for (; addr <= end; addr += 2)
 		{
 			Byte ch = Bus::Read(addr, true);
-			Byte at = Bus::Read(addr+1, true);
+			Byte at = Bus::Read(addr + 1, true);
 			Byte fg = at >> 4;
 			Byte bg = at & 0x0f;
 			Word index = addr - SCREEN_BUFFER;
 			Byte width = _texture_width / 8;
 			int x = ((index / 2) % width) * 8;
-			int y = ((index / 2) / width) * 8;			
-			for (int v=0; v<8; v++)
-			{    
-				for (int h=0; h<8; h++)
+			int y = ((index / 2) / width) * 8;
+			for (int v = 0; v < 8; v++)
+			{
+				for (int h = 0; h < 8; h++)
 				{
 					int color = bg;
-					if (_dsp_glyph_data[ch][v] & (1 << 7-h))
+					if (_dsp_glyph_data[ch][v] & (1 << 7 - h))
 						color = fg;
-					_setPixel_unlocked(pixels, pitch, x+h, y+v, color);   
+					_setPixel_unlocked(pixels, pitch, x + h, y + v, color);
 				}
 			}
 		}

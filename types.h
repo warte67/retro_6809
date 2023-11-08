@@ -34,7 +34,11 @@
 // constants
 const bool ENABLE_DEBUG = false;
 const bool DEBUG_SINGLE_STEP = ENABLE_DEBUG;	// false;
+
+
+// temp / testing:
 const Byte EDIT_BUFFER_SIZE = 64;       // 64 is tested
+// const Byte EDIT_BUFFER_SIZE = 255;       // 255 works
 
 
 

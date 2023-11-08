@@ -432,10 +432,17 @@ F03A  CE0400                          ldu     #SSTACK_TOP
 F03D  860C                            lda     #$0C
 F03F  B71C02                          sta     SYS_STATE
                       
-F042  86CE                            lda     #$CE    ; $CA
+                                      ; build DSP_GRES
+F042  868E                            lda     #$8E
+                                      * clra
+                                      * ora   #0b10000000     ; 16-color mode
+                                      * ora   #0b00010000     ; 16/10 aspect
+                                      * ora   #0b00001100     ; 1x horizontal overscan
+                                      * ora   #0b00000010     ; 2x vertical overscan
 F044  B71C08                          sta     DSP_GRES
                       
-F047  86C9                            lda     #$C9
+                                      ; build DSP_EXT
+F047  8689                            lda     #$89
 F049  B71C09                          sta     DSP_EXT
                       
                                       

@@ -85,13 +85,13 @@ kernel_start
 		lda	#$0C
 		sta	SYS_STATE
 
-		lda	#$CE	; $CA
+		; build DSP_GRES
+		lda	#$8E
 		sta	DSP_GRES
 
-		lda	#$C9
-		sta	DSP_EXT
-
-		
+		; build DSP_EXT
+		lda	#$89
+		sta	DSP_EXT		
 
 	; begin the display
 		lda	#$B4		; default character color attribute
