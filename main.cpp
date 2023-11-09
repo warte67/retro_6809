@@ -48,6 +48,18 @@ int main(int argc, char* argv[])
 
 /**** To Do: **************************************************
 
+	1) Implement GfxDebug registers and flags:
+		DBG_BRK_ADDR = 0x1828,        // (Word) Address of current breakpoint
+			DBG_FLAGS = 0x182a,        // (Byte) Debug Specific Hardware Flags
+			//      bit 7: Debug Enable
+			//      bit 6: Single Step Enable
+			//      bit 5: clear all breakpoints
+			//      bit 4: Toggle Breakpoint at DEBUG_BRK_ADDRESS
+			//      bit 3: FIRQ  (on low to high edge)
+			//      bit 2: IRQ   (on low to high edge)
+			//      bit 1: NMI   (on low to high edge)
+			//      bit 0: RESET (on low to high edge)
+
 	1) The _updateTextScreen() function in Gfx.cpp is proving 
 		to be too slow using the _setPixel_unlocked() method. 
 		This means that graphics rendering in the higher resolutions

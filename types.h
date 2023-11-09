@@ -32,8 +32,10 @@
 
 
 // constants
+const bool ENABLE_MOUSE_CURSOR = true;      // mouse cursor shown by default
 const bool ENABLE_DEBUG = false;
 const bool DEBUG_SINGLE_STEP = ENABLE_DEBUG;	// false;
+
 
 
 // temp / testing:

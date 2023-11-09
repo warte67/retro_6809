@@ -155,6 +155,7 @@ CSR_BMP_DATA     = 0x1C22, //  (Byte) mouse cursor bitmap pixel index color
 CSR_PAL_INDX     = 0x1C24, //  (Byte) mouse cursor color palette index (0-15)
 CSR_PAL_DATA     = 0x1C25, //  (Word) mouse cursor color palette data RGBA4444
 CSR_END          = 0x1C27, // End Mouse Registers
+
 GFX_END          = 0x1C27, // End of GFX Device Registers
 
 KEY_BEGIN        = 0x1C27, // Start of the Keyboard Register space

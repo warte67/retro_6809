@@ -29,13 +29,12 @@ public:
 
 protected:
 
-	bool mouse_cursor_enable = true;	//	NEEDS A REGISTER
 	int mouse_x = 0;			// horizontal mouse cursor position
 	int mouse_y = 0;			// vertical mouse cursor position
 	char mouse_wheel = 0;		// signed mouse wheel delta
-	Uint8 mouse_x_offset = 0;		// mouse cursor offset x
-	Uint8 mouse_y_offset = 0;		// mouse cursor offset y
-	Byte button_flags = 0;		// bits 0-5: button states, bits 6-7: number of clicks
+	Uint8 mouse_x_offset = 0;	// mouse cursor offset x
+	Uint8 mouse_y_offset = 0;	// mouse cursor offset y
+	Byte button_flags = 0;		// bits 0-4: button states, bit 5: cursor enable, bits 6-7: number of clicks
 
 	// cursor stuff
 	Byte bmp_offset = 0;
@@ -101,8 +100,8 @@ private:
 	//int _raw_csr_pos_y = 0;		// raw mouse cursor position
 	int _tex_width = 0;
 	int _tex_height = 0;
-	bool _bCsrIsDirty = true;				// internal flag
-	bool _bCsrIsVisible = mouse_cursor_enable;		// internal flag
+	bool _bCsrIsDirty = true;		// internal flag
+	bool _bCsrIsVisible = ENABLE_MOUSE_CURSOR;
 };
 
 

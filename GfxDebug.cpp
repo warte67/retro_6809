@@ -51,7 +51,7 @@ Word GfxDebug::OnAttach(Word nextAddr)
     //    //      bit 7: Debug Enable
     //    //      bit 6: Single Step Enable
     //    //      bit 5: clear all breakpoints
-    //    //      bit 4: Toggle Breakpoint at DEBUG_BRK_ADDRESS
+    //    //      bit 4: Breakpoint at DEBUG_BRK_ADDRESS (read/write)
     //    //      bit 3: FIRQ  (on low to high edge)
     //    //      bit 2: IRQ   (on low to high edge)
     //    //      bit 1: NMI   (on low to high edge)
@@ -153,7 +153,13 @@ void GfxDebug::OnEvent(SDL_Event* evnt)
                 {
                     _bIsDebugActive = !_bIsDebugActive;
                     bMouseWheelActive = false;
-                    bIsCursorVisible = false;
+
+                    if (_bIsDebugActive) // enable the cursor during debug
+                    {
+                        Byte data = Bus::Read(CSR_FLAGS);
+                        data |= 0x20;
+                        Bus::Write(CSR_FLAGS, data);
+                    }
                 }
                 if (evnt->key.keysym.sym == SDLK_r)
                 {

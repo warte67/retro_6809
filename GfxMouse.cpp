@@ -38,6 +38,10 @@ void GfxMouse::write(Word offset, Byte data, bool debug)
     case CSR_XOFS:		    mouse_x_offset = data; _bCsrIsDirty = true;	break;
     case CSR_YOFS:		    mouse_y_offset = data; _bCsrIsDirty = true;	break;
     case CSR_SCROLL:        mouse_wheel = data;     break;
+    case CSR_FLAGS:
+        if (data & 0x20)    { _bCsrIsVisible = true;  button_flags |= 0x20;  }
+        else                { _bCsrIsVisible = false; button_flags &= ~0x20; }
+        break;
     case CSR_BMP_INDX:	    bmp_offset = data;		break;
     case CSR_BMP_DATA:
         cursor_buffer[bmp_offset / 16][bmp_offset % 16] = data;
@@ -79,7 +83,8 @@ Word GfxMouse::OnAttach(Word nextAddr)
     nextAddr += 1;
     DisplayEnum("CSR_FLAGS", nextAddr, " (Byte) mouse button flags:");
     DisplayEnum("", 0, " CSR_FLAGS:");
-    DisplayEnum("", 0, "      bits 0-5: button states");
+    DisplayEnum("", 0, "      bits 0-4: button states");
+    DisplayEnum("", 0, "      bits 5:   cursor enable");
     DisplayEnum("", 0, "      bits 6-7: number of clicks");
     nextAddr += 1;
     DisplayEnum("CSR_BMP_INDX", nextAddr, " (Byte) mouse cursor bitmap pixel offset");
@@ -90,22 +95,33 @@ Word GfxMouse::OnAttach(Word nextAddr)
     nextAddr += 1;
     DisplayEnum("CSR_PAL_DATA", nextAddr, " (Word) mouse cursor color palette data RGBA4444");
     nextAddr += 2;
-
-
-
     DisplayEnum("CSR_END", nextAddr, "End Mouse Registers");
+    DisplayEnum("", 0, "");
 
     return nextAddr - old_addr;
 }
 
 
 
-void GfxMouse::OnInit() {}
+void GfxMouse::OnInit() 
+{
+    SDL_ShowCursor(SDL_DISABLE);
+
+    button_flags = 0;
+    _bCsrIsVisible = false;
+    if (ENABLE_MOUSE_CURSOR)
+    {
+        button_flags = 0x20;
+        _bCsrIsVisible = true;
+        SDL_ShowCursor(SDL_ENABLE);
+    }
+}
+
 void GfxMouse::OnQuit() {}
 
 void GfxMouse::OnActivate()
 {
-    if (mouse_cursor_enable)
+    if (_bCsrIsVisible)
         SDL_ShowCursor(SDL_DISABLE);
 
     // mouse layer texture size
@@ -174,7 +190,7 @@ void GfxMouse::OnEvent(SDL_Event* evnt)
                     _bCsrIsVisible = false;
                     break;
                 case SDL_WINDOWEVENT_ENTER:
-                    if (mouse_cursor_enable)
+                    if (button_flags & 0x20)
                         _bCsrIsVisible = true;
                     break;
             }
@@ -202,7 +218,7 @@ void GfxMouse::OnEvent(SDL_Event* evnt)
             mx = read_word(CSR_XPOS);   // verify
             my = read_word(CSR_YPOS);   // verify
 
-            if (mouse_cursor_enable)
+            if (_bCsrIsVisible)
             {
                 if (mx >= m_gfx->_texture_width || my >= m_gfx->_texture_height)
                     SDL_ShowCursor(true);
@@ -221,14 +237,16 @@ void GfxMouse::OnEvent(SDL_Event* evnt)
             break;
         }
         //		CSR_FLAGS = 0x1811,        // (Byte) mouse button flags:
-        //			//      bits 0-5: button states
+        //			//      bits 0-4: button states
+        //          //      bit 5: cursor enable
         //			//      bits 6-7: number of clicks
         case SDL_MOUSEBUTTONDOWN:
         case SDL_MOUSEBUTTONUP:
         {
             // update the button flags
-            button_flags = 0;
+            button_flags &= 0x3f;
             int bitmask = (1 << ((evnt->button.button % 7) - 1));
+            bitmask &= 0x1f;
             if (evnt->button.state == 0)
                 button_flags &= ~bitmask;
             else
