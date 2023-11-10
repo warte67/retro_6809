@@ -11,10 +11,20 @@ Byte GfxDebug::read(Word offset, bool debug)
     Byte data = 0xCC;
     switch (offset)
     {
-    //case CSR_XPOS + 0:      data = mouse_x >> 8;
-    //case CSR_XPOS + 1:      data = mouse_x & 0xFF;
-    //case CSR_YPOS + 0:      data = mouse_y >> 8;
-    //case CSR_YPOS + 1:      data = mouse_y & 0xFF;
+    case DBG_BRK_ADDR + 0: data = reg_brk_addr >> 8;   break;
+    case DBG_BRK_ADDR + 1: data = reg_brk_addr & 0xFF; break;
+    case DBG_FLAGS:
+        (_bIsDebugActive) ? reg_flags |= 0x80 : reg_flags &= ~0x80; // Enable
+        (bSingleStep)     ? reg_flags |= 0x40 : reg_flags &= ~0x40; // Single-Step
+        reg_flags &= ~0x20;     // zero for Clear all Breakpoints
+        (mapBreakpoints[reg_brk_addr]) ? reg_flags |= 0x10 : reg_flags &= ~0x10;
+        reg_flags &= ~0x08;     // FIRQ
+        reg_flags &= ~0x04;     // IRQ
+        reg_flags &= ~0x02;     // NMI
+        reg_flags &= ~0x01;     // RESET
+
+        data = reg_flags; 
+        break;
     }
     // update and return
     Bus::Write(offset, data, true);
@@ -24,10 +34,19 @@ void GfxDebug::write(Word offset, Byte data, bool debug)
 {
     switch (offset)
     {
-    //case CSR_XPOS + 0:    mouse_x = (mouse_x & 0x00ff) | (data << 8);    break;
-    //case CSR_XPOS + 1:    mouse_x = (mouse_x & 0xff00) | (data << 0);    break;
-    //case CSR_YPOS + 0:    mouse_y = (mouse_y & 0x00ff) | (data << 8);    break;
-    //case CSR_YPOS + 1:    mouse_y = (mouse_y & 0xff00) | (data << 0);    break;
+    case DBG_BRK_ADDR + 0: reg_brk_addr = (reg_brk_addr & 0x00ff) | (data << 8); break;
+    case DBG_BRK_ADDR + 1: reg_brk_addr = (reg_brk_addr & 0xff00) | (data << 0); break;
+    case DBG_FLAGS:
+        reg_flags = data;
+        (reg_flags & 0x80) ? _bIsDebugActive = true : _bIsDebugActive = false;
+        (reg_flags & 0x40) ? bSingleStep = true : bSingleStep = false;
+        if (reg_flags & 0x20)  cbClearBreaks();
+        (reg_flags & 0x10) ? mapBreakpoints[reg_brk_addr] = true : mapBreakpoints[reg_brk_addr] = false;
+        if (reg_flags & 0x08)   cbFIRQ();
+        if (reg_flags & 0x04)   cbIRQ();
+        if (reg_flags & 0x02)   cbNMI();
+        if (reg_flags & 0x01)   cbReset();
+        break;
     }
     // write statically
     Bus::Write(offset, data, true);
@@ -40,23 +59,19 @@ Word GfxDebug::OnAttach(Word nextAddr)
 
     DisplayEnum("", 0, "");
     DisplayEnum("", 0, "Debug Hardware Registers:");
-    DisplayEnum("DBG_BEGIN", nextAddr, " start of mouse cursor hardware registers");
-
-
-    DisplayEnum("DBG_TEMP", nextAddr, " (Byte) Simple Debug test register");
+    DisplayEnum("DBG_BEGIN",    nextAddr, "Start of Debug Hardware Registers");
+    DisplayEnum("DBG_BRK_ADDR", nextAddr, "   (Word) Address of current breakpoint");
+    nextAddr += 2;
+    DisplayEnum("DBG_FLAGS",    nextAddr, "   (Byte) Debug Specific Hardware Flags:");
     nextAddr += 1;
-
-    //DBG_BRK_ADDR = 0x1828,        // (Word) Address of current breakpoint
-    //    DBG_FLAGS = 0x182a,        // (Byte) Debug Specific Hardware Flags
-    //    //      bit 7: Debug Enable
-    //    //      bit 6: Single Step Enable
-    //    //      bit 5: clear all breakpoints
-    //    //      bit 4: Breakpoint at DEBUG_BRK_ADDRESS (read/write)
-    //    //      bit 3: FIRQ  (on low to high edge)
-    //    //      bit 2: IRQ   (on low to high edge)
-    //    //      bit 1: NMI   (on low to high edge)
-    //    //      bit 0: RESET (on low to high edge)
-
+    DisplayEnum("", 0, "    bit 7: Debug Enable");
+    DisplayEnum("", 0, "    bit 6: Single Step Enable");
+    DisplayEnum("", 0, "    bit 5: Clear All Breakpoints");
+    DisplayEnum("", 0, "    bit 4: Update Breakpoint at DEBUG_BRK_ADDR");
+    DisplayEnum("", 0, "    bit 3: FIRQ  (on low to high edge)");
+    DisplayEnum("", 0, "    bit 2: IRQ   (on low to high edge)");
+    DisplayEnum("", 0, "    bit 1: NMI   (on low to high edge)");
+    DisplayEnum("", 0, "    bit 0: RESET (on low to high edge)");
     DisplayEnum("DBG_END", nextAddr, "End Debug Registers");
 
     return nextAddr - old_addr;
@@ -151,9 +166,12 @@ void GfxDebug::OnEvent(SDL_Event* evnt)
             {
                 if (evnt->key.keysym.sym == SDLK_d)
                 {
-                    _bIsDebugActive = !_bIsDebugActive;
-                    bMouseWheelActive = false;
+                    // _bIsDebugActive = !_bIsDebugActive;
+                    Byte data = Bus::Read(DBG_FLAGS);
+                    data ^= 0x80;
+                    Bus::Write(DBG_FLAGS, data);
 
+                    bMouseWheelActive = false;
                     if (_bIsDebugActive) // enable the cursor during debug
                     {
                         Byte data = Bus::Read(CSR_FLAGS);

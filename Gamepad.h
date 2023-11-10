@@ -17,15 +17,8 @@
 class Gamepad : public Device
 {
 public:
-    Gamepad() 
-    { 
-        _deviceName = "Gamepad"; 
-        printf("Gamepad::Gamepad();\n");
-    }
-    virtual ~Gamepad() 
-    {
-        printf("Gamepad::~Gamepad();\n");
-    }
+    Gamepad() { _deviceName = "Gamepad"; }
+    virtual ~Gamepad() {}
 
     // virtuals
     virtual Word OnAttach(Word nextAddr) override;

@@ -158,6 +158,8 @@ private:
 
 	bool bEditingBreakpoint = false;
 	Word new_breakpoint = 0;		// working copy to be edited
+	Word reg_brk_addr = 0x0000;	// break point hardware register
+	Byte reg_flags = 0x00;			// debug flags hardware register
 };
 
 

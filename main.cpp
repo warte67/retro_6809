@@ -48,19 +48,7 @@ int main(int argc, char* argv[])
 
 /**** To Do: **************************************************
 
-	1) Implement GfxDebug registers and flags:
-		DBG_BRK_ADDR = 0x1828,        // (Word) Address of current breakpoint
-			DBG_FLAGS = 0x182a,        // (Byte) Debug Specific Hardware Flags
-			//      bit 7: Debug Enable
-			//      bit 6: Single Step Enable
-			//      bit 5: clear all breakpoints
-			//      bit 4: Toggle Breakpoint at DEBUG_BRK_ADDRESS
-			//      bit 3: FIRQ  (on low to high edge)
-			//      bit 2: IRQ   (on low to high edge)
-			//      bit 1: NMI   (on low to high edge)
-			//      bit 0: RESET (on low to high edge)
-
-	2) The _updateTextScreen() function in Gfx.cpp is proving 
+	1) The _updateTextScreen() function in Gfx.cpp is proving 
 		to be too slow using the _setPixel_unlocked() method. 
 		This means that graphics rendering in the higher resolutions
 		will also be very slow. Text modes should be able to be
@@ -86,21 +74,21 @@ int main(int argc, char* argv[])
 			routines will have to be rendered on a per scan-line
 			basis. 
 
-	3) Remove the EDT_BUFFER from the Keyboard object. Instead 
+	2) Remove the EDT_BUFFER from the Keyboard object. Instead 
 		of limiting the keyboard line input buffer to 64 bytes
 		in hardware register space, allow for a 255 byte line 
 		input buffer in the FIO_BUFFER ($100-$1ff) space.
 
 		- Remeber EDIT_BUFFER_SIZE is defined in types.h
 
-	4) Add command line history (remember the limited PI Pico
+	3) Add command line history (remember the limited PI Pico
 		memory constraints). This could actually be event
 		driven and use the second Pi PICO's memory.
 
-	5) Continue developing the FileIO object command options.
+	4) Continue developing the FileIO object command options.
 		- Revise the error bits (ABCD) of the SYS_STATE register.
 
-	6) Build the memory management system. Include the paged RAM 
+	5) Build the memory management system. Include the paged RAM 
 		and ROM systems. Consider a dynamic memory management
 		system using the paged RAM and kernel function calls. 
 		This should emulate the use of an external UART or SPI
@@ -119,18 +107,18 @@ int main(int argc, char* argv[])
 			- 128KB (1024k bits): 23LC1024-I/ST ($2.60 each) https://www.mouser.com/ProductDetail/Microchip-Technology/23LC1024-I-ST?qs=q1LPnGnpSmbEwymRcNxgsQ%3D%3D
 				16 x 8k pages
 
-	7) Continue development of the Extended Graphics systems. 
+	6) Continue development of the Extended Graphics systems. 
 		Remember: The performance of the Raspberry PI Pico 
 		is very limited. 
 		- Sprites
 		- Tiles
 
-	8) Update bit C of the SYS_STATE to reflect a warm reset
+	7) Update bit C of the SYS_STATE to reflect a warm reset
 		state. Clear this bit on cold start. Set this bit
 		immediately following the cold startup initialization.
 		This could actually be done in the Kernel ROM code.
 
-	9) Begin building more appropriate KERNEL functions and
+	8) Begin building more appropriate KERNEL functions and
 		wrappers such as:
 		- char_out
 		- line_out
