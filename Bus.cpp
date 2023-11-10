@@ -76,7 +76,7 @@ Bus::Bus()
     //// user stack 256 bytes
     //dev = new RAM("USER_STACK");
     //addr += Attach(dev, 256);
-    //dev->DisplayEnum("USTACK_TOP", 0x0300, "Top of the user stack space");
+    //dev->DisplayEnum("USTACK_TOP", 0x0200, "Top of the user stack space");
 
 	// system stack 512 bytes
     dev = new RAM("SYSTEM_STACK");

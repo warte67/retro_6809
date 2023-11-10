@@ -48,7 +48,21 @@ int main(int argc, char* argv[])
 
 /**** To Do: **************************************************
 
-	1) The _updateTextScreen() function in Gfx.cpp is proving 
+	1) Remove the EDT_BUFFER from the Keyboard object. Instead
+		of limiting the keyboard line input buffer to 64 bytes
+		in hardware register space, allow for a 255 byte line
+		input buffer in the FIO_BUFFER ($100-$1ff) space.
+		- Remeber EDIT_BUFFER_SIZE is defined in types.h
+
+		Problem: The FIO_BUFFER is outside of the Keyboard device
+			register address space. It is within a RAM device.
+
+		Note: FileIO does use this space, but it doesn't use
+			registers to access it. It addresses this space directly.
+
+
+
+	2) The _updateTextScreen() function in Gfx.cpp is proving 
 		to be too slow using the _setPixel_unlocked() method. 
 		This means that graphics rendering in the higher resolutions
 		will also be very slow. Text modes should be able to be
@@ -73,13 +87,6 @@ int main(int argc, char* argv[])
 		- keep in mind that ultimately the PI Pico display 
 			routines will have to be rendered on a per scan-line
 			basis. 
-
-	2) Remove the EDT_BUFFER from the Keyboard object. Instead 
-		of limiting the keyboard line input buffer to 64 bytes
-		in hardware register space, allow for a 255 byte line 
-		input buffer in the FIO_BUFFER ($100-$1ff) space.
-
-		- Remeber EDIT_BUFFER_SIZE is defined in types.h
 
 	3) Add command line history (remember the limited PI Pico
 		memory constraints). This could actually be event

@@ -14,7 +14,7 @@
 Byte Keyboard::read(Word offset, bool debug) 
 {
 	Byte data = 0xCC;	// default unassigned memory
-
+	
 	switch (offset)
 	{
 		case CHAR_Q_LEN:	data = charQueueLen();	break;
@@ -69,7 +69,7 @@ void Keyboard::write(Word offset, Byte data, bool debug)
 		editBuffer[index] = data;
 	}
 	// a null write to EDT_BUFFER resets the buffer
-	if (offset == EDT_BUFFER)
+	if (offset == EDT_BUFFER && data == 0)
 	{
 		edt_bfr_csr = 0;
 		_str_edt_buffer = "";
