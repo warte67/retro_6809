@@ -21,13 +21,12 @@ Byte Gfx::read(Word offset, bool debug )		// is debug completely unused in the c
 	if (offset >= DBG_BEGIN && offset <= DBG_END)
 		return m_debug->read(offset, debug);
 
-	// TESTING SCREEN BUFFER MEMORY REGISTERS...
-	if (offset >= 0x400 && offset < STD_VID_MAX)
-	{
-		printf("Read from video memory: $%4x\n", offset);
-	}
-	// ...END TESTING
-
+	//	// TESTING SCREEN BUFFER MEMORY REGISTERS...
+	//	if (offset >= 0x400 && offset < STD_VID_MAX)
+	//	{
+	//		printf("Read from video memory: $%4x\n", offset);
+	//	}
+	//	// ...END TESTING
 
 	Byte data = 0xCC;
 
@@ -162,13 +161,6 @@ Word Gfx::OnAttach(Word nextAddr)
 
 	// begin graphics device register allocation
 
-//  // display buffer 6k bytes
-//  dev = new RAM("SCREEN_BUFFER");
-//  dev->DisplayEnum("",0, "");
-//  dev->DisplayEnum("",0, "Display Buffer");
-//  addr += Attach(dev, 6*1024);
-
-
 	const Word VID_BUFFER_SIZE = 6 * 1024;
 	DisplayEnum("", 0, "");
 	DisplayEnum("STD_VID_MIN", nextAddr, "Start of Standard Video Buffer Memory");
@@ -302,20 +294,96 @@ Word Gfx::OnAttach(Word nextAddr)
     nextAddr += 8;
 
 	// ADD THE GFX DEVICES:
-	
+
+	// add the extended bitmap registers
+	m_gfx_extended = new GfxExtended(this);
+	nextAddr += Attach(m_gfx_extended, nextAddr);
+
+	// add the standard bitmap registers
+	m_gfx_bitmap = new GfxBitmap(this);
+	nextAddr += Attach(m_gfx_bitmap, nextAddr);
+
+	// add the text registers
+	m_gfx_text = new GfxText(this);
+	nextAddr += Attach(m_gfx_text, nextAddr);
+
+	// add the sprite registers
+	m_gfx_sprite = new GfxSprite(this);
+	nextAddr += Attach(m_gfx_sprite, nextAddr);
+
 	// add the debug registers
 	m_debug = new GfxDebug(this);
 	nextAddr += Attach(m_debug, nextAddr);
-	//_gfx_devices.push_back(m_debug);
 
 	// add the mouse registers
 	m_mouse = new GfxMouse(this);
 	nextAddr += Attach(m_mouse, nextAddr);
-	//_gfx_devices.push_back(m_mouse);
 
 	DisplayEnum("GFX_END", nextAddr, "End of GFX Device Registers");
 
 	return nextAddr - old_addr;
+}
+
+void Gfx::OnQuit()
+{
+//	// remove the mouse device
+//	if (m_mouse)
+//	{
+//		delete m_mouse;
+//		m_mouse = nullptr;
+//	}
+//	// clear the _gfx_devices vector
+//	_gfx_devices.clear();
+//	// run OnQuit() for the other graphics devices
+//	for (auto& d : _gfx_devices)
+//		d->OnQuit();
+// 	
+
+	// remove the extended bitmap device
+	if (m_gfx_extended)
+	{
+		m_gfx_extended->OnQuit();
+		delete m_gfx_extended;
+		m_gfx_extended = nullptr;
+	}
+	// remove the standard bitmap device
+	if (m_gfx_bitmap)
+	{
+		m_gfx_bitmap->OnQuit();
+		delete m_gfx_bitmap;
+		m_gfx_bitmap = nullptr;
+	}
+	// remove the text device
+	if (m_gfx_text)
+	{
+		m_gfx_text->OnQuit();
+		delete m_gfx_text;
+		m_gfx_text = nullptr;
+	}
+	// remove the sprite device
+	if (m_gfx_sprite)
+	{
+		m_gfx_sprite->OnQuit();
+		delete m_gfx_sprite;
+		m_gfx_sprite = nullptr;
+	}
+	// remove the mouse device
+	if (m_debug)
+	{
+		m_debug->OnQuit();
+		delete m_debug;
+		m_debug = nullptr;
+	}
+	// remove the debug device
+	if (m_mouse)
+	{
+		m_mouse->OnQuit();
+		delete m_mouse;
+		m_mouse = nullptr;
+	}
+
+	// clear the _gfx_devices vector
+	_gfx_devices.clear();
 }
 
 
@@ -529,22 +597,6 @@ Word Gfx::Attach(IGfxDevice* dev, Word _lastAddress, Word size)
 	if (size > 65536)
 		Bus::Error("Memory allocation beyond 64k boundary!");
 	return size;
-}
-
-void Gfx::OnQuit() 
-{
-	// remove the mouse device
-	if (m_mouse)
-	{
-		delete m_mouse;
-		m_mouse = nullptr;
-	}
-	// clear the _gfx_devices vector
-	_gfx_devices.clear();
-
-	// run OnQuit() for the other graphics devices
-	for (auto& d : _gfx_devices)
-		d->OnQuit();
 }
 
 void Gfx::OnActivate() 

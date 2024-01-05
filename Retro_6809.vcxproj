@@ -161,7 +161,11 @@
     <ClCompile Include="FileIO.cpp" />
     <ClCompile Include="Gamepad.cpp" />
     <ClCompile Include="Gfx.cpp" />
+    <ClCompile Include="GfxBitmap.cpp" />
     <ClCompile Include="GfxDebug.cpp" />
+    <ClCompile Include="GfxExtended.cpp" />
+    <ClCompile Include="GfxSprite.cpp" />
+    <ClCompile Include="GfxText.cpp" />
     <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="GfxMouse.cpp" />
@@ -174,7 +178,11 @@
     <ClInclude Include="FileIO.h" />
     <ClInclude Include="Gamepad.h" />
     <ClInclude Include="Gfx.h" />
+    <ClInclude Include="GfxBitmap.h" />
     <ClInclude Include="GfxDebug.h" />
+    <ClInclude Include="GfxExtended.h" />
+    <ClInclude Include="GfxSprite.h" />
+    <ClInclude Include="GfxText.h" />
     <ClInclude Include="IGfxDevice.h" />
     <ClInclude Include="Keyboard.h" />
     <ClInclude Include="Math.h" />

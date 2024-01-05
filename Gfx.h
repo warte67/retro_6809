@@ -9,13 +9,23 @@
 #include "GfxDebug.h"
 #include "GfxMouse.h"
 
+#include "GfxExtended.h"
+#include "GfxBitmap.h"
+#include "GfxText.h"
+#include "GfxSprite.h"
+
 class Gfx : public Device
 {
 	friend class Bus;
     friend class C6809;
     friend class GfxDebug;
     friend class GfxMouse;
-	
+
+    friend class GfxExtended;
+    friend class GfxBitmap;
+    friend class GfxText;
+    friend class GfxSprite;
+
     public:
         Gfx() { _deviceName = "GFX_DEVICE"; }
         // Gfx(Bus* _bus) { _deviceName = "GFX_DEVICE";  m_bus = _bus; }
@@ -101,8 +111,13 @@ class Gfx : public Device
         Byte _dsp_err = 0;          
 
         // graphics devices based on the IGfxDevice
-        GfxDebug* m_debug = nullptr;
-        GfxMouse* m_mouse = nullptr;
+        GfxDebug*       m_debug = nullptr;
+        GfxMouse*       m_mouse = nullptr;
+
+        GfxExtended*    m_gfx_extended  = nullptr;
+        GfxBitmap*      m_gfx_bitmap    = nullptr;
+        GfxText*        m_gfx_text      = nullptr;
+        GfxSprite*      m_gfx_sprite    = nullptr;
 
 	private:
 		// helpers
