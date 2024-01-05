@@ -1,8 +1,7 @@
 // GfxExtended.h
-//
 
+#include "Gfx.h"
 #include "GfxSprite.h"
-
 
 Byte GfxSprite::read(Word offset, bool debug)
 {

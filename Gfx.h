@@ -119,8 +119,8 @@ class Gfx : public Device
         GfxText*        m_gfx_text      = nullptr;
         GfxSprite*      m_gfx_sprite    = nullptr;
 
-	private:
-		// helpers
+
+        // helpers
 		void _decode_dsp_gres();
         void _decode_dsp_ext();
 

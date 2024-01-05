@@ -21,14 +21,14 @@ Byte Gfx::read(Word offset, bool debug )		// is debug completely unused in the c
 	if (offset >= DBG_BEGIN && offset <= DBG_END)
 		return m_debug->read(offset, debug);
 
-	//	// TESTING SCREEN BUFFER MEMORY REGISTERS...
-	//	if (offset >= 0x400 && offset < STD_VID_MAX)
-	//	{
-	//		printf("Read from video memory: $%4x\n", offset);
-	//	}
-	//	// ...END TESTING
-
 	Byte data = 0xCC;
+
+	if (offset >= STD_VID_MIN && offset <= _std_vid_max)
+	{
+		data = Bus::Read(offset, true);
+		// printf("Read: $%02x\n", data);
+		return data;
+	}
 
 	// handle Gfx Reads
 	switch (offset)
@@ -87,13 +87,11 @@ void Gfx::write(Word offset, Byte data, bool debug)
 	{ m_debug->write(offset, data, debug); return; }
 
 
-	//  // TESTING SCREEN BUFFER MEMORY REGISTERS...
-	//  if (offset >= 0x400 && offset< STD_VID_MAX)
-	//  {
-	//  	printf("Write to video memory: $%4x\n", offset);
-	//  }
-	//  // ...END TESTING
-
+	if (offset >= STD_VID_MIN && offset <= _std_vid_max)
+	{
+		// dispatch video memory writes
+		// ...
+	}
 
 	// handle Gfx Writes
 	switch (offset)
@@ -566,16 +564,6 @@ void Gfx::OnInit()
         for (int r=0; r<8; r++)
             _dsp_glyph_data[i][r] = font8x8_system[i][r];
 
-    // // output a test string
-    // std::string sMessage = "Hello World...";
-    // Word addr = SCREEN_BUFFER;
-    // for (auto &a : sMessage)
-    // {
-    //     write(addr, a);
-    //     write(addr+1, 0xF0);		// F: yellow
-    //     addr+=2;
-    // }
-
 	// init the other graphics devices
 	for (auto& d : _gfx_devices)
 		d->OnInit();
@@ -699,36 +687,32 @@ void Gfx::OnEvent(SDL_Event* evnt)
 
 void Gfx::OnUpdate(float fElapsedTime) 
 {
-	// restrict updates based on elapsed time
-	const float _delay = 0.01f;
-    static float _acc = fElapsedTime;
-    _acc += fElapsedTime;
-    if (_acc > fElapsedTime + _delay)
-    {
-        _acc -= _delay;
-
-		// clear the window to the border color
-		SDL_SetRenderTarget(_renderer, NULL);
-		SDL_SetRenderDrawColor(_renderer, 32, 32, 32, 255);	// border color
-		SDL_RenderClear(_renderer);
-
-		// update the display textures
-		if (Bus::bCpuEnabled)
+	/***
+		// restrict updates based on elapsed time
+		const float _delay = 0.033333f;
+		static float _acc = fElapsedTime;
+		_acc += fElapsedTime;
+		if (_acc > fElapsedTime + _delay)
 		{
-			Bus::bCpuEnabled = false;
-
-			//using clock = std::chrono::system_clock;
-			//auto _start = clock::now();
-
-			_display_extended();
-			_display_standard();
-
-			//auto _dur = _start - clock::now();
-			//std::cout << "TIME: " << _dur.count() << std::endl;
-
-			Bus::bCpuEnabled = true;
+			_acc -= _delay;
+			//		// clear the window to the border color
+			//		SDL_SetRenderTarget(_renderer, NULL);
+			//		SDL_SetRenderDrawColor(_renderer, 32, 32, 32, 255);	// border color
+			//		SDL_RenderClear(_renderer);
+			// update the display textures
+			if (Bus::bCpuEnabled)
+			{
+				Bus::bCpuEnabled = false;
+													//using clock = std::chrono::system_clock;
+													//auto _start = clock::now();
+				_display_extended();
+				_display_standard();
+													//auto _dur = _start - clock::now();
+													//std::cout << "TIME: " << _dur.count() << std::endl;
+				Bus::bCpuEnabled = true;
+			}
 		}
-	}
+	***/
 
 	// run OnUpdate() for the other graphics devices
 	for (auto& d : _gfx_devices)

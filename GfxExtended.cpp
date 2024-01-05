@@ -1,6 +1,6 @@
 // GfxExtended.h
-//
 
+#include "Gfx.h"
 #include "GfxExtended.h"
 
 Byte GfxExtended::read(Word offset, bool debug) 

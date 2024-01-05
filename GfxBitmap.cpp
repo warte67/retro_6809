@@ -1,6 +1,6 @@
 // GfxBitmap.h
-//
 
+#include "Gfx.h"
 #include "GfxBitmap.h"
 
 Byte GfxBitmap::read(Word offset, bool debug)

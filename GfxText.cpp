@@ -1,5 +1,7 @@
 // GfxText.cpp
 
+#include "Bus.h"
+#include "Gfx.h"
 #include "GfxText.h"
 
 Byte GfxText::read(Word offset, bool debug)
@@ -50,6 +52,21 @@ void GfxText::OnEvent(SDL_Event* evnt)
 void GfxText::OnUpdate(float fElapsedTime)
 {
 //	printf("%s::OnUpdate()\n", Name().c_str());
+
+	const float _delay = 0.033333f;
+	static float _acc = fElapsedTime;
+	_acc += fElapsedTime;
+	if (_acc > fElapsedTime + _delay)
+	{
+		_acc -= _delay;
+
+		if (Bus::bCpuEnabled)
+		{
+			Bus::bCpuEnabled = false;
+			m_gfx->_display_standard();
+			Bus::bCpuEnabled = true;
+		}
+	}
 }
 
 void GfxText::OnRender()

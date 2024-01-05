@@ -29,6 +29,7 @@ class Bus
 	friend class C6809;
 	friend class Gfx;
 	friend class GfxDebug;
+	friend class GfxText;
 	friend class Keyboard;
 	friend class Gamepad;
 	friend class FileIO;
