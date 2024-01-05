@@ -115,8 +115,8 @@ void GfxDebug::OnDeactivate()
 void GfxDebug::_onWindowResize()
 {
     // For whatever reason, when the viewing window gets resized, 
-    //  the glyphs get corrupted. A hacky workaround solution is to recreate them 
-    //  when this happens. Need a better understanding of whats really happening.
+    //  the glyphs get corrupted. This is a hacky workaround solution is to recreate
+    //  them when this happens. 
 
     // destroy the glyph textures
     for (auto& a : glyph_textures)

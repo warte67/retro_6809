@@ -141,7 +141,7 @@ private:
 	int _tex_width = 0;
 	int _tex_height = 0;
 
-	std::vector <Word> mem_bank = { SSTACK_TOP - 0x0048, SCREEN_BUFFER, HDW_REGS };
+	std::vector <Word> mem_bank = { SSTACK_TOP - 0x0048, STD_VID_MIN, HDW_REGS };
 	std::vector <Word> sDisplayedAsm;
 	std::map<Word, bool> mapBreakpoints;	
 	std::list<Word> asmHistory;		// track last several asm addresses

@@ -21,6 +21,14 @@ Byte Gfx::read(Word offset, bool debug )		// is debug completely unused in the c
 	if (offset >= DBG_BEGIN && offset <= DBG_END)
 		return m_debug->read(offset, debug);
 
+	// TESTING SCREEN BUFFER MEMORY REGISTERS...
+	if (offset >= 0x400 && offset < STD_VID_MAX)
+	{
+		printf("Read from video memory: $%4x\n", offset);
+	}
+	// ...END TESTING
+
+
 	Byte data = 0xCC;
 
 	// handle Gfx Reads
@@ -78,6 +86,15 @@ void Gfx::write(Word offset, Byte data, bool debug)
 	// handle GfxDebug writes
 	if (offset >= DBG_BEGIN && offset <= DBG_END)
 	{ m_debug->write(offset, data, debug); return; }
+
+
+	//  // TESTING SCREEN BUFFER MEMORY REGISTERS...
+	//  if (offset >= 0x400 && offset< STD_VID_MAX)
+	//  {
+	//  	printf("Write to video memory: $%4x\n", offset);
+	//  }
+	//  // ...END TESTING
+
 
 	// handle Gfx Writes
 	switch (offset)
@@ -143,8 +160,21 @@ Word Gfx::OnAttach(Word nextAddr)
     int size = 0;
     Word old_addr = nextAddr;
 
-    DisplayEnum("", 0, "");
-    DisplayEnum("STD_VID_MAX", nextAddr, " (Word) Standard Video Buffer Max");
+	// begin graphics device register allocation
+
+//  // display buffer 6k bytes
+//  dev = new RAM("SCREEN_BUFFER");
+//  dev->DisplayEnum("",0, "");
+//  dev->DisplayEnum("",0, "Display Buffer");
+//  addr += Attach(dev, 6*1024);
+
+
+	const Word VID_BUFFER_SIZE = 6 * 1024;
+	DisplayEnum("", 0, "");
+	DisplayEnum("STD_VID_MIN", nextAddr, "Start of Standard Video Buffer Memory");
+	nextAddr += VID_BUFFER_SIZE;
+
+	DisplayEnum("STD_VID_MAX", nextAddr, " (Word) Standard Video Buffer Max");
     nextAddr+=2;
 
 	DisplayEnum("", 0, "");
@@ -458,7 +488,7 @@ void Gfx::OnInit()
     //     _gfxDisplayBuffer[t] = 0;
 
     // clear the text buffer to white on black spaces
-    for (int t=SCREEN_BUFFER; t<SCREEN_BUFFER+std_buffer_size; t+=2)
+    for (int t= STD_VID_MIN; t< STD_VID_MIN +std_buffer_size; t+=2)
     {
         write(t, 32);        
         write(t+1, 0xF0);       
@@ -804,7 +834,7 @@ void Gfx::_decode_dsp_gres()
 	_texture_height = (int)real_height;
 
 	// [STD_VID_MAX] video buffer end
-	_std_vid_max = (SCREEN_BUFFER + (int)req_buffer_size)-1;
+	_std_vid_max = (STD_VID_MIN + (int)req_buffer_size)-1;
 
 	// output debugging text
 	printf("----====#####################################################====----\n");
@@ -914,7 +944,7 @@ void Gfx::_display_standard()
 		// graphics mode
 		if (_standard_display_mode)
 		{
-			Word pixel_index = SCREEN_BUFFER;
+			Word pixel_index = STD_VID_MIN;
 			void *pixels;
 			int pitch;
 			if (SDL_LockTexture(_std_texture, NULL, &pixels, &pitch) < 0)
@@ -1000,14 +1030,14 @@ void Gfx::_updateTextScreen()
     else
     {
 		Word end = Bus::Read_Word(STD_VID_MAX);
-		Word addr = SCREEN_BUFFER;
+		Word addr = STD_VID_MIN;
 		for (; addr <= end; addr += 2)
 		{
 			Byte ch = Bus::Read(addr, true);
 			Byte at = Bus::Read(addr + 1, true);
 			Byte fg = at >> 4;
 			Byte bg = at & 0x0f;
-			Word index = addr - SCREEN_BUFFER;
+			Word index = addr - STD_VID_MIN;
 			Byte width = _texture_width / 8;
 			int x = ((index / 2) % width) * 8;
 			int y = ((index / 2) / width) * 8;

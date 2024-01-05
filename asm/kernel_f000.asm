@@ -598,10 +598,10 @@ line_edit
 		clr	EDT_ENABLE	; disable the hardware line editor sub-system
 		rts			; return from the line editor subroutine
 0	; begin the line edit routine
-		; ldu	#SCREEN_BUFFER	; reserve the start of the display buffer
+		; ldu	#STD_VID_MIN	; reserve the start of the display buffer
 		; ldu	EDLIN_ANCH	; reserve the start of the display buffer
 		ldy	#EDT_BUFFER	; start of the character line edit buffer
-		; ldx	#SCREEN_BUFFER	; point to the start of the display buffer
+		; ldx	#STD_VID_MIN	; point to the start of the display buffer
 		ldx	EDLIN_ANCH	; point to the start of the display buffer
 		lda	EDT_BFR_CSR	; fetch the cursor position
 		pshs	a		; save it on the stack as a local variable	
@@ -728,7 +728,7 @@ cls	; clear out the text buffer
 		clr	CSR_COL		; cursor column = 0
 		clr	CSR_ROW		; cursor row = 0
 		jsr 	cursor_address	; X = cursor address based on CSR_COL and CSR_ROW
-		ldx	#SCREEN_BUFFER	; point to the start of the text buffer
+		ldx	#STD_VID_MIN	; point to the start of the text buffer
 		lda	#$20		; set next character to space
 		ldb	TXT_ATTR	; load the characters color
 1	; cls main loop	
@@ -758,10 +758,10 @@ csr_new_line	; perform a line-feed and a carriage return with scrolling
 
 std_text_scroll	; scroll the standard text screen up one line
 		pshs	d, x, y		; store the working registers
-		ldy	#SCREEN_BUFFER	; Y = start of the standard video buffer
+		ldy	#STD_VID_MIN	; Y = start of the standard video buffer
 		ldb	DSP_TXT_COLS	; B = number of displayed text columns
 		;lslb			; B = B * 2 -- account for the attribute byte
-		ldx	#SCREEN_BUFFER	; X = start of the standard video buffer
+		ldx	#STD_VID_MIN	; X = start of the standard video buffer
 		; B can become negative in the 4x horizontal overscan modes
 		; 	instead of shifting B left and using it to index once
 		;       simply load effective address twice
@@ -773,7 +773,7 @@ std_text_scroll	; scroll the standard text screen up one line
 		cmpx	STD_VID_MAX	; at the end of the display?
 		blt	1b		; loop if not
 	; fill the bottom line with spaces
-		ldx	#SCREEN_BUFFER	; X = start of the standard video buffer
+		ldx	#STD_VID_MIN	; X = start of the standard video buffer
 		ldb	DSP_TXT_ROWS	; B = number of displayed rows
 		decb			; B = B - 1  last line
 		lslb			; B = B * 1 -- account for the attribute byte
@@ -794,7 +794,7 @@ std_text_scroll	; scroll the standard text screen up one line
 cursor_address	; Update CSR_ADDR and return the cursor address in X 
 		; based on CSR_COL and CSR_ROW.
 		pshs	d		; store used registers
-		ldx	#SCREEN_BUFFER	; start of the standard video buffer
+		ldx	#STD_VID_MIN	; start of the standard video buffer
 		lda	CSR_ROW		; A = current cursor row
 		ldb	DSP_TXT_COLS	; B = number of columns displayed
 		lslb			; B = B * 2 -- account for the attribute byte
@@ -812,7 +812,7 @@ cursor_address	; Update CSR_ADDR and return the cursor address in X
 
 
 		org	$fe00
-prompt0		fcn	"Retro 6809 v0.2a \n"
+prompt0		fcn	"Retro 6809 v0.21a \n"
 prompt1		fcn	"Emulator compiled on "
 prompt2		fcn	"Copyright (C) 2023 By Jay Faries\n\n"
 ready_prompt	fcn	"Ready\n"

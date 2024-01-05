@@ -1,6 +1,23 @@
 ;  **********************************************
 ;  * Allocated 64k Memory Mapped System Symbols *
 ;  **********************************************
+
+; Simple Memory Map:
+;     $0000-$000F SOFT_VECTORS
+;     $0010-$00FF ZERO_PAGE
+;     $0100-$01FF FIO_BUFFER
+;     $0200-$03FF SYSTEM_STACK
+;     $0400-$1C28 GFX_DEVICE
+;     $1C29-$1C7D Keyboard
+;     $1C7E-$1C8F Gamepad
+;     $1C90-$1C9D FileIO
+;     $1C9E-$1CBC Math
+;     $1CBD-$2FFF RESERVED
+;     $3000-$AFFF USER_RAM
+;     $B000-$CFFF PAGED_RAM
+;     $D000-$EFFF PAGED_ROM
+;     $F000-$FFFF KERNEL_ROM
+
 SOFT_VECTORS        equ   $0000
 
           ; Software Interrupt Vectors:
@@ -19,12 +36,10 @@ FIO_BFR_TOP         equ   $01FF    ; Top of the File Input/Output Buffer
 SYSTEM_STACK        equ   $0200
 SSTACK_TOP          equ   $0400    ; Top of the system stack space
 
-          ; Display Buffer
-SCREEN_BUFFER       equ   $0400
-
           ; Device Registers:
-HDW_REGS            equ   $1C00    ; Begin Device Hardware Registers
+HDW_REGS            equ   $0400    ; Begin Device Hardware Registers
 
+STD_VID_MIN         equ   $0400    ; Start of Standard Video Buffer Memory
 STD_VID_MAX         equ   $1C00    ;  (Word) Standard Video Buffer Max
 
 SYS_STATE           equ   $1C02    ;  (Byte) System State Register

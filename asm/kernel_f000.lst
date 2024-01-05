@@ -22,6 +22,23 @@
                       ;  **********************************************
                       ;  * Allocated 64k Memory Mapped System Symbols *
                       ;  **********************************************
+                      
+                      ; Simple Memory Map:
+                      ;     $0000-$000F SOFT_VECTORS
+                      ;     $0010-$00FF ZERO_PAGE
+                      ;     $0100-$01FF FIO_BUFFER
+                      ;     $0200-$03FF SYSTEM_STACK
+                      ;     $0400-$1C28 GFX_DEVICE
+                      ;     $1C29-$1C7D Keyboard
+                      ;     $1C7E-$1C8F Gamepad
+                      ;     $1C90-$1C9D FileIO
+                      ;     $1C9E-$1CBC Math
+                      ;     $1CBD-$2FFF RESERVED
+                      ;     $3000-$AFFF USER_RAM
+                      ;     $B000-$CFFF PAGED_RAM
+                      ;     $D000-$EFFF PAGED_ROM
+                      ;     $F000-$FFFF KERNEL_ROM
+                      
 0000                  SOFT_VECTORS        equ   $0000
                       
                                 ; Software Interrupt Vectors:
@@ -40,12 +57,10 @@
 0200                  SYSTEM_STACK        equ   $0200
 0400                  SSTACK_TOP          equ   $0400    ; Top of the system stack space
                       
-                                ; Display Buffer
-0400                  SCREEN_BUFFER       equ   $0400
-                      
                                 ; Device Registers:
-1C00                  HDW_REGS            equ   $1C00    ; Begin Device Hardware Registers
+0400                  HDW_REGS            equ   $0400    ; Begin Device Hardware Registers
                       
+0400                  STD_VID_MIN         equ   $0400    ; Start of Standard Video Buffer Memory
 1C00                  STD_VID_MAX         equ   $1C00    ;  (Word) Standard Video Buffer Max
                       
 1C02                  SYS_STATE           equ   $1C02    ;  (Byte) System State Register
@@ -460,7 +475,7 @@ F054  BDF46E                          jsr     cls
 F057  8EFE00                          ldx     #prompt0                
 F05A  BDF423                          jsr     line_out        
                       
-F05D  8EFE13                          ldx     #prompt1
+F05D  8EFE14                          ldx     #prompt1
 F060  BDF423                          jsr     line_out        
                       
                                       ; fetch compilation date
@@ -472,11 +487,11 @@ F06D  BDF433                          jsr     char_out
 F070  20F6                            bra     0b
 F072  860A            2               lda     #$0a
 F074  BDF433                          jsr     char_out
-F077  8EFE29                          ldx     #prompt2
+F077  8EFE2A                          ldx     #prompt2
 F07A  BDF423                          jsr     line_out
                       
 F07D                  main_user_input_loop
-F07D  8EFE4C                          ldx     #ready_prompt           
+F07D  8EFE4D                          ldx     #ready_prompt           
 F080  BDF423                          jsr     line_out
 F083                  1
 F083  BDF36C                          jsr     line_edit       
@@ -956,10 +971,10 @@ F3A1  BF0011                          stx     CSR_ADDR        ; store the new CS
 F3A4  7F1C3D                          clr     EDT_ENABLE      ; disable the hardware line editor sub-system
 F3A7  39                              rts                     ; return from the line editor subroutine
 F3A8                  0       ; begin the line edit routine
-                                      ; ldu   #SCREEN_BUFFER  ; reserve the start of the display buffer
+                                      ; ldu   #STD_VID_MIN    ; reserve the start of the display buffer
                                       ; ldu   EDLIN_ANCH      ; reserve the start of the display buffer
 F3A8  108E1C3E                        ldy     #EDT_BUFFER     ; start of the character line edit buffer
-                                      ; ldx   #SCREEN_BUFFER  ; point to the start of the display buffer
+                                      ; ldx   #STD_VID_MIN    ; point to the start of the display buffer
 F3AC  BE0016                          ldx     EDLIN_ANCH      ; point to the start of the display buffer
 F3AF  B61C3C                          lda     EDT_BFR_CSR     ; fetch the cursor position
 F3B2  3402                            pshs    a               ; save it on the stack as a local variable      
@@ -1086,7 +1101,7 @@ F46E  3416                            pshs    d, x            ; store the workin
 F470  7F0013                          clr     CSR_COL         ; cursor column = 0
 F473  7F0014                          clr     CSR_ROW         ; cursor row = 0
 F476  BDF4E0                          jsr     cursor_address  ; X = cursor address based on CSR_COL and CSR_ROW
-F479  8E0400                          ldx     #SCREEN_BUFFER  ; point to the start of the text buffer
+F479  8E0400                          ldx     #STD_VID_MIN    ; point to the start of the text buffer
 F47C  8620                            lda     #$20            ; set next character to space
 F47E  F60015                          ldb     TXT_ATTR        ; load the characters color
 F481                  1       ; cls main loop 
@@ -1116,10 +1131,10 @@ F4A9  39                              rts                     ; return from the 
                       
 F4AA                  std_text_scroll ; scroll the standard text screen up one line
 F4AA  3436                            pshs    d, x, y         ; store the working registers
-F4AC  108E0400                        ldy     #SCREEN_BUFFER  ; Y = start of the standard video buffer
+F4AC  108E0400                        ldy     #STD_VID_MIN    ; Y = start of the standard video buffer
 F4B0  F61C0A                          ldb     DSP_TXT_COLS    ; B = number of displayed text columns
                                       ;lslb                   ; B = B * 2 -- account for the attribute byte
-F4B3  8E0400                          ldx     #SCREEN_BUFFER  ; X = start of the standard video buffer
+F4B3  8E0400                          ldx     #STD_VID_MIN    ; X = start of the standard video buffer
                                       ; B can become negative in the 4x horizontal overscan modes
                                       ;       instead of shifting B left and using it to index once
                                       ;       simply load effective address twice
@@ -1131,7 +1146,7 @@ F4BC  EDA1                            std     ,y++            ; store it at Y
 F4BE  BC1C00                          cmpx    STD_VID_MAX     ; at the end of the display?
 F4C1  2DF7                            blt     1b              ; loop if not
                               ; fill the bottom line with spaces
-F4C3  8E0400                          ldx     #SCREEN_BUFFER  ; X = start of the standard video buffer
+F4C3  8E0400                          ldx     #STD_VID_MIN    ; X = start of the standard video buffer
 F4C6  F61C0B                          ldb     DSP_TXT_ROWS    ; B = number of displayed rows
 F4C9  5A                              decb                    ; B = B - 1  last line
 F4CA  58                              lslb                    ; B = B * 1 -- account for the attribute byte
@@ -1152,7 +1167,7 @@ F4DF  39                              rts
 F4E0                  cursor_address  ; Update CSR_ADDR and return the cursor address in X 
                                       ; based on CSR_COL and CSR_ROW.
 F4E0  3406                            pshs    d               ; store used registers
-F4E2  8E0400                          ldx     #SCREEN_BUFFER  ; start of the standard video buffer
+F4E2  8E0400                          ldx     #STD_VID_MIN    ; start of the standard video buffer
 F4E5  B60014                          lda     CSR_ROW         ; A = current cursor row
 F4E8  F61C0A                          ldb     DSP_TXT_COLS    ; B = number of columns displayed
 F4EB  58                              lslb                    ; B = B * 2 -- account for the attribute byte
@@ -1170,10 +1185,10 @@ F4FA  39                              rts                     ; return
                       
                       
 FE00                                  org     $fe00
-FE00  526574726F20363830392076302E3261200A00 prompt0         fcn     "Retro 6809 v0.2a \n"
-FE13  456D756C61746F7220636F6D70696C6564206F6E2000 prompt1         fcn     "Emulator compiled on "
-FE29  436F70797269676874202843292032303233204279204A6179204661726965730A0A00 prompt2         fcn     "Copyright (C) 2023 By Jay Faries\n\n"
-FE4C  52656164790A00  ready_prompt    fcn     "Ready\n"
+FE00  526574726F20363830392076302E323161200A00 prompt0         fcn     "Retro 6809 v0.21a \n"
+FE14  456D756C61746F7220636F6D70696C6564206F6E2000 prompt1         fcn     "Emulator compiled on "
+FE2A  436F70797269676874202843292032303233204279204A6179204661726965730A0A00 prompt2         fcn     "Copyright (C) 2023 By Jay Faries\n\n"
+FE4D  52656164790A00  ready_prompt    fcn     "Ready\n"
                       
                       
                       

@@ -83,11 +83,20 @@ Bus::Bus()
     addr += Attach(dev, 512);  
     dev->DisplayEnum("SSTACK_TOP",0x0400, "Top of the system stack space");  	
 
-	// display buffer 6k bytes
-    dev = new RAM("SCREEN_BUFFER");
-    dev->DisplayEnum("",0, "");
-    dev->DisplayEnum("",0, "Display Buffer");
-    addr += Attach(dev, 6*1024);
+
+
+
+
+            //  // display buffer 6k bytes
+            //  dev = new RAM("SCREEN_BUFFER");
+            //  dev->DisplayEnum("",0, "");
+            //  dev->DisplayEnum("",0, "Display Buffer");
+            //  addr += Attach(dev, 6*1024);
+
+
+
+
+
 
 	// start hardware registers
 	dev->DisplayEnum("",0, "");

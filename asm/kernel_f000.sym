@@ -29,9 +29,9 @@ TXT_ATTR	equ	21
 command_table	equ	61583
 dcl_command_found	equ	61774
 CHAR_Q_LEN	equ	7209
-HDW_REGS	equ	7168
-do_color	equ	61801
+HDW_REGS	equ	1024
 MOP_EXP2	equ	23
+do_color	equ	61801
 arg1_8bit_attrib	equ	62090
 FIO_PATH_POS	equ	7323
 MOP_IS_LTE	equ	6
@@ -43,6 +43,7 @@ cursor_address	equ	62688
 VECT_FIRQ	equ	6
 MOP_ASIN	equ	36
 MOP_SUBTRACT	equ	13
+STD_VID_MIN	equ	1024
 CHAR_SCAN	equ	7210
 FC_OPENFILE	equ	4
 MATH_ACB_POS	equ	7336
@@ -77,8 +78,8 @@ FC_COPYFILE	equ	19
 GFX_END	equ	7209
 err_wrong_file_type	equ	61740
 SWI_start	equ	61482
-FIO_BEGIN	equ	7312
 do_load	equ	61815
+FIO_BEGIN	equ	7312
 FIO_SEEKPOS	equ	7316
 MOP_SINH	equ	40
 SYS_TIMER	equ	7174
@@ -118,8 +119,8 @@ DBG_END	equ	7195
 decode_16bit_hex_digit	equ	62056
 CSR_PAL_DATA	equ	7207
 MOP_TRUNC	equ	49
-do_exec	equ	61874
 DSP_PAL_IDX	equ	7180
+do_exec	equ	61874
 SOFT_VECTORS	equ	0
 std_text_scroll	equ	62634
 MATH_ACB_INT	equ	7342
@@ -151,8 +152,8 @@ DSP_GRES	equ	7176
 CSR_ROW	equ	20
 VECT_NMI	equ	12
 FC_RESET	equ	0
-do_chdir	equ	61978
 MOP_ERFC	equ	44
+do_chdir	equ	61978
 PAGED_RAM	equ	45056
 command_vector_table	equ	61630
 str2_cmp_term	equ	62287
@@ -161,7 +162,6 @@ str_cmp_loop	equ	62227
 MOP_TGAMMA	equ	46
 str_cmp_differ	equ	62305
 MOP_LASTOP	equ	56
-SCREEN_BUFFER	equ	1024
 kernel_start	equ	61488
 SOFT_IRQ	equ	8
 MOP_COSH	equ	41
@@ -196,9 +196,9 @@ HARD_RESET	equ	65534
 JOYS_1_LTX	equ	7297
 NMI_start	equ	61484
 SOFT_RESET	equ	14
-prompt2	equ	65065
+prompt2	equ	65066
 EDLIN_ANCH	equ	22
-prompt1	equ	65043
+prompt1	equ	65044
 do_exit	equ	62034
 MOP_IS_NAN	equ	10
 JOYS_1_RTY	equ	7300
@@ -271,7 +271,7 @@ MOP_LOG1P	equ	28
 MOP_IS_EQUAL	equ	2
 EDT_ENABLE	equ	7229
 FC_GETPATH	equ	14
-ready_prompt	equ	65100
+ready_prompt	equ	65101
 CSR_XOFS	equ	7199
 MOP_LGAMMA	equ	45
 CHAR_POP	equ	7211
