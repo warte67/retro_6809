@@ -132,6 +132,8 @@ class Gfx : public Device
 		void _display_standard();
         void _updateTextScreen();       
 		void _display_extended();
+
+
         std::vector< IGfxDevice*> _gfx_devices;
 };
 

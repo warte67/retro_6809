@@ -39,7 +39,7 @@ DSP_GLYPH_DATA	equ	7184
 CSR_PAL_INDX	equ	7206
 VECT_RESET	equ	14
 VECT_EXEC	equ	0
-cursor_address	equ	62688
+cursor_address	equ	62683
 VECT_FIRQ	equ	6
 MOP_ASIN	equ	36
 MOP_SUBTRACT	equ	13
@@ -62,7 +62,7 @@ JOYS_2_LTX	equ	7306
 FC_REN_DIR	equ	15
 MOP_ATAN	equ	38
 err_dir_nf	equ	61667
-csr_new_line	equ	62603
+csr_new_line	equ	62598
 SSTACK_TOP	equ	1024
 JOYS_2_RTY	equ	7309
 FC_GET_SEEK	equ	23
@@ -122,14 +122,14 @@ MOP_TRUNC	equ	49
 DSP_PAL_IDX	equ	7180
 do_exec	equ	61874
 SOFT_VECTORS	equ	0
-std_text_scroll	equ	62634
+std_text_scroll	equ	62629
 MATH_ACB_INT	equ	7342
 KRNL_SWI	equ	61460
 FIO_END	equ	7326
 do_nothing	equ	61781
 err_syntax	equ	61652
 FIO_IOWORD	equ	7321
-char_out_main	equ	62515
+char_out_main	equ	62510
 FC_MAKEDIR	equ	12
 KEY_END	equ	7294
 MOP_ADD	equ	14
@@ -263,10 +263,10 @@ MOP_IS_GTE	equ	7
 DSP_EXT	equ	7177
 JOYS_END	equ	7312
 CSR_BMP_DATA	equ	7204
-cls	equ	62574
+cls	equ	62569
 SYS_STATE	equ	7170
 FIO_STREAM	equ	7314
-line_out	equ	62499
+line_out	equ	62494
 MOP_LOG1P	equ	28
 MOP_IS_EQUAL	equ	2
 EDT_ENABLE	equ	7229
@@ -280,5 +280,5 @@ MOP_IS_FINITE	equ	8
 FC_CLOSEFILE	equ	6
 MOP_LOG	equ	25
 MOP_FDIM	equ	21
-char_out	equ	62515
+char_out	equ	62510
 SYSTEM_STACK	equ	512

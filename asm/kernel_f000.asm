@@ -654,12 +654,11 @@ flash_the_cursor
 0	; continue normally
 		ldu	EDLIN_ANCH	; point to the edline start of line anchor
 		lda	SYS_TIMER+1	; load the LSB of the system timer
+		lsra			; shift right
+		lsra			; shift right
+		lsra			; shift right
+;		lsra			; shift right
 		anda	#$07		; only concerned with these bits
-		bne	1f		; if non-zero, skip color change
-		lda	CSR_ATTR	; load the next cursor color
-		inca			; increment it
-		anda	#$0f		; mask off the foreground color
-		;ora	#$f0		; foreground 15 = opaque black
 		sta	CSR_ATTR	; store the new attribute
 		ldb	EDT_BFR_CSR	; load the cursor position
 		lslb			; skip the attribue
@@ -671,8 +670,7 @@ flash_the_cursor
 1	; clean up and return	
 		puls	a,b,x,u		; pop these off the stack
 		rts			; return when done
-
-
+		
 line_out	; Display a null terminated string pointed to by X
 		; begining at CSR_ROW and CSR_COL.
 		pshs	a,x		; store the working registers
