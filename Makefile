@@ -1,7 +1,7 @@
 # Makefile Retro_6809
 CC = g++
 TARGET = ./bin/main
-FLAGS = -std=c++20 -O2 #-g -V
+FLAGS = -std=c++20 -O2 #-g
 LIBS = -lSDL2 -ldl
 OBJ = obj
 OBJ_FILES = Bus.o \
