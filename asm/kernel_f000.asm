@@ -286,10 +286,10 @@ do_exec		; EXEC $####
 		rts
 
 do_reset	; RESET
-		;lda	#FC_RESET
-		;sta	FIO_COMMAND
-		;rts
-		jmp	[VECT_RESET]
+		lda	#FC_RESET
+		sta	FIO_COMMAND
+		rts
+		;jmp	[VECT_RESET]
 		; rts
 
 do_dir		; DIR

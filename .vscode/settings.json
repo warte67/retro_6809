@@ -50,6 +50,19 @@
 		"ratio": "cpp",
 		"sstream": "cpp",
 		"list": "cpp",
-		"map": "cpp"
+		"map": "cpp",
+		"cfenv": "cpp",
+		"charconv": "cpp",
+		"codecvt": "cpp",
+		"cstring": "cpp",
+		"optional": "cpp",
+		"format": "cpp",
+		"fstream": "cpp",
+		"iomanip": "cpp",
+		"semaphore": "cpp",
+		"span": "cpp",
+		"stop_token": "cpp",
+		"thread": "cpp",
+		"variant": "cpp"
 	}
 }

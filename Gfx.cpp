@@ -20,16 +20,16 @@ Byte Gfx::read(Word offset, bool debug )		// is debug completely unused in the c
 	// handle GfxDebug reads
 	if (offset >= DBG_BEGIN && offset <= DBG_END)
 		return m_debug->read(offset, debug);
-
+	// default data value
 	Byte data = 0xCC;
-
+	// handle screen memory
 	if (offset >= STD_VID_MIN && offset <= _std_vid_max)
 	{
-		data = Bus::Read(offset, true);
-		// printf("Read: $%02x\n", data);
-		return data;
+		if (_standard_display_mode)
+			return m_gfx_bitmap->read(offset, debug);
+		else
+			return m_gfx_text->read(offset, debug);
 	}
-
 	// handle Gfx Reads
 	switch (offset)
 	{
@@ -85,12 +85,13 @@ void Gfx::write(Word offset, Byte data, bool debug)
 	// handle GfxDebug writes
 	if (offset >= DBG_BEGIN && offset <= DBG_END)
 	{ m_debug->write(offset, data, debug); return; }
-
-
+	// dispatch video memory writes
 	if (offset >= STD_VID_MIN && offset <= _std_vid_max)
 	{
-		// dispatch video memory writes
-		// ...
+		if (_standard_display_mode)
+			m_gfx_bitmap->write(offset, data, debug);
+		else
+			m_gfx_text->write(offset, data, debug);
 	}
 
 	// handle Gfx Writes
@@ -873,16 +874,19 @@ void Gfx::_decode_dsp_gres()
 	_std_vid_max = (STD_VID_MIN + (int)req_buffer_size)-1;
 
 	// output debugging text
-	printf("----====#####################################################====----\n");
-	printf("DSP_GRES decoded:\n");
-	printf("  Aspect Ratio: %f\n", _aspect);
-	printf("  Horizontal Overscan: %dx\n", _h_scan);
-	printf("  Vertical Overscan: %dx\n", _v_scan);
-	printf("  Real Width: %3.2f\n", real_width);
-	printf("  Real Height: %3.2f\n", real_height);
-	printf("  Standard Graphics BPP: %d\n", _std_bpp);
-	printf("  Buffer Size: %3.2fK\n", req_buffer_size / 1024.0f);	
-	printf("  Buffer Top: $%04X\n", read_word(STD_VID_MAX));
+	if (false)
+	{
+		printf("----====#####################################################====----\n");
+		printf("DSP_GRES decoded:\n");
+		printf("  Aspect Ratio: %f\n", _aspect);
+		printf("  Horizontal Overscan: %dx\n", _h_scan);
+		printf("  Vertical Overscan: %dx\n", _v_scan);
+		printf("  Real Width: %3.2f\n", real_width);
+		printf("  Real Height: %3.2f\n", real_height);
+		printf("  Standard Graphics BPP: %d\n", _std_bpp);
+		printf("  Buffer Size: %3.2fK\n", req_buffer_size / 1024.0f);	
+		printf("  Buffer Top: $%04X\n", read_word(STD_VID_MAX));
+	}
 }
 
 
@@ -949,22 +953,25 @@ void Gfx::_decode_dsp_ext()
 		_renderer_flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE | SDL_RENDERER_PRESENTVSYNC;
 
 	// output debugging text
-	printf("DSP_EXT decoded:\n");
-	printf("  Window Width: %3.2f\n", _window_width);
-	printf("  Window Height: %3.2f\n", _window_height);
-	printf("  Extended Graphics BPP: %d\n", _ext_bpp);
-	printf("  Extended Graphics Enable: %d ", _extended_graphics_enable);
-	(_extended_graphics_enable) ? printf("(ENABLED)\n") : printf("(DISABLED)\n");
-	printf("  Extended Display Mode: %d ", _extended_display_mode);
-	(_extended_display_mode) ? printf("(TILES)\n") : printf("(BITMAP)\n");
-	printf("  Standard Graphics Enable: %d ", _standard_graphics_enable);
-	(_standard_graphics_enable) ? printf("(ENABLED)\n") : printf("(DISABLED)\n");
-	printf("  Standard Display Mode: %d ", _standard_display_mode);
-	(_extended_display_mode) ? printf("(BITMAP)\n") : printf("(TEXT)\n");
-	printf("  Vertical Sync: %d ", _vsync);
-	(_vsync) ? printf("(ON)\n") : printf("(OFF)\n");
-	printf("  Emulation Mode: %d ", _windowed);
-	(_windowed) ? printf("(WINDOWED)\n") : printf("(FULLSCREEN)\n");
+	if (false)
+	{
+		printf("DSP_EXT decoded:\n");
+		printf("  Window Width: %3.2f\n", _window_width);
+		printf("  Window Height: %3.2f\n", _window_height);
+		printf("  Extended Graphics BPP: %d\n", _ext_bpp);
+		printf("  Extended Graphics Enable: %d ", _extended_graphics_enable);
+		(_extended_graphics_enable) ? printf("(ENABLED)\n") : printf("(DISABLED)\n");
+		printf("  Extended Display Mode: %d ", _extended_display_mode);
+		(_extended_display_mode) ? printf("(TILES)\n") : printf("(BITMAP)\n");
+		printf("  Standard Graphics Enable: %d ", _standard_graphics_enable);
+		(_standard_graphics_enable) ? printf("(ENABLED)\n") : printf("(DISABLED)\n");
+		printf("  Standard Display Mode: %d ", _standard_display_mode);
+		(_extended_display_mode) ? printf("(BITMAP)\n") : printf("(TEXT)\n");
+		printf("  Vertical Sync: %d ", _vsync);
+		(_vsync) ? printf("(ON)\n") : printf("(OFF)\n");
+		printf("  Emulation Mode: %d ", _windowed);
+		(_windowed) ? printf("(WINDOWED)\n") : printf("(FULLSCREEN)\n");
+	}
 }
 
 

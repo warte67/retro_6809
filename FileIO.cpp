@@ -159,7 +159,7 @@ void FileIO::write(Word offset, Byte data, bool debug)
 
 void FileIO::_cmd_reset()
 {
-    //printf("FileIO: RESET Command Received\n");
+    // printf("FileIO: RESET Command Received\n");
     if (Bus::m_cpu)
         Bus::m_cpu->reset();
 }
@@ -167,15 +167,16 @@ void FileIO::_cmd_reset()
 void FileIO::_cmd_system_shutdown()
 {
     Bus::s_bIsRunning = false;
-    printf("FileIO: SHUTDOWN Command Received\n");
-    printf("\tShutting Down...\n");
+    // printf("FileIO: SHUTDOWN Command Received\n");
+    // printf("\tShutting Down...\n");
 }
 
 void FileIO::_cmd_system_load_comilation_date()
 {
-    //printf("FileIO: COMPILE DATE Command Received\n");
     filePath = __DATE__;
-    // printf("Compilation Date: %s\n", dir_data.c_str());
+    path_char_pos = 0;
+    // printf("FileIO: COMPILE DATE Command Received\n");
+    // printf("filePath: %s\n", filePath.c_str());
 }
 
 void FileIO::_cmd_new_file_stream()

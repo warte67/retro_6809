@@ -7,6 +7,7 @@
 
 #include "IGfxDevice.h"
 #include "types.h"
+#include <vector>
 
 class Gfx;
 
@@ -31,7 +32,10 @@ public:
 	virtual void OnRender() override;
 
 private:
+	// std::vector<SDL_Texture*> m_texture_blinds;
+	std::vector<bool> m_dirty_blinds;
 
+	void _updateTextBlind(int row);
 };
 
 
