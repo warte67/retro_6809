@@ -33,8 +33,8 @@ public:
 
 private:
 	// std::vector<SDL_Texture*> m_texture_blinds;
-	std::vector<bool> m_dirty_blinds;
-	void _updateTextBlind(int row);
+	// std::vector<bool> m_dirty_blinds;
+	// void _updateTextBlind(int row);
 	void _updateTextScreen();
 };
 
