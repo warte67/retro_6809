@@ -84,6 +84,10 @@ void GfxText::OnUpdate(float fElapsedTime)
 	if (!m_gfx->_standard_graphics_enable)
 		return;
 
+	// // full screen method
+	// _updateTextScreen();
+	// return;
+
 	// blinds method
 	const float _delay = 0.01666667f;
 	static float _acc = fElapsedTime;
@@ -91,14 +95,18 @@ void GfxText::OnUpdate(float fElapsedTime)
 	if (_acc > fElapsedTime + _delay)
 	{
 		_acc -= _delay;
-		// blinds method
-		if (m_dirty_blinds.size())
+
+		if (true)
+			_updateTextScreen();
+		else
 		{
-			for (int i=0; i<m_dirty_blinds.size(); i++)
+			// blinds method
+			if (m_dirty_blinds.size())
 			{
-				if (m_dirty_blinds[i])
+				for (int i=0; i<m_dirty_blinds.size(); i++)
 				{
-					_updateTextBlind(i);
+					if (m_dirty_blinds[i])
+						_updateTextBlind(i);
 					m_dirty_blinds[i] = false;
 				}
 			}
@@ -154,12 +162,11 @@ void GfxText::_updateTextBlind(int row)
 }
 
 
-/******
-void Gfx::_updateTextScreen() 
+void GfxText::_updateTextScreen() 
 {
     void *pixels;
     int pitch;
-    if (SDL_LockTexture(_std_texture, NULL, &pixels, &pitch) < 0) {
+    if (SDL_LockTexture(m_gfx->_std_texture, NULL, &pixels, &pitch) < 0) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't lock texture: %s\n", SDL_GetError());
         Bus::Error("");
     }
@@ -174,7 +181,7 @@ void Gfx::_updateTextScreen()
 			Byte fg = at >> 4;
 			Byte bg = at & 0x0f;
 			Word index = addr - STD_VID_MIN;
-			Byte width = _texture_width / 8;
+			Byte width = m_gfx->_texture_width / 8;
 			int x = ((index / 2) % width) * 8;
 			int y = ((index / 2) / width) * 8;
 			for (int v = 0; v < 8; v++)
@@ -182,14 +189,16 @@ void Gfx::_updateTextScreen()
 				for (int h = 0; h < 8; h++)
 				{
 					int color = bg;
-					if (_dsp_glyph_data[ch][v] & (1 << 7 - h))
+					if (m_gfx->_dsp_glyph_data[ch][v] & (1 << 7 - h))
 						color = fg;
-					_setPixel_unlocked(pixels, pitch, x + h, y + v, color);
+					m_gfx->_setPixel_unlocked(pixels, pitch, x + h, y + v, color);
 				}
 			}
 		}
-        SDL_UnlockTexture(_std_texture); 
+        SDL_UnlockTexture(m_gfx->_std_texture); 
     }
+	// render to the screen texture
+	SDL_SetRenderTarget(m_gfx->_renderer, m_gfx->_render_target);
+	SDL_RenderCopy(m_gfx->_renderer, m_gfx->_std_texture, NULL, NULL);			
 } 
- ******/
 
