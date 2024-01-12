@@ -57,15 +57,6 @@ void GfxText::OnActivate()
 {
 //	printf("%s::OnActivate()\n", Name().c_str());
 
-	// // create horizontal blinds
-	// for (int t=0; t<m_gfx->_texture_height/8;t++)
-	// {
-	// 	m_texture_blinds.push_back(SDL_CreateTexture(m_gfx->_renderer, SDL_PIXELFORMAT_ARGB4444,
-	//  		SDL_TEXTUREACCESS_STREAMING, m_gfx->_texture_width, 8));
-	// 	m_texture_dirty.push_back(true);
-	// }
-	// std::cout << "OnActivate size: " << m_texture_blinds.size() << std::endl;
-
 	for (int t=0; t<m_gfx->_texture_height/8;t++)
 		m_dirty_blinds.push_back(true);
 }
@@ -73,15 +64,6 @@ void GfxText::OnActivate()
 void GfxText::OnDeactivate()
 {
 //	printf("%s::OnDeactivate()\n", Name().c_str());
-
-	// if (m_texture_blinds.size()>0)
-	// {
-	// 	for (auto a : m_texture_blinds)
-	// 		SDL_DestroyTexture(a);
-	// 	m_texture_blinds.clear();
-	// 	m_texture_dirty.clear();
-	// }
-	// std::cout << "OnDeactivate size: " << m_texture_blinds.size() << std::endl;
 
 	if (m_dirty_blinds.size()>0)
 		for (auto a : m_dirty_blinds)
@@ -102,39 +84,24 @@ void GfxText::OnUpdate(float fElapsedTime)
 	if (!m_gfx->_standard_graphics_enable)
 		return;
 
-	const float _delay = 0.033333f;
+	// blinds method
+	const float _delay = 0.01666667f;
 	static float _acc = fElapsedTime;
 	_acc += fElapsedTime;
 	if (_acc > fElapsedTime + _delay)
 	{
 		_acc -= _delay;
-		if (Bus::bCpuEnabled)
+		// blinds method
+		if (m_dirty_blinds.size())
 		{
-			Bus::bCpuEnabled = false;
-			 m_gfx->_display_standard();
-			//_updateTextBlind(0);
-
-			// START New Update Code
-
-			if (m_dirty_blinds.size())
+			for (int i=0; i<m_dirty_blinds.size(); i++)
 			{
-				for (int i=0; i<m_dirty_blinds.size(); i++)
+				if (m_dirty_blinds[i])
 				{
-					// dirty blind, update the screen texture
-					if (m_dirty_blinds[i])
-					{
-						// render to this blind
-						// _updateTextBlind(i);
-						// m_gfx->_display_standard();
-
-						// m_dirty_blinds[i] = false;
-					}
+					_updateTextBlind(i);
+					m_dirty_blinds[i] = false;
 				}
 			}
-
-			// END New Update Code
-
-			Bus::bCpuEnabled = true;
 		}
 	}
 }
@@ -146,11 +113,6 @@ void GfxText::OnRender()
 
 void GfxText::_updateTextBlind(int row)
 {
-	// Word gw = m_gfx->_texture_width / 4;	// character + attribute
-	// Word offset = STD_VID_MIN + (row * gw);
-	m_gfx->_updateTextScreen();
-	return;
-
     void *pixels;
     int pitch;
     if (SDL_LockTexture(m_gfx->_std_texture, NULL, &pixels, &pitch) < 0) {
@@ -159,9 +121,11 @@ void GfxText::_updateTextBlind(int row)
     }
     else
     {		
-		Word end = Bus::Read_Word(STD_VID_MAX);
-		Word addr = STD_VID_MIN;
-		for (; addr <= end; addr += 2)
+		Word row_len = m_gfx->_texture_width / 4;
+		Word addr = STD_VID_MIN + (row * row_len);	// character + attribute
+		Word end = addr + row_len;
+
+		for (; addr < end; addr += 2)
 		{
 			Byte ch = Bus::Read(addr, true);
 			Byte at = Bus::Read(addr + 1, true);
@@ -184,7 +148,9 @@ void GfxText::_updateTextBlind(int row)
 		}
         SDL_UnlockTexture(m_gfx->_std_texture); 
     }
-
+	// render to the screen texture
+	SDL_SetRenderTarget(m_gfx->_renderer, m_gfx->_render_target);
+	SDL_RenderCopy(m_gfx->_renderer, m_gfx->_std_texture, NULL, NULL);			
 }
 
 
