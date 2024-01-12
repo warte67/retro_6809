@@ -4,7 +4,8 @@
                       ; *     a.k.a. The Basic Input and Output System (BIOS)                 *
                       ; ***********************************************************************
                       ; *                                                                     *
-                      ; *     LINUX:          ./asm/build.sh asm/kernel_f000                  *
+                      ; *     LINUX:          cd asm                                          *
+                      ; *                     sh build.sh kernel_f000                         *
                       ; *             or                                                      *       
                       ; *     WINDOWS:        asm kernel_f000                                 *
                       ; *                                                                     *
@@ -475,7 +476,7 @@ F054  BDF46B                          jsr     cls
 F057  8EFE00                          ldx     #prompt0                
 F05A  BDF420                          jsr     line_out        
                       
-F05D  8EFE14                          ldx     #prompt1
+F05D  8EFE1D                          ldx     #prompt1
 F060  BDF420                          jsr     line_out        
                       
                                       ; fetch compilation date
@@ -487,11 +488,11 @@ F06D  BDF430                          jsr     char_out
 F070  20F6                            bra     0b
 F072  860A            2               lda     #$0a
 F074  BDF430                          jsr     char_out
-F077  8EFE2A                          ldx     #prompt2
+F077  8EFE33                          ldx     #prompt2
 F07A  BDF420                          jsr     line_out
                       
 F07D                  main_user_input_loop
-F07D  8EFE4D                          ldx     #ready_prompt           
+F07D  8EFE56                          ldx     #ready_prompt           
 F080  BDF420                          jsr     line_out
 F083                  1
 F083  BDF36E                          jsr     line_edit       
@@ -1183,10 +1184,10 @@ F4F7  39                              rts                     ; return
                       
                       
 FE00                                  org     $fe00
-FE00  526574726F20363830392076302E323161200A00 prompt0         fcn     "Retro 6809 v0.21a \n"
-FE14  456D756C61746F7220636F6D70696C6564206F6E2000 prompt1         fcn     "Emulator compiled on "
-FE2A  436F70797269676874202843292032303233204279204A6179204661726965730A0A00 prompt2         fcn     "Copyright (C) 2023 By Jay Faries\n\n"
-FE4D  52656164790A00  ready_prompt    fcn     "Ready\n"
+FE00  526574726F2036383039204B65726E656C20762E302E32322E33200A00 prompt0         fcn     "Retro 6809 Kernel v.0.22.3 \n"
+FE1D  456D756C61746F7220636F6D70696C6564206F6E2000 prompt1         fcn     "Emulator compiled on "
+FE33  436F70797269676874202843292032303234204279204A6179204661726965730A0A00 prompt2         fcn     "Copyright (C) 2024 By Jay Faries\n\n"
+FE56  52656164790A00  ready_prompt    fcn     "Ready\n"
                       
                       
                       

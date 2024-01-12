@@ -4,7 +4,8 @@
 ; *	a.k.a. The Basic Input and Output System (BIOS)			*
 ; ***********************************************************************
 ; *									*
-; *  	LINUX: 		./asm/build.sh asm/kernel_f000			*
+; *  	LINUX: 		cd asm						*
+; *			sh build.sh kernel_f000				*
 ; *		or							*	
 ; *	WINDOWS:	asm kernel_f000					*
 ; *									*
@@ -810,9 +811,9 @@ cursor_address	; Update CSR_ADDR and return the cursor address in X
 
 
 		org	$fe00
-prompt0		fcn	"Retro 6809 v0.21a \n"
+prompt0		fcn	"Retro 6809 Kernel v.0.22.3 \n"
 prompt1		fcn	"Emulator compiled on "
-prompt2		fcn	"Copyright (C) 2023 By Jay Faries\n\n"
+prompt2		fcn	"Copyright (C) 2024 By Jay Faries\n\n"
 ready_prompt	fcn	"Ready\n"
 
 
