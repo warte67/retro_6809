@@ -197,9 +197,9 @@ FFFE                  HARD_RESET      equ     65534
 1C81                  JOYS_1_LTX      equ     7297
 F02C                  NMI_start       equ     61484
 000E                  SOFT_RESET      equ     14
-FE2A                  prompt2 equ     65066
+FE33                  prompt2 equ     65075
 0016                  EDLIN_ANCH      equ     22
-FE14                  prompt1 equ     65044
+FE1D                  prompt1 equ     65053
 F254                  do_exit equ     62036
 000A                  MOP_IS_NAN      equ     10
 1C84                  JOYS_1_RTY      equ     7300
@@ -272,7 +272,7 @@ F420                  line_out        equ     62496
 0002                  MOP_IS_EQUAL    equ     2
 1C3D                  EDT_ENABLE      equ     7229
 000E                  FC_GETPATH      equ     14
-FE4D                  ready_prompt    equ     65101
+FE56                  ready_prompt    equ     65110
 1C1F                  CSR_XOFS        equ     7199
 002D                  MOP_LGAMMA      equ     45
 1C2B                  CHAR_POP        equ     7211
@@ -289,34 +289,52 @@ F430                  char_out        equ     62512
                       
 3000                                  org     $3000
 3000                  start           
+3000  B60015                          lda     TXT_ATTR
+                      
                                       ; crank the CPU speed some
-3000  860E                            lda     #$0E    
-3002  B71C02                          sta     SYS_STATE
+3003  860E                            lda     #$0E    
+3005  B71C02                          sta     SYS_STATE
                                       ; set DSP_GRES
-3005  8680                            lda     #$80
-3007  B71C08                          sta     DSP_GRES
+                      
+                      ;               lda     #$00            ; 2-color mode
+                      ;               lda     #$40            ; 4-color mode
+3008  8680                            lda     #$80            ; 16-color mode
+                      ;               lda     #$C0            ; 256-color mode (16)
+                      
+300A  B71C08                          sta     DSP_GRES
                                       ; set DSP_EXT
-300A  B61C09                          lda     DSP_EXT
-300D  8403                            anda    #0b00000011
-300F  8A8C                            ora     #0b10001100
-3011  B71C09                          sta     DSP_EXT
+300D  B61C09                          lda     DSP_EXT
+3010  8403                            anda    #0b00000011     ; change to standard ...
+3012  8A8C                            ora     #0b10001100     ; ... bitmap mode
+3014  B71C09                          sta     DSP_EXT
                       
-3014  86C5                            lda     #$c5
-3016  B70015                          sta     TXT_ATTR
+                      ; should now be in standard bitmap graphics mode
                       
-3019  8E302D                          ldx     #test_str
-301C  BDF420                          jsr     line_out
+3017  8600                            lda     #$00
+3019  8E0400                          ldx     #STD_VID_MIN
+301C  A780            1               sta     ,x+
+301E  4C                              inca
+301F  8C1C00                          cmpx    #STD_VID_MAX
+3022  2DF8                            blt     1b
+3024                  2
+3024  8E0400                          ldx     #STD_VID_MIN
+3027  6C80            1               inc     ,x+
+3029  8C1C00                          cmpx    #STD_VID_MAX
+302C  2DF9                            blt     1b
                       
-301F                  1       ; wait for a key press
-301F  B61C29                          lda     CHAR_Q_LEN
-3022  27FB                            beq     1b
-3024                  2       ; clean up the queue
-3024  B61C2A                          lda     CHAR_SCAN
-3027  2603                            bne     3f
-3029  B61C2B                          lda     CHAR_POP
-302C                  3       ; clean up and return
-302C  39                              rts
+                              ; wait for a key press
+302E  B61C29                          lda     CHAR_Q_LEN
+3031  27F1                            beq     2b
+                              ; clean up the queue
+3033  B61C2A                          lda     CHAR_SCAN
+3036  2603                            bne     3f
+3038  B61C2B                          lda     CHAR_POP
+303B                  3       ; clean up and return
+                      ;               puls    A
+                      ;               sta     TXT_ATTR
+303B  BDF46B                          jsr     cls
+303E  39                              rts
                       
                       
                       
-302D  0A546573743A202048656C6C6F20576F726C640A70726573732061206B657920746F20657869742E2E2E0A0A00 test_str        fcn     "\nTest:  Hello World\npress a key to exit...\n\n";
+303F  0A546573743A202048656C6C6F20576F726C640A70726573732061206B657920746F20657869742E2E2E0A0A00 test_str        fcn     "\nTest:  Hello World\npress a key to exit...\n\n";

@@ -31,6 +31,7 @@ public:
 	virtual void OnRender() override;
 
 private:
+	void _updateBitmapScreen();
 
 };
 

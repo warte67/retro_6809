@@ -270,10 +270,8 @@ do_exec		; EXEC $####
 	; restore the system settings
 		puls	A
 		sta	SYS_STATE
-
 		puls	A
 		sta	TXT_ATTR
-
 		puls	A
 		cmpa	DSP_EXT
 		beq	1f
@@ -284,6 +282,7 @@ do_exec		; EXEC $####
 		beq	2f
 		sta	DSP_GRES
 2
+;		jsr 	cls
 		rts
 
 do_reset	; RESET

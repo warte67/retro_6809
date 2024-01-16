@@ -14,9 +14,9 @@
 //    $1C90 - $1C9D FileIO
 //    $1C9E - $1CBC Math
 //    $1CBD - $2FFF RESERVED
-//    $3000 - $AFFF USER_RAM
-//    $B000 - $CFFF PAGED_RAM
-//    $D000 - $EFFF PAGED_ROM
+//    $3000 - $AFFF USER_RAM    (32k)
+//    $B000 - $CFFF PAGED_MEM   (8k)
+//    $D000 - $EFFF PAGED_MEM   (8k)
 //    $F000 - $FFFF KERNEL_ROM
 
 enum MEMMAP

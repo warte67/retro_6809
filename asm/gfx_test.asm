@@ -5,32 +5,50 @@
 
 		org	$3000
 start		
+		lda	TXT_ATTR
+
 		; crank the CPU speed some
 		lda	#$0E	
 		sta	SYS_STATE
 		; set DSP_GRES
-		lda	#$80
+
+;		lda	#$00		; 2-color mode
+;		lda	#$40		; 4-color mode
+		lda	#$80		; 16-color mode
+;		lda	#$C0		; 256-color mode (16)
+
 		sta	DSP_GRES
 		; set DSP_EXT
 		lda	DSP_EXT
-		anda	#0b00000011
-		ora	#0b10001100
+		anda	#0b00000011	; change to standard ...
+		ora	#0b10001100	; ... bitmap mode
 		sta	DSP_EXT
 
-		lda	#$c5
-		sta	TXT_ATTR
+; should now be in standard bitmap graphics mode
 
-		ldx	#test_str
-		jsr	line_out
+		lda	#$00
+		ldx	#STD_VID_MIN
+1		sta	,x+
+		inca
+		cmpx	#STD_VID_MAX
+		blt	1b
+2
+		ldx	#STD_VID_MIN
+1		inc	,x+
+		cmpx	#STD_VID_MAX
+		blt	1b
 
-1	; wait for a key press
+	; wait for a key press
 		lda	CHAR_Q_LEN
-		beq	1b
-2	; clean up the queue
+		beq	2b
+	; clean up the queue
 		lda	CHAR_SCAN
 		bne	3f
 		lda	CHAR_POP
 3	; clean up and return
+;		puls	A
+;		sta	TXT_ATTR
+		jsr	cls
 		rts
 
 

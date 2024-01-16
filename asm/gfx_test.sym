@@ -198,9 +198,9 @@ JOYS_1_LTX	equ	7297
 NMI_start	equ	61484
 EDLIN_ANCH	equ	22
 SOFT_RESET	equ	14
-prompt2	equ	65066
+prompt2	equ	65075
 do_exit	equ	62036
-prompt1	equ	65044
+prompt1	equ	65053
 MOP_FMAX	equ	19
 MOP_IS_NAN	equ	10
 JOYS_1_RTY	equ	7300
@@ -238,7 +238,7 @@ SOFT_SWI2	equ	4
 decode_command_token	equ	62148
 dct_done	equ	62196
 dctfa_done	equ	62220
-test_str	equ	12333
+test_str	equ	12351
 KRNL_NMI	equ	61464
 KRNL_UNDEF	equ	61472
 DSP_TXT_ROWS	equ	7179
@@ -272,7 +272,7 @@ MOP_LOG1P	equ	28
 FIO_STREAM	equ	7314
 MOP_IS_EQUAL	equ	2
 EDT_ENABLE	equ	7229
-ready_prompt	equ	65101
+ready_prompt	equ	65110
 CSR_XOFS	equ	7199
 FC_GETPATH	equ	14
 CHAR_POP	equ	7211

@@ -643,10 +643,8 @@ F1D3                  3
                               ; restore the system settings
 F1D3  3502                            puls    A
 F1D5  B71C02                          sta     SYS_STATE
-                      
 F1D8  3502                            puls    A
 F1DA  B70015                          sta     TXT_ATTR
-                      
 F1DD  3502                            puls    A
 F1DF  B11C09                          cmpa    DSP_EXT
 F1E2  2703                            beq     1f
@@ -657,6 +655,7 @@ F1E9  B11C08                          cmpa    DSP_GRES
 F1EC  2703                            beq     2f
 F1EE  B71C08                          sta     DSP_GRES
 F1F1                  2
+                      ;               jsr     cls
 F1F1  39                              rts
                       
 F1F2                  do_reset        ; RESET
