@@ -214,6 +214,17 @@ Word Gfx::OnAttach(Word nextAddr)
 	DisplayEnum("SYS_TIMER", nextAddr, " (Word) Increments at 0.46875 hz");
 	nextAddr += 2;
 
+	//		DisplayEnum("", 0, "");
+	//		DisplayEnum("DSP_MODE", nextAddr, " (Byte) Display Mode Register");
+	//		DisplayEnum("", 0, "DSP_GRES: FEDC.BAAA");
+	//		DisplayEnum("", 0, "    AA:00 = 0-7 Graphics Display Mode:");
+	//		DisplayEnum("", 0, "     B:EXT Enable Extended Graphics");
+	//		DisplayEnum("", 0, "     C:EXT 0=TILE MODE, 1=BITMAP MODE");
+	//		DisplayEnum("", 0, "     D:STD Enable Standard Graphics");
+	//		DisplayEnum("", 0, "     E:STD 0=TEXT MODE, 1=BITMAP MODE");
+	//		DisplayEnum("", 0, "     F:ERROR 0=MODE VALID, 1=INVALID MODE");
+
+
     DisplayEnum("", 0, "");
     DisplayEnum("DSP_GRES", nextAddr, " (Byte) Screen Resolution Register");
     DisplayEnum("", 0, "DSP_GRES: BBRR.HHVV");

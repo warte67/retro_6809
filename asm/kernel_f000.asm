@@ -83,11 +83,11 @@ kernel_start
 		stu	VECT_EXEC
 		ldu	#SSTACK_TOP
 
-		lda	#$0C
+		lda	#$0A		; $0A ~= 1.0 mhz.
 		sta	SYS_STATE
 
 		; build DSP_GRES
-		lda	#$8E
+		lda	#$8E		; $8E == 4-bpp, 16:9 aspect, 512x192 resolution
 		sta	DSP_GRES
 
 		; build DSP_EXT
@@ -810,7 +810,7 @@ cursor_address	; Update CSR_ADDR and return the cursor address in X
 
 
 		org	$fe00
-prompt0		fcn	"Retro 6809 Kernel v.0.22.4 \n"
+prompt0		fcn	"Retro 6809 Kernel v.0.22.5 \n"
 prompt1		fcn	"Emulator compiled on "
 prompt2		fcn	"Copyright (C) 2024 By Jay Faries\n\n"
 ready_prompt	fcn	"Ready\n"

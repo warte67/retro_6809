@@ -456,11 +456,11 @@ F034  CE0000                          ldu     #0
 F037  FF0000                          stu     VECT_EXEC
 F03A  CE0400                          ldu     #SSTACK_TOP
                       
-F03D  860C                            lda     #$0C
+F03D  860A                            lda     #$0A            ; $0A ~= 1.0 mhz.
 F03F  B71C02                          sta     SYS_STATE
                       
                                       ; build DSP_GRES
-F042  868E                            lda     #$8E
+F042  868E                            lda     #$8E            ; $8E == 4-bpp, 16:9 aspect, 512x192 resolution
 F044  B71C08                          sta     DSP_GRES
                       
                                       ; build DSP_EXT
@@ -1183,7 +1183,7 @@ F4F7  39                              rts                     ; return
                       
                       
 FE00                                  org     $fe00
-FE00  526574726F2036383039204B65726E656C20762E302E32322E34200A00 prompt0         fcn     "Retro 6809 Kernel v.0.22.4 \n"
+FE00  526574726F2036383039204B65726E656C20762E302E32322E35200A00 prompt0         fcn     "Retro 6809 Kernel v.0.22.5 \n"
 FE1D  456D756C61746F7220636F6D70696C6564206F6E2000 prompt1         fcn     "Emulator compiled on "
 FE33  436F70797269676874202843292032303234204279204A6179204661726965730A0A00 prompt2         fcn     "Copyright (C) 2024 By Jay Faries\n\n"
 FE56  52656164790A00  ready_prompt    fcn     "Ready\n"
