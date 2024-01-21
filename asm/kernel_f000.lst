@@ -1183,7 +1183,7 @@ F4F7  39                              rts                     ; return
                       
                       
 FE00                                  org     $fe00
-FE00  526574726F2036383039204B65726E656C20762E302E32322E35200A00 prompt0         fcn     "Retro 6809 Kernel v.0.22.5 \n"
+FE00  526574726F2036383039204B65726E656C20762E302E32322E36200A00 prompt0         fcn     "Retro 6809 Kernel v.0.22.6 \n"
 FE1D  456D756C61746F7220636F6D70696C6564206F6E2000 prompt1         fcn     "Emulator compiled on "
 FE33  436F70797269676874202843292032303234204279204A6179204661726965730A0A00 prompt2         fcn     "Copyright (C) 2024 By Jay Faries\n\n"
 FE56  52656164790A00  ready_prompt    fcn     "Ready\n"
