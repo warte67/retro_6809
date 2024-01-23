@@ -289,52 +289,64 @@ F430                  char_out        equ     62512
                       
 3000                                  org     $3000
 3000                  start           
-3000  B60015                          lda     TXT_ATTR
+3000  2002                            bra     begin
+3002  808C            last_gmode      fdb     $808C
+                      
+3004                  begin
+3004  B60015                          lda     TXT_ATTR
                       
                                       ; crank the CPU speed some
-3003  860E                            lda     #$0E    
-3005  B71C02                          sta     SYS_STATE
-                                      ; set DSP_GRES
+3007  860E                            lda     #$0E    
+3009  B71C02                          sta     SYS_STATE
                       
+                                      ; set up the default display mode
                       ;               lda     #$00            ; 2-color mode
                       ;               lda     #$40            ; 4-color mode
-3008  8680                            lda     #$80            ; 16-color mode
+300C  8680                            lda     #$80            ; 16-color mode
                       ;               lda     #$C0            ; 256-color mode (16)
-                      
-300A  B71C08                          sta     DSP_GRES
+300E  B71C08                          sta     DSP_GRES
                                       ; set DSP_EXT
-300D  B61C09                          lda     DSP_EXT
-3010  8403                            anda    #0b00000011     ; change to standard ...
-3012  8A8C                            ora     #0b10001100     ; ... bitmap mode
-3014  B71C09                          sta     DSP_EXT
+3011  B61C09                          lda     DSP_EXT
+3014  8403                            anda    #0b00000011     ; change to standard ...
+3016  8A8C                            ora     #0b10001100     ; ... bitmap mode
+3018  B71C09                          sta     DSP_EXT
+                      
+301B                  3
+301B  FC1C08                          ldd     DSP_GRES
+301E  FD3002                          std     last_gmode
                       
                       ; should now be in standard bitmap graphics mode
                       
-3017  8600                            lda     #$00
-3019  8E0400                          ldx     #STD_VID_MIN
-301C  A780            1               sta     ,x+
-301E  4C                              inca
-301F  8C1C00                          cmpx    #STD_VID_MAX
-3022  2DF8                            blt     1b
-3024                  2
-3024  8E0400                          ldx     #STD_VID_MIN
-3027  6C80            1               inc     ,x+
+3021  8600                            lda     #$00
+3023  8E0400                          ldx     #STD_VID_MIN
+3026  A780            1               sta     ,x+
+3028  4C                              inca
 3029  8C1C00                          cmpx    #STD_VID_MAX
-302C  2DF9                            blt     1b
+302C  2DF8                            blt     1b
+302E                  2
+302E  8E0400                          ldx     #STD_VID_MIN
+3031  6C80            1               inc     ,x+
+3033  8C1C00                          cmpx    #STD_VID_MAX
+3036  2DF9                            blt     1b
+                      
+                                      ; restart if the graphics mode has changed
+3038  FC1C08                          ldd     DSP_GRES
+303B  10B33002                        cmpd    last_gmode
+303F  26DA                            bne     3b              
                       
                               ; wait for a key press
-302E  B61C29                          lda     CHAR_Q_LEN
-3031  27F1                            beq     2b
+3041  B61C29                          lda     CHAR_Q_LEN
+3044  27E8                            beq     2b
                               ; clean up the queue
-3033  B61C2A                          lda     CHAR_SCAN
-3036  2603                            bne     3f
-3038  B61C2B                          lda     CHAR_POP
-303B                  3       ; clean up and return
+3046  B61C2A                          lda     CHAR_SCAN
+3049  2603                            bne     3f
+304B  B61C2B                          lda     CHAR_POP
+304E                  3       ; clean up and return
                       ;               puls    A
                       ;               sta     TXT_ATTR
-303B  BDF46B                          jsr     cls
-303E  39                              rts
+304E  BDF46B                          jsr     cls
+3051  39                              rts
                       
                       
                       
-303F  0A546573743A202048656C6C6F20576F726C640A70726573732061206B657920746F20657869742E2E2E0A0A00 test_str        fcn     "\nTest:  Hello World\npress a key to exit...\n\n";
+3052  0A546573743A202048656C6C6F20576F726C640A70726573732061206B657920746F20657869742E2E2E0A0A00 test_str        fcn     "\nTest:  Hello World\npress a key to exit...\n\n";

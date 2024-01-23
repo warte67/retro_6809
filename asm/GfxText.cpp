@@ -54,9 +54,9 @@ void GfxText::OnUpdate(float fElapsedTime)
 {
 //	printf("%s::OnUpdate()\n", Name().c_str());
 
-	if (!m_gfx->_standard_graphics_enable)
-		return;
 	if (m_gfx->_standard_display_mode)
+		return;
+	if (!m_gfx->_standard_graphics_enable)
 		return;
 	const float _delay = 0.01666667f;
 	static float _acc = fElapsedTime;

@@ -5,24 +5,31 @@
 
 		org	$3000
 start		
+		bra 	begin
+last_gmode	fdb	$808C
+
+begin
 		lda	TXT_ATTR
 
 		; crank the CPU speed some
 		lda	#$0E	
 		sta	SYS_STATE
-		; set DSP_GRES
 
+		; set up the default display mode
 ;		lda	#$00		; 2-color mode
 ;		lda	#$40		; 4-color mode
 		lda	#$80		; 16-color mode
 ;		lda	#$C0		; 256-color mode (16)
-
 		sta	DSP_GRES
 		; set DSP_EXT
 		lda	DSP_EXT
 		anda	#0b00000011	; change to standard ...
 		ora	#0b10001100	; ... bitmap mode
 		sta	DSP_EXT
+
+3
+		ldd	DSP_GRES
+		std	last_gmode
 
 ; should now be in standard bitmap graphics mode
 
@@ -37,6 +44,11 @@ start
 1		inc	,x+
 		cmpx	#STD_VID_MAX
 		blt	1b
+
+		; restart if the graphics mode has changed
+		ldd	DSP_GRES
+		cmpd	last_gmode
+		bne	3b		
 
 	; wait for a key press
 		lda	CHAR_Q_LEN

@@ -16,6 +16,7 @@ HARD_SWI3	equ	65522
 main_user_input_loop	equ	61565
 MOP_IS_GREATER	equ	5
 HARD_SWI2	equ	65524
+begin	equ	12292
 CSR_YPOS	equ	7197
 dct_cmd_found	equ	62191
 var2	equ	26
@@ -238,7 +239,7 @@ SOFT_SWI2	equ	4
 decode_command_token	equ	62148
 dct_done	equ	62196
 dctfa_done	equ	62220
-test_str	equ	12351
+test_str	equ	12370
 KRNL_NMI	equ	61464
 KRNL_UNDEF	equ	61472
 DSP_TXT_ROWS	equ	7179
@@ -247,6 +248,7 @@ MOP_TAN	equ	35
 FIO_ERR_FLAGS	equ	7312
 MOP_REMAINDER	equ	18
 CMD_LN_TOKEN	equ	24
+last_gmode	equ	12290
 RESET_start	equ	61486
 JOYS_2_BTN	equ	7303
 CSR_END	equ	7209
