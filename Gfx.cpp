@@ -709,7 +709,6 @@ void Gfx::OnInit()
 				}
 				int ext_colors = 1<<ext_bpp;	if (ext_colors==1) ext_colors = 0;
 				int std_colors = 1<<std_bpp;	if (std_colors==1) std_colors = 0;
-
 				if (ext_colors>0 && std_colors>0)
 					printf("   %3d      %3d", ext_colors, std_colors);
 				else if (ext_colors>0)
@@ -720,9 +719,9 @@ void Gfx::OnInit()
 				int col = _scr_display_modes[t].res_width / 8;
 				int row = _scr_display_modes[t].res_height / 8;
 				if ((col*row)*2 > VID_BUFFER_SIZE)
-					printf("            \n");
+					printf("\n");
 				else
-					printf("    %3d x%3d\n", col, row);
+					printf("    %3d x%3d  %4d %3dx\n", col, row, (col*row*2), VID_BUFFER_SIZE/(col*row*2));
 			}
 		}
 	// END DEBUGGING
