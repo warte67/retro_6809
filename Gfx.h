@@ -68,9 +68,9 @@ class Gfx : public Device
             Word res_height;    // texture height
             Byte pixel_width;   // horizontal pixel overscan
             Byte pixel_height;  // vertical pixel overscan
-            bool isStdValid;    // is standard bitmap mode valid?
-            bool isExtValid;    // is extended bitmap mode valid?
-            bool isTxtValid;    // is text mode valid?
+            bool is_std_valid;    // is standard bitmap mode valid?
+            bool is_ext_valid;    // is extended bitmap mode valid?
+            bool is_txt_valid;    // is text mode valid?
         };
         std::vector<SCR_DISPLAY_MODE> _scr_display_modes{};
 

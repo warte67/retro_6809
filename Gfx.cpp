@@ -676,19 +676,21 @@ void Gfx::OnInit()
 	_scr_display_modes.push_back({ 7,  128,   68, 5, 7,  true,  true,  true });		// $FE
 	_scr_display_modes.push_back({ 7,  128,   60, 5, 8,  true,  true,  true });		// $FF
 
-	for (int t=0; t<256; t++)
-	{
-		printf("I:%2X  W:%4d, H:%4d PW:%2d PH:%2d S:%1d E:%1d T:%d \n", 
-			t, 
-			_scr_display_modes[t].res_width, 
-			_scr_display_modes[t].res_height,
-			_scr_display_modes[t].pixel_width,
-			_scr_display_modes[t].pixel_height,
-			_scr_display_modes[t].isStdValid,
-			_scr_display_modes[t].isExtValid,
-			_scr_display_modes[t].isTxtValid
-		);
+	if (false) {
+		for (int t=0; t<256; t++) 	{
+			printf("I:%2X  W:%4d, H:%4d PW:%2d PH:%2d S:%1d E:%1d T:%d \n", 
+				t, 
+				_scr_display_modes[t].res_width, 
+				_scr_display_modes[t].res_height,
+				_scr_display_modes[t].pixel_width,
+				_scr_display_modes[t].pixel_height,
+				_scr_display_modes[t].is_std_valid,
+				_scr_display_modes[t].is_ext_valid,
+				_scr_display_modes[t].is_txt_valid
+			);
+		}
 	}
+
 
 	// initialize the default color palette
 	if (_palette.size() == 0)
