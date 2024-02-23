@@ -69,7 +69,6 @@ class Gfx : public Device
             Byte pixel_width;   // horizontal pixel overscan
             Byte pixel_height;  // vertical pixel overscan
             bool is_std_valid;    // is standard bitmap mode valid?
-            bool is_ext_valid;    // is extended bitmap mode valid?
             bool is_txt_valid;    // is text mode valid?
         };
         std::vector<SCR_DISPLAY_MODE> _scr_display_modes{};
@@ -78,27 +77,28 @@ class Gfx : public Device
             // ToDo: replace these as needed
                 const float _base_texture_width = 128.0f;		// 1024x768 basic screen timing       
 
-                float _window_width = 1280.0f;
-                float _window_height = 0;			// invalid default
-                float _aspect = 1.0f;				// invalid default		
-                Uint32 _window_flags = 0;			// invalid default
-                Uint32 _renderer_flags = 0;			// invalid default
-                int _texture_width = 0;				// invalid default
-                int _texture_height = 0;			// invalid default
+                float _window_width = 1280.0f;          // screen/window raw display width
+                float _window_height = 0;			    // screen/window raw display height
+                float _aspect = 1.0f;				    // screen aspect ratio (not resolution aspect)
+                Uint32 _window_flags = 0;			    // SDL window flags
+                Uint32 _renderer_flags = 0;			    // SDL renderer flags
+                int _texture_width = 0;				    // texture width, aka. display resolution width
+                int _texture_height = 0;			    // texture height, aka. display resolution height
                 SDL_Texture* _render_target = nullptr;	// render target texture 
                 SDL_Texture* _ext_texture 	= nullptr;	// extended texture
                 SDL_Texture* _std_texture 	= nullptr;	// standard texture
-                SDL_Window* _window 	= nullptr;	// invalid default
-                SDL_Renderer* _renderer = nullptr;	// invalid default
-                Byte _ext_bpp = 0;					// invalid default
-                Byte _std_bpp = 0;					// invalid default
-                Byte _h_scan = 0;			        // invalid default
-                Byte _v_scan = 0;			        // invalid default
-                bool _vsync = false;
-                bool _windowed = false;
+                SDL_Window* _window 	= nullptr;	    // SDL Window pointer
+                SDL_Renderer* _renderer = nullptr;	    // SDL Renderer pointer
+                Byte _ext_bpp = 0;					    // extended bits per pixel
+                Byte _std_bpp = 0;					    // standard bits per pixel
+                Byte _pixel_w = 0;			            // pixel width
+                Byte _pixel_h = 0;			            // pixel height
+                bool _vsync = false;                    // 0:unmetered, 1:use vsync
+                bool _windowed = false;                 // 0:fullscreen, 1:windowed
+
                 bool _extended_graphics_enable = false;
                 bool _extended_display_mode = false;
-                bool _standard_graphics_enable = false; // invalid default
+                bool _standard_graphics_enable = false;     
                 bool _standard_display_mode = false;		// 0:text, 1:graphics
             // END ToDo:
 

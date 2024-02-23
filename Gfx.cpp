@@ -226,7 +226,7 @@ Word Gfx::OnAttach(Word nextAddr)
 
 
     DisplayEnum("", 0, "");
-    DisplayEnum("DSP_GRES", nextAddr, " (Byte) Screen Resolution Register");
+    DisplayEnum("DSP_GRES", nextAddr, " (Byte) Screen Resolution Register (DEPRECATED)");
     DisplayEnum("", 0, "DSP_GRES: BBRR.HHVV");
     DisplayEnum("", 0, "    BB:00 = Standard Graphics 1-bpp (2-color mode)");
     DisplayEnum("", 0, "    BB:01 = Standard Graphics 2-bpp (4-color mode)");
@@ -247,7 +247,7 @@ Word Gfx::OnAttach(Word nextAddr)
     nextAddr++;
 
     DisplayEnum("", 0, "");
-    DisplayEnum("DSP_EXT", nextAddr, " (Byte) Extended Graphics Register");
+    DisplayEnum("DSP_EXT", nextAddr, " (Byte) Extended Graphics Register (DEPRECATED)");
     DisplayEnum("", 0, "DSP_EXT: AABC.DEFG");
     DisplayEnum("", 0, "     AA:00 = Extended Graphics 1bpp (2-color mode) ");
     DisplayEnum("", 0, "     AA:01 = Extended Graphics 2bpp (4-color mode) ");
@@ -411,285 +411,321 @@ void Gfx::OnInit()
 	_scr_timing_modes.push_back({  800,  600, 0.0f });	// $06
 	_scr_timing_modes.push_back({  640,  480, 0.0f });	// $07
 
-	// initialize the display mode reference vector      std    ext    txt
-	_scr_display_modes.push_back({ 0,  800,  900, 2, 1, false, false, false });		// $00
-	_scr_display_modes.push_back({ 0,  800,  450, 2, 2, false,  true, false });		// $01
-	_scr_display_modes.push_back({ 0,  800,  300, 2, 3, false,  true,  true });		// $02
-	_scr_display_modes.push_back({ 0,  800,  225, 2, 4, false,  true,  true });		// $03
-	_scr_display_modes.push_back({ 0,  800,  180, 2, 5, false,  true,  true });		// $04
-	_scr_display_modes.push_back({ 0,  800,  150, 2, 6, false,  true,  true });		// $05
-	_scr_display_modes.push_back({ 0,  800,  128, 2, 7, false,  true,  true });		// $06
-	_scr_display_modes.push_back({ 0,  800,  112, 2, 8, false,  true,  true });		// $07
-	_scr_display_modes.push_back({ 0,  400,  900, 4, 1, false,  true, false });		// $08
-	_scr_display_modes.push_back({ 0,  400,  450, 4, 2, false,  true,  true });		// $09
-	_scr_display_modes.push_back({ 0,  400,  300, 4, 3, false,  true,  true });		// $0A
-	_scr_display_modes.push_back({ 0,  400,  225, 4, 4, false,  true,  true });		// $0B
-	_scr_display_modes.push_back({ 0,  400,  180, 4, 5, false,  true,  true });		// $0C
-	_scr_display_modes.push_back({ 0,  400,  150, 4, 6,  true,  true,  true });		// $0D
-	_scr_display_modes.push_back({ 0,  400,  128, 4, 7,  true,  true,  true });		// $0E
-	_scr_display_modes.push_back({ 0,  400,  112, 4, 8,  true,  true,  true });		// $0F
-	_scr_display_modes.push_back({ 0,  320,  900, 5, 1, false,  true, false });		// $10
-	_scr_display_modes.push_back({ 0,  320,  450, 5, 2, false,  true,  true });		// $11
-	_scr_display_modes.push_back({ 0,  320,  300, 5, 3, false,  true,  true });		// $12
-	_scr_display_modes.push_back({ 0,  320,  225, 5, 4, false,  true,  true });		// $13
-	_scr_display_modes.push_back({ 0,  320,  180, 5, 5,  true,  true,  true });		// $14
-	_scr_display_modes.push_back({ 0,  320,  150, 5, 6,  true,  true,  true });		// $15
-	_scr_display_modes.push_back({ 0,  320,  128, 5, 7,  true,  true,  true });		// $16
-	_scr_display_modes.push_back({ 0,  320,  112, 5, 8,  true,  true,  true });		// $17
-	_scr_display_modes.push_back({ 0,  200,  900, 8, 1, false,  true,  true });		// $18
-	_scr_display_modes.push_back({ 0,  200,  450, 8, 2, false,  true,  true });		// $19
-	_scr_display_modes.push_back({ 0,  200,  300, 8, 3, false,  true,  true });		// $1A
-	_scr_display_modes.push_back({ 0,  200,  225, 8, 4, false,  true,  true });		// $1B
-	_scr_display_modes.push_back({ 0,  200,  180, 8, 5,  true,  true,  true });		// $1C
-	_scr_display_modes.push_back({ 0,  200,  150, 8, 6,  true,  true,  true });		// $1D
-	_scr_display_modes.push_back({ 0,  200,  128, 8, 7,  true,  true,  true });		// $1E
-	_scr_display_modes.push_back({ 0,  200,  112, 8, 8,  true,  true,  true });		// $1F
-	//                  timing index width height PW PH   std    ext    txt	
-	_scr_display_modes.push_back({ 1,  720,  900, 2, 1, false, false, false });		// $20
-	_scr_display_modes.push_back({ 1,  720,  450, 2, 2, false,  true, false });		// $21
-	_scr_display_modes.push_back({ 1,  720,  300, 2, 3, false,  true,  true });		// $22
-	_scr_display_modes.push_back({ 1,  720,  225, 2, 4, false,  true,  true });		// $23
-	_scr_display_modes.push_back({ 1,  720,  180, 2, 5, false,  true,  true });		// $24
-	_scr_display_modes.push_back({ 1,  720,  150, 2, 6, false,  true,  true });		// $25
-	_scr_display_modes.push_back({ 1,  720,  128, 2, 7, false,  true,  true });		// $26
-	_scr_display_modes.push_back({ 1,  720,  112, 2, 8, false,  true,  true });		// $27
-	_scr_display_modes.push_back({ 1,  480,  900, 3, 1, false,  true, false });		// $28
-	_scr_display_modes.push_back({ 1,  480,  450, 3, 2, false,  true,  true });		// $29
-	_scr_display_modes.push_back({ 1,  480,  300, 3, 3, false,  true,  true });		// $2A
-	_scr_display_modes.push_back({ 1,  480,  225, 3, 4, false,  true,  true });		// $2B
-	_scr_display_modes.push_back({ 1,  480,  180, 3, 5, false,  true,  true });		// $2C
-	_scr_display_modes.push_back({ 1,  480,  150, 3, 6, false,  true,  true });		// $2D
-	_scr_display_modes.push_back({ 1,  480,  128, 3, 7,  true,  true,  true });		// $2E
-	_scr_display_modes.push_back({ 1,  480,  112, 3, 8,  true,  true,  true });		// $2F
-	_scr_display_modes.push_back({ 1,  360,  900, 4, 1, false,  true, false });		// $30
-	_scr_display_modes.push_back({ 1,  360,  450, 4, 2, false,  true,  true });		// $31
-	_scr_display_modes.push_back({ 1,  360,  300, 4, 3, false,  true,  true });		// $32
-	_scr_display_modes.push_back({ 1,  360,  225, 4, 4, false,  true,  true });		// $33
-	_scr_display_modes.push_back({ 1,  360,  180, 4, 5,  true,  true,  true });		// $34
-	_scr_display_modes.push_back({ 1,  360,  150, 4, 6,  true,  true,  true });		// $35
-	_scr_display_modes.push_back({ 1,  360,  128, 4, 7,  true,  true,  true });		// $36
-	_scr_display_modes.push_back({ 1,  360,  112, 4, 8,  true,  true,  true });		// $37
-	_scr_display_modes.push_back({ 1,  288,  900, 5, 1, false,  true,  true });		// $38
-	_scr_display_modes.push_back({ 1,  288,  450, 5, 2, false,  true,  true });		// $39
-	_scr_display_modes.push_back({ 1,  288,  300, 5, 3, false,  true,  true });		// $3A
-	_scr_display_modes.push_back({ 1,  288,  225, 5, 4,  true,  true,  true });		// $3B
-	_scr_display_modes.push_back({ 1,  288,  180, 5, 5,  true,  true,  true });		// $3C
-	_scr_display_modes.push_back({ 1,  288,  150, 5, 6,  true,  true,  true });		// $3D
-	_scr_display_modes.push_back({ 1,  288,  128, 5, 7,  true,  true,  true });		// $3E
-	_scr_display_modes.push_back({ 1,  288,  112, 5, 8,  true,  true,  true });		// $3F
-	//                  timing index width height PW PH   std    ext    txt	
-	_scr_display_modes.push_back({ 2,  800,  525, 2, 2, false,  true, false });		// $40
-	_scr_display_modes.push_back({ 2,  800,  350, 2, 3, false,  true, false });		// $41
-	_scr_display_modes.push_back({ 2,  800,  210, 2, 5, false,  true,  true });		// $42
-	_scr_display_modes.push_back({ 2,  800,  175, 2, 6, false,  true,  true });		// $43
-	_scr_display_modes.push_back({ 2,  800,  150, 2, 7, false,  true,  true });		// $44
-	_scr_display_modes.push_back({ 2,  800,  105, 2,10, false,  true,  true });		// $45
-	_scr_display_modes.push_back({ 2,  800,   75, 2,14,  true,  true,  true });		// $46
-	_scr_display_modes.push_back({ 2,  800,   70, 2,15,  true,  true,  true });		// $47
-	_scr_display_modes.push_back({ 2,  400,  525, 4, 2, false,  true,  true });		// $48
-	_scr_display_modes.push_back({ 2,  400,  350, 4, 3, false,  true,  true });		// $49
-	_scr_display_modes.push_back({ 2,  400,  210, 4, 5, false,  true,  true });		// $4A
-	_scr_display_modes.push_back({ 2,  400,  175, 4, 6, false,  true,  true });		// $4B
-	_scr_display_modes.push_back({ 2,  400,  150, 4, 7,  true,  true,  true });		// $4C
-	_scr_display_modes.push_back({ 2,  400,  105, 4,10,  true,  true,  true });		// $4D
-	_scr_display_modes.push_back({ 2,  400,   75, 4,14,  true,  true,  true });		// $4E
-	_scr_display_modes.push_back({ 2,  400,   70, 4,15,  true,  true,  true });		// $4F
-	_scr_display_modes.push_back({ 2,  320,  525, 5, 2, false,  true,  true });		// $50
-	_scr_display_modes.push_back({ 2,  320,  350, 5, 3, false,  true,  true });		// $51
-	_scr_display_modes.push_back({ 2,  320,  210, 5, 5, false,  true,  true });		// $52
-	_scr_display_modes.push_back({ 2,  320,  175, 5, 6,  true,  true,  true });		// $53
-	_scr_display_modes.push_back({ 2,  320,  150, 5, 7,  true,  true,  true });		// $54
-	_scr_display_modes.push_back({ 2,  320,  105, 5,10,  true,  true,  true });		// $55
-	_scr_display_modes.push_back({ 2,  320,   75, 5,14,  true,  true,  true });		// $56
-	_scr_display_modes.push_back({ 2,  320,   70, 5,15,  true,  true,  true });		// $57
-	_scr_display_modes.push_back({ 2,  200,  525, 8, 2, false,  true,  true });		// $58
-	_scr_display_modes.push_back({ 2,  200,  350, 8, 3, false,  true,  true });		// $59
-	_scr_display_modes.push_back({ 2,  200,  210, 8, 5,  true,  true,  true });		// $5A
-	_scr_display_modes.push_back({ 2,  200,  175, 8, 6,  true,  true,  true });		// $5B
-	_scr_display_modes.push_back({ 2,  200,  150, 8, 7,  true,  true,  true });		// $5C
-	_scr_display_modes.push_back({ 2,  200,  105, 8,10,  true,  true,  true });		// $5D
-	_scr_display_modes.push_back({ 2,  200,   75, 8,14,  true,  true,  true });		// $5E
-	_scr_display_modes.push_back({ 2,  200,   70, 8,15,  true,  true,  true });		// $5F
-	//                  timing index width height PW PH   std    ext    txt	
-	_scr_display_modes.push_back({ 3,  640,  800, 2, 1, false,  true, false });		// $60
-	_scr_display_modes.push_back({ 3,  640,  400, 2, 2, false,  true,  true });		// $61
-	_scr_display_modes.push_back({ 3,  640,  266, 2, 3, false,  true,  true });		// $62
-	_scr_display_modes.push_back({ 3,  640,  200, 2, 4, false,  true,  true });		// $63
-	_scr_display_modes.push_back({ 3,  640,  160, 2, 5, false,  true,  true });		// $64
-	_scr_display_modes.push_back({ 3,  640,  133, 2, 6, false,  true,  true });		// $65
-	_scr_display_modes.push_back({ 3,  640,  114, 2, 7, false,  true,  true });		// $66
-	_scr_display_modes.push_back({ 3,  640,  100, 2, 8,  true,  true,  true });		// $67
-	_scr_display_modes.push_back({ 3,  320,  800, 4, 1, false,  true,  true });		// $68
-	_scr_display_modes.push_back({ 3,  320,  400, 4, 2, false,  true,  true });		// $69
-	_scr_display_modes.push_back({ 3,  320,  266, 4, 3, false,  true,  true });		// $6A
-	_scr_display_modes.push_back({ 3,  320,  200, 4, 4,  true,  true,  true });		// $6B
-	_scr_display_modes.push_back({ 3,  320,  160, 4, 5,  true,  true,  true });		// $6C
-	_scr_display_modes.push_back({ 3,  320,  133, 4, 6,  true,  true,  true });		// $6D
-	_scr_display_modes.push_back({ 3,  320,  114, 4, 7,  true,  true,  true });		// $6E
-	_scr_display_modes.push_back({ 3,  320,  100, 4, 8,  true,  true,  true });		// $6F
-	_scr_display_modes.push_back({ 3,  256,  800, 5, 1, false,  true,  true });		// $70
-	_scr_display_modes.push_back({ 3,  256,  400, 5, 2, false,  true,  true });		// $71
-	_scr_display_modes.push_back({ 3,  256,  266, 5, 3, false,  true,  true });		// $72
-	_scr_display_modes.push_back({ 3,  256,  200, 5, 4,  true,  true,  true });		// $73
-	_scr_display_modes.push_back({ 3,  256,  160, 5, 5,  true,  true,  true });		// $74
-	_scr_display_modes.push_back({ 3,  256,  133, 5, 6,  true,  true,  true });		// $75
-	_scr_display_modes.push_back({ 3,  256,  114, 5, 7,  true,  true,  true });		// $76
-	_scr_display_modes.push_back({ 3,  256,  100, 5, 8,  true,  true,  true });		// $77
-	_scr_display_modes.push_back({ 3,  160,  800, 8, 1, false,  true,  true });		// $78
-	_scr_display_modes.push_back({ 3,  160,  400, 8, 2, false,  true,  true });		// $79
-	_scr_display_modes.push_back({ 3,  160,  266, 8, 3, false,  true,  true });		// $7A
-	_scr_display_modes.push_back({ 3,  160,  200, 8, 4,  true,  true,  true });		// $7B
-	_scr_display_modes.push_back({ 3,  160,  160, 8, 5,  true,  true,  true });		// $7C
-	_scr_display_modes.push_back({ 3,  160,  133, 8, 6,  true,  true,  true });		// $7D
-	_scr_display_modes.push_back({ 3,  160,  114, 8, 7,  true,  true,  true });		// $7E
-	_scr_display_modes.push_back({ 3,  160,  100, 8, 8,  true,  true,  true });		// $7F
-	//                  timing index width height PW PH   std    ext    txt	
-	_scr_display_modes.push_back({ 4,  640,  720, 2, 1, false,  true, false });		// $80
-	_scr_display_modes.push_back({ 4,  640,  360, 2, 2, false,  true,  true });		// $81
-	_scr_display_modes.push_back({ 4,  640,  240, 2, 3, false,  true,  true });		// $82
-	_scr_display_modes.push_back({ 4,  640,  180, 2, 4, false,  true,  true });		// $83
-	_scr_display_modes.push_back({ 4,  640,  144, 2, 5, false,  true,  true });		// $84
-	_scr_display_modes.push_back({ 4,  640,  120, 2, 6, false,  true,  true });		// $85
-	_scr_display_modes.push_back({ 4,  640,  102, 2, 7,  true,  true,  true });		// $86
-	_scr_display_modes.push_back({ 4,  640,   90, 2, 8,  true,  true,  true });		// $87
-	_scr_display_modes.push_back({ 4,  320,  720, 4, 1, false,  true,  true });		// $88
-	_scr_display_modes.push_back({ 4,  320,  360, 4, 2, false,  true,  true });		// $89
-	_scr_display_modes.push_back({ 4,  320,  240, 4, 3, false,  true,  true });		// $8A
-	_scr_display_modes.push_back({ 4,  320,  180, 4, 4,  true,  true,  true });		// $8B
-	_scr_display_modes.push_back({ 4,  320,  144, 4, 5,  true,  true,  true });		// $8C
-	_scr_display_modes.push_back({ 4,  320,  120, 4, 6,  true,  true,  true });		// $8D
-	_scr_display_modes.push_back({ 4,  320,  102, 4, 7,  true,  true,  true });		// $8E
-	_scr_display_modes.push_back({ 4,  320,   90, 4, 8,  true,  true,  true });		// $8F
-	_scr_display_modes.push_back({ 4,  256,  720, 5, 1, false,  true,  true });		// $90
-	_scr_display_modes.push_back({ 4,  256,  360, 5, 2, false,  true,  true });		// $91
-	_scr_display_modes.push_back({ 4,  256,  240, 5, 3,  true,  true,  true });		// $92
-	_scr_display_modes.push_back({ 4,  256,  180, 5, 4,  true,  true,  true });		// $93
-	_scr_display_modes.push_back({ 4,  256,  144, 5, 5,  true,  true,  true });		// $94
-	_scr_display_modes.push_back({ 4,  256,  120, 5, 6,  true,  true,  true });		// $95
-	_scr_display_modes.push_back({ 4,  256,  102, 5, 7,  true,  true,  true });		// $96
-	_scr_display_modes.push_back({ 4,  256,   90, 5, 8,  true,  true,  true });		// $97
-	_scr_display_modes.push_back({ 4,  160,  720, 8, 1, false,  true,  true });		// $98
-	_scr_display_modes.push_back({ 4,  160,  360, 8, 2, false,  true,  true });		// $99
-	_scr_display_modes.push_back({ 4,  160,  240, 8, 3,  true,  true,  true });		// $9A
-	_scr_display_modes.push_back({ 4,  160,  180, 8, 4,  true,  true,  true });		// $9B
-	_scr_display_modes.push_back({ 4,  160,  144, 8, 5,  true,  true,  true });		// $9C
-	_scr_display_modes.push_back({ 4,  160,  120, 8, 6,  true,  true,  true });		// $9D
-	_scr_display_modes.push_back({ 4,  160,  102, 8, 7,  true,  true,  true });		// $9E
-	_scr_display_modes.push_back({ 4,  160,   90, 8, 8,  true,  true,  true });		// $9F
-	//                  timing index width height PW PH   std    ext    txt	
-	_scr_display_modes.push_back({ 5,  512,  768, 2, 1, false,  true, false });		// $A0
-	_scr_display_modes.push_back({ 5,  512,  384, 2, 2, false,  true,  true });		// $A1
-	_scr_display_modes.push_back({ 5,  512,  256, 2, 3, false,  true,  true });		// $A2
-	_scr_display_modes.push_back({ 5,  512,  192, 2, 4, false,  true,  true });		// $A3
-	_scr_display_modes.push_back({ 5,  512,  153, 2, 5, false,  true,  true });		// $A4
-	_scr_display_modes.push_back({ 5,  512,  128, 2, 6,  true,  true,  true });		// $A5
-	_scr_display_modes.push_back({ 5,  512,  109, 2, 7,  true,  true,  true });		// $A6
-	_scr_display_modes.push_back({ 5,  512,   96, 2, 8,  true,  true,  true });		// $A7
-	_scr_display_modes.push_back({ 5,  340,  768, 3, 1, false,  true,  true });		// $A8		// 341 ?
-	_scr_display_modes.push_back({ 5,  340,  384, 3, 2, false,  true,  true });		// $A9		// 341 ?
-	_scr_display_modes.push_back({ 5,  340,  256, 3, 3, false,  true,  true });		// $AA		// 341 ?
-	_scr_display_modes.push_back({ 5,  340,  192, 3, 4,  true,  true,  true });		// $AB		// 341 ?
-	_scr_display_modes.push_back({ 5,  340,  153, 3, 5,  true,  true,  true });		// $AC		// 341 ?
-	_scr_display_modes.push_back({ 5,  340,  128, 3, 6,  true,  true,  true });		// $AD		// 341 ?
-	_scr_display_modes.push_back({ 5,  340,  109, 3, 7,  true,  true,  true });		// $AE		// 341 ?
-	_scr_display_modes.push_back({ 5,  340,   96, 3, 8,  true,  true,  true });		// $AF		// 341 ?
-	_scr_display_modes.push_back({ 5,  256,  768, 4, 1, false,  true,  true });		// $B0
-	_scr_display_modes.push_back({ 5,  256,  384, 4, 2, false,  true,  true });		// $B1
-	_scr_display_modes.push_back({ 5,  256,  256, 4, 3,  true,  true,  true });		// $B2
-	_scr_display_modes.push_back({ 5,  256,  192, 4, 4,  true,  true,  true });		// $B3
-	_scr_display_modes.push_back({ 5,  256,  153, 4, 5,  true,  true,  true });		// $B4
-	_scr_display_modes.push_back({ 5,  256,  128, 4, 6,  true,  true,  true });		// $B5
-	_scr_display_modes.push_back({ 5,  256,  109, 4, 7,  true,  true,  true });		// $B6
-	_scr_display_modes.push_back({ 5,  256,   96, 4, 8,  true,  true,  true });		// $B7
-	_scr_display_modes.push_back({ 5,  128,  768, 5, 1, false,  true,  true });		// $B8
-	_scr_display_modes.push_back({ 5,  128,  384, 5, 2, false,  true,  true });		// $B9
-	_scr_display_modes.push_back({ 5,  128,  256, 5, 3, false,  true,  true });		// $BA
-	_scr_display_modes.push_back({ 5,  128,  192, 5, 4,  true,  true,  true });		// $BB
-	_scr_display_modes.push_back({ 5,  128,  153, 5, 5,  true,  true,  true });		// $BC
-	_scr_display_modes.push_back({ 5,  128,  128, 5, 6,  true,  true,  true });		// $BD
-	_scr_display_modes.push_back({ 5,  128,  109, 5, 7,  true,  true,  true });		// $BE
-	_scr_display_modes.push_back({ 5,  128,   96, 5, 8,  true,  true,  true });		// $BF
-	//                  timing index width height PW PH   std    ext    txt	
-	_scr_display_modes.push_back({ 6,  400,  600, 2, 1, false,  true, false });		// $C0
-	_scr_display_modes.push_back({ 6,  400,  300, 2, 2, false,  true,  true });		// $C1
-	_scr_display_modes.push_back({ 6,  400,  200, 2, 3, false,  true,  true });		// $C2
-	_scr_display_modes.push_back({ 6,  400,  150, 2, 4,  true,  true,  true });		// $C3
-	_scr_display_modes.push_back({ 6,  400,  120, 2, 5,  true,  true,  true });		// $C4
-	_scr_display_modes.push_back({ 6,  400,  100, 2, 6,  true,  true,  true });		// $C5
-	_scr_display_modes.push_back({ 6,  400,   85, 2, 7,  true,  true,  true });		// $C6
-	_scr_display_modes.push_back({ 6,  400,   75, 2, 8,  true,  true,  true });		// $C7
-	_scr_display_modes.push_back({ 6,  200,  600, 4, 1, false,  true,  true });		// $C8
-	_scr_display_modes.push_back({ 6,  200,  300, 4, 2,  true,  true,  true });		// $C9
-	_scr_display_modes.push_back({ 6,  200,  200, 4, 3,  true,  true,  true });		// $CA
-	_scr_display_modes.push_back({ 6,  200,  150, 4, 4,  true,  true,  true });		// $CB
-	_scr_display_modes.push_back({ 6,  200,  120, 4, 5,  true,  true,  true });		// $CC
-	_scr_display_modes.push_back({ 6,  200,  100, 4, 6,  true,  true,  true });		// $CD
-	_scr_display_modes.push_back({ 6,  200,   85, 4, 7,  true,  true,  true });		// $CE
-	_scr_display_modes.push_back({ 6,  200,   75, 4, 8,  true,  true,  true });		// $CF
-	_scr_display_modes.push_back({ 6,  160,  600, 5, 1, false,  true,  true });		// $D0
-	_scr_display_modes.push_back({ 6,  160,  300, 5, 2, false,  true,  true });		// $D1
-	_scr_display_modes.push_back({ 6,  160,  200, 5, 3,  true,  true,  true });		// $D2
-	_scr_display_modes.push_back({ 6,  160,  150, 5, 4,  true,  true,  true });		// $D3
-	_scr_display_modes.push_back({ 6,  160,  120, 5, 5,  true,  true,  true });		// $D4
-	_scr_display_modes.push_back({ 6,  160,  100, 5, 6,  true,  true,  true });		// $D5
-	_scr_display_modes.push_back({ 6,  160,   85, 5, 7,  true,  true,  true });		// $D6
-	_scr_display_modes.push_back({ 6,  160,   75, 5, 8,  true,  true,  true });		// $D7
-	_scr_display_modes.push_back({ 6,  100,  600, 8, 1, false,  true,  true });		// $D8
-	_scr_display_modes.push_back({ 6,  100,  300, 8, 2,  true,  true,  true });		// $D9
-	_scr_display_modes.push_back({ 6,  100,  200, 8, 3,  true,  true,  true });		// $DA
-	_scr_display_modes.push_back({ 6,  100,  150, 8, 4,  true,  true,  true });		// $DB
-	_scr_display_modes.push_back({ 6,  100,  120, 8, 5,  true,  true,  true });		// $DC
-	_scr_display_modes.push_back({ 6,  100,  100, 8, 6,  true,  true,  true });		// $DD
-	_scr_display_modes.push_back({ 6,  100,   85, 8, 7,  true,  true,  true });		// $DE
-	_scr_display_modes.push_back({ 6,  100,   75, 8, 8,  true,  true,  true });		// $DF
-	//                  timing index width height PW PH   std    ext    txt	
-	_scr_display_modes.push_back({ 7,  640,  480, 1, 1, false,  true, false });		// $E0
-	_scr_display_modes.push_back({ 7,  640,  240, 1, 2, false,  true,  true });		// $E1
-	_scr_display_modes.push_back({ 7,  640,  160, 1, 3, false,  true,  true });		// $E2
-	_scr_display_modes.push_back({ 7,  640,  120, 1, 4, false,  true,  true });		// $E3
-	_scr_display_modes.push_back({ 7,  640,   96, 1, 5,  true,  true,  true });		// $E4
-	_scr_display_modes.push_back({ 7,  640,   80, 1, 6,  true,  true,  true });		// $E5
-	_scr_display_modes.push_back({ 7,  640,   68, 1, 7,  true,  true,  true });		// $E6
-	_scr_display_modes.push_back({ 7,  640,   60, 1, 8,  true,  true,  true });		// $E7
-	_scr_display_modes.push_back({ 7,  320,  480, 2, 1, false,  true,  true });		// $E8
-	_scr_display_modes.push_back({ 7,  320,  240, 2, 2, false,  true,  true });		// $E9
-	_scr_display_modes.push_back({ 7,  320,  160, 2, 3,  true,  true,  true });		// $EA
-	_scr_display_modes.push_back({ 7,  320,  120, 2, 4,  true,  true,  true });		// $EB
-	_scr_display_modes.push_back({ 7,  320,   96, 2, 5,  true,  true,  true });		// $EC
-	_scr_display_modes.push_back({ 7,  320,   80, 2, 6,  true,  true,  true });		// $ED
-	_scr_display_modes.push_back({ 7,  320,   68, 2, 7,  true,  true,  true });		// $EE
-	_scr_display_modes.push_back({ 7,  320,   60, 2, 8,  true,  true,  true });		// $EF
-	_scr_display_modes.push_back({ 7,  160,  480, 4, 1, false,  true,  true });		// $F0
-	_scr_display_modes.push_back({ 7,  160,  240, 4, 2,  true,  true,  true });		// $F1
-	_scr_display_modes.push_back({ 7,  160,  160, 4, 3,  true,  true,  true });		// $F2
-	_scr_display_modes.push_back({ 7,  160,  120, 4, 4,  true,  true,  true });		// $F3
-	_scr_display_modes.push_back({ 7,  160,   96, 4, 5,  true,  true,  true });		// $F4
-	_scr_display_modes.push_back({ 7,  160,   80, 4, 6,  true,  true,  true });		// $F5
-	_scr_display_modes.push_back({ 7,  160,   68, 4, 7,  true,  true,  true });		// $F6
-	_scr_display_modes.push_back({ 7,  160,   60, 4, 8,  true,  true,  true });		// $F7
-	_scr_display_modes.push_back({ 7,  128,  480, 5, 1,  true,  true,  true });		// $F8
-	_scr_display_modes.push_back({ 7,  128,  240, 5, 2,  true,  true,  true });		// $F9
-	_scr_display_modes.push_back({ 7,  128,  160, 5, 3,  true,  true,  true });		// $FA
-	_scr_display_modes.push_back({ 7,  128,  120, 5, 4,  true,  true,  true });		// $FB
-	_scr_display_modes.push_back({ 7,  128,   96, 5, 5,  true,  true,  true });		// $FC
-	_scr_display_modes.push_back({ 7,  128,   80, 5, 6,  true,  true,  true });		// $FD
-	_scr_display_modes.push_back({ 7,  128,   68, 5, 7,  true,  true,  true });		// $FE
-	_scr_display_modes.push_back({ 7,  128,   60, 5, 8,  true,  true,  true });		// $FF
+	// initialize the display mode reference vector      std    txt
+	_scr_display_modes.push_back({ 0,  800,  450, 2, 1, false, false });		// $00
+	_scr_display_modes.push_back({ 0,  800,  450, 2, 2, false, false });		// $01 (duplicate of $00)
+	_scr_display_modes.push_back({ 0,  800,  300, 2, 3, false,  true });		// $02
+	_scr_display_modes.push_back({ 0,  800,  225, 2, 4, false,  true });		// $03
+	_scr_display_modes.push_back({ 0,  800,  180, 2, 5, false,  true });		// $04
+	_scr_display_modes.push_back({ 0,  800,  150, 2, 6, false,  true });		// $05
+	_scr_display_modes.push_back({ 0,  800,  128, 2, 7, false,  true });		// $06
+	_scr_display_modes.push_back({ 0,  800,  112, 2, 8, false,  true });		// $07
+	_scr_display_modes.push_back({ 0,  400,  900, 4, 1, false, false });		// $08
+	_scr_display_modes.push_back({ 0,  400,  450, 4, 2, false,  true });		// $09
+	_scr_display_modes.push_back({ 0,  400,  300, 4, 3, false,  true });		// $0A
+	_scr_display_modes.push_back({ 0,  400,  225, 4, 4, false,  true });		// $0B
+	_scr_display_modes.push_back({ 0,  400,  180, 4, 5, false,  true });		// $0C
+	_scr_display_modes.push_back({ 0,  400,  150, 4, 6,  true,  true });		// $0D
+	_scr_display_modes.push_back({ 0,  400,  128, 4, 7,  true,  true });		// $0E
+	_scr_display_modes.push_back({ 0,  400,  112, 4, 8,  true,  true });		// $0F
+	_scr_display_modes.push_back({ 0,  320,  900, 5, 1, false, false });		// $10
+	_scr_display_modes.push_back({ 0,  320,  450, 5, 2, false,  true });		// $11
+	_scr_display_modes.push_back({ 0,  320,  300, 5, 3, false,  true });		// $12
+	_scr_display_modes.push_back({ 0,  320,  225, 5, 4, false,  true });		// $13
+	_scr_display_modes.push_back({ 0,  320,  180, 5, 5,  true,  true });		// $14
+	_scr_display_modes.push_back({ 0,  320,  150, 5, 6,  true,  true });		// $15
+	_scr_display_modes.push_back({ 0,  320,  128, 5, 7,  true,  true });		// $16
+	_scr_display_modes.push_back({ 0,  320,  112, 5, 8,  true,  true });		// $17
+	_scr_display_modes.push_back({ 0,  200,  900, 8, 1, false,  true });		// $18
+	_scr_display_modes.push_back({ 0,  200,  450, 8, 2, false,  true });		// $19
+	_scr_display_modes.push_back({ 0,  200,  300, 8, 3, false,  true });		// $1A
+	_scr_display_modes.push_back({ 0,  200,  225, 8, 4, false,  true });		// $1B
+	_scr_display_modes.push_back({ 0,  200,  180, 8, 5,  true,  true });		// $1C
+	_scr_display_modes.push_back({ 0,  200,  150, 8, 6,  true,  true });		// $1D
+	_scr_display_modes.push_back({ 0,  200,  128, 8, 7,  true,  true });		// $1E
+	_scr_display_modes.push_back({ 0,  200,  112, 8, 8,  true,  true });		// $1F
+	//                  timing index width height PW PH   std    txt	
+	_scr_display_modes.push_back({ 1,  720,  450, 2, 1, false, false });		// $20
+	_scr_display_modes.push_back({ 1,  720,  450, 2, 2, false, false });		// $21 (duplicate of $20)
+	_scr_display_modes.push_back({ 1,  720,  300, 2, 3, false,  true });		// $22
+	_scr_display_modes.push_back({ 1,  720,  225, 2, 4, false,  true });		// $23
+	_scr_display_modes.push_back({ 1,  720,  180, 2, 5, false,  true });		// $24
+	_scr_display_modes.push_back({ 1,  720,  150, 2, 6, false,  true });		// $25
+	_scr_display_modes.push_back({ 1,  720,  128, 2, 7, false,  true });		// $26
+	_scr_display_modes.push_back({ 1,  720,  112, 2, 8, false,  true });		// $27
+	_scr_display_modes.push_back({ 1,  480,  900, 3, 1, false, false });		// $28
+	_scr_display_modes.push_back({ 1,  480,  450, 3, 2, false,  true });		// $29
+	_scr_display_modes.push_back({ 1,  480,  300, 3, 3, false,  true });		// $2A
+	_scr_display_modes.push_back({ 1,  480,  225, 3, 4, false,  true });		// $2B
+	_scr_display_modes.push_back({ 1,  480,  180, 3, 5, false,  true });		// $2C
+	_scr_display_modes.push_back({ 1,  480,  150, 3, 6, false,  true });		// $2D
+	_scr_display_modes.push_back({ 1,  480,  128, 3, 7,  true,  true });		// $2E
+	_scr_display_modes.push_back({ 1,  480,  112, 3, 8,  true,  true });		// $2F
+	_scr_display_modes.push_back({ 1,  360,  900, 4, 1, false, false });		// $30
+	_scr_display_modes.push_back({ 1,  360,  450, 4, 2, false,  true });		// $31
+	_scr_display_modes.push_back({ 1,  360,  300, 4, 3, false,  true });		// $32
+	_scr_display_modes.push_back({ 1,  360,  225, 4, 4, false,  true });		// $33
+	_scr_display_modes.push_back({ 1,  360,  180, 4, 5,  true,  true });		// $34
+	_scr_display_modes.push_back({ 1,  360,  150, 4, 6,  true,  true });		// $35
+	_scr_display_modes.push_back({ 1,  360,  128, 4, 7,  true,  true });		// $36
+	_scr_display_modes.push_back({ 1,  360,  112, 4, 8,  true,  true });		// $37
+	_scr_display_modes.push_back({ 1,  288,  900, 5, 1, false,  true });		// $38
+	_scr_display_modes.push_back({ 1,  288,  450, 5, 2, false,  true });		// $39
+	_scr_display_modes.push_back({ 1,  288,  300, 5, 3, false,  true });		// $3A
+	_scr_display_modes.push_back({ 1,  288,  225, 5, 4,  true,  true });		// $3B
+	_scr_display_modes.push_back({ 1,  288,  180, 5, 5,  true,  true });		// $3C
+	_scr_display_modes.push_back({ 1,  288,  150, 5, 6,  true,  true });		// $3D
+	_scr_display_modes.push_back({ 1,  288,  128, 5, 7,  true,  true });		// $3E
+	_scr_display_modes.push_back({ 1,  288,  112, 5, 8,  true,  true });		// $3F
+	//                  timing index width height PW PH   std    txt	
+	_scr_display_modes.push_back({ 2,  800,  525, 2, 2, false, false });		// $40
+	_scr_display_modes.push_back({ 2,  800,  350, 2, 3, false, false });		// $41
+	_scr_display_modes.push_back({ 2,  800,  210, 2, 5, false,  true });		// $42
+	_scr_display_modes.push_back({ 2,  800,  175, 2, 6, false,  true });		// $43
+	_scr_display_modes.push_back({ 2,  800,  150, 2, 7, false,  true });		// $44
+	_scr_display_modes.push_back({ 2,  800,  105, 2,10, false,  true });		// $45
+	_scr_display_modes.push_back({ 2,  800,   75, 2,14,  true,  true });		// $46
+	_scr_display_modes.push_back({ 2,  800,   70, 2,15,  true,  true });		// $47
+	_scr_display_modes.push_back({ 2,  400,  525, 4, 2, false,  true });		// $48
+	_scr_display_modes.push_back({ 2,  400,  350, 4, 3, false,  true });		// $49
+	_scr_display_modes.push_back({ 2,  400,  210, 4, 5, false,  true });		// $4A
+	_scr_display_modes.push_back({ 2,  400,  175, 4, 6, false,  true });		// $4B
+	_scr_display_modes.push_back({ 2,  400,  150, 4, 7,  true,  true });		// $4C
+	_scr_display_modes.push_back({ 2,  400,  105, 4,10,  true,  true });		// $4D
+	_scr_display_modes.push_back({ 2,  400,   75, 4,14,  true,  true });		// $4E
+	_scr_display_modes.push_back({ 2,  400,   70, 4,15,  true,  true });		// $4F
+	_scr_display_modes.push_back({ 2,  320,  525, 5, 2, false,  true });		// $50
+	_scr_display_modes.push_back({ 2,  320,  350, 5, 3, false,  true });		// $51
+	_scr_display_modes.push_back({ 2,  320,  210, 5, 5, false,  true });		// $52
+	_scr_display_modes.push_back({ 2,  320,  175, 5, 6,  true,  true });		// $53
+	_scr_display_modes.push_back({ 2,  320,  150, 5, 7,  true,  true });		// $54
+	_scr_display_modes.push_back({ 2,  320,  105, 5,10,  true,  true });		// $55
+	_scr_display_modes.push_back({ 2,  320,   75, 5,14,  true,  true });		// $56
+	_scr_display_modes.push_back({ 2,  320,   70, 5,15,  true,  true });		// $57
+	_scr_display_modes.push_back({ 2,  200,  525, 8, 2, false,  true });		// $58
+	_scr_display_modes.push_back({ 2,  200,  350, 8, 3, false,  true });		// $59
+	_scr_display_modes.push_back({ 2,  200,  210, 8, 5,  true,  true });		// $5A
+	_scr_display_modes.push_back({ 2,  200,  175, 8, 6,  true,  true });		// $5B
+	_scr_display_modes.push_back({ 2,  200,  150, 8, 7,  true,  true });		// $5C
+	_scr_display_modes.push_back({ 2,  200,  105, 8,10,  true,  true });		// $5D
+	_scr_display_modes.push_back({ 2,  200,   75, 8,14,  true,  true });		// $5E
+	_scr_display_modes.push_back({ 2,  200,   70, 8,15,  true,  true });		// $5F
+	//                  timing index width height PW PH   std    txt	
+	_scr_display_modes.push_back({ 3,  640,  800, 2, 1, false, false });		// $60
+	_scr_display_modes.push_back({ 3,  640,  400, 2, 2, false,  true });		// $61
+	_scr_display_modes.push_back({ 3,  640,  266, 2, 3, false,  true });		// $62
+	_scr_display_modes.push_back({ 3,  640,  200, 2, 4, false,  true });		// $63
+	_scr_display_modes.push_back({ 3,  640,  160, 2, 5, false,  true });		// $64
+	_scr_display_modes.push_back({ 3,  640,  133, 2, 6, false,  true });		// $65
+	_scr_display_modes.push_back({ 3,  640,  114, 2, 7, false,  true });		// $66
+	_scr_display_modes.push_back({ 3,  640,  100, 2, 8,  true,  true });		// $67
+	_scr_display_modes.push_back({ 3,  320,  800, 4, 1, false,  true });		// $68
+	_scr_display_modes.push_back({ 3,  320,  400, 4, 2, false,  true });		// $69
+	_scr_display_modes.push_back({ 3,  320,  266, 4, 3, false,  true });		// $6A
+	_scr_display_modes.push_back({ 3,  320,  200, 4, 4,  true,  true });		// $6B
+	_scr_display_modes.push_back({ 3,  320,  160, 4, 5,  true,  true });		// $6C
+	_scr_display_modes.push_back({ 3,  320,  133, 4, 6,  true,  true });		// $6D
+	_scr_display_modes.push_back({ 3,  320,  114, 4, 7,  true,  true });		// $6E
+	_scr_display_modes.push_back({ 3,  320,  100, 4, 8,  true,  true });		// $6F
+	_scr_display_modes.push_back({ 3,  256,  800, 5, 1, false,  true });		// $70
+	_scr_display_modes.push_back({ 3,  256,  400, 5, 2, false,  true });		// $71
+	_scr_display_modes.push_back({ 3,  256,  266, 5, 3, false,  true });		// $72
+	_scr_display_modes.push_back({ 3,  256,  200, 5, 4,  true,  true });		// $73
+	_scr_display_modes.push_back({ 3,  256,  160, 5, 5,  true,  true });		// $74
+	_scr_display_modes.push_back({ 3,  256,  133, 5, 6,  true,  true });		// $75
+	_scr_display_modes.push_back({ 3,  256,  114, 5, 7,  true,  true });		// $76
+	_scr_display_modes.push_back({ 3,  256,  100, 5, 8,  true,  true });		// $77
+	_scr_display_modes.push_back({ 3,  160,  800, 8, 1, false,  true });		// $78
+	_scr_display_modes.push_back({ 3,  160,  400, 8, 2, false,  true });		// $79
+	_scr_display_modes.push_back({ 3,  160,  266, 8, 3, false,  true });		// $7A
+	_scr_display_modes.push_back({ 3,  160,  200, 8, 4,  true,  true });		// $7B
+	_scr_display_modes.push_back({ 3,  160,  160, 8, 5,  true,  true });		// $7C
+	_scr_display_modes.push_back({ 3,  160,  133, 8, 6,  true,  true });		// $7D
+	_scr_display_modes.push_back({ 3,  160,  114, 8, 7,  true,  true });		// $7E
+	_scr_display_modes.push_back({ 3,  160,  100, 8, 8,  true,  true });		// $7F
+	//                  timing index width height PW PH   std    txt	
+	_scr_display_modes.push_back({ 4,  640,  720, 2, 1, false, false });		// $80
+	_scr_display_modes.push_back({ 4,  640,  360, 2, 2, false,  true });		// $81
+	_scr_display_modes.push_back({ 4,  640,  240, 2, 3, false,  true });		// $82
+	_scr_display_modes.push_back({ 4,  640,  180, 2, 4, false,  true });		// $83
+	_scr_display_modes.push_back({ 4,  640,  144, 2, 5, false,  true });		// $84
+	_scr_display_modes.push_back({ 4,  640,  120, 2, 6, false,  true });		// $85
+	_scr_display_modes.push_back({ 4,  640,  102, 2, 7,  true,  true });		// $86
+	_scr_display_modes.push_back({ 4,  640,   90, 2, 8,  true,  true });		// $87
+	_scr_display_modes.push_back({ 4,  320,  720, 4, 1, false,  true });		// $88
+	_scr_display_modes.push_back({ 4,  320,  360, 4, 2, false,  true });		// $89
+	_scr_display_modes.push_back({ 4,  320,  240, 4, 3, false,  true });		// $8A
+	_scr_display_modes.push_back({ 4,  320,  180, 4, 4,  true,  true });		// $8B
+	_scr_display_modes.push_back({ 4,  320,  144, 4, 5,  true,  true });		// $8C
+	_scr_display_modes.push_back({ 4,  320,  120, 4, 6,  true,  true });		// $8D
+	_scr_display_modes.push_back({ 4,  320,  102, 4, 7,  true,  true });		// $8E
+	_scr_display_modes.push_back({ 4,  320,   90, 4, 8,  true,  true });		// $8F
+	_scr_display_modes.push_back({ 4,  256,  720, 5, 1, false,  true });		// $90
+	_scr_display_modes.push_back({ 4,  256,  360, 5, 2, false,  true });		// $91
+	_scr_display_modes.push_back({ 4,  256,  240, 5, 3,  true,  true });		// $92
+	_scr_display_modes.push_back({ 4,  256,  180, 5, 4,  true,  true });		// $93
+	_scr_display_modes.push_back({ 4,  256,  144, 5, 5,  true,  true });		// $94
+	_scr_display_modes.push_back({ 4,  256,  120, 5, 6,  true,  true });		// $95
+	_scr_display_modes.push_back({ 4,  256,  102, 5, 7,  true,  true });		// $96
+	_scr_display_modes.push_back({ 4,  256,   90, 5, 8,  true,  true });		// $97
+	_scr_display_modes.push_back({ 4,  160,  720, 8, 1, false,  true });		// $98
+	_scr_display_modes.push_back({ 4,  160,  360, 8, 2, false,  true });		// $99
+	_scr_display_modes.push_back({ 4,  160,  240, 8, 3,  true,  true });		// $9A
+	_scr_display_modes.push_back({ 4,  160,  180, 8, 4,  true,  true });		// $9B
+	_scr_display_modes.push_back({ 4,  160,  144, 8, 5,  true,  true });		// $9C
+	_scr_display_modes.push_back({ 4,  160,  120, 8, 6,  true,  true });		// $9D
+	_scr_display_modes.push_back({ 4,  160,  102, 8, 7,  true,  true });		// $9E
+	_scr_display_modes.push_back({ 4,  160,   90, 8, 8,  true,  true });		// $9F
+	//                  timing index width height PW PH   std    txt	
+	_scr_display_modes.push_back({ 5,  512,  768, 2, 1, false, false });		// $A0
+	_scr_display_modes.push_back({ 5,  512,  384, 2, 2, false,  true });		// $A1
+	_scr_display_modes.push_back({ 5,  512,  256, 2, 3, false,  true });		// $A2
+	_scr_display_modes.push_back({ 5,  512,  192, 2, 4, false,  true });		// $A3
+	_scr_display_modes.push_back({ 5,  512,  153, 2, 5, false,  true });		// $A4
+	_scr_display_modes.push_back({ 5,  512,  128, 2, 6,  true,  true });		// $A5
+	_scr_display_modes.push_back({ 5,  512,  109, 2, 7,  true,  true });		// $A6
+	_scr_display_modes.push_back({ 5,  512,   96, 2, 8,  true,  true });		// $A7
+	_scr_display_modes.push_back({ 5,  340,  768, 3, 1, false,  true });		// $A8		// 341 ?
+	_scr_display_modes.push_back({ 5,  340,  384, 3, 2, false,  true });		// $A9		// 341 ?
+	_scr_display_modes.push_back({ 5,  340,  256, 3, 3, false,  true });		// $AA		// 341 ?
+	_scr_display_modes.push_back({ 5,  340,  192, 3, 4,  true,  true });		// $AB		// 341 ?
+	_scr_display_modes.push_back({ 5,  340,  153, 3, 5,  true,  true });		// $AC		// 341 ?
+	_scr_display_modes.push_back({ 5,  340,  128, 3, 6,  true,  true });		// $AD		// 341 ?
+	_scr_display_modes.push_back({ 5,  340,  109, 3, 7,  true,  true });		// $AE		// 341 ?
+	_scr_display_modes.push_back({ 5,  340,   96, 3, 8,  true,  true });		// $AF		// 341 ?
+	_scr_display_modes.push_back({ 5,  256,  768, 4, 1, false,  true });		// $B0
+	_scr_display_modes.push_back({ 5,  256,  384, 4, 2, false,  true });		// $B1
+	_scr_display_modes.push_back({ 5,  256,  256, 4, 3,  true,  true });		// $B2
+	_scr_display_modes.push_back({ 5,  256,  192, 4, 4,  true,  true });		// $B3
+	_scr_display_modes.push_back({ 5,  256,  153, 4, 5,  true,  true });		// $B4
+	_scr_display_modes.push_back({ 5,  256,  128, 4, 6,  true,  true });		// $B5
+	_scr_display_modes.push_back({ 5,  256,  109, 4, 7,  true,  true });		// $B6
+	_scr_display_modes.push_back({ 5,  256,   96, 4, 8,  true,  true });		// $B7
+	_scr_display_modes.push_back({ 5,  128,  768, 5, 1, false,  true });		// $B8
+	_scr_display_modes.push_back({ 5,  128,  384, 5, 2, false,  true });		// $B9
+	_scr_display_modes.push_back({ 5,  128,  256, 5, 3, false,  true });		// $BA
+	_scr_display_modes.push_back({ 5,  128,  192, 5, 4,  true,  true });		// $BB
+	_scr_display_modes.push_back({ 5,  128,  153, 5, 5,  true,  true });		// $BC
+	_scr_display_modes.push_back({ 5,  128,  128, 5, 6,  true,  true });		// $BD
+	_scr_display_modes.push_back({ 5,  128,  109, 5, 7,  true,  true });		// $BE
+	_scr_display_modes.push_back({ 5,  128,   96, 5, 8,  true,  true });		// $BF
+	//                  timing index width height PW PH   std    txt	
+	_scr_display_modes.push_back({ 6,  400,  600, 2, 1, false, false });		// $C0
+	_scr_display_modes.push_back({ 6,  400,  300, 2, 2, false,  true });		// $C1
+	_scr_display_modes.push_back({ 6,  400,  200, 2, 3, false,  true });		// $C2
+	_scr_display_modes.push_back({ 6,  400,  150, 2, 4,  true,  true });		// $C3
+	_scr_display_modes.push_back({ 6,  400,  120, 2, 5,  true,  true });		// $C4
+	_scr_display_modes.push_back({ 6,  400,  100, 2, 6,  true,  true });		// $C5
+	_scr_display_modes.push_back({ 6,  400,   85, 2, 7,  true,  true });		// $C6
+	_scr_display_modes.push_back({ 6,  400,   75, 2, 8,  true,  true });		// $C7
+	_scr_display_modes.push_back({ 6,  200,  600, 4, 1, false,  true });		// $C8
+	_scr_display_modes.push_back({ 6,  200,  300, 4, 2,  true,  true });		// $C9
+	_scr_display_modes.push_back({ 6,  200,  200, 4, 3,  true,  true });		// $CA
+	_scr_display_modes.push_back({ 6,  200,  150, 4, 4,  true,  true });		// $CB
+	_scr_display_modes.push_back({ 6,  200,  120, 4, 5,  true,  true });		// $CC
+	_scr_display_modes.push_back({ 6,  200,  100, 4, 6,  true,  true });		// $CD
+	_scr_display_modes.push_back({ 6,  200,   85, 4, 7,  true,  true });		// $CE
+	_scr_display_modes.push_back({ 6,  200,   75, 4, 8,  true,  true });		// $CF
+	_scr_display_modes.push_back({ 6,  160,  600, 5, 1, false,  true });		// $D0
+	_scr_display_modes.push_back({ 6,  160,  300, 5, 2, false,  true });		// $D1
+	_scr_display_modes.push_back({ 6,  160,  200, 5, 3,  true,  true });		// $D2
+	_scr_display_modes.push_back({ 6,  160,  150, 5, 4,  true,  true });		// $D3
+	_scr_display_modes.push_back({ 6,  160,  120, 5, 5,  true,  true });		// $D4
+	_scr_display_modes.push_back({ 6,  160,  100, 5, 6,  true,  true });		// $D5
+	_scr_display_modes.push_back({ 6,  160,   85, 5, 7,  true,  true });		// $D6
+	_scr_display_modes.push_back({ 6,  160,   75, 5, 8,  true,  true });		// $D7
+	_scr_display_modes.push_back({ 6,  100,  600, 8, 1, false,  true });		// $D8
+	_scr_display_modes.push_back({ 6,  100,  300, 8, 2,  true,  true });		// $D9
+	_scr_display_modes.push_back({ 6,  100,  200, 8, 3,  true,  true });		// $DA
+	_scr_display_modes.push_back({ 6,  100,  150, 8, 4,  true,  true });		// $DB
+	_scr_display_modes.push_back({ 6,  100,  120, 8, 5,  true,  true });		// $DC
+	_scr_display_modes.push_back({ 6,  100,  100, 8, 6,  true,  true });		// $DD
+	_scr_display_modes.push_back({ 6,  100,   85, 8, 7,  true,  true });		// $DE
+	_scr_display_modes.push_back({ 6,  100,   75, 8, 8,  true,  true });		// $DF
+	//                  timing index width height PW PH   std    txt	
+	_scr_display_modes.push_back({ 7,  640,  480, 1, 1, false, false });		// $E0
+	_scr_display_modes.push_back({ 7,  640,  240, 1, 2, false,  true });		// $E1
+	_scr_display_modes.push_back({ 7,  640,  160, 1, 3, false,  true });		// $E2
+	_scr_display_modes.push_back({ 7,  640,  120, 1, 4, false,  true });		// $E3
+	_scr_display_modes.push_back({ 7,  640,   96, 1, 5,  true,  true });		// $E4
+	_scr_display_modes.push_back({ 7,  640,   80, 1, 6,  true,  true });		// $E5
+	_scr_display_modes.push_back({ 7,  640,   68, 1, 7,  true,  true });		// $E6
+	_scr_display_modes.push_back({ 7,  640,   60, 1, 8,  true,  true });		// $E7
+	_scr_display_modes.push_back({ 7,  320,  480, 2, 1, false,  true });		// $E8
+	_scr_display_modes.push_back({ 7,  320,  240, 2, 2, false,  true });		// $E9
+	_scr_display_modes.push_back({ 7,  320,  160, 2, 3,  true,  true });		// $EA
+	_scr_display_modes.push_back({ 7,  320,  120, 2, 4,  true,  true });		// $EB
+	_scr_display_modes.push_back({ 7,  320,   96, 2, 5,  true,  true });		// $EC
+	_scr_display_modes.push_back({ 7,  320,   80, 2, 6,  true,  true });		// $ED
+	_scr_display_modes.push_back({ 7,  320,   68, 2, 7,  true,  true });		// $EE
+	_scr_display_modes.push_back({ 7,  320,   60, 2, 8,  true,  true });		// $EF
+	_scr_display_modes.push_back({ 7,  160,  480, 4, 1, false,  true });		// $F0
+	_scr_display_modes.push_back({ 7,  160,  240, 4, 2,  true,  true });		// $F1
+	_scr_display_modes.push_back({ 7,  160,  160, 4, 3,  true,  true });		// $F2
+	_scr_display_modes.push_back({ 7,  160,  120, 4, 4,  true,  true });		// $F3
+	_scr_display_modes.push_back({ 7,  160,   96, 4, 5,  true,  true });		// $F4
+	_scr_display_modes.push_back({ 7,  160,   80, 4, 6,  true,  true });		// $F5
+	_scr_display_modes.push_back({ 7,  160,   68, 4, 7,  true,  true });		// $F6
+	_scr_display_modes.push_back({ 7,  160,   60, 4, 8,  true,  true });		// $F7
+	_scr_display_modes.push_back({ 7,  128,  480, 5, 1,  true,  true });		// $F8
+	_scr_display_modes.push_back({ 7,  128,  240, 5, 2,  true,  true });		// $F9
+	_scr_display_modes.push_back({ 7,  128,  160, 5, 3,  true,  true });		// $FA
+	_scr_display_modes.push_back({ 7,  128,  120, 5, 4,  true,  true });		// $FB
+	_scr_display_modes.push_back({ 7,  128,   96, 5, 5,  true,  true });		// $FC
+	_scr_display_modes.push_back({ 7,  128,   80, 5, 6,  true,  true });		// $FD
+	_scr_display_modes.push_back({ 7,  128,   68, 5, 7,  true,  true });		// $FE
+	_scr_display_modes.push_back({ 7,  128,   60, 5, 8,  true,  true });		// $FF
 
-	if (false) {
-		for (int t=0; t<256; t++) 	{
-			printf("I:%2X  W:%4d, H:%4d PW:%2d PH:%2d S:%1d E:%1d T:%d \n", 
-				t, 
-				_scr_display_modes[t].res_width, 
-				_scr_display_modes[t].res_height,
-				_scr_display_modes[t].pixel_width,
-				_scr_display_modes[t].pixel_height,
-				_scr_display_modes[t].is_std_valid,
-				_scr_display_modes[t].is_ext_valid,
-				_scr_display_modes[t].is_txt_valid
-			);
+
+	// DEBUGGING: display the raw display mode data
+		if (true) {
+			for (int t=0; t<256; t++) 	{
+				printf("I:%2X  W:%4d, H:%4d    ", 
+					t, 
+					_scr_display_modes[t].res_width, 
+					_scr_display_modes[t].res_height
+				);
+				// how many colors are available in this mode?
+				int ext_bpp = 8;
+				int std_bpp = 8;
+				int size = (_scr_display_modes[t].res_width * _scr_display_modes[t].res_height)/8;
+				while (size*ext_bpp>65536)
+				{
+					if (ext_bpp==8)	ext_bpp=4;
+					else if (ext_bpp==4)	ext_bpp=2;
+					else if (ext_bpp==2)	ext_bpp=1;
+					else if (ext_bpp==1)	ext_bpp=0;
+					if (ext_bpp==0)
+						break;
+				}
+				while (size*std_bpp>VID_BUFFER_SIZE)
+				{
+					if (std_bpp==8)	std_bpp=4;
+					else if (std_bpp==4)	std_bpp=2;
+					else if (std_bpp==2)	std_bpp=1;
+					else if (std_bpp==1)	std_bpp=0;
+					if (std_bpp==0)
+						break;
+				}
+				int ext_colors = 1<<ext_bpp;	if (ext_colors==1) ext_colors = 0;
+				int std_colors = 1<<std_bpp;	if (std_colors==1) std_colors = 0;
+
+				if (ext_colors>0 && std_colors>0)
+					printf("   %3d      %3d", ext_colors, std_colors);
+				else if (ext_colors>0)
+					printf("   %3d         ", ext_colors);
+				else if (std_colors>0)
+					printf("            %3d", std_colors);
+				// text res
+				int col = _scr_display_modes[t].res_width / 8;
+				int row = _scr_display_modes[t].res_height / 8;
+				if ((col*row)*2 > VID_BUFFER_SIZE)
+					printf("            \n");
+				else
+					printf("    %3d x%3d\n", col, row);
+			}
 		}
-	}
+	// END DEBUGGING
 
 
 	// initialize the default color palette
@@ -1076,20 +1112,20 @@ void Gfx::_decode_dsp_gres()
 	}
 
 	// _h_scan = Horizontal Overscan Multiplier
-	static Byte s_old_h_scan = _h_scan;
-	_h_scan = (3-((data >> 2) & 0x03))+1;
-	if (s_old_h_scan != _h_scan)
+	static Byte s_old_h_scan = _pixel_w;
+	_pixel_w = (3-((data >> 2) & 0x03))+1;
+	if (s_old_h_scan != _pixel_w)
 	{
-		s_old_h_scan = _h_scan;
+		s_old_h_scan = _pixel_w;
 		//Bus::m_cpu->nmi();
 	}
 
 	// _v_scan = Vertical Overscan Multiplier
-	static Byte s_old_v_scan = _v_scan;
-	_v_scan = (3-((data >> 0) & 0x03))+1;
-	if (s_old_v_scan != _v_scan)
+	static Byte s_old_v_scan = _pixel_h;
+	_pixel_h = (3-((data >> 0) & 0x03))+1;
+	if (s_old_v_scan != _pixel_h)
 	{
-		s_old_v_scan = _v_scan;
+		s_old_v_scan = _pixel_h;
 		//Bus::m_cpu->nmi();
 	}
 
@@ -1113,8 +1149,8 @@ void Gfx::_decode_dsp_gres()
 		}	
 		return 8;
 	};
-	float real_width = _base_texture_width * (5-_h_scan);
-	float real_height = (_base_texture_width / _aspect) * (5-_v_scan);	
+	float real_width = _base_texture_width * (5-_pixel_w);
+	float real_height = (_base_texture_width / _aspect) * (5-_pixel_h);	
 	float div = get_div(_std_bpp);
 	float req_buffer_size = (real_width * real_height) / div;
 
@@ -1156,15 +1192,15 @@ void Gfx::_decode_dsp_gres()
 			// try reducing vertical resolution
 			while (req_buffer_size > VID_BUFFER_SIZE)
 			{
-				_v_scan++;					// _v_scan changed
-				real_height = (_base_texture_width / _aspect) * (5-_v_scan);	
+				_pixel_h++;					// _v_scan changed
+				real_height = (_base_texture_width / _aspect) * (5-_pixel_h);	
 				printf("    -->real_height: %4.2f\n", real_height);
 				div = get_div(_std_bpp);
 				req_buffer_size = (real_width * real_height) / div;	
-				// ENCODE THE CHANGES (_v_scan: 0000.00XX)
+				// ENCODE THE CHANGES (_pixel_h: 0000.00XX)
 				Byte d = data;
 				d &= 0xFC;
-				d |= ((_v_scan-1) & 0x03);
+				d |= ((_pixel_h-1) & 0x03);
 				Bus::Write(DSP_GRES, d, true);			
 			}
 		}
@@ -1183,8 +1219,8 @@ void Gfx::_decode_dsp_gres()
 		printf("----====#####################################################====----\n");
 		printf("DSP_GRES decoded:\n");
 		printf("  Aspect Ratio: %f\n", _aspect);
-		printf("  Horizontal Overscan: %dx\n", _h_scan);
-		printf("  Vertical Overscan: %dx\n", _v_scan);
+		printf("  Horizontal Overscan: %dx\n", _pixel_w);
+		printf("  Vertical Overscan: %dx\n", _pixel_h);
 		printf("  Real Width: %3.2f\n", real_width);
 		printf("  Real Height: %3.2f\n", real_height);
 		printf("  Standard Graphics BPP: %d\n", _std_bpp);

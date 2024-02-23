@@ -303,19 +303,19 @@ void GfxMouse::OnUpdate(float fElapsedTime)
         SDL_SetRenderTarget(m_gfx->_renderer, _mouse_texture);
         SDL_SetRenderDrawColor(m_gfx->_renderer, 0, 0, 0, 0);   // mouse layer background color
         // render the mouse cursor
-        float hs = m_gfx->_h_scan;
-        float vs = m_gfx->_v_scan;
-        switch (m_gfx->_h_scan)
+        float hs = m_gfx->_pixel_w;
+        float vs = m_gfx->_pixel_h;
+        switch (m_gfx->_pixel_w)
         {
-            case 2:  hs = m_gfx->_h_scan * (2.0f / 3.0f);   break;
-            case 3:  hs = m_gfx->_h_scan * (2.0f / 3.0f);   break;
+            case 2:  hs = m_gfx->_pixel_w * (2.0f / 3.0f);   break;
+            case 3:  hs = m_gfx->_pixel_w * (2.0f / 3.0f);   break;
         }
-        switch (m_gfx->_v_scan)
+        switch (m_gfx->_pixel_h)
         {
-            case 2:  vs = m_gfx->_v_scan * (2.0f / 3.0f);   break;
-            case 3:  vs = m_gfx->_v_scan * (2.0f / 3.0f);   break;
+            case 2:  vs = m_gfx->_pixel_h * (2.0f / 3.0f);   break;
+            case 3:  vs = m_gfx->_pixel_h * (2.0f / 3.0f);   break;
         }
-        //printf("_v_scan: %d\n", m_gfx->_v_scan);
+        //printf("_pixel_h: %d\n", m_gfx->_pixel_h);
         SDL_Rect dst = {
             mouse_x_offset + (int)((float)mouse_x*hs),
             mouse_y_offset + (int)((float)mouse_y*vs),
