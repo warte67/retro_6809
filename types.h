@@ -16,7 +16,8 @@
 
 // Generate a memory map definition file?
 #define COMPILE_MEMORY_MAP      false
-#define MEMORY_MAP_OUTPUT_CPP   true
+#define MEMORY_MAP_OUTPUT_CPP   false
+
 
 
 // simple 6809 types
@@ -37,10 +38,11 @@ const bool ENABLE_DEBUG = false;
 const bool DEBUG_SINGLE_STEP = ENABLE_DEBUG;	// false;
 
 
+constexpr Word VID_BUFFER_SIZE = 8 * 1024;
+
 
 // temp / testing:
-const Byte EDIT_BUFFER_SIZE = 64;       // 64 is tested
-// const Byte EDIT_BUFFER_SIZE = 255;       // 255 works
+constexpr Word EDIT_BUFFER_SIZE = 256;
 
 
 

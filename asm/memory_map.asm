@@ -1,25 +1,8 @@
 ;  **********************************************
 ;  * Allocated 64k Memory Mapped System Symbols *
 ;  **********************************************
-
-; Simple Memory Map:
-;     $0000-$000F SOFT_VECTORS
-;     $0010-$00FF ZERO_PAGE
-;     $0100-$01FF FIO_BUFFER
-;     $0200-$03FF SYSTEM_STACK
-;     $0400-$1C28 GFX_DEVICE
-;     $1C29-$1C7D Keyboard
-;     $1C7E-$1C8F Gamepad
-;     $1C90-$1C9D FileIO
-;     $1C9E-$1CBC Math
-;     $1CBD-$2FFF RESERVED
-;     $3000-$AFFF USER_RAM
-;     $B000-$CFFF PAGED_RAM
-;     $D000-$EFFF PAGED_ROM
-;     $F000-$FFFF KERNEL_ROM
-
-SOFT_VECTORS        equ   $0000
-
+SOFT_VECTORS        equ   $0000  
+        
           ; Software Interrupt Vectors:
 SOFT_EXEC           equ   $0000    ; Exec Software Interrupt Vector
 SOFT_SWI3           equ   $0002    ; SWI3 Software Interrupt Vector
@@ -29,25 +12,25 @@ SOFT_IRQ            equ   $0008    ; IRQ Software Interrupt Vector
 SOFT_SWI            equ   $000A    ; SWI / SYS Software Interrupt Vector
 SOFT_NMI            equ   $000C    ; NMI Software Interrupt Vector
 SOFT_RESET          equ   $000E    ; RESET Software Interrupt Vector
-
-ZERO_PAGE           equ   $0010
-FIO_BUFFER          equ   $0100
+        
+ZERO_PAGE           equ   $0010  
+FIO_BUFFER          equ   $0100  
 FIO_BFR_TOP         equ   $01FF    ; Top of the File Input/Output Buffer
-SYSTEM_STACK        equ   $0200
+SYSTEM_STACK        equ   $0200  
 SSTACK_TOP          equ   $0400    ; Top of the system stack space
-
+        
           ; Device Registers:
 HDW_REGS            equ   $0400    ; Begin Device Hardware Registers
-
+        
 STD_VID_MIN         equ   $0400    ; Start of Standard Video Buffer Memory
-STD_VID_MAX         equ   $1C00    ;  (Word) Standard Video Buffer Max
-
-SYS_STATE           equ   $1C02    ;  (Byte) System State Register
+STD_VID_MAX         equ   $2400    ;  (Word) Standard Video Buffer Max
+        
+SYS_STATE           equ   $2402    ;  (Byte) System State Register
           ; SYS_STATE: ABCD.SSSS
-          ;      A:0   = Error: Standard Buffer Overflow
-          ;      B:0   = Error: Extended Buffer Overflow
-          ;      C:0   = Error: Reserved
-          ;      D:0   = Error: Reserved
+          ;      A:0   = Error: Standard Buffer Overflow 
+          ;      B:0   = Error: Extended Buffer Overflow 
+          ;      C:0   = Error: Reserved 
+          ;      D:0   = Error: Reserved 
           ;      S:$0  = CPU Clock  25 khz.
           ;      S:$1  = CPU Clock  50 khz.
           ;      S:$2  = CPU Clock 100 khz.
@@ -64,10 +47,10 @@ SYS_STATE           equ   $1C02    ;  (Byte) System State Register
           ;      S:$D  = CPU Clock 3.3 mhz.
           ;      S:$E  = CPU Clock 5.0 mhz.
           ;      S:$F  = CPU Clock ~10.0 mhz. (unmetered)
-
-SYS_SPEED           equ   $1C03    ;  (Word) Approx. Average CPU Clock Speed
-
-SYS_CLOCK_DIV       equ   $1C05    ;  (Byte) 60 hz Clock Divider Register (Read Only)
+        
+SYS_SPEED           equ   $2403    ;  (Word) Approx. Average CPU Clock Speed
+        
+SYS_CLOCK_DIV       equ   $2405    ;  (Byte) 60 hz Clock Divider Register (Read Only) 
           ; SYS_CLOCK_DIV: ABCD.SSSS
           ;      bit 7: 0.46875 hz
           ;      bit 6: 0.9375 hz
@@ -77,10 +60,10 @@ SYS_CLOCK_DIV       equ   $1C05    ;  (Byte) 60 hz Clock Divider Register (Read 
           ;      bit 2: 15.0 hz
           ;      bit 1: 30.0 hz
           ;      bit 0: 60.0 hz
-
-SYS_TIMER           equ   $1C06    ;  (Word) Increments at 0.46875 hz
-
-DSP_GRES            equ   $1C08    ;  (Byte) Screen Resolution Register
+        
+SYS_TIMER           equ   $2406    ;  (Word) Increments at 0.46875 hz
+        
+DSP_GRES            equ   $2408    ;  (Byte) Screen Resolution Register
           ; DSP_GRES: BBRR.HHVV
           ;     BB:00 = Standard Graphics 1-bpp (2-color mode)
           ;     BB:01 = Standard Graphics 2-bpp (4-color mode)
@@ -98,55 +81,55 @@ DSP_GRES            equ   $1C08    ;  (Byte) Screen Resolution Register
           ;     VV:01 = 3x Vertical Overscan Multiplier
           ;     VV:10 = 2x Vertical Overscan Multiplier
           ;     VV:11 = 1x Vertical Overscan Multiplier
-
-DSP_EXT             equ   $1C09    ;  (Byte) Extended Graphics Register
+        
+DSP_EXT             equ   $2409    ;  (Byte) Extended Graphics Register
           ; DSP_EXT: AABC.DEFG
-          ;      AA:00 = Extended Graphics 1bpp (2-color mode)
-          ;      AA:01 = Extended Graphics 2bpp (4-color mode)
-          ;      AA:10 = Extended Graphics 4bpp (16-color mode)
-          ;      AA:11 = Extended Graphics 4bpp (16-color mode)
-          ;      B:0   = Extended Graphics: DISABLED
-          ;      B:1   = Extended Graphics: ENABLED
-          ;      C:0   = Extended Extended Mode: BITMAP
-          ;      C:1   = Extended Extended Mode: TILES
-          ;      D:0   = Standard Graphics: DISABLED
-          ;      D:1   = Standard Graphics: ENABLED
-          ;      E:0   = Standard Display Mode: TEXT
-          ;      E:1   = Standard Display Mode: BITMAP
-          ;      F:0   = VSYNC OFF
-          ;      F:1   = VSYNC ON
-          ;      G:0   = Fullscreen Enabled( emulator only )
-          ;      G:1   = Windowed Enabled ( emulator only )
-
-DSP_TXT_COLS        equ   $1C0A    ;  (Byte) READ-ONLY Text Screen Columns
-DSP_TXT_ROWS        equ   $1C0B    ;  (Byte) READ-ONLY Text Screens Rows
-
-DSP_PAL_IDX         equ   $1C0C    ;  (Byte) Color Palette Index
+          ;      AA:00 = Extended Graphics 1bpp (2-color mode) 
+          ;      AA:01 = Extended Graphics 2bpp (4-color mode) 
+          ;      AA:10 = Extended Graphics 4bpp (16-color mode) 
+          ;      AA:11 = Extended Graphics 4bpp (16-color mode) 
+          ;      B:0   = Extended Graphics: DISABLED 
+          ;      B:1   = Extended Graphics: ENABLED 
+          ;      C:0   = Extended Extended Mode: BITMAP 
+          ;      C:1   = Extended Extended Mode: TILES 
+          ;      D:0   = Standard Graphics: DISABLED 
+          ;      D:1   = Standard Graphics: ENABLED 
+          ;      E:0   = Standard Display Mode: TEXT 
+          ;      E:1   = Standard Display Mode: BITMAP 
+          ;      F:0   = VSYNC OFF 
+          ;      F:1   = VSYNC ON 
+          ;      G:0   = Fullscreen Enabled( emulator only ) 
+          ;      G:1   = Windowed Enabled ( emulator only ) 
+        
+DSP_TXT_COLS        equ   $240A    ;  (Byte) READ-ONLY Text Screen Columns
+DSP_TXT_ROWS        equ   $240B    ;  (Byte) READ-ONLY Text Screens Rows
+        
+DSP_PAL_IDX         equ   $240C    ;  (Byte) Color Palette Index
           ; DSP_PAL_IDX: 0-255
-          ; Note: Use this register to set the index into theColor Palette.
+          ; Note: Use this register to set the index into theColor Palette. 
           ;   Set this value prior referencing color data (DSP_PAL_CLR).
-
-DSP_PAL_CLR         equ   $1C0D    ;  (Word) Indexed Color Palette Data
+        
+DSP_PAL_CLR         equ   $240D    ;  (Word) Indexed Color Palette Data
           ; DSP_PAL_CLR: Color Data A4R4G4B4 format
           ; Note: This is the color data for an individual palette entry.
           ;     Write to DSP_PAL_IDX with the index within the color palette
           ;     prior to reading or writing the color data in the DSP_PAL_CLR register.
-
-DSP_GLYPH_IDX       equ   $1C0F    ;  (Byte) Text Glyph Index
+        
+DSP_GLYPH_IDX       equ   $240F    ;  (Byte) Text Glyph Index
           ; DSP_GLYPH_IDX: 0-256
           ; Note: Set this register to index a specific text glyph. Set this value
           ;     prior to updating glyph pixel data.
-
-DSP_GLYPH_DATA      equ   $1C10    ;  (8-Bytes) Text Glyph Pixel Data Array
+        
+DSP_GLYPH_DATA      equ   $2410    ;  (8-Bytes) Text Glyph Pixel Data Array
           ; DSP_GLYPH_DATA: 8 rows of binary encoded glyph pixel data
-          ; Note: Each 8x8 text glyph is composed of 8 bytes. The first byte in this
+          ; Note: Each 8x8 text glyph is composed of 8 bytes. The first byte in this 
           ;     array represents the top line of 8 pixels. Each array entry represents
-          ;     a row of 8 pixels.
-
+          ;     a row of 8 pixels. 
+        
           ; Debug Hardware Registers:
-DBG_BEGIN           equ   $1C18    ; Start of Debug Hardware Registers
-DBG_BRK_ADDR        equ   $1C18    ;    (Word) Address of current breakpoint
-DBG_FLAGS           equ   $1C1A    ;    (Byte) Debug Specific Hardware Flags:
+DBG_BEGIN           equ   $2418    ; Start of Debug Hardware Registers
+DBG_BRK_ADDR        equ   $2418    ;    (Word) Address of current breakpoint
+DBG_FLAGS           equ   $241A    ;    (Byte) Debug Specific Hardware Flags:
           ;     bit 7: Debug Enable
           ;     bit 6: Single Step Enable
           ;     bit 5: Clear All Breakpoints
@@ -155,60 +138,60 @@ DBG_FLAGS           equ   $1C1A    ;    (Byte) Debug Specific Hardware Flags:
           ;     bit 2: IRQ   (on low to high edge)
           ;     bit 1: NMI   (on low to high edge)
           ;     bit 0: RESET (on low to high edge)
-DBG_END             equ   $1C1B    ; End Debug Registers
-
+DBG_END             equ   $241B    ; End Debug Registers
+        
           ; Mouse Cursor Hardware Registers:
-CSR_BEGIN           equ   $1C1B    ;  start of mouse cursor hardware registers
-CSR_XPOS            equ   $1C1B    ;  (Word) horizontal mouse cursor coordinate
-CSR_YPOS            equ   $1C1D    ;  (Word) vertical mouse cursor coordinate
-CSR_XOFS            equ   $1C1F    ;  (Byte) horizontal mouse cursor offset
-CSR_YOFS            equ   $1C20    ;  (Byte) vertical mouse cursor offset
-CSR_SCROLL          equ   $1C21    ;  (Signed) MouseWheel Scroll: -1, 0, 1
-CSR_FLAGS           equ   $1C22    ;  (Byte) mouse button flags:
+CSR_BEGIN           equ   $241B    ;  start of mouse cursor hardware registers
+CSR_XPOS            equ   $241B    ;  (Word) horizontal mouse cursor coordinate
+CSR_YPOS            equ   $241D    ;  (Word) vertical mouse cursor coordinate
+CSR_XOFS            equ   $241F    ;  (Byte) horizontal mouse cursor offset
+CSR_YOFS            equ   $2420    ;  (Byte) vertical mouse cursor offset
+CSR_SCROLL          equ   $2421    ;  (Signed) MouseWheel Scroll: -1, 0, 1
+CSR_FLAGS           equ   $2422    ;  (Byte) mouse button flags:
           ;  CSR_FLAGS:
           ;       bits 0-4: button states
           ;       bits 5:   cursor enable
           ;       bits 6-7: number of clicks
-CSR_BMP_INDX        equ   $1C23    ;  (Byte) mouse cursor bitmap pixel offset
-CSR_BMP_DATA        equ   $1C24    ;  (Byte) mouse cursor bitmap pixel index color
-CSR_PAL_INDX        equ   $1C26    ;  (Byte) mouse cursor color palette index (0-15)
-CSR_PAL_DATA        equ   $1C27    ;  (Word) mouse cursor color palette data RGBA4444
-CSR_END             equ   $1C29    ; End Mouse Registers
-
-GFX_END             equ   $1C29    ; End of GFX Device Registers
-
-KEY_BEGIN           equ   $1C29    ; Start of the Keyboard Register space
-CHAR_Q_LEN          equ   $1C29    ;   (Byte) # of characters waiting in queue        (Read Only)
-CHAR_SCAN           equ   $1C2A    ;   (Byte) read next character in queue (not popped when read)
-CHAR_POP            equ   $1C2B    ;   (Byte) read next character in queue (not popped when read)
-XKEY_BUFFER         equ   $1C2C    ;   (128 bits) 16 bytes for XK_KEY data buffer     (Read Only)
-EDT_BFR_CSR         equ   $1C3C    ;   (Byte) cursor position within edit buffer     (Read/Write)
-EDT_ENABLE          equ   $1C3D    ;   (Byte) line editor enable flag                 (Read/Write)
-EDT_BUFFER          equ   $1C3E    ;   line editing character buffer                 (Read/Write)
-KEY_END             equ   $1C7E    ; End of the Keyboard Register space
-
-JOYS_BEGIN          equ   $1C7E    ; Start of the Game Controller Register space
-JOYS_1_BTN          equ   $1C7E    ;   (Word) button bits: room for up to 16 buttons  (realtime)
-JOYS_1_DBND         equ   $1C80    ;   (Byte) PAD 1 analog deadband; default is 5   (read/write)
-JOYS_1_LTX          equ   $1C81    ;   (char) PAD 1 LThumb-X position (-128 _ +127)   (realtime)
-JOYS_1_LTY          equ   $1C82    ;   (char) PAD 1 LThumb-Y position (-128 _ +127)   (realtime)
-JOYS_1_RTX          equ   $1C83    ;   (char) PAD 1 RThumb-X position (-128 _ +127)   (realtime)
-JOYS_1_RTY          equ   $1C84    ;   (char) PAD 1 RThumb-Y position (-128 _ +127)   (realtime)
-JOYS_1_Z1           equ   $1C85    ;   (char) PAD 1 left analog trigger (0 - 127)     (realtime)
-JOYS_1_Z2           equ   $1C86    ;   (char) PAD 1 right analog trigger (0 - 127)    (realtime)
-
-JOYS_2_BTN          equ   $1C87    ;   (Word) button bits: room for up to 16 buttons  (realtime)
-JOYS_2_DBND         equ   $1C89    ;   (Byte) PAD 2 analog deadband; default is 5   (read/write)
-JOYS_2_LTX          equ   $1C8A    ;   (char) PAD 2 LThumb-X position (-128 _ +127)   (realtime)
-JOYS_2_LTY          equ   $1C8B    ;   (char) PAD 2 LThumb-Y position (-128 _ +127)   (realtime)
-JOYS_2_RTX          equ   $1C8C    ;   (char) PAD 2 RThumb-X position (-128 _ +127)   (realtime)
-JOYS_2_RTY          equ   $1C8D    ;   (char) PAD 2 RThumb-Y position (-128 _ +127)   (realtime)
-JOYS_2_Z1           equ   $1C8E    ;   (char) PAD 2 left analog trigger (0 - 127)     (realtime)
-JOYS_2_Z2           equ   $1C8F    ;   (char) PAD 2 right analog trigger (0 - 127)    (realtime)
-JOYS_END            equ   $1C90    ; End of the Game Controller Register space
-
-FIO_BEGIN           equ   $1C90    ; Start of the FileIO register space
-FIO_ERR_FLAGS       equ   $1C90    ; (Byte) File IO error flags
+CSR_BMP_INDX        equ   $2423    ;  (Byte) mouse cursor bitmap pixel offset
+CSR_BMP_DATA        equ   $2424    ;  (Byte) mouse cursor bitmap pixel index color
+CSR_PAL_INDX        equ   $2426    ;  (Byte) mouse cursor color palette index (0-15)
+CSR_PAL_DATA        equ   $2427    ;  (Word) mouse cursor color palette data RGBA4444
+CSR_END             equ   $2429    ; End Mouse Registers
+        
+GFX_END             equ   $2429    ; End of GFX Device Registers
+        
+KEY_BEGIN           equ   $2429    ; Start of the Keyboard Register space
+CHAR_Q_LEN          equ   $2429    ;   (Byte) # of characters waiting in queue        (Read Only)
+CHAR_SCAN           equ   $242A    ;   (Byte) read next character in queue (not popped when read)
+CHAR_POP            equ   $242B    ;   (Byte) read next character in queue (not popped when read)
+XKEY_BUFFER         equ   $242C    ;   (128 bits) 16 bytes for XK_KEY data buffer     (Read Only)
+EDT_BFR_CSR         equ   $243C    ;   (Byte) cursor position within edit buffer     (Read/Write)
+EDT_ENABLE          equ   $243D    ;   (Byte) line editor enable flag                 (Read/Write)
+EDT_BUFFER          equ   $243E    ;   line editing character buffer                 (Read/Write)
+KEY_END             equ   $253E    ; End of the Keyboard Register space
+        
+JOYS_BEGIN          equ   $253E    ; Start of the Game Controller Register space
+JOYS_1_BTN          equ   $253E    ;   (Word) button bits: room for up to 16 buttons  (realtime)
+JOYS_1_DBND         equ   $2540    ;   (Byte) PAD 1 analog deadband; default is 5   (read/write)
+JOYS_1_LTX          equ   $2541    ;   (char) PAD 1 LThumb-X position (-128 _ +127)   (realtime)
+JOYS_1_LTY          equ   $2542    ;   (char) PAD 1 LThumb-Y position (-128 _ +127)   (realtime)
+JOYS_1_RTX          equ   $2543    ;   (char) PAD 1 RThumb-X position (-128 _ +127)   (realtime)
+JOYS_1_RTY          equ   $2544    ;   (char) PAD 1 RThumb-Y position (-128 _ +127)   (realtime)
+JOYS_1_Z1           equ   $2545    ;   (char) PAD 1 left analog trigger (0 - 127)     (realtime)
+JOYS_1_Z2           equ   $2546    ;   (char) PAD 1 right analog trigger (0 - 127)    (realtime)
+        
+JOYS_2_BTN          equ   $2547    ;   (Word) button bits: room for up to 16 buttons  (realtime)
+JOYS_2_DBND         equ   $2549    ;   (Byte) PAD 2 analog deadband; default is 5   (read/write)
+JOYS_2_LTX          equ   $254A    ;   (char) PAD 2 LThumb-X position (-128 _ +127)   (realtime)
+JOYS_2_LTY          equ   $254B    ;   (char) PAD 2 LThumb-Y position (-128 _ +127)   (realtime)
+JOYS_2_RTX          equ   $254C    ;   (char) PAD 2 RThumb-X position (-128 _ +127)   (realtime)
+JOYS_2_RTY          equ   $254D    ;   (char) PAD 2 RThumb-Y position (-128 _ +127)   (realtime)
+JOYS_2_Z1           equ   $254E    ;   (char) PAD 2 left analog trigger (0 - 127)     (realtime)
+JOYS_2_Z2           equ   $254F    ;   (char) PAD 2 right analog trigger (0 - 127)    (realtime)
+JOYS_END            equ   $2550    ; End of the Game Controller Register space
+        
+FIO_BEGIN           equ   $2550    ; Start of the FileIO register space
+FIO_ERR_FLAGS       equ   $2550    ; (Byte) File IO error flags
           ; FIO_ERR_FLAGS: ABCD.EFGH
           ;      A:  file was not found
           ;      B:  directory was not found
@@ -218,8 +201,8 @@ FIO_ERR_FLAGS       equ   $1C90    ; (Byte) File IO error flags
           ;      F:  wrong file type
           ;      G:  invalid command
           ;      H:  incorrect file stream
-
-FIO_COMMAND         equ   $1C91    ; (Byte) OnWrite, execute a file command (FC_<cmd>)
+        
+FIO_COMMAND         equ   $2551    ; (Byte) OnWrite, execute a file command (FC_<cmd>)
           ; Begin FIO_COMMANDS
 FC_RESET            equ   $0000    ;        Reset
 FC_SHUTDOWN         equ   $0001    ;        SYSTEM: Shutdown
@@ -246,9 +229,9 @@ FC_SEEKEND          equ   $0015    ;      * Seek End
 FC_SET_SEEK         equ   $0016    ;      * Set Seek Position (from FIO_IOWORD)
 FC_GET_SEEK         equ   $0017    ;      * Get Seek Position (into FIO_IOWORD)
           ; End FIO_COMMANDS
-
-FIO_STREAM          equ   $1C92    ; (Byte) current file stream index (0-15)
-FIO_MODE            equ   $1C93    ; (Byte) Flags describing the I/O mode for the file
+        
+FIO_STREAM          equ   $2552    ; (Byte) current file stream index (0-15)
+FIO_MODE            equ   $2553    ; (Byte) Flags describing the I/O mode for the file
           ; FIO_MODE: 00AB.CDEF  (indexed by FIO_STREAM)
           ;      A:  INPUT - File open for reading
           ;      B:  OUTPUT - File open for writing
@@ -256,34 +239,34 @@ FIO_MODE            equ   $1C93    ; (Byte) Flags describing the I/O mode for th
           ;      D:  AT_END - Output starts at the end of the file
           ;      E:  APPEND - All output happens at end of the file
           ;      F:  TRUNC - discard all previous file data
-FIO_SEEKPOS         equ   $1C94    ; (DWord) file seek position
-FIO_IOBYTE          equ   $1C98    ; (Byte) input / output character
-FIO_IOWORD          equ   $1C99    ; (Byte) input / output character
-FIO_PATH_LEN        equ   $1C9A    ; (Byte) length of the filepath
-FIO_PATH_POS        equ   $1C9B    ; (Byte) character position within the filepath
-FIO_PATH_DATA       equ   $1C9C    ; (Byte) data at the character position of the path
-FIO_DIR_DATA        equ   $1C9D    ; (Byte) a series of null-terminated filenames
-          ;     NOTES: Current read-position is reset to the beginning following a
-          ;             List Directory command. The read-position is automatically
-          ;             advanced on read from this register. Each filename is
+FIO_SEEKPOS         equ   $2554    ; (DWord) file seek position
+FIO_IOBYTE          equ   $2558    ; (Byte) input / output character
+FIO_IOWORD          equ   $2559    ; (Byte) input / output character
+FIO_PATH_LEN        equ   $255A    ; (Byte) length of the filepath
+FIO_PATH_POS        equ   $255B    ; (Byte) character position within the filepath
+FIO_PATH_DATA       equ   $255C    ; (Byte) data at the character position of the path
+FIO_DIR_DATA        equ   $255D    ; (Byte) a series of null-terminated filenames
+          ;     NOTES: Current read-position is reset to the beginning following a 
+          ;             List Directory command. The read-position is automatically 
+          ;             advanced on read from this register. Each filename is 
           ;             $0a-terminated. The list itself is null-terminated.
-FIO_END             equ   $1C9E    ; End of the FileIO register space
-
+FIO_END             equ   $255E    ; End of the FileIO register space
+        
           ; Math Co-Processor Hardware Registers:
-MATH_BEGIN          equ   $1C9E    ;  start of math co-processor  hardware registers
-MATH_ACA_POS        equ   $1C9E    ;  (Byte) character position within the ACA float string
-MATH_ACA_DATA       equ   $1C9F    ;  (Byte) ACA float string character port
-MATH_ACA_RAW        equ   $1CA0    ;  (4-Bytes) ACA raw float data
-MATH_ACA_INT        equ   $1CA4    ;  (4-Bytes) ACA integer data
-MATH_ACB_POS        equ   $1CA8    ;  (Byte) character position within the ACB float string
-MATH_ACB_DATA       equ   $1CA9    ;  (Byte) ACB float string character port
-MATH_ACB_RAW        equ   $1CAA    ;  (4-Bytes) ACB raw float data
-MATH_ACB_INT        equ   $1CAE    ;  (4-Bytes) ACB integer data
-MATH_ACR_POS        equ   $1CB2    ;  (Byte) character position within the ACR float string
-MATH_ACR_DATA       equ   $1CB3    ;  (Byte) ACR float string character port
-MATH_ACR_RAW        equ   $1CB4    ;  (4-Bytes) ACR raw float data
-MATH_ACR_INT        equ   $1CB8    ;  (4-Bytes) ACR integer data
-MATH_OPERATION      equ   $1CBC    ;  (Byte) Operation 'command' to be issued
+MATH_BEGIN          equ   $255E    ;  start of math co-processor  hardware registers
+MATH_ACA_POS        equ   $255E    ;  (Byte) character position within the ACA float string
+MATH_ACA_DATA       equ   $255F    ;  (Byte) ACA float string character port
+MATH_ACA_RAW        equ   $2560    ;  (4-Bytes) ACA raw float data
+MATH_ACA_INT        equ   $2564    ;  (4-Bytes) ACA integer data
+MATH_ACB_POS        equ   $2568    ;  (Byte) character position within the ACB float string
+MATH_ACB_DATA       equ   $2569    ;  (Byte) ACB float string character port
+MATH_ACB_RAW        equ   $256A    ;  (4-Bytes) ACB raw float data
+MATH_ACB_INT        equ   $256E    ;  (4-Bytes) ACB integer data
+MATH_ACR_POS        equ   $2572    ;  (Byte) character position within the ACR float string
+MATH_ACR_DATA       equ   $2573    ;  (Byte) ACR float string character port
+MATH_ACR_RAW        equ   $2574    ;  (4-Bytes) ACR raw float data
+MATH_ACR_INT        equ   $2578    ;  (4-Bytes) ACR integer data
+MATH_OPERATION      equ   $257C    ;  (Byte) Operation 'command' to be issued
           ; Begin MATH_OPERATION's (MOPS)
 MOP_RANDOM          equ   $0000    ;        ACA, ACB, and ACR are set to randomized values
 MOP_RND_SEED        equ   $0001    ;        MATH_ACA_INT seeds the pseudo-random number generator
@@ -342,25 +325,25 @@ MOP_ILOGB           equ   $0035    ;        ACR = std::ilogb(ACA);
 MOP_LOGB            equ   $0036    ;        ACR = std::logb(ACA);
 MOP_NEXTAFTER       equ   $0037    ;        ACR = std::nextafter(ACA, ACB);
 MOP_COPYSIGN        equ   $0038    ;        ACR = std::copysign(ACA, ACB);
-MOP_LASTOP          equ   $0038    ;        last implemented math operation
+MOP_LASTOP          equ   $0038    ;        last implemented math operation 
           ; End MATH_OPERATION's (MOPS)
-MATH_END            equ   $1CBD    ; end of math co-processor registers
-
-    ; 4931 ($1343) bytes remaining for additional registers.
-RESERVED            equ   $1CBD
-
+MATH_END            equ   $257D    ; end of math co-processor registers
+        
+    ; 2691 ($0A83) bytes remaining for additional registers.
+RESERVED            equ   $257D  
+        
           ; User RAM (32K)
-USER_RAM            equ   $3000
-
+USER_RAM            equ   $3000  
+        
           ; Paged RAM (8K)
-PAGED_RAM           equ   $B000
-
+PAGED_RAM           equ   $B000  
+        
           ; PAGED ROM (8K bytes)
-PAGED_ROM           equ   $D000
-
+PAGED_ROM           equ   $D000  
+        
           ; KERNEL ROM (4K bytes)
-KERNEL_ROM          equ   $F000
-
+KERNEL_ROM          equ   $F000  
+        
           ; Hardware Interrupt Vectors:
 HARD_EXEC           equ   $FFF0    ; EXEC Hardware Interrupt Vector
 HARD_SWI3           equ   $FFF2    ; SWI3 Hardware Interrupt Vector
