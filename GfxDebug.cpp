@@ -170,7 +170,7 @@ void GfxDebug::OnEvent(SDL_Event* evnt)
                     Byte data = Bus::Read(DBG_FLAGS);
                     data ^= 0x80;
                     Bus::Write(DBG_FLAGS, data);
-
+                    bIsCursorVisible = false;
                     bMouseWheelActive = false;
                     if (_bIsDebugActive) // enable the cursor during debug
                     {
