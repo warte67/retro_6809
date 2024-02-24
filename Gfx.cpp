@@ -1113,33 +1113,6 @@ void Gfx::OnEvent(SDL_Event* evnt)
 
 void Gfx::OnUpdate(float fElapsedTime) 
 {
-	/***
-		// restrict updates based on elapsed time
-		const float _delay = 0.033333f;
-		static float _acc = fElapsedTime;
-		_acc += fElapsedTime;
-		if (_acc > fElapsedTime + _delay)
-		{
-			_acc -= _delay;
-			//		// clear the window to the border color
-			//		SDL_SetRenderTarget(_renderer, NULL);
-			//		SDL_SetRenderDrawColor(_renderer, 32, 32, 32, 255);	// border color
-			//		SDL_RenderClear(_renderer);
-			// update the display textures
-			if (Bus::bCpuEnabled)
-			{
-				Bus::bCpuEnabled = false;
-													//using clock = std::chrono::system_clock;
-													//auto _start = clock::now();
-				_display_extended();
-				_display_standard();
-													//auto _dur = _start - clock::now();
-													//std::cout << "TIME: " << _dur.count() << std::endl;
-				Bus::bCpuEnabled = true;
-			}
-		}
-	***/
-
 	// run OnUpdate() for the other graphics devices
 	for (auto& d : _gfx_devices)
 		d->OnUpdate(fElapsedTime);
