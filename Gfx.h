@@ -124,13 +124,13 @@ class Gfx : public Device
 		// hardware registers
 	protected:
 
-        Byte _dsp_res = 0x6B;       // Display Resolution Timing (320x200 default)
+        Byte _dsp_res = 0xE1;   //0x6B;       // Display Resolution Timing (0x6B=320x200 default)
         Byte _dsp_mode = 0x10;      // Graphics Display Modes (0b00010000)
         Byte _emu_flags = 0x01;     // Emulation flags (defaults)
 
         Word _std_vid_max = STD_VID_MAX;		// [STD_VID_MAX]
                                     // DEPRICATED
-                                        Byte _dsp_gres	= 0b11000101;	// DEPRICATED
+                                        Byte _dsp_gres	= 0b11010000;	// DEPRICATED
                                         Byte _dsp_ext 	= 0b11001001;	// DEPRICATED
                                     // DEPRICATED
         Byte _dsp_err = 0;          

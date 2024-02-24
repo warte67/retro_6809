@@ -42,6 +42,8 @@ constexpr Word VID_BUFFER_SIZE = 8 * 1024;      // standard video buffer size
 constexpr Word EDIT_BUFFER_SIZE = 256;          // input/edit buffer size
 
 
+// debugging
+const bool DEBUG_SCANTYPE_OLD = false;
 
 
 #endif //__TYPES_H__

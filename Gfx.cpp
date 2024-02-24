@@ -125,7 +125,7 @@ void Gfx::write(Word offset, Byte data, bool debug)
 		case DSP_MODE: {
 			_dsp_mode = data;
 			_decode_display();
-			Bus::IsDirty(true);		
+			Bus::IsDirty(true);	
 			break;
 		}
 														// DEPRECATED
@@ -1170,7 +1170,9 @@ void Gfx::OnPresent()
 void Gfx::_decode_display()
 {
 	// printf("Gfx::_decode_display()\n");
-	return;
+	if (DEBUG_SCANTYPE_OLD==true)
+		return;
+
 
 	// window measurements
 	_window_width  = _scr_timing_modes[_scr_display_modes[_dsp_res].timing_index].width;
@@ -1285,7 +1287,8 @@ void Gfx::_decode_display()
 // DEPRECATED
 	void Gfx::_decode_dsp_gres()
 	{
-		// return;
+		if (DEBUG_SCANTYPE_OLD==false)
+			return;
 
 		// shortcut to the Bus instance and DSP_GRES data
 		Byte data = Bus::Read(DSP_GRES);
@@ -1421,7 +1424,8 @@ void Gfx::_decode_display()
 
 	void Gfx::_decode_dsp_ext()
 	{
-		// return;
+		if (DEBUG_SCANTYPE_OLD==false)
+			return;
 
 		// shortcut to the Bus instance and DSP_EXT data
 		Byte data = Bus::Read(DSP_EXT);
