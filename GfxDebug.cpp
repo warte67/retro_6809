@@ -232,23 +232,23 @@ void GfxDebug::OnEvent(SDL_Event* evnt)
             mouse_wheel = evnt->wheel.y;
             break;
 
-        case SDL_KEYUP:
-        {
-            // toggle fullscreen/windowed 
-            if (evnt->key.keysym.sym == SDLK_RETURN)
-            {
-                if (SDL_GetModState() & KMOD_ALT)
-                {
-                    Byte data = Bus::Read(DSP_EXT);
-                    if (m_gfx->_windowed)
-                        data &= ~0x01;
-                    else
-                        data |= 0x01;
-                    Bus::Write(DSP_EXT, data);
-                }
-            }    
-            break;        
-        }
+        // case SDL_KEYUP:
+        // {
+        //     // toggle fullscreen/windowed 
+        //     if (evnt->key.keysym.sym == SDLK_RETURN)
+        //     {
+        //         if (SDL_GetModState() & KMOD_ALT)
+        //         {
+        //             Byte data = Bus::Read(DSP_EXT);
+        //             if (m_gfx->_windowed)
+        //                 data &= ~0x01;
+        //             else
+        //                 data |= 0x01;
+        //             Bus::Write(DSP_EXT, data);
+        //         }
+        //     }    
+        //     break;        
+        // }
     }
 }
 

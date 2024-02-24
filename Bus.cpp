@@ -391,21 +391,20 @@ void Bus::_onEvent()
 			d->OnEvent(&evnt);		
 
         switch (evnt.type) {
-
-		// handle default events SDL_QUIT and [ESC] quits
-        case SDL_QUIT:
-            // handling of close button
-            s_bIsRunning = false;
-            break;
-        
-        case SDL_KEYDOWN:
-            //if (evnt.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
-            if (evnt.key.keysym.sym == SDLK_x)
-            {
-                if (SDL_GetModState() & KMOD_ALT)
-                    s_bIsRunning = false;
-            }
-            break;
+            // handle default events SDL_QUIT and [ESC] quits
+            case SDL_QUIT:
+                // handling of close button
+                s_bIsRunning = false;
+                break;
+            
+            case SDL_KEYDOWN:
+                //if (evnt.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
+                if (evnt.key.keysym.sym == SDLK_x)
+                {
+                    if (SDL_GetModState() & KMOD_ALT)
+                        s_bIsRunning = false;
+                }
+                break;
         }
     }    
 }

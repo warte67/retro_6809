@@ -124,7 +124,7 @@ class Gfx : public Device
 		// hardware registers
 	protected:
 
-        Byte _dsp_res = 0x4A;   //0x6B;       // Display Resolution Timing (0x6B=320x200 default)
+        Byte _dsp_res = 0x6B;       // Display Resolution Timing (0x6B=320x200 default)
         Byte _dsp_mode = 0x10;      // Graphics Display Modes (0b00010000)
         Byte _emu_flags = 0x01;     // Emulation flags (defaults)
 
@@ -147,10 +147,10 @@ class Gfx : public Device
 
         // helpers
         void _decode_display();
-                                    // DEPRICATED
-                                        void _decode_dsp_gres();
-                                        void _decode_dsp_ext();
-                                    // DEPRICATED
+//                                    // DEPRICATED
+//                                        void _decode_dsp_gres();
+//                                        void _decode_dsp_ext();
+//                                    // DEPRICATED
 
 		void _setPixel(int x, int y, Byte color_index, 	
 						SDL_Texture* _texture, bool bIgnoreAlpha = false);

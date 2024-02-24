@@ -86,13 +86,13 @@ kernel_start
 		lda	#$0A		; $0A ~= 1.0 mhz.
 		sta	SYS_STATE
 
-		; build DSP_GRES
-		lda	#$8E		; $8E == 4-bpp, 16:9 aspect, 512x192 resolution
-		sta	DSP_GRES
-
-		; build DSP_EXT
-		lda	#$89
-		sta	DSP_EXT		
+;		; build DSP_GRES
+;		lda	#$8E		; $8E == 4-bpp, 16:9 aspect, 512x192 resolution
+;		sta	DSP_GRES
+;
+;		; build DSP_EXT
+;		lda	#$89
+;		sta	DSP_EXT		
 
 	; begin the display
 		lda	#$B4		; default character color attribute
@@ -252,10 +252,10 @@ do_load		; LOAD "file_name"
 do_exec		; EXEC $####
 
 	; save the system settings
-		lda	DSP_GRES
-		pshs	A
-		lda	DSP_EXT
-		pshs	A
+;		lda	DSP_GRES
+;		pshs	A
+;		lda	DSP_EXT
+;		pshs	A
 		lda	TXT_ATTR
 		pshs	A
 		lda	SYS_STATE
@@ -272,15 +272,15 @@ do_exec		; EXEC $####
 		sta	SYS_STATE
 		puls	A
 		sta	TXT_ATTR
-		puls	A
-		cmpa	DSP_EXT
-		beq	1f
-		sta	DSP_EXT
+;		puls	A
+;		cmpa	DSP_EXT
+;		beq	1f
+;		sta	DSP_EXT
 1		
-		puls	A
-		cmpa	DSP_GRES
-		beq	2f
-		sta	DSP_GRES
+;		puls	A
+;		cmpa	DSP_GRES
+;		beq	2f
+;		sta	DSP_GRES
 2
 ;		jsr 	cls
 		rts

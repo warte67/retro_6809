@@ -18,17 +18,17 @@ begin
 		; set up the default display mode
 ;		lda	#$00		; 2-color mode
 ;		lda	#$40		; 4-color mode
-		lda	#$80		; 16-color mode
+;		lda	#$80		; 16-color mode
 ;		lda	#$C0		; 256-color mode (16)
-		sta	DSP_GRES
-		; set DSP_EXT
-		lda	DSP_EXT
-		anda	#0b00000011	; change to standard ...
-		ora	#0b10001100	; ... bitmap mode
-		sta	DSP_EXT
+;		sta	DSP_GRES
+;		; set DSP_EXT
+;		lda	DSP_EXT
+;		anda	#0b00000011	; change to standard ...
+;		ora	#0b10001100	; ... bitmap mode
+;		sta	DSP_EXT
 
 3
-		ldd	DSP_GRES
+		ldd	DSP_RES
 		std	last_gmode
 
 ; should now be in standard bitmap graphics mode
@@ -46,7 +46,7 @@ begin
 		blt	1b
 
 		; restart if the graphics mode has changed
-		ldd	DSP_GRES
+		ldd	DSP_RES
 		cmpd	last_gmode
 		bne	3b		
 
