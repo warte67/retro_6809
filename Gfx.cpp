@@ -988,11 +988,6 @@ void Gfx::OnActivate()
 
 	_decode_display();
 
-	// printf("_window_width: %f\n", _window_width);
-	// printf("_window_height: %f\n", _window_height);
-	// printf("_texture_width: %d\n", _texture_width);
-	// printf("_texture_height: %d\n", _texture_height);
-
 	// create the window
     _window = SDL_CreateWindow("Retro_6809",
                                SDL_WINDOWPOS_CENTERED,
@@ -1249,6 +1244,16 @@ void Gfx::_decode_display()
 	int col = _scr_display_modes[_dsp_res].res_width / 8;
 	int row = _scr_display_modes[_dsp_res].res_height / 8;
 	_std_vid_max = (STD_VID_MIN + (col*row*2))-1;
+
+	// ...
+	if (_windowed)
+	{
+		if (_window_width < 1280 || _window_width > 1280)
+		{
+			_window_width = 1280;
+			_window_height = _window_width / _aspect;
+		}
+	}
 
 
 	printf("_window_width: %f\n", _window_width);
