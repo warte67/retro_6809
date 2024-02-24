@@ -38,11 +38,8 @@ const bool ENABLE_DEBUG = false;
 const bool DEBUG_SINGLE_STEP = ENABLE_DEBUG;	// false;
 
 
-constexpr Word VID_BUFFER_SIZE = 8 * 1024;
-
-
-// temp / testing:
-constexpr Word EDIT_BUFFER_SIZE = 256;
+constexpr Word VID_BUFFER_SIZE = 8 * 1024;      // standard video buffer size
+constexpr Word EDIT_BUFFER_SIZE = 256;          // input/edit buffer size
 
 
 

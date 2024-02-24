@@ -72,35 +72,32 @@ class Gfx : public Device
             bool is_txt_valid;    // is text mode valid?
         };
         std::vector<SCR_DISPLAY_MODE> _scr_display_modes{};
-
-
-            // ToDo: replace these as needed
+        
                 const float _base_texture_width = 128.0f;		// 1024x768 basic screen timing       
 
-                float _window_width = 1280.0f;          // screen/window raw display width
-                float _window_height = 0;			    // screen/window raw display height
-                float _aspect = 1.0f;				    // screen aspect ratio (not resolution aspect)
-                Uint32 _window_flags = 0;			    // SDL window flags
-                Uint32 _renderer_flags = 0;			    // SDL renderer flags
-                int _texture_width = 0;				    // texture width, aka. display resolution width
-                int _texture_height = 0;			    // texture height, aka. display resolution height
-                SDL_Texture* _render_target = nullptr;	// render target texture 
-                SDL_Texture* _ext_texture 	= nullptr;	// extended texture
-                SDL_Texture* _std_texture 	= nullptr;	// standard texture
-                SDL_Window* _window 	= nullptr;	    // SDL Window pointer
-                SDL_Renderer* _renderer = nullptr;	    // SDL Renderer pointer
-                Byte _ext_bpp = 0;					    // extended bits per pixel
-                Byte _std_bpp = 0;					    // standard bits per pixel
-                Byte _pixel_w = 0;			            // pixel width
-                Byte _pixel_h = 0;			            // pixel height
-                bool _vsync = false;                    // 0:unmetered, 1:use vsync
-                bool _windowed = false;                 // 0:fullscreen, 1:windowed
+        float _window_width = 1280.0f;          // screen/window raw display width
+        float _window_height = 0;			    // screen/window raw display height
+        float _aspect = 1.0f;				    // screen aspect ratio (not resolution aspect)
+        Uint32 _window_flags = 0;			    // SDL window flags
+        Uint32 _renderer_flags = 0;			    // SDL renderer flags
+        int _texture_width = 0;				    // texture width, aka. display resolution width
+        int _texture_height = 0;			    // texture height, aka. display resolution height
+        SDL_Texture* _render_target = nullptr;	// render target texture 
+        SDL_Texture* _ext_texture 	= nullptr;	// extended texture
+        SDL_Texture* _std_texture 	= nullptr;	// standard texture
+        SDL_Window* _window 	= nullptr;	    // SDL Window pointer
+        SDL_Renderer* _renderer = nullptr;	    // SDL Renderer pointer
+        Byte _ext_bpp = 0;					    // extended bits per pixel
+        Byte _std_bpp = 0;					    // standard bits per pixel
+        Byte _pixel_w = 0;			            // pixel width
+        Byte _pixel_h = 0;			            // pixel height
+        bool _vsync = true;                    // 0:unmetered, 1:use vsync
+        bool _windowed = true;                  // 0:fullscreen, 1:windowed
 
-                bool _extended_graphics_enable = false;
-                bool _extended_display_mode = false;
-                bool _standard_graphics_enable = false;     
-                bool _standard_display_mode = false;		// 0:text, 1:graphics
-            // END ToDo:
+        bool _extended_graphics_enable = false;
+        bool _extended_display_mode = false;
+        bool _standard_graphics_enable = true;     
+        bool _standard_display_mode = false;		// 0:text, 1:graphics
 
         // text glyph stuff
         Byte _dsp_glyph_idx = 0x00;         // DSP_GLYPH_IDX
@@ -127,9 +124,15 @@ class Gfx : public Device
 		// hardware registers
 	protected:
 
+        Byte _dsp_res = 0x6B;       // Display Resolution Timing (320x200 default)
+        Byte _dsp_mode = 0x10;      // Graphics Display Modes (0b00010000)
+        Byte _emu_flags = 0x01;     // Emulation flags (defaults)
+
         Word _std_vid_max = STD_VID_MAX;		// [STD_VID_MAX]
-		Byte _dsp_gres	= 0b11000101;	// defaults
-		Byte _dsp_ext 	= 0b11001001;	// defaults
+                                    // DEPRICATED
+                                        Byte _dsp_gres	= 0b11000101;	// DEPRICATED
+                                        Byte _dsp_ext 	= 0b11001001;	// DEPRICATED
+                                    // DEPRICATED
         Byte _dsp_err = 0;          
 
         // graphics devices based on the IGfxDevice
@@ -143,8 +146,11 @@ class Gfx : public Device
 
 
         // helpers
-		void _decode_dsp_gres();
-        void _decode_dsp_ext();
+        void _decode_display();
+                                    // DEPRICATED
+                                        void _decode_dsp_gres();
+                                        void _decode_dsp_ext();
+                                    // DEPRICATED
 
 		void _setPixel(int x, int y, Byte color_index, 	
 						SDL_Texture* _texture, bool bIgnoreAlpha = false);

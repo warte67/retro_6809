@@ -213,6 +213,7 @@ void GfxMouse::OnEvent(SDL_Event* evnt)
             float h_aspect = (float)dest.h / m_gfx->_texture_height;
             int mx = int((evnt->button.x / w_aspect) - (dest.x / w_aspect));
             int my = int((evnt->button.y / h_aspect) - (dest.y / h_aspect));
+
             write_word(CSR_XPOS, mx);
             write_word(CSR_YPOS, my);
             mx = read_word(CSR_XPOS);   // verify

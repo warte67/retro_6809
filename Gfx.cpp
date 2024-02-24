@@ -49,8 +49,14 @@ Byte Gfx::read(Word offset, bool debug )		// is debug completely unused in the c
 		case SYS_TIMER + 0:		data = Bus::_clock_timer >> 8; break;
 		case SYS_TIMER + 1:		data = Bus::_clock_timer & 0xff; break;
 
-		case DSP_GRES: 			data = _dsp_gres; break;
-		case DSP_EXT:			data = _dsp_ext; break;
+		case EMU_FLAGS:			data = _emu_flags; break;
+		case DSP_RES:			data = _dsp_res; break;
+		case DSP_MODE:			data = _dsp_mode; break;
+
+		case DSP_GRES: 			data = _dsp_gres; break;	// DEPRICATED
+		case DSP_EXT:			data = _dsp_ext; break;		// DEPRICATED
+
+
 		// case DSP_ERR:			{ Byte err = _dsp_err;	_dsp_err = 0;	data = err; break;} 
 		case DSP_TXT_COLS:      data = _texture_width / 8; break;
 		case DSP_TXT_ROWS:      data = _texture_height / 8; break;
@@ -109,18 +115,34 @@ void Gfx::write(Word offset, Byte data, bool debug)
 			Bus::_clock_timer = (data << 0) | (Bus::_clock_timer & 0xf0);
 			break;
 		}
-		case DSP_GRES: 	{
-			_dsp_gres = data;
-			_decode_dsp_gres();
+		case EMU_FLAGS: _emu_flags = data; break;
+		case DSP_RES: {
+			_dsp_res = data;
+			_decode_display();
 			Bus::IsDirty(true);		
 			break;
 		}
-		case DSP_EXT:	{
-			_dsp_ext = data;
-			_decode_dsp_ext();
-			Bus::IsDirty(true);
+		case DSP_MODE: {
+			_dsp_mode = data;
+			_decode_display();
+			Bus::IsDirty(true);		
 			break;
 		}
+														// DEPRECATED
+															case DSP_GRES: 	{
+																_dsp_gres = data;
+																_decode_dsp_gres();
+																Bus::IsDirty(true);		
+																break;
+															}
+															case DSP_EXT:	{
+																_dsp_ext = data;
+																_decode_dsp_ext();
+																Bus::IsDirty(true);
+																break;
+															}
+														// END DEPRECATED
+
 		// color palete registers
 		case DSP_PAL_IDX:	{ _dsp_pal_idx = data;  break; }
 		case DSP_PAL_CLR+1:	{
@@ -161,14 +183,14 @@ Word Gfx::OnAttach(Word nextAddr)
 	// begin graphics device register allocation
 
 	// const Word VID_BUFFER_SIZE = 6 * 1024;  // moved to types.h
-	DisplayEnum("", 0, "");
+	// DisplayEnum("", 0, "");
 	DisplayEnum("STD_VID_MIN", nextAddr, "Start of Standard Video Buffer Memory");
 	nextAddr += VID_BUFFER_SIZE;
 
 	DisplayEnum("STD_VID_MAX", nextAddr, " (Word) Standard Video Buffer Max");
     nextAddr+=2;
 
-	DisplayEnum("", 0, "");
+	// DisplayEnum("", 0, "");
 	DisplayEnum("SYS_STATE", nextAddr, " (Byte) System State Register");
 	DisplayEnum("", 0, "SYS_STATE: ABCD.SSSS");
 	DisplayEnum("", 0, "     A:0   = Error: Standard Buffer Overflow ");
@@ -197,9 +219,9 @@ Word Gfx::OnAttach(Word nextAddr)
 	DisplayEnum("SYS_SPEED", nextAddr, " (Word) Approx. Average CPU Clock Speed");
 	nextAddr+=2;
 
-	DisplayEnum("", 0, "");
+	// DisplayEnum("", 0, "");
 	DisplayEnum("SYS_CLOCK_DIV", nextAddr, " (Byte) 60 hz Clock Divider Register (Read Only) ");
-	DisplayEnum("", 0, "SYS_CLOCK_DIV: ABCD.SSSS");
+	DisplayEnum("", 0, "SYS_CLOCK_DIV:");
 	DisplayEnum("", 0, "     bit 7: 0.46875 hz");
 	DisplayEnum("", 0, "     bit 6: 0.9375 hz");
 	DisplayEnum("", 0, "     bit 5: 1.875 hz");
@@ -212,15 +234,25 @@ Word Gfx::OnAttach(Word nextAddr)
 
 	DisplayEnum("", 0, "");
 	DisplayEnum("SYS_TIMER", nextAddr, " (Word) Increments at 0.46875 hz");
-	nextAddr += 2;
 
-    DisplayEnum("", 0, "");
-    DisplayEnum("DSP_RES", nextAddr, " (Byte) Display Timing Resolution 0-255");
+	nextAddr += 2;
+	DisplayEnum("EMU_FLAGS", nextAddr, " (Byte) Emulation Flags ");
+	DisplayEnum("", 0, "EMU_FLAGS: xxxx.xxFG");
+	DisplayEnum("", 0, "     x     = reserved ");
+	DisplayEnum("", 0, "     F:0   = VSYNC OFF ");
+	DisplayEnum("", 0, "     F:1   = VSYNC ON ");
+	DisplayEnum("", 0, "     G:0   = Fullscreen Enabled ( emulator only ) ");
+	DisplayEnum("", 0, "     G:1   = Windowed Enabled ( emulator only ) ");
+
 	nextAddr++;
 
     DisplayEnum("", 0, "");
-    DisplayEnum("DSP_MODES", nextAddr, " (Byte) Graphics Display Modes");
-    DisplayEnum("", 0, "DSP_MODES: ABCD.EEFF");
+    DisplayEnum("DSP_RES", nextAddr, " (Byte) Display Resolution Timing 0-255");
+	nextAddr++;
+
+    // DisplayEnum("", 0, "");
+    DisplayEnum("DSP_MODE", nextAddr, " (Byte) Graphics Display Mode");
+    DisplayEnum("", 0, "DSP_MODE: ABCD.EEFF");
     DisplayEnum("", 0, "     A:0   = Extended Bitmap Mode ");
     DisplayEnum("", 0, "     A:1   = Extended Tile Mode ");
     DisplayEnum("", 0, "     B:0   = Standard Bitmap Mode ");
@@ -425,6 +457,8 @@ void Gfx::OnInit()
 	_scr_timing_modes.push_back({ 1024,  768, 0.0f });	// $05
 	_scr_timing_modes.push_back({  800,  600, 0.0f });	// $06
 	_scr_timing_modes.push_back({  640,  480, 0.0f });	// $07
+	for (auto &a : _scr_timing_modes)
+		a.aspect = a.width / a.height;
 
 	// initialize the display mode reference vector      std    txt
 	_scr_display_modes.push_back({ 0,  800,  450, 2, 1, false, false });		// $00
@@ -691,7 +725,6 @@ void Gfx::OnInit()
 	_scr_display_modes.push_back({ 7,  128,   68, 5, 7,  true,  true });		// $FE
 	_scr_display_modes.push_back({ 7,  128,   60, 5, 8,  true,  true });		// $FF
 
-
 	// DEBUGGING: display the raw display mode data
 		if (false) {
 			for (int t=0; t<256; t++) 	{
@@ -946,12 +979,19 @@ void Gfx::OnActivate()
 {
 	// printf("void Gfx::OnActivate() \n");
 
-	// decode the gfx registers
-	_decode_dsp_gres();
-	_decode_dsp_ext();
 
-	// testing
-	// bus.write(DSP_GRES, 0b10111111);	
+	// decode the gfx registers
+		// DEPRECATED...
+			_decode_dsp_gres();
+			_decode_dsp_ext();
+		// ...DEPRECATED
+
+	_decode_display();
+
+	// printf("_window_width: %f\n", _window_width);
+	// printf("_window_height: %f\n", _window_height);
+	// printf("_texture_width: %d\n", _texture_width);
+	// printf("_texture_height: %d\n", _texture_height);
 
 	// create the window
     _window = SDL_CreateWindow("Retro_6809",
@@ -960,7 +1000,7 @@ void Gfx::OnActivate()
                                (int)_window_width,
                                (int)_window_height,
                                _window_flags);		
-							   //SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+
 	// create the renderer
     _renderer = SDL_CreateRenderer(_window, -1, _renderer_flags);
     SDL_SetRenderDrawBlendMode(_renderer, SDL_BLENDMODE_BLEND);
@@ -1025,11 +1065,14 @@ void Gfx::OnEvent(SDL_Event* evnt)
             {
                 // printf("Window %d resized to %dx%d\n",
                 //         evnt->window.windowID, evnt->window.data1,
-                //         evnt->window.data2);                
+                //         evnt->window.data2);        
+				       				
                 _window_width = evnt->window.data1;
                 _window_height = evnt->window.data2;
-
 				m_debug->_onWindowResize();
+
+				// on mouse up...
+				// Bus::IsDirty(true);		
             }
 			break;
 		}
@@ -1110,185 +1153,49 @@ void Gfx::OnPresent()
 }
 
 
-void Gfx::_decode_dsp_gres()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void Gfx::_decode_display()
 {
-	// shortcut to the Bus instance and DSP_GRES data
-	Byte data = Bus::Read(DSP_GRES);
+	// printf("Gfx::_decode_display()\n");
+	return;
 
-	// _aspect = Aspect Ratio
-	Byte a = (data >> 4) & 0x03;
-	switch (a)
-	{
-		case 0: _aspect = 16.0f/9.0f;  break;	// 16:9 
-		case 1: _aspect = 16.0f/10.0f; break;	// 16:10
-		case 2: _aspect = 16.0f/11.0f; break;	// 16:11
-		case 3: _aspect = 16.0f/12.0f; break;	// 16:12
-	}
-
-	// _h_scan = Horizontal Overscan Multiplier
-	static Byte s_old_h_scan = _pixel_w;
-	_pixel_w = (3-((data >> 2) & 0x03))+1;
-	if (s_old_h_scan != _pixel_w)
-	{
-		s_old_h_scan = _pixel_w;
-		//Bus::m_cpu->nmi();
-	}
-
-	// _v_scan = Vertical Overscan Multiplier
-	static Byte s_old_v_scan = _pixel_h;
-	_pixel_h = (3-((data >> 0) & 0x03))+1;
-	if (s_old_v_scan != _pixel_h)
-	{
-		s_old_v_scan = _pixel_h;
-		//Bus::m_cpu->nmi();
-	}
-
-	// _std_bpp = Standard Graphics Bits-Per-Pixel
-	_std_bpp = (data >> 6) & 0x03;
-	switch (_std_bpp)
-	{
-		case 0: _std_bpp = 1; break;	// 2-colors
-		case 1: _std_bpp = 2; break;	// 4-colors
-		case 2: _std_bpp = 4; break;	// 16-colors
-		case 3: _std_bpp = 8; break;	// 256-colors
-	}
-	// Adjust to fit within Standard Buffer
-	auto get_div = [](Byte bpp) {
-		switch (bpp)
-		{
-			case 1: return 8;
-			case 2: return 4;
-			case 4: return 2;
-			case 8: return 1;
-		}	
-		return 8;
-	};
-	float real_width = _base_texture_width * (5-_pixel_w);
-	float real_height = (_base_texture_width / _aspect) * (5-_pixel_h);	
-	float div = get_div(_std_bpp);
-	float req_buffer_size = (real_width * real_height) / div;
-
-
-	// text mode
-	Byte tm = Bus::Read(DSP_EXT) & 0b00000100;
-	if (tm == 0)	
-	{
-		req_buffer_size = ((real_width/8) * (real_height/8)) * 2;
-		_std_bpp = 1;
-	}
-	else
-	{
-		// adjust for the bitmap mode
-		if (req_buffer_size > VID_BUFFER_SIZE)
-			printf ("    ERROR: Buffer Overrun... Making Adjustments\n");
-		while (req_buffer_size > VID_BUFFER_SIZE)
-		{		
-			_std_bpp >>= 1;					// _std_bpp changed
-			if (_std_bpp == 0) break;
-			printf("    -->_std_bpp: %d\n", _std_bpp);
-			div = get_div(_std_bpp);
-			req_buffer_size = (real_width * real_height) / div;
-			// ENCODE THE CHANGES (_std_bpp: XX00.0000)
-			Byte d = data;
-			d &= 0x3f;
-			d |= ((_std_bpp)-1) << 6;
-			Bus::Write(DSP_GRES, d, true);
-			// set the error bit
-			d = Bus::Read(SYS_STATE) | 0x80;
-			Bus::Write(SYS_STATE, d);
-		}
-
-		// bpp error buffer too big
-		if (_std_bpp == 0)	
-		{
-			printf ("    ERROR: Buffer Overrun... Making Adjustments\n");
-			_std_bpp = 1;	// back to 2-colors
-			// try reducing vertical resolution
-			while (req_buffer_size > VID_BUFFER_SIZE)
-			{
-				_pixel_h++;					// _v_scan changed
-				real_height = (_base_texture_width / _aspect) * (5-_pixel_h);	
-				printf("    -->real_height: %4.2f\n", real_height);
-				div = get_div(_std_bpp);
-				req_buffer_size = (real_width * real_height) / div;	
-				// ENCODE THE CHANGES (_pixel_h: 0000.00XX)
-				Byte d = data;
-				d &= 0xFC;
-				d |= ((_pixel_h-1) & 0x03);
-				Bus::Write(DSP_GRES, d, true);			
-			}
-		}
-	}	
-
-	// SDL Texture Size
-	_texture_width = (int)real_width;
-	_texture_height = (int)real_height;
-
-	// [STD_VID_MAX] video buffer end
-	_std_vid_max = (STD_VID_MIN + (int)req_buffer_size)-1;
-
-	// output debugging text
-	if (false)
-	{
-		printf("----====#####################################################====----\n");
-		printf("DSP_GRES decoded:\n");
-		printf("  Aspect Ratio: %f\n", _aspect);
-		printf("  Horizontal Overscan: %dx\n", _pixel_w);
-		printf("  Vertical Overscan: %dx\n", _pixel_h);
-		printf("  Real Width: %3.2f\n", real_width);
-		printf("  Real Height: %3.2f\n", real_height);
-		printf("  Standard Graphics BPP: %d\n", _std_bpp);
-		printf("  Buffer Size: %3.2fK\n", req_buffer_size / 1024.0f);	
-		printf("  Buffer Top: $%04X\n", read_word(STD_VID_MAX));
-	}
-}
-
-
-void Gfx::_decode_dsp_ext()
-{
-	// shortcut to the Bus instance and DSP_EXT data
-	Byte data = Bus::Read(DSP_EXT);
-
-	// _ext_bpp = Extended Graphics Bits_Per_Pixel
-	_ext_bpp = (data >> 6) & 0x03;
-	switch (_ext_bpp)
-	{
-		case 0: _ext_bpp = 1; break;	// 2-colors
-		case 1: _ext_bpp = 2; break;	// 4-colors
-		case 2: _ext_bpp = 4; break;	// 16-colors
-		case 3: _ext_bpp = 8; break;	// 256-colors
-	}	
-	// adjust _ext_bpp for extended buffer overrun
-	// ...
-
-	// _extended_graphics_enable = Extended Graphics Enable
-	_extended_graphics_enable = data & 0b00100000;
-
-	// _extended_display_mode = Extended Mode: BITMAP / TILES
-	_extended_display_mode = data & 0b00010000;
-
-	// _standard_graphics_enable = Standard Graphics Enable
-	_standard_graphics_enable = data & 0b00001000;
-
-	// _standard_display_mode = Standard Display Mode 
-	_standard_display_mode = data & 0b00000100;
-
+	// window measurements
+	_window_width  = _scr_timing_modes[_scr_display_modes[_dsp_res].timing_index].width;
+	_window_height = _scr_timing_modes[_scr_display_modes[_dsp_res].timing_index].height;
+	_aspect = _window_width / _window_height;
+	_pixel_w = _scr_display_modes[_dsp_res].pixel_width;
+	_pixel_h = _scr_display_modes[_dsp_res].pixel_height;
+	
 	// _vsync = Vertical Sync
-	_vsync = data & 0b00000010;
+	_vsync = Bus::Read(EMU_FLAGS) & 0b00000010;
+
+	// SDL Renderer Flags
+	_renderer_flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE;
+	if (_vsync)
+		_renderer_flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE | SDL_RENDERER_PRESENTVSYNC;
 
 	// _windowed = Emulation Mode: 0:FULLSCREEN or 1:WINDOWED 
 	bool _old = _windowed;
-	_windowed = data & 0b00000001;
+	_windowed = Bus::Read(EMU_FLAGS) & 0b00000001;
 	if (_windowed != _old)
 		m_debug->bIsCursorVisible = false;
 
-	// SDL Window Flags	
-	// _window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN_DESKTOP;  
-	_window_width = _base_texture_width * 10;
-	if (_windowed)
-	{
-		// _window_width = 1280;
-		_window_height = _window_width / _aspect;
+	// SDL Window	
+	if (_windowed) {
+		// _window_height = _window_width / _aspect;
 		_window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
 	}
 	else
@@ -1300,33 +1207,327 @@ void Gfx::_decode_dsp_ext()
 		_window_width = DM.w;
 		_window_height = DM.h;
 	}
+	_texture_width  = _scr_display_modes[_dsp_res].res_width;
+	_texture_height = _scr_display_modes[_dsp_res].res_height;
 
-	// SDL Renderer Flags
-	_renderer_flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE;
-	if (_vsync)
-		_renderer_flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE | SDL_RENDERER_PRESENTVSYNC;
-
-	// output debugging text
-	if (false)
+	// bits per pixel
+	_ext_bpp = 8;
+	_std_bpp = 8;
+	int size = (_scr_display_modes[_dsp_res].res_width * _scr_display_modes[_dsp_res].res_height)/8;
+	while (size*_ext_bpp>65536)
 	{
-		printf("DSP_EXT decoded:\n");
-		printf("  Window Width: %3.2f\n", _window_width);
-		printf("  Window Height: %3.2f\n", _window_height);
-		printf("  Extended Graphics BPP: %d\n", _ext_bpp);
-		printf("  Extended Graphics Enable: %d ", _extended_graphics_enable);
-		(_extended_graphics_enable) ? printf("(ENABLED)\n") : printf("(DISABLED)\n");
-		printf("  Extended Display Mode: %d ", _extended_display_mode);
-		(_extended_display_mode) ? printf("(TILES)\n") : printf("(BITMAP)\n");
-		printf("  Standard Graphics Enable: %d ", _standard_graphics_enable);
-		(_standard_graphics_enable) ? printf("(ENABLED)\n") : printf("(DISABLED)\n");
-		printf("  Standard Display Mode: %d ", _standard_display_mode);
-		(_extended_display_mode) ? printf("(BITMAP)\n") : printf("(TEXT)\n");
-		printf("  Vertical Sync: %d ", _vsync);
-		(_vsync) ? printf("(ON)\n") : printf("(OFF)\n");
-		printf("  Emulation Mode: %d ", _windowed);
-		(_windowed) ? printf("(WINDOWED)\n") : printf("(FULLSCREEN)\n");
+		if (_ext_bpp==8)	_ext_bpp=4;
+		else if (_ext_bpp==4)	_ext_bpp=2;
+		else if (_ext_bpp==2)	_ext_bpp=1;
+		else if (_ext_bpp==1)	_ext_bpp=0;
+		if (_ext_bpp==0)
+			break;
 	}
+	while (size*_std_bpp>VID_BUFFER_SIZE)
+	{
+		if (_std_bpp==8)	_std_bpp=4;
+		else if (_std_bpp==4)	_std_bpp=2;
+		else if (_std_bpp==2)	_std_bpp=1;
+		else if (_std_bpp==1)	_std_bpp=0;
+		if (_std_bpp==0)
+			break;
+	}
+	int ext_colors = 1<<_ext_bpp;	if (ext_colors==1) ext_colors = 0;
+	int std_colors = 1<<_std_bpp;	if (std_colors==1) std_colors = 0;
+	_pixel_w = _scr_display_modes[_dsp_res].pixel_width;
+	_pixel_h = _scr_display_modes[_dsp_res].pixel_height;
+
+	Byte data = Bus::Read(DSP_MODE);
+	_extended_display_mode = 	(data & 0b10000000);
+	_standard_display_mode = 	(data & 0b01000000);
+	_extended_graphics_enable = (data & 0b00100000);
+	_standard_graphics_enable = (data & 0b00010000);
+
+	// [STD_VID_MAX] video buffer end
+	int col = _scr_display_modes[_dsp_res].res_width / 8;
+	int row = _scr_display_modes[_dsp_res].res_height / 8;
+	_std_vid_max = (STD_VID_MIN + (col*row*2))-1;
+
+
+	printf("_window_width: %f\n", _window_width);
+	printf("_window_height: %f\n", _window_height);
+	printf("_aspect: %f\n", _aspect);
+	printf("_vsync: %d\n", _vsync);
+	printf("_windowed: %d\n", _windowed);
+	printf("_texture_width: %d\n", _texture_width);
+	printf("_texture_height: %d\n", _texture_height);
+	printf("Extended Bitmap Colors: %d\n",ext_colors);
+	printf("Standard Bitmap Colors: %d\n",std_colors);
+	printf("_pixel_w: %d\n", _pixel_w);
+	printf("_pixel_h: %d\n", _pixel_h);
+	printf("Text: %dx%d\n", col, row);
+	printf("EXT DISPLAY MODE: %d\n", _extended_display_mode);
+	printf("STD DISPLAY MODE: %d\n", _standard_display_mode);
+	printf("EXT GFX ENABLE: %d\n",	 _extended_graphics_enable);
+	printf("STD GFX ENABLE: %d\n", 	 _standard_graphics_enable);
+	printf("DSP_MODE: 0x%02X\n", Bus::Read(DSP_MODE));
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// DEPRECATED
+	void Gfx::_decode_dsp_gres()
+	{
+		// return;
+
+		// shortcut to the Bus instance and DSP_GRES data
+		Byte data = Bus::Read(DSP_GRES);
+
+		// _aspect = Aspect Ratio
+		Byte a = (data >> 4) & 0x03;
+		switch (a)
+		{
+			case 0: _aspect = 16.0f/9.0f;  break;	// 16:9 
+			case 1: _aspect = 16.0f/10.0f; break;	// 16:10
+			case 2: _aspect = 16.0f/11.0f; break;	// 16:11
+			case 3: _aspect = 16.0f/12.0f; break;	// 16:12
+		}
+
+		// _h_scan = Horizontal Overscan Multiplier
+		static Byte s_old_h_scan = _pixel_w;
+		_pixel_w = (3-((data >> 2) & 0x03))+1;
+		if (s_old_h_scan != _pixel_w)
+		{
+			s_old_h_scan = _pixel_w;
+			//Bus::m_cpu->nmi();
+		}
+
+		// _v_scan = Vertical Overscan Multiplier
+		static Byte s_old_v_scan = _pixel_h;
+		_pixel_h = (3-((data >> 0) & 0x03))+1;
+		if (s_old_v_scan != _pixel_h)
+		{
+			s_old_v_scan = _pixel_h;
+			//Bus::m_cpu->nmi();
+		}
+
+		// _std_bpp = Standard Graphics Bits-Per-Pixel
+		_std_bpp = (data >> 6) & 0x03;
+		switch (_std_bpp)
+		{
+			case 0: _std_bpp = 1; break;	// 2-colors
+			case 1: _std_bpp = 2; break;	// 4-colors
+			case 2: _std_bpp = 4; break;	// 16-colors
+			case 3: _std_bpp = 8; break;	// 256-colors
+		}
+		// Adjust to fit within Standard Buffer
+		auto get_div = [](Byte bpp) {
+			switch (bpp)
+			{
+				case 1: return 8;
+				case 2: return 4;
+				case 4: return 2;
+				case 8: return 1;
+			}	
+			return 8;
+		};
+		float real_width = _base_texture_width * (5-_pixel_w);
+		float real_height = (_base_texture_width / _aspect) * (5-_pixel_h);	
+		float div = get_div(_std_bpp);
+		float req_buffer_size = (real_width * real_height) / div;
+
+
+		// text mode
+		Byte tm = Bus::Read(DSP_EXT) & 0b00000100;
+		if (tm == 0)	
+		{
+			req_buffer_size = ((real_width/8) * (real_height/8)) * 2;
+			_std_bpp = 1;
+		}
+		else
+		{
+			// adjust for the bitmap mode
+			if (req_buffer_size > VID_BUFFER_SIZE)
+				printf ("    ERROR: Buffer Overrun... Making Adjustments\n");
+			while (req_buffer_size > VID_BUFFER_SIZE)
+			{		
+				_std_bpp >>= 1;					// _std_bpp changed
+				if (_std_bpp == 0) break;
+				printf("    -->_std_bpp: %d\n", _std_bpp);
+				div = get_div(_std_bpp);
+				req_buffer_size = (real_width * real_height) / div;
+				// ENCODE THE CHANGES (_std_bpp: XX00.0000)
+				Byte d = data;
+				d &= 0x3f;
+				d |= ((_std_bpp)-1) << 6;
+				Bus::Write(DSP_GRES, d, true);
+				// set the error bit
+				d = Bus::Read(SYS_STATE) | 0x80;
+				Bus::Write(SYS_STATE, d);
+			}
+
+			// bpp error buffer too big
+			if (_std_bpp == 0)	
+			{
+				printf ("    ERROR: Buffer Overrun... Making Adjustments\n");
+				_std_bpp = 1;	// back to 2-colors
+				// try reducing vertical resolution
+				while (req_buffer_size > VID_BUFFER_SIZE)
+				{
+					_pixel_h++;					// _v_scan changed
+					real_height = (_base_texture_width / _aspect) * (5-_pixel_h);	
+					printf("    -->real_height: %4.2f\n", real_height);
+					div = get_div(_std_bpp);
+					req_buffer_size = (real_width * real_height) / div;	
+					// ENCODE THE CHANGES (_pixel_h: 0000.00XX)
+					Byte d = data;
+					d &= 0xFC;
+					d |= ((_pixel_h-1) & 0x03);
+					Bus::Write(DSP_GRES, d, true);			
+				}
+			}
+		}	
+
+		// SDL Texture Size
+		_texture_width = (int)real_width;
+		_texture_height = (int)real_height;
+
+		// [STD_VID_MAX] video buffer end
+		_std_vid_max = (STD_VID_MIN + (int)req_buffer_size)-1;
+
+		// output debugging text
+		if (false)
+		{
+			printf("----====#####################################################====----\n");
+			printf("DSP_GRES decoded:\n");
+			printf("  Aspect Ratio: %f\n", _aspect);
+			printf("  Horizontal Overscan: %dx\n", _pixel_w);
+			printf("  Vertical Overscan: %dx\n", _pixel_h);
+			printf("  Real Width: %3.2f\n", real_width);
+			printf("  Real Height: %3.2f\n", real_height);
+			printf("  Standard Graphics BPP: %d\n", _std_bpp);
+			printf("  Buffer Size: %3.2fK\n", req_buffer_size / 1024.0f);	
+			printf("  Buffer Top: $%04X\n", read_word(STD_VID_MAX));
+		}
+	}
+
+
+	void Gfx::_decode_dsp_ext()
+	{
+		// return;
+
+		// shortcut to the Bus instance and DSP_EXT data
+		Byte data = Bus::Read(DSP_EXT);
+
+		// _ext_bpp = Extended Graphics Bits_Per_Pixel
+		_ext_bpp = (data >> 6) & 0x03;
+		switch (_ext_bpp)
+		{
+			case 0: _ext_bpp = 1; break;	// 2-colors
+			case 1: _ext_bpp = 2; break;	// 4-colors
+			case 2: _ext_bpp = 4; break;	// 16-colors
+			case 3: _ext_bpp = 8; break;	// 256-colors
+		}	
+		// adjust _ext_bpp for extended buffer overrun
+		// ...
+
+		// _extended_graphics_enable = Extended Graphics Enable
+		_extended_graphics_enable = data & 0b00100000;
+		// _extended_display_mode = Extended Mode: BITMAP / TILES
+		_extended_display_mode = data & 0b00010000;
+		// _standard_graphics_enable = Standard Graphics Enable
+		_standard_graphics_enable = data & 0b00001000;
+		// _standard_display_mode = Standard Display Mode 
+		_standard_display_mode = data & 0b00000100;
+
+		// _vsync = Vertical Sync
+		_vsync = data & 0b00000010;
+
+		// _windowed = Emulation Mode: 0:FULLSCREEN or 1:WINDOWED 
+		bool _old = _windowed;
+		_windowed = data & 0b00000001;
+		if (_windowed != _old)
+			m_debug->bIsCursorVisible = false;
+
+		// SDL Window Flags	
+		// _window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN_DESKTOP;  
+		_window_width = _base_texture_width * 10;
+		if (_windowed)
+		{
+			// _window_width = 1280;
+			_window_height = _window_width / _aspect;
+			_window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
+		}
+		else
+		{
+			// Screen Size
+			SDL_DisplayMode DM;
+			SDL_GetCurrentDisplayMode(0, &DM);
+			_window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN_DESKTOP;  
+			_window_width = DM.w;
+			_window_height = DM.h;
+		}
+
+		// SDL Renderer Flags
+		_renderer_flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE;
+		if (_vsync)
+			_renderer_flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE | SDL_RENDERER_PRESENTVSYNC;
+
+		// output debugging text
+		if (false)
+		{
+			printf("DSP_EXT decoded:\n");
+			printf("  Window Width: %3.2f\n", _window_width);
+			printf("  Window Height: %3.2f\n", _window_height);
+			printf("  Extended Graphics BPP: %d\n", _ext_bpp);
+			printf("  Extended Graphics Enable: %d ", _extended_graphics_enable);
+			(_extended_graphics_enable) ? printf("(ENABLED)\n") : printf("(DISABLED)\n");
+			printf("  Extended Display Mode: %d ", _extended_display_mode);
+			(_extended_display_mode) ? printf("(TILES)\n") : printf("(BITMAP)\n");
+			printf("  Standard Graphics Enable: %d ", _standard_graphics_enable);
+			(_standard_graphics_enable) ? printf("(ENABLED)\n") : printf("(DISABLED)\n");
+			printf("  Standard Display Mode: %d ", _standard_display_mode);
+			(_extended_display_mode) ? printf("(BITMAP)\n") : printf("(TEXT)\n");
+			printf("  Vertical Sync: %d ", _vsync);
+			(_vsync) ? printf("(ON)\n") : printf("(OFF)\n");
+			printf("  Emulation Mode: %d ", _windowed);
+			(_windowed) ? printf("(WINDOWED)\n") : printf("(FULLSCREEN)\n");
+		}
+	}
+// DEPRECATED
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // helpers
