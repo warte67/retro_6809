@@ -214,58 +214,73 @@ Word Gfx::OnAttach(Word nextAddr)
 	DisplayEnum("SYS_TIMER", nextAddr, " (Word) Increments at 0.46875 hz");
 	nextAddr += 2;
 
-	//		DisplayEnum("", 0, "");
-	//		DisplayEnum("DSP_MODE", nextAddr, " (Byte) Display Mode Register");
-	//		DisplayEnum("", 0, "DSP_GRES: FEDC.BAAA");
-	//		DisplayEnum("", 0, "    AA:00 = 0-7 Graphics Display Mode:");
-	//		DisplayEnum("", 0, "     B:EXT Enable Extended Graphics");
-	//		DisplayEnum("", 0, "     C:EXT 0=TILE MODE, 1=BITMAP MODE");
-	//		DisplayEnum("", 0, "     D:STD Enable Standard Graphics");
-	//		DisplayEnum("", 0, "     E:STD 0=TEXT MODE, 1=BITMAP MODE");
-	//		DisplayEnum("", 0, "     F:ERROR 0=MODE VALID, 1=INVALID MODE");
-
+    DisplayEnum("", 0, "");
+    DisplayEnum("DSP_RES", nextAddr, " (Byte) Display Timing Resolution 0-255");
+	nextAddr++;
 
     DisplayEnum("", 0, "");
-    DisplayEnum("DSP_GRES", nextAddr, " (Byte) Screen Resolution Register (DEPRECATED)");
-    DisplayEnum("", 0, "DSP_GRES: BBRR.HHVV");
-    DisplayEnum("", 0, "    BB:00 = Standard Graphics 1-bpp (2-color mode)");
-    DisplayEnum("", 0, "    BB:01 = Standard Graphics 2-bpp (4-color mode)");
-    DisplayEnum("", 0, "    BB:10 = Standard Graphics 4-bpp (16-color mode)");
-    DisplayEnum("", 0, "    BB:11 = Standard Graphics 8-bpp (256-color mode)");    
-    DisplayEnum("", 0, "    RR:00 = 16:9  aspect (1.777778)");
-    DisplayEnum("", 0, "    RR:01 = 16:10 aspect (1.600000)");
-    DisplayEnum("", 0, "    RR:10 = 16:11 aspect (1.454545)");
-    DisplayEnum("", 0, "    RR:11 = 16:12 aspect (1.333333)");    
-    DisplayEnum("", 0, "    HH:00 = 4x Horizontal Overscan Multiplier");
-    DisplayEnum("", 0, "    HH:01 = 3x Horizontal Overscan Multiplier");
-    DisplayEnum("", 0, "    HH:10 = 2x Horizontal Overscan Multiplier");
-    DisplayEnum("", 0, "    HH:11 = 1x Horizontal Overscan Multiplier");    
-    DisplayEnum("", 0, "    VV:00 = 4x Vertical Overscan Multiplier");
-    DisplayEnum("", 0, "    VV:01 = 3x Vertical Overscan Multiplier");
-    DisplayEnum("", 0, "    VV:10 = 2x Vertical Overscan Multiplier");
-    DisplayEnum("", 0, "    VV:11 = 1x Vertical Overscan Multiplier");
+    DisplayEnum("DSP_MODES", nextAddr, " (Byte) Graphics Display Modes");
+    DisplayEnum("", 0, "DSP_MODES: ABCD.EEFF");
+    DisplayEnum("", 0, "     A:0   = Extended Bitmap Mode ");
+    DisplayEnum("", 0, "     A:1   = Extended Tile Mode ");
+    DisplayEnum("", 0, "     B:0   = Standard Bitmap Mode ");
+    DisplayEnum("", 0, "     B:1   = Standard Text Mode ");
+    DisplayEnum("", 0, "     C:1   = Extended Graphics Enabled ");
+    DisplayEnum("", 0, "     C:0   = Extended Graphics Disabled ");
+    DisplayEnum("", 0, "     D:1   = Standard Graphics Enabled ");
+    DisplayEnum("", 0, "     D:0   = Standard Graphics Disabled ");
+    DisplayEnum("", 0, "    EE:00  = Extended Graphics   2-Color ");
+    DisplayEnum("", 0, "    EE:01  = Extended Graphics   4-Color ");
+    DisplayEnum("", 0, "    EE:10  = Extended Graphics  16-Color ");
+    DisplayEnum("", 0, "    EE:11  = Extended Graphics 256-Color ");
+    DisplayEnum("", 0, "    FF:00  = Standard Graphics   2-Color ");
+    DisplayEnum("", 0, "    FF:01  = Standard Graphics   4-Color ");
+    DisplayEnum("", 0, "    FF:10  = Standard Graphics  16-Color ");
+    DisplayEnum("", 0, "    FF:11  = Standard Graphics 256-Color ");
     nextAddr++;
 
-    DisplayEnum("", 0, "");
-    DisplayEnum("DSP_EXT", nextAddr, " (Byte) Extended Graphics Register (DEPRECATED)");
-    DisplayEnum("", 0, "DSP_EXT: AABC.DEFG");
-    DisplayEnum("", 0, "     AA:00 = Extended Graphics 1bpp (2-color mode) ");
-    DisplayEnum("", 0, "     AA:01 = Extended Graphics 2bpp (4-color mode) ");
-    DisplayEnum("", 0, "     AA:10 = Extended Graphics 4bpp (16-color mode) ");
-    DisplayEnum("", 0, "     AA:11 = Extended Graphics 4bpp (16-color mode) ");
-    DisplayEnum("", 0, "     B:0   = Extended Graphics: DISABLED ");
-    DisplayEnum("", 0, "     B:1   = Extended Graphics: ENABLED ");
-    DisplayEnum("", 0, "     C:0   = Extended Extended Mode: BITMAP ");
-    DisplayEnum("", 0, "     C:1   = Extended Extended Mode: TILES ");
-    DisplayEnum("", 0, "     D:0   = Standard Graphics: DISABLED ");
-    DisplayEnum("", 0, "     D:1   = Standard Graphics: ENABLED ");
-    DisplayEnum("", 0, "     E:0   = Standard Display Mode: TEXT ");
-    DisplayEnum("", 0, "     E:1   = Standard Display Mode: BITMAP ");
-    DisplayEnum("", 0, "     F:0   = VSYNC OFF ");
-    DisplayEnum("", 0, "     F:1   = VSYNC ON ");
-    DisplayEnum("", 0, "     G:0   = Fullscreen Enabled( emulator only ) ");
-    DisplayEnum("", 0, "     G:1   = Windowed Enabled ( emulator only ) ");
-    nextAddr++;
+		// BEGIN DEPRECIATED REGISTERS...
+			DisplayEnum("", 0, "");
+			DisplayEnum("DSP_GRES", nextAddr, " (Byte) Screen Resolution Register (DEPRECATED)");
+			DisplayEnum("", 0, "DSP_GRES: BBRR.HHVV");
+			DisplayEnum("", 0, "    BB:00 = Standard Graphics 1-bpp (2-color mode)");
+			DisplayEnum("", 0, "    BB:01 = Standard Graphics 2-bpp (4-color mode)");
+			DisplayEnum("", 0, "    BB:10 = Standard Graphics 4-bpp (16-color mode)");
+			DisplayEnum("", 0, "    BB:11 = Standard Graphics 8-bpp (256-color mode)");    
+			DisplayEnum("", 0, "    RR:00 = 16:9  aspect (1.777778)");
+			DisplayEnum("", 0, "    RR:01 = 16:10 aspect (1.600000)");
+			DisplayEnum("", 0, "    RR:10 = 16:11 aspect (1.454545)");
+			DisplayEnum("", 0, "    RR:11 = 16:12 aspect (1.333333)");    
+			DisplayEnum("", 0, "    HH:00 = 4x Horizontal Overscan Multiplier");
+			DisplayEnum("", 0, "    HH:01 = 3x Horizontal Overscan Multiplier");
+			DisplayEnum("", 0, "    HH:10 = 2x Horizontal Overscan Multiplier");
+			DisplayEnum("", 0, "    HH:11 = 1x Horizontal Overscan Multiplier");    
+			DisplayEnum("", 0, "    VV:00 = 4x Vertical Overscan Multiplier");
+			DisplayEnum("", 0, "    VV:01 = 3x Vertical Overscan Multiplier");
+			DisplayEnum("", 0, "    VV:10 = 2x Vertical Overscan Multiplier");
+			DisplayEnum("", 0, "    VV:11 = 1x Vertical Overscan Multiplier");
+			nextAddr++;
+			DisplayEnum("", 0, "");
+			DisplayEnum("DSP_EXT", nextAddr, " (Byte) Extended Graphics Register (DEPRECATED)");
+			DisplayEnum("", 0, "DSP_EXT: AABC.DEFG");
+			DisplayEnum("", 0, "     AA:00 = Extended Graphics 1bpp (2-color mode) ");
+			DisplayEnum("", 0, "     AA:01 = Extended Graphics 2bpp (4-color mode) ");
+			DisplayEnum("", 0, "     AA:10 = Extended Graphics 4bpp (16-color mode) ");
+			DisplayEnum("", 0, "     AA:11 = Extended Graphics 4bpp (16-color mode) ");
+			DisplayEnum("", 0, "     B:0   = Extended Graphics: DISABLED ");
+			DisplayEnum("", 0, "     B:1   = Extended Graphics: ENABLED ");
+			DisplayEnum("", 0, "     C:0   = Extended Extended Mode: BITMAP ");
+			DisplayEnum("", 0, "     C:1   = Extended Extended Mode: TILES ");
+			DisplayEnum("", 0, "     D:0   = Standard Graphics: DISABLED ");
+			DisplayEnum("", 0, "     D:1   = Standard Graphics: ENABLED ");
+			DisplayEnum("", 0, "     E:0   = Standard Display Mode: TEXT ");
+			DisplayEnum("", 0, "     E:1   = Standard Display Mode: BITMAP ");
+			DisplayEnum("", 0, "     F:0   = VSYNC OFF ");
+			DisplayEnum("", 0, "     F:1   = VSYNC ON ");
+			DisplayEnum("", 0, "     G:0   = Fullscreen Enabled( emulator only ) ");
+			DisplayEnum("", 0, "     G:1   = Windowed Enabled ( emulator only ) ");
+			nextAddr++;
+		// ... END DEPRECIATED REGISTERS
 
     DisplayEnum("", 0, "");
     DisplayEnum("DSP_TXT_COLS", nextAddr, " (Byte) READ-ONLY Text Screen Columns");
@@ -678,7 +693,7 @@ void Gfx::OnInit()
 
 
 	// DEBUGGING: display the raw display mode data
-		if (true) {
+		if (false) {
 			for (int t=0; t<256; t++) 	{
 				printf("I:%2X  W:%4d, H:%4d    ", 
 					t, 

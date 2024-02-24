@@ -85,7 +85,28 @@
                               
 2406                  SYS_TIMER           equ   $2406    ;  (Word) Increments at 0.46875 hz
                               
-2408                  DSP_GRES            equ   $2408    ;  (Byte) Screen Resolution Register
+2408                  DSP_RES             equ   $2408    ;  (Byte) Display Timing Resolution 0-255
+                              
+2409                  DSP_MODES           equ   $2409    ;  (Byte) Graphics Display Modes
+                                ; DSP_MODES: ABCD.EEFF
+                                ;      A:0   = Extended Bitmap Mode 
+                                ;      A:1   = Extended Tile Mode 
+                                ;      B:0   = Standard Bitmap Mode 
+                                ;      B:1   = Standard Text Mode 
+                                ;      C:1   = Extended Graphics Enabled 
+                                ;      C:0   = Extended Graphics Disabled 
+                                ;      D:1   = Standard Graphics Enabled 
+                                ;      D:0   = Standard Graphics Disabled 
+                                ;     EE:00  = Extended Graphics   2-Color 
+                                ;     EE:01  = Extended Graphics   4-Color 
+                                ;     EE:10  = Extended Graphics  16-Color 
+                                ;     EE:11  = Extended Graphics 256-Color 
+                                ;     FF:00  = Standard Graphics   2-Color 
+                                ;     FF:01  = Standard Graphics   4-Color 
+                                ;     FF:10  = Standard Graphics  16-Color 
+                                ;     FF:11  = Standard Graphics 256-Color 
+                              
+240A                  DSP_GRES            equ   $240A    ;  (Byte) Screen Resolution Register (DEPRECATED)
                                 ; DSP_GRES: BBRR.HHVV
                                 ;     BB:00 = Standard Graphics 1-bpp (2-color mode)
                                 ;     BB:01 = Standard Graphics 2-bpp (4-color mode)
@@ -104,7 +125,7 @@
                                 ;     VV:10 = 2x Vertical Overscan Multiplier
                                 ;     VV:11 = 1x Vertical Overscan Multiplier
                               
-2409                  DSP_EXT             equ   $2409    ;  (Byte) Extended Graphics Register
+240B                  DSP_EXT             equ   $240B    ;  (Byte) Extended Graphics Register (DEPRECATED)
                                 ; DSP_EXT: AABC.DEFG
                                 ;      AA:00 = Extended Graphics 1bpp (2-color mode) 
                                 ;      AA:01 = Extended Graphics 2bpp (4-color mode) 
@@ -123,35 +144,35 @@
                                 ;      G:0   = Fullscreen Enabled( emulator only ) 
                                 ;      G:1   = Windowed Enabled ( emulator only ) 
                               
-240A                  DSP_TXT_COLS        equ   $240A    ;  (Byte) READ-ONLY Text Screen Columns
-240B                  DSP_TXT_ROWS        equ   $240B    ;  (Byte) READ-ONLY Text Screens Rows
+240C                  DSP_TXT_COLS        equ   $240C    ;  (Byte) READ-ONLY Text Screen Columns
+240D                  DSP_TXT_ROWS        equ   $240D    ;  (Byte) READ-ONLY Text Screens Rows
                               
-240C                  DSP_PAL_IDX         equ   $240C    ;  (Byte) Color Palette Index
+240E                  DSP_PAL_IDX         equ   $240E    ;  (Byte) Color Palette Index
                                 ; DSP_PAL_IDX: 0-255
                                 ; Note: Use this register to set the index into theColor Palette. 
                                 ;   Set this value prior referencing color data (DSP_PAL_CLR).
                               
-240D                  DSP_PAL_CLR         equ   $240D    ;  (Word) Indexed Color Palette Data
+240F                  DSP_PAL_CLR         equ   $240F    ;  (Word) Indexed Color Palette Data
                                 ; DSP_PAL_CLR: Color Data A4R4G4B4 format
                                 ; Note: This is the color data for an individual palette entry.
                                 ;     Write to DSP_PAL_IDX with the index within the color palette
                                 ;     prior to reading or writing the color data in the DSP_PAL_CLR register.
                               
-240F                  DSP_GLYPH_IDX       equ   $240F    ;  (Byte) Text Glyph Index
+2411                  DSP_GLYPH_IDX       equ   $2411    ;  (Byte) Text Glyph Index
                                 ; DSP_GLYPH_IDX: 0-256
                                 ; Note: Set this register to index a specific text glyph. Set this value
                                 ;     prior to updating glyph pixel data.
                               
-2410                  DSP_GLYPH_DATA      equ   $2410    ;  (8-Bytes) Text Glyph Pixel Data Array
+2412                  DSP_GLYPH_DATA      equ   $2412    ;  (8-Bytes) Text Glyph Pixel Data Array
                                 ; DSP_GLYPH_DATA: 8 rows of binary encoded glyph pixel data
                                 ; Note: Each 8x8 text glyph is composed of 8 bytes. The first byte in this 
                                 ;     array represents the top line of 8 pixels. Each array entry represents
                                 ;     a row of 8 pixels. 
                               
                                 ; Debug Hardware Registers:
-2418                  DBG_BEGIN           equ   $2418    ; Start of Debug Hardware Registers
-2418                  DBG_BRK_ADDR        equ   $2418    ;    (Word) Address of current breakpoint
-241A                  DBG_FLAGS           equ   $241A    ;    (Byte) Debug Specific Hardware Flags:
+241A                  DBG_BEGIN           equ   $241A    ; Start of Debug Hardware Registers
+241A                  DBG_BRK_ADDR        equ   $241A    ;    (Word) Address of current breakpoint
+241C                  DBG_FLAGS           equ   $241C    ;    (Byte) Debug Specific Hardware Flags:
                                 ;     bit 7: Debug Enable
                                 ;     bit 6: Single Step Enable
                                 ;     bit 5: Clear All Breakpoints
@@ -160,60 +181,60 @@
                                 ;     bit 2: IRQ   (on low to high edge)
                                 ;     bit 1: NMI   (on low to high edge)
                                 ;     bit 0: RESET (on low to high edge)
-241B                  DBG_END             equ   $241B    ; End Debug Registers
+241D                  DBG_END             equ   $241D    ; End Debug Registers
                               
                                 ; Mouse Cursor Hardware Registers:
-241B                  CSR_BEGIN           equ   $241B    ;  start of mouse cursor hardware registers
-241B                  CSR_XPOS            equ   $241B    ;  (Word) horizontal mouse cursor coordinate
-241D                  CSR_YPOS            equ   $241D    ;  (Word) vertical mouse cursor coordinate
-241F                  CSR_XOFS            equ   $241F    ;  (Byte) horizontal mouse cursor offset
-2420                  CSR_YOFS            equ   $2420    ;  (Byte) vertical mouse cursor offset
-2421                  CSR_SCROLL          equ   $2421    ;  (Signed) MouseWheel Scroll: -1, 0, 1
-2422                  CSR_FLAGS           equ   $2422    ;  (Byte) mouse button flags:
+241D                  CSR_BEGIN           equ   $241D    ;  start of mouse cursor hardware registers
+241D                  CSR_XPOS            equ   $241D    ;  (Word) horizontal mouse cursor coordinate
+241F                  CSR_YPOS            equ   $241F    ;  (Word) vertical mouse cursor coordinate
+2421                  CSR_XOFS            equ   $2421    ;  (Byte) horizontal mouse cursor offset
+2422                  CSR_YOFS            equ   $2422    ;  (Byte) vertical mouse cursor offset
+2423                  CSR_SCROLL          equ   $2423    ;  (Signed) MouseWheel Scroll: -1, 0, 1
+2424                  CSR_FLAGS           equ   $2424    ;  (Byte) mouse button flags:
                                 ;  CSR_FLAGS:
                                 ;       bits 0-4: button states
                                 ;       bits 5:   cursor enable
                                 ;       bits 6-7: number of clicks
-2423                  CSR_BMP_INDX        equ   $2423    ;  (Byte) mouse cursor bitmap pixel offset
-2424                  CSR_BMP_DATA        equ   $2424    ;  (Byte) mouse cursor bitmap pixel index color
-2426                  CSR_PAL_INDX        equ   $2426    ;  (Byte) mouse cursor color palette index (0-15)
-2427                  CSR_PAL_DATA        equ   $2427    ;  (Word) mouse cursor color palette data RGBA4444
-2429                  CSR_END             equ   $2429    ; End Mouse Registers
+2425                  CSR_BMP_INDX        equ   $2425    ;  (Byte) mouse cursor bitmap pixel offset
+2426                  CSR_BMP_DATA        equ   $2426    ;  (Byte) mouse cursor bitmap pixel index color
+2428                  CSR_PAL_INDX        equ   $2428    ;  (Byte) mouse cursor color palette index (0-15)
+2429                  CSR_PAL_DATA        equ   $2429    ;  (Word) mouse cursor color palette data RGBA4444
+242B                  CSR_END             equ   $242B    ; End Mouse Registers
                               
-2429                  GFX_END             equ   $2429    ; End of GFX Device Registers
+242B                  GFX_END             equ   $242B    ; End of GFX Device Registers
                               
-2429                  KEY_BEGIN           equ   $2429    ; Start of the Keyboard Register space
-2429                  CHAR_Q_LEN          equ   $2429    ;   (Byte) # of characters waiting in queue        (Read Only)
-242A                  CHAR_SCAN           equ   $242A    ;   (Byte) read next character in queue (not popped when read)
-242B                  CHAR_POP            equ   $242B    ;   (Byte) read next character in queue (not popped when read)
-242C                  XKEY_BUFFER         equ   $242C    ;   (128 bits) 16 bytes for XK_KEY data buffer     (Read Only)
-243C                  EDT_BFR_CSR         equ   $243C    ;   (Byte) cursor position within edit buffer     (Read/Write)
-243D                  EDT_ENABLE          equ   $243D    ;   (Byte) line editor enable flag                 (Read/Write)
-243E                  EDT_BUFFER          equ   $243E    ;   line editing character buffer                 (Read/Write)
-253E                  KEY_END             equ   $253E    ; End of the Keyboard Register space
+242B                  KEY_BEGIN           equ   $242B    ; Start of the Keyboard Register space
+242B                  CHAR_Q_LEN          equ   $242B    ;   (Byte) # of characters waiting in queue        (Read Only)
+242C                  CHAR_SCAN           equ   $242C    ;   (Byte) read next character in queue (not popped when read)
+242D                  CHAR_POP            equ   $242D    ;   (Byte) read next character in queue (not popped when read)
+242E                  XKEY_BUFFER         equ   $242E    ;   (128 bits) 16 bytes for XK_KEY data buffer     (Read Only)
+243E                  EDT_BFR_CSR         equ   $243E    ;   (Byte) cursor position within edit buffer     (Read/Write)
+243F                  EDT_ENABLE          equ   $243F    ;   (Byte) line editor enable flag                 (Read/Write)
+2440                  EDT_BUFFER          equ   $2440    ;   line editing character buffer                 (Read/Write)
+2540                  KEY_END             equ   $2540    ; End of the Keyboard Register space
                               
-253E                  JOYS_BEGIN          equ   $253E    ; Start of the Game Controller Register space
-253E                  JOYS_1_BTN          equ   $253E    ;   (Word) button bits: room for up to 16 buttons  (realtime)
-2540                  JOYS_1_DBND         equ   $2540    ;   (Byte) PAD 1 analog deadband; default is 5   (read/write)
-2541                  JOYS_1_LTX          equ   $2541    ;   (char) PAD 1 LThumb-X position (-128 _ +127)   (realtime)
-2542                  JOYS_1_LTY          equ   $2542    ;   (char) PAD 1 LThumb-Y position (-128 _ +127)   (realtime)
-2543                  JOYS_1_RTX          equ   $2543    ;   (char) PAD 1 RThumb-X position (-128 _ +127)   (realtime)
-2544                  JOYS_1_RTY          equ   $2544    ;   (char) PAD 1 RThumb-Y position (-128 _ +127)   (realtime)
-2545                  JOYS_1_Z1           equ   $2545    ;   (char) PAD 1 left analog trigger (0 - 127)     (realtime)
-2546                  JOYS_1_Z2           equ   $2546    ;   (char) PAD 1 right analog trigger (0 - 127)    (realtime)
+2540                  JOYS_BEGIN          equ   $2540    ; Start of the Game Controller Register space
+2540                  JOYS_1_BTN          equ   $2540    ;   (Word) button bits: room for up to 16 buttons  (realtime)
+2542                  JOYS_1_DBND         equ   $2542    ;   (Byte) PAD 1 analog deadband; default is 5   (read/write)
+2543                  JOYS_1_LTX          equ   $2543    ;   (char) PAD 1 LThumb-X position (-128 _ +127)   (realtime)
+2544                  JOYS_1_LTY          equ   $2544    ;   (char) PAD 1 LThumb-Y position (-128 _ +127)   (realtime)
+2545                  JOYS_1_RTX          equ   $2545    ;   (char) PAD 1 RThumb-X position (-128 _ +127)   (realtime)
+2546                  JOYS_1_RTY          equ   $2546    ;   (char) PAD 1 RThumb-Y position (-128 _ +127)   (realtime)
+2547                  JOYS_1_Z1           equ   $2547    ;   (char) PAD 1 left analog trigger (0 - 127)     (realtime)
+2548                  JOYS_1_Z2           equ   $2548    ;   (char) PAD 1 right analog trigger (0 - 127)    (realtime)
                               
-2547                  JOYS_2_BTN          equ   $2547    ;   (Word) button bits: room for up to 16 buttons  (realtime)
-2549                  JOYS_2_DBND         equ   $2549    ;   (Byte) PAD 2 analog deadband; default is 5   (read/write)
-254A                  JOYS_2_LTX          equ   $254A    ;   (char) PAD 2 LThumb-X position (-128 _ +127)   (realtime)
-254B                  JOYS_2_LTY          equ   $254B    ;   (char) PAD 2 LThumb-Y position (-128 _ +127)   (realtime)
-254C                  JOYS_2_RTX          equ   $254C    ;   (char) PAD 2 RThumb-X position (-128 _ +127)   (realtime)
-254D                  JOYS_2_RTY          equ   $254D    ;   (char) PAD 2 RThumb-Y position (-128 _ +127)   (realtime)
-254E                  JOYS_2_Z1           equ   $254E    ;   (char) PAD 2 left analog trigger (0 - 127)     (realtime)
-254F                  JOYS_2_Z2           equ   $254F    ;   (char) PAD 2 right analog trigger (0 - 127)    (realtime)
-2550                  JOYS_END            equ   $2550    ; End of the Game Controller Register space
+2549                  JOYS_2_BTN          equ   $2549    ;   (Word) button bits: room for up to 16 buttons  (realtime)
+254B                  JOYS_2_DBND         equ   $254B    ;   (Byte) PAD 2 analog deadband; default is 5   (read/write)
+254C                  JOYS_2_LTX          equ   $254C    ;   (char) PAD 2 LThumb-X position (-128 _ +127)   (realtime)
+254D                  JOYS_2_LTY          equ   $254D    ;   (char) PAD 2 LThumb-Y position (-128 _ +127)   (realtime)
+254E                  JOYS_2_RTX          equ   $254E    ;   (char) PAD 2 RThumb-X position (-128 _ +127)   (realtime)
+254F                  JOYS_2_RTY          equ   $254F    ;   (char) PAD 2 RThumb-Y position (-128 _ +127)   (realtime)
+2550                  JOYS_2_Z1           equ   $2550    ;   (char) PAD 2 left analog trigger (0 - 127)     (realtime)
+2551                  JOYS_2_Z2           equ   $2551    ;   (char) PAD 2 right analog trigger (0 - 127)    (realtime)
+2552                  JOYS_END            equ   $2552    ; End of the Game Controller Register space
                               
-2550                  FIO_BEGIN           equ   $2550    ; Start of the FileIO register space
-2550                  FIO_ERR_FLAGS       equ   $2550    ; (Byte) File IO error flags
+2552                  FIO_BEGIN           equ   $2552    ; Start of the FileIO register space
+2552                  FIO_ERR_FLAGS       equ   $2552    ; (Byte) File IO error flags
                                 ; FIO_ERR_FLAGS: ABCD.EFGH
                                 ;      A:  file was not found
                                 ;      B:  directory was not found
@@ -224,7 +245,7 @@
                                 ;      G:  invalid command
                                 ;      H:  incorrect file stream
                               
-2551                  FIO_COMMAND         equ   $2551    ; (Byte) OnWrite, execute a file command (FC_<cmd>)
+2553                  FIO_COMMAND         equ   $2553    ; (Byte) OnWrite, execute a file command (FC_<cmd>)
                                 ; Begin FIO_COMMANDS
 0000                  FC_RESET            equ   $0000    ;        Reset
 0001                  FC_SHUTDOWN         equ   $0001    ;        SYSTEM: Shutdown
@@ -252,8 +273,8 @@
 0017                  FC_GET_SEEK         equ   $0017    ;      * Get Seek Position (into FIO_IOWORD)
                                 ; End FIO_COMMANDS
                               
-2552                  FIO_STREAM          equ   $2552    ; (Byte) current file stream index (0-15)
-2553                  FIO_MODE            equ   $2553    ; (Byte) Flags describing the I/O mode for the file
+2554                  FIO_STREAM          equ   $2554    ; (Byte) current file stream index (0-15)
+2555                  FIO_MODE            equ   $2555    ; (Byte) Flags describing the I/O mode for the file
                                 ; FIO_MODE: 00AB.CDEF  (indexed by FIO_STREAM)
                                 ;      A:  INPUT - File open for reading
                                 ;      B:  OUTPUT - File open for writing
@@ -261,34 +282,34 @@
                                 ;      D:  AT_END - Output starts at the end of the file
                                 ;      E:  APPEND - All output happens at end of the file
                                 ;      F:  TRUNC - discard all previous file data
-2554                  FIO_SEEKPOS         equ   $2554    ; (DWord) file seek position
-2558                  FIO_IOBYTE          equ   $2558    ; (Byte) input / output character
-2559                  FIO_IOWORD          equ   $2559    ; (Byte) input / output character
-255A                  FIO_PATH_LEN        equ   $255A    ; (Byte) length of the filepath
-255B                  FIO_PATH_POS        equ   $255B    ; (Byte) character position within the filepath
-255C                  FIO_PATH_DATA       equ   $255C    ; (Byte) data at the character position of the path
-255D                  FIO_DIR_DATA        equ   $255D    ; (Byte) a series of null-terminated filenames
+2556                  FIO_SEEKPOS         equ   $2556    ; (DWord) file seek position
+255A                  FIO_IOBYTE          equ   $255A    ; (Byte) input / output character
+255B                  FIO_IOWORD          equ   $255B    ; (Byte) input / output character
+255C                  FIO_PATH_LEN        equ   $255C    ; (Byte) length of the filepath
+255D                  FIO_PATH_POS        equ   $255D    ; (Byte) character position within the filepath
+255E                  FIO_PATH_DATA       equ   $255E    ; (Byte) data at the character position of the path
+255F                  FIO_DIR_DATA        equ   $255F    ; (Byte) a series of null-terminated filenames
                                 ;     NOTES: Current read-position is reset to the beginning following a 
                                 ;             List Directory command. The read-position is automatically 
                                 ;             advanced on read from this register. Each filename is 
                                 ;             $0a-terminated. The list itself is null-terminated.
-255E                  FIO_END             equ   $255E    ; End of the FileIO register space
+2560                  FIO_END             equ   $2560    ; End of the FileIO register space
                               
                                 ; Math Co-Processor Hardware Registers:
-255E                  MATH_BEGIN          equ   $255E    ;  start of math co-processor  hardware registers
-255E                  MATH_ACA_POS        equ   $255E    ;  (Byte) character position within the ACA float string
-255F                  MATH_ACA_DATA       equ   $255F    ;  (Byte) ACA float string character port
-2560                  MATH_ACA_RAW        equ   $2560    ;  (4-Bytes) ACA raw float data
-2564                  MATH_ACA_INT        equ   $2564    ;  (4-Bytes) ACA integer data
-2568                  MATH_ACB_POS        equ   $2568    ;  (Byte) character position within the ACB float string
-2569                  MATH_ACB_DATA       equ   $2569    ;  (Byte) ACB float string character port
-256A                  MATH_ACB_RAW        equ   $256A    ;  (4-Bytes) ACB raw float data
-256E                  MATH_ACB_INT        equ   $256E    ;  (4-Bytes) ACB integer data
-2572                  MATH_ACR_POS        equ   $2572    ;  (Byte) character position within the ACR float string
-2573                  MATH_ACR_DATA       equ   $2573    ;  (Byte) ACR float string character port
-2574                  MATH_ACR_RAW        equ   $2574    ;  (4-Bytes) ACR raw float data
-2578                  MATH_ACR_INT        equ   $2578    ;  (4-Bytes) ACR integer data
-257C                  MATH_OPERATION      equ   $257C    ;  (Byte) Operation 'command' to be issued
+2560                  MATH_BEGIN          equ   $2560    ;  start of math co-processor  hardware registers
+2560                  MATH_ACA_POS        equ   $2560    ;  (Byte) character position within the ACA float string
+2561                  MATH_ACA_DATA       equ   $2561    ;  (Byte) ACA float string character port
+2562                  MATH_ACA_RAW        equ   $2562    ;  (4-Bytes) ACA raw float data
+2566                  MATH_ACA_INT        equ   $2566    ;  (4-Bytes) ACA integer data
+256A                  MATH_ACB_POS        equ   $256A    ;  (Byte) character position within the ACB float string
+256B                  MATH_ACB_DATA       equ   $256B    ;  (Byte) ACB float string character port
+256C                  MATH_ACB_RAW        equ   $256C    ;  (4-Bytes) ACB raw float data
+2570                  MATH_ACB_INT        equ   $2570    ;  (4-Bytes) ACB integer data
+2574                  MATH_ACR_POS        equ   $2574    ;  (Byte) character position within the ACR float string
+2575                  MATH_ACR_DATA       equ   $2575    ;  (Byte) ACR float string character port
+2576                  MATH_ACR_RAW        equ   $2576    ;  (4-Bytes) ACR raw float data
+257A                  MATH_ACR_INT        equ   $257A    ;  (4-Bytes) ACR integer data
+257E                  MATH_OPERATION      equ   $257E    ;  (Byte) Operation 'command' to be issued
                                 ; Begin MATH_OPERATION's (MOPS)
 0000                  MOP_RANDOM          equ   $0000    ;        ACA, ACB, and ACR are set to randomized values
 0001                  MOP_RND_SEED        equ   $0001    ;        MATH_ACA_INT seeds the pseudo-random number generator
@@ -349,10 +370,10 @@
 0038                  MOP_COPYSIGN        equ   $0038    ;        ACR = std::copysign(ACA, ACB);
 0038                  MOP_LASTOP          equ   $0038    ;        last implemented math operation 
                                 ; End MATH_OPERATION's (MOPS)
-257D                  MATH_END            equ   $257D    ; end of math co-processor registers
+257F                  MATH_END            equ   $257F    ; end of math co-processor registers
                               
-                          ; 2691 ($0A83) bytes remaining for additional registers.
-257D                  RESERVED            equ   $257D  
+                          ; 2689 ($0A81) bytes remaining for additional registers.
+257F                  RESERVED            equ   $257F  
                               
                                 ; User RAM (32K)
 3000                  USER_RAM            equ   $3000  
@@ -376,6 +397,7 @@ FFFA                  HARD_SWI            equ   $FFFA    ; SWI / SYS Hardware In
 FFFC                  HARD_NMI            equ   $FFFC    ; NMI Hardware Interrupt Vector
 FFFE                  HARD_RESET          equ   $FFFE    ; RESET Hardware Interrupt Vector
                       ; END of definitions
+                      
                       
                       ; Software Vectors
 0000                          org     $0000   
@@ -444,11 +466,11 @@ F03F  B72402                          sta     SYS_STATE
                       
                                       ; build DSP_GRES
 F042  868E                            lda     #$8E            ; $8E == 4-bpp, 16:9 aspect, 512x192 resolution
-F044  B72408                          sta     DSP_GRES
+F044  B7240A                          sta     DSP_GRES
                       
                                       ; build DSP_EXT
 F047  8689                            lda     #$89
-F049  B72409                          sta     DSP_EXT         
+F049  B7240B                          sta     DSP_EXT         
                       
                               ; begin the display
 F04C  86B4                            lda     #$B4            ; default character color attribute
@@ -464,8 +486,8 @@ F060  BDF420                          jsr     line_out
                       
                                       ; fetch compilation date
 F063  8602                            lda     #FC_COMPDATE
-F065  B72551                          sta     FIO_COMMAND
-F068  B6255C          0               lda     FIO_PATH_DATA
+F065  B72553                          sta     FIO_COMMAND
+F068  B6255E          0               lda     FIO_PATH_DATA
 F06B  2705                            beq     2f
 F06D  BDF430                          jsr     char_out
 F070  20F6                            bra     0b
@@ -568,19 +590,19 @@ F176  39                              rts
                               
 F177                  do_load         ; LOAD "file_name"
                       
-F177  7F255B                          clr     FIO_PATH_POS    ; reset the file path cursor position
+F177  7F255D                          clr     FIO_PATH_POS    ; reset the file path cursor position
 F17A  BDF25A                          jsr     decode_command_find_arg_1
 F17D  12                              nop     ; X should point to the start of the first argument                     
                                       ;ldx    #EDT_BUFFER
 F17E                  1
 F17E  A680                            lda     ,x+
-F180  B7255C                          sta     FIO_PATH_DATA
+F180  B7255E                          sta     FIO_PATH_DATA
 F183  26F9                            bne     1b
                       
 F185  8609                            lda     #FC_LOADHEX
-F187  B72551                          sta     FIO_COMMAND     
+F187  B72553                          sta     FIO_COMMAND     
                       
-F18A  B62550                          lda     FIO_ERR_FLAGS
+F18A  B62552                          lda     FIO_ERR_FLAGS
 F18D  8180                            cmpa    #$80
 F18F  271A                            beq     2f              ; file not found        
 F191  8120                            cmpa    #$20
@@ -608,9 +630,9 @@ F1B1  39                              rts
 F1B2                  do_exec         ; EXEC $####
                       
                               ; save the system settings
-F1B2  B62408                          lda     DSP_GRES
+F1B2  B6240A                          lda     DSP_GRES
 F1B5  3402                            pshs    A
-F1B7  B62409                          lda     DSP_EXT
+F1B7  B6240B                          lda     DSP_EXT
 F1BA  3402                            pshs    A
 F1BC  B60015                          lda     TXT_ATTR
 F1BF  3402                            pshs    A
@@ -629,21 +651,21 @@ F1D5  B72402                          sta     SYS_STATE
 F1D8  3502                            puls    A
 F1DA  B70015                          sta     TXT_ATTR
 F1DD  3502                            puls    A
-F1DF  B12409                          cmpa    DSP_EXT
+F1DF  B1240B                          cmpa    DSP_EXT
 F1E2  2703                            beq     1f
-F1E4  B72409                          sta     DSP_EXT
+F1E4  B7240B                          sta     DSP_EXT
 F1E7                  1               
 F1E7  3502                            puls    A
-F1E9  B12408                          cmpa    DSP_GRES
+F1E9  B1240A                          cmpa    DSP_GRES
 F1EC  2703                            beq     2f
-F1EE  B72408                          sta     DSP_GRES
+F1EE  B7240A                          sta     DSP_GRES
 F1F1                  2
                       ;               jsr     cls
 F1F1  39                              rts
                       
 F1F2                  do_reset        ; RESET
 F1F2  8600                            lda     #FC_RESET
-F1F4  B72551                          sta     FIO_COMMAND
+F1F4  B72553                          sta     FIO_COMMAND
 F1F7  39                              rts
                                       ;jmp    [VECT_RESET]
                                       ; rts
@@ -660,9 +682,9 @@ F204  26FA                            bne     1b
 F206  12                              nop     ; argument one should now be copied to the FIO_BUFFER           
                       
 F207  860B                            lda     #FC_LISTDIR     ; COMMAND: List Directory
-F209  B72551                          sta     FIO_COMMAND             
+F209  B72553                          sta     FIO_COMMAND             
 F20C                  2       ; output the result
-F20C  B6255D                          lda     FIO_DIR_DATA
+F20C  B6255F                          lda     FIO_DIR_DATA
 F20F  2705                            beq     3f
 F211  BDF430                          jsr     char_out
 F214  20F6                            bra     2b
@@ -675,27 +697,27 @@ F21B  39                              rts
 F21C                  do_chdir        ; CHDIR  "directory_path"
 F21C  BDF25A                          jsr     decode_command_find_arg_1
 F21F  12                              nop     ; X should point to the start of the first argument
-F220  7F255B                          clr     FIO_PATH_POS    ; reset the cursor position in the file path
+F220  7F255D                          clr     FIO_PATH_POS    ; reset the cursor position in the file path
 F223                  1       ; 
 F223  A680                            lda     ,x+
-F225  B7255C                          sta     FIO_PATH_DATA
+F225  B7255E                          sta     FIO_PATH_DATA
 F228  26F9                            bne     1b
 F22A  860D                            lda     #FC_CHANGEDIR
-F22C  B72551                          sta     FIO_COMMAND
+F22C  B72553                          sta     FIO_COMMAND
 F22F  2010                            bra     2f
                               ; check for errors              
-F231  B62550                          lda     FIO_ERR_FLAGS
+F231  B62552                          lda     FIO_ERR_FLAGS
 F234  8440                            anda    #$40
 F236  2709                            beq     2f
 F238  8EF0E3                          ldx     #err_dir_nf
 F23B  BDF420                          jsr     line_out
-F23E  7F2550                          clr     FIO_ERR_FLAGS
+F23E  7F2552                          clr     FIO_ERR_FLAGS
 F241                  2       ;
 F241  860E                            lda     #FC_GETPATH
-F243  B72551                          sta     FIO_COMMAND
+F243  B72553                          sta     FIO_COMMAND
 F246  BDF430                          jsr     char_out        
 F249                  3       ;
-F249  B6255C                          lda     FIO_PATH_DATA
+F249  B6255E                          lda     FIO_PATH_DATA
 F24C  2705                            beq     4f
 F24E  BDF430                          jsr     char_out
 F251  20F6                            bra     3b              
@@ -706,13 +728,13 @@ F254                  do_exit         ; EXIT  "directory_path"
                                       * ldx   #str_exit_test
                                       * jsr   line_out
 F254  8601                            lda     #FC_SHUTDOWN
-F256  B72551                          sta     FIO_COMMAND
+F256  B72553                          sta     FIO_COMMAND
                                       ;jsr    [VECT_CHDIR]
 F259  39                              rts
                       
 F25A                  decode_command_find_arg_1       ; position X to the start of the first argument
 F25A  3402                            pshs    A               ; store the working registers
-F25C  8E243E                          ldx     #EDT_BUFFER     ; point to the start of the edit buffer
+F25C  8E2440                          ldx     #EDT_BUFFER     ; point to the start of the edit buffer
 F25F  A680            1               lda     ,x+             ; load a character from the edit buffer
 F261  2704                            beq     2f              ; cleanup and return if its a null-terminator
 F263  8120                            cmpa    #' '            ; is it a SPACE character?
@@ -804,11 +826,11 @@ F2C6  4F                              clra                    ; clear the token 
 F2C7  3402                            pshs    A               ;       store it locally @ 0,S 
 F2C9  108EF08F                        ldy     #command_table  ; load the start of the command table
 F2CD                  dct_0   ; main loop
-F2CD  8E243E                          ldx     #EDT_BUFFER     ; load the start of the edit buffer
+F2CD  8E2440                          ldx     #EDT_BUFFER     ; load the start of the edit buffer
 F2D0  BDF30F                          jsr     str_cmp_nmz     ; tokenize the command
 F2D3  271A                            beq     dct_cmd_found   ; command was found
                               ; not found at this entry in the table  
-F2D5  8E243E                          ldx     #EDT_BUFFER     ; reset X to the start of the edit buffer
+F2D5  8E2440                          ldx     #EDT_BUFFER     ; reset X to the start of the edit buffer
 F2D8                  dct_1   ; progress Y to the next entry
 F2D8  A6A0                            lda     ,y+             ; load character in the list entry
 F2DA  81FF                            cmpa    #$ff            ; end of list?
@@ -836,7 +858,7 @@ F2F9                  decode_command_to_first_argument
                               ; look for the first ' ' or '$' character to start ARG1
                               ; null character is end
 F2F9  3402                            pshs    A
-F2FB  8E243E                          ldx     #EDT_BUFFER     ; point to the start of the edit buffer
+F2FB  8E2440                          ldx     #EDT_BUFFER     ; point to the start of the edit buffer
 F2FE                  1
 F2FE  A680                            lda     ,x+             ; fetch next character from the buffer
 F300  270A                            beq     dctfa_done      ; branch if null-terminator?
@@ -928,12 +950,12 @@ F36E                  line_edit
                       ;               bne     9b
                       ;8
 F36E  86FF                            lda     #$ff            ; 'true'
-F370  B7243D                          sta     EDT_ENABLE      ; enable the hardware line editor sub-system
-F373  7F243E                          clr     EDT_BUFFER      ; null the start of the edit buffer
+F370  B7243F                          sta     EDT_ENABLE      ; enable the hardware line editor sub-system
+F373  7F2440                          clr     EDT_BUFFER      ; null the start of the edit buffer
 F376  FC0011                          ldd     CSR_ADDR        ; fetch the current cursor address
 F379  FD0016                          std     EDLIN_ANCH      ; store it as the anchor
 F37C                  6       ; check for ENTER press
-F37C  B6242B                          lda     CHAR_POP        ; scan for a character waiting in the queue
+F37C  B6242D                          lda     CHAR_POP        ; scan for a character waiting in the queue
 F37F  810D                            cmpa    #$0d            ; is it the ENTER key?
 F381  2627                            bne     0f              ; nope, continue to render the text line editor
                                       ; lda   CHAR_POP        ; pop the ENTER from the queue before returning
@@ -944,28 +966,28 @@ F388  ED9F0011                        std     [CSR_ADDR]      ; overrite the las
 F38C  7F0013                          clr     CSR_COL         ; CSR_COL = 0
 F38F  7C0014                          inc     CSR_ROW         ; CSR_ROW = 0
 F392  B60014                          lda     CSR_ROW         ; A - CSR_ROW
-F395  B1240B                          cmpa    DSP_TXT_ROWS    ; last line?
+F395  B1240D                          cmpa    DSP_TXT_ROWS    ; last line?
 F398  2D06                            blt     7f              ; nope, recalc the new cursor address
 F39A  7A0014                          dec     CSR_ROW         ; decrement CSR_ROW
 F39D  BDF4A7                          jsr     std_text_scroll ; scroll the text buffer
 F3A0                  7       ; recalculate the cursor address based on CSR_ROW and CSR_COL
 F3A0  BDF4DD                          jsr     cursor_address  ; find CSR_ADDR based on CSR_ROW and CSR_COL
 F3A3  BF0011                          stx     CSR_ADDR        ; store the new CSR_ADDR
-F3A6  7F243D                          clr     EDT_ENABLE      ; disable the hardware line editor sub-system
+F3A6  7F243F                          clr     EDT_ENABLE      ; disable the hardware line editor sub-system
 F3A9  39                              rts                     ; return from the line editor subroutine
 F3AA                  0       ; begin the line edit routine
                                       ; ldu   #STD_VID_MIN    ; reserve the start of the display buffer
                                       ; ldu   EDLIN_ANCH      ; reserve the start of the display buffer
-F3AA  108E243E                        ldy     #EDT_BUFFER     ; start of the character line edit buffer
+F3AA  108E2440                        ldy     #EDT_BUFFER     ; start of the character line edit buffer
                                       ; ldx   #STD_VID_MIN    ; point to the start of the display buffer
 F3AE  BE0016                          ldx     EDLIN_ANCH      ; point to the start of the display buffer
-F3B1  B6243C                          lda     EDT_BFR_CSR     ; fetch the cursor position
+F3B1  B6243E                          lda     EDT_BFR_CSR     ; fetch the cursor position
 F3B4  3402                            pshs    a               ; save it on the stack as a local variable      
 F3B6  2604                            bne     1f              ; cursor position is not zero, begin text
 F3B8  A6A4                            lda     ,y              ; load the first character in the buffer
 F3BA  261E                            bne     4f              ; if its not zero, display the cursor
 F3BC                  1       ; start of the line
-F3BC  B6243C                          lda     EDT_BFR_CSR     ; load the cursor position
+F3BC  B6243E                          lda     EDT_BFR_CSR     ; load the cursor position
 F3BF  270F                            beq     3f              ; if theres no character, display the cursor
 F3C1                  2       ; display up to the cursor position
 F3C1  A6A0                            lda     ,y+             ; fetch a character from the edit buffer
@@ -1016,7 +1038,7 @@ F40A  44                              lsra                    ; shift right
                       ;               lsra                    ; shift right
 F40B  8407                            anda    #$07            ; only concerned with these bits
 F40D  B70010                          sta     CSR_ATTR        ; store the new attribute
-F410  F6243C                          ldb     EDT_BFR_CSR     ; load the cursor position
+F410  F6243E                          ldb     EDT_BFR_CSR     ; load the cursor position
 F413  58                              lslb                    ; skip the attribue
 F414  5C                              incb                    ; increment the attribute color
 F415  A7C5                            sta     b, u            ; update the characters color
@@ -1061,14 +1083,14 @@ F445  ED84                            std     ,x              ; store it on scre
 F447  7C0013                          inc     CSR_COL         ; increase the cursors column
                                       ; handle line wrap and scrolling
 F44A  B60013                          lda     CSR_COL         ; load cursor column
-F44D  B1240A                          cmpa    DSP_TXT_COLS    ; compare with max displayed columns
+F44D  B1240C                          cmpa    DSP_TXT_COLS    ; compare with max displayed columns
 F450  2C02                            bge     1f              ; if greater or equal
 F452  2014                            bra     0f              ; skip and return
 F454                  1       ; if (CSR_COL >= DSP_TXT_COLS)
 F454  7F0013                          clr     CSR_COL         ; clear CSR_COL
 F457  7C0014                          inc     CSR_ROW         ; increment CSR_ROW
 F45A  B60014                          lda     CSR_ROW         ; load CSR_ROWS
-F45D  B1240B                          cmpa    DSP_TXT_ROWS    ; if (CSR_ROW < DSP_TXT_ROWS)
+F45D  B1240D                          cmpa    DSP_TXT_ROWS    ; if (CSR_ROW < DSP_TXT_ROWS)
 F460  2D06                            blt     0f              ;       clean up and return
 F462  BDF4A7                          jsr     std_text_scroll ; scroll the text screen
 F465  7A0014                          dec     CSR_ROW         ; CSR_ROW--
@@ -1098,7 +1120,7 @@ F488  3412                            pshs    a, x            ; store the workin
 F48A  7F0013                          clr     CSR_COL         ; set cursor column to zero
 F48D  7C0014                          inc     CSR_ROW         ; increment the cursor row
 F490  B60014                          lda     CSR_ROW         ; A = cursor row
-F493  B1240B                          cmpa    DSP_TXT_ROWS    ; skip if the current cursor row
+F493  B1240D                          cmpa    DSP_TXT_ROWS    ; skip if the current cursor row
 F496  2D06                            blt     1f              ;   is less than the max rows
 F498  7A0014                          dec     CSR_ROW         ; decrease the cursors row
 F49B  BDF4A7                          jsr     std_text_scroll ; scroll the text up one line
@@ -1113,7 +1135,7 @@ F4A6  39                              rts                     ; return from the 
 F4A7                  std_text_scroll ; scroll the standard text screen up one line
 F4A7  3436                            pshs    d, x, y         ; store the working registers
 F4A9  108E0400                        ldy     #STD_VID_MIN    ; Y = start of the standard video buffer
-F4AD  F6240A                          ldb     DSP_TXT_COLS    ; B = number of displayed text columns
+F4AD  F6240C                          ldb     DSP_TXT_COLS    ; B = number of displayed text columns
                                       ;lslb                   ; B = B * 2 -- account for the attribute byte
 F4B0  8E0400                          ldx     #STD_VID_MIN    ; X = start of the standard video buffer
                                       ; B can become negative in the 4x horizontal overscan modes
@@ -1128,10 +1150,10 @@ F4BB  BC2400                          cmpx    STD_VID_MAX     ; at the end of th
 F4BE  2DF7                            blt     1b              ; loop if not
                               ; fill the bottom line with spaces
 F4C0  8E0400                          ldx     #STD_VID_MIN    ; X = start of the standard video buffer
-F4C3  F6240B                          ldb     DSP_TXT_ROWS    ; B = number of displayed rows
+F4C3  F6240D                          ldb     DSP_TXT_ROWS    ; B = number of displayed rows
 F4C6  5A                              decb                    ; B = B - 1  last line
 F4C7  58                              lslb                    ; B = B * 1 -- account for the attribute byte
-F4C8  B6240A                          lda     DSP_TXT_COLS    ; A = number of displayed text columns
+F4C8  B6240C                          lda     DSP_TXT_COLS    ; A = number of displayed text columns
 F4CB  3D                              mul                     ; D = A * B
 F4CC  308B                            leax    d,x             ; X = the start of the bottom row
 F4CE  8620                            lda     #$20            ; load up default space character
@@ -1150,7 +1172,7 @@ F4DD                  cursor_address  ; Update CSR_ADDR and return the cursor ad
 F4DD  3406                            pshs    d               ; store used registers
 F4DF  8E0400                          ldx     #STD_VID_MIN    ; start of the standard video buffer
 F4E2  B60014                          lda     CSR_ROW         ; A = current cursor row
-F4E5  F6240A                          ldb     DSP_TXT_COLS    ; B = number of columns displayed
+F4E5  F6240C                          ldb     DSP_TXT_COLS    ; B = number of columns displayed
 F4E8  58                              lslb                    ; B = B * 2 -- account for the attribute byte
 F4E9  3D                              mul                     ; D = A * B
 F4EA  308B                            leax    d,x             ; X = D + X             
