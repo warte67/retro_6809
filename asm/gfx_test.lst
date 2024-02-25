@@ -322,12 +322,12 @@ F408                  char_out        equ     62472
 3014  8E0400                          ldx     #STD_VID_MIN
 3017  A780            1               sta     ,x+
 3019  4C                              inca
-301A  8C2400                          cmpx    #STD_VID_MAX
+301A  BC2400                          cmpx    STD_VID_MAX
 301D  2DF8                            blt     1b
 301F                  2
 301F  8E0400                          ldx     #STD_VID_MIN
 3022  6C80            1               inc     ,x+
-3024  8C2400                          cmpx    #STD_VID_MAX
+3024  BC2400                          cmpx    STD_VID_MAX
 3027  2DF9                            blt     1b
                       
                                       ; restart if the graphics mode has changed

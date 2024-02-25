@@ -101,6 +101,10 @@ void Gfx::write(Word offset, Byte data, bool debug)
 	// handle Gfx Writes
 	switch (offset)
 	{
+
+		// case STD_VID_MAX + 0: _std_vid_max = (_std_vid_max & 0x00ff) | (data << 8); break;
+		// case STD_VID_MAX + 1: _std_vid_max = (_std_vid_max & 0xff00) | (data << 0); break;
+
 		case SYS_STATE: { 
 			Bus::_sys_state = data;
 			break;
@@ -1256,16 +1260,47 @@ void Gfx::_decode_display()
 	int col = _scr_display_modes[_dsp_res].res_width / 8;
 	int row = _scr_display_modes[_dsp_res].res_height / 8;
 	_std_vid_max = (STD_VID_MIN + (col*row*2))-1;
+	if (_standard_display_mode && _standard_graphics_enable)	// if standard bitmap mode enabled
+		_std_vid_max = STD_VID_MAX-1;
 
-	// ...
+	// scale the window	
+	constexpr int DESIRED_WINDOW_WIDTH = 1440;
 	if (_windowed)
 	{
-		if (_window_width < 1280 || _window_width > 1280)
+		if (_window_width < DESIRED_WINDOW_WIDTH || _window_width > DESIRED_WINDOW_WIDTH)
 		{
-			_window_width = 1280;
+			_window_width = DESIRED_WINDOW_WIDTH;
 			_window_height = _window_width / _aspect;
 		}
 	}
+
+	// re-encode DSP_MODE
+	// _dsp_mode = 0;
+	// if (_extended_display_mode)		_dsp_mode |= 0x80;
+	// if (_standard_display_mode)		_dsp_mode |= 0x40;
+	// if (_extended_graphics_enable)	
+	// {
+	// 	_dsp_mode |= 0x20;
+	// 	switch (_ext_bpp)
+	// 	{
+	// 		case 2: _dsp_mode |= 0b00000100;	break;
+	// 		case 4: _dsp_mode |= 0b00001000;	break;
+	// 		case 8: _dsp_mode |= 0b00001100;	break;
+	// 	}		
+	// }
+	// if (_standard_graphics_enable)	
+	// {
+	// 	_dsp_mode |= 0x10;
+	// 	switch (_ext_bpp)
+	// 	{
+	// 		case 2: _dsp_mode |= 0b00000001;	break;
+	// 		case 4: _dsp_mode |= 0b00000010;	break;
+	// 		case 8: _dsp_mode |= 0b00000011;	break;
+	// 	}
+	// }
+
+
+	
 
 	printf("_window_width: %f\n", _window_width);
 	printf("_window_height: %f\n", _window_height);

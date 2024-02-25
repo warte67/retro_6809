@@ -37,12 +37,12 @@ begin
 		ldx	#STD_VID_MIN
 1		sta	,x+
 		inca
-		cmpx	#STD_VID_MAX
+		cmpx	STD_VID_MAX
 		blt	1b
 2
 		ldx	#STD_VID_MIN
 1		inc	,x+
-		cmpx	#STD_VID_MAX
+		cmpx	STD_VID_MAX
 		blt	1b
 
 		; restart if the graphics mode has changed

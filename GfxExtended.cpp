@@ -1,5 +1,6 @@
 // GfxExtended.h
 
+#include "Bus.h"
 #include "Gfx.h"
 #include "GfxExtended.h"
 
@@ -50,7 +51,7 @@ void GfxExtended::OnEvent(SDL_Event* evnt)
 
 void GfxExtended::OnUpdate(float fElapsedTime) 
 {
-	//printf("%s::OnUpdate()\n", Name().c_str());
+	//printf("%s::OnUpdate()\n", Name().c_str());	
 }
 
 void GfxExtended::OnRender() 
