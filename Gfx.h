@@ -94,10 +94,10 @@ class Gfx : public Device
         bool _vsync = true;                    // 0:unmetered, 1:use vsync
         bool _windowed = true;                  // 0:fullscreen, 1:windowed
 
-        bool _extended_graphics_enable = false;
-        bool _extended_display_mode = false;
-        bool _standard_graphics_enable = true;     
-        bool _standard_display_mode = false;		// 0:text, 1:graphics
+        bool _extended_graphics_enable;
+        bool _extended_display_mode;
+        bool _standard_graphics_enable;     
+        bool _standard_display_mode;		// 0:text, 1:graphics
 
         // text glyph stuff
         Byte _dsp_glyph_idx = 0x00;         // DSP_GLYPH_IDX
@@ -125,14 +125,14 @@ class Gfx : public Device
 	protected:
 
         Byte _dsp_res = 0x6B;       // Display Resolution Timing (0x6B=320x200 default)
-        Byte _dsp_mode = 0x10;      // Graphics Display Modes (0b00010000)
+        Byte _dsp_mode = 0x10;      // Graphics Display Modes (0b.0000.0000)
         Byte _emu_flags = 0x01;     // Emulation flags (defaults)
 
         Word _std_vid_max = STD_VID_MAX;		// [STD_VID_MAX]
-                                    // DEPRICATED
-                                        Byte _dsp_gres	= 0b11010000;	// DEPRICATED
-                                        Byte _dsp_ext 	= 0b11001001;	// DEPRICATED
-                                    // DEPRICATED
+        //    // DEPRICATED
+        //        Byte _dsp_gres	= 0b11010000;	// DEPRICATED
+        //        Byte _dsp_ext 	= 0b11001001;	// DEPRICATED
+        //    // DEPRICATED
         Byte _dsp_err = 0;          
 
         // graphics devices based on the IGfxDevice
@@ -144,13 +144,12 @@ class Gfx : public Device
         GfxText*        m_gfx_text      = nullptr;
         GfxSprite*      m_gfx_sprite    = nullptr;
 
-
         // helpers
         void _decode_display();
-//                                    // DEPRICATED
-//                                        void _decode_dsp_gres();
-//                                        void _decode_dsp_ext();
-//                                    // DEPRICATED
+//            // DEPRICATED
+//                void _decode_dsp_gres();
+//                void _decode_dsp_ext();
+//            // DEPRICATED
 
 		void _setPixel(int x, int y, Byte color_index, 	
 						SDL_Texture* _texture, bool bIgnoreAlpha = false);

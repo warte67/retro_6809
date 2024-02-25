@@ -10,8 +10,6 @@
 #include "Gfx.h"
 #include "font8x8_system.h"
 
-// extern const Byte font8x8_system[256][8];
-
 Byte Gfx::read(Word offset, bool debug )		// is debug completely unused in the call?
 {
 	// handle GfxMouse reads
@@ -1063,20 +1061,12 @@ void Gfx::OnEvent(SDL_Event* evnt)
         {
             if (evnt->window.event == SDL_WINDOWEVENT_RESIZED)
             {
-                // printf("Window %d resized to %dx%d\n",
-                //         evnt->window.windowID, evnt->window.data1,
-                //         evnt->window.data2);        
-				       				
                 _window_width = evnt->window.data1;
                 _window_height = evnt->window.data2;
 				m_debug->_onWindowResize();
-
-				// on mouse up...
-				// Bus::IsDirty(true);		
             }
 			break;
 		}
-
         case SDL_KEYUP:
         {
             // toggle fullscreen/windowed 
@@ -1091,21 +1081,10 @@ void Gfx::OnEvent(SDL_Event* evnt)
                         data |= 0x01;
                     Bus::Write(EMU_FLAGS, data);
                 }
-//                if (SDL_GetModState() & KMOD_ALT)
-//                {
-//                    Byte data = Bus::Read(DSP_EXT);
-//                    if (_windowed)
-//                        data &= ~0x01;
-//                    else
-//                        data |= 0x01;
-//                    Bus::Write(DSP_EXT, data);
-//                }
             }    
             break;        
         }
-
 	}	
-
 	// run OnEvent() for the other graphics devices
 	for (auto& d : _gfx_devices)
 		d->OnEvent(evnt);
@@ -1153,27 +1132,41 @@ void Gfx::OnPresent()
 	SDL_RenderPresent(_renderer);  	
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 void Gfx::_decode_display()
 {
 	// printf("Gfx::_decode_display()\n");
 	// if (DEBUG_SCANTYPE_OLD==true)
 	// 	return;
+	printf("\n-=#####################################=-\n");
 
+	// handle invalid resolutions	
+	static Byte old_res = _dsp_res;
+	static Byte old_mode = _dsp_mode;
+	if (_dsp_mode & 0b01000000)	// is standard bitmap mode enabled?
+	{
+		// is standard graphics mode valid?
+		if (!_scr_display_modes[_dsp_res].is_std_valid)		
+		{
+			printf("standard graphics mode INVALID\n");
+			if (_dsp_res != old_res)
+				_dsp_res = old_res;	
+			if (_dsp_mode != old_mode)
+				_dsp_mode = old_mode;
+		}
+	}
+	else	// text mode active
+	{
+		// is the text mode valid?
+		if (!_scr_display_modes[_dsp_res].is_txt_valid)		
+		{
+			printf("text mode INVALID\n");
+			if (_dsp_res != old_res)
+				_dsp_res = old_res;	
+			if (_dsp_mode != old_mode)
+				_dsp_mode = old_mode;
+		}
+	}
+	old_res = _dsp_res;
 
 	// window measurements
 	_window_width  = _scr_timing_modes[_scr_display_modes[_dsp_res].timing_index].width;
@@ -1213,9 +1206,22 @@ void Gfx::_decode_display()
 	_texture_width  = _scr_display_modes[_dsp_res].res_width;
 	_texture_height = _scr_display_modes[_dsp_res].res_height;
 
-	// bits per pixel
-	_ext_bpp = 8;
-	_std_bpp = 8;
+	// standard bits-per-pixel
+	switch (_dsp_mode & 0x03)
+	{
+		case 0:	_std_bpp = 1;	break; 	// 2-color
+		case 1:	_std_bpp = 2;	break; 	// 4-color
+		case 2:	_std_bpp = 4;	break; 	// 16-color
+		case 3:	_std_bpp = 8;	break; 	// 256-color
+	}
+	// extended bits-per-pixel
+	switch ((_dsp_mode & 0x0C)>>2)
+	{
+		case 0:	_ext_bpp = 1;	break; 	// 2-color
+		case 1:	_ext_bpp = 2;	break; 	// 4-color
+		case 2:	_ext_bpp = 4;	break; 	// 16-color
+		case 3:	_ext_bpp = 8;	break; 	// 256-color
+	}
 	int size = (_scr_display_modes[_dsp_res].res_width * _scr_display_modes[_dsp_res].res_height)/8;
 	while (size*_ext_bpp>65536)
 	{
@@ -1241,8 +1247,8 @@ void Gfx::_decode_display()
 	_pixel_h = _scr_display_modes[_dsp_res].pixel_height;
 
 	Byte data = Bus::Read(DSP_MODE);
-	_extended_display_mode = 	(data & 0b10000000);	// 0:ext bitmap,  1:ext tiles
-	_standard_display_mode = 	(data & 0b01000000);	// 0:std bitmap,  1:std text
+	_extended_display_mode = 	(data & 0b10000000);	// 0:ext bitmap,  	1:ext tiles
+	_standard_display_mode = 	(data & 0b01000000);	// 0:std text, 		1:std bitmap  
 	_extended_graphics_enable = (data & 0b00100000);	// 1:ext enable
 	_standard_graphics_enable = (data & 0b00010000);	// 1:std enable
 
@@ -1261,7 +1267,6 @@ void Gfx::_decode_display()
 		}
 	}
 
-
 	printf("_window_width: %f\n", _window_width);
 	printf("_window_height: %f\n", _window_height);
 	printf("_aspect: %f\n", _aspect);
@@ -1278,6 +1283,7 @@ void Gfx::_decode_display()
 	printf("STD DISPLAY MODE: %d\n", _standard_display_mode);
 	printf("EXT GFX ENABLE: %d\n",	 _extended_graphics_enable);
 	printf("STD GFX ENABLE: %d\n", 	 _standard_graphics_enable);
+	printf("DSP_RES: 0x%02X\n", Bus::Read(DSP_RES));
 	printf("DSP_MODE: 0x%02X\n", Bus::Read(DSP_MODE));
 	printf("Windowed: %d\n", _windowed);
 }
@@ -1519,32 +1525,6 @@ void Gfx::_decode_display()
 			}
 		// DEPRECATED
  ******************************************/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // helpers
 void Gfx::_display_standard()

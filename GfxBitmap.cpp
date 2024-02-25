@@ -84,7 +84,7 @@ void GfxBitmap::_updateBitmapScreen()
 		Bus::Error("Failed to lock texture: ");	
 	else
 	{
-		printf("W:%d H:%d\n", m_gfx->_texture_width, m_gfx->_texture_height);
+		// printf("W:%d H:%d\n", m_gfx->_texture_width, m_gfx->_texture_height);
 		for (int y = 0; y < m_gfx->_texture_height; y++)
 		{
 			for (int x = 0; x < m_gfx->_texture_width; )
