@@ -135,6 +135,9 @@ void GfxMouse::OnActivate()
     {
         _cursor_texture = SDL_CreateTexture(m_gfx->_renderer, SDL_PIXELFORMAT_RGBA4444,
             SDL_TEXTUREACCESS_TARGET, 16, 16);
+        if (!_cursor_texture)
+            Bus::Error("GfxMouse::OnActivate() -> Error Creating _cursor_texture");	
+
         SDL_SetTextureBlendMode(_cursor_texture, SDL_BLENDMODE_BLEND);
         SDL_SetRenderTarget(m_gfx->_renderer, _cursor_texture);
         SDL_SetRenderDrawColor(m_gfx->_renderer, 0, 0, 0, 0x00);
@@ -160,6 +163,9 @@ void GfxMouse::OnActivate()
     // create the working mouse layer texture
     _mouse_texture = SDL_CreateTexture(m_gfx->_renderer, SDL_PIXELFORMAT_ARGB4444,
         SDL_TEXTUREACCESS_TARGET, _tex_width, _tex_height);
+    if (!_mouse_texture)
+        Bus::Error("GfxMouse::OnActivate() -> Error Creating _mouse_texture");	
+
     SDL_SetTextureBlendMode(_mouse_texture, SDL_BLENDMODE_BLEND);
 }
 void GfxMouse::OnDeactivate()

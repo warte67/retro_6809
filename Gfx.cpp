@@ -65,14 +65,14 @@ Byte Gfx::read(Word offset, bool debug )		// is debug completely unused in the c
 		case DSP_PAL_CLR + 1: 	data = _palette[_dsp_pal_idx].color & 0xFF; break;
 
         // text glyph definition data registers
-        case DSP_GLYPH_IDX:     data = _dsp_glyph_idx; break;
-        case DSP_GLYPH_DATA+0:  data = _dsp_glyph_data[_dsp_glyph_idx][0]; break;
-        case DSP_GLYPH_DATA+1:  data = _dsp_glyph_data[_dsp_glyph_idx][1]; break;
-        case DSP_GLYPH_DATA+2:  data = _dsp_glyph_data[_dsp_glyph_idx][2]; break;
-        case DSP_GLYPH_DATA+3:  data = _dsp_glyph_data[_dsp_glyph_idx][3]; break;
-        case DSP_GLYPH_DATA+4:  data = _dsp_glyph_data[_dsp_glyph_idx][4]; break;
-        case DSP_GLYPH_DATA+5:  data = _dsp_glyph_data[_dsp_glyph_idx][5]; break;
-        case DSP_GLYPH_DATA+6:  data = _dsp_glyph_data[_dsp_glyph_idx][6]; break;
+        case DSP_GLYPH_IDX:       data = _dsp_glyph_idx; break;
+        case DSP_GLYPH_DATA+0:    data = _dsp_glyph_data[_dsp_glyph_idx][0]; break;
+        case DSP_GLYPH_DATA+1:    data = _dsp_glyph_data[_dsp_glyph_idx][1]; break;
+        case DSP_GLYPH_DATA+2:    data = _dsp_glyph_data[_dsp_glyph_idx][2]; break;
+        case DSP_GLYPH_DATA+3:    data = _dsp_glyph_data[_dsp_glyph_idx][3]; break;
+        case DSP_GLYPH_DATA+4:    data = _dsp_glyph_data[_dsp_glyph_idx][4]; break;
+        case DSP_GLYPH_DATA+5:    data = _dsp_glyph_data[_dsp_glyph_idx][5]; break;
+        case DSP_GLYPH_DATA+6:    data = _dsp_glyph_data[_dsp_glyph_idx][6]; break;
 		case DSP_GLYPH_DATA + 7:  data = _dsp_glyph_data[_dsp_glyph_idx][7]; break;
 	}
 
@@ -1002,22 +1002,31 @@ void Gfx::OnActivate()
                                (int)_window_width,
                                (int)_window_height,
                                _window_flags);		
-
+	if (!_window)
+		Bus::Error("Error Creating _window");	
 	// create the renderer
     _renderer = SDL_CreateRenderer(_window, -1, _renderer_flags);
+	if (!_renderer)
+		Bus::Error("Error Creating _renderer");	
     SDL_SetRenderDrawBlendMode(_renderer, SDL_BLENDMODE_BLEND);
 
 	// create the extended graphics texture
 	_ext_texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_ARGB4444,
 	 		SDL_TEXTUREACCESS_STREAMING, _texture_width, _texture_height);
+	if (!_ext_texture)
+		Bus::Error("Error Creating _ext_texture");
 
 	// create the standard graphics texture
 	_std_texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_ARGB4444,
 	 		SDL_TEXTUREACCESS_STREAMING, _texture_width, _texture_height);
+	if (!_ext_texture)
+		Bus::Error("Error Creating _std_texture");
 
 	// create the render target texture
 	_render_target = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_ARGB4444,
 			SDL_TEXTUREACCESS_TARGET, _texture_width, _texture_height);
+	if (!_ext_texture)
+		Bus::Error("Error Creating _render_target");
 
 	// run OnActivate() for the other graphics devices
 	for (auto& d : _gfx_devices)
@@ -1261,7 +1270,16 @@ void Gfx::_decode_display()
 	int row = _scr_display_modes[_dsp_res].res_height / 8;
 	_std_vid_max = (STD_VID_MIN + (col*row*2))-1;
 	if (_standard_display_mode && _standard_graphics_enable)	// if standard bitmap mode enabled
+	{
 		_std_vid_max = STD_VID_MAX-1;
+		Word width  = _scr_display_modes[_dsp_res].res_width;
+		Word height = _scr_display_modes[_dsp_res].res_height;
+		Word bitplane_size = (width * height) / 8;
+		Word buffer_required = bitplane_size * _std_bpp;
+		if (buffer_required > STD_VID_MAX - STD_VID_MIN)
+			Bus::Error("Standard Buffer Overrun");
+		_std_vid_max = STD_VID_MIN + buffer_required - 1;
+	}
 
 	// scale the window	
 	constexpr int DESIRED_WINDOW_WIDTH = 1440;
@@ -1275,29 +1293,29 @@ void Gfx::_decode_display()
 	}
 
 	// re-encode DSP_MODE
-	// _dsp_mode = 0;
-	// if (_extended_display_mode)		_dsp_mode |= 0x80;
-	// if (_standard_display_mode)		_dsp_mode |= 0x40;
-	// if (_extended_graphics_enable)	
-	// {
-	// 	_dsp_mode |= 0x20;
-	// 	switch (_ext_bpp)
-	// 	{
-	// 		case 2: _dsp_mode |= 0b00000100;	break;
-	// 		case 4: _dsp_mode |= 0b00001000;	break;
-	// 		case 8: _dsp_mode |= 0b00001100;	break;
-	// 	}		
-	// }
-	// if (_standard_graphics_enable)	
-	// {
-	// 	_dsp_mode |= 0x10;
-	// 	switch (_ext_bpp)
-	// 	{
-	// 		case 2: _dsp_mode |= 0b00000001;	break;
-	// 		case 4: _dsp_mode |= 0b00000010;	break;
-	// 		case 8: _dsp_mode |= 0b00000011;	break;
-	// 	}
-	// }
+	_dsp_mode = 0;
+	if (_extended_display_mode)		_dsp_mode |= 0x80;
+	if (_standard_display_mode)		_dsp_mode |= 0x40;
+	if (_extended_graphics_enable)	
+	{
+		_dsp_mode |= 0x20;
+		switch (_ext_bpp)
+		{
+			case 2: _dsp_mode |= 0b00000100;	break;
+			case 4: _dsp_mode |= 0b00001000;	break;
+			case 8: _dsp_mode |= 0b00001100;	break;
+		}		
+	}
+	if (_standard_graphics_enable)	
+	{
+		_dsp_mode |= 0x10;
+		switch (_ext_bpp)
+		{
+			case 2: _dsp_mode |= 0b00000001;	break;
+			case 4: _dsp_mode |= 0b00000010;	break;
+			case 8: _dsp_mode |= 0b00000011;	break;
+		}
+	}
 
 
 	
