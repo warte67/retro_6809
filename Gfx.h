@@ -94,6 +94,13 @@ class Gfx : public Device
         bool _vsync = true;                    // 0:unmetered, 1:use vsync
         bool _windowed = true;                  // 0:fullscreen, 1:windowed
 
+        Byte _dsp_res = 0x6B;       // Display Resolution Timing (0x6B=320x200 default)
+        Byte _dsp_mode = 0x10;      // Graphics Display Modes (0b.0000.0000)
+        Byte _emu_flags = 0x01;     // Emulation flags (defaults)
+        int _old_texture_width = 0;
+        int _old_texture_height = 0;
+        Byte _old_emu_flags = _emu_flags;
+
         bool _extended_graphics_enable;
         bool _extended_display_mode;
         bool _standard_graphics_enable;     
@@ -123,10 +130,6 @@ class Gfx : public Device
 
 		// hardware registers
 	protected:
-
-        Byte _dsp_res = 0x6B;       // Display Resolution Timing (0x6B=320x200 default)
-        Byte _dsp_mode = 0x10;      // Graphics Display Modes (0b.0000.0000)
-        Byte _emu_flags = 0x01;     // Emulation flags (defaults)
 
         Word _std_vid_max = STD_VID_MAX;		// [STD_VID_MAX]
         //    // DEPRICATED

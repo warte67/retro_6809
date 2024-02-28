@@ -995,6 +995,21 @@ void Gfx::OnActivate()
 
 	_decode_display();
 
+	// don't change windowing if the resolution hasn't changed
+	if (_texture_width == _old_texture_width && _texture_height == _old_texture_height && _old_emu_flags == _emu_flags)
+		return;
+	_old_texture_width = _texture_width;
+	_old_texture_height = _texture_height;
+	_old_emu_flags = _emu_flags;
+	if (_window)
+	{
+		if (_old_emu_flags != _emu_flags)
+		{
+			SDL_SetWindowFullscreen(_window, _window_flags);
+			return;
+		}
+	}
+
 	// create the window
     _window = SDL_CreateWindow("Retro_6809",
                                SDL_WINDOWPOS_CENTERED,
@@ -1038,6 +1053,10 @@ void Gfx::OnActivate()
 
 void Gfx::OnDeactivate()
 {
+	// resolution hasn't changed, just return
+	if (_texture_width == _old_texture_width && _texture_height == _old_texture_height && _old_emu_flags == _emu_flags)
+		return;
+
 	if (_render_target != nullptr)
 	{
 		SDL_DestroyTexture(_render_target);
@@ -1049,7 +1068,7 @@ void Gfx::OnDeactivate()
 
 
 		SDL_DestroyTexture(_std_texture);		// Exception thrown (in SDL2.dll): Access violation reading location
-
+												// free(): invalid next size (normal)
 
 		printf("Gfx::OnDeactivate()    \tSDL_DestroyTexture(_std_texture);\n");
 
@@ -1119,14 +1138,19 @@ void Gfx::OnEvent(SDL_Event* evnt)
 
 void Gfx::OnUpdate(float fElapsedTime) 
 {
+
+	// SDL_SetRenderTarget(_renderer, _render_target);
+	// SDL_RenderClear(_renderer);
+
+
 	// run OnUpdate() for the other graphics devices
 	for (auto& d : _gfx_devices)
 		d->OnUpdate(fElapsedTime);
 }
 void Gfx::OnRender() 
 {
+	// restore the render target
     SDL_SetRenderTarget(_renderer, NULL);
-
     // build the destination rectangle according to current aspect ratio
     int ww = _window_width;
     int wh = _window_height;

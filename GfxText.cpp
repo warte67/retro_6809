@@ -78,12 +78,13 @@ void GfxText::_updateTextScreen()
 {
     void *pixels;
     int pitch;
+
     if (SDL_LockTexture(m_gfx->_std_texture, NULL, &pixels, &pitch) < 0) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't lock texture: %s\n", SDL_GetError());
         Bus::Error("");
     }
     else
-    {
+    {		
 		Word end = Bus::Read_Word(STD_VID_MAX);
 		Word addr = STD_VID_MIN;
 		for (; addr <= end; addr += 2)

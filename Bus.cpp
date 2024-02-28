@@ -212,7 +212,7 @@ Bus::Bus()
     // called before the CPU thread starts running
     _onInit();
 
-	// Install the CPU
+	// Install the CPU and start its thread
 	m_cpu = new C6809(this);
 	m_cpuThread = std::thread(&Bus::_cpuThread);
 	bCpuEnabled = true;
@@ -519,8 +519,9 @@ void Bus::DumpMemoryMap()
 // main loop //////////////////////////////////////////////////////
 void Bus::Run()
 {
-	// called after Bus() constructor for each attached device
-    // _onInit();	
+	
+    // _onInit();	// Called at the end of the Bus() constructor... 
+                    //      Before the CPU thread starts running.
 
     while (s_bIsRunning)
     {
@@ -543,7 +544,7 @@ void Bus::Run()
 	// shutdown the old environment
 	_onDeactivate();	
 
-	// m_thread.join();
+	// m_thread.join(); // The CPU thread is joined in the ~Bus() destructor.
 
 	// one time shutdown	
     _onQuit();
