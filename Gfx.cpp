@@ -1019,13 +1019,16 @@ void Gfx::OnActivate()
 	// create the standard graphics texture
 	_std_texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_ARGB4444,
 	 		SDL_TEXTUREACCESS_STREAMING, _texture_width, _texture_height);
-	if (!_ext_texture)
+	if (_std_texture == NULL)
+	{
+		printf("ERROR: %s\n", SDL_GetError());
 		Bus::Error("Error Creating _std_texture");
+	}
 
 	// create the render target texture
 	_render_target = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_ARGB4444,
 			SDL_TEXTUREACCESS_TARGET, _texture_width, _texture_height);
-	if (!_ext_texture)
+	if (!_render_target)
 		Bus::Error("Error Creating _render_target");
 
 	// run OnActivate() for the other graphics devices
@@ -1042,9 +1045,20 @@ void Gfx::OnDeactivate()
 	}
 	if (_std_texture != nullptr)
 	{
-		SDL_DestroyTexture(_std_texture);
-		_std_texture = nullptr;
-	}	
+		printf("Gfx::OnDeactivate()    \t_std_texture: 0x%p\n", _std_texture);
+
+
+		SDL_DestroyTexture(_std_texture);		// Exception thrown (in SDL2.dll): Access violation reading location
+
+
+		printf("Gfx::OnDeactivate()    \tSDL_DestroyTexture(_std_texture);\n");
+
+
+		_std_texture = nullptr;					// Exception thrown (in SDL2.dll): Access violation reading location
+
+
+		printf("Gfx::OnDeactivate()    \t_std_texture = nullptr;\n");
+	}
 	if (_ext_texture != nullptr)
 	{
 		SDL_DestroyTexture(_ext_texture);
@@ -1216,7 +1230,8 @@ void Gfx::_decode_display()
 		_window_width = DM.w;
 		_window_height = DM.h;
 	}
-	_texture_width  = _scr_display_modes[_dsp_res].res_width;
+
+	_texture_width = _scr_display_modes[_dsp_res].res_width;
 	_texture_height = _scr_display_modes[_dsp_res].res_height;
 
 	// standard bits-per-pixel
@@ -1315,10 +1330,7 @@ void Gfx::_decode_display()
 			case 4: _dsp_mode |= 0b00000010;	break;
 			case 8: _dsp_mode |= 0b00000011;	break;
 		}
-	}
-
-
-	
+	}	
 
 	printf("_window_width: %f\n", _window_width);
 	printf("_window_height: %f\n", _window_height);
