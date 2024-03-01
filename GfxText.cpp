@@ -112,6 +112,12 @@ void GfxText::_updateTextScreen()
     }
 	// render to the screen texture
 	SDL_SetRenderTarget(m_gfx->_renderer, m_gfx->_render_target);
+
+	// SDL_SetRenderDrawColor(m_gfx->_renderer, 0,0,0,0);
+	// SDL_RenderClear(m_gfx->_renderer);	
+
 	SDL_RenderCopy(m_gfx->_renderer, m_gfx->_std_texture, NULL, NULL);			
+
+
 } 
 

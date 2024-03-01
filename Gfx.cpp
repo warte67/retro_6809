@@ -1169,6 +1169,10 @@ void Gfx::OnRender()
         (int)fw, 
         (int)fh 
     };
+
+	SDL_SetRenderDrawColor(_renderer, 0,0,0,0);
+	SDL_RenderClear(_renderer);	
+
     // render the background graphics layer
     SDL_RenderCopy(_renderer, _render_target, NULL, &dest);
 
