@@ -5,7 +5,7 @@ This document serves as Cody's persistent memory between development sessions - 
 
 ## Developer Information
 - Developer: Jay (GitHub: warte67)
-- Project started: December 25, 2023
+- Project started: December 25, 2024
 
 ## Project Thesis
 This project refactors the alpha_6809 proof-of-concept emulator into a robust, production-quality implementation with improved architecture, threading, and debugging capabilities.
