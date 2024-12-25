@@ -34,7 +34,8 @@ This project refactors the alpha_6809 proof-of-concept emulator into a robust, p
 
 ## Progress Log
 - December 25, 2023: Project initiated
-- [Future entries to track key milestones and decisions]
+- [Current Date]: Implemented improved Bus device management system using modern C++ RAII principles
+- [Current Date]: Added structured register mapping system using std::map
 
 ## Architecture Decisions
 - [Section to document important architectural choices and their rationale]
@@ -48,7 +49,39 @@ This project refactors the alpha_6809 proof-of-concept emulator into a robust, p
 [Status tracking for each major component]
 
 ## Technical Decisions
-[To be populated as we make architectural choices]
+- Improved Bus device management using modern C++ RAII principles
+  - Implemented template-based AttachDevice<T> method
+  - Uses std::unique_ptr for automatic memory management
+  - Devices remain valid within Bus scope
+  - Enables safe inter-device communication
+  - Provides compile-time type safety
+  - Example:
+    ```cpp
+    template<typename T, typename... Args>
+    T* AttachDevice(Args&&... args) {
+        auto device = std::make_unique<T>(std::forward<Args>(args)...);
+        // ... device configuration ...
+        _memoryNodes.push_back(std::move(device));
+        return device.get();
+    }
+    ```
+
+- Implemented device register mapping system using std::map
+  - Replaced manual DisplayEnum calls with structured register definitions
+  - Register metadata stored in std::map for runtime access
+  - Enables automatic generation of memory_map.hpp and memory_map.asm
+  - Improves maintainability and reduces errors
+  - Example:
+    ```cpp
+    struct Register {
+        std::string_view name;
+        uint16_t address;
+        uint8_t size;
+        std::string_view description;
+        std::vector<std::string_view> notes;
+    };
+    std::map<std::string_view, Register> device_registers;
+    ```
 
 ## Questions to Ask
 - Thread synchronization strategy
@@ -60,7 +93,7 @@ This project refactors the alpha_6809 proof-of-concept emulator into a robust, p
 Preparing for complete refactor while preserving core emulation logic
 
 ## To Do
-- Started refactoring project on Christmas Day 2023! 
+- Started refactoring project on Christmas Day 2024! 
 - Set up new Retro_6809 repository
 - Begin porting core components with improved architecture
 - Implement ncurses-based debugger
