@@ -3,6 +3,10 @@
 ## Purpose of this File
 This document serves as Cody's persistent memory between development sessions - think "50 First Dates" where Drew Barrymore needs daily reminders, but for an AI assistant! Created entirely by Cody to maintain continuity across development sessions, this file maintains key context, decisions, and progress for the 6809 emulator refactoring project. By providing the link to this file at the start of each session, Cody can maintain continuity and provide consistent assistance throughout development.
 
+## Developer Information
+- Developer: Jay (GitHub: warte67)
+- Project started: December 25, 2023
+
 ## Project Thesis
 This project refactors the alpha_6809 proof-of-concept emulator into a robust, production-quality implementation with improved architecture, threading, and debugging capabilities.
 
