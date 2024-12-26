@@ -36,5 +36,5 @@ build/main
 build/
 
 # Workspace
-beta_6809.code-workspace
+.code-workspace
 
