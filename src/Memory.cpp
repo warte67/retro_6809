@@ -124,33 +124,61 @@ bool Memory::OnRender()
 
 Byte Memory::Read(Word offset, bool debug)
 {
-    for (auto& a : Memory::_memory_nodes)
-    {
-        if (offset - a->base() < a->size())
-        {
-            if (debug)
-                if (offset - a->base() < a->size())
-                    return a->memory(offset - a->base() );
-            return a->OnRead(offset);
+    int index = _binary_search(offset);
+    if (index != -1) {
+        IDevice* pDevice = _memory_nodes[index];
+        if (debug) {
+            return pDevice->_memory[offset - pDevice->base()];
+        } else {
+            return pDevice->OnRead(offset - pDevice->base());
         }
+    } else {
+        // Handle error or default value for out-of-range addresses.
+        Bus::Error("Memory Address Out Of Range");
+        return 0xCC;
     }
-    return 0xCC;
+    
+    // for (auto& a : Memory::_memory_nodes)
+    // {
+    //     if (offset - a->base() < a->size())
+    //     {
+    //         if (debug)
+    //             if (offset - a->base() < a->size())
+    //                 return a->memory(offset - a->base() );
+    //         return a->OnRead(offset);
+    //     }
+    // }
+    // return 0xCC;
 }
 
 void Memory::Write(Word offset, Byte data, bool debug)
 {
-    for (auto& a : Memory::_memory_nodes)
-    {
-        if (offset - a->base() < a->size())
-        {
-            ROM* isROM = dynamic_cast<ROM*>(a);
-            if (debug && isROM)
-                isROM->write_to_rom(offset, data);
-            else
-                a->OnWrite(offset, data);
-            return;
+    int index = _binary_search(offset);
+    if (index != -1) {
+        IDevice* pDevice = _memory_nodes[index];
+        ROM* isROM = dynamic_cast<ROM*>(pDevice);
+        if (debug && isROM) {
+            isROM->write_to_rom(offset, data);
+        } else {
+            pDevice->OnWrite(offset - pDevice->base(), data);
         }
+    } else {
+        // Handle error for out-of-range addresses.
+        Bus::Error("Memory Address Out Of Range");
     }
+
+    // for (auto& a : Memory::_memory_nodes)
+    // {
+    //     if (offset - a->base() < a->size())
+    //     {
+    //         ROM* isROM = dynamic_cast<ROM*>(a);
+    //         if (debug && isROM)
+    //             isROM->write_to_rom(offset, data);
+    //         else
+    //             a->OnWrite(offset, data);
+    //         return;
+    //     }
+    // }
 }
 
 Word Memory::Read_Word(Word offset, bool debug)
@@ -223,4 +251,114 @@ Word Memory::_attach(IDevice* device)
         Bus::IsRunning(false);
     }
     return size;
+}
+
+int Memory::_binary_search(Word address)
+{
+    auto It = std::lower_bound(_memory_nodes.begin(), _memory_nodes.end(), address,
+        [](const IDevice* node, Word addr) {
+            return node->_base + (node->_size - 1) < addr;
+        }
+    );
+    if (It == _memory_nodes.end() || (*It)->base() > address) {
+        // Address not found in any devices.
+        return -1;
+    }
+    return std::distance(_memory_nodes.begin(), It);
+
+}
+
+
+void Memory::Display_Nodes() 
+{
+    auto hex = [](Uint32 n, Uint8 d)
+    {
+        std::string s(d, '0');
+        for (int i = d - 1; i >= 0; i--, n >>= 4)
+            s[i] = "0123456789ABCDEF"[n & 0xF];
+        return s;
+    };
+
+    auto pad = [](std::string text, Uint8 d)
+    {
+        std::string ret = text;
+        while (ret.length()<d) {
+            ret += " ";
+        }
+        return ret;
+    };
+
+    // 
+    // Display C++ memory_map.hpp
+    //
+    if (MEMORY_MAP_OUTPUT_CPP == true)
+    {
+        constexpr int FIRST_TAB = 4;
+        constexpr int VAR_LEN = 22;
+        constexpr int COMMENT_START = 32;
+        std::cout << "\n\n// memory_map.hpp\n";
+        std::cout << "#ifndef __MEMORY_MAP_HPP__\n";
+        std::cout << "#define __MEMORY_MAP_HPP__\n";
+        std::cout << std::endl;
+        std::cout << "enum MEMMAP\n";
+        std::cout << "{\n";
+        std::cout << pad(" ",FIRST_TAB) << "//  **********************************************\n";
+        std::cout << pad(" ",FIRST_TAB) << "//  * Allocated 64k Memory Mapped System Symbols *\n";
+        std::cout << pad(" ",FIRST_TAB) << "//  **********************************************\n";
+
+        for (auto &node : Memory::_memory_nodes) 
+        {
+            // std::cout << pad(" ",FIRST_TAB) << "\t// " << node->heading << ":\n";
+            std::cout << std::endl;
+            std::cout << pad(pad(" ",FIRST_TAB) + pad(node->name(), VAR_LEN) + "= 0x" + hex(node->base(),4), COMMENT_START+4) << "// START: " << node->heading << std::endl;
+
+            for (auto &r : node->mapped_register)
+            {
+                std::string _out = pad(pad(r.name, VAR_LEN) + "= 0x" + hex(r.address, 4), COMMENT_START);
+                for (auto &c : r.comment)
+                {
+                    if (_out.length() > 0) { 
+                        std::cout << pad(" ",FIRST_TAB) << _out << "// " << c << std::endl;   
+                        _out = "";                  
+                    } else {
+                        std::cout << pad(" ",FIRST_TAB) << pad(" ", COMMENT_START) << "// " << c << std::endl;
+                    }
+                }
+            }
+        }
+        std::cout << "}; // END: enum MEMMAP\n";
+        std::cout << "\n\n#endif // __MEMORY_MAP_H__\n\n\n";
+    } // END MEMORY_MAP_OUTPUT_CPP
+    else
+    { // Display an ASM memory_map.asm
+        constexpr int FIRST_TAB = 0;
+        constexpr int VAR_LEN = 18;
+        constexpr int COMMENT_START = 32;
+        std::cout << "\n\n;    memory_map.hpp\n;\n";
+        std::cout << pad("",FIRST_TAB) << ";   **********************************************\n";
+        std::cout << pad("",FIRST_TAB) << ";   * Allocated 64k Memory Mapped System Symbols *\n";
+        std::cout << pad("",FIRST_TAB) << ";   **********************************************\n;\n";
+
+        for (auto &node : Memory::_memory_nodes) 
+        {
+            // std::cout << pad("",FIRST_TAB) << "\t// " << node->heading << ":\n";
+            std::cout << std::endl;
+            std::cout << pad(pad("",FIRST_TAB) + pad(node->name(), VAR_LEN) + "equ   0x" + hex(node->base(),4), COMMENT_START) << "; START: " << node->heading << std::endl;
+
+            for (auto &r : node->mapped_register)
+            {
+                std::string _out = pad(pad(r.name, VAR_LEN) + "equ   0x" + hex(r.address, 4), COMMENT_START);
+                for (auto &c : r.comment)
+                {
+                    if (_out.length() > 0) { 
+                        std::cout << pad("",FIRST_TAB) << _out << "; " << c << std::endl;   
+                        _out = "";                  
+                    } else {
+                        std::cout << pad("",FIRST_TAB) << pad("", COMMENT_START) << "; " << c << std::endl;
+                    }
+                }
+            }
+        }
+        std::cout << "\n\n; END of memory_map.asm definitions\n\n\n";
+    }
 }

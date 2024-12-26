@@ -67,6 +67,16 @@ protected: // PROTECTED ACCESSORS
     Uint16 _size = 0;						std::mutex _mutex_size;		
     std::string _device_name = "??DEV??";	std::mutex _mutex_device_name;				
     std::vector<Uint8> _memory;				std::mutex _mutex_memory;
+
+
+    // device memory map description
+    std::string heading;                    // string that describes the entire device
+    struct register_node {
+        std::string name;                   // register label
+        Word address;                       // register starting address
+        std::vector<std::string> comment;   // register comments (can be multiple lines)
+    };
+    std::vector<register_node> mapped_register;
 };
 
 
@@ -100,16 +110,6 @@ class RAM : public IDevice
 		bool OnEvent(SDL_Event* evnt) override 		{ return (evnt==nullptr); }         // return true
 		bool OnUpdate(float fElapsedTime) override 	{ return (fElapsedTime==0.0f); }    // { return true; }           
 		bool OnRender() override 					{ return true; } 
-
-        // Word Attach(Word size, std::string sComment)
-        // {
-        //     // build a memory map node
-        //     //  ...
-        //     //      Bus:: _next_address
-        //     //      sComment
-        //     //      size
-        //     return size;
-        // }
 };
 
 class ROM : public IDevice
@@ -131,16 +131,61 @@ class ROM : public IDevice
 
 		// helper to set initial ROM values
         void write_to_rom(Word offset, Byte data);
-
-        // Word Attach(Word size, std::string sComment)
-        // {
-        //     // build a memory map node
-        //     //  ...
-        //     //      Bus:: _next_address
-        //     //      sComment
-        //     //      size
-        //     return size;
-        // } 
 };
 
 
+//              // device memory map description
+//              std::string heading;                    // string that describes the entire device
+//              struct register_node {
+//                  std::string name;                   // register label
+//                  Word address;                       // register starting address
+//                  std::vector<std::string> comment;   // register comments (can be multiple lines)
+//              };
+//              std::vector<register_node> mapped_register;
+
+class SOFT_VECTORS : public IDevice
+{
+    public:
+        SOFT_VECTORS() {
+            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
+            // _size = size;
+            _device_name = "SOFT_VECTORS";
+        }
+        virtual ~SOFT_VECTORS() {
+            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
+        }    
+
+		bool OnInit() override 						{ return true; }
+		bool OnQuit() override 						{ return true; }
+		bool OnActivate() override 					{ return true; }
+		bool OnDeactivate() override 				{ return true; }
+		// bool OnEvent(SDL_Event* evnt) override 		{ return true; }
+		bool OnEvent(SDL_Event* evnt) override 		{ return (evnt==nullptr); }         // return true
+		bool OnUpdate(float fElapsedTime) override 	{ return (fElapsedTime==0.0f); }    // { return true; }           
+		bool OnRender() override 					{ return true; } 
+
+		Word OnAttach(Word nextAddr) override       { 
+            Word old_address=nextAddr;
+            this->heading = "Software Interrupt Vectors";
+            register_node new_node;
+            new_node = { "SOFT_EXEC", nextAddr,  { "Exec Software Interrupt Vector","and some other crazy shit","but we don't talk about that stuff"} }; nextAddr+=2;
+            mapped_register.push_back(new_node);
+            new_node = { "SOFT_SWI3", nextAddr,  { "SWI3 Software Interrupt Vector"} }; nextAddr+=2;
+            mapped_register.push_back(new_node);
+            new_node = { "SOFT_SWI2", nextAddr,  { "SWI2 Software Interrupt Vector"} }; nextAddr+=2;
+            mapped_register.push_back(new_node);
+            new_node = { "SOFT_FIRQ", nextAddr,  { "FIRQ Software Interrupt Vector"} }; nextAddr+=2;
+            mapped_register.push_back(new_node);
+            new_node = { "SOFT_IRQ", nextAddr,   { "IRQ Software Interrupt Vector"} }; nextAddr+=2;
+            mapped_register.push_back(new_node);
+            new_node = { "SOFT_SWI", nextAddr,   { "SWI / SYS Software Interrupt Vector"} }; nextAddr+=2;
+            mapped_register.push_back(new_node);
+            new_node = { "SOFT_NMI", nextAddr,   { "NMI Software Interrupt Vector"} }; nextAddr+=2;
+            mapped_register.push_back(new_node);
+            new_node = { "SOFT_RESET", nextAddr, { "RESET Software Interrupt Vector"} }; nextAddr+=2;
+            mapped_register.push_back(new_node);
+
+            _size = nextAddr - old_address;
+            return _size; 
+        }  
+};

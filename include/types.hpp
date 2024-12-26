@@ -12,30 +12,35 @@
 #ifndef __TYPES_HPP__
 #define __TYPES_HPP__
 
+// // Generate a memory map definition file?
+constexpr bool DUMP_MEMORY_MAP          = true;
+constexpr bool MEMORY_MAP_OUTPUT_CPP    = true;
+
+// Tests To Perform
+constexpr bool MEM_TESTS                = true;  // test the first 16 memory locations (RAM device, SOFT_VECT)
+
+
+// simple types for 8-bit archetecture 
+#ifndef Byte
+    #define Byte Uint8
+#endif
+#ifndef Word
+    #define Word Uint16
+#endif
+#ifndef DWord
+    #define DWord Uint32
+#endif
+
+// common includes
 #include <SDL2/SDL.h>
 #include <string>
 #include <vector>
 #include <iostream>
 
-    
-// Generate a memory map definition file?
-#define COMPILE_MEMORY_MAP      false
-#define MEMORY_MAP_OUTPUT_CPP   true
-
-// simple types
-
-    #ifndef Byte
-        #define Byte Uint8
-    #endif
-    #ifndef Word
-        #define Word Uint16
-    #endif
-    #ifndef DWord
-        #define DWord Uint32
-    #endif
-
-
-
 #include "clr.hpp"
+
+
+
+
 
 #endif  // __TYPES_HPP__

@@ -167,8 +167,28 @@ bool Bus::_onInit()
 
     // Core system devices with parameters
     
-    // RAM* ram = Memory::Attach<RAM>(0x0010);
-    Memory::Attach<RAM>(0x0010);
+    
+    // Memory::Attach<RAM>(0x0010);        // RAM* ram = Memory::Attach<RAM>(0x0010);
+    Memory::Attach<SOFT_VECTORS>();
+
+        // BEGIN TEST...
+
+            if (MEM_TESTS) {
+                for (Word a = 0; a<0x10; a++) {
+                    for (Byte b = 0; b<240; b+=16) {
+                        Memory::Write(a,b);
+                        if (Memory::Read(a) != b) {
+                            Bus::Error("Memory Test Failure!");                        
+                        }
+                        std::cout << "Write(0x" << std::hex << (int)a << ", 0x" << (int)b << ") Read=" << (int)Memory::Read(a) << "\n";
+                    }
+                }
+                std::cout << "Memory::_next_address = 0x" << std::hex << Memory::NextAddress() << std::endl;
+            } // END MEM_TESTS
+
+            if (DUMP_MEMORY_MAP)    { Memory::Display_Nodes(); }
+
+        // ...END TEST
 
     // ROM* rom = Memory::Attach<ROM>("./roms/system.hex", 0x8000);
     // RAM* ram = Memory::Attach<RAM>(0x8000);
