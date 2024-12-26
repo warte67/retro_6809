@@ -73,3 +73,101 @@ void Memory::Write(Word offset, Byte data, bool debug)
             It->second->pDevice->memory[offset - It->second->range.first] = data;
     }
 }
+
+
+
+
+---------------------------------------------
+
+
+
+
+
+
+What changes would you make to this reminder_file?
+
+
+Ollama - codeqwen:latest
+^⏎ @codebase
+
+⏎ Enter
+After reviewing the Memory.cpp file again, it looks like the code has been updated to use a std::unordered_map instead of a vector for storing devices and their memory ranges. The code is now refactored to look up the appropriate device using the new data structure and directly access or call the device's methods to read or write data.
+
+Here's an updated reminder file based on the changes made:
+
+We discussed refactoring the Memory class in Memory.cpp to use a std::unordered_map instead of a vector to store devices and their memory ranges. The idea is to make lookups faster by leveraging the hashing property of the std::unordered_map.
+
+To achieve this, we first defined a custom hash function for MemoryRange type in our Memory class:
+
+struct std::hash<MemoryRange> {
+    size_t operator()(const MemoryRange& r) const noexcept {
+        return std::hash<Word>{}(r.first) ^ std::hash<Word>{}(r.second);
+    }
+};
+Then, we created a DeviceNode struct that contains a pointer to the device and its memory range:
+
+struct DeviceNode {
+    Device* pDevice;
+    MemoryRange range;
+};
+In the Attach() method of the Memory class, we modified it to populate the _memory_nodes map with DeviceNode instances for each attached device:
+
+template <typename T>
+bool Memory::Attach(uint32_t addr)
+{
+    std::cout << clr::indent_push() << clr::CYAN << "Memory::Attach<T>(addr, type=0x" << std::hex << (int)type << ", addr=0x" << std::hex << addr << " Entry" << clr::RETURN;
+    auto dev = new T(this);
+    dev->SetAddr(addr);
+
+    MemoryRange range{addr, addr + sizeof(T)};
+
+    if (!_attachDevice(range, {dev, range}))
+    {
+        std::cout << clr::indent_pop() << clr::ORANGE << "Memory::Attach<T>(addr, type=0x" << std::hex << (int)type << ", addr=0x" << std::hex << addr << " Error" << clr::RETURN;
+        delete dev;
+        return false;
+    }
+    std::cout << clr::indent_pop() << clr::CYAN << "Memory::Attach<T>(addr, type=0x" << std::hex << (int)type << ", addr=0x" << std::hex << addr << " Exit" << clr::RETURN;
+    return true;
+}
+
+bool Memory::OnInit()
+{
+    std::cout << clr::indent_push() << clr::CYAN << "Memory::OnInit() Entry" << clr::RETURN;
+    for (auto& node : _memory_nodes)
+    {
+        if (!node.second->pDevice->OnInit())
+        {
+            std::cout << clr::indent_pop() << clr::ORANGE << "Memory::OnInit() Error" << clr::RETURN;
+            return false;
+        }
+    }
+    std::cout << clr::indent_pop() << clr::CYAN << "Memory::OnInit() Exit" << clr::RETURN;
+    return true;
+}
+
+Byte Memory::Read(Word offset, bool debug)
+{
+    auto It = _memory_nodes.find({offset, offset});
+    if (It != _memory_nodes.end())
+    {
+        if (debug)
+            return It->second->pDevice->OnRead(offset);
+        return It->second->pDevice->memory[offset - It->second->range.first];
+    }
+    return 0xCC;
+}
+
+void Memory::Write(Word offset, Byte data, bool debug)
+{
+    auto It = _memory_nodes.find({offset, offset});
+    if (It != _memory_nodes.end())
+    {
+        ROM* IsROM = dynamic_cast<ROM*>(It->second->pDevice);
+        if (debug && IsROM)
+            IsROM->write_to_rom(offset, data);
+        else
+            It->second->pDevice->memory[offset - It->second->range.first] = data;
+    }
+}
+We modified the Read() and Write() methods to use the std::unordered_map to look up the appropriate DeviceNode, and then directly access or call the device's memory array or methods to read or write data. The overall goal of this refactoring was to improve performance by using a more efficient data structure for storing and looking up devices in the memory system, which is particularly relevant when we have a large number of individual devices.
