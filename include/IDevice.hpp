@@ -134,15 +134,6 @@ class ROM : public IDevice
 };
 
 
-//              // device memory map description
-//              std::string heading;                    // string that describes the entire device
-//              struct register_node {
-//                  std::string name;                   // register label
-//                  Word address;                       // register starting address
-//                  std::vector<std::string> comment;   // register comments (can be multiple lines)
-//              };
-//              std::vector<register_node> mapped_register;
-
 class SOFT_VECTORS : public IDevice
 {
     public:
@@ -168,7 +159,7 @@ class SOFT_VECTORS : public IDevice
             Word old_address=nextAddr;
             this->heading = "Software Interrupt Vectors";
             register_node new_node;
-            new_node = { "SOFT_EXEC", nextAddr,  { "Exec Software Interrupt Vector","and some other crazy shit","but we don't talk about that stuff"} }; nextAddr+=2;
+            new_node = { "SOFT_EXEC", nextAddr,  { "Exec Software Interrupt Vector"} }; nextAddr+=2;
             mapped_register.push_back(new_node);
             new_node = { "SOFT_SWI3", nextAddr,  { "SWI3 Software Interrupt Vector"} }; nextAddr+=2;
             mapped_register.push_back(new_node);
@@ -189,3 +180,107 @@ class SOFT_VECTORS : public IDevice
             return _size; 
         }  
 };
+
+
+class SYSTEM_MEMORY : public IDevice
+{
+    public:
+        SYSTEM_MEMORY() {
+            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
+            // _size = size;
+            _device_name = "SYSTEM_MEMORY";
+        }
+        virtual ~SYSTEM_MEMORY() {
+            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
+        }    
+
+		bool OnInit() override 						{ return true; }
+		bool OnQuit() override 						{ return true; }
+		bool OnActivate() override 					{ return true; }
+		bool OnDeactivate() override 				{ return true; }
+		// bool OnEvent(SDL_Event* evnt) override 		{ return true; }
+		bool OnEvent(SDL_Event* evnt) override 		{ return (evnt==nullptr); }         // return true
+		bool OnUpdate(float fElapsedTime) override 	{ return (fElapsedTime==0.0f); }    // { return true; }           
+		bool OnRender() override 					{ return true; } 
+
+		Word OnAttach(Word nextAddr) override       { 
+            Word old_address=nextAddr;
+            this->heading = "System Memory";
+            register_node new_node;
+            new_node = { "ZERO_PAGE", nextAddr,     { "Zero Page System and User Variables"} }; nextAddr=0x100;
+            mapped_register.push_back(new_node);
+            new_node = { "FIO_BUFFER", nextAddr,    { "START: File Input/Output Buffer"} }; nextAddr+=0xFF;
+            mapped_register.push_back(new_node);
+            new_node = { "FIO_BFR_END", nextAddr,   { "END: File Input/Output Buffer"} }; nextAddr+=1;
+            mapped_register.push_back(new_node);
+            new_node = { "SYSTEM_STACK", nextAddr,  { "Bottom of the system stack spcace"} }; nextAddr=0x400;
+            mapped_register.push_back(new_node);
+            new_node = { "SSTACK_TOP", nextAddr,    { "Top of the system statck space"} }; 
+            mapped_register.push_back(new_node);
+
+            _size = nextAddr - old_address;
+            return _size; 
+        }  
+};
+
+
+/*** class VIDEO_BUFFER *******************************************************
+ * 
+ * ██╗   ██╗██╗██████╗ ███████╗ ██████╗         ██████╗ ██╗   ██╗███████╗███████╗███████╗██████╗ 
+ * ██║   ██║██║██╔══██╗██╔════╝██╔═══██╗        ██╔══██╗██║   ██║██╔════╝██╔════╝██╔════╝██╔══██╗
+ * ██║   ██║██║██║  ██║█████╗  ██║   ██║        ██████╔╝██║   ██║█████╗  █████╗  █████╗  ██████╔╝
+ * ╚██╗ ██╔╝██║██║  ██║██╔══╝  ██║   ██║        ██╔══██╗██║   ██║██╔══╝  ██╔══╝  ██╔══╝  ██╔══██╗
+ *  ╚████╔╝ ██║██████╔╝███████╗╚██████╔╝███████╗██████╔╝╚██████╔╝██║     ██║     ███████╗██║  ██║
+ *   ╚═══╝  ╚═╝╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚═════╝  ╚═════╝ ╚═╝     ╚═╝     ╚══════╝╚═╝  ╚═╝
+ * 
+ * (This may be moved to its own files)
+ ****************************************************************/
+
+class VIDEO_BUFFER : public IDevice
+{
+    public:
+        VIDEO_BUFFER() {
+            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
+            // _size = size;
+            _device_name = "VIDEO_BUFFER";
+        }
+        virtual ~VIDEO_BUFFER() {
+            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
+        }    
+
+		bool OnInit() override 						{ return true; }
+		bool OnQuit() override 						{ return true; }
+		bool OnActivate() override 					{ return true; }
+		bool OnDeactivate() override 				{ return true; }
+		// bool OnEvent(SDL_Event* evnt) override 		{ return true; }
+		bool OnEvent(SDL_Event* evnt) override 		{ return (evnt==nullptr); }         // return true
+		bool OnUpdate(float fElapsedTime) override 	{ return (fElapsedTime==0.0f); }    // { return true; }           
+		bool OnRender() override 					{ return true; } 
+
+		Word OnAttach(Word nextAddr) override       { 
+            constexpr int vbfr_size = 8*1024;
+            Word old_address=nextAddr;
+            this->heading = "Video Buffer (" + std::to_string(vbfr_size/1024) + "K)";
+            register_node new_node;
+            new_node = { "VIDEO_START", nextAddr,   { "Start of standard video buffer"} }; nextAddr+=vbfr_size-1;
+            mapped_register.push_back(new_node);
+            new_node = { "VIDEO_END", nextAddr,     { "End of standard video buffer"} }; nextAddr+=1;
+            mapped_register.push_back(new_node);
+            new_node = { "VIDEO_TOP", nextAddr,     { "Top of standard video buffer"} };             
+            mapped_register.push_back(new_node);
+
+            _size = nextAddr - old_address;
+            return _size; 
+        }  
+};
+
+
+
+//              // device memory map description
+//              std::string heading;                    // string that describes the entire device
+//              struct register_node {
+//                  std::string name;                   // register label
+//                  Word address;                       // register starting address
+//                  std::vector<std::string> comment;   // register comments (can be multiple lines)
+//              };
+//              std::vector<register_node> mapped_register;

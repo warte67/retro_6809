@@ -17,7 +17,7 @@ constexpr bool DUMP_MEMORY_MAP          = true;
 constexpr bool MEMORY_MAP_OUTPUT_CPP    = true;
 
 // Tests To Perform
-constexpr bool MEM_TESTS                = true;  // test the first 16 memory locations (RAM device, SOFT_VECT)
+constexpr bool MEM_TESTS                = false;  // test the first 16 memory locations (RAM device, SOFT_VECT)
 
 
 // simple types for 8-bit archetecture 

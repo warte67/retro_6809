@@ -168,8 +168,10 @@ bool Bus::_onInit()
     // Core system devices with parameters
     
     
-    // Memory::Attach<RAM>(0x0010);        // RAM* ram = Memory::Attach<RAM>(0x0010);
-    Memory::Attach<SOFT_VECTORS>();
+    Memory::Attach<SOFT_VECTORS>();     // 0x0000 - 0x000F
+    Memory::Attach<SYSTEM_MEMORY>();    // 0x0010 - 0x03FF
+    Memory::Attach<VIDEO_BUFFER>();     // 0x0400 - 0x23FF      (8k video buffer)
+    
 
         // BEGIN TEST...
 
