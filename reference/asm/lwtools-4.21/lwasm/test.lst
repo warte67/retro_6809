@@ -1,0 +1,10 @@
+                      (         test.asm):00001         ; ./lwasm --format=ihex --list=test.lst --output=test.hex test.asm
+                      (         test.asm):00002         
+                      (         test.asm):00003                         org     $2000
+                      (         test.asm):00004         
+2000 00               (         test.asm):00005         var1            fcb     $00
+                      (         test.asm):00006         
+2001                  (         test.asm):00007         start           
+2001 8680             (         test.asm):00008                         lda     #$80
+2003 B72000           (         test.asm):00009                         sta     var1
+2006 39               (         test.asm):00010                         rts

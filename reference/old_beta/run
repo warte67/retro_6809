@@ -1,0 +1,11 @@
+#! /bin/bash
+
+#make
+#make release=1
+
+# echo ""
+# echo "####################################################"
+# echo ""
+if [ -f "./build/main" ]; then
+    ./build/main
+fi

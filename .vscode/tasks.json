@@ -1,0 +1,16 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build", // This task will be triggered by launch.json
+            "type": "shell",
+            "command": "make",  // Runs the make command
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [],
+            "detail": "Build the project using make"
+        }
+    ]
+}

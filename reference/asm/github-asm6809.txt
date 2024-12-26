@@ -1,0 +1,11 @@
+https://github.com/jamieleecho/asm6809
+
+install into Arch
+
+
+
+./autogen.sh
+./config
+make
+
+make install # if this doesnt work, the file asm6809 should be in the src folder now.

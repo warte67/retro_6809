@@ -1,0 +1,1 @@
+asm6809 should run directly on all linux systems. It should be a binary executable for linux.

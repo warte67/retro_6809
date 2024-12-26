@@ -1,0 +1,401 @@
+0000                                  INCLUDE "kernel_f000.sym"
+F317                  str1_cmp_term   equ     62231
+F143                  dcl_command_not_found   equ     61763
+FFFA                  HARD_SWI        equ     65530
+0100                  FIO_BUFFER      equ     256
+2405                  SYS_CLOCK_DIV   equ     9221
+0000                  MOP_RANDOM      equ     0
+256B                  MATH_ACB_RAW    equ     9579
+0013                  CSR_COL equ     19
+2541                  JOYS_1_DBND     equ     9537
+F2E7                  str_cmp_nmz     equ     62183
+F026                  FIRQ_start      equ     61478
+0010                  FC_DEL_DIR      equ     16
+2550                  JOYS_2_Z2       equ     9552
+254F                  JOYS_2_Z1       equ     9551
+FFF2                  HARD_SWI3       equ     65522
+F073                  main_user_input_loop    equ     61555
+0005                  MOP_IS_GREATER  equ     5
+FFF4                  HARD_SWI2       equ     65524
+241E                  CSR_YPOS        equ     9246
+F2C7                  dct_cmd_found   equ     62151
+001A                  var2    equ     26
+0019                  var1    equ     25
+0001                  MOP_RND_SEED    equ     1
+002A                  MOP_ATANH       equ     42
+242A                  KEY_BEGIN       equ     9258
+0004                  MOP_IS_LESS     equ     4
+001A                  MOP_LOG10       equ     26
+0015                  TXT_ATTR        equ     21
+F085                  command_table   equ     61573
+F144                  dcl_command_found       equ     61764
+242A                  CHAR_Q_LEN      equ     9258
+0400                  HDW_REGS        equ     1024
+F15F                  do_color        equ     61791
+0017                  MOP_EXP2        equ     23
+F264                  arg1_8bit_attrib        equ     62052
+255C                  FIO_PATH_POS    equ     9564
+0006                  MOP_IS_LTE      equ     6
+2411                  DSP_GLYPH_DATA  equ     9233
+2427                  CSR_PAL_INDX    equ     9255
+000E                  VECT_RESET      equ     14
+0000                  VECT_EXEC       equ     0
+F4B5                  cursor_address  equ     62645
+0006                  VECT_FIRQ       equ     6
+0024                  MOP_ASIN        equ     36
+000D                  MOP_SUBTRACT    equ     13
+0400                  STD_VID_MIN     equ     1024
+242B                  CHAR_SCAN       equ     9259
+0004                  FC_OPENFILE     equ     4
+2569                  MATH_ACB_POS    equ     9577
+240E                  DSP_PAL_CLR     equ     9230
+000A                  VECT_SWI        equ     10
+0014                  FC_SEEKSTART    equ     20
+243D                  EDT_BFR_CSR     equ     9277
+0027                  MOP_ATAN2       equ     39
+0038                  MOP_COPYSIGN    equ     56
+000C                  MOP_SIGNBIT     equ     12
+254C                  JOYS_2_LTY      equ     9548
+2559                  FIO_IOBYTE      equ     9561
+F10C                  err_file_no     equ     61708
+254A                  JOYS_2_DBND     equ     9546
+254B                  JOYS_2_LTX      equ     9547
+000F                  FC_REN_DIR      equ     15
+0026                  MOP_ATAN        equ     38
+F0D9                  err_dir_nf      equ     61657
+F460                  csr_new_line    equ     62560
+0400                  SSTACK_TOP      equ     1024
+254E                  JOYS_2_RTY      equ     9550
+0017                  FC_GET_SEEK     equ     23
+000A                  SOFT_SWI        equ     10
+0011                  FC_DEL_FILE     equ     17
+254D                  JOYS_2_RTX      equ     9549
+0020                  MOP_POW equ     32
+F0F5                  err_file_nf     equ     61685
+F232                  decode_command_find_arg_1       equ     62002
+F000                  KERNEL_ROM      equ     61440
+0010                  CSR_ATTR        equ     16
+0013                  FC_COPYFILE     equ     19
+242A                  GFX_END equ     9258
+F122                  err_wrong_file_type     equ     61730
+F02A                  SWI_start       equ     61482
+2551                  FIO_BEGIN       equ     9553
+F16D                  do_load equ     61805
+2555                  FIO_SEEKPOS     equ     9557
+0028                  MOP_SINH        equ     40
+2406                  SYS_TIMER       equ     9222
+0002                  VECT_SWI3       equ     2
+0004                  VECT_SWI2       equ     4
+001D                  MOP_SQRT        equ     29
+2560                  MATH_ACA_DATA   equ     9568
+240B                  DSP_TXT_COLS    equ     9227
+2422                  CSR_SCROLL      equ     9250
+F33F                  str_cmp_done    equ     62271
+0032                  MOP_ROUND       equ     50
+255B                  FIO_PATH_LEN    equ     9563
+240A                  DSP_MODE        equ     9226
+0011                  CSR_ADDR        equ     17
+FFF8                  HARD_IRQ        equ     65528
+2547                  JOYS_1_Z2       equ     9543
+3000                  USER_RAM        equ     12288
+F2C2                  dct_cmd_not_found       equ     62146
+0003                  MOP_IS_NOT_EQUAL        equ     3
+2546                  JOYS_1_Z1       equ     9542
+2575                  MATH_ACR_RAW    equ     9589
+2400                  STD_VID_MAX     equ     9216
+253F                  JOYS_1_BTN      equ     9535
+FFFC                  HARD_NMI        equ     65532
+255F                  MATH_BEGIN      equ     9567
+F000                  KRNL_EXEC       equ     61440
+0001                  FC_SHUTDOWN     equ     1
+F00C                  KRNL_FIRQ       equ     61452
+D000                  PAGED_ROM       equ     53248
+0022                  MOP_COS equ     34
+0007                  FC_READBYTE     equ     7
+241C                  CSR_XPOS        equ     9244
+257E                  RESERVED        equ     9598
+253F                  JOYS_BEGIN      equ     9535
+F13A                  decode_command_line     equ     61754
+0016                  FC_SET_SEEK     equ     22
+241C                  DBG_END equ     9244
+F242                  decode_16bit_hex_digit  equ     62018
+2428                  CSR_PAL_DATA    equ     9256
+0031                  MOP_TRUNC       equ     49
+F1A8                  do_exec equ     61864
+240D                  DSP_PAL_IDX     equ     9229
+0000                  SOFT_VECTORS    equ     0
+F47F                  std_text_scroll equ     62591
+256F                  MATH_ACB_INT    equ     9583
+F014                  KRNL_SWI        equ     61460
+255F                  FIO_END equ     9567
+F14B                  do_nothing      equ     61771
+F0CA                  err_syntax      equ     61642
+255A                  FIO_IOWORD      equ     9562
+F408                  char_out_main   equ     62472
+000C                  FC_MAKEDIR      equ     12
+253F                  KEY_END equ     9535
+000E                  MOP_ADD equ     14
+F2BA                  dct_2   equ     62138
+2561                  MATH_ACA_RAW    equ     9569
+F2B0                  dct_1   equ     62128
+F2A5                  dct_0   equ     62117
+0010                  ZERO_PAGE       equ     16
+2573                  MATH_ACR_POS    equ     9587
+001F                  MOP_HYPOT       equ     31
+0014                  MOP_FMIN        equ     20
+F1CA                  do_reset        equ     61898
+256A                  MATH_ACB_DATA   equ     9578
+F004                  KRNL_SWI3       equ     61444
+0008                  VECT_IRQ        equ     8
+F14E                  do_cls  equ     61774
+0009                  MOP_IS_INF      equ     9
+F008                  KRNL_SWI2       equ     61448
+0014                  CSR_ROW equ     20
+000C                  VECT_NMI        equ     12
+0000                  FC_RESET        equ     0
+F1F4                  do_chdir        equ     61940
+002C                  MOP_ERFC        equ     44
+B000                  PAGED_RAM       equ     45056
+F0B4                  command_vector_table    equ     61620
+F329                  str2_cmp_term   equ     62249
+F30D                  str_cmp_equal   equ     62221
+F2ED                  str_cmp_loop    equ     62189
+002E                  MOP_TGAMMA      equ     46
+F33B                  str_cmp_differ  equ     62267
+0038                  MOP_LASTOP      equ     56
+F030                  kernel_start    equ     61488
+0008                  SOFT_IRQ        equ     8
+0029                  MOP_COSH        equ     41
+000F                  MOP_MULTIPLY    equ     15
+000C                  SOFT_NMI        equ     12
+0002                  FC_COMPDATE     equ     2
+2421                  CSR_YOFS        equ     9249
+0011                  MOP_FMOD        equ     17
+255E                  FIO_DIR_DATA    equ     9566
+0006                  SOFT_FIRQ       equ     6
+2424                  CSR_BMP_INDX    equ     9252
+F022                  SWI3_start      equ     61474
+0000                  SOFT_EXEC       equ     0
+002B                  MOP_ERF equ     43
+255F                  MATH_ACA_POS    equ     9567
+F01C                  KRNL_RESET      equ     61468
+0034                  MOP_NEARBYINT   equ     52
+255D                  FIO_PATH_DATA   equ     9565
+000D                  FC_CHANGEDIR    equ     13
+F346                  line_edit       equ     62278
+0016                  MOP_EXP equ     22
+0035                  MOP_ILOGB       equ     53
+0009                  FC_LOADHEX      equ     9
+0012                  FC_REN_FILE     equ     18
+0036                  MOP_LOGB        equ     54
+F2C9                  dct_output      equ     62153
+2419                  DBG_BEGIN       equ     9241
+0005                  FC_ISOPEN       equ     5
+257D                  MATH_OPERATION  equ     9597
+2543                  JOYS_1_LTY      equ     9539
+FFFE                  HARD_RESET      equ     65534
+2542                  JOYS_1_LTX      equ     9538
+F02C                  NMI_start       equ     61484
+000E                  SOFT_RESET      equ     14
+FE33                  prompt2 equ     65075
+0016                  EDLIN_ANCH      equ     22
+FE1D                  prompt1 equ     65053
+F22C                  do_exit equ     61996
+000A                  MOP_IS_NAN      equ     10
+2545                  JOYS_1_RTY      equ     9541
+FE00                  prompt0 equ     65024
+0013                  MOP_FMAX        equ     19
+2544                  JOYS_1_RTX      equ     9540
+0015                  FC_SEEKEND      equ     21
+0010                  MOP_DIVIDE      equ     16
+001B                  MOP_LOG2        equ     27
+0003                  FC_NEWFILE      equ     3
+000B                  MOP_IS_NORMAL   equ     11
+2554                  FIO_MODE        equ     9556
+0018                  MOP_EXPM1       equ     24
+0021                  MOP_SIN equ     33
+0025                  MOP_ACOS        equ     37
+0030                  MOP_FLOOR       equ     48
+2410                  DSP_GLYPH_IDX   equ     9232
+F3C5                  flash_the_cursor        equ     62405
+002F                  MOP_CEIL        equ     47
+241C                  CSR_BEGIN       equ     9244
+0033                  MOP_LROUND      equ     51
+243F                  EDT_BUFFER      equ     9279
+241B                  DBG_FLAGS       equ     9243
+2579                  MATH_ACR_INT    equ     9593
+000B                  FC_LISTDIR      equ     11
+2574                  MATH_ACR_DATA   equ     9588
+000A                  FC_GETLENGTH    equ     10
+F2D1                  decode_command_to_first_argument        equ     62161
+242D                  XKEY_BUFFER     equ     9261
+2408                  EMU_FLAGS       equ     9224
+2419                  DBG_BRK_ADDR    equ     9241
+0002                  SOFT_SWI3       equ     2
+2409                  DSP_RES equ     9225
+F010                  KRNL_IRQ        equ     61456
+001E                  MOP_CBRT        equ     30
+0004                  SOFT_SWI2       equ     4
+F29C                  decode_command_token    equ     62108
+257E                  MATH_END        equ     9598
+F2CC                  dct_done        equ     62156
+F2E4                  dctfa_done      equ     62180
+F018                  KRNL_NMI        equ     61464
+F020                  KRNL_UNDEF      equ     61472
+240C                  DSP_TXT_ROWS    equ     9228
+F1D0                  do_dir  equ     61904
+0023                  MOP_TAN equ     35
+2551                  FIO_ERR_FLAGS   equ     9553
+0012                  MOP_REMAINDER   equ     18
+0018                  CMD_LN_TOKEN    equ     24
+F02E                  RESET_start     equ     61486
+2548                  JOYS_2_BTN      equ     9544
+242A                  CSR_END equ     9258
+FFF6                  HARD_FIRQ       equ     65526
+FFF0                  HARD_EXEC       equ     65520
+F028                  IRQ_start       equ     61480
+0037                  MOP_NEXTAFTER   equ     55
+2423                  CSR_FLAGS       equ     9251
+2552                  FIO_COMMAND     equ     9554
+2403                  SYS_SPEED       equ     9219
+F0C8                  str_eq  equ     61640
+0008                  FC_WRITEBYTE    equ     8
+F024                  SWI2_start      equ     61476
+2565                  MATH_ACA_INT    equ     9573
+0007                  MOP_IS_GTE      equ     7
+2551                  JOYS_END        equ     9553
+2425                  CSR_BMP_DATA    equ     9253
+F443                  cls     equ     62531
+2402                  SYS_STATE       equ     9218
+2553                  FIO_STREAM      equ     9555
+F3F8                  line_out        equ     62456
+001C                  MOP_LOG1P       equ     28
+0002                  MOP_IS_EQUAL    equ     2
+243E                  EDT_ENABLE      equ     9278
+000E                  FC_GETPATH      equ     14
+FE56                  ready_prompt    equ     65110
+2420                  CSR_XOFS        equ     9248
+002D                  MOP_LGAMMA      equ     45
+242C                  CHAR_POP        equ     9260
+01FF                  FIO_BFR_TOP     equ     511
+0008                  MOP_IS_FINITE   equ     8
+0006                  FC_CLOSEFILE    equ     6
+0019                  MOP_LOG equ     25
+0015                  MOP_FDIM        equ     21
+F408                  char_out        equ     62472
+0200                  SYSTEM_STACK    equ     512
+                      
+0000                                  org     $0000
+0000  3000                            fdb     start           ; SOFT_EXEC
+                      
+3000                                  org     $3000
+3000                  start           
+                                      ; crank the CPU speed some
+3000  860E                            lda     #$0E    
+3002  B72402                          sta     SYS_STATE
+                      
+                      *               ; write float string into ACA
+                      *               clr     MATH_ACA_POS
+                      *               ldx     #test_aca_string
+                      * st_1          lda     ,x+
+                      *               sta     MATH_ACA_DATA
+                      *               beq     st_2
+                      *               bmi     st_2
+                      *               bra     st_1
+                      * st_2
+                      *               ; write float string into ACB
+                      *               clr     MATH_ACB_POS
+                      *               ldx     #test_acb_string
+                      * st_3          lda     ,x+
+                      *               sta     MATH_ACB_DATA
+                      *               beq     3f
+                      *               bmi     3f
+                      *               bra     st_3
+                      
+                                      ;
+3005  CC0000                          ldd     #$0000
+3008  FD2565                          std     MATH_ACA_INT
+300B  CC0145                          ldd     #$0145
+300E  FD2567                          std     MATH_ACA_INT+2  
+                                      ;
+3011  CC0000                          ldd     #$0000
+3014  FD256F                          std     MATH_ACB_INT
+3017  CC0010                          ldd     #$0010
+301A  FD2571                          std     MATH_ACB_INT+2
+                                      ;
+                      
+                                      
+                      
+                      
+                                      ; display ACA
+301D  7F255F          3               clr     MATH_ACA_POS
+3020  B62560          1               lda     MATH_ACA_DATA
+3023  2705                            beq     2f
+3025  BDF408                          jsr     char_out
+3028  20F6                            bra     1b
+302A                  2
+302A  860A                            lda     #$0a
+302C  BDF408                          jsr     char_out
+                      
+                                      ; display ACB
+302F  7F2569                          clr     MATH_ACB_POS
+3032  B6256A          1               lda     MATH_ACB_DATA
+3035  2705                            beq     2f
+3037  BDF408                          jsr     char_out
+303A  20F6                            bra     1b
+303C                  2
+303C  860A                            lda     #$0a
+303E  BDF408                          jsr     char_out
+                      
+3041                  st_4
+                                      ; perform a math operation
+                                      * clr   MATH_ACA_INT+0
+                                      * clr   MATH_ACA_INT+1
+                                      * clr   MATH_ACA_INT+2
+                                      * clr   MATH_ACA_INT+3
+                                      * inc   MATH_ACA_INT+3
+                                      * lda   #MOP_RND_SEED
+                                      * sta   MATH_OPERATION
+                      
+3041  8600                            lda     #MOP_RANDOM
+3043  B7257D                          sta     MATH_OPERATION
+                      
+                                      ; display ACR (result)
+3046  7F2573                          clr     MATH_ACR_POS
+3049  B62574          1               lda     MATH_ACR_DATA
+304C  2705                            beq     2f
+304E  BDF408                          jsr     char_out
+3051  20F6                            bra     1b
+3053                  2
+3053  860A                            lda     #$0a
+3055  BDF408                          jsr     char_out
+                      
+                      
+                      
+                      
+                                      ; output true / false result
+                      *               ldx     #str_true
+                      *               tst     MATH_ACR_INT+3
+                      *               beq     st_5
+                      *               bra     st_6
+                      * st_5
+                      *               ldx     #str_false
+                      * st_6
+                      *               jsr     line_out
+                      
+3058                  done    ; clean up and return
+3058  860A                            lda     #$0a
+305A  BDF408                          jsr     char_out
+305D  39                              rts
+                      
+                      
+                      
+                      
+305E  352E3300        test_aca_string fcn     "5.3"
+3062  332E31343135323900 test_acb_string fcn     "3.141529"
+306B  5452554500      str_true        fcn     "TRUE"
+3070  46414C534500    str_false       fcn     "FALSE"
+3076  40              test_raw        fcb     $40
+3077  49                              fcb     $49
+3078  0E                              fcb     $0e
+3079  D0                              fcb     $d0

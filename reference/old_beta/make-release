@@ -1,0 +1,7 @@
+#!/bin/bash
+
+echo "make clean"
+make clean
+
+echo "make -j 12 release=1"
+make -j 12 release=1

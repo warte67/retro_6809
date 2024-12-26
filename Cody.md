@@ -36,9 +36,12 @@ This project refactors the alpha_6809 proof-of-concept emulator into a robust, p
 - December 25, 2023: Project initiated
 - [Current Date]: Implemented improved Bus device management system using modern C++ RAII principles
 - [Current Date]: Added structured register mapping system using std::map
+- [Current Date]: Completed video mode and sprite system specification
 
 ## Architecture Decisions
-- [Section to document important architectural choices and their rationale]
+- Improved Bus device management using modern C++ RAII principles
+- Designed comprehensive video and sprite system architecture
+- Implemented efficient memory mapping and device registration
 
 ## Component Status
 - Core CPU Emulation
@@ -83,17 +86,30 @@ This project refactors the alpha_6809 proof-of-concept emulator into a robust, p
     std::map<std::string_view, Register> device_registers;
     ```
 
+- Designed comprehensive video mode system
+  - Multiple resolutions: 320x200 base with overscan options
+  - Color depths: 2, 4, 16, 256 colors
+  - Efficient memory usage and timing calculations
+  - 5.88MHz pixel clock at 60Hz refresh
+
+- Implemented sprite system architecture
+  - 64 sprite capacity with 80-byte structure
+  - 4-color sprites with individual palettes
+  - Efficient 4x4 collision detection system
+  - Priority-based rendering with 4 layers
+  - Memory-efficient attribute structure
+
 ## Questions to Ask
 - Thread synchronization strategy
-- Memory management approach 
+- Memory management approach
 - Event system design
 - Module boundaries and interfaces
 
 ## Current Focus
-Preparing for complete refactor while preserving core emulation logic
+Implementing video and sprite system while maintaining efficient memory usage and performance
 
 ## To Do
-- Started refactoring project on Christmas Day 2024! 
+- Started refactoring project on Christmas Day 2024!
 - Set up new Retro_6809 repository
 - Begin porting core components with improved architecture
 - Implement ncurses-based debugger
