@@ -284,3 +284,42 @@ class VIDEO_BUFFER : public IDevice
 //                  std::vector<std::string> comment;   // register comments (can be multiple lines)
 //              };
 //              std::vector<register_node> mapped_register;
+
+
+class USER_RAM : public IDevice
+{
+    public:
+        USER_RAM() {
+            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
+            // _size = size;
+            _device_name = "USER_RAM";
+        }
+        virtual ~USER_RAM() {
+            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
+        }    
+
+		bool OnInit() override 						{ return true; }
+		bool OnQuit() override 						{ return true; }
+		bool OnActivate() override 					{ return true; }
+		bool OnDeactivate() override 				{ return true; }
+		// bool OnEvent(SDL_Event* evnt) override 		{ return true; }
+		bool OnEvent(SDL_Event* evnt) override 		{ return (evnt==nullptr); }         // return true
+		bool OnUpdate(float fElapsedTime) override 	{ return (fElapsedTime==0.0f); }    // { return true; }           
+		bool OnRender() override 					{ return true; } 
+
+		Word OnAttach(Word nextAddr) override       { 
+            int ram_size = 0xCFFF-nextAddr;
+            Word old_address=nextAddr;
+            this->heading = "User Ram (" + std::to_string(ram_size/1024) + "K)";
+            register_node new_node;
+            new_node = { "USER_RAM", nextAddr,      { "User Accessable RAM"} }; nextAddr+=ram_size;
+            mapped_register.push_back(new_node);
+            new_node = { "USER_RAM_END", nextAddr,  { "End User Accessable RAM"} }; nextAddr+=1;
+            mapped_register.push_back(new_node);
+            new_node = { "USER_RAM_TOP", nextAddr,  { "Top User Accessable RAM"} };             
+            mapped_register.push_back(new_node);
+
+            _size = nextAddr - old_address;
+            return _size; 
+        }  
+};
