@@ -13,10 +13,10 @@
 #define __TYPES_HPP__
 
 #include <SDL2/SDL.h>
-#include <ncurses.h>
 #include <string>
 #include <vector>
 #include <iostream>
+
     
 // Generate a memory map definition file?
 #define COMPILE_MEMORY_MAP      false
@@ -33,5 +33,9 @@
     #ifndef DWord
         #define DWord Uint32
     #endif
+
+
+
+#include "clr.hpp"
 
 #endif  // __TYPES_HPP__

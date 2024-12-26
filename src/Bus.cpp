@@ -9,25 +9,18 @@
 *                          |_|   |_|    
 ******************/
 
-//#include <mutex>
 #include "Bus.hpp"
+#include "clr.hpp"
 
 
 Bus::Bus()  
 { 
-    // initscr();               // Initialize the ncurses mode
-
-    // printw("Bus::Bus()  \n");
-    //refresh(); 
+    std::cout << clr::indent_push() << clr::LT_BLUE << "Bus Singleton Created" << clr::RETURN;
 }
 
 Bus::~Bus()
 { 
-    // std::cout << clr::LT_BLUE << "Bus Singleton Destroyed" << clr::RETURN; 
-    // printw("Bus::~Bus()\n");
-    //refresh(); 
-
-    // endwin();                // Exit ncurses mode
+    std::cout << clr::indent_pop() << clr::LT_BLUE << "Bus Singleton Destroyed" << clr::RETURN;
 }
 
 
@@ -58,39 +51,22 @@ void Bus::IsDirty(bool b)
 
 void Bus::Error(std::string err_msg, std::string file, int line)
 {
-	// std::string err_msg = "Something like a simulated error has happened!";
-
-    // // printw("\n");
-	// std::cout << std::endl;  // printw("\n");
-	// std::cout << clr::RED << "  ╭──" << clr::YELLOW << "  ERROR:  " << clr::RED << "────────====####" << clr::RETURN; // printw("\n");
-	// std::cout << clr::RED << "  │" << clr::NORMAL << " in file: " << clr::WHITE << file << clr::RETURN; // printw("\n");
-	// std::cout << clr::RED << "  │" << clr::NORMAL << " on line: " << clr::WHITE << line << clr::RETURN; // printw("\n");
-	// std::cout << clr::RED << "  │" << clr::RETURN;// printw("\n"); // printw("\n");
-	// std::cout << clr::RED << "  │" << clr::NORMAL << clr::WHITE << "   " << err_msg << clr::RETURN; // printw("\n");
-	// std::cout << clr::RED << "  │" << clr::RETURN; // printw("\n");
-	// std::cout << clr::RED << "  ╰────────────────────====####" << clr::RETURN; // printw("\n");
-	// std::cout << std::endl; // printw("\n");
-
-    // printw("\n");
-    start_color();
-	printw("  +--  ERROR:  ---------====####\n");
-	printw("  | in file: %s\n", file.c_str());
-	printw("  | on line: %d\n", line);
-	printw("  |\n");
-	printw("  |   %s\n", err_msg.c_str());
-	printw("  |\n");
-	printw("  +---------------====####\n");
-
-    // refresh(); 
-	// std::cout << std::endl;
+	std::cout << std::endl;
+	std::cout << clr::RED << "  ╭──" << clr::YELLOW << "  ERROR:  " << clr::RED << "────────====####" << clr::RETURN;
+	std::cout << clr::RED << "  │" << clr::NORMAL << " in file: " << clr::WHITE << file << clr::RETURN;
+	std::cout << clr::RED << "  │" << clr::NORMAL << " on line: " << clr::WHITE << line << clr::RETURN;
+	std::cout << clr::RED << "  │" << clr::RETURN;// printw("\n");
+	std::cout << clr::RED << "  │" << clr::NORMAL << clr::WHITE << "   " << err_msg << clr::RETURN;
+	std::cout << clr::RED << "  │" << clr::RETURN;
+	std::cout << clr::RED << "  ╰────────────────────====####" << clr::RETURN;
+	std::cout << std::endl;
 
 	Bus::IsRunning(false);
 }  
 
 bool Bus::Run()
 {
-    // printw("Bus::Run()\n");
-    //refresh(); 
+    std::cout << clr::indent_push() << clr::CYAN << "Bus::Run() Entry" << clr::RETURN;
     bool bWasActivated = false;
 
     if (_onInit())
@@ -139,13 +115,16 @@ bool Bus::Run()
         // Bus::Error("Something like a simulated error happened!");
 
     }
-    else
+    else {
+        std::cout << clr::indent_pop() << clr::ORANGE << "Bus::Run() Error" << clr::RETURN;
         return false;
+    }
 
     // shutdown the environment
     _onDeactivate();    
 
     // shutdown SDL2 and return with status
+    std::cout << clr::indent_pop() << clr::CYAN << "Bus::Run() Exit" << clr::RETURN;
     return _onQuit();
 }
 
@@ -154,8 +133,7 @@ bool Bus::Run()
 // this should only ever run exactly once when the app starts
 bool Bus::_onInit()
 {
-    // printw("Bus::_onInit()\n");
-    //refresh(); 
+    std::cout << clr::indent_push() << clr::CYAN << "Bus::_onInit() Entry" << clr::RETURN;
 
 	// TESTING....
 
@@ -163,7 +141,8 @@ bool Bus::_onInit()
 		if (SDL_Init(SDL_INIT_EVERYTHING))
 		{
 			// std::cout << SDL_GetError() << std::endl;
-			Bus::ERROR(SDL_GetError());
+            std::cout << clr::indent_pop() << clr::ORANGE << "Bus::_onInit() Error" << clr::RETURN;
+			Bus::Error(SDL_GetError());
 			return false;
 		}
 
@@ -178,25 +157,34 @@ bool Bus::_onInit()
         // create the renderer
         pRenderer = SDL_CreateRenderer(pWindow, -1, renderer_flags);
 	// END TESTING
-
-
     
     if (_memory.OnInit() == false)
 	{
-		Bus::ERROR("Device Initialization Failure!");
+        std::cout << clr::indent_pop() << clr::ORANGE << "Bus::_onInit() Error" << clr::RETURN;
+		Bus::Error("Device Initialization Failure!");
         return false;
 	}
+
+    // Core system devices with parameters
+    
+    // RAM* ram = Memory::Attach<RAM>(0x0010);
+    Memory::Attach<RAM>(0x0010);
+
+    // ROM* rom = Memory::Attach<ROM>("./roms/system.hex", 0x8000);
+    // RAM* ram = Memory::Attach<RAM>(0x8000);
+    // Video* video = Memory::Attach<Video>(320, 200, 8);
+    // Sound* sound = Memory::Attach<Sound>(44100, 2);
+
     _bWasInit = true;
+
+    std::cout << clr::indent_pop() << clr::CYAN << "Bus::_onInit() Exit" << clr::RETURN;
     return true;
 }
 
 // this should only ever run exactly once when the app shuts down
 bool Bus::_onQuit()
 {
-    // printw("Bus::_onQuit()\n");
-    //refresh(); 
-
-    bool bRet = false;
+    std::cout << clr::indent_push() << clr::CYAN << "Bus::_onQuit() Entry" << clr::RETURN;
     if (_bWasInit)   
     { 
         // shut down SDL stuff
@@ -213,38 +201,41 @@ bool Bus::_onQuit()
 
         _bWasInit = false;         
         SDL_Quit();
-        bRet = true;
         if (_memory.OnQuit() == false)
 		{
-			Bus::ERROR("Device Termination Failure!");
-            bRet = false;
+            std::cout << clr::indent_pop() << clr::ORANGE << "Bus::_onQuit() Error" << clr::RETURN;
+			Bus::Error("Device Termination Failure!");
+            return false;
 		}
     }    
-    return bRet;
+    std::cout << clr::indent_pop() << clr::CYAN << "Bus::_onQuit() Exit" << clr::RETURN;
+    return true;
 }
 
 
 bool Bus::_onActivate(void) 
 {
-    // printw("Bus::_onActivate()\n");
-    //refresh(); 
-
+    std::cout << clr::indent_push() << clr::CYAN << "Bus::_onActivate() Entry" << clr::RETURN;    
     if (_memory.OnActivate() == false)
     {
-		Bus::ERROR("Device Failed to Activate!");
+        std::cout << clr::indent_pop() << clr::ORANGE << "Bus::_onActivate() Error" << clr::RETURN;
+		Bus::Error("Device Failed to Activate!");
 		return false;
 	}
+    std::cout << clr::indent_pop() << clr::CYAN << "Bus::_onActivate() Exit" << clr::RETURN;
     return true;
 }
 
 bool Bus::_onDeactivate(void) 
 {
-    // printw("Bus::_onDeactivate()\n");
+    std::cout << clr::indent_push() << clr::CYAN << "Bus::_onDeactivate() Entry" << clr::RETURN;
     if (_memory.OnDeactivate() == false)
 	{
-		Bus::ERROR("Device Failed to Deactivate!");		
+        std::cout << clr::indent_pop() << clr::ORANGE << "Bus::_onDeactivate() Error" << clr::RETURN;
+		Bus::Error("Device Failed to Deactivate!");		        
         return false;
 	}
+    std::cout << clr::indent_pop() << clr::CYAN << "Bus::_onDeactivate() Exit" << clr::RETURN;
     return true;
 }
 
@@ -319,8 +310,8 @@ bool Bus::_onUpdate(float __na)
 
     static int s_width=0, s_height=0;
     int w, h;
-    // clr::get_terminal_size(w, h);
-    getmaxyx(stdscr,h,w);
+    clr::get_terminal_size(w, h);       // getmaxyx(stdscr,h,w);
+    
 
     if (s_width != w || s_height != h)
     {        
@@ -332,7 +323,7 @@ bool Bus::_onUpdate(float __na)
     }
     if (_memory.OnUpdate(__na) == false)
 	{
-		Bus::ERROR("Device Update Failure!");
+		Bus::Error("Device Update Failure!");
         return false;
 	}
     return true;
@@ -343,7 +334,7 @@ bool Bus::_onRender(void)
     // std::cout << "Bus::_onRender()\n";
     if (_memory.OnRender() == false)
 	{
-		Bus::ERROR("Device Render Failure!");
+		Bus::Error("Device Render Failure!");
         return false;    
 	}
 

@@ -1,4 +1,5 @@
 # Cody's Project Memory
+At this point, I'm not sold on using the Cody Extension in VS Code. It is not free. it's $9 a month. I am going to try ollama instead.
 
 ## Purpose of this File
 This document serves as Cody's persistent memory between development sessions - think "50 First Dates" where Drew Barrymore needs daily reminders, but for an AI assistant! Created entirely by Cody to maintain continuity across development sessions, this file maintains key context, decisions, and progress for the 6809 emulator refactoring project. By providing the link to this file at the start of each session, Cody can maintain continuity and provide consistent assistance throughout development.
@@ -52,7 +53,7 @@ This project refactors the alpha_6809 proof-of-concept emulator into a robust, p
 [Status tracking for each major component]
 
 ## Technical Decisions
-- Improved Bus device management using modern C++ RAII principles
+- Discussed Bus device management using modern C++ RAII principles
   - Implemented template-based AttachDevice<T> method
   - Uses std::unique_ptr for automatic memory management
   - Devices remain valid within Bus scope
@@ -69,7 +70,7 @@ This project refactors the alpha_6809 proof-of-concept emulator into a robust, p
     }
     ```
 
-- Implemented device register mapping system using std::map
+- Discussed device register mapping system using std::map
   - Replaced manual DisplayEnum calls with structured register definitions
   - Register metadata stored in std::map for runtime access
   - Enables automatic generation of memory_map.hpp and memory_map.asm
@@ -92,12 +93,32 @@ This project refactors the alpha_6809 proof-of-concept emulator into a robust, p
   - Efficient memory usage and timing calculations
   - 5.88MHz pixel clock at 60Hz refresh
 
-- Implemented sprite system architecture
+- Discussed sprite system architecture
   - 64 sprite capacity with 80-byte structure
   - 4-color sprites with individual palettes
   - Efficient 4x4 collision detection system
   - Priority-based rendering with 4 layers
   - Memory-efficient attribute structure
+
+- Implemented hierarchical debug output system
+  - Uses ANSI color codes for visual clarity
+  - Tracks RAII object lifecycles with indent_push/pop
+  - Color-coded execution states:
+    - LT_BLUE: Constructor/Destructor pairs
+    - CYAN: Normal method execution
+    - ORANGE: Error conditions
+  - Automatic indentation shows call stack depth
+  - Makes memory leaks and RAII violations immediately visible
+  - Example:
+    ```cpp
+    Bus::Bus() {
+        std::cout << clr::indent_push() << clr::LT_BLUE << "Bus Singleton Created" << clr::RETURN;
+    }
+    Bus::~Bus()
+    { 
+        std::cout << clr::indent_pop() << clr::LT_BLUE << "Bus Singleton Destroyed" << clr::RETURN;
+    }    
+    ```  
 
 ## Questions to Ask
 - Thread synchronization strategy

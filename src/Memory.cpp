@@ -16,6 +16,7 @@
  ******************/
 
 #include "Bus.hpp"
+#include "clr.hpp"
 #include "Memory.hpp"
 
 
@@ -25,14 +26,12 @@
 
 Memory::Memory()  
 { 
-    // std::cout << clr::LT_BLUE << "Memory Singleton Created" << clr::RETURN;  
-    // printw("Memory::Memory() \n"); refresh();
+    std::cout << clr::indent_push() << clr::LT_BLUE << "Memory Singleton Created" << clr::RETURN;
 }
 
 Memory::~Memory() 
 { 
-    // std::cout << clr::LT_BLUE << "Memory Singleton Destroyed" << clr::RETURN; 
-    // printw("Memory::~Memory()\n"); refresh();
+    std::cout << clr::indent_pop() << clr::LT_BLUE << "Memory Singleton Destroyed" << clr::RETURN;
 }
 
 
@@ -42,53 +41,79 @@ Memory::~Memory()
 
 bool Memory::OnInit() 
 {
-	for (auto &d : Memory::_memory_nodes)
-		if ( d->OnInit() == false ) 
-            return false;        
+    std::cout << clr::indent_push() << clr::CYAN << "Memory::OnInit() Entry" << clr::RETURN;
+    for (auto &d : Memory::_memory_nodes) {
+        if (d->OnInit() == false) {
+            std::cout << clr::indent_pop() << clr::ORANGE << "Memory::OnInit() Error" << clr::RETURN;
+            return false;
+        }
+    }
+    std::cout << clr::indent_pop() << clr::CYAN << "Memory::OnInit() Exit" << clr::RETURN;                
     return true;
 }
 
 bool Memory::OnQuit() 
 {
-	for (auto &d : Memory::_memory_nodes)
-        if ( d->OnQuit() == false)
+    std::cout << clr::indent_push() << clr::CYAN << "Memory::OnQuit() Entry" << clr::RETURN;
+	for (auto &d : Memory::_memory_nodes) {
+        if ( d->OnQuit() == false) {
+            std::cout << clr::indent_pop() << clr::ORANGE << "Memory::OnQuit() Error" << clr::RETURN;
             return false;
+        }
+    }
+    std::cout << clr::indent_pop() << clr::CYAN << "Memory::OnQuit() Exit" << clr::RETURN;
     return true;
 }
 bool Memory::OnActivate() 
 {
-	for (auto &d : Memory::_memory_nodes)
-		if ( d->OnActivate() == false )
+    std::cout << clr::indent_push() << clr::CYAN << "Memory::OnActivate() Entry" << clr::RETURN;
+	for (auto &d : Memory::_memory_nodes) {
+		if ( d->OnActivate() == false ) {
+            std::cout << clr::indent_pop() << clr::ORANGE << "Memory::OnActivate() Error" << clr::RETURN;
 			return false;
+        }
+    }
+    std::cout << clr::indent_pop() << clr::CYAN << "Memory::OnActivate() Exit" << clr::RETURN;
 	return true;
 }
 bool Memory::OnDeactivate() 
 {
-	for (auto &d : Memory::_memory_nodes)
-		if ( d->OnDeactivate() == false )
+    std::cout << clr::indent_push() << clr::CYAN << "Memory::OnDeactivate() Entry" << clr::RETURN;
+	for (auto &d : Memory::_memory_nodes) {
+		if ( d->OnDeactivate() == false ) {
+            std::cout << clr::indent_pop() << clr::ORANGE << "Memory::OnDeactivate() Error" << clr::RETURN;
 			return false;
+        }
+    }
+    std::cout << clr::indent_pop() << clr::CYAN << "Memory::OnDeactivate() Exit" << clr::RETURN;
 	return true;
 }
 // bool Memory::OnEvent(SDL_Event* evnt) 
 bool Memory::OnEvent(SDL_Event* evnt) 
 {
-	for (auto &d : Memory::_memory_nodes)
-		if ( d->OnEvent(evnt) == false )
+	for (auto &d : Memory::_memory_nodes) {
+		if ( d->OnEvent(evnt) == false ) {
 			return false;
+        }
+    }
 	return true;
 }
 bool Memory::OnUpdate(float fElapsedTime) 
 {
-	for (auto &d : Memory::_memory_nodes)
-		if ( d->OnUpdate(fElapsedTime) == false )
+	for (auto &d : Memory::_memory_nodes) {
+		if ( d->OnUpdate(fElapsedTime) == false ) {
 			return false;
+        }
+    }
 	return true;
 }
 bool Memory::OnRender() 
 {
-	for (auto &d : Memory::_memory_nodes)
-		if ( d->OnRender() == false )
+	for (auto &d : Memory::_memory_nodes) {
+		if ( d->OnRender() == false ) {
 			return false;
+        }
+    }
 	return true;
 }
 
@@ -168,7 +193,7 @@ void Memory::Write_DWord(Word offset, DWord data, bool debug)
 }
 
 
-Word Memory::Attach(IDevice* device)
+Word Memory::_attach(IDevice* device)
 {    
     Word size = 0;
     if (device != nullptr)
@@ -188,16 +213,13 @@ Word Memory::Attach(IDevice* device)
             std::string err = "Memory node '";
             err += device->name();
             err += "' was zero size!";
-            Bus::ERROR(err);
-            //std::cout << "Memory node was size zero!\n";
+            Bus::Error(err.c_str());
             Bus::IsRunning(false);
         }
     }
     if (_next_address >= 65536)
     {
-        // std::cout << "Memory allocation beyond 64k boundary!\n";
-        Bus::ERROR("Memory allocation beyond 64k boundary!");
-        // Bus::Error("Memory allocation beyond 64k boundary!");
+        Bus::Error("Memory allocation beyond 64k boundary!");
         Bus::IsRunning(false);
     }
     return size;

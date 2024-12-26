@@ -81,11 +81,17 @@ protected: // PROTECTED ACCESSORS
 class RAM : public IDevice
 {
     public:
-        RAM() {  name("RAM"); }
-        RAM(std::string sName) { name(sName); }
-        virtual ~RAM() {}    
+        // RAM() {  name("RAM"); }
+        // RAM(std::string sName) { name(sName); }
+        RAM(Word size) {
+            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
+            _size = size;
+        }
+        virtual ~RAM() {
+            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
+        }    
 
-		Word OnAttach(Word nextAddr) override 		{ return nextAddr; }        // { return 0xA5A5; }
+		Word OnAttach(Word nextAddr) override       { if (nextAddr==0) { ; }  return _size; }  
 		bool OnInit() override 						{ return true; }
 		bool OnQuit() override 						{ return true; }
 		bool OnActivate() override 					{ return true; }
@@ -113,7 +119,7 @@ class ROM : public IDevice
         ROM(std::string sName) { name(sName); }
         virtual ~ROM() {}    
 
-		Word OnAttach(Word nextAddr) override 		{ return nextAddr; }        // { return 0xA5A5; }
+		Word OnAttach(Word nextAddr) override       { if (nextAddr==0) { ; }  return _size; }  
 		bool OnInit() override 						{ return true; }
 		bool OnQuit() override 						{ return true; }
 		bool OnActivate() override 					{ return true; }

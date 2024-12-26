@@ -22,7 +22,7 @@
 
 #include "IDevice.hpp"
 #include "types.hpp"
-// #include "clr.hpp"
+#include "clr.hpp"
 
 class Memory : public IDevice
 {
@@ -58,9 +58,25 @@ public:     // PUBLIC ACCESSORS
     static DWord Read_DWord(Word offset, bool debug = false);
     static void Write_DWord(Word offset, DWord data, bool debug = false);   
 
-    static Word Attach(IDevice* device );
+    // Template method for device attachment with flexible parameters
+    template<typename T, typename... Args>
+    static T* Attach(Args&&... args) {
+        //std::cout << clr::indent_push() << clr::CYAN << "Memory::Attach() Entry" << clr::RETURN;        
+        T* device = new T(std::forward<Args>(args)...);
+        Word size = _attach(device);
+        if (size == 0) {
+            delete device;
+            //std::cout << clr::indent_pop() << clr::ORANGE << "Memory::Attach() Error" << clr::RETURN;
+            return nullptr;
+        }        
+        //std::cout << clr::indent_pop() << clr::CYAN << "Memory::Attach() Exit" << clr::RETURN;
+        return device;
+    }    
+
 
 protected:
+
+    static Word _attach(IDevice* device);
 
     // Move to the Memory Management Device
     inline static int _next_address = 0;    // next assignable address
