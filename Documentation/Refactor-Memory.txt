@@ -1,21 +1,20 @@
-
-We discussed refactoring the Memory class in Memory.cpp to use a std::unordered_map instead of a vector to store devices and their memory ranges. The idea is to make lookups faster by leveraging the hashing property of the std::unordered_map.
-
-To achieve this, we first defined a custom hash function for MemoryRange type in our Memory class:
-
-struct std::hash<MemoryRange> {
-    size_t operator()(const MemoryRange& r) const noexcept {
-        return std::hash<Word>{}(r.first) ^ std::hash<Word>{}(r.second);
-    }
-};
-Then, we created a DeviceNode struct that contains a pointer to the device and its memory range:
+typedef std::pair<Word, Word> MemoryRange;
 
 struct DeviceNode {
     Device* pDevice;
     MemoryRange range;
 };
-In the Attach() method of the Memory class, we modified it to populate the _memory_nodes map with DeviceNode instances for each attached device:
 
+// In your Memory class
+struct std::hash<MemoryRange> {
+    size_t operator()(const MemoryRange& r) const noexcept {
+        return std::hash<Word>{}(r.first) ^ std::hash<Word>{}(r.second);
+    }
+};
+
+std::unordered_map<MemoryRange, DeviceNode*> _memory_nodes;
+
+// In the Attach() method of your Memory class
 template <typename T>
 bool Memory::Attach(uint32_t addr)
 {
@@ -74,11 +73,3 @@ void Memory::Write(Word offset, Byte data, bool debug)
             It->second->pDevice->memory[offset - It->second->range.first] = data;
     }
 }
-We modified the Read() and Write() methods to use the std::unordered_map to look up the appropriate DeviceNode, and then directly access or call the device's memory array or methods to read or write data.
-
-The overall goal of this refactoring was to improve performance by using a more efficient data structure for storing and looking up devices in the memory system, which is particularly relevant when we have a large number of individual devices.
-
-
-
-
-
