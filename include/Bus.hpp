@@ -80,7 +80,8 @@ private: // INTERNAL PRIVATES
 	SDL_Renderer* pRenderer = nullptr;
 	// Uint32 window_flags = SDL_WINDOW_FULLSCREEN_DESKTOP;
 	Uint32 window_flags = SDL_WINDOW_ALWAYS_ON_TOP | SDL_WINDOW_RESIZABLE;
-	Uint32 renderer_flags = SDL_RENDERER_ACCELERATED;
+    // Uint32 renderer_flags = SDL_RENDERER_ACCELERATED_2D | SDL_RENDERER_PRESENTVSYNC;
+    Uint32 renderer_flags = SDL_RENDERER_VSYNC_ADAPTIVE;
 
     // static Memory Management Device:
     Memory& _memory = Memory::GetInstance();   

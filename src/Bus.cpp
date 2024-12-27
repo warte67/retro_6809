@@ -138,25 +138,20 @@ bool Bus::_onInit()
 	// TESTING....
 
         // initialize SDL2
-		if (SDL_Init(SDL_INIT_EVERYTHING))
+		if (!SDL_Init(SDL_INIT_VIDEO))
 		{
 			// std::cout << SDL_GetError() << std::endl;
             std::cout << clr::indent_pop() << clr::ORANGE << "Bus::_onInit() Error" << clr::RETURN;
-			Bus::Error(SDL_GetError());
+			Bus::Error(SDL_GetError(), __FILE__, __LINE__);
 			return false;
 		}
 
         // create the main window
-		pWindow = SDL_CreateWindow("temp", 
-			SDL_WINDOWPOS_CENTERED,
-			SDL_WINDOWPOS_CENTERED,
-			1024,640, 
-			window_flags); 
+		pWindow = SDL_CreateWindow("SDL3 Retro_6809", 1024, 640, window_flags); 
 		SDL_ShowWindow(pWindow);
 
         // create the renderer
-        pRenderer = SDL_CreateRenderer(pWindow, -1, renderer_flags);
-	// END TESTING
+        pRenderer = SDL_CreateRenderer(pWindow, NULL);
     
     if (_memory.OnInit() == false)
 	{
@@ -287,7 +282,7 @@ bool Bus::_onEvent(SDL_Event* __na)
             // handle default events SDL_QUIT and ALT-X quits
 
             // case EV_QUIT:  
-            case SDL_QUIT:  
+            case SDL_EVENT_QUIT:  
                 Bus::IsRunning(false);
                 break;
  
@@ -300,18 +295,18 @@ bool Bus::_onEvent(SDL_Event* __na)
             //     // ... Need EV_GetModState();
             //     break;
 
-            case SDL_KEYDOWN:
+            case SDL_EVENT_KEY_DOWN:
             {
                 // [ESCAPE]  KMOD_SHIFT
                 SDL_Keymod mod = SDL_GetModState();
-                if (mod & KMOD_SHIFT)
+                if (mod & SDL_KMOD_SHIFT)
                 {
-                    if (evnt.key.keysym.sym == SDLK_ESCAPE)
+                    if (evnt.key.key == SDLK_ESCAPE)
                         Bus::IsRunning(false);
                 }                
-                if (mod & KMOD_ALT)
+                if (mod & SDL_KMOD_ALT)
                 {
-                    if (evnt.key.keysym.sym == SDLK_x)
+                    if (evnt.key.key == SDLK_X)
                         Bus::IsRunning(false);
                 }
                 break;                

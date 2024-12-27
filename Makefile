@@ -1,7 +1,7 @@
 # Compiler and flags
 CXX := g++
-CXXFLAGS := -Wall -Wextra -std=c++20 -Iinclude -fexceptions -Wall 
-LDFLAGS := -lSDL2 -lSDLmain -ldl -lpthread
+CXXFLAGS := -Wall -Wextra -std=c++23 -Iinclude -I/usr/include/SDL3 -fexceptions -Wall
+LDFLAGS := -lSDL3 -ldl -lpthread
 
 # Project name
 TARGET := build/main
