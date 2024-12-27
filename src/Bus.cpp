@@ -114,7 +114,6 @@ void Bus::IsDirty(bool b)
  * @param file The name of the file where the error occurred.
  * @param line The line number in the file where the error occurred.
  */
-
 void Bus::Error(std::string err_msg, std::string file, int line)
 {
 	std::cout << std::endl;
@@ -420,15 +419,6 @@ bool Bus::_onEvent(SDL_Event* __na)
             case SDL_EVENT_QUIT:  
                 Bus::IsRunning(false);
                 break;
- 
-            // case EV_KEYDOWN:
-			// // case EV_KEYUP:
-            //     // Bus::IsRunning(false);
-			// 	if (evnt.key.keysym.sym == SDLK_ESCAPE)		// <--- NOTE:  SDL Defined
-			// 		Bus::IsRunning(false);			
-            //     // [ESCAPE] KMOD_SHIFT
-            //     // ... Need EV_GetModState();
-            //     break;
 
             case SDL_EVENT_KEY_DOWN:
             {

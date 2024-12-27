@@ -19,8 +19,8 @@
 class NewDevice : public IDevice {
 
 public: // PUBLIC CONSTRUCTOR / DESTRUCTOR
-    NewDevice() { _device_name = "NewDevice"; }
-    virtual ~NewDevice() {}
+    NewDevice();
+    virtual ~NewDevice();
 
 public: // VIRTUAL METHODS
     virtual Byte OnRead(Word offset);

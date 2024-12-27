@@ -108,13 +108,11 @@ void IDevice::name(std::string n)
 }
 
 
-/*************  ✨ Codeium Command ⭐  *************/
 /// @brief Retrieves the value of the memory at the given offset
 /// @details This method locks the memory mutex for thread safety
 ///          and returns the value of the memory at the given offset
 /// @param[in] ofs The offset in the device's memory
 /// @return The value at the given offset in the device's memory
-/******  7972908e-f444-4a31-a6b8-31284b76580d  *******/
 Byte IDevice::memory(Word ofs) 
 { 
     std::lock_guard<std::mutex> guard(_mutex_memory);
@@ -139,6 +137,12 @@ void IDevice::memory(Word ofs, Byte data)
 // ROM Device Helper Method
 /////////////////////////////
 
+/// @brief Helper method to write a byte to the ROM
+/// @details This method is used by the Memory class to write to the ROM
+///          It locks the memory mutex for thread safety and
+///          sets the value of the memory at the given offset
+/// @param[in] offset The offset in the device's memory
+/// @param[in] data The value to be written to the device's memory
 void ROM::write_to_rom(Word offset, Byte data) 
 {
     if (offset - base() < size())
