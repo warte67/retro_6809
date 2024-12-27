@@ -31,55 +31,55 @@ Both Overscan:                   160x100 (doubled in both directions)
 - Monochrome (1bpp):   8,000 bytes  (320x200 ÷ 8)
 - 4-Color (2bpp):     16,000 bytes  (320x200 ÷ 4)
 - 16-Color (4bpp):    32,000 bytes  (320x200 ÷ 2)
-- 256-Color (8bpp):   64,000 bytes  (320x200)
+- 256-Color (8bpp):   64,000 bytes  (320x200 ÷ 1)
 
 ## 320x100 Resolution
 - Monochrome (1bpp):   4,000 bytes  (320x100 ÷ 8)
 - 4-Color (2bpp):      8,000 bytes  (320x100 ÷ 4)
 - 16-Color (4bpp):    16,000 bytes  (320x100 ÷ 2)
-- 256-Color (8bpp):   32,000 bytes  (320x100)
+- 256-Color (8bpp):   32,000 bytes  (320x100 ÷ 1)
 
 ## 320x50 Resolution
 - Monochrome (1bpp):   2,000 bytes  (320x50 ÷ 8)
 - 4-Color (2bpp):      4,000 bytes  (320x50 ÷ 4)
 - 16-Color (4bpp):     8,000 bytes  (320x50 ÷ 2)
-- 256-Color (8bpp):   16,000 bytes  (320x50)
+- 256-Color (8bpp):   16,000 bytes  (320x50 ÷ 1)
 
 ## 160x200 Resolution
 - Monochrome (1bpp):   4,000 bytes  (160x200 ÷ 8)
 - 4-Color (2bpp):      8,000 bytes  (160x200 ÷ 4)
 - 16-Color (4bpp):    16,000 bytes  (160x200 ÷ 2)
-- 256-Color (8bpp):   32,000 bytes  (160x200)
+- 256-Color (8bpp):   32,000 bytes  (160x200 ÷ 1)
 
 ## 160x100 Resolution
 - Monochrome (1bpp):   2,000 bytes  (160x100 ÷ 8)
 - 4-Color (2bpp):      4,000 bytes  (160x100 ÷ 4)
 - 16-Color (4bpp):     8,000 bytes  (160x100 ÷ 2)
-- 256-Color (8bpp):   16,000 bytes  (160x100)
+- 256-Color (8bpp):   16,000 bytes  (160x100 ÷ 1)
 
 ## 160x50 Resolution
 - Monochrome (1bpp):   1,000 bytes  (160x50 ÷ 8)
 - 4-Color (2bpp):      2,000 bytes  (160x50 ÷ 4)
 - 16-Color (4bpp):     4,000 bytes  (160x50 ÷ 2)
-- 256-Color (8bpp):    8,000 bytes  (160x50)
+- 256-Color (8bpp):    8,000 bytes  (160x50 ÷ 1)
 
 ## 80x200 Resolution
 - Monochrome (1bpp):   2,000 bytes  (80x200 ÷ 8)
 - 4-Color (2bpp):      4,000 bytes  (80x200 ÷ 4)
 - 16-Color (4bpp):     8,000 bytes  (80x200 ÷ 2)
-- 256-Color (8bpp):   16,000 bytes  (80x200)
+- 256-Color (8bpp):   16,000 bytes  (80x200 ÷ 1)
 
 ## 80x100 Resolution
 - Monochrome (1bpp):   1,000 bytes  (80x100 ÷ 8)
 - 4-Color (2bpp):      2,000 bytes  (80x100 ÷ 4)
 - 16-Color (4bpp):     4,000 bytes  (80x100 ÷ 2)
-- 256-Color (8bpp):    8,000 bytes  (80x100)
+- 256-Color (8bpp):    8,000 bytes  (80x100 ÷ 1)
 
 ## 80x50 Resolution
 - Monochrome (1bpp):     500 bytes  (80x50 ÷ 8)
 - 4-Color (2bpp):      1,000 bytes  (80x50 ÷ 4)
 - 16-Color (4bpp):     2,000 bytes  (80x50 ÷ 2)
-- 256-Color (8bpp):    4,000 bytes  (80x50)
+- 256-Color (8bpp):    4,000 bytes  (80x50 ÷ 1)
 
 ## Notes
 - Border color taken from palette index 0
