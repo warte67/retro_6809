@@ -171,34 +171,31 @@ bool Bus::_onInit()
     Memory::Attach<VIDEO_BUFFER>();     // 0x0400 - 0x23FF      (8k video buffer)
     Memory::Attach<USER_MEMORY>();      // 0x2400 - 0xAFFF      (42k user RAM)    
     Memory::Attach<MEMBANK>();          // 0xB000 - 0xEFFF      (16k banked memory)
+    Memory::Attach<KERNEL_ROM>();       // 0xF000 - 0xFFFF      (3.5k kernel ROM)
+    Memory::Attach<HDW_REGISTERS>();    // 0xFE00 - 0xFFeF      (Hardware Registers)
+    Memory::Attach<ROM_VECTS>();        // 0xFFF0 - 0xFFFF      (System ROM Vectors)
 
-        // BEGIN TEST...
+    if (Memory::NextAddress() > 0x10000) {
+        Bus::Error("Memory Limit Exceeded!", __FILE__, __LINE__);        
+    }
 
-            if (MEM_TESTS) {
-                int upper_bounds = Memory::NextAddress();  
-                std::cout << clr::indent() << clr::GREEN << "Testing Addresses $0000-$" << clr::hex(upper_bounds,4) << " ... ";              
-                Byte b = 0;
-                for (int a = 0; a<upper_bounds; a++) 
-                {
-                    Memory::Write((Word)a,b);
-                    if (Memory::Read((Word)a) != b) {
-                        Bus::Error("Memory Test Failure!", __FILE__, __LINE__);                        
-                    }
-                    //std::cout << "Write(0x" << std::hex << (int)a << ", 0x" << (int)b << ") Read=" << (int)Memory::Read(a) << "\n";
-                    b++;
-                }
-                //std::cout << "Memory::_next_address = 0x" << std::hex << Memory::NextAddress() << std::endl;
-            } // END MEM_TESTS
-            std::cout << clr::YELLOW << "Memory Tests Passed!\n" << clr::RESET;
+    if (MEM_TESTS) {
+        int upper_bounds = Memory::NextAddress();  
+        std::cout << clr::indent() << clr::GREEN << "Testing Addresses $0000-$" << clr::hex(upper_bounds,4) << " ... ";              
+        Byte b = 0;
+        for (int a = 0; a<upper_bounds; a++) 
+        {
+            Memory::Write((Word)a,b);
+            if (Memory::Read((Word)a) != b) {
+                Bus::Error("Memory Test Failure!", __FILE__, __LINE__);                        
+            }
+            //std::cout << "Write(0x" << std::hex << (int)a << ", 0x" << (int)b << ") Read=" << (int)Memory::Read(a) << "\n";
+            b++;
+        }
+        std::cout << clr::YELLOW << "Memory Tests Passed!\n" << clr::RESET;
+    } // END MEM_TESTS
 
-            if (DUMP_MEMORY_MAP)    { Memory::Display_Nodes(); }
-
-        // ...END TEST
-
-    // ROM* rom = Memory::Attach<ROM>("./roms/system.hex", 0x8000);
-    // RAM* ram = Memory::Attach<RAM>(0x8000);
-    // Video* video = Memory::Attach<Video>(320, 200, 8);
-    // Sound* sound = Memory::Attach<Sound>(44100, 2);
+    if (DUMP_MEMORY_MAP)    { Memory::Display_Nodes(); }
 
     _bWasInit = true;
 

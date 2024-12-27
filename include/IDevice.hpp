@@ -453,15 +453,180 @@ class MEMBANK : public IDevice
             register_node new_node;
             new_node = { "MEMBANK_ONE", nextAddr,  { "Banked Memory Page One (8K)"} }; nextAddr+=bank_size;
             mapped_register.push_back(new_node);
-            new_node = { "MEMBANK_TWO", nextAddr,  { "Banked Memory Page Two (8K)"} }; nextAddr+=bank_size;
+            new_node = { "MEMBANK_TWO", nextAddr,  { "Banked Memory Page Two (8K)"} }; nextAddr+=(bank_size-1);
             mapped_register.push_back(new_node);
-            new_node = { "MEMBANK_END", nextAddr,  { "End of Banked Memory Region"} };             
+            new_node = { "MEMBANK_END", nextAddr,  { "End of Banked Memory Region"} }; nextAddr+=1;            
+            mapped_register.push_back(new_node);
+            new_node = { "MEMBANK_TOP", nextAddr,  { "TOP of Banked Memory Region"} }; 
             mapped_register.push_back(new_node);
 
             _size = nextAddr - old_address;
             return _size; 
         }  
 };
+
+
+/*** class KERNEL_ROM *******************************************************
+ * 
+ * ██╗  ██╗███████╗██████╗ ███╗   ██╗███████╗██╗             ██████╗  ██████╗ ███╗   ███╗
+ * ██║ ██╔╝██╔════╝██╔══██╗████╗  ██║██╔════╝██║             ██╔══██╗██╔═══██╗████╗ ████║
+ * █████╔╝ █████╗  ██████╔╝██╔██╗ ██║█████╗  ██║             ██████╔╝██║   ██║██╔████╔██║
+ * ██╔═██╗ ██╔══╝  ██╔══██╗██║╚██╗██║██╔══╝  ██║             ██╔══██╗██║   ██║██║╚██╔╝██║
+ * ██║  ██╗███████╗██║  ██║██║ ╚████║███████╗███████╗███████╗██║  ██║╚██████╔╝██║ ╚═╝ ██║
+ * ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚══════╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝
+ * 
+ * (This will be moved to its own files)
+ * Currently using a RAM model for testing.
+ ****************************************************************/
+class KERNEL_ROM : public IDevice
+{
+    public:
+        KERNEL_ROM() {
+            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
+            _size = 16 * 1024;
+            _device_name = "KERNEL_ROM";
+        }
+        virtual ~KERNEL_ROM() {
+            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
+        }    
+
+		bool OnInit() override 						{ return true; }
+		bool OnQuit() override 						{ return true; }
+		bool OnActivate() override 					{ return true; }
+		bool OnDeactivate() override 				{ return true; }
+		// bool OnEvent(SDL_Event* evnt) override 		{ return true; }
+		bool OnEvent(SDL_Event* evnt) override 		{ return (evnt==nullptr); }         // return true
+		bool OnUpdate(float fElapsedTime) override 	{ return (fElapsedTime==0.0f); }    // { return true; }           
+		bool OnRender() override 					{ return true; } 
+
+		int OnAttach(int nextAddr) override       { 
+            int bank_size = 3.5f*1024;
+            Word old_address=nextAddr;
+            this->heading = "Kernel Rom (3.5K)";
+            register_node new_node;
+            new_node = { "KERNEL_START", nextAddr,  { "Start of Kernel Rom Space"} }; nextAddr+=(bank_size-1);
+            mapped_register.push_back(new_node);
+            new_node = { "KERNEL_END", nextAddr,  { "End of Kernel Rom Space"} }; nextAddr+=1;
+            mapped_register.push_back(new_node);
+            new_node = { "KERNEL_TOP", nextAddr,  { "Top of Kernel Rom Space"} };
+            mapped_register.push_back(new_node);
+
+            _size = nextAddr - old_address;
+            return _size; 
+        }  
+};
+
+
+/*** class HDW_REGISTERS *******************************************************
+ *
+ * ██╗  ██╗██████╗ ██╗    ██╗        ██████╗ ███████╗ ██████╗ ██╗███████╗████████╗███████╗██████╗ ███████╗
+ * ██║  ██║██╔══██╗██║    ██║        ██╔══██╗██╔════╝██╔════╝ ██║██╔════╝╚══██╔══╝██╔════╝██╔══██╗██╔════╝
+ * ███████║██║  ██║██║ █╗ ██║        ██████╔╝█████╗  ██║  ███╗██║███████╗   ██║   █████╗  ██████╔╝███████╗
+ * ██╔══██║██║  ██║██║███╗██║        ██╔══██╗██╔══╝  ██║   ██║██║╚════██║   ██║   ██╔══╝  ██╔══██╗╚════██║
+ * ██║  ██║██████╔╝╚███╔███╔╝███████╗██║  ██║███████╗╚██████╔╝██║███████║   ██║   ███████╗██║  ██║███████║
+ * ╚═╝  ╚═╝╚═════╝  ╚══╝╚══╝ ╚══════╝╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝╚══════╝
+ * 
+ * (This will be moved to its own files)
+ * Currently using a RAM model for testing.
+ ****************************************************************/
+class HDW_REGISTERS : public IDevice
+{
+    public:
+        HDW_REGISTERS() {
+            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
+            _size = 16 * 1024;
+            _device_name = "HDW_REGISTERS";
+        }
+        virtual ~HDW_REGISTERS() {
+            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
+        }    
+
+		bool OnInit() override 						{ return true; }
+		bool OnQuit() override 						{ return true; }
+		bool OnActivate() override 					{ return true; }
+		bool OnDeactivate() override 				{ return true; }
+		// bool OnEvent(SDL_Event* evnt) override 		{ return true; }
+		bool OnEvent(SDL_Event* evnt) override 		{ return (evnt==nullptr); }         // return true
+		bool OnUpdate(float fElapsedTime) override 	{ return (fElapsedTime==0.0f); }    // { return true; }           
+		bool OnRender() override 					{ return true; } 
+
+		int OnAttach(int nextAddr) override       { 
+            Word old_address=nextAddr;
+            this->heading = "Start of Hardware Register Space";
+            register_node new_node;
+            new_node = { "HDW_REG_START", nextAddr,  { "Start of Register Space"} }; 
+            mapped_register.push_back(new_node);
+
+            int bank_size = 0xFFF0-nextAddr;      
+            std::string res = std::to_string(bank_size);
+            res += " bytes reserved for future use.";
+            new_node = { "HWD_RESERVED", nextAddr,  { res } }; nextAddr+=bank_size;
+            mapped_register.push_back(new_node);
+
+            _size = nextAddr - old_address;
+            return _size; 
+        }  
+};
+
+
+/*** class ROM_VECTS *******************************************************
+ * 
+ * ██████╗  ██████╗ ███╗   ███╗       ██╗   ██╗███████╗ ██████╗████████╗███████╗
+ * ██╔══██╗██╔═══██╗████╗ ████║       ██║   ██║██╔════╝██╔════╝╚══██╔══╝██╔════╝
+ * ██████╔╝██║   ██║██╔████╔██║       ██║   ██║█████╗  ██║        ██║   ███████╗
+ * ██╔══██╗██║   ██║██║╚██╔╝██║       ╚██╗ ██╔╝██╔══╝  ██║        ██║   ╚════██║
+ * ██║  ██║╚██████╔╝██║ ╚═╝ ██║███████╗╚████╔╝ ███████╗╚██████╗   ██║   ███████║
+ * ╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝ ╚═══╝  ╚══════╝ ╚═════╝   ╚═╝   ╚══════╝
+ * 
+ ****************************************************************/
+class ROM_VECTS : public IDevice
+{
+    public:
+        ROM_VECTS() {
+            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
+            _size = 16 * 1024;
+            _device_name = "ROM_VECTS";
+        }
+        virtual ~ROM_VECTS() {
+            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
+        }    
+
+		bool OnInit() override 						{ return true; }
+		bool OnQuit() override 						{ return true; }
+		bool OnActivate() override 					{ return true; }
+		bool OnDeactivate() override 				{ return true; }
+		// bool OnEvent(SDL_Event* evnt) override 		{ return true; }
+		bool OnEvent(SDL_Event* evnt) override 		{ return (evnt==nullptr); }         // return true
+		bool OnUpdate(float fElapsedTime) override 	{ return (fElapsedTime==0.0f); }    // { return true; }           
+		bool OnRender() override 					{ return true; } 
+
+		int OnAttach(int nextAddr) override       { 
+            Word old_address=nextAddr;
+            this->heading = "Hardware Interrupt Vectors";
+            register_node new_node;
+            new_node = { "HARD_EXEC", nextAddr,     { "EXEC Hardware Interrupt Vector" } }; nextAddr+=2;
+            mapped_register.push_back(new_node);
+            new_node = { "HARD_SWI3", nextAddr,     { "SWI3 Hardware Interrupt Vector" } }; nextAddr+=2;
+            mapped_register.push_back(new_node);
+            new_node = { "HARD_SWI2", nextAddr,     { "SWI2 Hardware Interrupt Vector" } }; nextAddr+=2;
+            mapped_register.push_back(new_node);
+            new_node = { "HARD_FIRQ", nextAddr,     { "FIRQ Hardware Interrupt Vector" } }; nextAddr+=2;
+            mapped_register.push_back(new_node);
+            new_node = { "HARD_IRQ", nextAddr,      { "IRQ Hardware Interrupt Vector" } }; nextAddr+=2;
+            mapped_register.push_back(new_node);
+            new_node = { "HARD_SWI", nextAddr,      { "SWI / SYS Hardware Interrupt Vector" } }; nextAddr+=2;
+            mapped_register.push_back(new_node);
+            new_node = { "HARD_NMI", nextAddr,      { "NMI Hardware Interrupt Vector" } }; nextAddr+=2;
+            mapped_register.push_back(new_node);
+            new_node = { "HARD_RESET", nextAddr,    { "RESET Hardware Interrupt Vector" } }; nextAddr+=2;
+            mapped_register.push_back(new_node);
+
+            _size = nextAddr - old_address;
+            return _size; 
+        }  
+};
+
+
 
 //              // device memory map description
 //              std::string heading;                    // string that describes the entire device
