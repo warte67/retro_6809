@@ -88,6 +88,17 @@ protected: // PROTECTED ACCESSORS
 //
 ////////
 
+/*** class RAM *******************************************************
+ * 
+ * ██████╗  █████╗ ███╗   ███╗
+ * ██╔══██╗██╔══██╗████╗ ████║
+ * ██████╔╝███████║██╔████╔██║
+ * ██╔══██╗██╔══██║██║╚██╔╝██║
+ * ██║  ██║██║  ██║██║ ╚═╝ ██║
+ * ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝
+ * 
+ * (This may be moved to its own files)
+ ****************************************************************/
 class RAM : public IDevice
 {
     public:
@@ -113,6 +124,17 @@ class RAM : public IDevice
 		bool OnRender() override 					{ return true; } 
 };
 
+/*** class ROM *******************************************************
+ * 
+ * ██████╗  ██████╗ ███╗   ███╗
+ * ██╔══██╗██╔═══██╗████╗ ████║
+ * ██████╔╝██║   ██║██╔████╔██║
+ * ██╔══██╗██║   ██║██║╚██╔╝██║
+ * ██║  ██║╚██████╔╝██║ ╚═╝ ██║
+ * ╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝                         
+ * 
+ * (This may be moved to its own files)
+ ****************************************************************/
 class ROM : public IDevice
 {
     public:
@@ -134,6 +156,17 @@ class ROM : public IDevice
         void write_to_rom(Word offset, Byte data);
 };
 
+/*** class RAM_64K *******************************************************
+ * 
+ * ██████╗  █████╗ ███╗   ███╗         ██████╗ ██╗  ██╗██╗  ██╗
+ * ██╔══██╗██╔══██╗████╗ ████║        ██╔════╝ ██║  ██║██║ ██╔╝
+ * ██████╔╝███████║██╔████╔██║        ███████╗ ███████║█████╔╝ 
+ * ██╔══██╗██╔══██║██║╚██╔╝██║        ██╔═══██╗╚════██║██╔═██╗ 
+ * ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗╚██████╔╝     ██║██║  ██╗
+ * ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝ ╚═════╝      ╚═╝╚═╝  ╚═╝
+ * 
+ * (This may be moved to its own files)
+ ****************************************************************/
 class RAM_64K : public IDevice
 {
     public:
@@ -170,6 +203,17 @@ class RAM_64K : public IDevice
 };
 
 
+/*** class SOFT_VECTORS *******************************************************
+ * 
+ * ███████╗ ██████╗ ███████╗████████╗    ██╗   ██╗███████╗ ██████╗████████╗ ██████╗ ██████╗ ███████╗
+ * ██╔════╝██╔═══██╗██╔════╝╚══██╔══╝    ██║   ██║██╔════╝██╔════╝╚══██╔══╝██╔═══██╗██╔══██╗██╔════╝
+ * ███████╗██║   ██║█████╗     ██║       ██║   ██║█████╗  ██║        ██║   ██║   ██║██████╔╝███████╗
+ * ╚════██║██║   ██║██╔══╝     ██║       ╚██╗ ██╔╝██╔══╝  ██║        ██║   ██║   ██║██╔══██╗╚════██║
+ * ███████║╚██████╔╝██║        ██║███████╗╚████╔╝ ███████╗╚██████╗   ██║   ╚██████╔╝██║  ██║███████║
+ * ╚══════╝ ╚═════╝ ╚═╝        ╚═╝╚══════╝ ╚═══╝  ╚══════╝ ╚═════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝╚══════╝
+ * 
+ * (This may be moved to its own files)
+ ****************************************************************/
 class SOFT_VECTORS : public IDevice
 {
     public:
@@ -217,7 +261,17 @@ class SOFT_VECTORS : public IDevice
         }  
 };
 
-
+/*** class SYSTEM_MEMORY *******************************************************
+ * 
+ * ███████╗██╗   ██╗███████╗████████╗███████╗███╗   ███╗        ███╗   ███╗███████╗███╗   ███╗ ██████╗ ██████╗ ██╗   ██╗
+ * ██╔════╝╚██╗ ██╔╝██╔════╝╚══██╔══╝██╔════╝████╗ ████║        ████╗ ████║██╔════╝████╗ ████║██╔═══██╗██╔══██╗╚██╗ ██╔╝
+ * ███████╗ ╚████╔╝ ███████╗   ██║   █████╗  ██╔████╔██║        ██╔████╔██║█████╗  ██╔████╔██║██║   ██║██████╔╝ ╚████╔╝ 
+ * ╚════██║  ╚██╔╝  ╚════██║   ██║   ██╔══╝  ██║╚██╔╝██║        ██║╚██╔╝██║██╔══╝  ██║╚██╔╝██║██║   ██║██╔══██╗  ╚██╔╝  
+ * ███████║   ██║   ███████║   ██║   ███████╗██║ ╚═╝ ██║███████╗██║ ╚═╝ ██║███████╗██║ ╚═╝ ██║╚██████╔╝██║  ██║   ██║   
+ * ╚══════╝   ╚═╝   ╚══════╝   ╚═╝   ╚══════╝╚═╝     ╚═╝╚══════╝╚═╝     ╚═╝╚══════╝╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝   
+ *                                                                                                                      
+ * (This may be moved to its own files)
+ ****************************************************************/
 class SYSTEM_MEMORY : public IDevice
 {
     public:
@@ -271,7 +325,6 @@ class SYSTEM_MEMORY : public IDevice
  * 
  * (This may be moved to its own files)
  ****************************************************************/
-
 class VIDEO_BUFFER : public IDevice
 {
     public:
@@ -311,16 +364,26 @@ class VIDEO_BUFFER : public IDevice
 };
 
 
-
-class USER_RAM : public IDevice
+/*** class USER_MEMORY *******************************************************
+ * 
+* ██╗   ██╗███████╗███████╗██████╗         ███╗   ███╗███████╗███╗   ███╗ ██████╗ ██████╗ ██╗   ██╗
+* ██║   ██║██╔════╝██╔════╝██╔══██╗        ████╗ ████║██╔════╝████╗ ████║██╔═══██╗██╔══██╗╚██╗ ██╔╝
+* ██║   ██║███████╗█████╗  ██████╔╝        ██╔████╔██║█████╗  ██╔████╔██║██║   ██║██████╔╝ ╚████╔╝ 
+* ██║   ██║╚════██║██╔══╝  ██╔══██╗        ██║╚██╔╝██║██╔══╝  ██║╚██╔╝██║██║   ██║██╔══██╗  ╚██╔╝  
+* ╚██████╔╝███████║███████╗██║  ██║███████╗██║ ╚═╝ ██║███████╗██║ ╚═╝ ██║╚██████╔╝██║  ██║   ██║   
+*  ╚═════╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝╚══════╝╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝   
+ * 
+ * (This may be moved to its own files)
+ ****************************************************************/
+class USER_MEMORY : public IDevice
 {
     public:
-        USER_RAM() {
+        USER_MEMORY() {
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
             // _size = size;
-            _device_name = "USER_RAM";
+            _device_name = "USER_MEMORY";
         }
-        virtual ~USER_RAM() {
+        virtual ~USER_MEMORY() {
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
         }    
 
@@ -334,9 +397,9 @@ class USER_RAM : public IDevice
 		bool OnRender() override 					{ return true; } 
 
 		int OnAttach(int nextAddr) override       { 
-            int ram_size = 0xCFFF-nextAddr;
+            int ram_size = 0xAFFF-nextAddr;
             Word old_address=nextAddr;
-            this->heading = "User Ram (" + std::to_string(ram_size/1024) + "K)";
+            this->heading = "User Memory (" + std::to_string(ram_size/1024) + "K)";
             register_node new_node;
             new_node = { "USER_RAM", nextAddr,      { "User Accessable RAM"} }; nextAddr+=ram_size;
             mapped_register.push_back(new_node);
@@ -351,7 +414,54 @@ class USER_RAM : public IDevice
 };
 
 
+/*** class MEMBANK *******************************************************
+ * 
+ * ███╗   ███╗███████╗███╗   ███╗██████╗  █████╗ ███╗   ██╗██╗  ██╗
+ * ████╗ ████║██╔════╝████╗ ████║██╔══██╗██╔══██╗████╗  ██║██║ ██╔╝
+ * ██╔████╔██║█████╗  ██╔████╔██║██████╔╝███████║██╔██╗ ██║█████╔╝ 
+ * ██║╚██╔╝██║██╔══╝  ██║╚██╔╝██║██╔══██╗██╔══██║██║╚██╗██║██╔═██╗ 
+ * ██║ ╚═╝ ██║███████╗██║ ╚═╝ ██║██████╔╝██║  ██║██║ ╚████║██║  ██╗
+ * ╚═╝     ╚═╝╚══════╝╚═╝     ╚═╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝
+ * 
+ * (This may be moved to its own files)
+ ****************************************************************/
+class MEMBANK : public IDevice
+{
+    public:
+        MEMBANK() {
+            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
+            _size = 16 * 1024;
+            _device_name = "MEMBANK";
+        }
+        virtual ~MEMBANK() {
+            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
+        }    
 
+		bool OnInit() override 						{ return true; }
+		bool OnQuit() override 						{ return true; }
+		bool OnActivate() override 					{ return true; }
+		bool OnDeactivate() override 				{ return true; }
+		// bool OnEvent(SDL_Event* evnt) override 		{ return true; }
+		bool OnEvent(SDL_Event* evnt) override 		{ return (evnt==nullptr); }         // return true
+		bool OnUpdate(float fElapsedTime) override 	{ return (fElapsedTime==0.0f); }    // { return true; }           
+		bool OnRender() override 					{ return true; } 
+
+		int OnAttach(int nextAddr) override       { 
+            int bank_size = 8*1024;
+            Word old_address=nextAddr;
+            this->heading = "Banked Memory Region (" + std::to_string(bank_size/512) + "K)";
+            register_node new_node;
+            new_node = { "MEMBANK_ONE", nextAddr,  { "Banked Memory Page One (8K)"} }; nextAddr+=bank_size;
+            mapped_register.push_back(new_node);
+            new_node = { "MEMBANK_TWO", nextAddr,  { "Banked Memory Page Two (8K)"} }; nextAddr+=bank_size;
+            mapped_register.push_back(new_node);
+            new_node = { "MEMBANK_END", nextAddr,  { "End of Banked Memory Region"} };             
+            mapped_register.push_back(new_node);
+
+            _size = nextAddr - old_address;
+            return _size; 
+        }  
+};
 
 //              // device memory map description
 //              std::string heading;                    // string that describes the entire device

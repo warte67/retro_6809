@@ -10,6 +10,7 @@
  ******************/
 
 #include "IDevice.hpp"
+#include "Memory.hpp"
 
 
 ///////////////////////////

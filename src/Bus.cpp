@@ -112,7 +112,7 @@ bool Bus::Run()
             // (( TESTING ))
             // Bus::IsRunning(false);
         }
-        // Bus::Error("Something like a simulated error happened!");
+        // Bus::Error("Something like a simulated error happened!", __FILE__, __LINE__);
 
     }
     else {
@@ -135,28 +135,27 @@ bool Bus::_onInit()
 {
     std::cout << clr::indent_push() << clr::CYAN << "Bus::_onInit() Entry" << clr::RETURN;
 
-	// TESTING....
+    // initialize SDL2
+    if (!SDL_Init(SDL_INIT_VIDEO))
+    {
+        // std::cout << SDL_GetError() << std::endl;
+        std::cout << clr::indent_pop() << clr::ORANGE << "Bus::_onInit() Error" << clr::RETURN;
+        Bus::Error(SDL_GetError(), __FILE__, __LINE__);
+        return false;
+    }
 
-        // initialize SDL2
-		if (!SDL_Init(SDL_INIT_VIDEO))
-		{
-			// std::cout << SDL_GetError() << std::endl;
-            std::cout << clr::indent_pop() << clr::ORANGE << "Bus::_onInit() Error" << clr::RETURN;
-			Bus::Error(SDL_GetError(), __FILE__, __LINE__);
-			return false;
-		}
+    // create the main window
+    pWindow = SDL_CreateWindow("SDL3 Retro_6809", 1280, 800, window_flags); 
+    SDL_ShowWindow(pWindow);
 
-        // create the main window
-		pWindow = SDL_CreateWindow("SDL3 Retro_6809", 1024, 640, window_flags); 
-		SDL_ShowWindow(pWindow);
-
-        // create the renderer
-        pRenderer = SDL_CreateRenderer(pWindow, NULL);
+    // create the renderer
+    pRenderer = SDL_CreateRenderer(pWindow, NULL);
+    SDL_SetRenderLogicalPresentation(pRenderer, 320, 200, SDL_LOGICAL_PRESENTATION_STRETCH);
     
     if (_memory.OnInit() == false)
 	{
         std::cout << clr::indent_pop() << clr::ORANGE << "Bus::_onInit() Error" << clr::RETURN;
-		Bus::Error("Device Initialization Failure!");
+		Bus::Error("Device Initialization Failure!", __FILE__, __LINE__);
         return false;
 	}
 
@@ -170,7 +169,8 @@ bool Bus::_onInit()
     Memory::Attach<SOFT_VECTORS>();     // 0x0000 - 0x000F
     Memory::Attach<SYSTEM_MEMORY>();    // 0x0010 - 0x03FF
     Memory::Attach<VIDEO_BUFFER>();     // 0x0400 - 0x23FF      (8k video buffer)
-    Memory::Attach<USER_RAM>();         // 0x0400 - 0x23FF      (42k user RAM)    
+    Memory::Attach<USER_MEMORY>();      // 0x2400 - 0xAFFF      (42k user RAM)    
+    Memory::Attach<MEMBANK>();          // 0xB000 - 0xEFFF      (16k banked memory)
 
         // BEGIN TEST...
 
@@ -181,9 +181,8 @@ bool Bus::_onInit()
                 for (int a = 0; a<upper_bounds; a++) 
                 {
                     Memory::Write((Word)a,b);
-                    if (Memory::Read((Word)a) != b) 
-                    {
-                        Bus::Error("Memory Test Failure!");                        
+                    if (Memory::Read((Word)a) != b) {
+                        Bus::Error("Memory Test Failure!", __FILE__, __LINE__);                        
                     }
                     //std::cout << "Write(0x" << std::hex << (int)a << ", 0x" << (int)b << ") Read=" << (int)Memory::Read(a) << "\n";
                     b++;
@@ -216,7 +215,7 @@ bool Bus::_onQuit()
         if (_memory.OnQuit() == false)
 		{
             std::cout << clr::indent_pop() << clr::ORANGE << "Bus::_onQuit() Error" << clr::RETURN;
-			Bus::Error("Device Termination Failure!");
+			Bus::Error("Device Termination Failure!", __FILE__, __LINE__);
             return false;
 		}
         // shut down SDL stuff
@@ -245,7 +244,7 @@ bool Bus::_onActivate(void)
     if (_memory.OnActivate() == false)
     {
         std::cout << clr::indent_pop() << clr::ORANGE << "Bus::_onActivate() Error" << clr::RETURN;
-		Bus::Error("Device Failed to Activate!");
+		Bus::Error("Device Failed to Activate!", __FILE__, __LINE__);
 		return false;
 	}
     std::cout << clr::indent_pop() << clr::CYAN << "Bus::_onActivate() Exit" << clr::RETURN;
@@ -258,7 +257,7 @@ bool Bus::_onDeactivate(void)
     if (_memory.OnDeactivate() == false)
 	{
         std::cout << clr::indent_pop() << clr::ORANGE << "Bus::_onDeactivate() Error" << clr::RETURN;
-		Bus::Error("Device Failed to Deactivate!");		        
+		Bus::Error("Device Failed to Deactivate!", __FILE__, __LINE__);		        
         return false;
 	}
     std::cout << clr::indent_pop() << clr::CYAN << "Bus::_onDeactivate() Exit" << clr::RETURN;
@@ -349,7 +348,7 @@ bool Bus::_onUpdate(float __na)
     }
     if (_memory.OnUpdate(__na) == false)
 	{
-		Bus::Error("Device Update Failure!");
+		Bus::Error("Device Update Failure!", __FILE__, __LINE__);
         return false;
 	}
     return true;
@@ -360,7 +359,7 @@ bool Bus::_onRender(void)
     // std::cout << "Bus::_onRender()\n";
     if (_memory.OnRender() == false)
 	{
-		Bus::Error("Device Render Failure!");
+		Bus::Error("Device Render Failure!", __FILE__, __LINE__);
         return false;    
 	}
 

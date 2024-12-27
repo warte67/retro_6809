@@ -135,61 +135,60 @@ bool Memory::OnRender()
 
 Byte Memory::Read(Word offset, bool debug)
 {
-    int index = _binary_search(offset);
-    if (index != -1) {
-        IDevice* pDevice = _memory_nodes[index];
-        if (debug) {
-            return pDevice->_memory[offset - pDevice->base()];
-        } else {
-            return pDevice->OnRead(offset - pDevice->base());
-        }
-    } else {
-        // Handle error or default value for out-of-range addresses.
-        Bus::Error("Memory Address Out Of Range");
-        return 0xCC;
-    }
-    
-    // for (auto& a : Memory::_memory_nodes)
-    // {
-    //     if (offset - a->base() < a->size())
-    //     {
-    //         if (debug)
-    //             if (offset - a->base() < a->size())
-    //                 return a->memory(offset - a->base() );
-    //         return a->OnRead(offset);
+    // int index = _binary_search(offset);
+    // if (index != -1) {
+    //     IDevice* pDevice = _memory_nodes[index];
+    //     if (debug) {
+    //         return pDevice->_memory[offset - pDevice->base()];
+    //     } else {
+    //         return pDevice->OnRead(offset - pDevice->base());
     //     }
+    // } else {
+    //     // Handle error or default value for out-of-range addresses.
+    //     Bus::Error("Memory Address Out Of Range");
+    //     return 0xCC;
     // }
-    // return 0xCC;
+    for (auto& a : Memory::_memory_nodes)
+    {
+        if (offset - a->base() < a->size())
+        {
+            if (debug)
+                if (offset - a->base() < a->size())
+                    return a->memory(offset - a->base() );
+            return a->OnRead(offset);
+        }
+    }
+    return 0xCC;    
 }
 
 void Memory::Write(Word offset, Byte data, bool debug)
 {
-    int index = _binary_search(offset);
-    if (index != -1) {
-        IDevice* pDevice = _memory_nodes[index];
-        ROM* isROM = dynamic_cast<ROM*>(pDevice);
-        if (debug && isROM) {
-            isROM->write_to_rom(offset, data);
-        } else {
-            pDevice->OnWrite(offset - pDevice->base(), data);
-        }
-    } else {
-        // Handle error for out-of-range addresses.
-        Bus::Error("Memory Address Out Of Range");
-    }
-
-    // for (auto& a : Memory::_memory_nodes)
-    // {
-    //     if (offset - a->base() < a->size())
-    //     {
-    //         ROM* isROM = dynamic_cast<ROM*>(a);
-    //         if (debug && isROM)
-    //             isROM->write_to_rom(offset, data);
-    //         else
-    //             a->OnWrite(offset, data);
-    //         return;
+    // int index = _binary_search(offset);
+    // if (index != -1) {
+    //     IDevice* pDevice = _memory_nodes[index];
+    //     ROM* isROM = dynamic_cast<ROM*>(pDevice);
+    //     if (debug && isROM) {
+    //         isROM->write_to_rom(offset, data);
+    //     } else {
+    //         pDevice->OnWrite(offset - pDevice->base(), data);
     //     }
+    // } else {
+    //     // Handle error for out-of-range addresses.
+    //     Bus::Error("Memory Address Out Of Range");
     // }
+    
+    for (auto& a : Memory::_memory_nodes)
+    {
+        if (offset - a->base() < a->size())
+        {
+            ROM* isROM = dynamic_cast<ROM*>(a);
+            if (debug && isROM)
+                isROM->write_to_rom(offset, data);
+            else
+                a->OnWrite(offset, data);
+            return;
+        }
+    }
 }
 
 Word Memory::Read_Word(Word offset, bool debug)
@@ -283,23 +282,6 @@ int Memory::_binary_search(Word address)
 
 void Memory::Display_Nodes() 
 {
-    // auto hex = [](Uint32 n, Uint8 d)
-    // {
-    //     std::string s(d, '0');
-    //     for (int i = d - 1; i >= 0; i--, n >>= 4)
-    //         s[i] = "0123456789ABCDEF"[n & 0xF];
-    //     return s;
-    // };
-
-    // auto pad = [](std::string text, Uint8 d)
-    // {
-    //     std::string ret = text;
-    //     while (ret.length()<d) {
-    //         ret += " ";
-    //     }
-    //     return ret;
-    // };
-
     // 
     // Display C++ memory_map.hpp
     //
