@@ -135,37 +135,38 @@ bool Bus::_onInit()
 {
     std::cout << clr::indent_push() << clr::CYAN << "Bus::_onInit() Entry" << clr::RETURN;
 
-    // initialize SDL2
-    if (!SDL_Init(SDL_INIT_VIDEO))
-    {
-        // std::cout << SDL_GetError() << std::endl;
-        std::cout << clr::indent_pop() << clr::ORANGE << "Bus::_onInit() Error" << clr::RETURN;
-        Bus::Error(SDL_GetError(), __FILE__, __LINE__);
-        return false;
-    }
+    // ToDo: Move this to Gfx::OnInit()
+    { // BEGIN OF SDL3 Initialization
+        // initialize SDL3
+        if (!SDL_Init(SDL_INIT_VIDEO))
+        {
+            // std::cout << SDL_GetError() << std::endl;
+            std::cout << clr::indent_pop() << clr::ORANGE << "Bus::_onInit() Error" << clr::RETURN;
+            Bus::Error(SDL_GetError(), __FILE__, __LINE__);
+            return false;
+        }
 
-    // create the main window
-    pWindow = SDL_CreateWindow("SDL3 Retro_6809", 1280, 800, window_flags); 
-    SDL_ShowWindow(pWindow);
+        // create the main window
+        pWindow = SDL_CreateWindow("SDL3 Retro_6809", 1280, 800, window_flags); 
+        SDL_ShowWindow(pWindow);
 
-    // create the renderer
-    pRenderer = SDL_CreateRenderer(pWindow, NULL);
-    SDL_SetRenderLogicalPresentation(pRenderer, 320, 200, SDL_LOGICAL_PRESENTATION_STRETCH);
-    
-    if (_memory.OnInit() == false)
-	{
-        std::cout << clr::indent_pop() << clr::ORANGE << "Bus::_onInit() Error" << clr::RETURN;
-		Bus::Error("Device Initialization Failure!", __FILE__, __LINE__);
-        return false;
-	}
+        // create the renderer
+        pRenderer = SDL_CreateRenderer(pWindow, NULL);
+        SDL_SetRenderLogicalPresentation(pRenderer, 320, 200, SDL_LOGICAL_PRESENTATION_STRETCH);
+        
+        if (_memory.OnInit() == false)
+        {
+            std::cout << clr::indent_pop() << clr::ORANGE << "Bus::_onInit() Error" << clr::RETURN;
+            Bus::Error("Device Initialization Failure!", __FILE__, __LINE__);
+            return false;
+        }
+    } // END OF SDL3 Initialization
 
     ////////////////////////////////////////
     // Core system devices with parameters
     ////////////////////////////////////////
 
-    // Memory::Attach<RAM_64K>(0x10000);       // allocate 64k for testing
-
-
+    // Attach the core system devices
     Memory::Attach<SOFT_VECTORS>();     // 0x0000 - 0x000F
     Memory::Attach<SYSTEM_MEMORY>();    // 0x0010 - 0x03FF
     Memory::Attach<VIDEO_BUFFER>();     // 0x0400 - 0x23FF      (8k video buffer)
@@ -175,30 +176,32 @@ bool Bus::_onInit()
     Memory::Attach<HDW_REGISTERS>();    // 0xFE00 - 0xFFeF      (Hardware Registers)
     Memory::Attach<ROM_VECTS>();        // 0xFFF0 - 0xFFFF      (System ROM Vectors)
 
+    // Error Checking
     if (Memory::NextAddress() > 0x10000) {
         Bus::Error("Memory Limit Exceeded!", __FILE__, __LINE__);        
     }
 
-    if (MEM_TESTS) {
-        int upper_bounds = Memory::NextAddress();  
-        std::cout << clr::indent() << clr::GREEN << "Testing Addresses $0000-$" << clr::hex(upper_bounds,4) << " ... ";              
-        Byte b = 0;
-        for (int a = 0; a<upper_bounds; a++) 
-        {
-            Memory::Write((Word)a,b);
-            if (Memory::Read((Word)a) != b) {
-                Bus::Error("Memory Test Failure!", __FILE__, __LINE__);                        
-            }
-            //std::cout << "Write(0x" << std::hex << (int)a << ", 0x" << (int)b << ") Read=" << (int)Memory::Read(a) << "\n";
-            b++;
+    // Engange Basic Memory Tests
+    int upper_bounds = Memory::NextAddress();  
+    std::cout << clr::indent() << clr::GREEN << "Testing Addresses $0000-$" << clr::hex(upper_bounds,4) << " ... ";              
+    Byte b = 0;
+    for (int a = 0; a<upper_bounds; a++) 
+    {
+        Memory::Write((Word)a,b);
+        if (Memory::Read((Word)a) != b) {
+            Bus::Error("Memory Test Failure!", __FILE__, __LINE__);                        
         }
-        std::cout << clr::YELLOW << "Memory Tests Passed!\n" << clr::RESET;
-    } // END MEM_TESTS
+        b++;
+    }
+    std::cout << clr::YELLOW << "Memory Tests Passed!\n" << clr::RESET;
 
+    // Dump the memory map
     if (DUMP_MEMORY_MAP)    { Memory::Display_Nodes(); }
 
+    // Set the initialized flag
     _bWasInit = true;
 
+    // cleanup and return
     std::cout << clr::indent_pop() << clr::CYAN << "Bus::_onInit() Exit" << clr::RETURN;
     return true;
 }
@@ -215,17 +218,20 @@ bool Bus::_onQuit()
 			Bus::Error("Device Termination Failure!", __FILE__, __LINE__);
             return false;
 		}
-        // shut down SDL stuff
-        if (pRenderer)
-        {
-            // SDL_DestroyRenderer(pRenderer);
-            pRenderer = nullptr;
-        }
-        if (pWindow)
-        {
-            SDL_DestroyWindow(pWindow);
-            pWindow = nullptr;
-        }
+        // Move this to Gfx::OnQuit()
+        { // BEGIN OF SDL3 Shutdown
+            // shut down SDL stuff
+            if (pRenderer)
+            {
+                // SDL_DestroyRenderer(pRenderer);
+                pRenderer = nullptr;
+            }
+            if (pWindow)
+            {
+                SDL_DestroyWindow(pWindow);
+                pWindow = nullptr;
+            }
+        } // END OF SDL3 Shutdown
 
         _bWasInit = false;         
         SDL_Quit();
