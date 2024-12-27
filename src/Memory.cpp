@@ -225,14 +225,14 @@ void Memory::Write_DWord(Word offset, DWord data, bool debug)
 }
 
 
-Word Memory::_attach(IDevice* device)
+int Memory::_attach(IDevice* device)
 {    
-    Word size = 0;
+    int size = 0;
     if (device != nullptr)
     {
         // attach to the memory map and allow the new device to build its own
         // device descrptor node.
-        size = device->OnAttach((Word)_next_address);     
+        size = device->OnAttach(_next_address);     
         if (size > 0)
         {
             device->base(_next_address);
@@ -245,16 +245,16 @@ Word Memory::_attach(IDevice* device)
             std::string err = "Memory node '";
             err += device->name();
             err += "' was zero size!";
-            Bus::Error(err.c_str());
+            Bus::Error(err.c_str(), __FILE__, __LINE__);
             Bus::IsRunning(false);
         }
     }
-    if (_next_address >= 65536)
+    if (_next_address > 65536)
     {
-        Bus::Error("Memory allocation beyond 64k boundary!");
+        Bus::ERROR("Memory allocation beyond 64k boundary!");
         Bus::IsRunning(false);
     }
-    if (size==0)  Bus::Error("_attach size was zero");
+    if (size==0)  Bus::ERROR("_attach size was zero");
     return size;
 }
 

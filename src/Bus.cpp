@@ -110,7 +110,7 @@ bool Bus::Run()
             SDL_RenderPresent(pRenderer);
 
             // (( TESTING ))
-            Bus::IsRunning(false);
+            // Bus::IsRunning(false);
         }
         // Bus::Error("Something like a simulated error happened!");
 
@@ -151,7 +151,7 @@ bool Bus::_onInit()
 			SDL_WINDOWPOS_CENTERED,
 			SDL_WINDOWPOS_CENTERED,
 			1024,640, 
-			window_flags);
+			window_flags); 
 		SDL_ShowWindow(pWindow);
 
         // create the renderer
@@ -165,30 +165,35 @@ bool Bus::_onInit()
         return false;
 	}
 
+    ////////////////////////////////////////
     // Core system devices with parameters
+    ////////////////////////////////////////
     
-    
-    Memory::Attach<SOFT_VECTORS>();     // 0x0000 - 0x000F
-    Memory::Attach<SYSTEM_MEMORY>();    // 0x0010 - 0x03FF
-    // Memory::Attach<VIDEO_BUFFER>();     // 0x0400 - 0x23FF      (8k video buffer)
-    // Memory::Attach<USER_RAM>();         // 0x0400 - 0x23FF      (42k user RAM)
+    // Memory::Attach<SOFT_VECTORS>();     // 0x0000 - 0x000F
+    //Memory::Attach<SYSTEM_MEMORY>();    // 0x0010 - 0x03FF
+    //Memory::Attach<VIDEO_BUFFER>();     // 0x0400 - 0x23FF      (8k video buffer)
+    //Memory::Attach<USER_RAM>();         // 0x0400 - 0x23FF      (42k user RAM)
+
+
+    Memory::Attach<RAM_64K>(0x10000);       // allocate 64k for testing
     
 
         // BEGIN TEST...
 
             if (MEM_TESTS) {
-                int upper_bounds = Memory::NextAddress();
+                int upper_bounds = Memory::NextAddress(); 
                 Byte b = 0;
                 for (int a = 0; a<upper_bounds; a++) {
                     Memory::Write((Word)a,b);
                     if (Memory::Read((Word)a) != b) {
                         Bus::Error("Memory Test Failure!");                        
                     }
-                    std::cout << "Write(0x" << std::hex << (int)a << ", 0x" << (int)b << ") Read=" << (int)Memory::Read(a) << "\n";
+                    //std::cout << "Write(0x" << std::hex << (int)a << ", 0x" << (int)b << ") Read=" << (int)Memory::Read(a) << "\n";
                     b++;
                 }
-                std::cout << "Memory::_next_address = 0x" << std::hex << Memory::NextAddress() << std::endl;
+                //std::cout << "Memory::_next_address = 0x" << std::hex << Memory::NextAddress() << std::endl;
             } // END MEM_TESTS
+            std::cout << clr::indent() << clr::YELLOW << "Memory Tests Passed!\n" << clr::RESET;
 
             if (DUMP_MEMORY_MAP)    { Memory::Display_Nodes(); }
 

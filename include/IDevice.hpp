@@ -48,7 +48,7 @@ public: // INTERFACE (PURE VIRTUAL METHODS)
     // ToDo:
     //      create a basic implementation of this to use
     //      a new Memory device to track these nodes
-    virtual Word OnAttach(Word nextAddr) = 0;   
+    virtual int OnAttach(int nextAddr) = 0;   
 
 public: // PUBLIC ACCESSORS
     // ... 
@@ -56,15 +56,15 @@ public: // PUBLIC ACCESSORS
 protected: // PROTECTED ACCESSORS
     Word base();
     void base(Word addr);
-    Word size();
-    void size(Word size);
+    int size();
+    void size(int size);
     std::string name();
     void name(std::string n);
     Byte memory(Word ofs);
     void memory(Word ofs, Byte data);
 
     Uint16 _base = 0;						std::mutex _mutex_base;		
-    Uint16 _size = 0;						std::mutex _mutex_size;		
+    int _size = 0;						std::mutex _mutex_size;		
     std::string _device_name = "??DEV??";	std::mutex _mutex_device_name;				
     std::vector<Uint8> _memory;				std::mutex _mutex_memory;
 
@@ -73,7 +73,7 @@ protected: // PROTECTED ACCESSORS
     std::string heading;                    // string that describes the entire device
     struct register_node {
         std::string name;                   // register label
-        Word address;                       // register starting address
+        int address;                       // register starting address
         std::vector<std::string> comment;   // register comments (can be multiple lines)
     };
     std::vector<register_node> mapped_register;
@@ -94,14 +94,15 @@ class RAM : public IDevice
         // RAM() {  name("RAM"); }
         // RAM(std::string sName) { name(sName); }
         RAM(Word size) {
-            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
+            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN; 
+            name("RAM");
             _size = size;
         }
         virtual ~RAM() {
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
         }    
 
-		Word OnAttach(Word nextAddr) override       { if (nextAddr==0) { ; }  return _size; }  
+		int OnAttach(int nextAddr) override        { return nextAddr; }  
 		bool OnInit() override 						{ return true; }
 		bool OnQuit() override 						{ return true; }
 		bool OnActivate() override 					{ return true; }
@@ -119,7 +120,7 @@ class ROM : public IDevice
         ROM(std::string sName) { name(sName); }
         virtual ~ROM() {}    
 
-		Word OnAttach(Word nextAddr) override       { if (nextAddr==0) { ; }  return _size; }  
+		int OnAttach(int nextAddr) override       { if (nextAddr==0) { ; }  return _size; }  
 		bool OnInit() override 						{ return true; }
 		bool OnQuit() override 						{ return true; }
 		bool OnActivate() override 					{ return true; }
@@ -131,6 +132,41 @@ class ROM : public IDevice
 
 		// helper to set initial ROM values
         void write_to_rom(Word offset, Byte data);
+};
+
+class RAM_64K : public IDevice
+{
+    public:
+        RAM_64K(int size) {
+            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
+            _size = size;
+            _device_name = "RAM_64K";
+        }
+        virtual ~RAM_64K() {
+            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
+        }    
+
+		bool OnInit() override 						{ return true; }
+		bool OnQuit() override 						{ return true; }
+		bool OnActivate() override 					{ return true; }
+		bool OnDeactivate() override 				{ return true; }
+		// bool OnEvent(SDL_Event* evnt) override 		{ return true; }
+		bool OnEvent(SDL_Event* evnt) override 		{ return (evnt==nullptr); }         // return true
+		bool OnUpdate(float fElapsedTime) override 	{ return (fElapsedTime==0.0f); }    // { return true; }           
+		bool OnRender() override 					{ return true; } 
+
+		int OnAttach(int nextAddr) override       { 
+            int old_address=nextAddr;
+            this->heading = "Full Bank of System RAM";
+            register_node new_node;
+            new_node = { "SOFT_EXEC", nextAddr,  { "Exec Software Interrupt Vector"} }; nextAddr+=(64*1024);
+            mapped_register.push_back(new_node);
+
+            _size = nextAddr - old_address;
+            return _size; 
+        }  
+
+
 };
 
 
@@ -155,7 +191,7 @@ class SOFT_VECTORS : public IDevice
 		bool OnUpdate(float fElapsedTime) override 	{ return (fElapsedTime==0.0f); }    // { return true; }           
 		bool OnRender() override 					{ return true; } 
 
-		Word OnAttach(Word nextAddr) override       { 
+		int OnAttach(int nextAddr) override       { 
             Word old_address=nextAddr;
             this->heading = "Software Interrupt Vectors";
             register_node new_node;
@@ -203,7 +239,7 @@ class SYSTEM_MEMORY : public IDevice
 		bool OnUpdate(float fElapsedTime) override 	{ return (fElapsedTime==0.0f); }    // { return true; }           
 		bool OnRender() override 					{ return true; } 
 
-		Word OnAttach(Word nextAddr) override       { 
+		int OnAttach(int nextAddr) override       { 
             Word old_address=nextAddr;
             this->heading = "System Memory";
             register_node new_node;
@@ -257,7 +293,7 @@ class VIDEO_BUFFER : public IDevice
 		bool OnUpdate(float fElapsedTime) override 	{ return (fElapsedTime==0.0f); }    // { return true; }           
 		bool OnRender() override 					{ return true; } 
 
-		Word OnAttach(Word nextAddr) override       { 
+		int OnAttach(int nextAddr) override       { 
             constexpr int vbfr_size = 8*1024;
             Word old_address=nextAddr;
             this->heading = "Video Buffer (" + std::to_string(vbfr_size/1024) + "K)";
@@ -307,7 +343,7 @@ class USER_RAM : public IDevice
 		bool OnUpdate(float fElapsedTime) override 	{ return (fElapsedTime==0.0f); }    // { return true; }           
 		bool OnRender() override 					{ return true; } 
 
-		Word OnAttach(Word nextAddr) override       { 
+		int OnAttach(int nextAddr) override       { 
             int ram_size = 0xCFFF-nextAddr;
             Word old_address=nextAddr;
             this->heading = "User Ram (" + std::to_string(ram_size/1024) + "K)";

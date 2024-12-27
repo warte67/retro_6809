@@ -45,13 +45,13 @@ void IDevice::base(Word addr)
     std::lock_guard<std::mutex> guard(_mutex_base); 
     _base = addr; 
 }
-Word IDevice::size() 
+int IDevice::size() 
 { 
     std::lock_guard<std::mutex> guard(_mutex_size); 
     std::lock_guard<std::mutex> mem_guard(_mutex_memory); 
     return _size = _memory.size();
 }
-void IDevice::size(Word size) 
+void IDevice::size(int size) 
 { 
     std::lock_guard<std::mutex> guard(_mutex_size); 
     std::lock_guard<std::mutex> mem_guard(_mutex_memory); 

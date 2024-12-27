@@ -69,7 +69,7 @@ public: // PUBLIC METHODS
     static void IsDirty(bool b);
 
     static void Error(std::string err_msg, std::string file=__FILE__, int line=__LINE__);
-    //#define ERROR(msg) Bus::Error(#msg, __FILE__, __LINE__)
+    #define ERROR(msg) Bus::Error(#msg, __FILE__, __LINE__)
 
 
 private: // INTERNAL PRIVATES

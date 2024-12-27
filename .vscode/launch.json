@@ -2,10 +2,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug (g++)",
+            "name": "Debug (Build and Run)",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/main", // Path to the executable
+            "program": "${workspaceFolder}/build/main",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -19,11 +19,35 @@
                     "ignoreFailures": true
                 }
             ],
-            "miDebuggerPath": "/usr/bin/gdb", // Adjust if necessary
-            "preLaunchTask": "build",  // Ensure this is linked to the build task
-            "sourceFileMap": {
-                "/src": "${workspaceFolder}/src"
-            }
+            "miDebuggerPath": "/usr/bin/gdb",
+            "preLaunchTask": "Build Debug",  // This triggers the 'Build Debug' task before running
+            "miDebuggerArgs": "",
+            "postDebugTask": "",  // You can set up a task after debugging if needed
+            "logging": { "engineLogging": false }
+        },
+        {
+            "name": "Run (Build and Run)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/main",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb",
+            "preLaunchTask": "Build Debug",  // This triggers the 'Build Debug' task before running
+            "miDebuggerArgs": "",
+            "postDebugTask": "",
+            "logging": { "engineLogging": false }
         }
     ]
 }

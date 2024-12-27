@@ -48,7 +48,7 @@ public:		// PUBLIC VIRTUAL METHODS
     bool OnUpdate(float fElapsedTime) override;
     bool OnRender() override;
 
-    Word OnAttach(Word nextAddr) override 		{ if (nextAddr) { return 0; } return 0; } // stop the argument not used warning
+    int OnAttach(int nextAddr) override 		{ if (nextAddr) { return 0; } return 0; } // stop the argument not used warning
 
 public:     // PUBLIC ACCESSORS
     static Byte Read(Word offset, bool debug = false);
@@ -63,8 +63,8 @@ public:     // PUBLIC ACCESSORS
     static T* Attach(Args&&... args) {
         //std::cout << clr::indent_push() << clr::CYAN << "Memory::Attach() Entry" << clr::RETURN;        
         T* device = new T(std::forward<Args>(args)...);
-        Word size = _attach(device);
-        if (size == 0) {
+        int sz = _attach(device);
+        if (sz == 0) {
             delete device;
             //std::cout << clr::indent_pop() << clr::ORANGE << "Memory::Attach() Error" << clr::RETURN;
             return nullptr;
@@ -73,13 +73,13 @@ public:     // PUBLIC ACCESSORS
         return device;
     }    
 
-    static Word NextAddress() { return _next_address; }
+    static int NextAddress() { return _next_address; }
 
     static void Display_Nodes();
 
 protected:
 
-    static Word _attach(IDevice* device);
+    static int _attach(IDevice* device);
 
     // Move to the Memory Management Device
     inline static int _next_address = 0;    // next assignable address
