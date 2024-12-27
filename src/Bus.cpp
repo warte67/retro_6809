@@ -110,7 +110,7 @@ bool Bus::Run()
             SDL_RenderPresent(pRenderer);
 
             // (( TESTING ))
-            // Bus::IsRunning(false);
+            Bus::IsRunning(false);
         }
         // Bus::Error("Something like a simulated error happened!");
 

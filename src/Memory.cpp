@@ -58,6 +58,7 @@ bool Memory::OnQuit()
 	for (auto &d : Memory::_memory_nodes) {
         if ( d->OnQuit() == false) {
             std::cout << clr::indent_pop() << clr::ORANGE << "Memory::OnQuit() Error" << clr::RETURN;
+            delete(d);
             return false;
         }
     }
@@ -250,6 +251,7 @@ Word Memory::_attach(IDevice* device)
         Bus::Error("Memory allocation beyond 64k boundary!");
         Bus::IsRunning(false);
     }
+    if (size==0)  Bus::Error("_attach size was zero");
     return size;
 }
 
