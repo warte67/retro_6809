@@ -42,14 +42,15 @@ Memory::~Memory()
 bool Memory::OnInit() 
 {
     std::cout << clr::indent_push() << clr::CYAN << "Memory::OnInit() Entry" << clr::RETURN;
+    bool ret = true;
     for (auto &d : Memory::_memory_nodes) {
         if (d->OnInit() == false) {
             std::cout << clr::indent_pop() << clr::ORANGE << "Memory::OnInit() Error" << clr::RETURN;
-            return false;
+            ret = false;
         }
     }
     std::cout << clr::indent_pop() << clr::CYAN << "Memory::OnInit() Exit" << clr::RETURN;                
-    return true;
+    return ret;
 }
 
 bool Memory::OnQuit() 
@@ -71,54 +72,59 @@ bool Memory::OnQuit()
 bool Memory::OnActivate() 
 {
     std::cout << clr::indent_push() << clr::CYAN << "Memory::OnActivate() Entry" << clr::RETURN;
+    bool ret = true;
 	for (auto &d : Memory::_memory_nodes) {
 		if ( d->OnActivate() == false ) {
             std::cout << clr::indent_pop() << clr::ORANGE << "Memory::OnActivate() Error" << clr::RETURN;
-			return false;
+			ret = false;
         }
     }
     std::cout << clr::indent_pop() << clr::CYAN << "Memory::OnActivate() Exit" << clr::RETURN;
-	return true;
+	return ret;
 }
 bool Memory::OnDeactivate() 
 {
     std::cout << clr::indent_push() << clr::CYAN << "Memory::OnDeactivate() Entry" << clr::RETURN;
+    bool ret = true;
 	for (auto &d : Memory::_memory_nodes) {
 		if ( d->OnDeactivate() == false ) {
             std::cout << clr::indent_pop() << clr::ORANGE << "Memory::OnDeactivate() Error" << clr::RETURN;
-			return false;
+			ret = false;
         }
     }
     std::cout << clr::indent_pop() << clr::CYAN << "Memory::OnDeactivate() Exit" << clr::RETURN;
-	return true;
+	return ret;
 }
 // bool Memory::OnEvent(SDL_Event* evnt) 
 bool Memory::OnEvent(SDL_Event* evnt) 
 {
+    bool ret = true;
 	for (auto &d : Memory::_memory_nodes) {
 		if ( d->OnEvent(evnt) == false ) {
-			return false;
+			ret = false;
         }
     }
-	return true;
+	return ret;
 }
 bool Memory::OnUpdate(float fElapsedTime) 
 {
+    bool ret = true;
 	for (auto &d : Memory::_memory_nodes) {
 		if ( d->OnUpdate(fElapsedTime) == false ) {
-			return false;
+			ret = false;
         }
     }
-	return true;
+	return ret;
 }
 bool Memory::OnRender() 
 {
+    bool ret = true;
 	for (auto &d : Memory::_memory_nodes) {
 		if ( d->OnRender() == false ) {
-			return false;
+			ret = false;
         }
     }
-	return true;
+	return ret;
 }
 
 
@@ -276,22 +282,22 @@ int Memory::_binary_search(Word address)
 
 void Memory::Display_Nodes() 
 {
-    auto hex = [](Uint32 n, Uint8 d)
-    {
-        std::string s(d, '0');
-        for (int i = d - 1; i >= 0; i--, n >>= 4)
-            s[i] = "0123456789ABCDEF"[n & 0xF];
-        return s;
-    };
+    // auto hex = [](Uint32 n, Uint8 d)
+    // {
+    //     std::string s(d, '0');
+    //     for (int i = d - 1; i >= 0; i--, n >>= 4)
+    //         s[i] = "0123456789ABCDEF"[n & 0xF];
+    //     return s;
+    // };
 
-    auto pad = [](std::string text, Uint8 d)
-    {
-        std::string ret = text;
-        while (ret.length()<d) {
-            ret += " ";
-        }
-        return ret;
-    };
+    // auto pad = [](std::string text, Uint8 d)
+    // {
+    //     std::string ret = text;
+    //     while (ret.length()<d) {
+    //         ret += " ";
+    //     }
+    //     return ret;
+    // };
 
     // 
     // Display C++ memory_map.hpp
@@ -301,32 +307,33 @@ void Memory::Display_Nodes()
         constexpr int FIRST_TAB = 4;
         constexpr int VAR_LEN = 22;
         constexpr int COMMENT_START = 32;
+
         std::cout << "\n\n// memory_map.hpp\n";
         std::cout << "#ifndef __MEMORY_MAP_HPP__\n";
         std::cout << "#define __MEMORY_MAP_HPP__\n";
         std::cout << std::endl;
         std::cout << "enum MEMMAP\n";
         std::cout << "{\n";
-        std::cout << pad(" ",FIRST_TAB) << "//  **********************************************\n";
-        std::cout << pad(" ",FIRST_TAB) << "//  * Allocated 64k Memory Mapped System Symbols *\n";
-        std::cout << pad(" ",FIRST_TAB) << "//  **********************************************\n";
+        std::cout << clr::pad(" ",FIRST_TAB) << "//  **********************************************\n";
+        std::cout << clr::pad(" ",FIRST_TAB) << "//  * Allocated 64k Memory Mapped System Symbols *\n";
+        std::cout << clr::pad(" ",FIRST_TAB) << "//  **********************************************\n";
 
         for (auto &node : Memory::_memory_nodes) 
         {
             // std::cout << pad(" ",FIRST_TAB) << "\t// " << node->heading << ":\n";
             std::cout << std::endl;
-            std::cout << pad(pad(" ",FIRST_TAB) + pad(node->name(), VAR_LEN) + "= 0x" + hex(node->base(),4), COMMENT_START+4) << "// START: " << node->heading << std::endl;
+            std::cout << clr::pad(clr::pad(" ",FIRST_TAB) + clr::pad(node->name(), VAR_LEN) + "= 0x" + clr::hex(node->base(),4), COMMENT_START+4) << "// START: " << node->heading << std::endl;
 
             for (auto &r : node->mapped_register)
             {
-                std::string _out = pad(pad(r.name, VAR_LEN) + "= 0x" + hex(r.address, 4), COMMENT_START);
+                std::string _out = clr::pad(clr::pad(r.name, VAR_LEN) + "= 0x" + clr::hex(r.address, 4), COMMENT_START);
                 for (auto &c : r.comment)
                 {
                     if (_out.length() > 0) { 
-                        std::cout << pad(" ",FIRST_TAB) << _out << "// " << c << std::endl;   
+                        std::cout << clr::pad(" ",FIRST_TAB) << _out << "// " << c << std::endl;   
                         _out = "";                  
                     } else {
-                        std::cout << pad(" ",FIRST_TAB) << pad(" ", COMMENT_START) << "// " << c << std::endl;
+                        std::cout << clr::pad(" ",FIRST_TAB) << clr::pad(" ", COMMENT_START) << "// " << c << std::endl;
                     }
                 }
             }
@@ -340,26 +347,26 @@ void Memory::Display_Nodes()
         constexpr int VAR_LEN = 18;
         constexpr int COMMENT_START = 32;
         std::cout << "\n\n;    memory_map.hpp\n;\n";
-        std::cout << pad("",FIRST_TAB) << ";   **********************************************\n";
-        std::cout << pad("",FIRST_TAB) << ";   * Allocated 64k Memory Mapped System Symbols *\n";
-        std::cout << pad("",FIRST_TAB) << ";   **********************************************\n;\n";
+        std::cout << clr::pad("",FIRST_TAB) << ";   **********************************************\n";
+        std::cout << clr::pad("",FIRST_TAB) << ";   * Allocated 64k Memory Mapped System Symbols *\n";
+        std::cout << clr::pad("",FIRST_TAB) << ";   **********************************************\n;\n";
 
         for (auto &node : Memory::_memory_nodes) 
         {
             // std::cout << pad("",FIRST_TAB) << "\t// " << node->heading << ":\n";
             std::cout << std::endl;
-            std::cout << pad(pad("",FIRST_TAB) + pad(node->name(), VAR_LEN) + "equ   0x" + hex(node->base(),4), COMMENT_START) << "; START: " << node->heading << std::endl;
+            std::cout << clr::pad(clr::pad("",FIRST_TAB) + clr::pad(node->name(), VAR_LEN) + "equ   0x" + clr::hex(node->base(),4), COMMENT_START) << "; START: " << node->heading << std::endl;
 
             for (auto &r : node->mapped_register)
             {
-                std::string _out = pad(pad(r.name, VAR_LEN) + "equ   0x" + hex(r.address, 4), COMMENT_START);
+                std::string _out = clr::pad(clr::pad(r.name, VAR_LEN) + "equ   0x" + clr::hex(r.address, 4), COMMENT_START);
                 for (auto &c : r.comment)
                 {
                     if (_out.length() > 0) { 
-                        std::cout << pad("",FIRST_TAB) << _out << "; " << c << std::endl;   
+                        std::cout << clr::pad("",FIRST_TAB) << _out << "; " << c << std::endl;   
                         _out = "";                  
                     } else {
-                        std::cout << pad("",FIRST_TAB) << pad("", COMMENT_START) << "; " << c << std::endl;
+                        std::cout << clr::pad("",FIRST_TAB) << clr::pad("", COMMENT_START) << "; " << c << std::endl;
                     }
                 }
             }

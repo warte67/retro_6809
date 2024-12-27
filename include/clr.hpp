@@ -185,4 +185,20 @@ public:
         return std::string((indent_level-- > 0 ? indent_level : 0) * 2, ' '); 
     }
     inline static std::string indent() { return std::string(indent_level * 2, ' '); }
+
+    inline static std::string hex(Uint32 n, Uint8 d)
+    {
+        std::string s(d, '0');
+        for (int i = d - 1; i >= 0; i--, n >>= 4)
+            s[i] = "0123456789ABCDEF"[n & 0xF];
+        return s;
+    };
+    inline static std::string pad(std::string text, Uint8 d)
+    {
+        std::string ret = text;
+        while (ret.length()<d) {
+            ret += " ";
+        }
+        return ret;
+    };
 };

@@ -168,24 +168,26 @@ bool Bus::_onInit()
     ////////////////////////////////////////
     // Core system devices with parameters
     ////////////////////////////////////////
-    
-    // Memory::Attach<SOFT_VECTORS>();     // 0x0000 - 0x000F
-    //Memory::Attach<SYSTEM_MEMORY>();    // 0x0010 - 0x03FF
-    //Memory::Attach<VIDEO_BUFFER>();     // 0x0400 - 0x23FF      (8k video buffer)
-    //Memory::Attach<USER_RAM>();         // 0x0400 - 0x23FF      (42k user RAM)
+
+    // Memory::Attach<RAM_64K>(0x10000);       // allocate 64k for testing
 
 
-    Memory::Attach<RAM_64K>(0x10000);       // allocate 64k for testing
-    
+    Memory::Attach<SOFT_VECTORS>();     // 0x0000 - 0x000F
+    Memory::Attach<SYSTEM_MEMORY>();    // 0x0010 - 0x03FF
+    Memory::Attach<VIDEO_BUFFER>();     // 0x0400 - 0x23FF      (8k video buffer)
+    Memory::Attach<USER_RAM>();         // 0x0400 - 0x23FF      (42k user RAM)    
 
         // BEGIN TEST...
 
             if (MEM_TESTS) {
-                int upper_bounds = Memory::NextAddress(); 
+                int upper_bounds = Memory::NextAddress();  
+                std::cout << clr::indent() << clr::GREEN << "Testing Addresses $0000-$" << clr::hex(upper_bounds,4) << " ... ";              
                 Byte b = 0;
-                for (int a = 0; a<upper_bounds; a++) {
+                for (int a = 0; a<upper_bounds; a++) 
+                {
                     Memory::Write((Word)a,b);
-                    if (Memory::Read((Word)a) != b) {
+                    if (Memory::Read((Word)a) != b) 
+                    {
                         Bus::Error("Memory Test Failure!");                        
                     }
                     //std::cout << "Write(0x" << std::hex << (int)a << ", 0x" << (int)b << ") Read=" << (int)Memory::Read(a) << "\n";
@@ -193,7 +195,7 @@ bool Bus::_onInit()
                 }
                 //std::cout << "Memory::_next_address = 0x" << std::hex << Memory::NextAddress() << std::endl;
             } // END MEM_TESTS
-            std::cout << clr::indent() << clr::YELLOW << "Memory Tests Passed!\n" << clr::RESET;
+            std::cout << clr::YELLOW << "Memory Tests Passed!\n" << clr::RESET;
 
             if (DUMP_MEMORY_MAP)    { Memory::Display_Nodes(); }
 
@@ -216,10 +218,16 @@ bool Bus::_onQuit()
     std::cout << clr::indent_push() << clr::CYAN << "Bus::_onQuit() Entry" << clr::RETURN;
     if (_bWasInit)   
     { 
+        if (_memory.OnQuit() == false)
+		{
+            std::cout << clr::indent_pop() << clr::ORANGE << "Bus::_onQuit() Error" << clr::RETURN;
+			Bus::Error("Device Termination Failure!");
+            return false;
+		}
         // shut down SDL stuff
         if (pRenderer)
         {
-            SDL_DestroyRenderer(pRenderer);
+            // SDL_DestroyRenderer(pRenderer);
             pRenderer = nullptr;
         }
         if (pWindow)
@@ -230,12 +238,6 @@ bool Bus::_onQuit()
 
         _bWasInit = false;         
         SDL_Quit();
-        if (_memory.OnQuit() == false)
-		{
-            std::cout << clr::indent_pop() << clr::ORANGE << "Bus::_onQuit() Error" << clr::RETURN;
-			Bus::Error("Device Termination Failure!");
-            return false;
-		}
     }    
     std::cout << clr::indent_pop() << clr::CYAN << "Bus::_onQuit() Exit" << clr::RETURN;
     return true;
