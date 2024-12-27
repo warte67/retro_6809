@@ -312,16 +312,6 @@ class VIDEO_BUFFER : public IDevice
 
 
 
-//              // device memory map description
-//              std::string heading;                    // string that describes the entire device
-//              struct register_node {
-//                  std::string name;                   // register label
-//                  Word address;                       // register starting address
-//                  std::vector<std::string> comment;   // register comments (can be multiple lines)
-//              };
-//              std::vector<register_node> mapped_register;
-
-
 class USER_RAM : public IDevice
 {
     public:
@@ -359,3 +349,15 @@ class USER_RAM : public IDevice
             return _size; 
         }  
 };
+
+
+
+
+//              // device memory map description
+//              std::string heading;                    // string that describes the entire device
+//              struct register_node {
+//                  std::string name;                   // register label
+//                  Word address;                       // register starting address
+//                  std::vector<std::string> comment;   // register comments (can be multiple lines)
+//              };
+//              std::vector<register_node> mapped_register;

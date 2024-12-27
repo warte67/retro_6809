@@ -15,6 +15,7 @@
  * 
  ******************/
 
+#include <algorithm>
 #include "Bus.hpp"
 #include "clr.hpp"
 #include "Memory.hpp"

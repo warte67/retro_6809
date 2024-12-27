@@ -1,6 +1,6 @@
 # Compiler and flags
 CXX := g++
-CXXFLAGS := -Wall -Wextra -std=c++23 -Iinclude -fexceptions -Wall 
+CXXFLAGS := -Wall -Wextra -std=c++20 -Iinclude -fexceptions -Wall 
 LDFLAGS := -lSDL2 -lSDLmain -ldl -lpthread
 
 # Project name
