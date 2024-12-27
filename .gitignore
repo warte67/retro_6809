@@ -38,3 +38,5 @@ build/
 # Workspace
 .code-workspace
 
+vgcore.*
+

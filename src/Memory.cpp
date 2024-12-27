@@ -55,15 +55,18 @@ bool Memory::OnInit()
 bool Memory::OnQuit() 
 {
     std::cout << clr::indent_push() << clr::CYAN << "Memory::OnQuit() Entry" << clr::RETURN;
+    bool ret = true;
 	for (auto &d : Memory::_memory_nodes) {
         if ( d->OnQuit() == false) {
             std::cout << clr::indent_pop() << clr::ORANGE << "Memory::OnQuit() Error" << clr::RETURN;
-            delete(d);
-            return false;
+            ret = false;
         }
     }
+    for (auto &d : Memory::_memory_nodes) {
+        delete d;  // Add this line to properly release memory for each device
+    }    
     std::cout << clr::indent_pop() << clr::CYAN << "Memory::OnQuit() Exit" << clr::RETURN;
-    return true;
+    return ret;
 }
 bool Memory::OnActivate() 
 {

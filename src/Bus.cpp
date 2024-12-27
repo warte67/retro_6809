@@ -170,23 +170,24 @@ bool Bus::_onInit()
     
     Memory::Attach<SOFT_VECTORS>();     // 0x0000 - 0x000F
     Memory::Attach<SYSTEM_MEMORY>();    // 0x0010 - 0x03FF
-    Memory::Attach<VIDEO_BUFFER>();     // 0x0400 - 0x23FF      (8k video buffer)
-    Memory::Attach<USER_RAM>();         // 0x0400 - 0x23FF      (42k user RAM)
+    // Memory::Attach<VIDEO_BUFFER>();     // 0x0400 - 0x23FF      (8k video buffer)
+    // Memory::Attach<USER_RAM>();         // 0x0400 - 0x23FF      (42k user RAM)
     
 
         // BEGIN TEST...
 
             if (MEM_TESTS) {
+                int upper_bounds = Memory::NextAddress();
                 Byte b = 0;
-                for (int a = 0; a<Memory::NextAddress(); a++) {
+                for (int a = 0; a<upper_bounds; a++) {
                     Memory::Write((Word)a,b);
                     if (Memory::Read((Word)a) != b) {
                         Bus::Error("Memory Test Failure!");                        
                     }
-                    // std::cout << "Write(0x" << std::hex << (int)a << ", 0x" << (int)b << ") Read=" << (int)Memory::Read(a) << "\n";
+                    std::cout << "Write(0x" << std::hex << (int)a << ", 0x" << (int)b << ") Read=" << (int)Memory::Read(a) << "\n";
                     b++;
                 }
-                // std::cout << "Memory::_next_address = 0x" << std::hex << Memory::NextAddress() << std::endl;
+                std::cout << "Memory::_next_address = 0x" << std::hex << Memory::NextAddress() << std::endl;
             } // END MEM_TESTS
 
             if (DUMP_MEMORY_MAP)    { Memory::Display_Nodes(); }

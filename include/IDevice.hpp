@@ -215,7 +215,7 @@ class SYSTEM_MEMORY : public IDevice
             mapped_register.push_back(new_node);
             new_node = { "SYSTEM_STACK", nextAddr,  { "Bottom of the system stack spcace"} }; nextAddr=0x400;
             mapped_register.push_back(new_node);
-            new_node = { "SSTACK_TOP", nextAddr,    { "Top of the system statck space"} }; 
+            new_node = { "SSTACK_TOP", nextAddr,    { "Top of the system statck space"} };
             mapped_register.push_back(new_node);
 
             _size = nextAddr - old_address;
