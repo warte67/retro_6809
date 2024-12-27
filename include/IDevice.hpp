@@ -560,7 +560,7 @@ class HDW_REGISTERS : public IDevice
             int bank_size = 0xFFF0-nextAddr;      
             std::string res = std::to_string(bank_size);
             res += " bytes reserved for future use.";
-            new_node = { "HWD_RESERVED", nextAddr,  { res } }; nextAddr+=bank_size;
+            new_node = { "HDW_RESERVED", nextAddr,  { res } }; nextAddr+=bank_size;
             mapped_register.push_back(new_node);
 
             _size = nextAddr - old_address;

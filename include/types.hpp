@@ -14,10 +14,10 @@
 
 // // Generate a memory map definition file?
 constexpr bool DUMP_MEMORY_MAP          = true;
-constexpr bool MEMORY_MAP_OUTPUT_CPP    = true;
+constexpr bool MEMORY_MAP_OUTPUT_CPP    = false;
 
 // Tests To Perform
-constexpr bool MEM_TESTS                = true;  
+// ... constexpr bool MEM_TESTS                = true;  
 
 
 // simple types for 8-bit archetecture 
