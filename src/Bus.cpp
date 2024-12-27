@@ -13,23 +13,53 @@
 #include "clr.hpp"
 
 
+/**
+ * Constructor for the Bus singleton.
+ *
+ * This constructor is responsible for initializing the Bus's internal state.
+ * It is thread-safe and idempotent.
+ */
 Bus::Bus()  
 { 
     std::cout << clr::indent_push() << clr::LT_BLUE << "Bus Singleton Created" << clr::RETURN;
 }
 
+
+/**
+ * Destructor for the Bus singleton.
+ *
+ * This destructor is responsible for releasing any resources acquired by the Bus
+ * and is thread-safe.
+ */
 Bus::~Bus()
 { 
     std::cout << clr::indent_pop() << clr::LT_BLUE << "Bus Singleton Destroyed" << clr::RETURN;
 }
 
 
-inline static std::mutex _mutex_IsRunning;
+/**
+ * Checks if the Bus is currently running.
+ *
+ * This method returns the running state of the Bus. It is thread-safe
+ * by utilizing a mutex to protect the access to the shared state.
+ *
+ * @return True if the Bus is running, false otherwise.
+ */
 bool Bus::IsRunning()	    
 { 
     std::lock_guard<std::mutex> guard(_mutex_IsRunning); 
     return s_bIsRunning; 
 }
+
+/**
+ * Sets the running state of the Bus.
+ *
+ * This method is used to signal that the Bus should
+ * stop running, and is thread-safe.
+ *
+ * @param b If true, the Bus will continue running.
+ *          If false, the Bus will stop running.
+ */
 void Bus::IsRunning(bool b)	
 { 
     std::lock_guard<std::mutex> guard(_mutex_IsRunning); 
@@ -37,17 +67,53 @@ void Bus::IsRunning(bool b)
 }
 
 
-inline static std::mutex _mutex_IsDirty;
+/**
+ * Gets the dirty state of the Bus.
+ *
+ * The dirty state is a flag that signals to the main loop of the Bus
+ * that something has changed and that the environment should be
+ * rebuilt. This might be the result of a change in the memory map,
+ * the connection or disconnection of a device, or some other event
+ * that requires the Bus to re-evaluate its internal state.
+ *
+ * @return True if the Bus is dirty, false otherwise.
+ */
 bool Bus::IsDirty()			
 { 
     std::lock_guard<std::mutex> guard(_mutex_IsDirty); 
     return s_bIsDirty; 
 }
+
+/**
+ * Sets the dirty state of the Bus.
+ *
+ * This function updates the internal static flag that indicates whether the 
+ * Bus is in a 'dirty' state, meaning that some changes have occurred that 
+ * require the environment to be rebuilt. It uses a mutex to ensure thread 
+ * safety while updating the flag.
+ *
+ * @param b The new state to set for the dirty flag. 'true' indicates the 
+ * Bus is dirty, and 'false' indicates it is not.
+ */
 void Bus::IsDirty(bool b)	
 { 
     std::lock_guard<std::mutex> guard(_mutex_IsDirty); 
     s_bIsDirty = b; 
 }
+
+
+/**
+ * Logs an error message with file and line information in a formatted manner,
+ * and stops the Bus execution.
+ *
+ * This function outputs an error message to the console with a specific format,
+ * including the file name and line number where the error occurred. The Bus
+ * execution is subsequently stopped by setting the running status to false.
+ *
+ * @param err_msg The error message to display.
+ * @param file The name of the file where the error occurred.
+ * @param line The line number in the file where the error occurred.
+ */
 
 void Bus::Error(std::string err_msg, std::string file, int line)
 {
@@ -64,6 +130,23 @@ void Bus::Error(std::string err_msg, std::string file, int line)
 	Bus::IsRunning(false);
 }  
 
+
+/**
+ * This is the main loop of the application. It will continue to run until the 'bIsRunning' flag is set to false.
+ * It will first call the _onInit() method to initialize the application. If the initialization is successful, then it
+ * will enter the main loop. In the main loop it will first check if the 'bIsDirty' flag is set to true. If it is, then
+ * it will call the _onDeactivate() method to shutdown the current environment, then it will call the _onActivate() method
+ * to create a new environment. After that it will set the 'bWasActivated' flag to true.
+ * Then it will call the _onUpdate() method to update all of the devices, and _onEvent() to dispatch SDL events to the
+ * devices, and _onRender() to render all of the devices to the screen buffers. After that it will call the
+ * SDL_RenderPresent() method to present the rendered frame to the screen. Finally, it will check if the 'bIsRunning'
+ * flag is set to false, and if so, it will break out of the loop.
+ * If the initialization is not successful, it will print an error message and return false.
+ * After the main loop is finished, it will call the _onDeactivate() method to shutdown the environment, and then it will
+ * call the _onQuit() method to shutdown SDL2 and return with status.
+ * @return True if the application was successfully initialized and the main loop was successfully terminated, otherwise
+ * false.
+ */
 bool Bus::Run()
 {
     std::cout << clr::indent_push() << clr::CYAN << "Bus::Run() Entry" << clr::RETURN;
@@ -129,8 +212,17 @@ bool Bus::Run()
 }
 
 
-
-// this should only ever run exactly once when the app starts
+/**
+ * Initializes the Bus by setting up the SDL3 environment, attaching core system devices,
+ * and performing memory tests. This function should only be called once when the application starts.
+ * It initializes SDL3, creates the main window and renderer, and sets the logical presentation.
+ * It then attaches core system devices to the memory and performs basic memory tests to ensure
+ * everything is functioning correctly. Finally, it sets the initialized flag and dumps the memory map
+ * if required.
+ *
+ * @return True if initialization is successful, false if there's an error during SDL3 initialization,
+ *         device initialization, or memory test failure.
+ */
 bool Bus::_onInit()
 {
     std::cout << clr::indent_push() << clr::CYAN << "Bus::_onInit() Entry" << clr::RETURN;
@@ -206,7 +298,15 @@ bool Bus::_onInit()
     return true;
 }
 
-// this should only ever run exactly once when the app shuts down
+
+/**
+ * Shuts down the Bus by calling the OnQuit() method on all memory devices and then
+ * shutting down the SDL3 environment. This function should only be called once when
+ * the application is exiting.
+ *
+ * @return True if shutdown is successful, false if there's an error during device
+ *         termination or SDL3 shutdown.
+ */
 bool Bus::_onQuit()
 {
     std::cout << clr::indent_push() << clr::CYAN << "Bus::_onQuit() Entry" << clr::RETURN;
@@ -241,6 +341,14 @@ bool Bus::_onQuit()
 }
 
 
+/**
+ * Calls the OnActivate() method on all memory devices to prepare them for use.
+ * If any device fails to activate, an error message is logged and the function
+ * will return false. The function logs the entry and exit of the activation
+ * process and returns true if all devices successfully activate.
+ *
+ * @return True if all devices are successfully activated, otherwise false.
+ */
 bool Bus::_onActivate(void) 
 {
     std::cout << clr::indent_push() << clr::CYAN << "Bus::_onActivate() Entry" << clr::RETURN;    
@@ -253,6 +361,16 @@ bool Bus::_onActivate(void)
     std::cout << clr::indent_pop() << clr::CYAN << "Bus::_onActivate() Exit" << clr::RETURN;
     return true;
 }
+
+/**
+ * _onDeactivate() is responsible for deactivating the memory components
+ * associated with the bus. It logs the entry and exit of the deactivation
+ * process. If any memory component fails to deactivate properly, an error
+ * message is logged and the function returns false.
+ *
+ * @return True if all memory components are successfully deactivated,
+ *         otherwise false.
+ */
 
 bool Bus::_onDeactivate(void) 
 {
@@ -267,7 +385,22 @@ bool Bus::_onDeactivate(void)
     return true;
 }
 
-// bool Bus::_onEvent(SDL_Event* __na)
+
+/**
+ * _onEvent() is a protected virtual method called by the Bus's event handling loop.
+ * It is responsible for processing SDL events and forwarding them to the memory
+ * components associated with the bus. If any memory component fails to handle
+ * the event properly, an error message is logged and the function returns false.
+ * The function logs the entry and exit of the event handling process. If the
+ * event is not handled by any memory component, the function returns true.
+ *
+ * @param __na A pointer to an SDL_Event structure that contains the event data.
+ *             This parameter is not currently used, but is included to prevent
+ *             warnings about unused function parameters.
+ *
+ * @return True if all memory components successfully handle the event,
+ *         otherwise false.
+ */
 bool Bus::_onEvent(SDL_Event* __na)
 {
     // std::cout << "Bus::_onEvent()\n";
@@ -314,13 +447,26 @@ bool Bus::_onEvent(SDL_Event* __na)
                 break;                
             }
         }
-        if (_memory.OnEvent(&evnt) == false)		// this is likely broken
-            return false;							// this is likely broken
+        // forward the event to all of the memory devices
+        if (_memory.OnEvent(&evnt) == false)
+            return false;
 	
     }     
     return true;
 }
 
+
+/**
+ * This is a virtual method that is called periodically to allow the
+ * device to update its internal state. The frequency of the calls
+ * is determined by the Memory class, and the time since the last
+ * call is given in the fElapsedTime parameter.
+ *
+ * @param fElapsedTime The time, in seconds, that has elapsed since
+ *  the last call to OnUpdate.
+ *
+ * @return True if the update was successful, false otherwise.
+ */
 bool Bus::_onUpdate(float __na) 
 {
     // stop the unused argument warning
@@ -334,8 +480,6 @@ bool Bus::_onUpdate(float __na)
     //		Be sure to fetch the initial console 
     //		terminal demensions during OnInit() too.
 
-
-
     static int s_width=0, s_height=0;
     int w, h;
     clr::get_terminal_size(w, h);       // getmaxyx(stdscr,h,w);
@@ -347,7 +491,7 @@ bool Bus::_onUpdate(float __na)
         s_height = h;
         // fire a terminal resize event from here
         // ...
-        // printw("Terminal Resized: W:%d H:%d\n",  w, h); refresh();
+        std::cout << "Terminal Resized: W:" << std::to_string(w) << " H:" << std::to_string(h) << "\n";
     }
     if (_memory.OnUpdate(__na) == false)
 	{
@@ -357,6 +501,16 @@ bool Bus::_onUpdate(float __na)
     return true;
 }
 
+
+/**
+ * _onRender() is responsible for rendering the Bus's visual output.
+ * It first attempts to render all memory nodes by calling their OnRender() method.
+ * If any memory node fails to render, it logs an error and returns false.
+ * If successful, it proceeds to perform a test render operation by cycling
+ * through colors and clearing the render target.
+ *
+ * @return True if all operations were successful, false otherwise.
+ */
 bool Bus::_onRender(void) 
 {
     // std::cout << "Bus::_onRender()\n";

@@ -74,6 +74,10 @@ public: // PUBLIC METHODS
 private: // INTERNAL PRIVATES
 	bool _bWasInit = false;
 
+    inline static std::mutex _mutex_IsDirty;
+    inline static std::mutex _mutex_IsRunning;
+
+    
 	// SDL stuff
 	SDL_Window* pWindow = nullptr;
 	SDL_Renderer* pRenderer = nullptr;

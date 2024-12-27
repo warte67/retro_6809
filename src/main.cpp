@@ -40,6 +40,10 @@
  *          make clean          # cleans the build folder   
  *          make run            # builds and runs 
  * 
+ *      Fancy Text:
+ *          Headers     - https://patorjk.com/software/taag/#p=display&h=0&v=0&c=c&f=Big
+ *          Functions   - https://patorjk.com/software/taag/#p=display&h=0&v=0&c=c%2B%2B&f=Small
+ * 
  *      Class Identifier Convensions:
  *      - public should be in CamelCase (w/leading cap)
  *      - private underscore case with leading _'s
@@ -72,6 +76,7 @@ int main() {
     std::cout << clr::erase_in_display(3);
     std::cout << clr::erase_in_display(2);
 
+    // get the compiler mode
     std::string comp_mode = "";
     #ifdef DEBUG
         #undef RELEASE
@@ -82,6 +87,7 @@ int main() {
         comp_mode = "RELEASE";
     #endif
 
+    // print the header
     std::cout << clr::RED << "----";
     std::cout << clr::ORANGE << "====";
     std::cout << clr::YELLOW << "[ ";
@@ -91,11 +97,13 @@ int main() {
     std::cout << clr::RED << "----";
     std::cout << clr::RETURN;
 
+    // get the exit mode
     std::string exit_mode = "ABNORMAL";
     Bus& bus = Bus::GetInstance();
     if (bus.Run())
         exit_mode = "NORMAL";
 
+    // print the footer
     std::cout << clr::RED << "----";
     std::cout << clr::ORANGE << "====";
     std::cout << clr::YELLOW << "[ ";
