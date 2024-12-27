@@ -264,21 +264,6 @@ int Memory::_attach(IDevice* device)
     return size;
 }
 
-int Memory::_binary_search(Word address)
-{
-    auto It = std::lower_bound(_memory_nodes.begin(), _memory_nodes.end(), address,
-        [](const IDevice* node, Word addr) {
-            return node->_base + (node->_size - 1) < addr;
-        }
-    );
-    if (It == _memory_nodes.end() || (*It)->base() > address) {
-        // Address not found in any devices.
-        return -1;
-    }
-    return std::distance(_memory_nodes.begin(), It);
-
-}
-
 
 void Memory::Display_Nodes() 
 {

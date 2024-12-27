@@ -84,7 +84,6 @@ protected:
     // Move to the Memory Management Device
     inline static int _next_address = 0;    // next assignable address
     inline static std::vector<IDevice*> _memory_nodes;		
-    inline static int _binary_search(Word address);
 
 private: 
     bool bWasInit = false;
