@@ -11,6 +11,7 @@
 
 #include "Bus.hpp"
 #include "clr.hpp"
+#include "Gfx.hpp"
 
 
 /**
@@ -264,7 +265,11 @@ bool Bus::_onInit()
     Memory::Attach<USER_MEMORY>();      // 0x2400 - 0xAFFF      (42k user RAM)    
     Memory::Attach<MEMBANK>();          // 0xB000 - 0xEFFF      (16k banked memory)
     Memory::Attach<KERNEL_ROM>();       // 0xF000 - 0xFFFF      (3.5k kernel ROM)
-    Memory::Attach<HDW_REGISTERS>();    // 0xFE00 - 0xFFeF      (Hardware Registers)
+    Memory::Attach<HDW_REGISTERS>();    // 0xFE00 - 0xFFEF      (Hardware Registers)
+
+    Memory::Attach<Gfx>();
+
+    Memory::Attach<HDW_RESERVED>();     
     Memory::Attach<ROM_VECTS>();        // 0xFFF0 - 0xFFFF      (System ROM Vectors)
 
     // Error Checking

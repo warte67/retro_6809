@@ -23,17 +23,17 @@ public: // PUBLIC CONSTRUCTOR / DESTRUCTOR
     virtual ~NewDevice();
 
 public: // VIRTUAL METHODS
-    virtual Byte OnRead(Word offset);
-    virtual void OnWrite(Word offset, Byte data);
-
-    virtual int  OnAttach(int nextAddr) = 0;   
-    virtual bool OnInit() = 0;
-    virtual bool OnQuit() = 0;
-    virtual bool OnActivate() = 0;
-    virtual bool OnDeactivate() = 0;
-    virtual bool OnEvent(SDL_Event* evnt) = 0;
-    virtual bool OnUpdate(float fElapsedTime) = 0;
-    virtual bool OnRender() = 0;
+    virtual Byte OnRead(Word offset);               // read
+    virtual void OnWrite(Word offset, Byte data);   // write
+    // =============================================
+    virtual int  OnAttach(int nextAddr);            // attach to the memory map
+    virtual bool OnInit();                          // initialize
+    virtual bool OnQuit();                          // shutdown
+    virtual bool OnActivate();                      // activate
+    virtual bool OnDeactivate();                    // deactivate
+    virtual bool OnEvent(SDL_Event* evnt);          // handle events
+    virtual bool OnUpdate(float fElapsedTime);      // update
+    virtual bool OnRender();                        // render
 
 public: // PUBLIC ACCESSORS
     // ... 

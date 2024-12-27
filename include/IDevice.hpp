@@ -557,17 +557,57 @@ class HDW_REGISTERS : public IDevice
             new_node = { "HDW_REG_START", nextAddr,  { "Start of Register Space"} }; 
             mapped_register.push_back(new_node);
 
-            int bank_size = 0xFFF0-nextAddr;      
-            std::string res = std::to_string(bank_size);
-            res += " bytes reserved for future use.";
-            new_node = { "HDW_RESERVED", nextAddr,  { res } }; nextAddr+=bank_size;
-            mapped_register.push_back(new_node);
+            // // reserve space for future use
+            // int bank_size = 0xFFF0-nextAddr;      
+            // std::string res = std::to_string(bank_size);
+            // res += " bytes reserved for future use.";
+            // new_node = { "HDW_RESERVED", nextAddr,  { res } }; nextAddr+=bank_size;
+            // mapped_register.push_back(new_node);        
 
             _size = nextAddr - old_address;
             return _size; 
         }  
 };
 
+
+class HDW_RESERVED : public IDevice
+{
+    public:
+        HDW_RESERVED() {
+            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
+            _size = 0;
+            _device_name = "HDW_RESERVED";
+        }
+        virtual ~HDW_RESERVED() {
+            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
+        }    
+
+        bool OnInit() override 						{ return true; }
+        bool OnQuit() override 						{ return true; }
+        bool OnActivate() override 					{ return true; }
+        bool OnDeactivate() override 				{ return true; }
+        // bool OnEvent(SDL_Event* evnt) override 		{ return true; }
+        bool OnEvent(SDL_Event* evnt) override 		{ return (evnt==nullptr); }         // return true
+        bool OnUpdate(float fElapsedTime) override 	{ return (fElapsedTime==0.0f); }    // { return true; }           
+        bool OnRender() override 					{ return true; } 
+
+        int OnAttach(int nextAddr) override       {
+            Word old_address=nextAddr-1;
+            this->heading = "Start of Reserved Register Space";
+            register_node new_node;
+
+            // reserve space for future use
+            int bank_size = 0xFFF0-nextAddr;      
+            std::string res = std::to_string(bank_size);
+            res += " bytes reserved for future use.";
+            nextAddr+=bank_size;
+            new_node = { "HDW_REG_END", nextAddr,  { res } }; nextAddr+=1;
+            mapped_register.push_back(new_node);     
+
+            _size = nextAddr - old_address;          
+            return _size;
+        }
+};
 
 /*** class ROM_VECTS *******************************************************
  * 
