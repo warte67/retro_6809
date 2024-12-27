@@ -1,29 +1,28 @@
 /***  clr.hpp  ****************************
-* 
-*            _      _                 
-*           | |    | |                
-*        ___| |_ __| |__  _ __  _ __  
-*       / __| | '__| '_ \| '_ \| '_ \ 
-*      | (__| | |_ | | | | |_) | |_) |
-*       \___|_|_(_)|_| |_| .__/| .__/ 
-*                      | |   | |    
-*                      |_|   |_|    
-*
-* 		(Static Container Object)
-* 		Cannot Be Instantiated
-* 
-* 		Defines a set of ansii escape sequences 
-* 		to be used to colorize and format text
-* 		in the terminal.
-* 
-*      Note: It may be required to periodically
-*          fflush(stdout);   
-* 
-*          /usr/bin/resize -s row col
-* 
-* 	https://stackoverflow.com/questions/4842424/list-of-ansi-color-escape-sequences
-* 
-******************/
+ *             _              _                     
+ *            | |            | |                    
+ *       ___  | |  _ __      | |__    _ __    _ __  
+ *      / __| | | | '__|     | '_ \  | '_ \  | '_ \ 
+ *     | (__  | | | |     _  | | | | | |_) | | |_) |
+ *      \___| |_| |_|    (_) |_| |_| | .__/  | .__/ 
+ *                                   | |     | |    
+ *                                   |_|     |_|   
+ *
+ * 		(Static Container Object)
+ * 		Cannot Be Instantiated
+ * 
+ * 		Defines a set of ansii escape sequences 
+ * 		to be used to colorize and format text
+ * 		in the terminal.
+ * 
+ *      Note: It may be required to periodically
+ *          fflush(stdout);   
+ * 
+ *          /usr/bin/resize -s row col
+ * 
+ * 	https://stackoverflow.com/questions/4842424/list-of-ansi-color-escape-sequences
+ * 
+ ******************/
 #pragma once
 
 #include <string>

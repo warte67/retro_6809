@@ -1,12 +1,12 @@
 /****************************************************************
- *                      _                         
- *                     (_)                        
- *      _ __ ___   __ _ _ _ __    ___ _ __  _ __  
- *     | '_ ` _ \ / _` | | '_ \  / __| '_ \| '_ \ 
- *     | | | | | | (_| | | | | || (__| |_) | |_) |
- *     |_| |_| |_|\__,_|_|_| |_(_)___| .__/| .__/ 
- *                                   | |   | |    
- *                                   |_|   |_|    
+ *                          _                                    
+ *                         (_)                                   
+ *      _ __ ___     __ _   _   _ __         ___   _ __    _ __  
+ *     | '_ ` _ \   / _` | | | | '_ \       / __| | '_ \  | '_ \ 
+ *     | | | | | | | (_| | | | | | | |  _  | (__  | |_) | | |_) |
+ *     |_| |_| |_|  \__,_| |_| |_| |_| (_)  \___| | .__/  | .__/ 
+ *                                                | |     | |    
+ *                                                |_|     |_|   
  *    
  *---------------------------------------------------------------
  *
@@ -21,7 +21,7 @@
  *          C/C++ Extension Pack
  *          Makefile Tools
  *          6x09 Assembly`
- *          Cody: AI Coding Assistant with Autocompletion & Chat (Can't leave Cody Out)
+ *          Codium: AI Coding Autocompletion & Chat or Continue - Codestral, Claude, and more
  *
  *      Debian Based Linux Dependencies:
             sudo apt install libsdl2-dev libsdl2-gfx-dev libsdl2-image-dev
@@ -34,14 +34,12 @@
  *      Run with:
  *          ./run
  *
- *      Examples:
- *           #ifdef DEBUG
- *               std::cout << "(DEBUG)";
- *           #endif
- *           #ifdef RELEASE
- *               std::cout << "(RELEASE)";
- *           #endif
- *
+ *      Build with:
+ *          make                # builds with debug symbols
+ *          make release        # builds for performance but without debug
+ *          make clean          # cleans the build folder   
+ *          make run            # builds and runs 
+ * 
  *      Class Identifier Convensions:
  *      - public should be in CamelCase (w/leading cap)
  *      - private underscore case with leading _'s

@@ -1,19 +1,19 @@
 /***  Memory.hpp  (singleton) ****************************
-*   __  __                                   _                 
-*  |  \/  |                                 | |                
-*  | \  / | ___ _ __ ___   ___  _ __ _   _  | |__  _ __  _ __  
-*  | |\/| |/ _ \ '_ ` _ \ / _ \| '__| | | | | '_ \| '_ \| '_ \ 
-*  | |  | |  __/ | | | | | (_) | |  | |_| |_| | | | |_) | |_) |
-*  |_|  |_|\___|_| |_| |_|\___/|_|   \__, (_)_| |_| .__/| .__/ 
-*                                     __/ |       | |   | |    
-*                                    |___/        |_|   |_|    
-* 
-*  The Memory Object is responsible for maintaining the
-*  CPU addressable memory map, reading, and writing. It
-*  acts as a static singleton  container object for all 
-*  of the attached mememory devices. 
-* 
-******************/
+ *      __  __                                                 _                     
+ *     |  \/  |                                               | |                    
+ *     | \  / |   ___   _ __ ___     ___    _ __   _   _      | |__    _ __    _ __  
+ *     | |\/| |  / _ \ | '_ ` _ \   / _ \  | '__| | | | |     | '_ \  | '_ \  | '_ \ 
+ *     | |  | | |  __/ | | | | | | | (_) | | |    | |_| |  _  | | | | | |_) | | |_) |
+ *     |_|  |_|  \___| |_| |_| |_|  \___/  |_|     \__, | (_) |_| |_| | .__/  | .__/ 
+ *                                                  __/ |             | |     | |    
+ *                                                 |___/              |_|     |_|   
+ * 
+ *  The Memory Object is responsible for maintaining the
+ *  CPU addressable memory map, reading, and writing. It
+ *  acts as a static singleton  container object for all 
+ *  of the attached mememory devices. 
+ * 
+ ******************/
 #pragma once
 
 #include <string>
