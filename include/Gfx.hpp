@@ -40,34 +40,33 @@ public: // PUBLIC ACCESSORS
     // ... 
 
 private: // PRIVATE MEMBERS
-    // ...
+    // internal hardware register states:
+    Byte _gfx_mode = 0b00000010;    // default: text, max resolution, 16 colors
+    Byte _gfx_emu =  0b00000000;    // default: no debug
 
+    bool _change_gfx_mode(Byte data);
+    bool _change_emu_mode(Byte data);
 };
 
 /*** NOTES: ****************************************
  
- Total Video Resolution:    400x240 with borders
- Actual Video Resolution:   320x200
- Top Border:                20 pixels
- Bottom Border:             20 pixels
- Left Border:               40 pixels
- Right Border:              40 pixels
+    Total Video Resolution:    400x240 with borders
+    Actual Video Resolution:   320x200
+    Top Border:                20 pixels
+    Bottom Border:             20 pixels
+    Left Border:               40 pixels
+    Right Border:              40 pixels
 
- 4 color modes:             2 colors, 4 colors, 16 colors, 256 colors
- Overscan Horiz and Vert:   1x, 2x, 4x
- Horizontal Resolutions:    320, 160, 80
- Vertical Resolutions:      200, 100, 50
+    4 color modes:             2 colors, 4 colors, 16 colors, 256 colors
+    Overscan Horiz and Vert:   1x, 2x, 4x
+    Horizontal Resolutions:    320, 160, 80
+    Vertical Resolutions:      200, 100, 50
 
-2-bits for color
-2-bits for Hscan
-2-bits for Vscan
-1-bit for text/bitmap mode
-1-bit reserved
-
-
-
-
- 
+    2-bits for color
+    2-bits for Vscan
+    2-bits for Hscan
+    1-bit for text/bitmap mode
+    1-bit reserved
   
  ****************************************/
 

@@ -26,17 +26,33 @@
 Byte Gfx::OnRead(Word offset) 
 { 
     Byte data = IDevice::OnRead(offset);
-    std::cout << clr::indent() << clr::CYAN << "Gfx::OnRead($"<< clr::hex(offset,4) << ") = $" << clr::hex(data,2) << "\n" << clr::RESET;
+    // std::cout << clr::indent() << clr::CYAN << "Gfx::OnRead($"<< clr::hex(offset,4) << ") = $" << clr::hex(data,2) << "\n" << clr::RESET;
 
-    // if (offset == MAP(GFX_MODE)) std::cout << clr::indent() << clr::CYAN << "Gfx::OnRead(GFX_MODE) = $" << clr::hex(data,2) << "\n" << clr::RESET;
-    // if (offset == MAP(GFX_EMU)) std::cout << clr::indent() << clr::CYAN << "Gfx::OnRead(GFX_EMU) = $" << clr::hex(data,2) << "\n" << clr::RESET;
+    if (offset == MAP(GFX_MODE))    { data = _gfx_mode; }
+    if (offset == MAP(GFX_EMU))     { data = _gfx_emu; }
 
     return data;
 } // END: Gfx::OnRead()
 
 void Gfx::OnWrite(Word offset, Byte data) 
 { 
-    std::cout << clr::indent() << clr::CYAN << "Gfx::OnWrite($" << clr::hex(offset,4) << ", $" << clr::hex(data,2) << ")\n" << clr::RESET;
+    // std::cout << clr::indent() << clr::CYAN << "Gfx::OnWrite($" << clr::hex(offset,4) << ", $" << clr::hex(data,2) << ")\n" << clr::RESET;
+
+    if (offset == MAP(GFX_MODE))    
+    { 
+        if (_change_gfx_mode(data)) 
+        { 
+            _gfx_mode = data; 
+        }
+    }
+    if (offset == MAP(GFX_EMU))     
+    {
+        if (_change_emu_mode(data)) 
+        { 
+            _gfx_emu = data; 
+        }
+    }
+
     IDevice::OnWrite( offset, data);
 } // END: Gfx::OnWrite()
 
@@ -84,16 +100,29 @@ int  Gfx::OnAttach(int nextAddr)
 
     register_node new_node;
     new_node = { "GFX_MODE", nextAddr,  {   "(Byte) Graphics Mode",
-                                            "   - bits 0-4 = Resoltion Modes (0-15)",
-                                            "   - bits 5-6 = Color Depth (0-7)",
-                                            "   - bits 7   = 0:text, 1:bitmap" } }; nextAddr+=1;
+                                            "   - bit  7   = reserved" ,
+                                            "   - bit  6   = 0:screen is text, ",
+                                            "               1:screen is bitmap",
+                                            "   - bits 4-5 = horizontal overscan: ",
+                                            "               00=1x, 01=2x, 10=4x",
+                                            "   - bits 2-3 = vertical overscan: ",
+                                            "               00=1x, 01=2x, 10=4x",
+                                            "   - bits 0-1 = Color Mode: 00=2-clr, ",
+                                            "               01=4-clr, 10=16-clr, ",
+                                            "               11=256-clr",
+                                            "" } }; nextAddr+=1;
     mapped_register.push_back(new_node);
 
     new_node = { "GFX_EMU", nextAddr,  {    "(Byte) Emulation Flags",
-                                            "   - bits 0-2  = Active Monitor 0-7",
-                                            "   - bits 3-5  = Debug Monitor 0-7",
-                                            "   - bit  6    = 0:vsync off, 1:vsync on",
-                                            "   - bit  7    = 0:windowed, 1:fullscreen" } }; nextAddr+=1;
+                                            "   - bit  7    = vsync: 0=off, 1=on",
+                                            "   - bit  6    = main: 0=windowed,",
+                                            "                 1=fullscreen",
+                                            "   - bit  5    = debug: 0=off, 1=on",
+                                            "   - bit  4    = debug: 0=windowed, ",
+                                            "                 1=fullscreen",                                                                                        
+                                            "   - bits 2-3  = Debug Monitor 0-3",
+                                            "   - bits 0-1  = Active Monitor 0-3",
+                                            "" } }; nextAddr+=1;
     mapped_register.push_back(new_node);
 
     _size = nextAddr - old_address;
@@ -242,6 +271,68 @@ bool Gfx::OnRender()
     //std::cout << clr::indent() << clr::CYAN << "Gfx::OnRender() Exit" << clr::RETURN;
     return true;
 }
+
+/*************************************************************************
+ * bool _change_gfx_mode(Byte mode):
+ * 
+ * This function processes the given graphics mode and changes the
+ * internal state of the device accordingly. It returns true if the
+ * mode change was successful, false otherwise.
+ ************************************************************************/
+bool Gfx::_change_gfx_mode(Byte mode) 
+{ 
+// GFX_MODE          equ   0xFE00  ; (Byte) Graphics Mode
+//                                 ;    - bit  7   = reserved
+//                                 ;    - bit  6   = 0:screen is text, 
+//                                 ;                1:screen is bitmap
+//                                 ;    - bits 4-5 = horizontal overscan: 
+//                                 ;                00=1x, 01=2x, 10=4x
+//                                 ;    - bits 2-3 = vertical overscan: 
+//                                 ;                00=1x, 01=2x, 10=4x
+//                                 ;    - bits 0-1 = Color Mode: 00=2-clr, 
+//                                 ;                01=4-clr, 10=16-clr, 
+//                                 ;                11=256-clr
+
+    // horizontal overscan pattern 11 is also 4x (instead of error)
+    if ((mode & 0b00110000) == 0b00110000) 
+    { 
+        mode &= 0b11001111;
+        mode |= 0b00100000;
+    }
+    // vertical overscan pattern 11 is also 4x (instead of error)
+    if ((mode & 0b00001100) == 0b00001100) 
+    { 
+        mode &= 0b11110011;
+        mode |= 0b00001000;
+    }
+
+    return true; 
+}
+
+/*************************************************************************
+ * bool _change_emu_mode(Byte emu):
+ * 
+ * This function processes the given emulation flags and changes the
+ * internal state of the device accordingly. It returns true if the
+ * flag change was successful, false otherwise.
+ ************************************************************************/
+bool Gfx::_change_emu_mode(Byte emu) 
+{ 
+// GFX_EMU           equ   0xFE01  ; (Byte) Emulation Flags
+//                             ;    - bit  7    = vsync: 0=off, 1=on
+//                             ;    - bit  6    = main: 0=windowed,
+//                             ;                  1=fullscreen
+//                             ;    - bit  5    = debug: 0=off, 1=on
+//                             ;    - bit  4    = debug: 0=windowed, 
+//                             ;                  1=fullscreen
+//                             ;    - bits 2-3  = Debug Monitor 0-3
+//                             ;    - bits 0-1  = Active Monitor 0-3
+
+    if (emu)  {;}     // stop the compiler from complaining
+
+    return true; 
+}    
+
 
 
 /***** NOTES: ******
