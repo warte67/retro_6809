@@ -245,13 +245,6 @@ bool Bus::_onInit()
         // create the renderer
         pRenderer = SDL_CreateRenderer(pWindow, NULL);
         SDL_SetRenderLogicalPresentation(pRenderer, 320, 200, SDL_LOGICAL_PRESENTATION_STRETCH);
-        
-        if (_memory.OnInit() == false)
-        {
-            std::cout << clr::indent_pop() << clr::ORANGE << "Bus::_onInit() Error" << clr::RETURN;
-            Bus::Error("Device Initialization Failure!", __FILE__, __LINE__);
-            return false;
-        }
     } // END OF SDL3 Initialization
 
     ////////////////////////////////////////
@@ -265,7 +258,7 @@ bool Bus::_onInit()
     Memory::Attach<USER_MEMORY>();      // 0x2400 - 0xAFFF      (42k user RAM)    
     Memory::Attach<MEMBANK>();          // 0xB000 - 0xEFFF      (16k banked memory)
     Memory::Attach<KERNEL_ROM>();       // 0xF000 - 0xFFFF      (3.5k kernel ROM)
-    Memory::Attach<HDW_REGISTERS>();    // 0xFE00 - 0xFFEF      (Hardware Registers)
+    // Memory::Attach<HDW_REGISTERS>();    // 0xFE00 - 0xFFEF      (Hardware Registers)
 
     Memory::Attach<Gfx>();
 
@@ -279,7 +272,7 @@ bool Bus::_onInit()
 
     // Engange Basic Memory Tests
     int upper_bounds = Memory::NextAddress();  
-    std::cout << clr::indent() << clr::GREEN << "Testing Addresses $0000-$" << clr::hex(upper_bounds,4) << " ... ";              
+    std::cout << clr::indent_push() << clr::YELLOW << "Testing Addresses $0000-$" << clr::hex(upper_bounds-1,4) << " ... \n";
     Byte b = 0;
     for (int a = 0; a<upper_bounds; a++) 
     {
@@ -289,10 +282,18 @@ bool Bus::_onInit()
         }
         b++;
     }
-    std::cout << clr::YELLOW << "Memory Tests Passed!\n" << clr::RESET;
+    std::cout << clr::indent_pop() << clr::YELLOW << "Memory Tests Passed!\n" << clr::RESET;
 
     // Dump the memory map
     if (DUMP_MEMORY_MAP)    { Memory::Display_Nodes(); }
+
+    // initialize the devices
+    if (_memory.OnInit() == false)
+    {
+        std::cout << clr::indent_pop() << clr::ORANGE << "Bus::_onInit() Error" << clr::RETURN;
+        Bus::Error("Device Initialization Failure!", __FILE__, __LINE__);
+        return false;
+    }
 
     // Set the initialized flag
     _bWasInit = true;

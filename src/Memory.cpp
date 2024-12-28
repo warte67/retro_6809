@@ -55,7 +55,8 @@ bool Memory::OnInit()
             std::cout << clr::indent_pop() << clr::ORANGE << "Memory::OnInit() Error" << clr::RETURN;
             ret = false;
         }
-    }
+    }    
+    // _build_map();
     std::cout << clr::indent_pop() << clr::CYAN << "Memory::OnInit() Exit" << clr::RETURN;                
     return ret;
 }
@@ -429,6 +430,12 @@ int Memory::_attach(IDevice* device)
             device->size(size);
             _next_address += size;               
             Memory::_memory_nodes.push_back(device);
+
+            // update the memory map
+            for (auto &n : device->mapped_register) {
+                _map[n.name] = n.address;
+                // std::cout << "_map[\"" << n.name << "\"] = $" << clr::hex(n.address,4) << std::endl;
+            }
         }
         else
         {
@@ -484,7 +491,6 @@ void Memory::Display_Nodes()
 
         for (auto &node : Memory::_memory_nodes) 
         {
-            // std::cout << pad(" ",FIRST_TAB) << "\t// " << node->heading << ":\n";
             std::cout << std::endl;
             std::cout << clr::pad(clr::pad(" ",FIRST_TAB) + clr::pad(node->name(), VAR_LEN) + "= 0x" + clr::hex(node->base(),4), COMMENT_START+4) << "// START: " << node->heading << std::endl;
 
@@ -517,8 +523,7 @@ void Memory::Display_Nodes()
 
         for (auto &node : Memory::_memory_nodes) 
         {
-            // std::cout << pad("",FIRST_TAB) << "\t// " << node->heading << ":\n";
-            std::cout << std::endl;
+             std::cout << std::endl;
             std::cout << clr::pad(clr::pad("",FIRST_TAB) + clr::pad(node->name(), VAR_LEN) + "equ   0x" + clr::hex(node->base(),4), COMMENT_START) << "; START: " << node->heading << std::endl;
 
             for (auto &r : node->mapped_register)
@@ -538,3 +543,16 @@ void Memory::Display_Nodes()
         std::cout << "\n\n; END of memory_map.asm definitions\n\n\n";
     }
 }
+
+// void Memory::_build_map()
+// {
+//     std::cout << clr::indent_push() << clr::CYAN << "Memory::_build_map() Entry" << clr::RETURN;
+//     for (auto &node : Memory::_memory_nodes) 
+//     {
+//         for (auto &r : node->mapped_register)
+//         {
+//             _map[r.name] = r.address;
+//         }
+//     }
+//     std::cout << clr::indent_pop() << clr::CYAN << "Memory::_build_map() Exit" << clr::RETURN;
+// }

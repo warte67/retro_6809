@@ -18,6 +18,7 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
 #include <mutex>
 
 #include "IDevice.hpp"
@@ -74,18 +75,22 @@ public:     // PUBLIC ACCESSORS
     }    
 
     static int NextAddress() { return _next_address; }
-
     static void Display_Nodes();
+    
+    static Word Map(std::string name) { return _map[name]; }    // Map a device name to its address
+    #define MAP_IMPL(key) Memory::Map(#key)                     
+    #define MAP(key) MAP_IMPL(key)    
 
-protected:
-
+private:
     static int _attach(IDevice* device);
 
     // Move to the Memory Management Device
     inline static int _next_address = 0;    // next assignable address
     inline static std::vector<IDevice*> _memory_nodes;		
 
-private: 
+    inline static std::unordered_map<std::string, Word> _map;
+    // inline static void _build_map();
+
     bool bWasInit = false;
 };
 

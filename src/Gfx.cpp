@@ -16,6 +16,7 @@
 
 
 #include "Gfx.hpp"
+#include "Memory.hpp"
 
 
 /****************
@@ -24,14 +25,20 @@
 
 Byte Gfx::OnRead(Word offset) 
 { 
-    return IDevice::OnRead(offset); 
+    Byte data = IDevice::OnRead(offset);
+    std::cout << clr::indent() << clr::CYAN << "Gfx::OnRead($"<< clr::hex(offset,4) << ") = $" << clr::hex(data,2) << "\n" << clr::RESET;
+
+    // if (offset == MAP(GFX_MODE)) std::cout << clr::indent() << clr::CYAN << "Gfx::OnRead(GFX_MODE) = $" << clr::hex(data,2) << "\n" << clr::RESET;
+    // if (offset == MAP(GFX_EMU)) std::cout << clr::indent() << clr::CYAN << "Gfx::OnRead(GFX_EMU) = $" << clr::hex(data,2) << "\n" << clr::RESET;
+
+    return data;
 } // END: Gfx::OnRead()
 
 void Gfx::OnWrite(Word offset, Byte data) 
 { 
-    IDevice::OnWrite( offset, data); 
+    std::cout << clr::indent() << clr::CYAN << "Gfx::OnWrite($" << clr::hex(offset,4) << ", $" << clr::hex(data,2) << ")\n" << clr::RESET;
+    IDevice::OnWrite( offset, data);
 } // END: Gfx::OnWrite()
-
 
 
 /***************************
@@ -40,13 +47,13 @@ void Gfx::OnWrite(Word offset, Byte data)
 
 Gfx::Gfx() 
 { 
-    std::cout << clr::indent_push() << clr::LT_BLUE << "Gfx Created" << clr::RETURN;
+    std::cout << clr::indent_push() << clr::CYAN << "Gfx Created" << clr::RETURN;
     _device_name = "Gfx"; 
 } // END: Gfx()
 
 Gfx::~Gfx() 
 { 
-    std::cout << clr::indent_pop() << clr::LT_BLUE << "Gfx Destroyed" << clr::RETURN; 
+    std::cout << clr::indent_pop() << clr::CYAN << "Gfx Destroyed" << clr::RETURN; 
 } // END: ~Gfx()
 
 
@@ -69,7 +76,7 @@ Gfx::~Gfx()
  ********************/
 int  Gfx::OnAttach(int nextAddr)
 {
-    std::cout << clr::indent() << clr::LT_BLUE << "Gfx::OnAttach() Entry" << clr::RETURN;
+    std::cout << clr::indent() << clr::CYAN << "Gfx::OnAttach() Entry" << clr::RETURN;
     if (nextAddr == 0) { ; } // stop the compiler from complaining
 
     Word old_address=nextAddr;
@@ -90,7 +97,7 @@ int  Gfx::OnAttach(int nextAddr)
     mapped_register.push_back(new_node);
 
     _size = nextAddr - old_address;
-    std::cout << clr::indent() << clr::LT_BLUE << "Gfx::OnAttach() Exit" << clr::RETURN;
+    std::cout << clr::indent() << clr::CYAN << "Gfx::OnAttach() Exit" << clr::RETURN;
     return _size;   // return the size of the allocation
 }
 
@@ -107,9 +114,9 @@ int  Gfx::OnAttach(int nextAddr)
  *********************/
 bool Gfx::OnInit()
 {
-    std::cout << clr::indent() << clr::LT_BLUE << "Gfx::OnInit() Entry" << clr::RETURN;
+    std::cout << clr::indent() << clr::CYAN << "Gfx::OnInit() Entry" << clr::RETURN;
     // ...
-    std::cout << clr::indent() << clr::LT_BLUE << "Gfx::OnInit() Exit" << clr::RETURN;
+    std::cout << clr::indent() << clr::CYAN << "Gfx::OnInit() Exit" << clr::RETURN;
     return true;
 }
 
@@ -126,9 +133,9 @@ bool Gfx::OnInit()
  **********************/
 bool Gfx::OnQuit()
 {
-    std::cout << clr::indent() << clr::LT_BLUE << "Gfx::OnQuit() Entry" << clr::RETURN;
+    std::cout << clr::indent() << clr::CYAN << "Gfx::OnQuit() Entry" << clr::RETURN;
     // ...
-    std::cout << clr::indent() << clr::LT_BLUE << "Gfx::OnQuit() Exit" << clr::RETURN;
+    std::cout << clr::indent() << clr::CYAN << "Gfx::OnQuit() Exit" << clr::RETURN;
     return true;
 }
 
@@ -146,9 +153,9 @@ bool Gfx::OnQuit()
  ***********************/
 bool Gfx::OnActivate()
 {
-    std::cout << clr::indent() << clr::LT_BLUE << "Gfx::OnActivate() Entry" << clr::RETURN;
+    std::cout << clr::indent() << clr::CYAN << "Gfx::OnActivate() Entry" << clr::RETURN;
     // ...
-    std::cout << clr::indent() << clr::LT_BLUE << "Gfx::OnActivate() Exit" << clr::RETURN;
+    std::cout << clr::indent() << clr::CYAN << "Gfx::OnActivate() Exit" << clr::RETURN;
     return true;
 }
 
@@ -166,9 +173,9 @@ bool Gfx::OnActivate()
  ***********************/
 bool Gfx::OnDeactivate()
 {
-    std::cout << clr::indent() << clr::LT_BLUE << "Gfx::OnDeactivate() Entry" << clr::RETURN;
+    std::cout << clr::indent() << clr::CYAN << "Gfx::OnDeactivate() Entry" << clr::RETURN;
     // ...
-    std::cout << clr::indent() << clr::LT_BLUE << "Gfx::OnDeactivate() Exit" << clr::RETURN;
+    std::cout << clr::indent() << clr::CYAN << "Gfx::OnDeactivate() Exit" << clr::RETURN;
     return true;
 }
 
@@ -188,10 +195,10 @@ bool Gfx::OnDeactivate()
 
 bool Gfx::OnEvent(SDL_Event* evnt)
 {
-    //std::cout << clr::indent() << clr::LT_BLUE << "Gfx::OnEvent() Entry" << clr::RETURN;
+    //std::cout << clr::indent() << clr::CYAN << "Gfx::OnEvent() Entry" << clr::RETURN;
     if (evnt) { ; } // stop the compiler from complaining
     // ...
-    //std::cout << clr::indent() << clr::LT_BLUE << "Gfx::OnEvent() Exit" << clr::RETURN;
+    //std::cout << clr::indent() << clr::CYAN << "Gfx::OnEvent() Exit" << clr::RETURN;
     return true;
 }
 
@@ -211,10 +218,10 @@ bool Gfx::OnEvent(SDL_Event* evnt)
  ************************************************************************/
 bool Gfx::OnUpdate(float fElapsedTime)
 {
-    //std::cout << clr::indent() << clr::LT_BLUE << "Gfx::OnUpdate() Entry" << clr::RETURN;
+    //std::cout << clr::indent() << clr::CYAN << "Gfx::OnUpdate() Entry" << clr::RETURN;
     if (fElapsedTime==0.0f) { ; } // stop the compiler from complaining
     // ...
-    //std::cout << clr::indent() << clr::LT_BLUE << "Gfx::OnUpdate() Exit" << clr::RETURN;
+    //std::cout << clr::indent() << clr::CYAN << "Gfx::OnUpdate() Exit" << clr::RETURN;
     return true;
 }
 
@@ -230,9 +237,9 @@ bool Gfx::OnUpdate(float fElapsedTime)
  *************************************************************************/
 bool Gfx::OnRender()
 {
-    //std::cout << clr::indent() << clr::LT_BLUE << "Gfx::OnRender() Entry" << clr::RETURN;
+    //std::cout << clr::indent() << clr::CYAN << "Gfx::OnRender() Entry" << clr::RETURN;
     // ...
-    //std::cout << clr::indent() << clr::LT_BLUE << "Gfx::OnRender() Exit" << clr::RETURN;
+    //std::cout << clr::indent() << clr::CYAN << "Gfx::OnRender() Exit" << clr::RETURN;
     return true;
 }
 

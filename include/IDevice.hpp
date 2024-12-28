@@ -554,7 +554,7 @@ class HDW_REGISTERS : public IDevice
             Word old_address=nextAddr;
             this->heading = "Start of Hardware Register Space";
             register_node new_node;
-            new_node = { "HDW_REG_START", nextAddr,  { "Start of Register Space"} }; 
+            new_node = { "HDW_REG_START", nextAddr,  { "Start of Register Space"} }; nextAddr+=2;
             mapped_register.push_back(new_node);
 
             // // reserve space for future use
@@ -597,11 +597,11 @@ class HDW_RESERVED : public IDevice
             register_node new_node;
 
             // reserve space for future use
-            int bank_size = 0xFFF0-nextAddr;      
+            int bank_size = 0xFFEF-nextAddr;      
             std::string res = std::to_string(bank_size);
             res += " bytes reserved for future use.";
             nextAddr+=bank_size;
-            new_node = { "HDW_REG_END", nextAddr,  { res } }; nextAddr+=1;
+            new_node = { "HDW_REG_END", nextAddr,  { res } }; // nextAddr+=1;
             mapped_register.push_back(new_node);     
 
             _size = nextAddr - old_address;          

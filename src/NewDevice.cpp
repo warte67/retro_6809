@@ -21,12 +21,19 @@
 
 Byte NewDevice::OnRead(Word offset) 
 { 
-    return IDevice::OnRead(offset); 
+    Byte data = IDevice::OnRead(offset);
+    // ...
+
+    // std::cout << "MAP(GFX_MODE) = $" << clr::hex(MAP(GFX_MODE),4) << "\n";
+    // std::cout << "MAP(GFX_EMU) = $" << clr::hex(MAP(GFX_EMU),4) << "\n";
+
+    // ...
+    return data; 
 } // END: NewDevice::OnRead()
 
 void NewDevice::OnWrite(Word offset, Byte data) 
 { 
-    IDevice::OnWrite( offset, data); 
+    IDevice::OnWrite( offset, data);
 } // END: NewDevice::OnWrite()
 
 
