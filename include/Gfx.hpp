@@ -8,7 +8,7 @@
  *                                       | |     | |    
  *                                       |_|     |_|    
  *
- * This is the base class for all graphics devices. It provides the
+ * This is the base class for the primary graphics devices. It provides the
  * basic methods for reading and writing to the device's memory.
  * 
  ************************************/
@@ -40,6 +40,8 @@ public: // PUBLIC ACCESSORS
     void RenderPresent() {
         SDL_RenderPresent(pRenderer);
     }
+    SDL_Window* GetWindow() { return pWindow; }         // get the SDL window
+    SDL_Renderer* GetRenderer() { return pRenderer; }   // get the SDL renderer
 
 private: // PRIVATE MEMBERS
     // internal hardware register states:

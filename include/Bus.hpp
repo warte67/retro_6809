@@ -80,7 +80,7 @@ private: // INTERNAL PRIVATES
     inline static std::mutex _mutex_IsRunning;
 
     // quick and dirty reference to the Gfx object:
-    Gfx* _pGfx = nullptr;   // singlular but not necessarily a singleton
+    inline static Gfx* _pGfx = nullptr;   // singlular but not necessarily a singleton
 
     // static Memory Management Device:
     Memory& _memory = Memory::GetInstance();   
