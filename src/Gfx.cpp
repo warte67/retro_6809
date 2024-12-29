@@ -145,21 +145,17 @@ bool Gfx::OnInit()
 {
     std::cout << clr::indent() << clr::CYAN << "Gfx::OnInit() Entry" << clr::RETURN;
 
-    // ToDo: Move this to Gfx::OnInit()
     { // BEGIN OF SDL3 Initialization
         // initialize SDL3
         if (!SDL_Init(SDL_INIT_VIDEO))
         {
-            // std::cout << SDL_GetError() << std::endl;
             std::cout << clr::indent_pop() << clr::ORANGE << "Bus::_onInit() Error" << clr::RETURN;
             Bus::Error(SDL_GetError(), __FILE__, __LINE__);
             return false;
         }
-
         // create the main window
         pWindow = SDL_CreateWindow("SDL3 Retro_6809", 1280, 800, window_flags); 
         SDL_ShowWindow(pWindow);
-
         // create the renderer
         pRenderer = SDL_CreateRenderer(pWindow, NULL);
         SDL_SetRenderLogicalPresentation(pRenderer, 320, 200, SDL_LOGICAL_PRESENTATION_STRETCH);
@@ -184,19 +180,19 @@ bool Gfx::OnQuit()
 {
     std::cout << clr::indent() << clr::CYAN << "Gfx::OnQuit() Entry" << clr::RETURN;
     
-    // Move this to Gfx::OnQuit()
     { // BEGIN OF SDL3 Shutdown
-        // shut down SDL stuff
         if (pRenderer)
-        {
-            // SDL_DestroyRenderer(pRenderer);
+        { // destroy the renderer
+            SDL_DestroyRenderer(pRenderer);
             pRenderer = nullptr;
         }
         if (pWindow)
-        {
+        { // destroy the window
             SDL_DestroyWindow(pWindow);
             pWindow = nullptr;
         }
+        // shutdown SDL
+        SDL_Quit();
     } // END OF SDL3 Shutdown
 
     std::cout << clr::indent() << clr::CYAN << "Gfx::OnQuit() Exit" << clr::RETURN;
@@ -285,7 +281,7 @@ bool Gfx::OnUpdate(float fElapsedTime)
     //std::cout << clr::indent() << clr::CYAN << "Gfx::OnUpdate() Entry" << clr::RETURN;
     if (fElapsedTime==0.0f) { ; } // stop the compiler from complaining
 
-    // TESTING:  Something to look at while running these tests...
+    { // TESTING:  Something to look at while running these tests...
         SDL_SetRenderTarget(pRenderer, NULL);
         static Uint16 r=0;
         static Uint16 g=0;
@@ -297,8 +293,8 @@ bool Gfx::OnUpdate(float fElapsedTime)
         if (b>255) {  b=0; g+=t;  }
         if (g>255) {  g=0; r+=t;  }
         if (r>255) {  r=0; b+=t;  }
-        SDL_RenderClear(pRenderer);	
-    // END TESTING ...
+        SDL_RenderClear(pRenderer);
+    } // END TESTING ...
 
     //std::cout << clr::indent() << clr::CYAN << "Gfx::OnUpdate() Exit" << clr::RETURN;
     return true;
@@ -317,9 +313,7 @@ bool Gfx::OnUpdate(float fElapsedTime)
 bool Gfx::OnRender()
 {
     //std::cout << clr::indent() << clr::CYAN << "Gfx::OnRender() Entry" << clr::RETURN;
-
     // ...
-    
     //std::cout << clr::indent() << clr::CYAN << "Gfx::OnRender() Exit" << clr::RETURN;
     return true;
 }
