@@ -31,6 +31,8 @@
 #include "types.hpp"
 #include "Memory.hpp"
 
+#include "Gfx.hpp"
+
 
 
 class Bus
@@ -77,14 +79,8 @@ private: // INTERNAL PRIVATES
     inline static std::mutex _mutex_IsDirty;
     inline static std::mutex _mutex_IsRunning;
 
-    
-	// SDL stuff
-	SDL_Window* pWindow = nullptr;
-	SDL_Renderer* pRenderer = nullptr;
-	// Uint32 window_flags = SDL_WINDOW_FULLSCREEN_DESKTOP;
-	Uint32 window_flags = SDL_WINDOW_ALWAYS_ON_TOP | SDL_WINDOW_RESIZABLE;
-    // Uint32 renderer_flags = SDL_RENDERER_ACCELERATED_2D | SDL_RENDERER_PRESENTVSYNC;
-    Uint32 renderer_flags = SDL_RENDERER_VSYNC_ADAPTIVE;
+    // quick and dirty reference to the Gfx object:
+    Gfx* _pGfx = nullptr;   // singlular but not necessarily a singleton
 
     // static Memory Management Device:
     Memory& _memory = Memory::GetInstance();   

@@ -544,15 +544,5 @@ void Memory::Display_Nodes()
     }
 }
 
-// void Memory::_build_map()
-// {
-//     std::cout << clr::indent_push() << clr::CYAN << "Memory::_build_map() Entry" << clr::RETURN;
-//     for (auto &node : Memory::_memory_nodes) 
-//     {
-//         for (auto &r : node->mapped_register)
-//         {
-//             _map[r.name] = r.address;
-//         }
-//     }
-//     std::cout << clr::indent_pop() << clr::CYAN << "Memory::_build_map() Exit" << clr::RETURN;
-// }
+
+// END: Memory.cpp

@@ -89,7 +89,6 @@ private:
     inline static std::vector<IDevice*> _memory_nodes;		
 
     inline static std::unordered_map<std::string, Word> _map;
-    // inline static void _build_map();
 
     bool bWasInit = false;
 };

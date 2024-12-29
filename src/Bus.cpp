@@ -190,7 +190,7 @@ bool Bus::Run()
             _onRender();      
 
             // only present for GfxCore            
-            SDL_RenderPresent(pRenderer);
+            if (_pGfx) { _pGfx->RenderPresent(); }
 
             // (( TESTING ))
             // Bus::IsRunning(false);
@@ -227,26 +227,6 @@ bool Bus::_onInit()
 {
     std::cout << clr::indent_push() << clr::CYAN << "Bus::_onInit() Entry" << clr::RETURN;
 
-    // ToDo: Move this to Gfx::OnInit()
-    { // BEGIN OF SDL3 Initialization
-        // initialize SDL3
-        if (!SDL_Init(SDL_INIT_VIDEO))
-        {
-            // std::cout << SDL_GetError() << std::endl;
-            std::cout << clr::indent_pop() << clr::ORANGE << "Bus::_onInit() Error" << clr::RETURN;
-            Bus::Error(SDL_GetError(), __FILE__, __LINE__);
-            return false;
-        }
-
-        // create the main window
-        pWindow = SDL_CreateWindow("SDL3 Retro_6809", 1280, 800, window_flags); 
-        SDL_ShowWindow(pWindow);
-
-        // create the renderer
-        pRenderer = SDL_CreateRenderer(pWindow, NULL);
-        SDL_SetRenderLogicalPresentation(pRenderer, 320, 200, SDL_LOGICAL_PRESENTATION_STRETCH);
-    } // END OF SDL3 Initialization
-
     ////////////////////////////////////////
     // Core system devices with parameters
     ////////////////////////////////////////
@@ -257,12 +237,12 @@ bool Bus::_onInit()
     Memory::Attach<VIDEO_BUFFER>();     // 0x0400 - 0x23FF      (8k video buffer)
     Memory::Attach<USER_MEMORY>();      // 0x2400 - 0xAFFF      (42k user RAM)    
     Memory::Attach<MEMBANK>();          // 0xB000 - 0xEFFF      (16k banked memory)
-    Memory::Attach<KERNEL_ROM>();       // 0xF000 - 0xFFFF      (3.5k kernel ROM)
+    Memory::Attach<KERNEL_ROM>();       // 0xF000 - 0xFDFF      (3.5k kernel ROM)
     // Memory::Attach<HDW_REGISTERS>();    // 0xFE00 - 0xFFEF      (Hardware Registers)
 
-    Memory::Attach<Gfx>();
+    _pGfx = Memory::Attach<Gfx>();
 
-    Memory::Attach<HDW_RESERVED>();     
+    Memory::Attach<HDW_RESERVED>();     // unused ...
     Memory::Attach<ROM_VECTS>();        // 0xFFF0 - 0xFFFF      (System ROM Vectors)
 
     // Error Checking
@@ -270,7 +250,7 @@ bool Bus::_onInit()
         Bus::Error("Memory Limit Exceeded!", __FILE__, __LINE__);        
     }
 
-    // Engange Basic Memory Tests
+    // Engage Basic Memory Tests
     int upper_bounds = Memory::NextAddress();  
     std::cout << clr::indent_push() << clr::YELLOW << "Testing Addresses $0000-$" << clr::hex(upper_bounds-1,4) << " ... \n";
     Byte b = 0;
@@ -315,30 +295,19 @@ bool Bus::_onInit()
 bool Bus::_onQuit()
 {
     std::cout << clr::indent_push() << clr::CYAN << "Bus::_onQuit() Entry" << clr::RETURN;
+    // check if the bus is initialized
     if (_bWasInit)   
     { 
+        // shutdown the devices
         if (_memory.OnQuit() == false)
 		{
             std::cout << clr::indent_pop() << clr::ORANGE << "Bus::_onQuit() Error" << clr::RETURN;
 			Bus::Error("Device Termination Failure!", __FILE__, __LINE__);
             return false;
 		}
-        // Move this to Gfx::OnQuit()
-        { // BEGIN OF SDL3 Shutdown
-            // shut down SDL stuff
-            if (pRenderer)
-            {
-                // SDL_DestroyRenderer(pRenderer);
-                pRenderer = nullptr;
-            }
-            if (pWindow)
-            {
-                SDL_DestroyWindow(pWindow);
-                pWindow = nullptr;
-            }
-        } // END OF SDL3 Shutdown
-
+        // reset the initialized flag
         _bWasInit = false;         
+        // shutdown SDL
         SDL_Quit();
     }    
     std::cout << clr::indent_pop() << clr::CYAN << "Bus::_onQuit() Exit" << clr::RETURN;
@@ -515,25 +484,5 @@ bool Bus::_onRender(void)
 		Bus::Error("Device Render Failure!", __FILE__, __LINE__);
         return false;    
 	}
-
-    // TESTING:  Something to look at while running these tests...
-        // 
-            //
-                SDL_SetRenderTarget(pRenderer, NULL);
-                static Uint16 r=0;
-                static Uint16 g=0;
-                static Uint16 b=0;
-                Uint16 a=255;
-                SDL_SetRenderDrawColor(pRenderer, (Uint8)r, (Uint8)g, (Uint8)b, (Uint8)a);
-                Uint16 t=4;
-                b+=t;
-                if (b>255) {  b=0; g+=t;  }
-                if (g>255) {  g=0; r+=t;  }
-                if (r>255) {  r=0; b+=t;  }
-                SDL_RenderClear(pRenderer);	
-            //
-        //
-    // END TESTING ...
-
     return true;
 }

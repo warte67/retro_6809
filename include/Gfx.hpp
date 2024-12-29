@@ -37,7 +37,9 @@ public: // VIRTUAL METHODS
     virtual bool OnRender();                        // render
 
 public: // PUBLIC ACCESSORS
-    // ... 
+    void RenderPresent() {
+        SDL_RenderPresent(pRenderer);
+    }
 
 private: // PRIVATE MEMBERS
     // internal hardware register states:
@@ -46,6 +48,14 @@ private: // PRIVATE MEMBERS
 
     bool _change_gfx_mode(Byte data);
     bool _change_emu_mode(Byte data);
+
+	// SDL stuff
+	SDL_Window* pWindow = nullptr;
+	SDL_Renderer* pRenderer = nullptr;
+	// Uint32 window_flags = SDL_WINDOW_FULLSCREEN_DESKTOP;
+	Uint32 window_flags = SDL_WINDOW_ALWAYS_ON_TOP | SDL_WINDOW_RESIZABLE;
+    // Uint32 renderer_flags = SDL_RENDERER_ACCELERATED_2D | SDL_RENDERER_PRESENTVSYNC;
+    Uint32 renderer_flags = SDL_RENDERER_VSYNC_ADAPTIVE;    
 };
 
 /*** NOTES: ****************************************

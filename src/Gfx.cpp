@@ -14,7 +14,7 @@
  ************************************/
 
 
-
+#include "Bus.hpp"
 #include "Gfx.hpp"
 #include "Memory.hpp"
 
@@ -144,7 +144,27 @@ int  Gfx::OnAttach(int nextAddr)
 bool Gfx::OnInit()
 {
     std::cout << clr::indent() << clr::CYAN << "Gfx::OnInit() Entry" << clr::RETURN;
-    // ...
+
+    // ToDo: Move this to Gfx::OnInit()
+    { // BEGIN OF SDL3 Initialization
+        // initialize SDL3
+        if (!SDL_Init(SDL_INIT_VIDEO))
+        {
+            // std::cout << SDL_GetError() << std::endl;
+            std::cout << clr::indent_pop() << clr::ORANGE << "Bus::_onInit() Error" << clr::RETURN;
+            Bus::Error(SDL_GetError(), __FILE__, __LINE__);
+            return false;
+        }
+
+        // create the main window
+        pWindow = SDL_CreateWindow("SDL3 Retro_6809", 1280, 800, window_flags); 
+        SDL_ShowWindow(pWindow);
+
+        // create the renderer
+        pRenderer = SDL_CreateRenderer(pWindow, NULL);
+        SDL_SetRenderLogicalPresentation(pRenderer, 320, 200, SDL_LOGICAL_PRESENTATION_STRETCH);
+    } // END OF SDL3 Initialization
+
     std::cout << clr::indent() << clr::CYAN << "Gfx::OnInit() Exit" << clr::RETURN;
     return true;
 }
@@ -163,7 +183,22 @@ bool Gfx::OnInit()
 bool Gfx::OnQuit()
 {
     std::cout << clr::indent() << clr::CYAN << "Gfx::OnQuit() Entry" << clr::RETURN;
-    // ...
+    
+    // Move this to Gfx::OnQuit()
+    { // BEGIN OF SDL3 Shutdown
+        // shut down SDL stuff
+        if (pRenderer)
+        {
+            // SDL_DestroyRenderer(pRenderer);
+            pRenderer = nullptr;
+        }
+        if (pWindow)
+        {
+            SDL_DestroyWindow(pWindow);
+            pWindow = nullptr;
+        }
+    } // END OF SDL3 Shutdown
+
     std::cout << clr::indent() << clr::CYAN << "Gfx::OnQuit() Exit" << clr::RETURN;
     return true;
 }
@@ -249,7 +284,22 @@ bool Gfx::OnUpdate(float fElapsedTime)
 {
     //std::cout << clr::indent() << clr::CYAN << "Gfx::OnUpdate() Entry" << clr::RETURN;
     if (fElapsedTime==0.0f) { ; } // stop the compiler from complaining
-    // ...
+
+    // TESTING:  Something to look at while running these tests...
+        SDL_SetRenderTarget(pRenderer, NULL);
+        static Uint16 r=0;
+        static Uint16 g=0;
+        static Uint16 b=0;
+        Uint16 a=255;
+        SDL_SetRenderDrawColor(pRenderer, (Uint8)r, (Uint8)g, (Uint8)b, (Uint8)a);
+        Uint16 t=4;
+        b+=t;
+        if (b>255) {  b=0; g+=t;  }
+        if (g>255) {  g=0; r+=t;  }
+        if (r>255) {  r=0; b+=t;  }
+        SDL_RenderClear(pRenderer);	
+    // END TESTING ...
+
     //std::cout << clr::indent() << clr::CYAN << "Gfx::OnUpdate() Exit" << clr::RETURN;
     return true;
 }
@@ -267,7 +317,9 @@ bool Gfx::OnUpdate(float fElapsedTime)
 bool Gfx::OnRender()
 {
     //std::cout << clr::indent() << clr::CYAN << "Gfx::OnRender() Entry" << clr::RETURN;
+
     // ...
+    
     //std::cout << clr::indent() << clr::CYAN << "Gfx::OnRender() Exit" << clr::RETURN;
     return true;
 }
@@ -332,217 +384,6 @@ bool Gfx::_change_emu_mode(Byte emu)
 
     return true; 
 }    
-
-
-
-/***** NOTES: ******
-
-
-# Video Timing Calculations for 320x200 @ 60Hz
-
-## Horizontal Timing (pixels)
-- Active Display: 320
-- Front Porch: 16
-- Sync Pulse: 32  
-- Back Porch: 32
-- Total Horizontal: 400 pixels
-
-## Vertical Timing (lines)
-- Active Display: 200
-- Front Porch: 10
-- Sync Pulse: 2
-- Back Porch: 33
-- Total Vertical: 245 lines
-
-## Clock Calculations
-- Total Pixels per Frame = 400 * 245 = 98,000 pixels
-- Frames per Second = 60
-- Pixel Clock = 98,000 * 60 = 5.88 MHz
-
-## Resolution Modes via Overscan Flags
-Base Resolution (no overscan):    320x200
-Horizontal Overscan:             160x200 (doubled horizontal pixels)
-Vertical Overscan:               320x100 (doubled vertical pixels)
-Both Overscan:                   160x100 (doubled in both directions)
-
-# Display Buffer Memory Requirements
-
-## 320x200 Base Resolution
-- Monochrome (1bpp):   8,000 bytes  (320x200 ÷ 8)
-- 4-Color (2bpp):     16,000 bytes  (320x200 ÷ 4)
-- 16-Color (4bpp):    32,000 bytes  (320x200 ÷ 2)
-- 256-Color (8bpp):   64,000 bytes  (320x200 ÷ 1)
-
-## 320x100 Resolution
-- Monochrome (1bpp):   4,000 bytes  (320x100 ÷ 8)
-- 4-Color (2bpp):      8,000 bytes  (320x100 ÷ 4)
-- 16-Color (4bpp):    16,000 bytes  (320x100 ÷ 2)
-- 256-Color (8bpp):   32,000 bytes  (320x100 ÷ 1)
-
-## 320x50 Resolution
-- Monochrome (1bpp):   2,000 bytes  (320x50 ÷ 8)
-- 4-Color (2bpp):      4,000 bytes  (320x50 ÷ 4)
-- 16-Color (4bpp):     8,000 bytes  (320x50 ÷ 2)
-- 256-Color (8bpp):   16,000 bytes  (320x50 ÷ 1)
-
-## 160x200 Resolution
-- Monochrome (1bpp):   4,000 bytes  (160x200 ÷ 8)
-- 4-Color (2bpp):      8,000 bytes  (160x200 ÷ 4)
-- 16-Color (4bpp):    16,000 bytes  (160x200 ÷ 2)
-- 256-Color (8bpp):   32,000 bytes  (160x200 ÷ 1)
-
-## 160x100 Resolution
-- Monochrome (1bpp):   2,000 bytes  (160x100 ÷ 8)
-- 4-Color (2bpp):      4,000 bytes  (160x100 ÷ 4)
-- 16-Color (4bpp):     8,000 bytes  (160x100 ÷ 2)
-- 256-Color (8bpp):   16,000 bytes  (160x100 ÷ 1)
-
-## 160x50 Resolution
-- Monochrome (1bpp):   1,000 bytes  (160x50 ÷ 8)
-- 4-Color (2bpp):      2,000 bytes  (160x50 ÷ 4)
-- 16-Color (4bpp):     4,000 bytes  (160x50 ÷ 2)
-- 256-Color (8bpp):    8,000 bytes  (160x50 ÷ 1)
-
-## 80x200 Resolution
-- Monochrome (1bpp):   2,000 bytes  (80x200 ÷ 8)
-- 4-Color (2bpp):      4,000 bytes  (80x200 ÷ 4)
-- 16-Color (4bpp):     8,000 bytes  (80x200 ÷ 2)
-- 256-Color (8bpp):   16,000 bytes  (80x200 ÷ 1)
-
-## 80x100 Resolution
-- Monochrome (1bpp):   1,000 bytes  (80x100 ÷ 8)
-- 4-Color (2bpp):      2,000 bytes  (80x100 ÷ 4)
-- 16-Color (4bpp):     4,000 bytes  (80x100 ÷ 2)
-- 256-Color (8bpp):    8,000 bytes  (80x100 ÷ 1)
-
-## 80x50 Resolution
-- Monochrome (1bpp):     500 bytes  (80x50 ÷ 8)
-- 4-Color (2bpp):      1,000 bytes  (80x50 ÷ 4)
-- 16-Color (4bpp):     2,000 bytes  (80x50 ÷ 2)
-- 256-Color (8bpp):    4,000 bytes  (80x50 ÷ 1)
-
-## Notes
-- Border color taken from palette index 0
-- Visible area varies by overscan mode
-- Timing compatible with 6MHz target pixel clock
-- Overscan flags modify pixel/line doubling during active display only
-- Sync timing parameters remain constant across all modes
-
-# Text Mode Specifications
-
-## Character Format
-- 8x8 pixel characters
-- 8 bytes per character definition (1 byte per row)
-- 256 possible characters (8-bit character code)
-- Character ROM size: 2048 bytes (256 chars * 8 bytes)
-
-## Attribute Byte Format
-- Byte 1: Character code (0-255)
-- Byte 2: Color attributes
-  - Bits 7-4: Foreground color (0-15)
-  - Bits 3-0: Background color (0-15)
-
-## Available Text Resolutions
-1. 40x25 characters (320x200 base)
-   - 1000 character positions
-   - 2000 bytes total (2 bytes per position)
-
-2. 40x12 characters (320x100 V2x)
-   - 480 character positions
-   - 960 bytes total
-
-3. 40x6 characters (320x50 V4x)
-   - 240 character positions
-   - 480 bytes total
-
-4. 20x25 characters (160x200 H2x)
-   - 500 character positions
-   - 1000 bytes total
-
-5. 20x12 characters (160x100 H2x+V2x)
-   - 240 character positions
-   - 480 bytes total
-
-6. 20x6 characters (160x50 H2x+V4x)
-   - 120 character positions
-   - 240 bytes total
-
-7. 10x25 characters (80x200 H4x)
-   - 250 character positions
-   - 500 bytes total
-
-8. 10x12 characters (80x100 H4x+V2x)
-   - 120 character positions
-   - 240 bytes total
-
-9. 10x6 characters (80x50 H4x+V4x)
-   - 60 character positions
-   - 120 bytes total
-
-
-
-# Sprite System Specifications
-
-## Complete Sprite Data Structure (80 bytes per sprite)
-### Image Data (64 bytes)
-- 16x16 pixels
-- 4 colors per sprite (2 bits per pixel)
-- 64 bytes total for image data
-
-### Palette Data (8 bytes)
-- 4 colors per sprite
-- 2 bytes per color (A4R4G4B4 format)
-- 8 bytes total for palette data
-
-### Attribute Block (8 bytes)
-#### Byte 0: Control Flags
-- Bit 7: Enable/Disable sprite (1=visible, 0=hidden)
-- Bits 6-5: Priority (0x11 front, 0x10 mid-fore, 0x01 mid-back, 0x00 back)
-- Bit 4: Enable 4x4 collision detection (sprites 0-15)
-- Bit 3: Enable bounding box collision (sprites 16-31)
-- Bits 2-0: User definable bits (custom per-sprite flags)
-
-#### Bytes 1-2: X Position
-- 16-bit signed integer for horizontal position
-
-#### Bytes 3-4: Y Position
-- 16-bit signed integer for vertical position
-
-#### Bytes 5-6: Collision Mask
-- Byte 5: [TTTT][TTMM] (Top and Top-Middle rows)
-- Byte 6: [BBMM][BBBB] (Bottom-Middle and Bottom rows)
-
-#### Byte 7: User Definable Data
-- Available for custom programmer use on a per sprite basis
-
-## System Capacity
-- 64 sprites total (5120 bytes)
-- Memory usage: 5120 bytes total
-
-## Collision Detection Tiers
-1. Sprites 0-15: Enhanced collision detection
-   - Bounding box detection
-   - 4x4 collision mask for near pixel-perfect detection
-2. Sprites 16-31: Basic collision
-   - Bounding box detection only
-3. Sprites 32-63: No collision detection
-   - Visual elements only
-
-## Priority System (2-bit)
-- 0x11: Front layer (UI, projectiles)
-- 0x10: Middle foreground (players, enemies)
-- 0x01: Middle background (platforms, collectibles)
-- 0x00: Background (decorative elements)
-
-## Notes:
-- Within each priority level, sprite index determines draw order
-- 4x4 collision mask provides efficient near pixel-perfect collision detection
-- Individual palettes allow unique colors per sprite
-
-
-
-
-************/ 
 
 
 
