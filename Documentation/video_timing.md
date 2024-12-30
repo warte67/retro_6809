@@ -199,3 +199,76 @@ Both Overscan:                   160x100 (doubled in both directions)
 - 4x4 collision mask provides efficient near pixel-perfect collision detection
 - Individual palettes allow unique colors per sprite
 
+
+----------------------------------------------------------------------------------
+
+
+# Video Timing Calculations for 256x192 @ 60Hz
+
+## Horizontal Timing (pixels)
+### - Active Display: 256
+- Front Porch: 16
+- Sync Pulse: 32
+- Back Porch: 32
+
+## Total Horizontal: 336 pixels
+### - Vertical Timing (lines)
+- Active Display: 192
+- Front Porch: 10
+- Sync Pulse: 2
+- Back Porch: 33
+- Total Vertical: 237 lines
+
+## Clock Calculations
+- Total Pixels per Frame = 336 * 237 = 79,392 pixels
+- Frames per Second = 60
+- Pixel Clock = 79,392 * 60 = 4.758 MHz
+- Resolution Modes via Overscan Flags
+- Base Resolution (no overscan): 256x192 Horizontal Overscan: 128x192 (doubled horizontal pixels) -
+- Vertical Overscan: 256x96 (doubled vertical pixels) Both Overscan: 128x96 (doubled in both directions)
+
+## Display Buffer Memory Requirements
+- 256x192 Base Resolution
+- Monochrome (1bpp): 6,144 bytes (256x192 ÷ 8)
+- 4-Color (2bpp): 12,288 bytes (256x192 ÷ 4)
+- 16-Color (4bpp): 24,576 bytes (256x192 ÷ 2)
+- 256-Color (8bpp): 49,152 bytes (256x192 ÷ 1)
+- 256x96 Resolution
+
+## Monochrome (1bpp): 3,072 bytes (256x96 ÷ 8)
+ - 4-Color (2bpp): 6,144 bytes (256x96 ÷ 4)
+- 16-Color (4bpp): 12,288 bytes (256x96 ÷ 2)
+- 256-Color (8bpp): 24,576 bytes (256x96 ÷ 1)
+- 128x192 Resolution
+
+## Monochrome (1bpp): 6,144 bytes (128x192 ÷ 8)
+- 4-Color (2bpp): 12,288 bytes (128x192 ÷ 4)
+- 16-Color (4bpp): 24,576 bytes (128x192 ÷ 2)
+- 256-Color (8bpp): 49,152 bytes (128x192 ÷ 1)
+- 128x96 Resolution
+
+## Monochrome (1bpp): 3,072 bytes (128x96 ÷ 8)
+- 4-Color (2bpp): 6,144 bytes (128x96 ÷ 4)
+- 16-Color (4bpp): 12,288 bytes (128x96 ÷ 2)
+- 256-Color (8bpp): 24,576 bytes (128x96 ÷ 1)
+- 64x192 Resolution
+
+## Monochrome (1bpp): 3,072 bytes (64x192 ÷ 8)
+- 4-Color (2bpp): 6,144 bytes (64x192 ÷ 4)
+- 16-Color (4bpp): 12,288 bytes (64x192 ÷ 2)
+- 256-Color (8bpp): 24,576 bytes (64x192 ÷ 1)
+- 64x96 Resolution
+
+## Monochrome (1bpp): 1,536 bytes (64x96 ÷ 8)
+- 4-Color (2bpp): 3,072 bytes (64x96 ÷ 4)
+- 16-Color (4bpp): 6,144 bytes (64x96 ÷ 2)
+- 256-Color (8bpp): 12,288 bytes (64x96 ÷ 1)
+### Notes
+Border color taken from palette index 0
+Visible area varies by overscan mode
+Timing compatible with 4
+
+
+
+
+

@@ -100,7 +100,8 @@ int  Gfx::OnAttach(int nextAddr)
 
     register_node new_node;
     new_node = { "GFX_MODE", nextAddr,  {   "(Byte) Graphics Mode",
-                                            "   - bit  7   = reserved" ,
+                                            "   - bit  7   = video timing: ",
+                                            "                0=256x192, 1=320x200",
                                             "   - bit  6   = 0:screen is text, ",
                                             "               1:screen is bitmap",
                                             "   - bits 4-5 = horizontal overscan: ",
@@ -369,7 +370,8 @@ bool Gfx::OnRender()
 bool Gfx::_change_gfx_mode(Byte mode) 
 { 
 // GFX_MODE          equ   0xFE00  ; (Byte) Graphics Mode
-//                                 ;    - bit  7   = reserved
+//                                 ;    - bit  7   = video timing: 
+//                                 ;                0=256x192, 1=320x200
 //                                 ;    - bit  6   = 0:screen is text, 
 //                                 ;                1:screen is bitmap
 //                                 ;    - bits 4-5 = horizontal overscan: 
@@ -393,7 +395,7 @@ bool Gfx::_change_gfx_mode(Byte mode)
         mode |= 0b00001000;
     }
 
-    // bit 7: reserved
+    // bit 7: video timing: 0=256x192, 1=320x200
     // ...
 
     // bit 6: 0:screen is text, 1:screen is bitmap
