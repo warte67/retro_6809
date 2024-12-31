@@ -579,7 +579,7 @@ class HDW_REGISTERS : public IDevice
 
 		int OnAttach(int nextAddr) override       { 
             Word old_address=nextAddr;
-            this->heading = "Start of Hardware Register Space";
+            this->heading = "Hardware Register Space";
             register_node new_node;
             new_node = { "HDW_REG_START", nextAddr,  { "Start of Register Space"} }; nextAddr+=2;
             mapped_register.push_back(new_node);
@@ -620,7 +620,7 @@ class HDW_RESERVED : public IDevice
 
         int OnAttach(int nextAddr) override       {
             Word old_address=nextAddr-1;
-            this->heading = "Start of Reserved Register Space";
+            this->heading = "Reserved Register Space";
             register_node new_node;
 
             // reserve space for future use

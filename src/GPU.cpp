@@ -108,25 +108,57 @@ int  GPU::OnAttach(int nextAddr)
     if (nextAddr == 0) { ; } // stop the compiler from complaining
 
     Word old_address=nextAddr;
-    this->heading = "Start of GPU Device Hardware Registers";
+    this->heading = "GPU Device Hardware Registers";
 
     register_node new_node;
-    new_node = { "GFX_MODE", nextAddr,  {   "(Byte) Graphics Mode",
-                                            "   - bit  7   = video timing: ",
-                                            "                0=256x192, 1=320x200",
-                                            "   - bit  6   = 0:screen is text, ",
-                                            "               1:screen is bitmap",
-                                            "   - bits 4-5 = horizontal overscan: ",
-                                            "               00=1x, 01=2x, 10=4x",
-                                            "   - bits 2-3 = vertical overscan: ",
-                                            "               00=1x, 01=2x, 10=4x",
-                                            "   - bits 0-1 = Color Mode: 00=2-clr, ",
-                                            "               01=4-clr, 10=16-clr, ",
-                                            "               11=256-clr",
+
+    new_node = { "GFX_ENABLE", nextAddr,  {   "(Byte) Bitflag Enables",
+                                            "   - bits 6-7 = reserved",
+                                            "   - bit  5   = 0:disable ext display,",
+                                            "                1:enable ext display",
+                                            "   - bit  4   = 0:disable std display,",
+                                            "                1:enable std display",
+                                            "   - bit  3   = 0:disable sprites,",
+                                            "                1:enable sprites",
+                                            "   - bit  2   = 0:disable tilemap,",
+                                            "                1:enable tilemap",
+                                            "   - bit  1   = 0:disable mouse cursor,",
+                                            "                1:enable mouse cursor",
+                                            "   - bit  0   = 0:monochrome text,",
+                                            "                1:color text",
                                             "" } }; nextAddr+=1;
     mapped_register.push_back(new_node);
 
-    new_node = { "GFX_EMU", nextAddr,  {    "(Byte) Emulation Flags",
+    new_node = { "GFX_STD_MODE", nextAddr,  {   "(Byte) Standard Graphics Mode",
+                                            "   - bit  7   = 0:screen is text, ",
+                                            "                1:screen is bitmap",
+                                            "   - bit  6   = video timing: ",
+                                            "                0=512x384, 1=640x400",
+                                            "   - bits 4-5 = horizontal overscan: ",
+                                            "                00=1x, 01=2x, 10=4x, 11=8x",
+                                            "   - bits 2-3 = vertical overscan: ",
+                                            "                00=1x, 01=2x, 10=4x",
+                                            "   - bits 0-1 = Color Mode: 00=2-clr, ",
+                                            "                01=4-clr, 10=16-clr, ",
+                                            "                11=256-clr",
+                                            "" } }; nextAddr+=1;
+    mapped_register.push_back(new_node);
+
+    new_node = { "GFX_EXT_MODE", nextAddr,  {   "(Byte) Extended Graphics Mode",
+                                            "   - bit  7   = reserved",
+                                            "   - bit  6   = video timing: ",
+                                            "                0=512x384, 1=640x400",
+                                            "   - bits 4-5 = horizontal overscan: ",
+                                            "                00=1x, 01=2x, 10=4x, 11=8x",
+                                            "   - bits 2-3 = vertical overscan: ",
+                                            "                00=1x, 01=2x, 10=4x",
+                                            "   - bits 0-1 = Color Mode: 00=2-clr, ",
+                                            "                01=4-clr, 10=16-clr, ",
+                                            "                11=256-clr",
+                                            "" } }; nextAddr+=1;
+    mapped_register.push_back(new_node);
+
+    new_node = { "GFX_EMULATION", nextAddr,  {    "(Byte) Emulation Flags",
                                             "   - bit  7    = vsync: 0=off, 1=on",
                                             "   - bit  6    = main: 0=windowed,",
                                             "                 1=fullscreen",

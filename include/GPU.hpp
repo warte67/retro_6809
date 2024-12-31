@@ -62,24 +62,42 @@ private: // PRIVATE MEMBERS
 
 /*** NOTES: ****************************************
  
-    Total Video Resolution:    400x240 with borders
-    Actual Video Resolution:   320x200
-    Top Border:                20 pixels
-    Bottom Border:             20 pixels
-    Left Border:               40 pixels
-    Right Border:              40 pixels
+    A fundamental change in display modes has been incorporated. A more 
+    conventional display mode of 640x480 @ 70hz will be implemented. From 
+    this mode a 640x400 and 512x384 will be derrived. Single, Double, Quad, 
+    and Octa overscan modes will be supported. Including text/bitmap, both 
+    base pixel resolutions, and overscan modes there will be a total of 256 
+    different display modes as defined in the GFX_MODE register.
 
-    4 color modes:             2 colors, 4 colors, 16 colors, 256 colors
-    Overscan Horiz and Vert:   1x, 2x, 4x
-    Horizontal Resolutions:    320, 160, 80
-    Vertical Resolutions:      200, 100, 50
+    GPU hardware registers:
 
-    2-bits for color
-    2-bits for Vscan
-    2-bits for Hscan
-    1-bit for text/bitmap mode
-    1-bit reserved
+    GFX_MODE          equ   0xFE00  ; (Byte) Graphics Mode
+                                    ;    - bit  7   = 0:screen is text, 
+                                    ;                1:screen is bitmap
+                                    ;    - bit  6   = video timing: 
+                                    ;                 0=512x384, 1=640x400
+                                    ;    - bits 4-5 = horizontal overscan: 
+                                    ;                00=1x, 01=2x, 10=4x, 11=8x
+                                    ;    - bits 2-3 = vertical overscan: 
+                                    ;                00=1x, 01=2x, 10=4x
+                                    ;    - bits 0-1 = Color Mode: 00=2-clr, 
+                                    ;                01=4-clr, 10=16-clr, 
+                                    ;                11=256-clr
 
+    GFX_EMU           equ   0xFE01  ; (Byte) Emulation Flags
+                                    ;    - bit  7    = vsync: 0=off, 1=on
+                                    ;    - bit  6    = main: 0=windowed,
+                                    ;                  1=fullscreen
+                                    ;    - bit  5    = debug: 0=off, 1=on
+                                    ;    - bit  4    = debug: 0=windowed, 
+                                    ;                  1=fullscreen
+                                    ;    - bits 2-3  = Active Monitor 0-3
+                                    ;    - bits 0-1  = Debug Monitor 0-3
+                                
+
+
+
+    SDL3 Specific Notes:
 
     SDL3 Pixel Format:  SDL_PIXELFORMAT_ARGB4444
 
