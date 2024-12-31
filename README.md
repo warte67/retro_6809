@@ -34,6 +34,7 @@ The **GPU** on Board 1 (Core 2) uses **12 GPIO pins** to generate VGA output thr
 - **64KB GPU-addressable background buffer** for a **320x200 display** with 256 colors.
 - **8KB CPU-addressable foreground layer** for low-resolution text and graphics.
 - **Sprites:** Supports up to **64 sprites** with collision detection. The first **16 sprites** support pixel-level collision, and **bounding-box** collision is supported for the first **32 sprites**. These sprites use a **4x4 collision mask**.
+- **Tiles:** A fuly featured 16x16 tilemap system is planned, but not yet designed.
 
 ### Memory Architecture
 
