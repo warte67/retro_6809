@@ -3,60 +3,145 @@ A complete refactoring of the alpha_6809 project. This is a work in progress. Pl
 
 ### Project Summary: **The Dream 6809 Computer Reimagined**
 
-#### Background and Inspiration
-The idea for this project stems from my early programming experiences in the 1980s on the TRS-80 Color Computer. While I enjoyed the challenge of programming in 6809 assembler, I envied the superior graphics and sound capabilities of contemporaneous systems like the Commodore 64. Despite learning to program for the MOS 6502, I always found the 6809 to be far more enjoyable. I often dreamed of a computer combining the elegance of the 6809 architecture with robust graphics and audio capabilities. This project, made possible by modern hardware like the Raspberry Pi Pico 2, aims to bring that dream to life.
+## Overview
 
-#### Vision
-The goal is to design and build a fully open-source, retro-style single-board computer that captures the spirit of an idealized 1980s computer powered by a 6809 processor. Dubbed **alpha_6809**, this system goes beyond a proof of concept, offering a practical and refactored realization of that dream. The design integrates the best of vintage computing with the versatility of modern microcontroller technology.
+The **retro_6809** project is a fully open-source retro computing project designed to replicate the vision of a 6809-based computer with modern components. Using two Raspberry Pi Pico 2 boards, this project brings together the power of the **Motorola 6809** CPU emulation with modern peripherals, graphics, audio, and general-purpose input/output capabilities. It provides an environment for **students** and **developers** to learn about hardware design, embedded systems, operating systems, and video game development.
 
-#### Hardware Overview
-The system is built using **two Raspberry Pi Pico 2** boards, each leveraging their dual-core capabilities:  
-1. **Core Allocation (Board One):**
-   - **Core 1:** Cycle-accurate emulation of the Motorola 6809, memory management, and system clock generation.
-   - **Core 2:** GPU functionality for VGA video output, generating video signals and rendering pixels.
-2. **Core Allocation (Board Two):**
-   - **Core 1:** Emulation of the Commodore SID for advanced FM audio synthesis.
-   - **Core 2:** USB host functionality for peripherals like storage devices, keyboards, mice, joysticks, gamepads, and debugging interfaces.  
+### Historical Context and Motivation
 
-Additionally, **32 GPIO pins** will be available for user projects, enhancing the system’s flexibility.
+The project draws inspiration from the 1980s era, specifically from my experience programming on the TRS-80 Color Computer and the Commodore 64. I started out programming in **BASIC**, which was too slow for my needs. I soon switched to assembly for the **Motorola 6809** processor, but I couldn't help but notice that my nephew’s **Commodore 64** had better graphics and sound capabilities. While I did learn assembly for the **C64**, I still longed for a machine that combined the 6809's power with better graphics and sound.
 
-#### Graphics and Video Capabilities
-- **Output:** VGA-compatible video generated via 12 GPIO pins using resistor ladders for RGB channels (0-0.7V).  
-- **Internal Palette:** 256 colors per frame using A4R4G4B4 format, offering up to 4096 colors with 16 transparency levels.  
-- **Background Layer:** A 64KB GPU-addressable buffer, capable of rendering 320x200 resolution at 256 colors.  
-- **Foreground Layer:** An 8000-byte CPU-addressable layer for text and low-resolution graphics.  
+The **retro_6809** project aims to fulfill that dream. By using modern Raspberry Pi Pico 2 boards, we have a platform that provides the **6809 emulation** along with rich hardware features.
 
-#### Sprite Engine
-The sprite system supports **64 sprites**, each 16x16 pixels with 4 colors and individual palettes:
-- **Collision Detection:**  
-  - **Sprites 1–16:** Support both pixel-level collision detection (4x4 resolution masks) and bounding box collision.  
-  - **Sprites 17–32:** Bounding box collision detection only.  
-  - **Sprites 33–64:** No collision detection (visual elements only).  
-- Sprites can be combined for higher color depth or larger composite shapes.
+---
 
-#### Memory Architecture
-The system features a **2MB paged memory system**:  
-- A single **8KB window** in CPU memory can map to any 8KB block in the 2MB memory space.  
-- Memory types include **RAM**, **ROM**, and **Persistent** memory, allowing developers to configure blocks as needed.  
-- Persistent memory is write-locked until the page is switched, ensuring efficient state preservation.
+## Hardware Architecture
 
-#### Upper Memory Map
-The upper portion of the CPU’s addressable memory space is reserved for **512 bytes of hardware registers**. These registers enable programmatic control of the system’s integrated devices, such as:  
-- **GPU** for video rendering.  
-- **Keyboard and joystick input.**  
-- **USB storage management.**  
-- **Floating-point math operations.**  
-This design allows seamless interaction with peripherals and system resources, offering a cohesive programming experience.
+Each **Raspberry Pi Pico 2** board has **two processor cores**. The system uses two **Pico 2** boards, each playing a specific role:
 
-#### Applications
-- **Programming:** A platform for retrocomputing enthusiasts to program in assembly or C, recapturing the joy of early computing.  
-- **Gaming:** A robust base for creating classic-style games with advanced sound and visual capabilities.  
-- **Education:** A hands-on tool for teaching:
-  - **IoT Device Design:** Using GPIO and peripheral integration.  
-  - **Microcontroller Architecture:** Understanding and working with dual-core microcontrollers.  
-  - **Operating System Basics:** Exploring kernel and low-level software design.  
-  - **Low-Level Programming:** Developing efficient, performance-critical applications.  
-  - **Video Game Development:** Creating sprite-based games with hardware collision detection and layered graphics.  
-- **Homebrew Projects:** A flexible system for hobbyists and tinkerers to bring creative ideas to life.
+- **Core 1 on Board 1:** Cycle-accurate **6809 emulation**, system clock generation, and memory management.
+- **Core 2 on Board 1:** **GPU emulation** that drives VGA output, manages pixel streaming, and generates **HSYNC** and **VSYNC** signals.
+- **Core 1 on Board 2:** **Commodore SID emulation** for FM audio synthesis.
+- **Core 2 on Board 2:** Manages **USB peripherals** (keyboard, mouse, joysticks, storage) and communication with a host PC for debugging.
 
-This system provides an ideal environment for students and hobbyists to learn and experiment with various aspects of modern and retro-computing technologies. The combination of open-source hardware and software encourages exploration and innovation.
+Additionally, **32 GPIO pins** are exposed for external projects.
+
+### Graphics Capabilities
+
+The **GPU** on Board 1 (Core 2) uses **12 GPIO pins** to generate VGA output through resistor ladders, supporting three color channels (0V to 0.7V). The system features:
+
+- **256-color palette** (A4R4G4B4 format) with up to **4096 colors**.
+- **64KB GPU-addressable background buffer** for a **320x200 display** with 256 colors.
+- **8KB CPU-addressable foreground layer** for low-resolution text and graphics.
+- **Sprites:** Supports up to **64 sprites** with collision detection. The first **16 sprites** support pixel-level collision, and **bounding-box** collision is supported for the first **32 sprites**. These sprites use a **4x4 collision mask**.
+
+### Memory Architecture
+
+The system uses a **2MB paged memory system**:
+
+- **8KB of addressable memory** pages through the entire **2MB memory**.
+- Each page can be **RAM, ROM, or Persistent memory**. Persistent memory is used to save application states when the page is switched.
+  
+Additionally, there are **512 bytes of hardware registers** available, which can be programmatically addressed for devices such as the GPU, Keyboard, Joysticks, USB Storage, Floating Point Math, and more.
+
+---
+
+## Software Features
+
+This project includes a **cycle-accurate emulator** of the **Motorola 6809**, providing a platform for both retro and modern software development. The emulator includes a **VGA graphics output**, a **FM audio synthesizer**, and a **fully functional I/O system** with USB support for peripherals.
+
+### Use Cases for Education
+
+The **retro_6809** project serves as a hands-on platform for teaching:
+
+- **Microcontroller design** and embedded systems.
+- **Operating systems** and **kernel development** for low-level programming.
+- **Video game design**, hardware interfacing, and graphics programming.
+- Understanding the **basics of assembly language** and retro computing.
+
+---
+
+## License
+
+This project is licensed under the **GNU General Public License v3.0** (GPL v3). You are free to use, modify, and distribute the code and designs under the terms of the GPL v3, as long as you follow the license's requirements.
+
+### GPL v3 Highlights
+
+- **Freedom to use, modify, and distribute**: You are free to use the software for any purpose, modify it, and distribute your changes under the same terms.
+- **Share-alike**: Any derivative works of this project, whether hardware or software, must also be released under the GPL v3 license. Any modifications to the code or design must be shared with the community.
+- **Commercial Use**: You may sell the pre-built hardware and provide commercial services, but any modified code or design must remain open-source and licensed under GPL v3.
+- **Reverse Engineering**: You have the right to reverse-engineer the software, as long as any modified code is shared under the GPL v3.
+
+### Closed-Source Software Note
+
+Software developed to **utilize the 2MB banked memory format** can be closed-source, as long as it does not directly incorporate or link to GPL-licensed code. However, **reverse-engineering** or **disassembly** of the code is allowed, and any modifications must still adhere to the GPL v3 if they are derived from this project.
+
+---
+
+## Contributing
+
+Contributions to the project are welcome! If you would like to contribute to the development of the retro_6809 project, please follow these steps:
+
+1. Fork the repository.
+2. Create a new branch.
+3. Make your changes.
+4. Submit a pull request.
+
+Please ensure that all contributions are well-documented and comply with the GPL v3 license.
+
+---
+
+## Acknowledgments
+
+- The **Raspberry Pi Pico 2** boards for their powerful and affordable microcontroller capabilities.
+- The community of **retro computing enthusiasts** who inspired and contributed to the original ideas behind this project.
+- The **open-source community** for their ongoing support and contribution to free software.
+
+---
+
+## Contact
+
+For more information, or to get involved, feel free to open an issue on GitHub or contact the project maintainers via email.
+
+
+--- 
+
+
+## License
+
+This project is licensed under the terms of the [GNU General Public License v3.0 (GPL-3.0)](LICENSE.md).
+
+
+### Closed-Source Software Note
+
+Software developed to **utilize the 2MB banked memory format** can be closed-source, as long as it does not directly incorporate or link to GPL-licensed code. However, **reverse-engineering** or **disassembly** of the code is allowed, and any modifications must still adhere to the GPL v3 if they are derived from this project.
+
+It is also allowed for software to access and interact with the system's **hardware registers** (located at memory addresses **$FE00-$FFEF**), as these registers are part of the open system hardware. This access does not impose any restrictions on the software being open or closed source.
+
+
+---
+
+## Contributing
+
+Contributions to the project are welcome! If you would like to contribute to the development of the retro_6809 project, please follow these steps:
+
+1. Fork the repository.
+2. Create a new branch.
+3. Make your changes.
+4. Submit a pull request.
+
+Please ensure that all contributions are well-documented and comply with the GPL v3 license.
+
+---
+
+## Acknowledgments
+
+- The **Raspberry Pi Pico 2** boards for their powerful and affordable microcontroller capabilities.
+- The community of **retro computing enthusiasts** who inspired and contributed to the original ideas behind this project.
+- The **open-source community** for their ongoing support and contribution to free software.
+
+---
+
+## Contact
+
+For more information, or to get involved, feel free to open an issue on GitHub or contact the project maintainers via email.
