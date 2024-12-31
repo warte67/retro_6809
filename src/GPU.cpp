@@ -1,12 +1,12 @@
-/*** Gfx.cpp *******************************************
- *       _____    __                                   
- *      / ____|  / _|                                  
- *     | |  __  | |_  __  __       ___   _ __    _ __  
- *     | | |_ | |  _| \ \/ /      / __| | '_ \  | '_ \ 
- *     | |__| | | |    >  <   _  | (__  | |_) | | |_) |
- *      \_____| |_|   /_/\_\ (_)  \___| | .__/  | .__/ 
- *                                      | |     | |    
- *                                      |_|     |_|    
+/*** GPU.cpp *******************************************
+ *     _____ _____  _    _                        
+ *    / ____|  __ \| |  | |                       
+ *   | |  __| |__) | |  | |       ___ _ __  _ __  
+ *   | | |_ |  ___/| |  | |      / __| '_ \| '_ \ 
+ *   | |__| | |    | |__| |  _  | (__| |_) | |_) |
+ *    \_____|_|     \____/  (_)  \___| .__/| .__/ 
+ *                                   | |   | |    
+ *                                   |_|   |_|    
  *
  * This is the base class for the primary graphics devices. It provides the
  * basic methods for reading and writing to the device's memory.
@@ -15,7 +15,7 @@
 
 
 #include "Bus.hpp"
-#include "Gfx.hpp"
+#include "GPU.hpp"
 #include "Memory.hpp"
 
 
@@ -23,21 +23,30 @@
  * Read / Write *
  ***************/ 
 
-Byte Gfx::OnRead(Word offset) 
+Byte GPU::OnRead(Word offset) 
 { 
-    Byte data = IDevice::OnRead(offset);
-    // std::cout << clr::indent() << clr::CYAN << "Gfx::OnRead($"<< clr::hex(offset,4) << ") = $" << clr::hex(data,2) << "\n" << clr::RESET;
+    Byte data = IDevice::OnRead(offset);    // use this for other devices
+    // std::cout << clr::indent() << clr::CYAN << "GPU::OnRead($"<< clr::hex(offset,4) << ") = $" << clr::hex(data,2) << "\n" << clr::RESET;
 
     if (offset == MAP(GFX_MODE))    { data = _gfx_mode; }
     if (offset == MAP(GFX_EMU))     { data = _gfx_emu; }
 
     return data;
-} // END: Gfx::OnRead()
+} // END: GPU::OnRead()
 
-void Gfx::OnWrite(Word offset, Byte data) 
+/**
+ * This is the write callback for the GPU device. It is called whenever the CPU
+ * writes to a location in the device's memory space.
+ *
+ * The write callback is responsible for updating the device's internal state
+ * and performing any necessary actions based on the value written.
+ *
+ * @param offset The address of the memory location to write to.
+ * @param data The value to write to the memory location.
+ */
+void GPU::OnWrite(Word offset, Byte data) 
 { 
-    // std::cout << clr::indent() << clr::CYAN << "Gfx::OnWrite($" << clr::hex(offset,4) << ", $" << clr::hex(data,2) << ")\n" << clr::RESET;
-
+    // std::cout << clr::indent() << clr::CYAN << "GPU::OnWrite($" << clr::hex(offset,4) << ", $" << clr::hex(data,2) << ")\n" << clr::RESET;
     if (offset == MAP(GFX_MODE))    
     { 
         if (_change_gfx_mode(data)) 
@@ -54,23 +63,26 @@ void Gfx::OnWrite(Word offset, Byte data)
     }
 
     IDevice::OnWrite( offset, data);
-} // END: Gfx::OnWrite()
+} // END: GPU::OnWrite()
+
+
+
 
 
 /***************************
 * Constructor / Destructor *
 ***************************/
 
-Gfx::Gfx() 
+GPU::GPU() 
 { 
-    std::cout << clr::indent_push() << clr::CYAN << "Gfx Created" << clr::RETURN;
-    _device_name = "Gfx"; 
-} // END: Gfx()
+    std::cout << clr::indent_push() << clr::CYAN << "GPU Created" << clr::RETURN;
+    _device_name = "GPU"; 
+} // END: GPU()
 
-Gfx::~Gfx() 
+GPU::~GPU() 
 { 
-    std::cout << clr::indent_pop() << clr::CYAN << "Gfx Destroyed" << clr::RETURN; 
-} // END: ~Gfx()
+    std::cout << clr::indent_pop() << clr::CYAN << "GPU Destroyed" << clr::RETURN; 
+} // END: ~GPU()
 
 
 
@@ -90,13 +102,13 @@ Gfx::~Gfx()
  * @param nextAddr The current address in the memory map.
  * @return The size of the allocation.
  ********************/
-int  Gfx::OnAttach(int nextAddr)
+int  GPU::OnAttach(int nextAddr)
 {
-    std::cout << clr::indent() << clr::CYAN << "Gfx::OnAttach() Entry" << clr::RETURN;
+    std::cout << clr::indent() << clr::CYAN << "GPU::OnAttach() Entry" << clr::RETURN;
     if (nextAddr == 0) { ; } // stop the compiler from complaining
 
     Word old_address=nextAddr;
-    this->heading = "Start of Gfx Device Hardware Registers";
+    this->heading = "Start of GPU Device Hardware Registers";
 
     register_node new_node;
     new_node = { "GFX_MODE", nextAddr,  {   "(Byte) Graphics Mode",
@@ -127,7 +139,7 @@ int  Gfx::OnAttach(int nextAddr)
     mapped_register.push_back(new_node);
 
     _size = nextAddr - old_address;
-    std::cout << clr::indent() << clr::CYAN << "Gfx::OnAttach() Exit" << clr::RETURN;
+    std::cout << clr::indent() << clr::CYAN << "GPU::OnAttach() Exit" << clr::RETURN;
     return _size;   // return the size of the allocation
 }
 
@@ -142,9 +154,9 @@ int  Gfx::OnAttach(int nextAddr)
  * 
  * @return True if the initialization was successful.
  *********************/
-bool Gfx::OnInit()
+bool GPU::OnInit()
 {
-    std::cout << clr::indent() << clr::CYAN << "Gfx::OnInit() Entry" << clr::RETURN;
+    std::cout << clr::indent() << clr::CYAN << "GPU::OnInit() Entry" << clr::RETURN;
 
     { // BEGIN OF SDL3 Initialization
         // initialize SDL3
@@ -162,7 +174,7 @@ bool Gfx::OnInit()
         SDL_SetRenderLogicalPresentation(pRenderer, 320, 200, SDL_LOGICAL_PRESENTATION_STRETCH);
     } // END OF SDL3 Initialization
 
-    std::cout << clr::indent() << clr::CYAN << "Gfx::OnInit() Exit" << clr::RETURN;
+    std::cout << clr::indent() << clr::CYAN << "GPU::OnInit() Exit" << clr::RETURN;
     return true;
 }
 
@@ -177,9 +189,9 @@ bool Gfx::OnInit()
  *
  * @return True if the shutdown was successful.
  **********************/
-bool Gfx::OnQuit()
+bool GPU::OnQuit()
 {
-    std::cout << clr::indent() << clr::CYAN << "Gfx::OnQuit() Entry" << clr::RETURN;
+    std::cout << clr::indent() << clr::CYAN << "GPU::OnQuit() Entry" << clr::RETURN;
     
     { // BEGIN OF SDL3 Shutdown
         if (pRenderer)
@@ -196,7 +208,7 @@ bool Gfx::OnQuit()
         SDL_Quit();
     } // END OF SDL3 Shutdown
 
-    std::cout << clr::indent() << clr::CYAN << "Gfx::OnQuit() Exit" << clr::RETURN;
+    std::cout << clr::indent() << clr::CYAN << "GPU::OnQuit() Exit" << clr::RETURN;
     return true;
 }
 
@@ -212,11 +224,11 @@ bool Gfx::OnQuit()
  * @return True if the device was successfully activated, false
  *          otherwise.
  ***********************/
-bool Gfx::OnActivate()
+bool GPU::OnActivate()
 {
-    std::cout << clr::indent() << clr::CYAN << "Gfx::OnActivate() Entry" << clr::RETURN;
+    std::cout << clr::indent() << clr::CYAN << "GPU::OnActivate() Entry" << clr::RETURN;
     // ...
-    std::cout << clr::indent() << clr::CYAN << "Gfx::OnActivate() Exit" << clr::RETURN;
+    std::cout << clr::indent() << clr::CYAN << "GPU::OnActivate() Exit" << clr::RETURN;
     return true;
 }
 
@@ -232,11 +244,11 @@ bool Gfx::OnActivate()
  * @return True if the device was successfully deactivated, false 
  *          otherwise.
  ***********************/
-bool Gfx::OnDeactivate()
+bool GPU::OnDeactivate()
 {
-    std::cout << clr::indent() << clr::CYAN << "Gfx::OnDeactivate() Entry" << clr::RETURN;
+    std::cout << clr::indent() << clr::CYAN << "GPU::OnDeactivate() Entry" << clr::RETURN;
     // ...
-    std::cout << clr::indent() << clr::CYAN << "Gfx::OnDeactivate() Exit" << clr::RETURN;
+    std::cout << clr::indent() << clr::CYAN << "GPU::OnDeactivate() Exit" << clr::RETURN;
     return true;
 }
 
@@ -254,9 +266,9 @@ bool Gfx::OnDeactivate()
  * @return True if the event was handled successfully, false otherwise.
  ********************************************************************/
 
-bool Gfx::OnEvent(SDL_Event* evnt)
+bool GPU::OnEvent(SDL_Event* evnt)
 {
-    //std::cout << clr::indent() << clr::CYAN << "Gfx::OnEvent() Entry" << clr::RETURN;
+    //std::cout << clr::indent() << clr::CYAN << "GPU::OnEvent() Entry" << clr::RETURN;
     if (evnt) { ; } // stop the compiler from complaining
     
     switch (evnt->type) 
@@ -300,7 +312,7 @@ bool Gfx::OnEvent(SDL_Event* evnt)
 
     } // END: switch  (evnt->type) 
 
-    //std::cout << clr::indent() << clr::CYAN << "Gfx::OnEvent() Exit" << clr::RETURN;
+    //std::cout << clr::indent() << clr::CYAN << "GPU::OnEvent() Exit" << clr::RETURN;
     return true;
 }
 
@@ -318,9 +330,9 @@ bool Gfx::OnEvent(SDL_Event* evnt)
  *
  * @return True if the update was successful, false otherwise.
  ************************************************************************/
-bool Gfx::OnUpdate(float fElapsedTime)
+bool GPU::OnUpdate(float fElapsedTime)
 {
-    //std::cout << clr::indent() << clr::CYAN << "Gfx::OnUpdate() Entry" << clr::RETURN;
+    //std::cout << clr::indent() << clr::CYAN << "GPU::OnUpdate() Entry" << clr::RETURN;
     if (fElapsedTime==0.0f) { ; } // stop the compiler from complaining
 
     { // TESTING:  Something to look at while running these tests...
@@ -338,7 +350,7 @@ bool Gfx::OnUpdate(float fElapsedTime)
         SDL_RenderClear(pRenderer);
     } // END TESTING ...
 
-    //std::cout << clr::indent() << clr::CYAN << "Gfx::OnUpdate() Exit" << clr::RETURN;
+    //std::cout << clr::indent() << clr::CYAN << "GPU::OnUpdate() Exit" << clr::RETURN;
     return true;
 }
 
@@ -352,11 +364,11 @@ bool Gfx::OnUpdate(float fElapsedTime)
  * 
  * @return True if the render was successful, false otherwise.
  *************************************************************************/
-bool Gfx::OnRender()
+bool GPU::OnRender()
 {
-    //std::cout << clr::indent() << clr::CYAN << "Gfx::OnRender() Entry" << clr::RETURN;
+    //std::cout << clr::indent() << clr::CYAN << "GPU::OnRender() Entry" << clr::RETURN;
     // ...
-    //std::cout << clr::indent() << clr::CYAN << "Gfx::OnRender() Exit" << clr::RETURN;
+    //std::cout << clr::indent() << clr::CYAN << "GPU::OnRender() Exit" << clr::RETURN;
     return true;
 }
 
@@ -367,7 +379,7 @@ bool Gfx::OnRender()
  * internal state of the device accordingly. It returns true if the
  * mode change was successful, false otherwise.
  ************************************************************************/
-bool Gfx::_change_gfx_mode(Byte mode) 
+bool GPU::_change_gfx_mode(Byte mode) 
 { 
 // GFX_MODE          equ   0xFE00  ; (Byte) Graphics Mode
 //                                 ;    - bit  7   = video timing: 
@@ -422,7 +434,7 @@ bool Gfx::_change_gfx_mode(Byte mode)
  * internal state of the device accordingly. It returns true if the
  * flag change was successful, false otherwise.
  ************************************************************************/
-bool Gfx::_change_emu_mode(Byte emu) 
+bool GPU::_change_emu_mode(Byte emu) 
 { 
 // GFX_EMU           equ   0xFE01  ; (Byte) Emulation Flags
 //                             ;    - bit  7    = vsync: 0=off, 1=on

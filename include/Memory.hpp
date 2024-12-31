@@ -84,12 +84,9 @@ public:     // PUBLIC ACCESSORS
 private:
     static int _attach(IDevice* device);
 
-    // Move to the Memory Management Device
     inline static int _next_address = 0;    // next assignable address
     inline static std::vector<IDevice*> _memory_nodes;		
-
     inline static std::unordered_map<std::string, Word> _map;
-
     bool bWasInit = false;
 };
 

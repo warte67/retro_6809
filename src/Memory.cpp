@@ -270,10 +270,11 @@ void Memory::Write(Word offset, Byte data, bool debug)
         if (offset - a->base() < a->size())
         {
             ROM* isROM = dynamic_cast<ROM*>(a);
-            if (debug && isROM)
+            if (debug && isROM) {
                 isROM->write_to_rom(offset, data);
-            else
+            } else {
                 a->OnWrite(offset, data);
+            }
             return;
         }
     }

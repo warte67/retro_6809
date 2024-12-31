@@ -62,9 +62,11 @@ protected: // PROTECTED ACCESSORS
     void name(std::string n);
     Byte memory(Word ofs);
     void memory(Word ofs, Byte data);
+    Byte memory_no_lock(Word ofs);
+    void memory_no_lock(Word ofs, Byte data);
 
-    Uint16 _base = 0;						std::mutex _mutex_base;		
-    int _size = 0;						std::mutex _mutex_size;		
+    Uint16 _base = 0;					    std::mutex _mutex_base;		
+    int _size = 0;						    std::mutex _mutex_size;		
     std::string _device_name = "??DEV??";	std::mutex _mutex_device_name;				
     std::vector<Uint8> _memory;				std::mutex _mutex_memory;
 
@@ -361,6 +363,31 @@ class VIDEO_BUFFER : public IDevice
             _size = nextAddr - old_address;
             return _size; 
         }  
+
+        // Override OnRead and OnWrite with lock-free logic for GPU
+        Byte OnRead(Word offset) override
+        {
+            return Read_NoLock(offset);
+        }
+
+        void OnWrite(Word offset, Byte data) override
+        {
+            Write_NoLock(offset, data);
+        }
+
+        Byte Read_NoLock(Word offset)
+        {
+            if (offset - base() < size())
+                return IDevice::_memory[ offset - base() ];
+            return 0xCC;
+        }
+
+        void Write_NoLock(Word offset, Byte data)
+        {
+            if (offset - base() < size())
+                IDevice::_memory[ offset - base() ] = data;
+        }
+
 };
 
 

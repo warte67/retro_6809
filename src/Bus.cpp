@@ -11,7 +11,7 @@
 
 #include "Bus.hpp"
 #include "clr.hpp"
-#include "Gfx.hpp"
+#include "GPU.hpp"
 
 
 /**
@@ -199,7 +199,7 @@ bool Bus::Run()
             _onRender();      
 
             // only present for GfxCore            
-            if (_pGfx) { _pGfx->RenderPresent(); }
+            if (_pGPU) { _pGPU->RenderPresent(); }
 
             // (( TESTING ))
             // Bus::IsRunning(false);
@@ -250,7 +250,7 @@ bool Bus::_onInit()
     Memory::Attach<KERNEL_ROM>();       // 0xF000 - 0xFDFF      (3.5k kernel ROM)
     // Memory::Attach<HDW_REGISTERS>();    // 0xFE00 - 0xFFEF      (Hardware Registers)
 
-    _pGfx = Memory::Attach<Gfx>();
+    _pGPU = Memory::Attach<GPU>();
 
     Memory::Attach<HDW_RESERVED>();     // unused ...
     Memory::Attach<ROM_VECTS>();        // 0xFFF0 - 0xFFFF      (System ROM Vectors)

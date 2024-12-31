@@ -31,7 +31,7 @@
 #include "types.hpp"
 #include "Memory.hpp"
 
-#include "Gfx.hpp"
+#include "GPU.hpp"
 
 
 
@@ -80,7 +80,7 @@ private: // INTERNAL PRIVATES
     inline static std::mutex _mutex_IsRunning;
 
     // quick and dirty reference to the Gfx object:
-    inline static Gfx* _pGfx = nullptr;   // singlular but not necessarily a singleton
+    inline static GPU* _pGPU = nullptr;   // singlular but not necessarily a singleton
 
     // static Memory Management Device:
     Memory& _memory = Memory::GetInstance();   

@@ -1,13 +1,13 @@
-/*** Gfx.hpp *******************************************
- *       _____    __              _                     
- *      / ____|  / _|            | |                    
- *     | |  __  | |_  __  __     | |__    _ __    _ __  
- *     | | |_ | |  _| \ \/ /     | '_ \  | '_ \  | '_ \ 
- *     | |__| | | |    >  <   _  | | | | | |_) | | |_) |
- *      \_____| |_|   /_/\_\ (_) |_| |_| | .__/  | .__/ 
- *                                       | |     | |    
- *                                       |_|     |_|    
- *
+/*** GPU.hpp *******************************************
+ *     _____ _____  _    _       _                 
+ *    / ____|  __ \| |  | |     | |                
+ *   | |  __| |__) | |  | |     | |__  _ __  _ __  
+ *   | | |_ |  ___/| |  | |     | '_ \| '_ \| '_ \ 
+ *   | |__| | |    | |__| |  _  | | | | |_) | |_) |
+ *    \_____|_|     \____/  (_) |_| |_| .__/| .__/ 
+ *                                    | |   | |    
+ *                                    |_|   |_|    
+ *   
  * This is the base class for the primary graphics devices. It provides the
  * basic methods for reading and writing to the device's memory.
  * 
@@ -17,11 +17,11 @@
 
 #include "IDevice.hpp"
 
-class Gfx : public IDevice {
+class GPU : public IDevice {
 
 public: // PUBLIC CONSTRUCTOR / DESTRUCTOR
-    Gfx();
-    virtual ~Gfx();
+    GPU();
+    virtual ~GPU();
 
 public: // VIRTUAL METHODS
     virtual Byte OnRead(Word offset);               // read

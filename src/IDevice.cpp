@@ -132,7 +132,6 @@ void IDevice::memory(Word ofs, Byte data)
 }
 
 
-
 /////////////////////////////
 // ROM Device Helper Method
 /////////////////////////////
