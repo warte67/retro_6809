@@ -1,55 +1,70 @@
-# Video Timing Calculations for 320x200 @ 60Hz
+# Video Timing Calculations for 640x400 (Active) @ 70Hz within 640x480 Base
 
 ## Horizontal Timing (pixels)
-- Active Display: 320
+- Active Display: 640
 - Front Porch: 16
-- Sync Pulse: 32  
-- Back Porch: 32
-- Total Horizontal: 400 pixels
+- Sync Pulse: 96  
+- Back Porch: 48
+- Total Horizontal: 800 pixels
 
 ## Vertical Timing (lines)
-- Active Display: 200
-- Front Porch: 10
-- Sync Pulse: 2
-- Back Porch: 33
-- Total Vertical: 245 lines
+- Active Display: 400  
+- Front Porch: 10  
+- Sync Pulse: 2  
+- Back Porch: 33  
+- Blank Lines: 40 (20 top, 20 bottom)  
+- Total Vertical: 525 lines
 
 ## Clock Calculations
-- Total Pixels per Frame = 400 * 245 = 98,000 pixels
-- Frames per Second = 60
-- Pixel Clock = 98,000 * 60 = 5.88 MHz
+- Total Pixels per Frame = 800 * 525 = 420,000 pixels
+- Frames per Second = 70
+- Pixel Clock = 420,000 * 70 = 29.4 MHz
 
-## Resolution Modes via Overscan Flags
-Base Resolution (no overscan):    320x200
-Horizontal Overscan:             160x200 (doubled horizontal pixels)
-Vertical Overscan:               320x100 (doubled vertical pixels)
-Both Overscan:                   160x100 (doubled in both directions)
+## Resolution Modes via Overscan and Border Adjustments
+Base Resolution (no overscan):     640x400 active display within 640x480 base  
+Single Overscan (2x):              320x200 active display within 320x240 base  
+Double Overscan (4x):              160x100 active display within 160x120 base  
+Quad Overscan (8x):                 80x50 active display within 80x60 base  
+512x384 (More border):             512x384 active display with extended borders
+
+# Video Modes with 512x384 Overscan
+Using 512x384 as the active display, the following overscan modes are derived:
+
+1. **Base 512x384 Resolution**:  
+   - Active area is centered within the 640x480 base with increased horizontal and vertical porch sizes.
+   
+2. **Overscan Variants**:  
+   - Single Overscan (256x192): Doubled pixels horizontally and vertically.
+   - Double Overscan (128x96): Quadrupled pixels horizontally and vertically.
+   - Quad Overscan (64x48): Octupled pixels horizontally and vertically.
+
+---
 
 # Display Buffer Memory Requirements
 
-## 320x200 Base Resolution
+## 640x400 Active Display
+- Monochrome (1bpp):  32,000 bytes  (640x400 ÷ 8)
+- 4-Color (2bpp):     64,000 bytes  (640x400 ÷ 4)
+- 16-Color (4bpp):   128,000 bytes  (640x400 ÷ 2)
+- 256-Color (8bpp):  256,000 bytes  (640x400 ÷ 1)
+
+## 512x384 Active Display
+- Monochrome (1bpp):  24,576 bytes  (512x384 ÷ 8)
+- 4-Color (2bpp):     49,152 bytes  (512x384 ÷ 4)
+- 16-Color (4bpp):    98,304 bytes  (512x384 ÷ 2)
+- 256-Color (8bpp):  196,608 bytes  (512x384 ÷ 1)
+
+## 320x200 Resolution
 - Monochrome (1bpp):   8,000 bytes  (320x200 ÷ 8)
 - 4-Color (2bpp):     16,000 bytes  (320x200 ÷ 4)
 - 16-Color (4bpp):    32,000 bytes  (320x200 ÷ 2)
 - 256-Color (8bpp):   64,000 bytes  (320x200 ÷ 1)
 
-## 320x100 Resolution
-- Monochrome (1bpp):   4,000 bytes  (320x100 ÷ 8)
-- 4-Color (2bpp):      8,000 bytes  (320x100 ÷ 4)
-- 16-Color (4bpp):    16,000 bytes  (320x100 ÷ 2)
-- 256-Color (8bpp):   32,000 bytes  (320x100 ÷ 1)
-
-## 320x50 Resolution
-- Monochrome (1bpp):   2,000 bytes  (320x50 ÷ 8)
-- 4-Color (2bpp):      4,000 bytes  (320x50 ÷ 4)
-- 16-Color (4bpp):     8,000 bytes  (320x50 ÷ 2)
-- 256-Color (8bpp):   16,000 bytes  (320x50 ÷ 1)
-
-## 160x200 Resolution
-- Monochrome (1bpp):   4,000 bytes  (160x200 ÷ 8)
-- 4-Color (2bpp):      8,000 bytes  (160x200 ÷ 4)
-- 16-Color (4bpp):    16,000 bytes  (160x200 ÷ 2)
-- 256-Color (8bpp):   32,000 bytes  (160x200 ÷ 1)
+## 256x192 Resolution (from 512x384 Overscan)
+- Monochrome (1bpp):   6,144 bytes  (256x192 ÷ 8)
+- 4-Color (2bpp):     12,288 bytes  (256x192 ÷ 4)
+- 16-Color (4bpp):    24,576 bytes  (256x192 ÷ 2)
+- 256-Color (8bpp):   49,152 bytes  (256x192 ÷ 1)
 
 ## 160x100 Resolution
 - Monochrome (1bpp):   2,000 bytes  (160x100 ÷ 8)
@@ -57,38 +72,15 @@ Both Overscan:                   160x100 (doubled in both directions)
 - 16-Color (4bpp):     8,000 bytes  (160x100 ÷ 2)
 - 256-Color (8bpp):   16,000 bytes  (160x100 ÷ 1)
 
-## 160x50 Resolution
-- Monochrome (1bpp):   1,000 bytes  (160x50 ÷ 8)
-- 4-Color (2bpp):      2,000 bytes  (160x50 ÷ 4)
-- 16-Color (4bpp):     4,000 bytes  (160x50 ÷ 2)
-- 256-Color (8bpp):    8,000 bytes  (160x50 ÷ 1)
+## 64x48 Resolution (from 512x384 Overscan)
+- Monochrome (1bpp):     384 bytes  (64x48 ÷ 8)
+- 4-Color (2bpp):        768 bytes  (64x48 ÷ 4)
+- 16-Color (4bpp):     1,536 bytes  (64x48 ÷ 2)
+- 256-Color (8bpp):    3,072 bytes  (64x48 ÷ 1)
 
-## 80x200 Resolution
-- Monochrome (1bpp):   2,000 bytes  (80x200 ÷ 8)
-- 4-Color (2bpp):      4,000 bytes  (80x200 ÷ 4)
-- 16-Color (4bpp):     8,000 bytes  (80x200 ÷ 2)
-- 256-Color (8bpp):   16,000 bytes  (80x200 ÷ 1)
+---
 
-## 80x100 Resolution
-- Monochrome (1bpp):   1,000 bytes  (80x100 ÷ 8)
-- 4-Color (2bpp):      2,000 bytes  (80x100 ÷ 4)
-- 16-Color (4bpp):     4,000 bytes  (80x100 ÷ 2)
-- 256-Color (8bpp):    8,000 bytes  (80x100 ÷ 1)
-
-## 80x50 Resolution
-- Monochrome (1bpp):     500 bytes  (80x50 ÷ 8)
-- 4-Color (2bpp):      1,000 bytes  (80x50 ÷ 4)
-- 16-Color (4bpp):     2,000 bytes  (80x50 ÷ 2)
-- 256-Color (8bpp):    4,000 bytes  (80x50 ÷ 1)
-
-## Notes
-- Border color taken from palette index 0
-- Visible area varies by overscan mode
-- Timing compatible with 6MHz target pixel clock
-- Overscan flags modify pixel/line doubling during active display only
-- Sync timing parameters remain constant across all modes
-
-# Text Mode Specifications
+# Text Mode Specifications (Adjusted for 640x400 Active)
 
 ## Character Format
 - 8x8 pixel characters
@@ -103,43 +95,40 @@ Both Overscan:                   160x100 (doubled in both directions)
   - Bits 3-0: Background color (0-15)
 
 ## Available Text Resolutions
-1. 40x25 characters (320x200 base)
-   - 1000 character positions
-   - 2000 bytes total (2 bytes per position)
+1. 80x50 characters (640x400 base)
+   - 4,000 character positions
+   - 8,000 bytes total (2 bytes per position)
 
-2. 40x12 characters (320x100 V2x)
-   - 480 character positions
-   - 960 bytes total
+2. 64x48 characters (512x384 adjusted porch)
+   - 3,072 character positions
+   - 6,144 bytes total
 
-3. 40x6 characters (320x50 V4x)
+3. 40x25 characters (320x200 S2x)
+   - 1,000 character positions
+   - 2,000 bytes total
+
+4. 32x24 characters (256x192 S2x from 512x384 overscan)
+   - 768 character positions
+   - 1,536 bytes total
+
+5. 20x12 characters (160x100 S4x)
    - 240 character positions
    - 480 bytes total
 
-4. 20x25 characters (160x200 H2x)
-   - 500 character positions
-   - 1000 bytes total
-
-5. 20x12 characters (160x100 H2x+V2x)
-   - 240 character positions
-   - 480 bytes total
-
-6. 20x6 characters (160x50 H2x+V4x)
-   - 120 character positions
-   - 240 bytes total
-
-7. 10x25 characters (80x200 H4x)
-   - 250 character positions
-   - 500 bytes total
-
-8. 10x12 characters (80x100 H4x+V2x)
-   - 120 character positions
-   - 240 bytes total
-
-9. 10x6 characters (80x50 H4x+V4x)
+6. 10x6 characters (80x50 S8x)
    - 60 character positions
    - 120 bytes total
 
+---
 
+# Notes
+
+- The blank lines for the **640x400 active display** (20 lines at top and bottom) are filled with the border color.
+- The **512x384 mode** uses extended porches to center the active display within the 640x480 base, allowing overscan-derived modes.
+- All sync timings remain constant at 29.4 MHz pixel clock for compatibility.
+- Overscan and porch adjustments are achieved without altering the sync timings, ensuring monitor compatibility.
+
+---
 
 # Sprite System Specifications
 
@@ -198,77 +187,4 @@ Both Overscan:                   160x100 (doubled in both directions)
 - Within each priority level, sprite index determines draw order
 - 4x4 collision mask provides efficient near pixel-perfect collision detection
 - Individual palettes allow unique colors per sprite
-
-
-----------------------------------------------------------------------------------
-
-
-# Video Timing Calculations for 256x192 @ 60Hz
-
-## Horizontal Timing (pixels)
-### - Active Display: 256
-- Front Porch: 16
-- Sync Pulse: 32
-- Back Porch: 32
-
-## Total Horizontal: 336 pixels
-### - Vertical Timing (lines)
-- Active Display: 192
-- Front Porch: 10
-- Sync Pulse: 2
-- Back Porch: 33
-- Total Vertical: 237 lines
-
-## Clock Calculations
-- Total Pixels per Frame = 336 * 237 = 79,392 pixels
-- Frames per Second = 60
-- Pixel Clock = 79,392 * 60 = 4.758 MHz
-- Resolution Modes via Overscan Flags
-- Base Resolution (no overscan): 256x192 Horizontal Overscan: 128x192 (doubled horizontal pixels) -
-- Vertical Overscan: 256x96 (doubled vertical pixels) Both Overscan: 128x96 (doubled in both directions)
-
-## Display Buffer Memory Requirements
-- 256x192 Base Resolution
-- Monochrome (1bpp): 6,144 bytes (256x192 ÷ 8)
-- 4-Color (2bpp): 12,288 bytes (256x192 ÷ 4)
-- 16-Color (4bpp): 24,576 bytes (256x192 ÷ 2)
-- 256-Color (8bpp): 49,152 bytes (256x192 ÷ 1)
-- 256x96 Resolution
-
-## Monochrome (1bpp): 3,072 bytes (256x96 ÷ 8)
- - 4-Color (2bpp): 6,144 bytes (256x96 ÷ 4)
-- 16-Color (4bpp): 12,288 bytes (256x96 ÷ 2)
-- 256-Color (8bpp): 24,576 bytes (256x96 ÷ 1)
-- 128x192 Resolution
-
-## Monochrome (1bpp): 6,144 bytes (128x192 ÷ 8)
-- 4-Color (2bpp): 12,288 bytes (128x192 ÷ 4)
-- 16-Color (4bpp): 24,576 bytes (128x192 ÷ 2)
-- 256-Color (8bpp): 49,152 bytes (128x192 ÷ 1)
-- 128x96 Resolution
-
-## Monochrome (1bpp): 3,072 bytes (128x96 ÷ 8)
-- 4-Color (2bpp): 6,144 bytes (128x96 ÷ 4)
-- 16-Color (4bpp): 12,288 bytes (128x96 ÷ 2)
-- 256-Color (8bpp): 24,576 bytes (128x96 ÷ 1)
-- 64x192 Resolution
-
-## Monochrome (1bpp): 3,072 bytes (64x192 ÷ 8)
-- 4-Color (2bpp): 6,144 bytes (64x192 ÷ 4)
-- 16-Color (4bpp): 12,288 bytes (64x192 ÷ 2)
-- 256-Color (8bpp): 24,576 bytes (64x192 ÷ 1)
-- 64x96 Resolution
-
-## Monochrome (1bpp): 1,536 bytes (64x96 ÷ 8)
-- 4-Color (2bpp): 3,072 bytes (64x96 ÷ 4)
-- 16-Color (4bpp): 6,144 bytes (64x96 ÷ 2)
-- 256-Color (8bpp): 12,288 bytes (64x96 ÷ 1)
-### Notes
-Border color taken from palette index 0
-Visible area varies by overscan mode
-Timing compatible with 4
-
-
-
-
 
