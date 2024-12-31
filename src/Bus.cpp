@@ -272,7 +272,7 @@ bool Bus::_onInit()
         }
         b++;
     }
-    std::cout << clr::indent_pop() << clr::YELLOW << "Memory Tests Passed!\n" << clr::RESET;
+    std::cout << clr::indent_pop() << clr::YELLOW << "... Memory Tests Passed!\n" << clr::RESET;
 
     // Dump the memory map
     if (DUMP_MEMORY_MAP)    { Memory::Display_Nodes(); }
