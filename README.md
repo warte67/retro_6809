@@ -72,11 +72,12 @@ This project is licensed under the **GNU General Public License v3.0** (GPL v3).
 - **Share-alike**: Any derivative works of this project, whether hardware or software, must also be released under the GPL v3 license. Any modifications to the code or design must be shared with the community.
 - **Commercial Use**: You may sell the pre-built hardware and provide commercial services, but any modified code or design must remain open-source and licensed under GPL v3.
 - **Reverse Engineering**: You have the right to reverse-engineer the software, as long as any modified code is shared under the GPL v3.
-###### For the full GPL v3 license text, please visit the official page: [https://www.gnu.org/licenses/gpl-3.0.html](https://www.gnu.org/licenses/gpl-3.0.html)
 
 ### Closed-Source Software Note
 
 Software developed to **utilize the 2MB banked memory format** can be closed-source, as long as it does not directly incorporate or link to GPL-licensed code. However, **reverse-engineering** or **disassembly** of the code is allowed, and any modifications must still adhere to the GPL v3 if they are derived from this project.
+
+###### For the full GPL v3 license text, please visit the official page: [https://www.gnu.org/licenses/gpl-3.0.html](https://www.gnu.org/licenses/gpl-3.0.html)
 
 ---
 
