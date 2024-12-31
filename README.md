@@ -64,6 +64,7 @@ The **retro_6809** project serves as a hands-on platform for teaching:
 ## License
 
 This project is licensed under the **GNU General Public License v3.0** (GPL v3). You are free to use, modify, and distribute the code and designs under the terms of the [GPL-3.0](LICENSE.md), as long as you follow the license's requirements. 
+###### For the full GPL v3 license text, please visit the official page: [https://www.gnu.org/licenses/gpl-3.0.html](https://www.gnu.org/licenses/gpl-3.0.html)
 
 ### GPL v3 Highlights
 
