@@ -102,13 +102,6 @@ Please ensure that all contributions are well-documented and comply with the GPL
 
 ---
 
-## Contact
-
-For more information, or to get involved, feel free to open an issue on GitHub or contact the project maintainers via email.
-
-
---- 
-
 
 ### Closed-Source Software Note
 
