@@ -23,43 +23,60 @@
  * Read / Write *
  ***************/ 
 
+/**
+ * This is the read callback for the GPU device. It is called whenever the CPU
+ * reads from a location in the device's memory space.
+ *
+ * The read callback is responsible for returning the value stored at the
+ * specified memory location.
+ *
+ * If the offset is out of range, the function returns a default value of 0xCC
+ * to indicate an error.
+ *
+ * @param offset The memory offset from which to read.
+ * 
+ * @return The value read from the specified memory location, or 0xCC if the
+ *         offset is out of range.
+ */
 Byte GPU::OnRead(Word offset) 
 { 
     Byte data = IDevice::OnRead(offset);    // use this for other devices
     // std::cout << clr::indent() << clr::CYAN << "GPU::OnRead($"<< clr::hex(offset,4) << ") = $" << clr::hex(data,2) << "\n" << clr::RESET;
 
-    if (offset == MAP(GFX_MODE))    { data = _gfx_mode; }
-    if (offset == MAP(GFX_EMU))     { data = _gfx_emu; }
+    if (offset == MAP(GPU_STD_MODE))    { data = _gpu_std_mode; }
+    if (offset == MAP(GPU_EXT_MODE))    { data = _gpu_ext_mode; }
+    if (offset == MAP(GPU_EMULATION))   { data = _gpu_emu_mode; }
 
     return data;
 } // END: GPU::OnRead()
+
 
 /**
  * This is the write callback for the GPU device. It is called whenever the CPU
  * writes to a location in the device's memory space.
  *
- * The write callback is responsible for updating the device's internal state
- * and performing any necessary actions based on the value written.
+ * The write callback is responsible for modifying the device state according
+ * to the value written to the specified memory location.
  *
- * @param offset The address of the memory location to write to.
- * @param data The value to write to the memory location.
+ * If the offset is out of range, the function does nothing.
+ *
+ * @param offset The memory offset to which to write.
+ * @param data The value to be written to the specified memory location.
  */
 void GPU::OnWrite(Word offset, Byte data) 
 { 
     // std::cout << clr::indent() << clr::CYAN << "GPU::OnWrite($" << clr::hex(offset,4) << ", $" << clr::hex(data,2) << ")\n" << clr::RESET;
-    if (offset == MAP(GFX_MODE))    
+    if (offset == MAP(GPU_STD_MODE))    
     { 
-        if (_change_gfx_mode(data)) 
-        { 
-            _gfx_mode = data; 
-        }
+        data = _gpu_std_mode = _change_std_mode(data);
     }
-    if (offset == MAP(GFX_EMU))     
+    if (offset == MAP(GPU_EXT_MODE))    
+    { 
+        data = _gpu_ext_mode = _change_ext_mode(data);
+    }
+    if (offset == MAP(GPU_EMULATION))     
     {
-        if (_change_emu_mode(data)) 
-        { 
-            _gfx_emu = data; 
-        }
+        data = _gpu_emu_mode = _change_emu_mode(data);
     }
 
     IDevice::OnWrite( offset, data);
@@ -112,24 +129,22 @@ int  GPU::OnAttach(int nextAddr)
 
     register_node new_node;
 
-    new_node = { "GFX_ENABLE", nextAddr,  {   "(Byte) Bitflag Enables",
-                                            "   - bits 6-7 = reserved",
-                                            "   - bit  5   = 0:disable ext display,",
+    new_node = { "GPU_ENABLE", nextAddr,  {   "(Byte) Bitflag Enables",
+                                            "   - bits 5-7 = reserved",
+                                            "   - bit  4   = 0:disable ext display,",
                                             "                1:enable ext display",
-                                            "   - bit  4   = 0:disable std display,",
+                                            "   - bit  3   = 0:disable std display,",
                                             "                1:enable std display",
-                                            "   - bit  3   = 0:disable sprites,",
+                                            "   - bit  2   = 0:disable sprites,",
                                             "                1:enable sprites",
-                                            "   - bit  2   = 0:disable tilemap,",
+                                            "   - bit  1   = 0:disable tilemap,",
                                             "                1:enable tilemap",
-                                            "   - bit  1   = 0:disable mouse cursor,",
+                                            "   - bit  0   = 0:disable mouse cursor,",
                                             "                1:enable mouse cursor",
-                                            "   - bit  0   = 0:monochrome text,",
-                                            "                1:color text",
                                             "" } }; nextAddr+=1;
     mapped_register.push_back(new_node);
 
-    new_node = { "GFX_STD_MODE", nextAddr,  {   "(Byte) Standard Graphics Mode",
+    new_node = { "GPU_STD_MODE", nextAddr,  {   "(Byte) Standard Graphics Mode",
                                             "   - bit  7   = 0:screen is text, ",
                                             "                1:screen is bitmap",
                                             "   - bit  6   = video timing: ",
@@ -144,7 +159,7 @@ int  GPU::OnAttach(int nextAddr)
                                             "" } }; nextAddr+=1;
     mapped_register.push_back(new_node);
 
-    new_node = { "GFX_EXT_MODE", nextAddr,  {   "(Byte) Extended Graphics Mode",
+    new_node = { "GPU_EXT_MODE", nextAddr,  {   "(Byte) Extended Graphics Mode",
                                             "   - bit  7   = reserved",
                                             "   - bit  6   = video timing: ",
                                             "                0=512x384, 1=640x400",
@@ -158,7 +173,7 @@ int  GPU::OnAttach(int nextAddr)
                                             "" } }; nextAddr+=1;
     mapped_register.push_back(new_node);
 
-    new_node = { "GFX_EMULATION", nextAddr,  {    "(Byte) Emulation Flags",
+    new_node = { "GPU_EMULATION", nextAddr,  {    "(Byte) Emulation Flags",
                                             "   - bit  7    = vsync: 0=off, 1=on",
                                             "   - bit  6    = main: 0=windowed,",
                                             "                 1=fullscreen",
@@ -330,15 +345,15 @@ bool GPU::OnEvent(SDL_Event* evnt)
 
         case SDL_EVENT_WINDOW_ENTER_FULLSCREEN:
         {            
-            _gfx_emu |= 0b01000000; // Set bit 6 = ENTER FULLSCREEN
-            std::cout << "SDL_EVENT_WINDOW_ENTER_FULLSCREEN (0x" << clr::hex(_gfx_emu,2) << ")\n";
+            _gpu_emu_mode |= 0b01000000; // Set bit 6 = ENTER FULLSCREEN
+            std::cout << "SDL_EVENT_WINDOW_ENTER_FULLSCREEN (0x" << clr::hex(_gpu_emu_mode,2) << ")\n";
             break;
         } // END: case SDL_EVENT_WINDOW_ENTER_FULLSCREEN
 
         case SDL_EVENT_WINDOW_LEAVE_FULLSCREEN:
         {
-            _gfx_emu &= 0b10111111; // Clear bit 6 = LEAVE FULLSCREEN
-            std::cout << "SDL_EVENT_WINDOW_LEAVE_FULLSCREEN (0x" << clr::hex(_gfx_emu,2) << ")\n";
+            _gpu_emu_mode &= 0b10111111; // Clear bit 6 = LEAVE FULLSCREEN
+            std::cout << "SDL_EVENT_WINDOW_LEAVE_FULLSCREEN (0x" << clr::hex(_gpu_emu_mode,2) << ")\n";
             break;
         } // END: case SDL_EVENT_WINDOW_ENTER_FULLSCREEN
 
@@ -404,95 +419,111 @@ bool GPU::OnRender()
     return true;
 }
 
-/*************************************************************************
- * bool _change_gfx_mode(Byte mode):
- * 
- * This function processes the given graphics mode and changes the
- * internal state of the device accordingly. It returns true if the
- * mode change was successful, false otherwise.
- ************************************************************************/
-bool GPU::_change_gfx_mode(Byte mode) 
+
+
+
+/**
+ * Updates the standard graphics mode of the GPU based on GPU_STD_MODE.
+ * The mode byte is structured as follows:
+ *   - Bit 7: Screen type (0 = text, 1 = bitmap)
+ *   - Bit 6: Video timing (0 = 512x384, 1 = 640x400)
+ *   - Bits 4-5: Horizontal overscan (00 = 1x, 01 = 2x, 10 = 4x, 11 = 8x)
+ *   - Bits 2-3: Vertical overscan (00 = 1x, 01 = 2x, 10 = 4x)
+ *   - Bits 0-1: Color mode (00 = 2-color, 01 = 4-color, 10 = 16-color, 11 = 256-color)
+ *
+ * @param mode The mode byte representing the desired standard graphics mode.
+ * @return The updated mode configuration.
+ */
+Byte GPU::_change_std_mode(Byte mode) 
 { 
-// GFX_MODE          equ   0xFE00  ; (Byte) Graphics Mode
-//                                 ;    - bit  7   = video timing: 
-//                                 ;                0=256x192, 1=320x200
-//                                 ;    - bit  6   = 0:screen is text, 
-//                                 ;                1:screen is bitmap
-//                                 ;    - bits 4-5 = horizontal overscan: 
-//                                 ;                00=1x, 01=2x, 10=4x
-//                                 ;    - bits 2-3 = vertical overscan: 
-//                                 ;                00=1x, 01=2x, 10=4x
-//                                 ;    - bits 0-1 = Color Mode: 00=2-clr, 
-//                                 ;                01=4-clr, 10=16-clr, 
-//                                 ;                11=256-clr
+    if (mode)  {;}     // stop the compiler from complaining
 
-    // horizontal overscan pattern 11 is also 4x (instead of error)
-    if ((mode & 0b00110000) == 0b00110000) 
-    { 
-        mode &= 0b11001111;
-        mode |= 0b00100000;
-    }
-    // vertical overscan pattern 11 is also 4x (instead of error)
-    if ((mode & 0b00001100) == 0b00001100) 
-    { 
-        mode &= 0b11110011;
-        mode |= 0b00001000;
-    }
+    // Byte data = _gpu_std_mode;
+    Byte data = mode;
 
-    // bit 7: video timing: 0=256x192, 1=320x200
+    // bit 7 = 0:screen is text, 1:screen is bitmap
     // ...
 
-    // bit 6: 0:screen is text, 1:screen is bitmap
+    // bit 6 = video timing: 0=512x384, 1=640x400
     // ...
 
-    // bits 4-5: horizontal overscan: 00=1x, 01=2x, 10=4x    
-    // ...       
+    // bits 4-5 = horizontal overscan: 00=1x, 01=2x, 10=4x, 11=8x
+    // ...  
 
-    // bits 2-3: vertical overscan: 00=1x, 01=2x, 10=4x    
-    // ...               
-
-    // bits 0-1: Color Mode: 00=2-clr, 01=4-clr, 10=16-clr, 11=256-clr
+    // bits 2-3 = vertical overscan: 00=1x, 01=2x, 10=4x
     // ...
 
-    
+    // bits 0-1 = Color Mode: 00=2-clr, 01=4-clr, 10=16-clr, 11=256-clr 
+    // ...
 
-    return true; 
+    return data; 
 }
 
-/*************************************************************************
- * bool _change_emu_mode(Byte emu):
- * 
- * This function processes the given emulation flags and changes the
- * internal state of the device accordingly. It returns true if the
- * flag change was successful, false otherwise.
- ************************************************************************/
-bool GPU::_change_emu_mode(Byte emu) 
-{ 
-// GFX_EMU           equ   0xFE01  ; (Byte) Emulation Flags
-//                             ;    - bit  7    = vsync: 0=off, 1=on
-//                             ;    - bit  6    = main: 0=windowed,
-//                             ;                  1=fullscreen
-//                             ;    - bit  5    = debug: 0=off, 1=on
-//                             ;    - bit  4    = debug: 0=windowed, 
-//                             ;                  1=fullscreen
-//                             ;    - bits 2-3  = Active Monitor 0-3
-//                             ;    - bits 0-1  = Debug Monitor 0-3
 
-    if (emu)  {;}     // stop the compiler from complaining
+/**
+ * Updates the extended graphics mode of the GPU based on GPU_EXT_MODE.
+ * The mode byte is structured as follows:
+ *   - Bit 7: Reserved
+ *   - Bit 6: Video timing (0 = 512x384, 1 = 640x400)
+ *   - Bits 4-5: Horizontal overscan (00 = 1x, 01 = 2x, 10 = 4x, 11 = 8x)
+ *   - Bits 2-3: Vertical overscan (00 = 1x, 01 = 2x, 10 = 4x)
+ *   - Bits 0-1: Color mode (00 = 2-color, 01 = 4-color, 10 = 16-color, 11 = 256-color)
+ *
+ * @param mode The mode byte representing the desired extended graphics mode.
+ * @return The updated mode configuration.
+ */
+Byte GPU::_change_ext_mode(Byte mode) 
+{ 
+    if (mode)  {;}     // stop the compiler from complaining
+
+    // Byte data = _gpu_ext_mode;
+    Byte data = mode;
+
+    // bit 7 = reserved
+    // ...
+
+    // bit 6 = video timing: 0=512x384, 1=640x400   
+    // ...
+
+    // bits 4-5 = horizontal overscan: 00=1x, 01=2x, 10=4x, 11=8x
+    // ...  
+
+    // bits 2-3 = vertical overscan: 00=1x, 01=2x, 10=4x
+    // ...
+
+    // bits 0-1 = Color Mode: 00=2-clr, 01=4-clr, 10=16-clr, 11=256-clr 
+    // ...
+    
+    return data; 
+}
+
+
+
+/**
+ * Updates the emulation mode of the GPU based on GPU_EMULATION.
+ * The mode byte is structured as follows:
+ *   - Bit 7: VSync (0 = off, 1 = on)
+ *   - Bit 6: Main display (0 = windowed, 1 = fullscreen)
+ *   - Bit 5: Debug display (0 = off, 1 = on)
+ *   - Bit 4: Debug display (0 = windowed, 1 = fullscreen)
+ *   - Bits 2-3: Active monitor (0-3)
+ *   - Bits 0-1: Debug monitor (0-3)
+ *
+ * @param emu The mode byte representing the desired emulation mode.
+ * @return The updated mode configuration.
+ */
+Byte GPU::_change_emu_mode(Byte mode) 
+{ 
+    if (mode)  {;}     // stop the compiler from complaining
+
+    // Byte data = _gpu_emu_mode;
+    Byte data = mode;
 
     // bit 7: vsync: 0=off, 1=on
-    if (emu & 0b10000000) {
-        SDL_SetWindowSurfaceVSync(pWindow, true);
-    } else {
-        SDL_SetWindowSurfaceVSync(pWindow, false);
-    }
+    // ...
 
     // bit 6: main: 0=windowed, 1=fullscreen
-    if (emu & 0b01000000) {
-        SDL_SetWindowFullscreen(pWindow, true);
-    } else {
-        SDL_SetWindowFullscreen(pWindow, false);
-    }
+    // ...
 
     // bit 5: debug: 0=off, 1=on
     // ...
@@ -506,7 +537,7 @@ bool GPU::_change_emu_mode(Byte emu)
     // bits 0-1: Debug Monitor 0-3
     // ...  
 
-    return true; 
+    return data; 
 }    
 
 

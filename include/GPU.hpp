@@ -45,11 +45,13 @@ public: // PUBLIC ACCESSORS
 
 private: // PRIVATE MEMBERS
     // internal hardware register states:
-    Byte _gfx_mode = 0b00000010;    // default: text, max resolution, 16 colors
-    Byte _gfx_emu =  0b00000000;    // default: no debug
+    Byte _gpu_std_mode = 0b00000010;
+    Byte _gpu_ext_mode = 0b00000000;
+    Byte _gpu_emu_mode = 0b00000000;    // default: no debug
 
-    bool _change_gfx_mode(Byte data);
-    bool _change_emu_mode(Byte data);
+    Byte _change_std_mode(Byte data);
+    Byte _change_ext_mode(Byte data);
+    Byte _change_emu_mode(Byte data);
 
 	// SDL stuff
 	SDL_Window* pWindow = nullptr;
@@ -73,16 +75,16 @@ private: // PRIVATE MEMBERS
 
     GFX_MODE          equ   0xFE00  ; (Byte) Graphics Mode
                                     ;    - bit  7   = 0:screen is text, 
-                                    ;                1:screen is bitmap
+                                    ;                 1:screen is bitmap
                                     ;    - bit  6   = video timing: 
                                     ;                 0=512x384, 1=640x400
                                     ;    - bits 4-5 = horizontal overscan: 
-                                    ;                00=1x, 01=2x, 10=4x, 11=8x
+                                    ;                 00=1x, 01=2x, 10=4x, 11=8x
                                     ;    - bits 2-3 = vertical overscan: 
-                                    ;                00=1x, 01=2x, 10=4x
+                                    ;                 00=1x, 01=2x, 10=4x
                                     ;    - bits 0-1 = Color Mode: 00=2-clr, 
-                                    ;                01=4-clr, 10=16-clr, 
-                                    ;                11=256-clr
+                                    ;                 01=4-clr, 10=16-clr, 
+                                    ;                 11=256-clr
 
     GFX_EMU           equ   0xFE01  ; (Byte) Emulation Flags
                                     ;    - bit  7    = vsync: 0=off, 1=on

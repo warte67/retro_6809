@@ -149,6 +149,7 @@ class ROM : public IDevice
 		bool OnQuit() override 						{ return true; }
 		bool OnActivate() override 					{ return true; }
 		bool OnDeactivate() override 				{ return true; }
+        void OnWrite(Word offset, Byte data) override { if (offset || data) { ; } }
 		// bool OnEvent(SDL_Event* evnt) override 		{ return true; }
 		bool OnEvent(SDL_Event* evnt) override 		{ return (evnt==nullptr); }         // return true
 		bool OnUpdate(float fElapsedTime) override 	{ return (fElapsedTime==0.0f); }    // { return true; } 
@@ -525,6 +526,7 @@ class KERNEL_ROM : public IDevice
 		bool OnEvent(SDL_Event* evnt) override 		{ return (evnt==nullptr); }         // return true
 		bool OnUpdate(float fElapsedTime) override 	{ return (fElapsedTime==0.0f); }    // { return true; }           
 		bool OnRender() override 					{ return true; } 
+        void OnWrite(Word offset, Byte data) override { if (offset || data) { ; } }
 
 		int OnAttach(int nextAddr) override       { 
             int bank_size = 3.5f*1024;
