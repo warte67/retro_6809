@@ -387,7 +387,6 @@ DWord Memory::Read_DWord(Word offset, bool debug)
  * @param data The 32-bit double word to be written to the specified memory offset.
  * @param debug A boolean flag used to suppress unused variable warnings.
  */
-
 void Memory::Write_DWord(Word offset, DWord data, bool debug)
 {
     if (debug) {;}  // stop the unused argument warning
@@ -400,24 +399,26 @@ void Memory::Write_DWord(Word offset, DWord data, bool debug)
 
 
 /**
- * Attaches a device to the memory map by allowing the device to build its 
- * own descriptor node and updating the memory map accordingly.
- * 
- * This function calls the device's OnAttach method to determine the size 
- * of the memory allocation for the device, setting the device's base 
- * address and size. If the allocation is successful, the device is added 
- * to the memory nodes list, and the next available address is updated. 
- * In case of failure (e.g., zero size), an error is reported, and the 
- * system is marked as not running.
- * 
- * If the address exceeds the 64k boundary, an error is reported, and the 
- * system is stopped. Additionally, a message is logged if the size is zero.
- * 
- * @param device A pointer to the device to be attached.
- * @return The size of the memory allocated for the device, 
- *         or zero if the attachment failed.
+ * Attaches the specified device to the memory map and allocates space
+ * for it.
+ *
+ * The device is given the opportunity to build its own device descriptor
+ * node by calling its OnAttach method. If the device returns a non-zero size,
+ * the device is added to the memory map and its base and size are set to
+ * the value returned by OnAttach. The memory map is then updated by adding
+ * the device's mapped registers to the map.
+ *
+ * If the device returns a size of zero, an error is generated and the
+ * emulator is halted.
+ *
+ * If the device is attached beyond the 64k boundary, an error is generated
+ * and the emulator is halted.
+ *
+ * @param device The device to be attached to the memory map.
+ *
+ * @return The size of the device, if it was successfully attached;
+ *         zero, otherwise.
  */
-
 int Memory::_attach(IDevice* device)
 {    
     int size = 0;
@@ -458,44 +459,20 @@ int Memory::_attach(IDevice* device)
 }
 
 
-
 /**
- * Generate_Memory_Map - Generates a text file containing the memory map
- *     in either C++ or 6809 assembly format.
- *
- *     If MEMORY_MAP_OUTPUT_CPP is true, the file is written in C++
- *     format. If false, it is written in 6809 assembly language format.
- *
- *     The file is written to the location specified by
- *     MEMORY_MAP_OUTPUT_FILE_HPP or MEMORY_MAP_OUTPUT_FILE_ASM
- *     depending on the setting of MEMORY_MAP_OUTPUT_CPP.
- *
- *     The format of the file is as follows:
- *
- *     C++ Format:
- *          enum MEMMAP {
- *              // START: Device Name
- *              DEVICE_NAME = 0xDevice_Base_Address,
- *              // START: Register Name
- *              REGISTER_NAME = 0xRegister_Address,
- *              // END: Register Name
- *              // END: Device Name
- *          };
- *
- *     6809 Assembly Language Format:
- *          ; START: Device Name
- *          DEVICE_NAME equ 0xDevice_Base_Address
- *          ; START: Register Name
- *          REGISTER_NAME equ 0xRegister_Address
- *          ; END: Register Name
- *          ; END: Device Name
+ * Generates C++ and Assembly memory map files for the system.
+ * 
+ * This function creates two output files, MEMORY_MAP_OUTPUT_FILE_HPP and MEMORY_MAP_OUTPUT_FILE_ASM,
+ * containing memory map definitions for C++ and Assembly, respectively. It iterates through the 
+ * memory nodes and mapped registers, formatting and writing their names, addresses, and comments 
+ * to the output files.
+ * 
+ * If the files cannot be opened for writing or reading, an error is reported via the Bus::Error 
+ * function. The C++ file defines an enum of memory map symbols, while the Assembly file defines 
+ * equivalent symbols using 'equ'.
  */
 void Memory::Generate_Memory_Map() 
 {
-    // 
-    // Display C++ Memory_Map.hpp
-    //
-
     { // Generate C++ Memory_Map.hpp
         constexpr int FIRST_TAB = 4;
         constexpr int VAR_LEN = 22;
@@ -551,8 +528,7 @@ void Memory::Generate_Memory_Map()
         } else {
             Bus::Error("Unable to open mem_test.hpp", __FILE__, __LINE__);
         }
-    } // END: Generate C++ Memory_Map.hpp
-    
+    } // END: Generate C++ Memory_Map.hpp    
     
     { // Generate Assembly Memory_Map.asm
         constexpr int FIRST_TAB = 0;
