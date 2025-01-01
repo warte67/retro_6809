@@ -16,6 +16,7 @@
  ******************/
 
 #include <algorithm>
+#include <fstream>
 #include "Bus.hpp"
 #include "clr.hpp"
 #include "Memory.hpp"
@@ -457,95 +458,148 @@ int Memory::_attach(IDevice* device)
 }
 
 
+
 /**
- * Displays the memory map as C++ or ASM code to the console.
+ * Generate_Memory_Map - Generates a text file containing the memory map
+ *     in either C++ or 6809 assembly format.
  *
- * If the MEMORY_MAP_OUTPUT_CPP macro is defined, this function generates
- * C++ code that can be used to define the memory map as an enumeration.
- * If the macro is not defined, this function generates an ASM memory map
- * definition.
+ *     If MEMORY_MAP_OUTPUT_CPP is true, the file is written in C++
+ *     format. If false, it is written in 6809 assembly language format.
  *
- * In both cases, the memory map is displayed in a formatted manner,
- * with each device's name and base address displayed, followed by the
- * register names and addresses for each device.
+ *     The file is written to the location specified by
+ *     MEMORY_MAP_OUTPUT_FILE_HPP or MEMORY_MAP_OUTPUT_FILE_ASM
+ *     depending on the setting of MEMORY_MAP_OUTPUT_CPP.
+ *
+ *     The format of the file is as follows:
+ *
+ *     C++ Format:
+ *          enum MEMMAP {
+ *              // START: Device Name
+ *              DEVICE_NAME = 0xDevice_Base_Address,
+ *              // START: Register Name
+ *              REGISTER_NAME = 0xRegister_Address,
+ *              // END: Register Name
+ *              // END: Device Name
+ *          };
+ *
+ *     6809 Assembly Language Format:
+ *          ; START: Device Name
+ *          DEVICE_NAME equ 0xDevice_Base_Address
+ *          ; START: Register Name
+ *          REGISTER_NAME equ 0xRegister_Address
+ *          ; END: Register Name
+ *          ; END: Device Name
  */
-void Memory::Display_Nodes() 
+void Memory::Generate_Memory_Map() 
 {
     // 
-    // Display C++ memory_map.hpp
+    // Display C++ Memory_Map.hpp
     //
-    if (MEMORY_MAP_OUTPUT_CPP == true)
-    {
+
+    { // Generate C++ Memory_Map.hpp
         constexpr int FIRST_TAB = 4;
         constexpr int VAR_LEN = 22;
         constexpr int COMMENT_START = 32;
 
-        std::cout << "\n\n// memory_map.hpp\n";
-        std::cout << "#ifndef __MEMORY_MAP_HPP__\n";
-        std::cout << "#define __MEMORY_MAP_HPP__\n";
-
-        std::cout << std::endl;
-        std::cout << "enum MEMMAP\n";
-        std::cout << "{\n";
-        std::cout << clr::pad(" ",FIRST_TAB) << "//  **********************************************\n";
-        std::cout << clr::pad(" ",FIRST_TAB) << "//  * Allocated 64k Memory Mapped System Symbols *\n";
-        std::cout << clr::pad(" ",FIRST_TAB) << "//  **********************************************\n";
-
-        for (auto &node : Memory::_memory_nodes) 
+        std::ofstream fout(MEMORY_MAP_OUTPUT_FILE_HPP);
+        if (fout.is_open())
         {
-            std::cout << std::endl;
-                std::cout << clr::pad(clr::pad(" ",FIRST_TAB) + clr::pad(node->name(), VAR_LEN) + "= 0x" + clr::hex(node->base(),4)+",", COMMENT_START+4) << "// START: " << node->heading << std::endl;
-
-            for (auto &r : node->mapped_register)
+            fout << "\n\n// memory_map.hpp\n";
+            fout << "#ifndef __MEMORY_MAP_HPP__\n";
+            fout << "#define __MEMORY_MAP_HPP__\n";
+            fout << std::endl;
+            fout << "enum MEMMAP\n";
+            fout << "{\n";
+            fout << clr::pad(" ",FIRST_TAB) << "//  **********************************************\n";
+            fout << clr::pad(" ",FIRST_TAB) << "//  * Allocated 64k Memory Mapped System Symbols *\n";
+            fout << clr::pad(" ",FIRST_TAB) << "//  **********************************************\n";
+            for (auto &node : Memory::_memory_nodes) 
             {
-                std::string _out = clr::pad(clr::pad(r.name, VAR_LEN) + "= 0x" + clr::hex(r.address, 4) +",", COMMENT_START);
-                for (auto &c : r.comment)
+                fout << std::endl;
+                fout << clr::pad(clr::pad(" ",FIRST_TAB) + clr::pad(node->name(), VAR_LEN) + "= 0x" + clr::hex(node->base(),4)+",", COMMENT_START+4) << "// START: " << node->heading << std::endl;
+                for (auto &r : node->mapped_register)
                 {
-                    if (_out.length() > 0) { 
-                        std::cout << clr::pad(" ",FIRST_TAB) << _out << "// " << c << std::endl;   
-                        _out = "";                  
-                    } else {
-                        std::cout << clr::pad(" ",FIRST_TAB) << clr::pad(" ", COMMENT_START) << "// " << c << std::endl;
+                    std::string _out = clr::pad(clr::pad(r.name, VAR_LEN) + "= 0x" + clr::hex(r.address, 4) +",", COMMENT_START);
+                    for (auto &c : r.comment)
+                    {
+                        if (_out.length() > 0) { 
+                            fout << clr::pad(" ",FIRST_TAB) << _out << "// " << c << std::endl;   
+                            _out = "";                  
+                        } else {
+                            fout << clr::pad(" ",FIRST_TAB) << clr::pad(" ", COMMENT_START) << "// " << c << std::endl;
+                        }
                     }
                 }
             }
+            fout << clr::pad(" ",FIRST_TAB) << "MEMMAP_END\n";
+            fout << "}; // END: enum MEMMAP\n";
+            fout << "\n\n#endif // __MEMORY_MAP_H__\n\n\n";
+            fout.close();
+        } else {
+            Bus::Error("Unable to open mem_test.hpp", __FILE__, __LINE__);
         }
-        std::cout << clr::pad(" ",FIRST_TAB) << "MEMMAP_END\n";
-        std::cout << "}; // END: enum MEMMAP\n";
-        std::cout << "\n\n#endif // __MEMORY_MAP_H__\n\n\n";
-    } // END MEMORY_MAP_OUTPUT_CPP
-    else
-    { // Display an ASM memory_map.asm
+        // output that text file
+        std::ifstream fin(MEMORY_MAP_OUTPUT_FILE_HPP);
+        if (fin.is_open())
+        {
+            std::string line;
+            while (std::getline(fin, line))
+            {
+                std::cout << line << std::endl;
+            }
+            fin.close();
+        } else {
+            Bus::Error("Unable to open mem_test.hpp", __FILE__, __LINE__);
+        }
+    } // END: Generate C++ Memory_Map.hpp
+    
+    
+    { // Generate Assembly Memory_Map.asm
         constexpr int FIRST_TAB = 0;
-        constexpr int VAR_LEN = 18;
-        constexpr int COMMENT_START = 32;
-        std::cout << "\n\n;    memory_map.asm\n;\n";
-
-        std::cout << clr::pad("",FIRST_TAB) << ";   **********************************************\n";
-        std::cout << clr::pad("",FIRST_TAB) << ";   * Allocated 64k Memory Mapped System Symbols *\n";
-        std::cout << clr::pad("",FIRST_TAB) << ";   **********************************************\n;\n";
-
-        for (auto &node : Memory::_memory_nodes) 
+        constexpr int VAR_LEN = 22;
+        constexpr int COMMENT_START = 38;
+        std::ofstream fout(MEMORY_MAP_OUTPUT_FILE_ASM);
+        if (fout.is_open())
         {
-             std::cout << std::endl;
-            std::cout << clr::pad(clr::pad("",FIRST_TAB) + clr::pad(node->name(), VAR_LEN) + "equ   0x" + clr::hex(node->base(),4), COMMENT_START) << "; START: " << node->heading << std::endl;
-
-            for (auto &r : node->mapped_register)
+            fout << "\n\n;    memory_map.asm\n;\n";
+            fout << clr::pad("",FIRST_TAB) << ";   **********************************************\n";
+            fout << clr::pad("",FIRST_TAB) << ";   * Allocated 64k Memory Mapped System Symbols *\n";
+            fout << clr::pad("",FIRST_TAB) << ";   **********************************************\n;\n";
+            for (auto &node : Memory::_memory_nodes) 
             {
-                std::string _out = clr::pad(clr::pad(r.name, VAR_LEN) + "equ   0x" + clr::hex(r.address, 4), COMMENT_START);
-                for (auto &c : r.comment)
+                fout << std::endl;
+                fout << clr::pad(clr::pad("",FIRST_TAB) + clr::pad(node->name(), VAR_LEN) + "equ   0x" + clr::hex(node->base(),4), COMMENT_START) << "; START: " << node->heading << std::endl;
+                for (auto &r : node->mapped_register)
                 {
-                    if (_out.length() > 0) { 
-                        std::cout << clr::pad("",FIRST_TAB) << _out << "; " << c << std::endl;   
-                        _out = "";                  
-                    } else {
-                        std::cout << clr::pad("",FIRST_TAB) << clr::pad("", COMMENT_START) << "; " << c << std::endl;
+                    std::string _out = clr::pad(clr::pad(r.name, VAR_LEN) + "equ   0x" + clr::hex(r.address, 4), COMMENT_START);
+                    for (auto &c : r.comment)
+                    {
+                        if (_out.length() > 0) { 
+                            fout << clr::pad("",FIRST_TAB) << _out << "; " << c << std::endl;   
+                            _out = "";                  
+                        } else {
+                            fout << clr::pad("",FIRST_TAB) << clr::pad("", COMMENT_START) << "; " << c << std::endl;
+                        }
                     }
                 }
             }
+            fout << "\n\n; END of memory_map.asm definitions\n\n\n";
+            fout.close();
         }
-        std::cout << "\n\n; END of memory_map.asm definitions\n\n\n";
-    }
+        // output that text file
+        std::ifstream fin(MEMORY_MAP_OUTPUT_FILE_ASM);
+        if (fin.is_open())
+        {
+            std::string line;
+            while (std::getline(fin, line))
+            {
+                std::cout << line << std::endl;
+            }
+            fin.close();
+        } else {
+            Bus::Error("Unable to open mem_test.hpp", __FILE__, __LINE__);
+        }
+    } // END: Generate Assembly Memory_Map.asm
 }
 
 

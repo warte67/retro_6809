@@ -14,13 +14,23 @@
 #ifndef __TYPES_HPP__
 #define __TYPES_HPP__
 
-// // Generate a memory map definition file?
-constexpr bool DISPLAY_MEMORY_MAP       = true;
-constexpr bool MEMORY_MAP_OUTPUT_CPP    = true;
+// GENERATE_MEMORY_MAP: Generate a memory map definition file?
+//      true:  generate Memory_Map.hpp and use the local unordered map
+//      false: to use enums from Memory_Map.hpp
+#define GENERATE_MEMORY_MAP     true         
 
-// Tests To Perform
-// ... constexpr bool MEM_TESTS                = true;  
-
+// Create an appropriate MAP() macro
+#if GENERATE_MEMORY_MAP == true
+    // use the unordered map
+    #define MAP_IMPL(key) Memory::Map(#key)                     
+    #define MAP(key) MAP_IMPL(key)
+#else // use the enumeration
+    #include "Memory_Map.hpp"
+    #define MAP(key) key                
+#endif
+// Memory_Map output file names
+#define MEMORY_MAP_OUTPUT_FILE_HPP  "./include/Memory_Map.hpp"
+#define MEMORY_MAP_OUTPUT_FILE_ASM  "./include/Memory_Map.asm"
 
 // simple types for 8-bit archetecture 
 #ifndef Byte
@@ -38,17 +48,6 @@ constexpr bool MEMORY_MAP_OUTPUT_CPP    = true;
 #include <string>
 #include <vector>
 #include <iostream>
-
 #include "clr.hpp"
-
-#if DISPLAY_MEMORY_MAP == true  
-    #define MAP_IMPL(key) Memory::Map(#key)                     
-    #define MAP(key) MAP_IMPL(key)      // use the unordered map
-#else
-    #include "Memory_Map.hpp"
-    #define MAP(key) key                // use the enumeration
-#endif
-
-
 
 #endif  // __TYPES_HPP__

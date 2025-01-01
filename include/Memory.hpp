@@ -75,7 +75,7 @@ public:     // PUBLIC ACCESSORS
     }    
 
     static int NextAddress() { return _next_address; }
-    static void Display_Nodes();
+    static void Generate_Memory_Map();
     
     static Word Map(std::string name) { return _map[name]; }    // Map a device name to its address
     // #define MAP_IMPL(key) Memory::Map(#key)                     

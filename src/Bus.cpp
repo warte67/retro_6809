@@ -268,7 +268,7 @@ bool Bus::_onInit()
     // ######################################################################
 
     // Check the Memory_Map.hpp enumerations against the new address space
-    if (!DISPLAY_MEMORY_MAP) {
+    if (!GENERATE_MEMORY_MAP) {
         // ...
     }
 
@@ -333,7 +333,7 @@ bool Bus::_onInit()
     
 
     // Dump the memory map
-    if (DISPLAY_MEMORY_MAP)    { Memory::Display_Nodes(); }
+    if (GENERATE_MEMORY_MAP)    { Memory::Generate_Memory_Map(); }
 
     // initialize the devices
     if (_memory.OnInit() == false)
@@ -512,6 +512,7 @@ bool Bus::_onUpdate(float __na)
     //1
     //		Be sure to fetch the initial console 
     //		terminal demensions during OnInit() too.
+    //
 
     static int s_width=0, s_height=0;
     int w, h;
@@ -524,7 +525,7 @@ bool Bus::_onUpdate(float __na)
         s_height = h;
         // fire a terminal resize event from here
         // ...
-        std::cout << "Terminal Resized: W:" << std::to_string(w) << " H:" << std::to_string(h) << "\n";
+        // std::cout << "Terminal Resized: W:" << std::to_string(w) << " H:" << std::to_string(h) << "\n";
     }
     if (_memory.OnUpdate(__na) == false)
 	{

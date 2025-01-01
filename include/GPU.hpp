@@ -45,10 +45,10 @@ public: // PUBLIC ACCESSORS
 
 private: // PRIVATE MEMBERS
     // internal hardware register states:
-    Byte _gpu_enable    = 0b00000000;
-    Byte _gpu_std_mode  = 0b00000010;
-    Byte _gpu_ext_mode  = 0b00000000;
-    Byte _gpu_emu_mode  = 0b00000000;    // default: no debug
+    Byte _gpu_enable    = 0b00001000;   // enable text mode only
+    Byte _gpu_std_mode  = 0b01010110;   // 80x25 text mode
+    Byte _gpu_ext_mode  = 0b01000000;   // 640x400 monochrome bitmap
+    Byte _gpu_emu_mode  = 0b00000000;   // default: no debug
 
     Byte _change_gpu_enable(Byte data);
     Byte _change_std_mode(Byte data);
@@ -56,8 +56,8 @@ private: // PRIVATE MEMBERS
     Byte _change_emu_mode(Byte data);
 
 	// SDL stuff
-    int initial_width = 640*2;  // 1280;
-    int initial_height = 400*2; //800;
+    int initial_width = 640*2;      // 1280;
+    int initial_height = 400*2;     // 800;
 	SDL_Window* pWindow = nullptr;
 	SDL_Renderer* pRenderer = nullptr;
 	Uint32 window_flags = SDL_WINDOW_ALWAYS_ON_TOP | SDL_WINDOW_RESIZABLE;
