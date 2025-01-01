@@ -214,11 +214,14 @@ bool GPU::OnInit()
             return false;
         }
         // create the main window
-        pWindow = SDL_CreateWindow("SDL3 Retro_6809", 1280, 800, window_flags); 
+        pWindow = SDL_CreateWindow("SDL3 Retro_6809", initial_width, initial_height, window_flags); 
         SDL_ShowWindow(pWindow);
         // create the renderer
         pRenderer = SDL_CreateRenderer(pWindow, NULL);
-        SDL_SetRenderLogicalPresentation(pRenderer, 320, 200, SDL_LOGICAL_PRESENTATION_STRETCH);
+        // SDL_SetRenderLogicalPresentation(pRenderer, 320, 200, SDL_LOGICAL_PRESENTATION_STRETCH);
+        SDL_SetRenderLogicalPresentation(pRenderer, 320, 200, SDL_LOGICAL_PRESENTATION_LETTERBOX);
+
+        
     } // END OF SDL3 Initialization
 
     std::cout << clr::indent() << clr::CYAN << "GPU::OnInit() Exit" << clr::RETURN;

@@ -54,12 +54,13 @@ private: // PRIVATE MEMBERS
     Byte _change_emu_mode(Byte data);
 
 	// SDL stuff
+    int initial_width = 640*2;  // 1280;
+    int initial_height = 400*2; //800;
 	SDL_Window* pWindow = nullptr;
 	SDL_Renderer* pRenderer = nullptr;
-	// Uint32 window_flags = SDL_WINDOW_FULLSCREEN_DESKTOP;
 	Uint32 window_flags = SDL_WINDOW_ALWAYS_ON_TOP | SDL_WINDOW_RESIZABLE;
-    // Uint32 renderer_flags = SDL_RENDERER_ACCELERATED_2D | SDL_RENDERER_PRESENTVSYNC;
     Uint32 renderer_flags = SDL_RENDERER_VSYNC_ADAPTIVE;    
+    // SDL_RENDERER_VSYNC_DISABLED
 };
 
 /*** NOTES: ****************************************
@@ -72,39 +73,63 @@ private: // PRIVATE MEMBERS
     different display modes as defined in the GFX_MODE register.
 
     GPU hardware registers:
-
-    GFX_MODE          equ   0xFE00  ; (Byte) Graphics Mode
-                                    ;    - bit  7   = 0:screen is text, 
-                                    ;                 1:screen is bitmap
-                                    ;    - bit  6   = video timing: 
-                                    ;                 0=512x384, 1=640x400
-                                    ;    - bits 4-5 = horizontal overscan: 
-                                    ;                 00=1x, 01=2x, 10=4x, 11=8x
-                                    ;    - bits 2-3 = vertical overscan: 
-                                    ;                 00=1x, 01=2x, 10=4x
-                                    ;    - bits 0-1 = Color Mode: 00=2-clr, 
-                                    ;                 01=4-clr, 10=16-clr, 
-                                    ;                 11=256-clr
-
-    GFX_EMU           equ   0xFE01  ; (Byte) Emulation Flags
-                                    ;    - bit  7    = vsync: 0=off, 1=on
-                                    ;    - bit  6    = main: 0=windowed,
-                                    ;                  1=fullscreen
-                                    ;    - bit  5    = debug: 0=off, 1=on
-                                    ;    - bit  4    = debug: 0=windowed, 
-                                    ;                  1=fullscreen
-                                    ;    - bits 2-3  = Active Monitor 0-3
-                                    ;    - bits 0-1  = Debug Monitor 0-3
+GPU_ENABLE        equ   0xFE00  ; (Byte) Bitflag Enables
+                                ;    - bits 5-7 = reserved
+                                ;    - bit  4   = 0:disable ext display,
+                                ;                 1:enable ext display
+                                ;    - bit  3   = 0:disable std display,
+                                ;                 1:enable std display
+                                ;    - bit  2   = 0:disable sprites,
+                                ;                 1:enable sprites
+                                ;    - bit  1   = 0:disable tilemap,
+                                ;                 1:enable tilemap
+                                ;    - bit  0   = 0:disable mouse cursor,
+                                ;                 1:enable mouse cursor
+                                ; 
+GPU_STD_MODE      equ   0xFE01  ; (Byte) Standard Graphics Mode
+                                ;    - bit  7   = 0:screen is text, 
+                                ;                 1:screen is bitmap
+                                ;    - bit  6   = video timing: 
+                                ;                 0=512x384, 1=640x400
+                                ;    - bits 4-5 = horizontal overscan: 
+                                ;                 00=1x, 01=2x, 10=4x, 11=8x
+                                ;    - bits 2-3 = vertical overscan: 
+                                ;                 00=1x, 01=2x, 10=4x
+                                ;    - bits 0-1 = Color Mode: 00=2-clr, 
+                                ;                 01=4-clr, 10=16-clr, 
+                                ;                 11=256-clr
+                                ; 
+GPU_EXT_MODE      equ   0xFE02  ; (Byte) Extended Graphics Mode
+                                ;    - bit  7   = reserved
+                                ;    - bit  6   = video timing: 
+                                ;                 0=512x384, 1=640x400
+                                ;    - bits 4-5 = horizontal overscan: 
+                                ;                 00=1x, 01=2x, 10=4x, 11=8x
+                                ;    - bits 2-3 = vertical overscan: 
+                                ;                 00=1x, 01=2x, 10=4x
+                                ;    - bits 0-1 = Color Mode: 00=2-clr, 
+                                ;                 01=4-clr, 10=16-clr, 
+                                ;                 11=256-clr
+                                ; 
+GPU_EMULATION     equ   0xFE03  ; (Byte) Emulation Flags
+                                ;    - bit  7    = vsync: 0=off, 1=on
+                                ;    - bit  6    = main: 0=windowed,
+                                ;                  1=fullscreen
+                                ;    - bit  5    = debug: 0=off, 1=on
+                                ;    - bit  4    = debug: 0=windowed, 
+                                ;                  1=fullscreen
+                                ;    - bits 2-3  = Active Monitor 0-3
+                                ;    - bits 0-1  = Debug Monitor 0-3
                                 
-
-
-
     SDL3 Specific Notes:
 
     SDL3 Pixel Format:  SDL_PIXELFORMAT_ARGB4444
 
     see: https://wiki.libsdl.org/SDL3/SDL_PixelFormatDetails
     see: https://wiki.libsdl.org/SDL3/SDL_CreateTexture
+    see: https://wiki.libsdl.org/SDL3/SDL_SetRenderLogicalPresentation
+    see: https://wiki.libsdl.org/SDL3/SDL_ConvertEventToRenderCoordinates
+
 
     //Lock a portion of the texture for write-only pixel access.
     SDL_LockTexture(texture, NULL, &pixels, &pitch);
