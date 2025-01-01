@@ -78,8 +78,11 @@ public:     // PUBLIC ACCESSORS
     static void Display_Nodes();
     
     static Word Map(std::string name) { return _map[name]; }    // Map a device name to its address
-    #define MAP_IMPL(key) Memory::Map(#key)                     
-    #define MAP(key) MAP_IMPL(key)    
+    // #define MAP_IMPL(key) Memory::Map(#key)                     
+    // #define MAP(key) MAP_IMPL(key)    
+
+    // #define MAP(key) key    // Simply substitute the key
+ 
 
 private:
     static int _attach(IDevice* device);

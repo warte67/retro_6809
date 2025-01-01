@@ -483,6 +483,7 @@ void Memory::Display_Nodes()
         std::cout << "\n\n// memory_map.hpp\n";
         std::cout << "#ifndef __MEMORY_MAP_HPP__\n";
         std::cout << "#define __MEMORY_MAP_HPP__\n";
+
         std::cout << std::endl;
         std::cout << "enum MEMMAP\n";
         std::cout << "{\n";
@@ -493,11 +494,11 @@ void Memory::Display_Nodes()
         for (auto &node : Memory::_memory_nodes) 
         {
             std::cout << std::endl;
-            std::cout << clr::pad(clr::pad(" ",FIRST_TAB) + clr::pad(node->name(), VAR_LEN) + "= 0x" + clr::hex(node->base(),4), COMMENT_START+4) << "// START: " << node->heading << std::endl;
+                std::cout << clr::pad(clr::pad(" ",FIRST_TAB) + clr::pad(node->name(), VAR_LEN) + "= 0x" + clr::hex(node->base(),4)+",", COMMENT_START+4) << "// START: " << node->heading << std::endl;
 
             for (auto &r : node->mapped_register)
             {
-                std::string _out = clr::pad(clr::pad(r.name, VAR_LEN) + "= 0x" + clr::hex(r.address, 4), COMMENT_START);
+                std::string _out = clr::pad(clr::pad(r.name, VAR_LEN) + "= 0x" + clr::hex(r.address, 4) +",", COMMENT_START);
                 for (auto &c : r.comment)
                 {
                     if (_out.length() > 0) { 
@@ -509,6 +510,7 @@ void Memory::Display_Nodes()
                 }
             }
         }
+        std::cout << clr::pad(" ",FIRST_TAB) << "MEMMAP_END\n";
         std::cout << "}; // END: enum MEMMAP\n";
         std::cout << "\n\n#endif // __MEMORY_MAP_H__\n\n\n";
     } // END MEMORY_MAP_OUTPUT_CPP
@@ -517,7 +519,8 @@ void Memory::Display_Nodes()
         constexpr int FIRST_TAB = 0;
         constexpr int VAR_LEN = 18;
         constexpr int COMMENT_START = 32;
-        std::cout << "\n\n;    memory_map.hpp\n;\n";
+        std::cout << "\n\n;    memory_map.asm\n;\n";
+
         std::cout << clr::pad("",FIRST_TAB) << ";   **********************************************\n";
         std::cout << clr::pad("",FIRST_TAB) << ";   * Allocated 64k Memory Mapped System Symbols *\n";
         std::cout << clr::pad("",FIRST_TAB) << ";   **********************************************\n;\n";

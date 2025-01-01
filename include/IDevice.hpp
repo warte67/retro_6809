@@ -108,7 +108,7 @@ class RAM : public IDevice
         // RAM(std::string sName) { name(sName); }
         RAM(Word size) {
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN; 
-            name("RAM");
+            name("RAM_DEVICE");
             _size = size;
         }
         virtual ~RAM() {
@@ -140,7 +140,7 @@ class RAM : public IDevice
 class ROM : public IDevice
 {
     public:
-        ROM() {  name("ROM"); }
+        ROM() {  name("ROM_DEVICE"); }
         ROM(std::string sName) { name(sName); }
         virtual ~ROM() {}    
 
@@ -176,7 +176,7 @@ class RAM_64K : public IDevice
         RAM_64K(int size) {
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
             _size = size;
-            _device_name = "RAM_64K";
+            _device_name = "RAM_64K_DEVICE";
         }
         virtual ~RAM_64K() {
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
@@ -223,7 +223,7 @@ class SOFT_VECTORS : public IDevice
         SOFT_VECTORS() {
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
             // _size = size;
-            _device_name = "SOFT_VECTORS";
+            _device_name = "SOFT_VECTORS_DEVICE";
         }
         virtual ~SOFT_VECTORS() {
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
@@ -281,7 +281,7 @@ class SYSTEM_MEMORY : public IDevice
         SYSTEM_MEMORY() {
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
             // _size = size;
-            _device_name = "SYSTEM_MEMORY";
+            _device_name = "SYSTEM_MEMORY_DEVICE";
         }
         virtual ~SYSTEM_MEMORY() {
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
@@ -334,7 +334,7 @@ class VIDEO_BUFFER : public IDevice
         VIDEO_BUFFER() {
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
             // _size = size;
-            _device_name = "VIDEO_BUFFER";
+            _device_name = "VIDEO_BUFFER_DEVICE";
         }
         virtual ~VIDEO_BUFFER() {
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
@@ -409,7 +409,7 @@ class USER_MEMORY : public IDevice
         USER_MEMORY() {
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
             // _size = size;
-            _device_name = "USER_MEMORY";
+            _device_name = "USER_MEMORY_DEVICE";
         }
         virtual ~USER_MEMORY() {
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
@@ -459,7 +459,7 @@ class MEMBANK : public IDevice
         MEMBANK() {
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
             _size = 16 * 1024;
-            _device_name = "MEMBANK";
+            _device_name = "MEMBANK_DEVICE";
         }
         virtual ~MEMBANK() {
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
@@ -494,6 +494,16 @@ class MEMBANK : public IDevice
 };
 
 
+//              // device memory map description
+//              std::string heading;                    // string that describes the entire device
+//              struct register_node {
+//                  std::string name;                   // register label
+//                  Word address;                       // register starting address
+//                  std::vector<std::string> comment;   // register comments (can be multiple lines)
+//              };
+//              std::vector<register_node> mapped_register;
+
+
 /*** class KERNEL_ROM *******************************************************
  * 
  * ██╗  ██╗███████╗██████╗ ███╗   ██╗███████╗██╗             ██████╗  ██████╗ ███╗   ███╗
@@ -512,7 +522,7 @@ class KERNEL_ROM : public IDevice
         KERNEL_ROM() {
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
             _size = 16 * 1024;
-            _device_name = "KERNEL_ROM";
+            _device_name = "KERNEL_ROM_DEVICE";
         }
         virtual ~KERNEL_ROM() {
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
@@ -564,7 +574,7 @@ class HDW_REGISTERS : public IDevice
         HDW_REGISTERS() {
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
             _size = 16 * 1024;
-            _device_name = "HDW_REGISTERS";
+            _device_name = "HDW_REGISTERS_DEVICE";
         }
         virtual ~HDW_REGISTERS() {
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
@@ -605,7 +615,7 @@ class HDW_RESERVED : public IDevice
         HDW_RESERVED() {
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
             _size = 0;
-            _device_name = "HDW_RESERVED";
+            _device_name = "HDW_RESERVED_DEVICE";
         }
         virtual ~HDW_RESERVED() {
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
@@ -654,7 +664,7 @@ class ROM_VECTS : public IDevice
         ROM_VECTS() {
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
             _size = 16 * 1024;
-            _device_name = "ROM_VECTS";
+            _device_name = "ROM_VECTS_DEVICE";
         }
         virtual ~ROM_VECTS() {
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
@@ -695,13 +705,3 @@ class ROM_VECTS : public IDevice
         }  
 };
 
-
-
-//              // device memory map description
-//              std::string heading;                    // string that describes the entire device
-//              struct register_node {
-//                  std::string name;                   // register label
-//                  Word address;                       // register starting address
-//                  std::vector<std::string> comment;   // register comments (can be multiple lines)
-//              };
-//              std::vector<register_node> mapped_register;

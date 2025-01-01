@@ -45,10 +45,12 @@ public: // PUBLIC ACCESSORS
 
 private: // PRIVATE MEMBERS
     // internal hardware register states:
-    Byte _gpu_std_mode = 0b00000010;
-    Byte _gpu_ext_mode = 0b00000000;
-    Byte _gpu_emu_mode = 0b00000000;    // default: no debug
+    Byte _gpu_enable    = 0b00000000;
+    Byte _gpu_std_mode  = 0b00000010;
+    Byte _gpu_ext_mode  = 0b00000000;
+    Byte _gpu_emu_mode  = 0b00000000;    // default: no debug
 
+    Byte _change_gpu_enable(Byte data);
     Byte _change_std_mode(Byte data);
     Byte _change_ext_mode(Byte data);
     Byte _change_emu_mode(Byte data);

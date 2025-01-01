@@ -267,6 +267,11 @@ bool Bus::_onInit()
     // #       so they will be responsible for doing their own tests.       #
     // ######################################################################
 
+    // Check the Memory_Map.hpp enumerations against the new address space
+    if (!DISPLAY_MEMORY_MAP) {
+        // ...
+    }
+
     // Engage Basic Memory Tests
     int upper_bounds = 0xB000;  // Memory::NextAddress();  
     std::cout << clr::indent_push() << clr::YELLOW << "Testing Addresses $0000-$" << clr::hex(upper_bounds-1,4) << " ... ";
@@ -328,7 +333,7 @@ bool Bus::_onInit()
     
 
     // Dump the memory map
-    if (DUMP_MEMORY_MAP)    { Memory::Display_Nodes(); }
+    if (DISPLAY_MEMORY_MAP)    { Memory::Display_Nodes(); }
 
     // initialize the devices
     if (_memory.OnInit() == false)

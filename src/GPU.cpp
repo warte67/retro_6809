@@ -43,9 +43,10 @@ Byte GPU::OnRead(Word offset)
     Byte data = IDevice::OnRead(offset);    // use this for other devices
     // std::cout << clr::indent() << clr::CYAN << "GPU::OnRead($"<< clr::hex(offset,4) << ") = $" << clr::hex(data,2) << "\n" << clr::RESET;
 
-    if (offset == MAP(GPU_STD_MODE))    { data = _gpu_std_mode; }
-    if (offset == MAP(GPU_EXT_MODE))    { data = _gpu_ext_mode; }
-    if (offset == MAP(GPU_EMULATION))   { data = _gpu_emu_mode; }
+    if (offset == MAP(GPU_ENABLE))           { data = _gpu_enable;   }
+    else if (offset == MAP(GPU_STD_MODE))    { data = _gpu_std_mode; }
+    else if (offset == MAP(GPU_EXT_MODE))    { data = _gpu_ext_mode; }
+    else if (offset == MAP(GPU_EMULATION))   { data = _gpu_emu_mode; }
 
     return data;
 } // END: GPU::OnRead()
@@ -66,18 +67,11 @@ Byte GPU::OnRead(Word offset)
 void GPU::OnWrite(Word offset, Byte data) 
 { 
     // std::cout << clr::indent() << clr::CYAN << "GPU::OnWrite($" << clr::hex(offset,4) << ", $" << clr::hex(data,2) << ")\n" << clr::RESET;
-    if (offset == MAP(GPU_STD_MODE))    
-    { 
-        data = _gpu_std_mode = _change_std_mode(data);
-    }
-    if (offset == MAP(GPU_EXT_MODE))    
-    { 
-        data = _gpu_ext_mode = _change_ext_mode(data);
-    }
-    if (offset == MAP(GPU_EMULATION))     
-    {
-        data = _gpu_emu_mode = _change_emu_mode(data);
-    }
+
+    if (offset == MAP(GPU_ENABLE))          { data = _change_gpu_enable(data); } 
+    else if (offset == MAP(GPU_STD_MODE))   { data = _change_std_mode(data);   }  
+    else if (offset == MAP(GPU_EXT_MODE))   { data = _change_ext_mode(data);   }
+    else if (offset == MAP(GPU_EMULATION))  { data = _change_emu_mode(data);   }
 
     IDevice::OnWrite( offset, data);
 } // END: GPU::OnWrite()
@@ -93,7 +87,7 @@ void GPU::OnWrite(Word offset, Byte data)
 GPU::GPU() 
 { 
     std::cout << clr::indent_push() << clr::CYAN << "GPU Created" << clr::RETURN;
-    _device_name = "GPU"; 
+    _device_name = "GPU_DEVICE"; 
 } // END: GPU()
 
 GPU::~GPU() 
@@ -423,7 +417,40 @@ bool GPU::OnRender()
 }
 
 
+/**
+ * Updates the GPU enable state based on the provided mode byte.
+ * The mode byte is structured as follows:
+ *   - Bit 4: Enable extended display (0 = disable, 1 = enable)
+ *   - Bit 3: Enable standard display (0 = disable, 1 = enable)
+ *   - Bit 2: Enable sprites (0 = disable, 1 = enable)
+ *   - Bit 1: Enable tilemap (0 = disable, 1 = enable)
+ *   - Bit 0: Enable mouse cursor (0 = disable, 1 = enable)
+ *
+ * @param data The mode byte representing the desired GPU enable state.
+ * @return The updated enable state configuration.
+ */
+Byte GPU::_change_gpu_enable(Byte data)
+{
+    // bit 4 = enable extended display
+    // ... 
 
+    // bit 3 = enable standard display
+    // ...
+
+    // bit 2 = enable sprites
+    // ...
+
+    // bit 1 = enable tilemap
+    // ...  
+
+    // bit 0 = enable mouse cursor
+    // ...
+
+    // save the new enable state
+    _gpu_enable = data;
+    
+    return data;
+}
 
 /**
  * Updates the standard graphics mode of the GPU based on GPU_STD_MODE.
@@ -439,8 +466,6 @@ bool GPU::OnRender()
  */
 Byte GPU::_change_std_mode(Byte mode) 
 { 
-    if (mode)  {;}     // stop the compiler from complaining
-
     // Byte data = _gpu_std_mode;
     Byte data = mode;
 
@@ -458,6 +483,9 @@ Byte GPU::_change_std_mode(Byte mode)
 
     // bits 0-1 = Color Mode: 00=2-clr, 01=4-clr, 10=16-clr, 11=256-clr 
     // ...
+
+    // save the new standard mode
+    _gpu_std_mode = data;
 
     return data; 
 }
@@ -477,8 +505,6 @@ Byte GPU::_change_std_mode(Byte mode)
  */
 Byte GPU::_change_ext_mode(Byte mode) 
 { 
-    if (mode)  {;}     // stop the compiler from complaining
-
     // Byte data = _gpu_ext_mode;
     Byte data = mode;
 
@@ -496,6 +522,9 @@ Byte GPU::_change_ext_mode(Byte mode)
 
     // bits 0-1 = Color Mode: 00=2-clr, 01=4-clr, 10=16-clr, 11=256-clr 
     // ...
+
+    // save the new extended mode
+    _gpu_ext_mode = data;   
     
     return data; 
 }
@@ -517,8 +546,6 @@ Byte GPU::_change_ext_mode(Byte mode)
  */
 Byte GPU::_change_emu_mode(Byte mode) 
 { 
-    if (mode)  {;}     // stop the compiler from complaining
-
     // Byte data = _gpu_emu_mode;
     Byte data = mode;
 
@@ -539,6 +566,9 @@ Byte GPU::_change_emu_mode(Byte mode)
 
     // bits 0-1: Debug Monitor 0-3
     // ...  
+
+    // save the new emulation mode
+    _gpu_emu_mode = data;
 
     return data; 
 }    

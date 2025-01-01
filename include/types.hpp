@@ -15,8 +15,8 @@
 #define __TYPES_HPP__
 
 // // Generate a memory map definition file?
-constexpr bool DUMP_MEMORY_MAP          = true;
-constexpr bool MEMORY_MAP_OUTPUT_CPP    = false;
+constexpr bool DISPLAY_MEMORY_MAP       = true;
+constexpr bool MEMORY_MAP_OUTPUT_CPP    = true;
 
 // Tests To Perform
 // ... constexpr bool MEM_TESTS                = true;  
@@ -41,7 +41,13 @@ constexpr bool MEMORY_MAP_OUTPUT_CPP    = false;
 
 #include "clr.hpp"
 
-
+#if DISPLAY_MEMORY_MAP == true  
+    #define MAP_IMPL(key) Memory::Map(#key)                     
+    #define MAP(key) MAP_IMPL(key)      // use the unordered map
+#else
+    #include "Memory_Map.hpp"
+    #define MAP(key) key                // use the enumeration
+#endif
 
 
 
