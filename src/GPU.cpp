@@ -444,6 +444,17 @@ bool GPU::OnUpdate(float fElapsedTime)
     //std::cout << clr::indent() << clr::CYAN << "GPU::OnUpdate() Entry" << clr::RETURN;
     if (fElapsedTime==0.0f) { ; } // stop the compiler from complaining
 
+    static float deltaTime = fElapsedTime;
+    static float runningTime = fElapsedTime;
+    if (runningTime > deltaTime + 0.1f) {
+        deltaTime = fElapsedTime;
+        runningTime = fElapsedTime;
+        SDL_SetWindowTitle(pWindow, Bus::GetTitle().c_str());
+        // std::cout << "FPS: " << Bus::FPS() << std::endl;
+    }
+    runningTime += fElapsedTime;
+    // std::cout << fElapsedTime << std::endl;
+
     if (false)
     { // TESTING:  Something to look at while running these tests...
         SDL_SetRenderTarget(pRenderer, NULL);
@@ -491,17 +502,19 @@ bool GPU::OnUpdate(float fElapsedTime)
                 for (int h=0; h<8; h++) {
                     int x = h + (ch*8); 
                     int bit = 1 << (7-h);
+                    Word a = 4;
                     Word r = 0;
                     Word g = 0;
                     Word b = 0;
                     Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));
                     if (font8x8_system[glyph][y] & bit) {
+                        a = 4;
                         r = 15;
                         g = 15;
                         b = 15;
-                        *dst = ( 0xf000 | (r<<8) | (g<<4) | (b) );
+                        *dst = ( (a<<12) | (r<<8) | (g<<4) | (b) );
                     }
-                    // *dst = ( 0xf000 | (r<<8) | (g<<4) | (b) );
+                    *dst = ( (a<<12) | (r<<8) | (g<<4) | (b) );
                 }  
             }
             ch++; 

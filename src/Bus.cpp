@@ -9,6 +9,8 @@
  *                                      |_|     |_|      
  ******************/
 
+#include <chrono>
+#include <deque>
 #include "Bus.hpp"
 #include "clr.hpp"
 #include "GPU.hpp"
@@ -504,16 +506,57 @@ bool Bus::_onUpdate(float __na)
 {
     // stop the unused argument warning
     if (__na == 0.0f) { ; }
+
     // std::cout << "Bus::_onUpdate()\n";
+
+    // handle timing
+    static std::chrono::time_point<std::chrono::system_clock> tp1 = std::chrono::system_clock::now();
+    static std::chrono::time_point<std::chrono::system_clock> tp2 = std::chrono::system_clock::now();    
+    tp2 = std::chrono::system_clock::now();
+    std::chrono::duration<float> elapsedTime = tp2 - tp1;
+    tp1 = tp2;
+    // Our time per frame coefficient
+    float fElapsedTime = elapsedTime.count();
+    // count frames per second
+    static int frame_count = 0;
+    static float frame_acc = fElapsedTime;
+    frame_count++;
+    frame_acc += fElapsedTime;    
+    if (frame_acc > 0.25f + fElapsedTime)
+    {
+        static std::deque<float> fps_queue;
+        frame_acc -= 0.25f;
+		// _fps = frame_count * 4;
+
+        // get an FPS average over the last several iterations
+        float f = frame_count * 4;
+        fps_queue.push_back(f);
+        if (fps_queue.size()>10)
+            fps_queue.pop_front();
+        float total = 0.0f;
+        for (auto &e : fps_queue)
+            total += e;
+        _fps = total / (float)fps_queue.size();
+        // reset the frame count
+		frame_count = 0;
+        // generate a string for reporting
+        _s_title = "Retro 6809";
+		_s_title += "  FPS: ";		
+		_s_title += std::to_string((int)_fps);
+
+        // _sys_cpu_speed = (int)(1.0f / (s_avg_cpu_cycle_time / 1000000.0f));
+        // sTitle += "   CPU_SPEED: " + std::to_string(_sys_cpu_speed) + " khz.";
+    }    
+
+
 
     // NOTE: This might be a good place to monitor the
     // 		terminal dimensions. Perhaps a new event
     //		can be triggered from here.
-    //1
+    //
     //		Be sure to fetch the initial console 
     //		terminal demensions during OnInit() too.
     //
-
     static int s_width=0, s_height=0;
     int w, h;
     clr::get_terminal_size(w, h);       // getmaxyx(stdscr,h,w);
@@ -527,7 +570,7 @@ bool Bus::_onUpdate(float __na)
         // ...
         // std::cout << "Terminal Resized: W:" << std::to_string(w) << " H:" << std::to_string(h) << "\n";
     }
-    if (_memory.OnUpdate(__na) == false)
+    if (_memory.OnUpdate(fElapsedTime) == false)
 	{
 		Bus::Error("Device Update Failure!", __FILE__, __LINE__);
         return false;

@@ -72,6 +72,8 @@ public: // PUBLIC METHODS
     static void Error(std::string err_msg, std::string file=__FILE__, int line=__LINE__);
     #define ERROR(msg) Bus::Error(#msg, __FILE__, __LINE__)
 
+    static float FPS() { return _fps; }
+    static std::string GetTitle() { return _s_title; }
 
 private: // INTERNAL PRIVATES
 	bool _bWasInit = false;
@@ -84,5 +86,9 @@ private: // INTERNAL PRIVATES
 
     // static Memory Management Device:
     Memory& _memory = Memory::GetInstance();   
+
+    // frames per second
+    inline static float _fps;
+    inline static std::string _s_title;
 
 };

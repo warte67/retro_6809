@@ -184,6 +184,7 @@ bool Memory::OnUpdate(float fElapsedTime)
 			ret = false;
         }
     }
+    return true;
 	return ret;
 }
 
