@@ -8,19 +8,17 @@ project(${PROJECT_NAME})
 # FIND THE SDL STUFF
 find_package(SDL3 REQUIRED)
 
-# SOURCE FILES
-add_executable(${PROJECT_NAME}
-    ./src/main.cpp
-    ./src/IDevice.cpp
-    ./src/Bus.cpp
-    ./src/GPU.cpp
-    ./src/Memory.cpp
-)
+# GLOB ALL SOURCE FILES FROM THE ./src FOLDER
+file(GLOB SRC_FILES ./src/*.cpp)
+
+# ADD EXECUTABLE
+add_executable(${PROJECT_NAME} ${SRC_FILES})
 
 # INCLUDE DIRECTORIES
 include_directories(
     ${SDL3_INCLUDE_DIR}
-    ./include)
+    ./include
+)
 
 # LINK LIBRARIES
 target_link_libraries(

@@ -943,7 +943,4 @@ Byte GPU::_change_emu_mode(Byte data)
     return data; 
 }    
 
-
-
-
 // END: Gfx.cpp
