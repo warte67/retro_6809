@@ -201,7 +201,7 @@ int  GPU::OnAttach(int nextAddr)
     _size = nextAddr - old_address;
     std::cout << clr::indent() << clr::CYAN << "GPU::OnAttach() Exit" << clr::RETURN;
     return _size;   // return the size of the allocation
-}
+} // END: GPU::OnAttach()
 
 
 /*****************************************************************
@@ -233,15 +233,24 @@ bool GPU::OnInit()
         
     } // END OF SDL3 Initialization
 
+    // Build The Color Palette
+    _build_palette();
+
     // initialize the default values
     _change_gpu_enable(_gpu_enable);
     _change_std_mode(_gpu_std_mode);
     _change_ext_mode(_gpu_ext_mode);    
     _change_emu_mode(_gpu_emu_mode);
 
+    // Reserve 64k for the extended video buffer
+    int bfr_size = 64*1024;
+    _ext_video_buffer.reserve(bfr_size);
+    
+    for (int i=0; i<bfr_size; i++) _ext_video_buffer[i] = rand() % 256; // fill with random data
+
     std::cout << clr::indent() << clr::CYAN << "GPU::OnInit() Exit" << clr::RETURN;
     return true;
-}
+} // END: GPU::OnInit()
 
 
 /******************************************************************
@@ -275,7 +284,7 @@ bool GPU::OnQuit()
 
     std::cout << clr::indent() << clr::CYAN << "GPU::OnQuit() Exit" << clr::RETURN;
     return true;
-}
+} // END: GPU::OnQuit()
 
 
 /******************************************************************
@@ -317,7 +326,7 @@ bool GPU::OnActivate()
 
     std::cout << clr::indent() << clr::CYAN << "GPU::OnActivate() Exit" << clr::RETURN;
     return true;
-}
+} // END: GPU::OnActivate()
 
 
 /******************************************************************
@@ -356,7 +365,7 @@ bool GPU::OnDeactivate()
     
     std::cout << clr::indent() << clr::CYAN << "GPU::OnDeactivate() Exit" << clr::RETURN;
     return true;
-}
+} // END: GPU::OnDeactivate()
 
 
 /********************************************************************
@@ -371,7 +380,6 @@ bool GPU::OnDeactivate()
  *
  * @return True if the event was handled successfully, false otherwise.
  ********************************************************************/
-
 bool GPU::OnEvent(SDL_Event* evnt)
 {
     //std::cout << clr::indent() << clr::CYAN << "GPU::OnEvent() Entry" << clr::RETURN;
@@ -403,6 +411,30 @@ bool GPU::OnEvent(SDL_Event* evnt)
                 Memory::Write(MAP(GPU_EMULATION), data);
             } // END: if (evnt->key.key == SDLK_F)
 
+            // [E] Extended Display Enable Toggle
+            if (evnt->key.key == SDLK_E)
+            {
+                Byte data = Memory::Read( MAP(GPU_ENABLE) );
+                if (data & 0b00000100) {
+                    data &= 0b11111011;
+                } else {
+                    data |= 0b00000100;
+                }
+                Memory::Write(MAP(GPU_ENABLE), data);
+            }
+            // [S] Standard Display Enable Toggle
+            if (evnt->key.key == SDLK_S)
+            {
+                Byte data = Memory::Read( MAP(GPU_ENABLE) );
+                if (data & 0b00001000) {
+                    data &= 0b11110111;
+                } else {
+                    data |= 0b00001000;
+                }
+                Memory::Write(MAP(GPU_ENABLE), data);
+            }
+
+            // active monitor [1-4]
             if (evnt->key.key == SDLK_1)
             {
                 Byte data = Memory::Read( MAP(GPU_EMULATION) );
@@ -453,7 +485,7 @@ bool GPU::OnEvent(SDL_Event* evnt)
 
     //std::cout << clr::indent() << clr::CYAN << "GPU::OnEvent() Exit" << clr::RETURN;
     return true;
-}
+} // END: GPU::OnEvent()
 
 
 /****************************************************************
@@ -476,96 +508,44 @@ bool GPU::OnUpdate(float fElapsedTime)
 
     static float deltaTime = fElapsedTime;
     static float runningTime = fElapsedTime;
-    if (runningTime > deltaTime + 0.1f) {
+    if (runningTime > deltaTime + 0.01f) {
         deltaTime = fElapsedTime;
         runningTime = fElapsedTime;
         SDL_SetWindowTitle(pWindow, Bus::GetTitle().c_str());
         // std::cout << "FPS: " << Bus::FPS() << std::endl;
+
+        int bfr_size = 64*1024;
+        static Byte c = 0;
+        for (int i=0; i<bfr_size; i++) { _ext_video_buffer[i] = c++; } 
+        c++;
+
     }
     runningTime += fElapsedTime;
     // std::cout << fElapsedTime << std::endl;
 
-    if (false)
-    { // TESTING:  Something to look at while running these tests...
-        SDL_SetRenderTarget(pRenderer, NULL);
-        static Uint16 r=0;
-        static Uint16 g=0;
-        static Uint16 b=0;
-        Uint16 a=255;
-        SDL_SetRenderDrawColor(pRenderer, (Uint8)r, (Uint8)g, (Uint8)b, (Uint8)a);
-        Uint16 t=4;
-        b+=t;
-        if (b>255) {  b=0; g+=t;  }
-        if (g>255) {  g=0; r+=t;  }
-        if (r>255) {  r=0; b+=t;  }
-        SDL_RenderClear(pRenderer);
-    } // END TESTING ...
 
     Word *pixels;
     int pitch;
+    
+    // is extended graphics enabled?
+    if (Memory::Read(GPU_ENABLE) & 0b00000100)
+    {
+        // int bfr_size = 64*1024;
+        // static Byte c = 0;
+        // for (int i=0; i<bfr_size; i++) { _ext_video_buffer[i] = c++; } 
+        // c++;
 
-    if (true)
-    { // Fill the Extended Display with some stuff
-        SDL_LockTexture(pExt_Texture, NULL, (void **)&pixels, &pitch); // Lock the texture for write accesspExt_Texture
-        for (int y=0; y< (int)_ext_height; y++) {
-            static Word r=0;
-            static Word g=0;
-            static Word b=0;
-            Word a=15;
-
-            for (int x=0; x<(int)_ext_width; x++) {
-                Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));
-                *dst = ( (a<<12) | (r<<8) | (g<<4) | (b) );
-            }
-
-            if (false)
-            {
-                Word level=6;
-                Word t=1;
-                b+=t;
-                if (b>level) {  b=0; g+=t;  }
-                if (g>level) {  g=0; r+=t;  }
-                if (r>level) {  r=0; b+=t;  }
-            }
-            else
-            {
-                Word level=12; //24;
-                static Byte mode = 0;
-                static Sint32 dr = 1;
-                static Sint32 dg = 1;
-                static Sint32 db = 1;
-                switch (mode) {
-                    case 0:
-                        r+=dr;
-                        if (r>level) { mode = 1; dr=-1; }
-                        break;
-                    case 1:
-                        r+=dr;
-                        if (r==0) { mode = 2; dr=1; }
-                        break;
-                    case 2:
-                        g+=dg;
-                        if (g>level) { mode = 3; dg=-1; }
-                        break;
-                    case 3:
-                        g+=dg;
-                        if (g==0) { mode = 4; dg=1; }
-                        break;
-                    case 4:
-                        b+=db;
-                        if (b>level) { mode = 5; db=-1; }
-                        break;
-                    case 5:
-                        b+=db;
-                        if (b==0) { mode = 0; db=1; }
-                        break;
-                }
-            }
-        }
-        SDL_UnlockTexture(pExt_Texture);
+        _render_extended_graphics();       
     }
 
-    if (true)
+    // // is standard graphics enabled?
+    // if (Memory::Read(GPU_ENABLE) & 0b00001000)
+    // {
+    //     _render_standard_graphics();
+    // }
+
+    if (Memory::Read(GPU_ENABLE) & 0b00001000)
+    // if (false)
     { // Fill the Standard Display with Some Text
         SDL_LockTexture(pStd_Texture, NULL, (void **)&pixels, &pitch); // Lock the texture for write accesspExt_Texture
         // Byte glyph = '@';
@@ -597,10 +577,9 @@ bool GPU::OnUpdate(float fElapsedTime)
         }
         SDL_UnlockTexture(pStd_Texture);
     }
-
     //std::cout << clr::indent() << clr::CYAN << "GPU::OnUpdate() Exit" << clr::RETURN;
     return true;
-}
+} // END: GPU::OnUpdate()
 
 
 /*************************************************************************
@@ -617,18 +596,26 @@ bool GPU::OnRender()
     //std::cout << clr::indent() << clr::CYAN << "GPU::OnRender() Entry" << clr::RETURN;
     // SDL_FRect r{0.0f, 0.0f, _screen_width, _screen_height};
 
-    // SDL_SetRenderVSync(pRenderer, SDL_RENDERER_VSYNC_DISABLED); // VSYNC OFF
-    // SDL_SetRenderVSync(pRenderer, SDL_RENDERER_VSYNC_ADAPTIVE); // VSYNC ON
-
+    // clear the primary texture
     SDL_SetRenderTarget(pRenderer, pMain_Texture);
+    SDL_SetRenderDrawColor(pRenderer, 0x00, 0x00, 0x00, 0xFF);
+    SDL_RenderClear(pRenderer);
 
-    // SDL_SetTextureScaleMode(pExt_Texture, SDL_SCALEMODE_LINEAR);   // blurry
-    SDL_SetTextureScaleMode(pExt_Texture, SDL_SCALEMODE_NEAREST);     // clear
-    SDL_RenderTexture(pRenderer, pExt_Texture, NULL, NULL);
+    // render Extended Graphics
+    if (Memory::Read(GPU_ENABLE) & 0b00000100)
+    {
+        // SDL_SetTextureScaleMode(pExt_Texture, SDL_SCALEMODE_LINEAR);   // blurry
+        SDL_SetTextureScaleMode(pExt_Texture, SDL_SCALEMODE_NEAREST);     // clear
+        SDL_RenderTexture(pRenderer, pExt_Texture, NULL, NULL);
+    }
 
-    // SDL_SetTextureScaleMode(pStd_Texture, SDL_SCALEMODE_LINEAR);   // blurry
-    SDL_SetTextureScaleMode(pStd_Texture, SDL_SCALEMODE_NEAREST);     // clear
-    SDL_RenderTexture(pRenderer, pStd_Texture, NULL, NULL);
+    // render Standard Graphics
+    if (Memory::Read(GPU_ENABLE) & 0b00001000)
+    {
+        // SDL_SetTextureScaleMode(pStd_Texture, SDL_SCALEMODE_LINEAR);   // blurry
+        SDL_SetTextureScaleMode(pStd_Texture, SDL_SCALEMODE_NEAREST);     // clear
+        SDL_RenderTexture(pRenderer, pStd_Texture, NULL, NULL);
+    }
 
     // Set the render target to the window
     SDL_SetRenderTarget(pRenderer, NULL);
@@ -639,7 +626,7 @@ bool GPU::OnRender()
 
     //std::cout << clr::indent() << clr::CYAN << "GPU::OnRender() Exit" << clr::RETURN;
     return true;
-}
+} // END: GPU::OnRender()
 
 
 /**
@@ -690,7 +677,7 @@ Byte GPU::_change_gpu_enable(Byte data)
     // return with the new enable state
     _gpu_enable = data;
    return data;
-}
+} // END: GPU::_change_gpu_enable
 
 
 /**
@@ -714,7 +701,6 @@ Byte GPU::_change_gpu_enable(Byte data)
  * @param data The input byte representing the desired standard mode.
  * @return The updated standard mode if valid, otherwise the old mode.
  */
-
 Byte GPU::_change_std_mode(Byte data) 
 { 
     Byte old_data = _gpu_std_mode;
@@ -809,7 +795,7 @@ Byte GPU::_change_std_mode(Byte data)
     // return with the new standard mode
     _gpu_std_mode = data;
     return data; 
-}
+} // END: GPU::_change_std_mode()
 
 
 
@@ -914,10 +900,10 @@ Byte GPU::_change_ext_mode(Byte data)
         return old_data;
     }
 
-    // return with the new standard mode
+    // return with the new extended mode
     _gpu_ext_mode = data;
     return data; 
-}
+} // END: GPU::_change_ext_mode()
 
 
 /**
@@ -950,44 +936,396 @@ Byte GPU::_change_emu_mode(Byte data)
     } else {
         SDL_SetWindowFullscreen(pWindow, false);
     }   
+
     // bit 5: debug: 0=off, 1=on
     // ...
 
     // bit 4: debug: 0=windowed, 1=fullscreen
     // ...   
 
-    // Fetch Active Displays
-    _displays = SDL_GetDisplays(&_num_displays);
-
     // bits 2-3: Active Monitor 0-3 
-    SDL_Rect rect;
-    std::cout << "Active Displays: " << _num_displays << std::endl;
-    for (int i = 0; i < _num_displays; i++) {
-        std::cout << "Display " << i << ": " << _displays[i] << std::endl;
+    if (false) 
+    { // Wayland cannot position non-popup windows
+        // Fetch Active Displays
+        _displays = SDL_GetDisplays(&_num_displays);
+        SDL_Rect rect;
+        std::cout << "Active Displays: " << _num_displays << std::endl;
+        for (int i = 0; i < _num_displays; i++) {
+            std::cout << "Display " << i << ": " << _displays[i] << std::endl;
+            SDL_GetDisplayBounds(_displays[i], &rect);
+            std::cout << "Display " << i << " bounds: " << rect.x << ", " << rect.y << ", " << rect.w << ", " << rect.h << std::endl;
+        }
+        int i = (data & 0b0000'1100) >> 2;
+        if (i>=_num_displays)   i=_num_displays-1;
         SDL_GetDisplayBounds(_displays[i], &rect);
-        std::cout << "Display " << i << " bounds: " << rect.x << ", " << rect.y << ", " << rect.w << ", " << rect.h << std::endl;
+        if (!SDL_SetWindowPosition(pWindow, SDL_WINDOWPOS_CENTERED_DISPLAY(i), SDL_WINDOWPOS_CENTERED_DISPLAY(i))) {
+            Bus::Error(SDL_GetError(), __FILE__, __LINE__);
+        }
+        std::cout << "Active Display: " << i << "  X:" << rect.x << "  Y:" << rect.y << std::endl;
+        // clear active displays
+        SDL_free(_displays);
     }
 
-    int i = (data & 0b0000'1100) >> 2;
-    if (i>=_num_displays)   i=_num_displays-1;
-    SDL_GetDisplayBounds(_displays[i], &rect);
-    // if (!SDL_SetWindowPosition(pWindow, rect.x, rect.y)) {
-    //     Bus::Error(SDL_GetError(), __FILE__, __LINE__);
-    // }
-    SDL_SetWindowPosition(pWindow, SDL_WINDOWPOS_CENTERED_DISPLAY(i), SDL_WINDOWPOS_CENTERED_DISPLAY(i));
-
-    std::cout << "Active Display: " << i << "  X:" << rect.x << "  Y:" << rect.y << std::endl;
-
-
     // bits 0-1: Debug Monitor 0-3
-    // ...  
-
-    // clear active displays
-    SDL_free(_displays);
+    if (false)
+    { // Wayland cannot position non-popup windows 
+        // ...
+    }
 
     // return with the new emulation mode
     _gpu_emu_mode = data;
     return data; 
-}    
+} // END: GPU::_change_emu_mode()
+
+void GPU::_render_extended_graphics()
+{    
+    //    GPU_EXT_MODE          = 0xFE02, // (Byte) Extended Graphics Mode
+    int _width = _ext_width;
+    int _height = _ext_height;
+
+    //    - bit  7   = 0: screen is tiled,
+    //                 1: screen is bitmap
+    bool bIsTiled = !(Memory::Read(GPU_EXT_MODE) & 0b1000'0000) ? true : false;
+
+    //    - bits 5-6 = bitmap color depth:
+    //                 00: 2 colors,
+    //                 01: 4 colors,
+    //                 10: 16 colors, 
+    //                 11: 256 colors
+    int bpp = ((Memory::Read(GPU_EXT_MODE) & 0b0110'0000) >> 5) & 0b000'0011;
+    bpp = 1<<bpp;
+
+    //    - bits 3-4 = horizontal overscan: 
+    //                 00:H/1 (512 or 640)
+    //                 01:H/2 (256 or 320)
+    //                 10:H/3 (170 or 213)
+    //                 11:H/4 (128 or 160)
+    int dh = ((Memory::Read(GPU_EXT_MODE) & 0b0001'1000) >> 3) & 0b000'0011;
+    switch(dh) {
+        case 0: dh = 1; break;
+        case 1: dh = 2; break;
+        case 2: dh = 3; break;
+        case 3: dh = 4; break;
+    }
+
+    //    - bits 1-2 = vertical overscan: 
+    //                 00:V/1 (320 or 400)
+    //                 01:V/2 (160 or 200)
+    //                 10:V/3 (106 or 133)
+    //                 11:V/4 (80 or 100)
+    int dv = ((Memory::Read(GPU_EXT_MODE) & 0b0000'0110) >> 1) & 0b000'0011;
+    switch(dv) {
+        case 0: dv = 1; break;
+        case 1: dv = 2; break;
+        case 2: dv = 3; break;
+        case 3: dv = 4; break;
+    }
+
+    //    - bit  0   = Video Timing:
+    //                 0: H:512 x V:320
+    //                 1: H:640 x V:400
+    //                 (Overrides STD_MODE)
+    int timing = (Memory::Read(GPU_EXT_MODE) & 0b0000'0001) & 0b000'0001;
+    switch (timing) {
+        case 0: _width = 512/dh; _height = 320/dv; break;
+        case 1: _width = 640/dh; _height = 400/dv; break;
+    }
+
+    if (bIsTiled) {
+        // TODO: render tiled graphics
+        std::cout << "Displaying extended tilemap buffer" << std::endl;
+    } else {
+        // display the extended bitmap buffer
+        Word pixel_index = 0x0000;
+        void *pixels;
+        int pitch;
+        if (!SDL_LockTexture(pExt_Texture, NULL, (void **)&pixels, &pitch))
+            Bus::Error(SDL_GetError());	
+        else
+        {
+            for (int y = 0; y < _height; y++)
+            {
+                for (int x = 0; x < _width; )
+                {
+                    // 256 color mode
+                    if (bpp == 8)
+                    {
+    // printf("256-colors\n");
+                        Byte index = _ext_video_buffer[pixel_index++];
+                        _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    }
+                    // 16 color mode
+                    else if (bpp == 4)
+                    {
+    // printf("16-colors\n");
+                        Byte data = _ext_video_buffer[pixel_index++];
+                        Byte index = (data >> 4);
+                        _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                        index = (data & 0x0f);
+                        _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    }
+                    // 4 color mode
+                    else if (bpp == 2)
+                    {
+    // printf("4-colors\n");
+                        Byte data = _ext_video_buffer[pixel_index++];
+                        Byte index = (data >> 6) & 0x03;
+                        _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                        index = (data >> 4) & 0x03;
+                        _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                        index = (data >> 2) & 0x03;
+                        _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                        index = (data >> 0) & 0x03;
+                        _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    }
+                    // 2 color mode
+                    else if (bpp == 1)
+                    {
+    // printf("2-colors\n");
+                        Byte data = _ext_video_buffer[pixel_index++];
+                        Byte index = (data >> 7) & 1;
+                        _setPixel_unlocked(pixels, pitch, x++, y, index, true); 
+                        index = (data >> 6) & 1;
+                        _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                        index = (data >> 5) & 1;
+                        _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                        index = (data >> 4) & 1;
+                        _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                        index = (data >> 3) & 1;
+                        _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                        index = (data >> 2) & 1;
+                        _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                        index = (data >> 1) & 1;
+                        _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                        index = (data >> 0) & 1;
+                        _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    }
+                    // if (pixel_index > _ext_video_buffer.size())
+                    //     Bus::Error("Pixel index out of range");
+                }
+            }
+            SDL_UnlockTexture(pExt_Texture); 
+        }
+
+        
+    }
+
+
+} // END: GPU::_render_extended_graphics()
+
+void GPU::_render_standard_graphics()
+{
+    //    GPU_STD_MODE          = 0xFE01, // (Byte) Standard Graphics Mode
+
+    //    - bit  7   = 0: screen is text, 
+    //                 1: screen is bitmap
+    // ...
+
+    //    - bits 5-6 = bitmap color depth:
+    //                 00: 2 colors,
+    //                 01: 4 colors,
+    //                 10: 16 colors, 
+    //                 11: 256 colors
+    // ...
+
+    //    - bits 3-4 = horizontal overscan: 
+    //                 00:H/1 (512 or 640)
+    //                 01:H/2 (256 or 320)
+    //                 10:H/3 (170 or 213)
+    //                 11:H/4 (128 or 160)
+    // ...
+
+    //    - bits 1-2 = vertical overscan: 
+    //                 00:V/1 (320 or 400)
+    //                 01:V/2 (160 or 200)
+    //                 10:V/3 (106 or 133)
+    //                 11:V/4 (80 or 100)
+    // ...
+
+    //    - bit  0   = Video Timing:
+    //                 0: H:512 x V:320
+    //                 1: H:640 x V:400
+    //                 (Overrides EXT_MODE)
+    // ...
+
+} // END: GPU::_render_standard_graphics()
+
+/**
+ * Sets a pixel in the given surface without locking the surface.
+ *
+ * This function combines the pixel color with the color index, using the alpha channel
+ * of the color index as the alpha value for the combination. If bIgnoreAlpha is true,
+ * the alpha value is ignored and the pixel color is set to the color index if the color
+ * index is not transparent.
+ *
+ * @param pixels The surface to draw on.
+ * @param pitch The pitch of the surface.
+ * @param x The x coordinate of the pixel.
+ * @param y The y coordinate of the pixel.
+ * @param color_index The color index to use.
+ * @param bIgnoreAlpha If true, the alpha value is ignored.
+ */
+void GPU::_setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_index, bool bIgnoreAlpha)
+{
+    Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));		// because data size is two bytes 
+
+    bool cls = false;
+    if (color_index ==0 && bIgnoreAlpha)
+        cls = true;
+
+    if (!bIgnoreAlpha)
+    {       
+        // int ret = ((p1 * (256-a))) + (p2 * (a+1)) >> 8;
+        Uint16 pixel = *dst;	// 0xARGB
+		Byte r1 = (pixel & 0x0f00) >> 8;
+		Byte g1 = (pixel & 0x00f0) >> 4;
+		Byte b1 = (pixel & 0x000f) >> 0;
+		//
+        Byte a2 = alf(color_index);
+        Byte r2 = red(color_index);
+        Byte g2 = grn(color_index);
+        Byte b2 = blu(color_index);
+        // if (bIgnoreAlpha)
+        //     a2 = 15;
+		//
+        Byte r = (((r1 * (16-a2))) + (r2 * (a2+1))) >> 4;
+        Byte g = (((g1 * (16-a2))) + (g2 * (a2+1))) >> 4;
+        Byte b = (((b1 * (16-a2))) + (b2 * (a2+1))) >> 4;
+
+        if (alf(color_index) != 0) // || bIgnoreAlpha)
+        {
+            *dst = (
+                0xF000 | 
+                (r<<8) | 
+                (g<<4) | 
+                (b)
+            );          
+            // *dst = (
+            //     (a2<<12) |       // utilize the alpha channel
+            //     (r<<8) | 
+            //     (g<<4) | 
+            //     (b)
+            // );          
+		}	
+    }
+    else
+    {        
+        if (cls)
+        {
+            *dst = 0x0000;
+        }
+        else
+        {
+            *dst = 
+            (
+                0xF000 |
+                (red(color_index)<<8) |
+                (grn(color_index)<<4) |
+                 blu(color_index)
+            );    
+        }
+    }
+} // END: GPU::_setPixel_unlocked()
+
+
+/**
+ * Initializes the palette data by filling it with the following:
+ *   - CUSTOM DEFAULT COLORS (0-15)
+ *   - BGR 6x6x6 CUBE COLORS (16-232)
+ *   - GRAYSCALE RAMP (233-255)
+ *   - 100% TRANSPARENT WHITE (256)
+ *
+ * The palette is only initialized once, and subsequent calls to this
+ * method do not modify the palette.
+ */
+void GPU::_build_palette()
+{
+    // INITIALIZE PALETTE DATA
+    if (_palette.size() == 0)
+    {
+        // BASIC COLORS (0-15) CUSTOM DEFAULT COLORS
+        std::vector<PALETTE> ref = {    
+			{ 0xF000 },		// 0: black
+			{ 0xF555 },		// 1: dk gray
+			{ 0xF007 },		// 2: dk blue
+			{ 0xF600 },		// 3: dk red
+			{ 0x0140 },		// 4: dk green
+			{ 0xF840 },		// 5: brown
+			{ 0xF406 },		// 6: purple          
+			{ 0xF046 },		// 7: deep sea           	
+			{ 0xF888 },		// 8: lt gray
+			{ 0xF22F },		// 9: blue
+			{ 0xFd00 },		// A: red
+			{ 0xF4F6 },		// B: lt green
+			{ 0xFED0 },		// C: yellow
+			{ 0xF85b },		// D: Lt Purple
+			{ 0xF59f },		// E: lt sky
+			{ 0xFFFF },		// F: white
+
+        // // BASIC COLORS (0-15) STANDARD CGA COLORS
+        // std::vector<PALETTE> ref = {    
+		// 	{ 0x0000 },	// 0: DK_BLACK
+		// 	{ 0xF005 },	// 1: DK_BLUE
+		// 	{ 0xF050 },	// 2: DK_GREEN
+		// 	{ 0xF055 },	// 3: DK_CYAN
+		// 	{ 0xF500 },	// 4: DK_RED
+		// 	{ 0xF505 },	// 5: DK_MAGENTA
+		// 	{ 0xF631 },	// 6: BROWN
+		// 	{ 0xFAAA },	// 7: GRAY
+		// 	{ 0xF555 },	// 8: DK_GRAY
+		// 	{ 0xF00F },	// 9: BLUE
+		// 	{ 0xF0F0 },	// a: GREEN
+		// 	{ 0xF0FF },	// b: CYAN
+		// 	{ 0xFF00 },	// c: RED
+		// 	{ 0xFA0A },	// d: MAGENTA
+		// 	{ 0xFFF0 },	// e: YELLOW
+		// 	{ 0xFFFF },	// f: WHITE
+        };
+        for (auto &p : ref)
+        {
+			_palette.push_back(p);     
+            // printf("%3d:$%04X\n", (int)_palette.size(), p.color);
+        }
+        // BGR 6x6x6 CUBE COLORS (16-232)          
+        Byte b=0, g=0, r=0;
+        for (float fb=0.0f; fb<=256.0f; fb+=(256.0f / 5.0f))
+        {
+            b = fb;
+            if (fb == 256.0f) b=255;
+            for (float fg=0.0f; fg<=256.0f; fg+=(256.0f / 5.0f))
+            {
+                g = fg;
+                if (fg == 256.0f) g=255;
+                for (float fr=0.0f; fr<=256.0f; fr+=(256.0f / 5.0f))
+                {
+                    r = fr;
+                    if (fr == 256.0f) r=255;
+                    PALETTE ent = { 0x0000 };
+                    ent.a = 255>>4;
+                    ent.b = b>>4;
+                    ent.g = g>>4;
+                    ent.r = r>>4;
+                    _palette.push_back(ent);
+                    // printf("%3d:$%04X\n", (int)_palette.size(), ent.color);
+                }
+            }
+        }
+        // GRAYSCALE RAMP (233-255) 
+        for (float f=0.0f; f<=256.0f; f+=(256.0f / 24.0f))
+        {
+            if (f != 0.0f)
+            {
+                PALETTE ent = { 0x0000 };
+                ent.a = 255>>4;
+                ent.b = (int)f>>4;
+                ent.g = (int)f>>4;
+                ent.r = (int)f>>4;
+                _palette.push_back(ent);
+            }
+        }  
+        // Add one 100% transparent white entry to the end              
+        _palette.push_back({0x0FFF});   // (255 = 100% transparent)
+    }
+} // END::_buildPalette();
 
 // END: Gfx.cpp

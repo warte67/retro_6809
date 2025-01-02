@@ -44,6 +44,22 @@ public: // PUBLIC ACCESSORS
     SDL_Window* GetWindow() { return pWindow; }         // get the SDL window
     SDL_Renderer* GetRenderer() { return pRenderer; }   // get the SDL renderer
 
+    // palette stuff
+    union PALETTE {
+        Word color;
+        struct {
+            Uint8 b : 4;
+            Uint8 g : 4;
+            Uint8 r : 4;
+            Uint8 a : 4;
+        };
+    };
+    Uint8 red(Uint8 index) { Uint8 c = _palette[index].r;  return c; }
+    Uint8 grn(Uint8 index) { Uint8 c = _palette[index].g;  return c; }
+    Uint8 blu(Uint8 index) { Uint8 c = _palette[index].b;  return c; }
+    Uint8 alf(Uint8 index) { Uint8 c = _palette[index].a;  return c; }      
+
+    // GPU enable flags
     enum _GPU_ENABLE{
         ENABLE_STD      = 0b00001000,
         ENABLE_EXT      = 0b00000100,
@@ -53,10 +69,13 @@ public: // PUBLIC ACCESSORS
 
 private: // PRIVATE MEMBERS
     // internal hardware register states:
-    Byte _gpu_enable    = ENABLE_STD;
+    Byte _gpu_enable    = ENABLE_STD | ENABLE_EXT;
 
-    Byte _gpu_std_mode  = 0x0B;   // 0x0B = 40x25 (320x200)
-    Byte _gpu_ext_mode  = 0x8B;   // 0x8B = 320x200
+    Byte _gpu_std_mode  = 0x0A;   // 0x0A   = 32x20 (256x160)
+    Byte _gpu_ext_mode  = 0xEA;   // 0x0xEA = 256x160 x 256-colors
+
+    // Byte _gpu_std_mode  = 0x0B;   // 0x0B = 40x25 (320x200)
+    // Byte _gpu_ext_mode  = 0xEB;   // 0x0xEB = 320x200 x 256-colors
 
     // Byte _gpu_std_mode  = 0x1F;   // 0x1F = 20x12 (160x100) 
     // Byte _gpu_ext_mode  = 0xBF;   // 0xBF = 160x100
@@ -91,6 +110,10 @@ private: // PRIVATE MEMBERS
     Byte _change_std_mode(Byte data);
     Byte _change_ext_mode(Byte data);
     Byte _change_emu_mode(Byte data);
+    void _render_extended_graphics();
+    void _render_standard_graphics();
+    void _setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_index, bool bIgnoreAlpha);
+    void _build_palette();
 
 	// SDL stuff
     // int initial_width = 640*2.75;
@@ -106,6 +129,11 @@ private: // PRIVATE MEMBERS
 
 	Uint32 window_flags = SDL_WINDOW_RESIZABLE;
     Uint32 renderer_flags = SDL_RENDERER_VSYNC_DISABLED;
+
+    std::vector<PALETTE> _palette;          // color palette
+    std::vector<Byte> _ext_video_buffer;    // 64k extended video buffer
+
+
 
     int _num_displays;
     SDL_DisplayID* _displays = nullptr;
