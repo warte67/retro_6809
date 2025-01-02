@@ -71,11 +71,14 @@ private: // PRIVATE MEMBERS
     // internal hardware register states:
     Byte _gpu_enable    = ENABLE_STD | ENABLE_EXT;
 
-    Byte _gpu_std_mode  = 0x0A;   // 0x0A   = 32x20 (256x160)
-    Byte _gpu_ext_mode  = 0xEA;   // 0x0xEA = 256x160 x 256-colors
+    // Byte _gpu_std_mode  = 0x1E;   // 0x1E = 16x10 (128x80)
+    // Byte _gpu_ext_mode  = 0xFE;   // 0xFE = 128x80 x 256-colors
 
-    // Byte _gpu_std_mode  = 0x0B;   // 0x0B = 40x25 (320x200)
-    // Byte _gpu_ext_mode  = 0xEB;   // 0x0xEB = 320x200 x 256-colors
+    // Byte _gpu_std_mode  = 0x0A;   // 0x0A = 32x20 (256x160)
+    // Byte _gpu_ext_mode  = 0xEA;   // 0xEA = 256x160 x 256-colors
+
+    Byte _gpu_std_mode  = 0x0B;   // 0x0B = 40x25 (320x200)
+    Byte _gpu_ext_mode  = 0xEB;   // 0x0xEB = 320x200 x 256-colors
 
     // Byte _gpu_std_mode  = 0x1F;   // 0x1F = 20x12 (160x100) 
     // Byte _gpu_ext_mode  = 0xBF;   // 0xBF = 160x100

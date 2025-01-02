@@ -530,11 +530,6 @@ bool GPU::OnUpdate(float fElapsedTime)
     // is extended graphics enabled?
     if (Memory::Read(GPU_ENABLE) & 0b00000100)
     {
-        // int bfr_size = 64*1024;
-        // static Byte c = 0;
-        // for (int i=0; i<bfr_size; i++) { _ext_video_buffer[i] = c++; } 
-        // c++;
-
         _render_extended_graphics();       
     }
 
@@ -558,13 +553,13 @@ bool GPU::OnUpdate(float fElapsedTime)
                 for (int h=0; h<8; h++) {
                     int x = h + (ch*8); 
                     int bit = 1 << (7-h);
-                    Word a = 4;
+                    Word a = 12;
                     Word r = 0;
                     Word g = 0;
                     Word b = 0;
                     Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));
                     if (font8x8_system[glyph][y] & bit) {
-                        a = 6;
+                        a = 12;
                         r = 15;
                         g = 15;
                         b = 15;

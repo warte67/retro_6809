@@ -540,7 +540,7 @@ bool Bus::_onUpdate(float __na)
         // reset the frame count
 		frame_count = 0;
         // generate a string for reporting
-        _s_title = "Retro 6809";
+        _s_title = "R6809"; // "Retro 6809";
 		_s_title += " FPS:";		
 		_s_title += std::to_string((int)_fps);
 
