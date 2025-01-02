@@ -547,30 +547,20 @@ bool GPU::OnRender()
 
     SDL_SetRenderTarget(pRenderer, pMain_Texture);
 
-    // SDL_SetRenderDrawColor(pRenderer, 0x00, 0x00, 0x00, 0x00);
-    // SDL_RenderClear(pRenderer);
-    // // SDL_RenderRect(pRenderer, &r);
-    // // SDL_SetRenderDrawColor(pRenderer, 0x00, 0x00, 0x00, 0x00);
-    // // SDL_RenderFillRect(pRenderer, &r);
-
     // SDL_SetTextureScaleMode(pExt_Texture, SDL_SCALEMODE_LINEAR);   // blurry
-    SDL_SetTextureScaleMode(pExt_Texture, SDL_SCALEMODE_NEAREST);
+    SDL_SetTextureScaleMode(pExt_Texture, SDL_SCALEMODE_NEAREST);     // clear
     SDL_RenderTexture(pRenderer, pExt_Texture, NULL, NULL);
 
-    SDL_SetTextureScaleMode(pStd_Texture, SDL_SCALEMODE_NEAREST);        
+    // SDL_SetTextureScaleMode(pStd_Texture, SDL_SCALEMODE_LINEAR);   // blurry
+    SDL_SetTextureScaleMode(pStd_Texture, SDL_SCALEMODE_NEAREST);     // clear
     SDL_RenderTexture(pRenderer, pStd_Texture, NULL, NULL);
 
+    // Set the render target to the window
     SDL_SetRenderTarget(pRenderer, NULL);
 
     // SDL_SetTextureScaleMode(pMain_Texture, SDL_SCALEMODE_LINEAR);   // blurry
-    SDL_SetTextureScaleMode(pMain_Texture, SDL_SCALEMODE_NEAREST);        
+    SDL_SetTextureScaleMode(pMain_Texture, SDL_SCALEMODE_NEAREST);     // clear
     SDL_RenderTexture(pRenderer, pMain_Texture, NULL, NULL);
-
-
-    // SDL_SetRenderTarget(pRenderer, NULL);
-    // SDL_RenderTexture(pRenderer, pExt_Texture, NULL, NULL);
-
-
 
     //std::cout << clr::indent() << clr::CYAN << "GPU::OnRender() Exit" << clr::RETURN;
     return true;
