@@ -46,7 +46,7 @@ public: // PUBLIC ACCESSORS
 private: // PRIVATE MEMBERS
     // internal hardware register states:
     Byte _gpu_enable    = 0b00001000;   // enable text mode only
-    Byte _gpu_std_mode  = 0b01010110;   // 80x25 text mode
+    Byte _gpu_std_mode  = 0x05;         // 64x20 bg/fg text
     Byte _gpu_ext_mode  = 0b01000000;   // 640x400 monochrome bitmap
     Byte _gpu_emu_mode  = 0b00000000;   // default: no debug
 
@@ -74,55 +74,8 @@ private: // PRIVATE MEMBERS
     base pixel resolutions, and overscan modes there will be a total of 256 
     different display modes as defined in the GFX_MODE register.
 
-    GPU hardware registers:
-GPU_ENABLE        equ   0xFE00  ; (Byte) Bitflag Enables
-                                ;    - bits 5-7 = reserved
-                                ;    - bit  4   = 0:disable ext display,
-                                ;                 1:enable ext display
-                                ;    - bit  3   = 0:disable std display,
-                                ;                 1:enable std display
-                                ;    - bit  2   = 0:disable sprites,
-                                ;                 1:enable sprites
-                                ;    - bit  1   = 0:disable tilemap,
-                                ;                 1:enable tilemap
-                                ;    - bit  0   = 0:disable mouse cursor,
-                                ;                 1:enable mouse cursor
-                                ; 
-GPU_STD_MODE      equ   0xFE01  ; (Byte) Standard Graphics Mode
-                                ;    - bit  7   = 0:screen is text, 
-                                ;                 1:screen is bitmap
-                                ;    - bit  6   = video timing: 
-                                ;                 0=512x320, 1=640x400
-                                ;    - bits 4-5 = horizontal overscan: 
-                                ;                 00=1x, 01=2x, 10=4x, 11=8x
-                                ;    - bits 2-3 = vertical overscan: 
-                                ;                 00=1x, 01=2x, 10=4x
-                                ;    - bits 0-1 = Color Mode: 00=2-clr, 
-                                ;                 01=4-clr, 10=16-clr, 
-                                ;                 11=256-clr
-                                ; 
-GPU_EXT_MODE      equ   0xFE02  ; (Byte) Extended Graphics Mode
-                                ;    - bit  7   = reserved
-                                ;    - bit  6   = video timing: 
-                                ;                 0=512x320, 1=640x400
-                                ;    - bits 4-5 = horizontal overscan: 
-                                ;                 00=1x, 01=2x, 10=4x, 11=8x
-                                ;    - bits 2-3 = vertical overscan: 
-                                ;                 00=1x, 01=2x, 10=4x
-                                ;    - bits 0-1 = Color Mode: 00=2-clr, 
-                                ;                 01=4-clr, 10=16-clr, 
-                                ;                 11=256-clr
-                                ; 
-GPU_EMULATION     equ   0xFE03  ; (Byte) Emulation Flags
-                                ;    - bit  7    = vsync: 0=off, 1=on
-                                ;    - bit  6    = main: 0=windowed,
-                                ;                  1=fullscreen
-                                ;    - bit  5    = debug: 0=off, 1=on
-                                ;    - bit  4    = debug: 0=windowed, 
-                                ;                  1=fullscreen
-                                ;    - bits 2-3  = Active Monitor 0-3
-                                ;    - bits 0-1  = Debug Monitor 0-3
-                                
+
+
     SDL3 Specific Notes:
 
     SDL3 Pixel Format:  SDL_PIXELFORMAT_ARGB4444

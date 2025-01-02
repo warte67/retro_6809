@@ -1,5 +1,10 @@
 ### **Video Timing Calculations for 640x400 (Active) @ 70Hz within 640x480 Base**
 
+Both the 640x400 and 512x320 base timing modes have a 16:10 aspect ratio. This aspect ratio
+was chosen due to the 64k extended video buffer size restriction. The 16x10 aspect ratio also 
+works out well as a compromise between the 4x3 aspect ratio of the 1980's and a more 
+modern 16:9 wide screen.
+
 ## **Horizontal Timing (pixels)**:
 - Active Display: 640
 - Front Porch: 16

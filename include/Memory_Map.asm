@@ -48,50 +48,66 @@ KERNEL_TOP            equ   0xFE00    ; Top of Kernel Rom Space
 GPU_DEVICE            equ   0xFE00    ; START: GPU Device Hardware Registers
 GPU_ENABLE            equ   0xFE00    ; (Byte) Bitflag Enables
                                       ;    - bits 5-7 = reserved
-                                      ;    - bit  4   = 0:disable ext display,
-                                      ;                 1:enable ext display
-                                      ;    - bit  3   = 0:disable std display,
-                                      ;                 1:enable std display
-                                      ;    - bit  2   = 0:disable sprites,
-                                      ;                 1:enable sprites
-                                      ;    - bit  1   = 0:disable tilemap,
-                                      ;                 1:enable tilemap
-                                      ;    - bit  0   = 0:disable mouse cursor,
-                                      ;                 1:enable mouse cursor
+                                      ;    - bit  4   = 0: disable ext display,
+                                      ;                 1: enable ext display
+                                      ;    - bit  3   = 0: disable std display,
+                                      ;                 1: enable std display
+                                      ;    - bit  2   = 0: disable sprites,
+                                      ;                 1: enable sprites
+                                      ;    - bit  1   = 0: disable tilemap,
+                                      ;                 1: enable tilemap
+                                      ;    - bit  0   = 0: disable mouse cursor,
+                                      ;                 1: enable mouse cursor
                                       ; 
 GPU_STD_MODE          equ   0xFE01    ; (Byte) Standard Graphics Mode
-                                      ;    - bit  7   = 0:screen is text, 
-                                      ;                 1:screen is bitmap
+                                      ;    - bit  7   = 0: screen is text, 
+                                      ;                 1: screen is bitmap
                                       ;    - bit  6   = video timing: 
-                                      ;                 0=H:512xV:320, 1=H:640xV:400
+                                      ;                 0: H:512 x V:320
+                                      ;                 1: H:640 x V:400
                                       ;    - bits 4-5 = horizontal overscan: 
-                                      ;                 00=H/8, 01=H/4, 10=H/2, 11=H/1
+                                      ;                 00:H/1 (512 or 640)
+                                      ;                 01:H/2 (256 or 320)
+                                      ;                 10:H/3 (170 or 213)
+                                      ;                 11:H/4 (128 or 160)
                                       ;    - bits 2-3 = vertical overscan: 
-                                      ;                 00=V/8, 01=V/4, 10=V/2, 11=V/1
-                                      ;    - bits 0-1 = bitmap mode:
-                                      ;                 00=2-colors,
-                                      ;                 01=4-colors,
-                                      ;                 10=16-colors, 
-                                      ;                 11=256-clr
-                                      ;          or  
+                                      ;                 00:V/1 (320 or 400)
+                                      ;                 01:V/2 (160 or 200)
+                                      ;                 10:V/3 (106 or 133)
+                                      ;                 11:V/4 (80 or 100)
                                       ;    - bits 0-1 = text mode:
-                                      ;                 00=monochrome text
-                                      ;                 01=bg/fg + text
-                                      ;                 10=clear-bgnd 256-color text
-                                      ;                 11=color_0-bgnd 256-color text
+                                      ;                 00:monochrome text
+                                      ;                 01:bg/fg + text
+                                      ;                 10:clear-bgnd 256-color text
+                                      ;                 11:color_0-bgnd 256-color text
+                                      ;     ... or ... 
+                                      ;    - bits 0-1 = bitmap mode:
+                                      ;                 00: 2 colors,
+                                      ;                 01: 4 colors,
+                                      ;                 10: 16 colors, 
+                                      ;                 11: 256 colors
                                       ; 
 GPU_EXT_MODE          equ   0xFE02    ; (Byte) Extended Graphics Mode
-                                      ;    - bit  7   = 0:screen is tiled,
-                                      ;                 1:screen is bitmap
+                                      ;    - bit  7   = 0: screen is tiled,
+                                      ;                 1: screen is bitmap
                                       ;    - bit  6   = video timing: 
-                                      ;                 0=H:512xV:320, 1=H:640xV:400
+                                      ;                 0: H:512 x V:320
+                                      ;                 1: H:640 x V:400
                                       ;    - bits 4-5 = horizontal overscan: 
-                                      ;                 00=H/8, 01=H/4, 10=H/2, 11=H/1
+                                      ;                 00:H/1 (512 or 640)
+                                      ;                 01:H/2 (256 or 320)
+                                      ;                 10:H/3 (170 or 213)
+                                      ;                 11:H/4 (128 or 160)
                                       ;    - bits 2-3 = vertical overscan: 
-                                      ;                 00=V/8, 01=V/4, 10=V/2, 11=V/1
-                                      ;    - bits 0-1 = Color Mode: 00=2-clr, 
-                                      ;                 01=4-clr, 10=16-clr, 
-                                      ;                 11=256-clr
+                                      ;                 00:V/1 (320 or 400)
+                                      ;                 01:V/2 (160 or 200)
+                                      ;                 10:V/3 (106 or 133)
+                                      ;                 11:V/4 (80 or 100)
+                                      ;    - bits 0-1 = Color Mode:
+                                      ;                 00: 2 colors
+                                      ;                 01: 4 colors
+                                      ;                 10: 16 colors
+                                      ;                 11: 256 colors
                                       ; 
 GPU_EMULATION         equ   0xFE03    ; (Byte) Emulation Flags
                                       ;    - bit  7    = vsync: 0=off, 1=on
