@@ -16,6 +16,7 @@
 #pragma once
 
 #include "IDevice.hpp"
+#include "font8x8_system.hpp"
 
 class GPU : public IDevice {
 
@@ -53,8 +54,8 @@ public: // PUBLIC ACCESSORS
 private: // PRIVATE MEMBERS
     // internal hardware register states:
     Byte _gpu_enable    = ENABLE_STD;
-    Byte _gpu_std_mode  = 0b00000000;
-    Byte _gpu_ext_mode  = 0b00000000;
+    Byte _gpu_std_mode  = 0x0A;   // 0x0A = 32x20 (256x160)
+    Byte _gpu_ext_mode  = 0x8A;   // 0x8A = 256x160
     Byte _gpu_emu_mode  = 0b00000000;
     bool _video_hires = false;          // true: 640x400, false: 512x384 
     float _screen_width = 0.0f;
@@ -78,19 +79,21 @@ private: // PRIVATE MEMBERS
     float _ext_width = 0.0f;
     float _ext_height = 0.0f;
 
-
-
-
     Byte _change_gpu_enable(Byte data);
     Byte _change_std_mode(Byte data);
     Byte _change_ext_mode(Byte data);
     Byte _change_emu_mode(Byte data);
 
 	// SDL stuff
-    int initial_width = 640*2;      // 1280;
-    int initial_height = 400*2;     // 800;
+    int initial_width = 512*2;      // 1280;
+    int initial_height = 320*2;     // 800;
 	SDL_Window* pWindow = nullptr;
 	SDL_Renderer* pRenderer = nullptr;
+
+    SDL_Texture* pExt_Texture = nullptr;
+    SDL_Texture* pStd_Texture = nullptr;
+    SDL_Texture* pMain_Texture = nullptr;
+
 	Uint32 window_flags = SDL_WINDOW_ALWAYS_ON_TOP | SDL_WINDOW_RESIZABLE;
     Uint32 renderer_flags = SDL_RENDERER_VSYNC_ADAPTIVE;    
     // SDL_RENDERER_VSYNC_DISABLED

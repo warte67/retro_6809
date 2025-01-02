@@ -229,12 +229,13 @@ bool GPU::OnInit()
         // create the main window
         pWindow = SDL_CreateWindow("SDL3 Retro_6809", initial_width, initial_height, window_flags); 
         SDL_ShowWindow(pWindow);
+
         
     } // END OF SDL3 Initialization
 
     // initialize the default values
     _change_gpu_enable(_gpu_enable);
-    // _change_std_mode(_gpu_std_mode);
+    _change_std_mode(_gpu_std_mode);
     _change_ext_mode(_gpu_ext_mode);    
     _change_emu_mode(_gpu_emu_mode);
 
@@ -298,6 +299,25 @@ bool GPU::OnActivate()
     // the extended video mode should determine the overall renderer logical presentation area
     SDL_SetRenderLogicalPresentation(pRenderer, (int)_screen_width, (int)_screen_height, SDL_LOGICAL_PRESENTATION_LETTERBOX);
 
+    // build the textures
+    pExt_Texture = SDL_CreateTexture(pRenderer, 
+            SDL_PIXELFORMAT_ARGB4444, 
+            SDL_TEXTUREACCESS_STREAMING, 
+            (int)_ext_width, (int)_ext_height);
+
+    pStd_Texture = SDL_CreateTexture(pRenderer, 
+            SDL_PIXELFORMAT_ARGB4444, 
+            SDL_TEXTUREACCESS_STREAMING, 
+            (int)_std_width, (int)_std_height);
+
+    pMain_Texture = SDL_CreateTexture(pRenderer, 
+            SDL_PIXELFORMAT_ARGB4444, 
+            SDL_TEXTUREACCESS_TARGET, 
+            (int)_screen_width, (int)_screen_height);
+    
+    std::cout << "std_width: " << std::to_string((int)_std_width) << std::endl;
+    std::cout << "std_height: " << std::to_string((int)_std_height) << std::endl;
+
     std::cout << clr::indent() << clr::CYAN << "GPU::OnActivate() Exit" << clr::RETURN;
     return true;
 }
@@ -318,11 +338,24 @@ bool GPU::OnDeactivate()
 {
     std::cout << clr::indent() << clr::CYAN << "GPU::OnDeactivate() Entry" << clr::RETURN;
 
-    if (pRenderer)
-    { // destroy the renderer
+    // destroy the renderer
+    if (pRenderer) { 
         SDL_DestroyRenderer(pRenderer);
         pRenderer = nullptr;
     }
+    // destroy the textures
+    if (pExt_Texture) { 
+        SDL_DestroyTexture(pExt_Texture);
+        pExt_Texture = nullptr;
+    }
+    if (pStd_Texture) { 
+        SDL_DestroyTexture(pStd_Texture);
+        pStd_Texture = nullptr;
+    }
+    if (pMain_Texture) { 
+        SDL_DestroyTexture(pMain_Texture);
+        pMain_Texture = nullptr;
+    }   
     
     std::cout << clr::indent() << clr::CYAN << "GPU::OnDeactivate() Exit" << clr::RETURN;
     return true;
@@ -411,6 +444,7 @@ bool GPU::OnUpdate(float fElapsedTime)
     //std::cout << clr::indent() << clr::CYAN << "GPU::OnUpdate() Entry" << clr::RETURN;
     if (fElapsedTime==0.0f) { ; } // stop the compiler from complaining
 
+    if (false)
     { // TESTING:  Something to look at while running these tests...
         SDL_SetRenderTarget(pRenderer, NULL);
         static Uint16 r=0;
@@ -425,6 +459,55 @@ bool GPU::OnUpdate(float fElapsedTime)
         if (r>255) {  r=0; b+=t;  }
         SDL_RenderClear(pRenderer);
     } // END TESTING ...
+
+    Word *pixels;
+    int pitch;
+
+    if (true)
+    { // Fill the Extended Display with Random Noise
+        SDL_LockTexture(pExt_Texture, NULL, (void **)&pixels, &pitch); // Lock the texture for write accesspExt_Texture
+        for (int y=0; y< (int)_ext_height; y++) {
+            for (int x=0; x<(int)_ext_width; x++) {
+                // Word gray = rand()%6;
+                Word r = rand()%8;  // 16
+                Word g = rand()%8;  // 16
+                Word b = rand()%8;  // 16
+                Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));
+                *dst = ( 0xf000 | (r<<8) | (g<<4) | (b) );
+            }
+        }
+        SDL_UnlockTexture(pExt_Texture);
+    }
+
+    if (true)
+    { // Fill the Standard Display with Some Text
+        SDL_LockTexture(pStd_Texture, NULL, (void **)&pixels, &pitch); // Lock the texture for write accesspExt_Texture
+        // Byte glyph = '@';
+        int ch = 0;
+        std::string hello = "Hello, World!";        
+        for (auto &g : hello) {
+            Byte glyph = (int)g;
+            for (int y=0; y<8; y++) {
+                for (int h=0; h<8; h++) {
+                    int x = h + (ch*8); 
+                    int bit = 1 << (7-h);
+                    Word r = 0;
+                    Word g = 0;
+                    Word b = 0;
+                    Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));
+                    if (font8x8_system[glyph][y] & bit) {
+                        r = 15;
+                        g = 15;
+                        b = 15;
+                        *dst = ( 0xf000 | (r<<8) | (g<<4) | (b) );
+                    }
+                    // *dst = ( 0xf000 | (r<<8) | (g<<4) | (b) );
+                }  
+            }
+            ch++; 
+        }
+        SDL_UnlockTexture(pStd_Texture);
+    }
 
     //std::cout << clr::indent() << clr::CYAN << "GPU::OnUpdate() Exit" << clr::RETURN;
     return true;
@@ -443,7 +526,40 @@ bool GPU::OnUpdate(float fElapsedTime)
 bool GPU::OnRender()
 {
     //std::cout << clr::indent() << clr::CYAN << "GPU::OnRender() Entry" << clr::RETURN;
-    // ...
+    // SDL_FRect r{0.0f, 0.0f, _screen_width, _screen_height};
+
+    SDL_SetRenderVSync(pRenderer, SDL_RENDERER_VSYNC_DISABLED);
+    // SDL_SetRenderVSync(pRenderer, SDL_RENDERER_VSYNC_ADAPTIVE);
+
+    SDL_SetRenderTarget(pRenderer, pMain_Texture);
+
+    // SDL_SetRenderDrawColor(pRenderer, 0x00, 0x00, 0x00, 0x00);
+    // SDL_RenderClear(pRenderer);
+    // // SDL_RenderRect(pRenderer, &r);
+    // // SDL_SetRenderDrawColor(pRenderer, 0x00, 0x00, 0x00, 0x00);
+    // // SDL_RenderFillRect(pRenderer, &r);
+
+    // SDL_SetTextureScaleMode(pExt_Texture, SDL_SCALEMODE_LINEAR);   // blurry
+    SDL_SetTextureScaleMode(pExt_Texture, SDL_SCALEMODE_NEAREST);
+    SDL_RenderTexture(pRenderer, pExt_Texture, NULL, NULL);
+
+    SDL_SetTextureScaleMode(pStd_Texture, SDL_SCALEMODE_NEAREST);        
+    SDL_RenderTexture(pRenderer, pStd_Texture, NULL, NULL);
+
+    SDL_SetRenderTarget(pRenderer, NULL);
+
+    // SDL_SetTextureScaleMode(pMain_Texture, SDL_SCALEMODE_LINEAR);   // blurry
+    SDL_SetTextureScaleMode(pMain_Texture, SDL_SCALEMODE_NEAREST);        
+    SDL_RenderTexture(pRenderer, pMain_Texture, NULL, NULL);
+
+
+    // SDL_SetRenderTarget(pRenderer, NULL);
+    // SDL_RenderTexture(pRenderer, pExt_Texture, NULL, NULL);
+
+
+    SDL_RenderPresent(pRenderer);
+
+
     //std::cout << clr::indent() << clr::CYAN << "GPU::OnRender() Exit" << clr::RETURN;
     return true;
 }
@@ -551,12 +667,14 @@ Byte GPU::_change_std_mode(Byte data)
     //              10: 16 colors, 
     //              11: 256 colors
     _std_color_depth = (data >> 5) & 0b11;
-    float div = 1.0f;
-    switch (_std_color_depth) {
-        case 0: div = 8.0f; break;
-        case 1: div = 4.0f; break;
-        case 2: div = 2.0f; break;
-        case 3: div = 1.0f; break;
+    float div = 0.5f;
+    if (_is_std_bitmap_mode) {
+        switch (_std_color_depth) {
+            case 0: div = 8.0f; break;
+            case 1: div = 4.0f; break;
+            case 2: div = 2.0f; break;
+            case 3: div = 1.0f; break;
+        }
     }
 
     // - bit  0   = Video Timing:
@@ -590,6 +708,9 @@ Byte GPU::_change_std_mode(Byte data)
 
     // verify the new mode will fit within the standard buffer
     int buffer_size = (_std_width * _std_height) / div;
+    if (_is_std_text_mode) { 
+        buffer_size = ( (_std_width/8) * (_std_height/8) );
+    }
     if (buffer_size > 8000) {    
         _is_std_bitmap_mode = _bitmap_mode;
         _is_std_text_mode = !_bitmap_mode;
