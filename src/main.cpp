@@ -70,150 +70,128 @@
 
 std::string std_gfx_mode(unsigned char mode) {
     std::string result = "| ";
-    float width = 640.0f;
-    float height = 400.0f;
+    float width = 512.0f;
+    float height = 320.0f;    
+    if (mode & 0b00000001) {
+        width = 640.0f;
+        height = 400.0f;
+    }
+    int w = (int)width;
+    int h = (int)height;
     float div = 1.0f;
+    // mode:
     result += clr::pad("0x" + clr::hex(mode,2) + " | ", 6);
-    // screen mode
+    // screen
     if (mode & 0b10000000) {
-        result += clr::pad("bitmap | ", 9);
+        result += clr::pad("bitmap | ", 6);
     } else {
-        result += clr::pad("text | ", 9);
+        result += clr::pad("text   | ", 6);
     }
-    // video timing
-    if (mode & 0b01000000) {
-        result += clr::pad("640x400 | ", 8);
-        width = 640;
-        height = 400;
-    } else {
-        result += clr::pad("512x320 | ", 8);
-        width = 512;
-        height = 320;
-    }
-    // horizontal overscan
-    switch ((mode & 0b00110000) >> 4) {
-        case 0b00: result += clr::pad("1x | ", 4); width /= 1.0f; break;
-        case 0b01: result += clr::pad("2x | ", 4); width /= 2.0f; break;
-        case 0b10: result += clr::pad("3x | ", 4); width /= 3.0f; break;
-        case 0b11: result += clr::pad("4x | ", 4); width /= 4.0f; break;
-    }
-    // vertical overscan
-    switch ((mode & 0b00001100) >> 2) {
-        case 0b00: result += clr::pad("1x | ",4); height /= 1.0f; break;
-        case 0b01: result += clr::pad("2x | ",4); height /= 2.0f; break;
-        case 0b10: result += clr::pad("3x | ",4); height /= 3.0f; break;
-        case 0b11: result += clr::pad("4x | ",4); height /= 4.0f; break;
-    }
-    // adjust for text mode
-    if (!(mode & 0b10000000)) {
-        width /= 8.0f;
-        height /=8.0f;
-    }
-    // overall resolution     
-    result += clr::pad(std::to_string((int)width) + "x" + std::to_string((int)height), 7) + " | ";
-    // color depth
-    if (!(mode & 0b10000000)) {
-        // result += clr::pad("text | ", 7); div = 0.5f;
-        switch (mode & 0b00000011) {
-            case 0b00: result += clr::pad("     monochrome text        |",17); div = 1.0f; break;
-            case 0b01: result += clr::pad("       bg/fg + text         |",17); div = 0.5f; break;
-            case 0b10: result += clr::pad(" clear-bgnd 256-color text  |",17); div = 0.5f; break;
-            case 0b11: result += clr::pad("color_0-bgnd 256-color text |",17); div = 0.5f; break;
+    // colors
+    if (mode & 0b10000000) {        
+        switch ((mode & 0b01100000) >> 5) {
+            case 0x00: result += "2 colors | ";     div *= 8.0f; break;
+            case 0x01: result += "4 colors | ";     div *= 4.0f; break;
+            case 0x02: result += "16 colors | ";    div *= 2.0f; break;
+            case 0x03: result += "256 colors | ";   div *= 1.0f; break;
         }
     } else {
-        switch (mode & 0b00000011) {
-            case 0b00: result += clr::pad("   2 colors |",17); div = 8.0f; break;
-            case 0b01: result += clr::pad("   4 colors |",17); div = 4.0f; break;
-            case 0b10: result += clr::pad("  16 colors |",17); div = 2.0f; break;
-            case 0b11: result += clr::pad(" 256 colors |",17); div = 1.0f; break;
-        }
+        result += "bg/fg | ";
     }
-    // buffer size
-    int buffer = (int)((width * height) / div);
-    result += clr::pad(std::to_string(buffer), 6);
-
-    if (buffer > 8000)
-        return "";       
+    // h.over
+    switch ((mode & 0b00011000) >> 3) {
+        case 0x00: width /= 1.0f; result += "W/1 | "; break;
+        case 0x01: width /= 2.0f; result += "W/2 | "; break;
+        case 0x02: width /= 3.0f; result += "W/3 | "; break;
+        case 0x03: width /= 4.0f; result += "W/4 | "; break;    
+    }
+    // v.over
+    switch ((mode & 0b00000110) >> 1) {
+        case 0x00: height /= 1.0f; result += "H/1 | "; break;
+        case 0x01: height /= 2.0f; result += "H/2 | "; break;
+        case 0x02: height /= 3.0f; result += "H/3 | "; break;
+        case 0x03: height /= 4.0f; result += "H/4 | "; break;    
+    }
+    // timing
+    result += std::to_string(w) + "x" + std::to_string(h) + " | ";    
+    // text resolution
+    if ((mode & 0b10000000)==0) {
+        width /= 8;
+        height /= 8;
+        div = 0.5f;
+    }
+    result += std::to_string((int)width) + "x" + std::to_string((int)height) + " | ";
+    // buffer
+    float buffer = (width * height) / div;
+    result += std::to_string((int)buffer) + " bytes | ";
+    if (buffer > 8000)  
+        return "";
     return result;
 }
 
 
 std::string ext_gfx_mode(unsigned char mode) {
     std::string result = "| ";
-    float width = 640.0f;
-    float height = 400.0f;
+    float width = 512.0f;
+    float height = 320.0f;
+    if (mode & 0b00000001) {
+        width = 640.0f;
+        height = 400.0f;
+    }
+    int w = (int)width;
+    int h = (int)height;
     float div = 1.0f;
+    // mode:
     result += clr::pad("0x" + clr::hex(mode,2) + " | ", 6);
-    // screen mode
+    // screen
     if (mode & 0b10000000) {
-        result += clr::pad("bitmap | ", 9);
+        result += clr::pad("bitmap | ", 6);
     } else {
-        result += clr::pad("tiled | ", 9);
+        result += clr::pad("tiled  | ", 6);
     }
-    // video timing
-    if (mode & 0b01000000) {
-        result += clr::pad("640x400 | ", 8);
-        width = 640;
-        height = 400;
-    } else {
-        result += clr::pad("512x320 | ", 8);
-        width = 512;
-        height = 320;
+    // colors
+    switch ((mode & 0b01100000) >> 5) {
+        case 0x00: result += "2 colors | ";     div *= 8.0f; break;
+        case 0x01: result += "4 colors | ";     div *= 4.0f; break;
+        case 0x02: result += "16 colors | ";    div *= 2.0f; break;
+        case 0x03: result += "256 colors | ";   div *= 1.0f; break;
     }
-    // horizontal overscan
-    switch ((mode & 0b00110000) >> 4) {
-        case 0b00: result += clr::pad("1x | ", 4); width /= 1.0f; break;
-        case 0b01: result += clr::pad("2x | ", 4); width /= 2.0f; break;
-        case 0b10: result += clr::pad("3x | ", 4); width /= 3.0f; break;
-        case 0b11: result += clr::pad("4x | ", 4); width /= 4.0f; break;
+    // h.over
+    switch ((mode & 0b00011000) >> 3) {
+        case 0x00: width /= 1.0f; result += "W/1 | "; break;
+        case 0x01: width /= 2.0f; result += "W/2 | "; break;
+        case 0x02: width /= 3.0f; result += "W/3 | "; break;
+        case 0x03: width /= 4.0f; result += "W/4 | "; break;    
     }
-    // vertical overscan
-    switch ((mode & 0b00001100) >> 2) {
-        case 0b00: result += clr::pad("1x | ",4); height /= 1.0f; break;
-        case 0b01: result += clr::pad("2x | ",4); height /= 2.0f; break;
-        case 0b10: result += clr::pad("3x | ",4); height /= 3.0f; break;
-        case 0b11: result += clr::pad("4x | ",4); height /= 4.0f; break;
+    // v.over
+    switch ((mode & 0b00000110) >> 1) {
+        case 0x00: height /= 1.0f; result += "H/1 | "; break;
+        case 0x01: height /= 2.0f; result += "H/2 | "; break;
+        case 0x02: height /= 3.0f; result += "H/3 | "; break;
+        case 0x03: height /= 4.0f; result += "H/4 | "; break;    
     }
-    // adjust for tiled mode
-    if (!(mode & 0b10000000)) {
+    // timing
+    result += std::to_string(w) + "x" + std::to_string(h) + " | ";    
+
+    // displayed tilemap resolution
+    if ((mode & 0b10000000)==0) {
         width /= 16.0f;
         height /= 16.0f;
+        div = 1.0f;
     }
-    // overall resolution     
-    result += clr::pad(std::to_string((int)width) + "x" + std::to_string((int)height), 7) + " | ";
-    // color depth
-    if (!(mode & 0b10000000)) {
-        // result += clr::pad("text | ", 7); div = 0.5f;
-        switch (mode & 0b00000011) {
-            case 0b00: result += clr::pad(" mode one   |",7); div = 1.0f; break;
-            case 0b01: result += clr::pad(" mode two   |",7); div = 0.5f; break;
-            case 0b10: result += clr::pad(" mode three |",7); div = 0.5f; break;
-            case 0b11: result += clr::pad(" mode four  |",7); div = 0.5f; break;
-        }
-    } else {
-        switch (mode & 0b00000011) {
-            case 0b00: result += clr::pad("   2 colors |",7); div = 8.0f; break;
-            case 0b01: result += clr::pad("   4 colors |",7); div = 4.0f; break;
-            case 0b10: result += clr::pad("  16 colors |",7); div = 2.0f; break;
-            case 0b11: result += clr::pad(" 256 colors |",7); div = 1.0f; break;
-        }
-    }
-    // buffer size
-    int buffer = (int)((width * height) / div);
-    result += clr::pad(std::to_string(buffer), 6);
-
-    if (buffer > 64000)
-        return "";       
+    result += std::to_string((int)width) + "x" + std::to_string((int)height) + " | ";
+    // buffer
+    float buffer = (width * height) / div;
+    result += std::to_string((int)buffer) + " bytes | ";
+    if (buffer > 64000.0f)  
+        return "";
     return result;
 }
 
 
 
 int main() {
-    // home the cursor
-    std::cout << clr::csr_pos();
-
-    // clear the screen and home the cursor
+    // home the cursor | COLORS
     std::cout << clr::erase_in_display(3);
     std::cout << clr::erase_in_display(2);
 
@@ -256,30 +234,51 @@ int main() {
 
     // Bus::Error("Something like a simulated error happened!");
     
-    #define DISPLAY_MODE_LIST false
+    #define DISPLAY_MODE_LIST true
     #if DISPLAY_MODE_LIST
-        // display the standard mode list
+        // display the standard text modes:
+        std::cout << clr::RETURN;
+        std::cout << "Standard Text Modes:\n";
+        std::cout << "| MODE | SCREEN | COLORS | H.OVER | V.OVER | TIMING | RESOLUTION | BUFFER |\n";
+        std::cout << "|:----:|:------:|:------:|:------:|:------:|:------:|:----------:|:------:|\n";
+        for (int i = 0; i < 32; i++) {
+            if (std_gfx_mode(i) != "")
+                std::cout << std_gfx_mode(i) << " \n";
+        }
+
+        // display the standard graphics modes:
         std::cout << clr::RETURN;
         std::cout << "Standard Graphics Modes:\n";
-        std::cout << "| MODE | SCREEN | TIMING | H.OVER | V.OVER | RESOLUTION | COLORS | BUFFER |\n";
+        std::cout << "| MODE | SCREEN | COLORS | H.OVER | V.OVER | TIMING | RESOLUTION | BUFFER |\n";
         std::cout << "|:----:|:------:|:------:|:------:|:------:|:----------:|:------:|:------:|\n";
-        for (int i = 0; i < 256; i++) {
+        for (int i = 128; i < 256; i++) {
             if (std_gfx_mode(i) != "")
-                std::cout << std_gfx_mode(i) << " |\n";
+                std::cout << std_gfx_mode(i) << " \n";
         }
-        // display the extended mode list
+
+        // display the extended tile modes:
+        std::cout << clr::RETURN;
+        std::cout << "Extended Tile Modes:\n";
+        std::cout << "| MODE | SCREEN | COLORS | H.OVER | V.OVER | TIMING | RESOLUTION | BUFFER |\n";
+        std::cout << "|:----:|:------:|:------:|:------:|:------:|:------:|:----------:|:------:|\n";
+        for (int i = 0; i < 128; i++) {
+            if (ext_gfx_mode(i) != "")
+                std::cout << ext_gfx_mode(i) << " \n";
+        }
+
+        // display the extended graphics modes:
         std::cout << clr::RETURN;
         std::cout << "Extended Graphics Modes:\n";
-        std::cout << "| MODE | SCREEN | TIMING | H.OVER | V.OVER | RESOLUTION | COLORS | BUFFER |\n";
-        std::cout << "|:----:|:------:|:------:|:------:|:------:|:----------:|:------:|:------:|\n";
-        for (int i = 0; i < 256; i++) {
+        std::cout << "| MODE | SCREEN | COLORS | H.OVER | V.OVER | TIMING | RESOLUTION | BUFFER |\n";
+        std::cout << "|:----:|:------:|:------:|:------:|:------:|:------:|:----------:|:------:|\n";
+        for (int i = 128; i < 256; i++) {
             if (ext_gfx_mode(i) != "")
-                std::cout << ext_gfx_mode(i) << " |\n";
+                std::cout << ext_gfx_mode(i) << " \n";
         }
+
     #endif
 
 
     return 0;
 }
-
 
