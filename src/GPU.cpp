@@ -971,10 +971,11 @@ Byte GPU::_change_emu_mode(Byte data)
     int i = (data & 0b0000'1100) >> 2;
     if (i>=_num_displays)   i=_num_displays-1;
     SDL_GetDisplayBounds(_displays[i], &rect);
-    if (!SDL_SetWindowPosition(pWindow, rect.x, rect.y)) {
-        Bus::Error(SDL_GetError(), __FILE__, __LINE__);
-    }
-    SDL_SetWindowPosition(pWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+    // if (!SDL_SetWindowPosition(pWindow, rect.x, rect.y)) {
+    //     Bus::Error(SDL_GetError(), __FILE__, __LINE__);
+    // }
+    SDL_SetWindowPosition(pWindow, SDL_WINDOWPOS_CENTERED_DISPLAY(i), SDL_WINDOWPOS_CENTERED_DISPLAY(i));
+
     std::cout << "Active Display: " << i << "  X:" << rect.x << "  Y:" << rect.y << std::endl;
 
 

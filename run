@@ -18,7 +18,9 @@ if [ -e "$FILE" ]; then
     if [ "$1" == "build" ]; then
         echo "done"
     else
+        # if [ $? -eq 0 ]; then
         ./build/main
+        # fi
     fi
 else
     cd build
@@ -28,7 +30,9 @@ else
     if [ "$1" == "build" ]; then
         echo "done"
     else
+        # if [ $? -eq 0 ]; then
         ./build/main
+        # fi
     fi
 fi
 
