@@ -542,8 +542,8 @@ bool GPU::OnRender()
     //std::cout << clr::indent() << clr::CYAN << "GPU::OnRender() Entry" << clr::RETURN;
     // SDL_FRect r{0.0f, 0.0f, _screen_width, _screen_height};
 
-    // SDL_SetRenderVSync(pRenderer, SDL_RENDERER_VSYNC_DISABLED); // VSYNC OFF
-    SDL_SetRenderVSync(pRenderer, SDL_RENDERER_VSYNC_ADAPTIVE); // VSYNC ON
+    SDL_SetRenderVSync(pRenderer, SDL_RENDERER_VSYNC_DISABLED); // VSYNC OFF
+    // SDL_SetRenderVSync(pRenderer, SDL_RENDERER_VSYNC_ADAPTIVE); // VSYNC ON
 
     SDL_SetRenderTarget(pRenderer, pMain_Texture);
 
