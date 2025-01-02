@@ -541,7 +541,7 @@ bool Bus::_onUpdate(float __na)
 		frame_count = 0;
         // generate a string for reporting
         _s_title = "Retro 6809";
-		_s_title += "  FPS: ";		
+		_s_title += " FPS:";		
 		_s_title += std::to_string((int)_fps);
 
         // _sys_cpu_speed = (int)(1.0f / (s_avg_cpu_cycle_time / 1000000.0f));

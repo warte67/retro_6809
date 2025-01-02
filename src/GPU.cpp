@@ -387,6 +387,18 @@ bool GPU::OnEvent(SDL_Event* evnt)
             // [ESCAPE]  KMOD_SHIFT
             SDL_Keymod mod = SDL_GetModState();
 
+            // [V] Toggle VSYNC
+            if (evnt->key.key == SDLK_V)
+            {
+                Byte data = Memory::Read( MAP(GPU_EMULATION) );
+                if (data & 0b10000000) {
+                    data &= 0b01111111;
+                } else {
+                    data |= 0b10000000;
+                }
+                Memory::Write(MAP(GPU_EMULATION), data);
+            }
+
             // TESTING [F] and [F-SHIFT] to toggle fullscreen
             if (evnt->key.key == SDLK_F)
             {
@@ -478,13 +490,58 @@ bool GPU::OnUpdate(float fElapsedTime)
     { // Fill the Extended Display with Random Noise
         SDL_LockTexture(pExt_Texture, NULL, (void **)&pixels, &pitch); // Lock the texture for write accesspExt_Texture
         for (int y=0; y< (int)_ext_height; y++) {
+            static Word r=0;
+            static Word g=0;
+            static Word b=0;
+            Word a=15;
+
             for (int x=0; x<(int)_ext_width; x++) {
-                // Word gray = rand()%6;
-                Word r = rand()%8;  // 16
-                Word g = rand()%8;  // 16
-                Word b = rand()%8;  // 16
                 Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));
-                *dst = ( 0xf000 | (r<<8) | (g<<4) | (b) );
+                *dst = ( (a<<12) | (r<<8) | (g<<4) | (b) );
+            }
+
+            if (false)
+            {
+                Word level=6;
+                Word t=1;
+                b+=t;
+                if (b>level) {  b=0; g+=t;  }
+                if (g>level) {  g=0; r+=t;  }
+                if (r>level) {  r=0; b+=t;  }
+            }
+            else
+            {
+                Word level=24;
+                static Byte mode = 0;
+                static Sint32 dr = 1;
+                static Sint32 dg = 1;
+                static Sint32 db = 1;
+                switch (mode) {
+                    case 0:
+                        r+=dr;
+                        if (r>level) { mode = 1; dr=-1; }
+                        break;
+                    case 1:
+                        r+=dr;
+                        if (r==0) { mode = 2; dr=1; }
+                        break;
+                    case 2:
+                        g+=dg;
+                        if (g>level) { mode = 3; dg=-1; }
+                        break;
+                    case 3:
+                        g+=dg;
+                        if (g==0) { mode = 4; dg=1; }
+                        break;
+                    case 4:
+                        b+=db;
+                        if (b>level) { mode = 5; db=-1; }
+                        break;
+                    case 5:
+                        b+=db;
+                        if (b==0) { mode = 0; db=1; }
+                        break;
+                }
             }
         }
         SDL_UnlockTexture(pExt_Texture);
@@ -496,7 +553,7 @@ bool GPU::OnUpdate(float fElapsedTime)
         // Byte glyph = '@';
         int ch = 0;
         //std::string hello = "Hello, World!";        
-        std::string hello = Bus::GetTitle();
+        std::string hello = clr::pad(Bus::GetTitle(), _std_width/8);
         for (auto &g : hello) {
             Byte glyph = (int)g;
             for (int y=0; y<8; y++) {
@@ -542,7 +599,7 @@ bool GPU::OnRender()
     //std::cout << clr::indent() << clr::CYAN << "GPU::OnRender() Entry" << clr::RETURN;
     // SDL_FRect r{0.0f, 0.0f, _screen_width, _screen_height};
 
-    SDL_SetRenderVSync(pRenderer, SDL_RENDERER_VSYNC_DISABLED); // VSYNC OFF
+    // SDL_SetRenderVSync(pRenderer, SDL_RENDERER_VSYNC_DISABLED); // VSYNC OFF
     // SDL_SetRenderVSync(pRenderer, SDL_RENDERER_VSYNC_ADAPTIVE); // VSYNC ON
 
     SDL_SetRenderTarget(pRenderer, pMain_Texture);
@@ -863,7 +920,11 @@ Byte GPU::_change_emu_mode(Byte data)
     // Byte old_data = _gpu_emu_mode;
 
     // bit 7: vsync: 0=off, 1=on
-    // ...
+    if (data & 0b10000000) {
+        SDL_SetRenderVSync(pRenderer, SDL_RENDERER_VSYNC_ADAPTIVE); // VSYNC ON
+    } else {
+        SDL_SetRenderVSync(pRenderer, SDL_RENDERER_VSYNC_DISABLED); // VSYNC OFF
+    }   
 
     // bit 6: main: 0=windowed, 1=fullscreen
     // ...
