@@ -64,7 +64,6 @@
     #endif
 #endif
 
-
 #include "Bus.hpp"
 #include "clr.hpp"
 
