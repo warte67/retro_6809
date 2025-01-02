@@ -495,7 +495,8 @@ bool GPU::OnUpdate(float fElapsedTime)
         SDL_LockTexture(pStd_Texture, NULL, (void **)&pixels, &pitch); // Lock the texture for write accesspExt_Texture
         // Byte glyph = '@';
         int ch = 0;
-        std::string hello = "Hello, World!";        
+        //std::string hello = "Hello, World!";        
+        std::string hello = Bus::GetTitle();
         for (auto &g : hello) {
             Byte glyph = (int)g;
             for (int y=0; y<8; y++) {
@@ -508,7 +509,7 @@ bool GPU::OnUpdate(float fElapsedTime)
                     Word b = 0;
                     Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));
                     if (font8x8_system[glyph][y] & bit) {
-                        a = 4;
+                        a = 6;
                         r = 15;
                         g = 15;
                         b = 15;
@@ -541,8 +542,8 @@ bool GPU::OnRender()
     //std::cout << clr::indent() << clr::CYAN << "GPU::OnRender() Entry" << clr::RETURN;
     // SDL_FRect r{0.0f, 0.0f, _screen_width, _screen_height};
 
-    SDL_SetRenderVSync(pRenderer, SDL_RENDERER_VSYNC_DISABLED);
-    // SDL_SetRenderVSync(pRenderer, SDL_RENDERER_VSYNC_ADAPTIVE);
+    // SDL_SetRenderVSync(pRenderer, SDL_RENDERER_VSYNC_DISABLED); // VSYNC OFF
+    SDL_SetRenderVSync(pRenderer, SDL_RENDERER_VSYNC_ADAPTIVE); // VSYNC ON
 
     SDL_SetRenderTarget(pRenderer, pMain_Texture);
 

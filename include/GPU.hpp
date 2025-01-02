@@ -85,8 +85,10 @@ private: // PRIVATE MEMBERS
     Byte _change_emu_mode(Byte data);
 
 	// SDL stuff
-    int initial_width = 640*2.75;      // 1280;
-    int initial_height = 400*2.75;     // 800;
+    // int initial_width = 640*2.75;
+    // int initial_height = 400*2.75;
+    int initial_width = 640*2.25;
+    int initial_height = 400*2.25;
 	SDL_Window* pWindow = nullptr;
 	SDL_Renderer* pRenderer = nullptr;
 
