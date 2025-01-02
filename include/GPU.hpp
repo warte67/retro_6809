@@ -43,12 +43,43 @@ public: // PUBLIC ACCESSORS
     SDL_Window* GetWindow() { return pWindow; }         // get the SDL window
     SDL_Renderer* GetRenderer() { return pRenderer; }   // get the SDL renderer
 
+    enum _GPU_ENABLE{
+        ENABLE_STD      = 0b00001000,
+        ENABLE_EXT      = 0b00000100,
+        ENABLE_SPRITES  = 0b00000010,
+        ENABLE_CURSOR   = 0b00000001
+    };
+
 private: // PRIVATE MEMBERS
     // internal hardware register states:
-    Byte _gpu_enable    = 0b00001000;   // enable text mode only
-    Byte _gpu_std_mode  = 0x05;         // 64x20 bg/fg text
-    Byte _gpu_ext_mode  = 0b01000000;   // 640x400 monochrome bitmap
-    Byte _gpu_emu_mode  = 0b00000000;   // default: no debug
+    Byte _gpu_enable    = ENABLE_STD;
+    Byte _gpu_std_mode  = 0b00000000;
+    Byte _gpu_ext_mode  = 0b00000000;
+    Byte _gpu_emu_mode  = 0b00000000;
+    bool _video_hires = false;          // true: 640x400, false: 512x384 
+    float _screen_width = 0.0f;
+    float _screen_height = 0.0f;
+
+    // standard display flags
+    bool _is_std_text_mode = false;
+    bool _is_std_bitmap_mode = false;
+    Byte _std_color_depth = 0;
+    float _std_overscan_horiz = 1.0f;
+    float _std_overscan_vert = 1.0f;
+    float _std_width = 0.0f;
+    float _std_height = 0.0f;
+
+    // extended display flags
+    bool _is_ext_tile_mode = false;
+    bool _is_ext_bitmap_mode = false;
+    Byte _ext_color_depth = 0;
+    float _ext_overscan_horiz = 1.0f;
+    float _ext_overscan_vert = 1.0f;
+    float _ext_width = 0.0f;
+    float _ext_height = 0.0f;
+
+
+
 
     Byte _change_gpu_enable(Byte data);
     Byte _change_std_mode(Byte data);

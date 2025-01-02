@@ -130,7 +130,7 @@ int  GPU::OnAttach(int nextAddr)
                                             "   - bit  2   = 0: Disable Extended Mode,",
                                             "                1: Enable Extended Mode",
                                             "   - bit  1   = 0: Disable Sprites,",
-                                            "                1: Dnable Sprites",
+                                            "                1: Enable Sprites",
                                             "   - bit  0   = 0: Disable Mouse Cursor,",
                                             "                1: Enable Mouse Cursor",
                                             "" } }; nextAddr+=1;
@@ -232,6 +232,12 @@ bool GPU::OnInit()
         
     } // END OF SDL3 Initialization
 
+    // initialize the default values
+    _change_gpu_enable(_gpu_enable);
+    // _change_std_mode(_gpu_std_mode);
+    _change_ext_mode(_gpu_ext_mode);    
+    _change_emu_mode(_gpu_emu_mode);
+
     std::cout << clr::indent() << clr::CYAN << "GPU::OnInit() Exit" << clr::RETURN;
     return true;
 }
@@ -288,8 +294,9 @@ bool GPU::OnActivate()
 
     // create the renderer
     pRenderer = SDL_CreateRenderer(pWindow, NULL);
-    // SDL_SetRenderLogicalPresentation(pRenderer, 320, 200, SDL_LOGICAL_PRESENTATION_STRETCH);
-    SDL_SetRenderLogicalPresentation(pRenderer, 640, 400, SDL_LOGICAL_PRESENTATION_LETTERBOX);
+
+    // the extended video mode should determine the overall renderer logical presentation area
+    SDL_SetRenderLogicalPresentation(pRenderer, (int)_screen_width, (int)_screen_height, SDL_LOGICAL_PRESENTATION_LETTERBOX);
 
     std::cout << clr::indent() << clr::CYAN << "GPU::OnActivate() Exit" << clr::RETURN;
     return true;
@@ -443,117 +450,276 @@ bool GPU::OnRender()
 
 
 /**
- * Updates the GPU enable state based on the provided mode byte.
- * The mode byte is structured as follows:
- *   - Bit 4: Enable extended display (0 = disable, 1 = enable)
- *   - Bit 3: Enable standard display (0 = disable, 1 = enable)
- *   - Bit 2: Enable sprites (0 = disable, 1 = enable)
- *   - Bit 1: Enable tilemap (0 = disable, 1 = enable)
- *   - Bit 0: Enable mouse cursor (0 = disable, 1 = enable)
+ * Updates the GPU enable state (GPU_ENABLE) based on the provided data byte.
+ * The data byte controls the enabling and disabling of several GPU
+ * features, represented by individual bitflags within the byte.
+ * 
+ * The byte is structured as follows:
+ *   - Bits 5-7: Reserved (masked out)
+ *   - Bit 3: Standard Mode (0 = disabled, 1 = enabled)
+ *   - Bit 2: Extended Mode (0 = disabled, 1 = enabled)
+ *   - Bit 1: Sprites (0 = disabled, 1 = enabled)
+ *   - Bit 0: Mouse Cursor (0 = disabled, 1 = enabled)
+ * 
+ * The following BITFLAGS are defined and can be ored together:
+ *   - ENABLE_STD: 0b00001000
+ *   - ENABLE_EXT: 0b00000100
+ *   - ENABLE_SPRITES: 0b00000010
+ *   - ENABLE_CURSOR: 0b00000001
  *
- * @param data The mode byte representing the desired GPU enable state.
- * @return The updated enable state configuration.
+ * The function masks out the reserved bits and updates the GPU's
+ * enable state based on the remaining bits.
+ *
+ * @param data The input byte representing the desired enable state.
+ * @return The updated enable state.
  */
 Byte GPU::_change_gpu_enable(Byte data)
 {
-    // bit 4 = enable extended display
-    // ... 
+    // - bits 5-7 = (reserved)
+    data &= 0b00001111;     // Mask out the reserved bits
 
-    // bit 3 = enable standard display
+    // - bits 3   = 0: Disable Standard Mode,
+    //              1: Enable Standard Mode
     // ...
 
-    // bit 2 = enable sprites
+    // - bit  2   = 0: Disable Extended Mode,
+    //              1: Enable Extended Mode
     // ...
 
-    // bit 1 = enable tilemap
-    // ...  
-
-    // bit 0 = enable mouse cursor
+    // - bit  1   = 0: Disable Sprites,
+    //              1: Enable Sprites
     // ...
 
-    // save the new enable state
+    // - bit  0   = 0: Disable Mouse Cursor,
+    //              1: Enable Mouse Cursor
+    // ...
+    
+    // return with the new enable state
     _gpu_enable = data;
-    
-    return data;
+   return data;
 }
 
+
 /**
- * Updates the standard graphics mode of the GPU based on GPU_STD_MODE.
- * The mode byte is structured as follows:
- *   - Bit 7: Screen type (0 = text, 1 = bitmap)
- *   - Bit 6: Video timing (0 = 512x384, 1 = 640x400)
- *   - Bits 4-5: Horizontal overscan (00 = 1x, 01 = 2x, 10 = 4x, 11 = 8x)
- *   - Bits 2-3: Vertical overscan (00 = 1x, 01 = 2x, 10 = 4x)
- *   - Bits 0-1: Color mode (00 = 2-color, 01 = 4-color, 10 = 16-color, 11 = 256-color)
+ * Updates the standard graphics mode of the GPU (GPU_STD_MODE).
+ * This method takes a single byte as an argument, which is used
+ * to set various standard graphics mode options. It validates
+ * the new mode against the standard buffer size and reverts to
+ * the old mode if the new mode does not fit.
  *
- * @param mode The mode byte representing the desired standard graphics mode.
- * @return The updated mode configuration.
+ * The argument byte is interpreted as follows:
+ * - Bit 7: Screen mode (0 = text, 1 = bitmap)
+ * - Bits 5-6: Bitmap color depth (00 = 2 colors, 01 = 4 colors, 
+ *             10 = 16 colors, 11 = 256 colors)
+ * - Bits 3-4: Horizontal overscan (00:H/1, 01:H/2, 10:H/3, 11:H/4)
+ * - Bits 1-2: Vertical overscan (00:V/1, 01:V/2, 10:V/3, 11:V/4)
+ * - Bit 0: Video Timing (0: H:512 x V:320, 1: H:640 x V:400)
+ *
+ * If the new mode is valid, updates the GPU's internal state
+ * and marks the bus as dirty if the mode has changed.
+ *
+ * @param data The input byte representing the desired standard mode.
+ * @return The updated standard mode if valid, otherwise the old mode.
  */
-Byte GPU::_change_std_mode(Byte mode) 
+
+Byte GPU::_change_std_mode(Byte data) 
 { 
-    // Byte data = _gpu_std_mode;
-    Byte data = mode;
+    Byte old_data = _gpu_std_mode;
 
-    // bit 7 = 0:screen is text, 1:screen is bitmap
-    // ...
+    // save the old values
+    bool _bitmap_mode = _is_std_bitmap_mode;
+    Byte _color_depth = _std_color_depth;
+    bool _hires = _video_hires;
+    float _s_width = _std_width;
+    float _s_height = _std_height;
+    float _oscan_h = _std_overscan_horiz;
+    float _oscan_v = _std_overscan_vert;
 
-    // bit 6 = video timing: 0=512x384, 1=640x400
-    // ...
+    // - bit  7   = 0: screen is text, 
+    //              1: screen is bitmap
+    if (data & 0b10000000) {
+        _is_std_bitmap_mode = true;
+        _is_std_text_mode = !_is_std_bitmap_mode;
+    } else {
+        _is_std_bitmap_mode = false;
+        _is_std_text_mode = !_is_std_bitmap_mode;
+    }
 
-    // bits 4-5 = horizontal overscan: 00=1x, 01=2x, 10=4x, 11=8x
-    // ...  
+    // - bits 5-6 = bitmap color depth:
+    //              00: 2 colors,
+    //              01: 4 colors,
+    //              10: 16 colors, 
+    //              11: 256 colors
+    _std_color_depth = (data >> 5) & 0b11;
+    float div = 1.0f;
+    switch (_std_color_depth) {
+        case 0: div = 8.0f; break;
+        case 1: div = 4.0f; break;
+        case 2: div = 2.0f; break;
+        case 3: div = 1.0f; break;
+    }
 
-    // bits 2-3 = vertical overscan: 00=1x, 01=2x, 10=4x
-    // ...
+    // - bit  0   = Video Timing:
+    //              0: H:512 x V:320
+    //              1: H:640 x V:400
+    //              (Overrides EXT_MODE)
+    _video_hires = (data & 0b00000001);
+    if (_video_hires) {
+        _screen_width = 640;
+        _screen_height = 400;
+    } else {
+        _screen_width = 512;
+        _screen_height = 320;
+    }
 
-    // bits 0-1 = Color Mode: 00=2-clr, 01=4-clr, 10=16-clr, 11=256-clr 
-    // ...
+    // - bits 3-4 = horizontal overscan: 
+    //              00:H/1 (512 or 640)
+    //              01:H/2 (256 or 320)
+    //              10:H/3 (170 or 213)
+    //              11:H/4 (128 or 160)
+    _std_overscan_horiz = (float)((data >> 3) & 0b11) + 1.0f;
+    _std_width = _screen_width / _std_overscan_horiz;
 
-    // save the new standard mode
+    // - bits 1-2 = vertical overscan: 
+    //              00:V/1 (320 or 400)
+    //              01:V/2 (160 or 200)
+    //              10:V/3 (106 or 133)
+    //              11:V/4 (80 or 100)
+    _std_overscan_vert = (float)((data >> 1) & 0b11) + 1.0f;
+    _std_height = _screen_height / _std_overscan_vert;
+
+    // verify the new mode will fit within the standard buffer
+    int buffer_size = (_std_width * _std_height) / div;
+    if (buffer_size > 8000) {    
+        _is_std_bitmap_mode = _bitmap_mode;
+        _is_std_text_mode = !_bitmap_mode;
+        _std_color_depth = _color_depth;
+        _video_hires = _hires;
+        _std_width = _s_width;
+        _std_height = _s_height;
+        _std_overscan_horiz = _oscan_h;
+        _std_overscan_vert = _oscan_v;
+        // ... and just return the old data
+        return data;
+    }
+
+    // if the mode has changed, we're dirty!
+    if (data != old_data) {
+        Bus::IsDirty(true);
+    }   
+
+    // return with the new standard mode
     _gpu_std_mode = data;
-
     return data; 
 }
+
 
 
 /**
- * Updates the extended graphics mode of the GPU based on GPU_EXT_MODE.
- * The mode byte is structured as follows:
- *   - Bit 7: Reserved
- *   - Bit 6: Video timing (0 = 512x384, 1 = 640x400)
- *   - Bits 4-5: Horizontal overscan (00 = 1x, 01 = 2x, 10 = 4x, 11 = 8x)
- *   - Bits 2-3: Vertical overscan (00 = 1x, 01 = 2x, 10 = 4x)
- *   - Bits 0-1: Color mode (00 = 2-color, 01 = 4-color, 10 = 16-color, 11 = 256-color)
+ * Updates the extended graphics mode of the GPU (GPU_EXT_MODE).
+ * This method takes a single byte as an argument, which is used
+ * to set various extended graphics mode options. It validates
+ * the new mode against the extended buffer size and reverts to
+ * the old mode if the new mode does not fit.
  *
- * @param mode The mode byte representing the desired extended graphics mode.
- * @return The updated mode configuration.
+ * The argument byte is interpreted as follows:
+ * - Bit 7: Screen mode (0 = tilemap, 1 = bitmap)
+ * - Bits 5-6: Bitmap color depth (00 = 2 colors, 01 = 4 colors, 
+ *             10 = 16 colors, 11 = 256 colors)
+ * - Bits 3-4: Horizontal overscan (00:H/1, 01:H/2, 10:H/3, 11:H/4)
+ * - Bits 1-2: Vertical overscan (00:V/1, 01:V/2, 10:V/3, 11:V/4)
+ * - Bit 0: Video Timing (0: H:512 x V:320, 1: H:640 x V:400)
+ *
+ * If the new mode is valid, updates the GPU's internal state
+ * and marks the bus as dirty if the mode has changed.
+ *
+ * @param data The input byte representing the desired extended mode.
+ * @return The updated extended mode if valid, otherwise the old mode.
  */
-Byte GPU::_change_ext_mode(Byte mode) 
+Byte GPU::_change_ext_mode(Byte data) 
 { 
-    // Byte data = _gpu_ext_mode;
-    Byte data = mode;
+    // save the old settings
+    Byte old_data = _gpu_ext_mode;
+    bool _bitmap_mode = _is_ext_bitmap_mode;
+    Byte _color_depth = _ext_color_depth;
+    bool _hires = _video_hires;
+    float _s_width = _std_width;
+    float _s_height = _std_height;
+    float _oscan_h = _std_overscan_horiz;
+    float _oscan_v = _std_overscan_vert;
 
-    // bit 7 = reserved
-    // ...
+    // GPU_EXT_MODE     ; (Byte) Extended Graphics Mode
+    // - bit  7   = 0: screen is tiled,
+    //              1: screen is bitmap
+    if (data & 0b10000000) {
+        _is_ext_tile_mode = true;
+        _is_ext_bitmap_mode = !_is_ext_tile_mode;
+    } else {
+        _is_ext_tile_mode = false;
+        _is_ext_bitmap_mode = !_is_ext_tile_mode; 
+    }
 
-    // bit 6 = video timing: 0=512x384, 1=640x400   
-    // ...
+    // - bits 5-6 = bitmap color depth:
+    //              00: 2 colors,
+    //              01: 4 colors,
+    //              10: 16 colors, 
+    //              11: 256 colors
+    _ext_color_depth = (data >> 5) & 0b11;
+    float div = 1.0f;
+    switch (_ext_color_depth) {
+        case 0: div = 8.0f; break;
+        case 1: div = 4.0f; break;
+        case 2: div = 2.0f; break;
+        case 3: div = 1.0f; break;
+    }
+    // - bit  0   = Video Timing:
+    //              0: H:512 x V:320
+    //              1: H:640 x V:400
+    //              (Overrides EXT_MODE)
+    _video_hires = (data & 0b00000001);
+    if (_video_hires) {
+        _screen_width = 640;
+        _screen_height = 400;
+    } else {
+        _screen_width = 512;
+        _screen_height = 320;
+    }
 
-    // bits 4-5 = horizontal overscan: 00=1x, 01=2x, 10=4x, 11=8x
-    // ...  
+    // - bits 3-4 = horizontal overscan: 
+    //              00:H/1 (512 or 640)
+    //              01:H/2 (256 or 320)
+    //              10:H/3 (170 or 213)
+    //              11:H/4 (128 or 160)
+    _ext_overscan_horiz = (float)((data >> 3) & 0b11) + 1.0f;
+    _ext_width = _screen_width / _ext_overscan_horiz;
 
-    // bits 2-3 = vertical overscan: 00=1x, 01=2x, 10=4x
-    // ...
+    // - bits 1-2 = vertical overscan: 
+    //              00:V/1 (320 or 400)
+    //              01:V/2 (160 or 200)
+    //              10:V/3 (106 or 133)
+    //              11:V/4 (80 or 100)
+    _ext_overscan_vert = (float)((data >> 1) & 0b11) + 1.0f;
+    _ext_height = _screen_height / _ext_overscan_vert;
 
-    // bits 0-1 = Color Mode: 00=2-clr, 01=4-clr, 10=16-clr, 11=256-clr 
-    // ...
+    // verify the new mode will fit within the standard buffer
+    int buffer_size = (_std_width * _std_height) / div;
+    if (buffer_size > 64000) { 
+        _is_ext_bitmap_mode = _bitmap_mode;
+        _is_ext_tile_mode = !_bitmap_mode;
+        _ext_color_depth = _color_depth;
+        _video_hires = _hires;
+        _ext_width = _s_width;
+        _ext_height = _s_height;
+        _ext_overscan_horiz = _oscan_h;
+        _ext_overscan_vert = _oscan_v;
+        // ... and just return the old data
+        return old_data;
+    }
 
-    // save the new extended mode
-    _gpu_ext_mode = data;   
-    
+    // return with the new standard mode
+    _gpu_ext_mode = data;
     return data; 
 }
-
 
 
 /**
@@ -569,10 +735,9 @@ Byte GPU::_change_ext_mode(Byte mode)
  * @param emu The mode byte representing the desired emulation mode.
  * @return The updated mode configuration.
  */
-Byte GPU::_change_emu_mode(Byte mode) 
+Byte GPU::_change_emu_mode(Byte data) 
 { 
-    // Byte data = _gpu_emu_mode;
-    Byte data = mode;
+    // Byte old_data = _gpu_emu_mode;
 
     // bit 7: vsync: 0=off, 1=on
     // ...
@@ -592,9 +757,8 @@ Byte GPU::_change_emu_mode(Byte mode)
     // bits 0-1: Debug Monitor 0-3
     // ...  
 
-    // save the new emulation mode
+    // return with the new emulation mode
     _gpu_emu_mode = data;
-
     return data; 
 }    
 

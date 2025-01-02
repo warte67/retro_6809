@@ -234,7 +234,7 @@ int main() {
 
     // Bus::Error("Something like a simulated error happened!");
     
-    #define DISPLAY_MODE_LIST true
+    #define DISPLAY_MODE_LIST false
     #if DISPLAY_MODE_LIST
         // display the standard text modes:
         std::cout << clr::RETURN;

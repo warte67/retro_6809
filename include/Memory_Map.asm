@@ -53,7 +53,7 @@ GPU_ENABLE            equ   0xFE00    ; (Byte) Bitflag Enables
                                       ;    - bit  2   = 0: Disable Extended Mode,
                                       ;                 1: Enable Extended Mode
                                       ;    - bit  1   = 0: Disable Sprites,
-                                      ;                 1: Dnable Sprites
+                                      ;                 1: Enable Sprites
                                       ;    - bit  0   = 0: Disable Mouse Cursor,
                                       ;                 1: Enable Mouse Cursor
                                       ; 
