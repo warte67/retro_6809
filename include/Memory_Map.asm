@@ -63,23 +63,32 @@ GPU_STD_MODE          equ   0xFE01    ; (Byte) Standard Graphics Mode
                                       ;    - bit  7   = 0:screen is text, 
                                       ;                 1:screen is bitmap
                                       ;    - bit  6   = video timing: 
-                                      ;                 0=512x384, 1=640x400
+                                      ;                 0=H:512xV:320, 1=H:640xV:400
                                       ;    - bits 4-5 = horizontal overscan: 
-                                      ;                 00=1x, 01=2x, 10=4x, 11=8x
+                                      ;                 00=H/8, 01=H/4, 10=H/2, 11=H/1
                                       ;    - bits 2-3 = vertical overscan: 
-                                      ;                 00=1x, 01=2x, 10=4x
-                                      ;    - bits 0-1 = Color Mode: 00=2-clr, 
-                                      ;                 01=4-clr, 10=16-clr, 
+                                      ;                 00=V/8, 01=V/4, 10=V/2, 11=V/1
+                                      ;    - bits 0-1 = bitmap mode:
+                                      ;                 00=2-colors,
+                                      ;                 01=4-colors,
+                                      ;                 10=16-colors, 
                                       ;                 11=256-clr
+                                      ;          or  
+                                      ;    - bits 0-1 = text mode:
+                                      ;                 00=monochrome text
+                                      ;                 01=bg/fg + text
+                                      ;                 10=clear-bgnd 256-color text
+                                      ;                 11=color_0-bgnd 256-color text
                                       ; 
 GPU_EXT_MODE          equ   0xFE02    ; (Byte) Extended Graphics Mode
-                                      ;    - bit  7   = reserved
+                                      ;    - bit  7   = 0:screen is tiled,
+                                      ;                 1:screen is bitmap
                                       ;    - bit  6   = video timing: 
-                                      ;                 0=512x384, 1=640x400
+                                      ;                 0=H:512xV:320, 1=H:640xV:400
                                       ;    - bits 4-5 = horizontal overscan: 
-                                      ;                 00=1x, 01=2x, 10=4x, 11=8x
+                                      ;                 00=H/8, 01=H/4, 10=H/2, 11=H/1
                                       ;    - bits 2-3 = vertical overscan: 
-                                      ;                 00=1x, 01=2x, 10=4x
+                                      ;                 00=V/8, 01=V/4, 10=V/2, 11=V/1
                                       ;    - bits 0-1 = Color Mode: 00=2-clr, 
                                       ;                 01=4-clr, 10=16-clr, 
                                       ;                 11=256-clr

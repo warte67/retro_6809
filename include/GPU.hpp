@@ -92,7 +92,7 @@ GPU_STD_MODE      equ   0xFE01  ; (Byte) Standard Graphics Mode
                                 ;    - bit  7   = 0:screen is text, 
                                 ;                 1:screen is bitmap
                                 ;    - bit  6   = video timing: 
-                                ;                 0=512x384, 1=640x400
+                                ;                 0=512x320, 1=640x400
                                 ;    - bits 4-5 = horizontal overscan: 
                                 ;                 00=1x, 01=2x, 10=4x, 11=8x
                                 ;    - bits 2-3 = vertical overscan: 
@@ -104,7 +104,7 @@ GPU_STD_MODE      equ   0xFE01  ; (Byte) Standard Graphics Mode
 GPU_EXT_MODE      equ   0xFE02  ; (Byte) Extended Graphics Mode
                                 ;    - bit  7   = reserved
                                 ;    - bit  6   = video timing: 
-                                ;                 0=512x384, 1=640x400
+                                ;                 0=512x320, 1=640x400
                                 ;    - bits 4-5 = horizontal overscan: 
                                 ;                 00=1x, 01=2x, 10=4x, 11=8x
                                 ;    - bits 2-3 = vertical overscan: 
