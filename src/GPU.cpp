@@ -131,64 +131,55 @@ int  GPU::OnAttach(int nextAddr)
                                             "                1: enable std display",
                                             "   - bit  2   = 0: disable sprites,",
                                             "                1: enable sprites",
-                                            "   - bit  1   = 0: disable tilemap,",
-                                            "                1: enable tilemap",
-                                            "   - bit  0   = 0: disable mouse cursor,",
+                                            "   - bit  1   = 0: disable mouse cursor,",
                                             "                1: enable mouse cursor",
+                                            "   - bit  0   = Video Timing:",
+                                            "                0: H:512 x V:320",
+                                            "                1: H:640 x V:400",
                                             "" } }; nextAddr+=1;
     mapped_register.push_back(new_node);
 
     new_node = { "GPU_STD_MODE", nextAddr,  {   "(Byte) Standard Graphics Mode",
                                             "   - bit  7   = 0: screen is text, ",
                                             "                1: screen is bitmap",
-                                            "   - bit  6   = video timing: ",
-                                            "                0: H:512 x V:320",
-                                            "                1: H:640 x V:400",
-                                            "   - bits 4-5 = horizontal overscan: ",
-                                            "                00:H/1 (512 or 640)",
-                                            "                01:H/2 (256 or 320)",
-                                            "                10:H/3 (170 or 213)",
-                                            "                11:H/4 (128 or 160)",
-                                            "   - bits 2-3 = vertical overscan: ",
-                                            "                00:V/1 (320 or 400)",
-                                            "                01:V/2 (160 or 200)",
-                                            "                10:V/3 (106 or 133)",
-                                            "                11:V/4 (80 or 100)",
-                                            "   - bits 0-1 = text mode:",
-                                            "                00:monochrome text",
-                                            "                01:bg/fg + text",
-                                            "                10:clear-bgnd 256-color text",
-                                            "                11:color_0-bgnd 256-color text",
-                                            "    ... or ... ",
-                                            "   - bits 0-1 = bitmap mode:",
+                                            "   - bits 6   = (reserved)",
+                                            "   - bits 4-5 = bitmap color depth:",
                                             "                00: 2 colors,",
                                             "                01: 4 colors,",
                                             "                10: 16 colors, ",
                                             "                11: 256 colors",
+                                            "   - bits 2-3 = horizontal overscan: ",
+                                            "                00:H/1 (512 or 640)",
+                                            "                01:H/2 (256 or 320)",
+                                            "                10:H/3 (170 or 213)",
+                                            "                11:H/4 (128 or 160)",
+                                            "   - bits 0-1 = vertical overscan: ",
+                                            "                00:V/1 (320 or 400)",
+                                            "                01:V/2 (160 or 200)",
+                                            "                10:V/3 (106 or 133)",
+                                            "                11:V/4 (80 or 100)",
                                             "" } }; nextAddr+=1;
     mapped_register.push_back(new_node);
 
     new_node = { "GPU_EXT_MODE", nextAddr,  {   "(Byte) Extended Graphics Mode",
                                             "   - bit  7   = 0: screen is tiled,",
                                             "                1: screen is bitmap",
-                                            "   - bit  6   = video timing: ",
-                                            "                0: H:512 x V:320",
-                                            "                1: H:640 x V:400",
-                                            "   - bits 4-5 = horizontal overscan: ",
-                                            "                00:H/1 (512 or 640)",
-                                            "                01:H/2 (256 or 320)",
-                                            "                10:H/3 (170 or 213)",
-                                            "                11:H/4 (128 or 160)",
-                                            "   - bits 2-3 = vertical overscan: ",
-                                            "                00:V/1 (320 or 400)",
-                                            "                01:V/2 (160 or 200)",
-                                            "                10:V/3 (106 or 133)",
-                                            "                11:V/4 (80 or 100)",
-                                            "   - bits 0-1 = Color Mode:",
+                                            "   - bit  6   = (reserved)",
+                                            "   - bits 4-5 = Color Mode:",
                                             "                00: 2 colors",
                                             "                01: 4 colors",
                                             "                10: 16 colors",
                                             "                11: 256 colors",
+                                            "   - bits 2-3 = horizontal overscan: ",
+                                            "                00:H/1 (512 or 640)",
+                                            "                01:H/2 (256 or 320)",
+                                            "                10:H/3 (170 or 213)",
+                                            "                11:H/4 (128 or 160)",
+                                            "   - bits 0-1 = vertical overscan: ",
+                                            "                00:V/1 (320 or 400)",
+                                            "                01:V/2 (160 or 200)",
+                                            "                10:V/3 (106 or 133)",
+                                            "                11:V/4 (80 or 100)",
                                             "" } }; nextAddr+=1;
     mapped_register.push_back(new_node);
 
@@ -196,9 +187,9 @@ int  GPU::OnAttach(int nextAddr)
                                             "   - bit  7    = vsync: 0=off, 1=on",
                                             "   - bit  6    = main: 0=windowed,",
                                             "                 1=fullscreen",
-                                            "   - bit  5    = debug: 0=off, 1=on",
-                                            "   - bit  4    = debug: 0=windowed, ",
+                                            "   - bit  5    = debug: 0=windowed, ",
                                             "                 1=fullscreen",                                                                                        
+                                            "   - bit  4    = debug: 0=off, 1=on",
                                             "   - bits 2-3  = Active Monitor 0-3",
                                             "   - bits 0-1  = Debug Monitor 0-3",
                                             "" } }; nextAddr+=1;
@@ -235,11 +226,6 @@ bool GPU::OnInit()
         // create the main window
         pWindow = SDL_CreateWindow("SDL3 Retro_6809", initial_width, initial_height, window_flags); 
         SDL_ShowWindow(pWindow);
-        // create the renderer
-        pRenderer = SDL_CreateRenderer(pWindow, NULL);
-        // SDL_SetRenderLogicalPresentation(pRenderer, 320, 200, SDL_LOGICAL_PRESENTATION_STRETCH);
-        SDL_SetRenderLogicalPresentation(pRenderer, 640, 400, SDL_LOGICAL_PRESENTATION_LETTERBOX);
-
         
     } // END OF SDL3 Initialization
 
@@ -296,7 +282,12 @@ bool GPU::OnQuit()
 bool GPU::OnActivate()
 {
     std::cout << clr::indent() << clr::CYAN << "GPU::OnActivate() Entry" << clr::RETURN;
-    // ...
+
+    // create the renderer
+    pRenderer = SDL_CreateRenderer(pWindow, NULL);
+    // SDL_SetRenderLogicalPresentation(pRenderer, 320, 200, SDL_LOGICAL_PRESENTATION_STRETCH);
+    SDL_SetRenderLogicalPresentation(pRenderer, 640, 400, SDL_LOGICAL_PRESENTATION_LETTERBOX);
+
     std::cout << clr::indent() << clr::CYAN << "GPU::OnActivate() Exit" << clr::RETURN;
     return true;
 }
@@ -316,7 +307,13 @@ bool GPU::OnActivate()
 bool GPU::OnDeactivate()
 {
     std::cout << clr::indent() << clr::CYAN << "GPU::OnDeactivate() Entry" << clr::RETURN;
-    // ...
+
+    if (pRenderer)
+    { // destroy the renderer
+        SDL_DestroyRenderer(pRenderer);
+        pRenderer = nullptr;
+    }
+    
     std::cout << clr::indent() << clr::CYAN << "GPU::OnDeactivate() Exit" << clr::RETURN;
     return true;
 }
