@@ -54,8 +54,8 @@ public: // PUBLIC ACCESSORS
 private: // PRIVATE MEMBERS
     // internal hardware register states:
     Byte _gpu_enable    = ENABLE_STD;
-    Byte _gpu_std_mode  = 0x0A;   // 0x0A = 32x20 (256x160)
-    Byte _gpu_ext_mode  = 0x8A;   // 0x8A = 256x160
+    Byte _gpu_std_mode  = 0x0B;   // 0x0B = 40x25 (320x200)
+    Byte _gpu_ext_mode  = 0x8B;   // 0x8B = 320x200
     Byte _gpu_emu_mode  = 0b00000000;
     bool _video_hires = false;          // true: 640x400, false: 512x384 
     float _screen_width = 0.0f;
