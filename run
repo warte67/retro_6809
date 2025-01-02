@@ -5,7 +5,7 @@
 if [ "$1" == "clean" ]; then
     rm -r build
 fi
-if test -d "build"; then
+if [ -d "build" ]; then
     echo 
 else
     mkdir build
@@ -15,12 +15,20 @@ if [ -e "$FILE" ]; then
     cd build
     make -j$(nproc)
     cd ..
-    ./build/main
+    if [ "$1" == "build" ]; then
+        echo "done"
+    else
+        ./build/main
+    fi
 else
     cd build
     cmake ..
     make -j$(nproc)
     cd ..
-    ./build/main
+    if [ "$1" == "build" ]; then
+        echo "done"
+    else
+        ./build/main
+    fi
 fi
 

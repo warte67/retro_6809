@@ -129,14 +129,14 @@ void Bus::Error(std::string err_msg, std::string file, int line)
 	std::cout << clr::RED << "  ╰────────────────────====####" << clr::RETURN;
 	std::cout << std::endl;
 
-    // SDL_Window* pWin = _pGfx->GetWindow();
-    // if (pWin)
-    // {
-    //     SDL_Window* pError = SDL_CreatePopupWindow(pWin, 0, 0, 400, 150, SDL_WINDOW_TOOLTIP | SDL_EVENT_WINDOW_SHOWN);
-    //     SDL_SetWindowTitle(pError, "Error");
-    //     SDL_SetWindowPosition(pError, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-    //     SDL_ShowWindow(pError);
-    // }
+    SDL_Window* pWin = _pGPU->GetWindow();
+    if (pWin)
+    {
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, 
+            "Error", 
+            err_msg.c_str(), 
+            pWin);
+    }
 
 	Bus::IsRunning(false);
 }  

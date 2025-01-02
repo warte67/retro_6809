@@ -104,7 +104,7 @@ private: // PRIVATE MEMBERS
     SDL_Texture* pStd_Texture = nullptr;
     SDL_Texture* pMain_Texture = nullptr;
 
-	Uint32 window_flags = SDL_WINDOW_ALWAYS_ON_TOP | SDL_WINDOW_RESIZABLE;
+	Uint32 window_flags = SDL_WINDOW_RESIZABLE;
     Uint32 renderer_flags = SDL_RENDERER_VSYNC_ADAPTIVE;    
     // SDL_RENDERER_VSYNC_DISABLED
 };

@@ -220,7 +220,7 @@ bool GPU::OnInit()
 
     { // BEGIN OF SDL3 Initialization
         // initialize SDL3
-        if (!SDL_Init(SDL_INIT_VIDEO))
+        if (!SDL_InitSubSystem(SDL_INIT_VIDEO))
         {
             std::cout << clr::indent_pop() << clr::ORANGE << "Bus::_onInit() Error" << clr::RETURN;
             Bus::Error(SDL_GetError(), __FILE__, __LINE__);
@@ -270,7 +270,7 @@ bool GPU::OnQuit()
             pWindow = nullptr;
         }
         // shutdown SDL
-        SDL_Quit();
+        SDL_QuitSubSystem(SDL_INIT_VIDEO);
     } // END OF SDL3 Shutdown
 
     std::cout << clr::indent() << clr::CYAN << "GPU::OnQuit() Exit" << clr::RETURN;
@@ -381,12 +381,8 @@ bool GPU::OnEvent(SDL_Event* evnt)
     {
         case SDL_EVENT_KEY_DOWN:
         {
-            // [ESCAPE]  KMOD_SHIFT
-            SDL_Keymod mod = SDL_GetModState();
-
-            // [V] Toggle VSYNC
             if (evnt->key.key == SDLK_V)
-            {
+            {   // [V] Toggle VSYNC
                 Byte data = Memory::Read( MAP(GPU_EMULATION) );
                 if (data & 0b10000000) {
                     data &= 0b01111111;
@@ -395,36 +391,31 @@ bool GPU::OnEvent(SDL_Event* evnt)
                 }
                 Memory::Write(MAP(GPU_EMULATION), data);
             }
-
-            // TESTING [F] and [F-SHIFT] to toggle fullscreen
+            
             if (evnt->key.key == SDLK_F)
-            {
-                if (mod & SDL_KMOD_SHIFT) {
-                    // Byte data = Memory::Read( MAP(GFX_EMU) );
-                    // data &= 0b10111111;
-                    // Memory::Write(MAP(GFX_EMU), data);
-                    SDL_SetWindowFullscreen(pWindow, false);                    
+            {   // [F] Toggle Fullscreen
+                Byte data = Memory::Read( MAP(GPU_EMULATION) );
+                if (data & 0b01000000) {
+                    SDL_SetWindowFullscreen(pWindow, false);
                 } else {
-                    // Byte data = Memory::Read( MAP(GFX_EMU) );
-                    // data |= 0b01000000  ;
-                    // Memory::Write(MAP(GFX_EMU), data);
                     SDL_SetWindowFullscreen(pWindow, true);
-                }                    
+                }
             } // END: if (evnt->key.key == SDLK_F)
-            break;            
+            break;       
+
         } // END: case SDL_EVENT_KEY_DOWN
 
         case SDL_EVENT_WINDOW_ENTER_FULLSCREEN:
         {            
             _gpu_emu_mode |= 0b01000000; // Set bit 6 = ENTER FULLSCREEN
-            std::cout << "SDL_EVENT_WINDOW_ENTER_FULLSCREEN (0x" << clr::hex(_gpu_emu_mode,2) << ")\n";
+            // std::cout << "SDL_EVENT_WINDOW_ENTER_FULLSCREEN (0x" << clr::hex(_gpu_emu_mode,2) << ")\n";
             break;
         } // END: case SDL_EVENT_WINDOW_ENTER_FULLSCREEN
 
         case SDL_EVENT_WINDOW_LEAVE_FULLSCREEN:
         {
             _gpu_emu_mode &= 0b10111111; // Clear bit 6 = LEAVE FULLSCREEN
-            std::cout << "SDL_EVENT_WINDOW_LEAVE_FULLSCREEN (0x" << clr::hex(_gpu_emu_mode,2) << ")\n";
+            // std::cout << "SDL_EVENT_WINDOW_LEAVE_FULLSCREEN (0x" << clr::hex(_gpu_emu_mode,2) << ")\n";
             break;
         } // END: case SDL_EVENT_WINDOW_ENTER_FULLSCREEN
 
@@ -484,7 +475,7 @@ bool GPU::OnUpdate(float fElapsedTime)
     int pitch;
 
     if (true)
-    { // Fill the Extended Display with Random Noise
+    { // Fill the Extended Display with some stuff
         SDL_LockTexture(pExt_Texture, NULL, (void **)&pixels, &pitch); // Lock the texture for write accesspExt_Texture
         for (int y=0; y< (int)_ext_height; y++) {
             static Word r=0;
@@ -508,7 +499,7 @@ bool GPU::OnUpdate(float fElapsedTime)
             }
             else
             {
-                Word level=24;
+                Word level=12; //24;
                 static Byte mode = 0;
                 static Sint32 dr = 1;
                 static Sint32 dg = 1;
@@ -918,9 +909,9 @@ Byte GPU::_change_emu_mode(Byte data)
 
     // bit 7: vsync: 0=off, 1=on
     if (data & 0b10000000) {
-        SDL_SetRenderVSync(pRenderer, SDL_RENDERER_VSYNC_ADAPTIVE); // VSYNC ON
+        SDL_SetRenderVSync(pRenderer, 1); // VSYNC ON
     } else {
-        SDL_SetRenderVSync(pRenderer, SDL_RENDERER_VSYNC_DISABLED); // VSYNC OFF
+        SDL_SetRenderVSync(pRenderer, 0); // VSYNC OFF
     }   
 
     // bit 6: main: 0=windowed, 1=fullscreen
