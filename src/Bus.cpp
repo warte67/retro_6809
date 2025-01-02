@@ -504,10 +504,10 @@ bool Bus::_onEvent(SDL_Event* __na)
  */
 bool Bus::_onUpdate(float __na) 
 {
+    // std::cout << "Bus::_onUpdate()\n";
+
     // stop the unused argument warning
     if (__na == 0.0f) { ; }
-
-    // std::cout << "Bus::_onUpdate()\n";
 
     // handle timing
     static std::chrono::time_point<std::chrono::system_clock> tp1 = std::chrono::system_clock::now();
