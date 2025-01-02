@@ -571,8 +571,6 @@ bool GPU::OnRender()
     // SDL_RenderTexture(pRenderer, pExt_Texture, NULL, NULL);
 
 
-    SDL_RenderPresent(pRenderer);
-
 
     //std::cout << clr::indent() << clr::CYAN << "GPU::OnRender() Exit" << clr::RETURN;
     return true;
