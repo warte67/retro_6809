@@ -396,13 +396,43 @@ bool GPU::OnEvent(SDL_Event* evnt)
             {   // [F] Toggle Fullscreen
                 Byte data = Memory::Read( MAP(GPU_EMULATION) );
                 if (data & 0b01000000) {
-                    SDL_SetWindowFullscreen(pWindow, false);
+                    data &= 0b10111111;
                 } else {
-                    SDL_SetWindowFullscreen(pWindow, true);
+                    data |= 0b01000000;
                 }
+                Memory::Write(MAP(GPU_EMULATION), data);
             } // END: if (evnt->key.key == SDLK_F)
-            break;       
 
+            if (evnt->key.key == SDLK_1)
+            {
+                Byte data = Memory::Read( MAP(GPU_EMULATION) );
+                data &= 0b1111'0011;
+                data |= 0b0000'0000;
+                Memory::Write(MAP(GPU_EMULATION), data);
+            }
+            if (evnt->key.key == SDLK_2)
+            {
+                Byte data = Memory::Read( MAP(GPU_EMULATION) );
+                data &= 0b1111'0011;
+                data |= 0b0000'0100;
+                Memory::Write(MAP(GPU_EMULATION), data);
+            }
+            if (evnt->key.key == SDLK_3)
+            {
+                Byte data = Memory::Read( MAP(GPU_EMULATION) );
+                data &= 0b1111'0011;
+                data |= 0b0000'1000;
+                Memory::Write(MAP(GPU_EMULATION), data);
+            }
+            if (evnt->key.key == SDLK_4)
+            {
+                Byte data = Memory::Read( MAP(GPU_EMULATION) );
+                data &= 0b1111'0011;
+                data |= 0b0000'1100;
+                Memory::Write(MAP(GPU_EMULATION), data);
+            }
+
+            break;       
         } // END: case SDL_EVENT_KEY_DOWN
 
         case SDL_EVENT_WINDOW_ENTER_FULLSCREEN:
@@ -915,19 +945,44 @@ Byte GPU::_change_emu_mode(Byte data)
     }   
 
     // bit 6: main: 0=windowed, 1=fullscreen
-    // ...
-
+    if (data & 0b01000000) {
+        SDL_SetWindowFullscreen(pWindow, true);
+    } else {
+        SDL_SetWindowFullscreen(pWindow, false);
+    }   
     // bit 5: debug: 0=off, 1=on
     // ...
 
     // bit 4: debug: 0=windowed, 1=fullscreen
     // ...   
 
+    // Fetch Active Displays
+    _displays = SDL_GetDisplays(&_num_displays);
+
     // bits 2-3: Active Monitor 0-3 
-    // ...   
+    SDL_Rect rect;
+    std::cout << "Active Displays: " << _num_displays << std::endl;
+    for (int i = 0; i < _num_displays; i++) {
+        std::cout << "Display " << i << ": " << _displays[i] << std::endl;
+        SDL_GetDisplayBounds(_displays[i], &rect);
+        std::cout << "Display " << i << " bounds: " << rect.x << ", " << rect.y << ", " << rect.w << ", " << rect.h << std::endl;
+    }
+
+    int i = (data & 0b0000'1100) >> 2;
+    if (i>=_num_displays)   i=_num_displays-1;
+    SDL_GetDisplayBounds(_displays[i], &rect);
+    if (!SDL_SetWindowPosition(pWindow, rect.x, rect.y)) {
+        Bus::Error(SDL_GetError(), __FILE__, __LINE__);
+    }
+    SDL_SetWindowPosition(pWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+    std::cout << "Active Display: " << i << "  X:" << rect.x << "  Y:" << rect.y << std::endl;
+
 
     // bits 0-1: Debug Monitor 0-3
     // ...  
+
+    // clear active displays
+    SDL_free(_displays);
 
     // return with the new emulation mode
     _gpu_emu_mode = data;

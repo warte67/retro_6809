@@ -95,8 +95,8 @@ private: // PRIVATE MEMBERS
 	// SDL stuff
     // int initial_width = 640*2.75;
     // int initial_height = 400*2.75;
-    int initial_width = 640*2.25;
-    int initial_height = 400*2.25;
+    int initial_width = 640*2.125;
+    int initial_height = 400*2.125;
 	SDL_Window* pWindow = nullptr;
 	SDL_Renderer* pRenderer = nullptr;
 
@@ -105,8 +105,10 @@ private: // PRIVATE MEMBERS
     SDL_Texture* pMain_Texture = nullptr;
 
 	Uint32 window_flags = SDL_WINDOW_RESIZABLE;
-    Uint32 renderer_flags = SDL_RENDERER_VSYNC_ADAPTIVE;    
-    // SDL_RENDERER_VSYNC_DISABLED
+    Uint32 renderer_flags = SDL_RENDERER_VSYNC_DISABLED;
+
+    int _num_displays;
+    SDL_DisplayID* _displays = nullptr;
 };
 
 /*** NOTES: ****************************************
