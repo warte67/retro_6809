@@ -314,9 +314,6 @@ bool GPU::OnActivate()
             SDL_PIXELFORMAT_ARGB4444, 
             SDL_TEXTUREACCESS_TARGET, 
             (int)_screen_width, (int)_screen_height);
-    
-    std::cout << "std_width: " << std::to_string((int)_std_width) << std::endl;
-    std::cout << "std_height: " << std::to_string((int)_std_height) << std::endl;
 
     std::cout << clr::indent() << clr::CYAN << "GPU::OnActivate() Exit" << clr::RETURN;
     return true;

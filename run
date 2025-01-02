@@ -1,1 +1,26 @@
-./build/main
+#!/bin/sh
+#
+# 'run' bash script
+
+if [ "$1" == "clean" ]; then
+    rm -r build
+fi
+if test -d "build"; then
+    echo 
+else
+    mkdir build
+fi
+FILE=./build/Makefile
+if [ -e "$FILE" ]; then
+    cd build
+    make -j$(nproc)
+    cd ..
+    ./build/main
+else
+    cd build
+    cmake ..
+    make -j$(nproc)
+    cd ..
+    ./build/main
+fi
+
