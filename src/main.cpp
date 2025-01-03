@@ -67,129 +67,6 @@
 #include "Bus.hpp"
 #include "clr.hpp"
 
-std::string std_gfx_mode(unsigned char mode) {
-    std::string result = "| ";
-    float width = 512.0f;
-    float height = 320.0f;    
-    if (mode & 0b00000001) {
-        width = 640.0f;
-        height = 400.0f;
-    }
-    // int w = (int)width;
-    // int h = (int)height;
-    float div = 1.0f;
-    // mode:
-    result += clr::pad("0x" + clr::hex(mode,2) + " | ", 6);
-    // screen
-    if (mode & 0b10000000) {
-        result += clr::pad("bitmap | ", 6);
-    } else {
-        result += clr::pad("text   | ", 6);
-    }
-    // colors
-    if (mode & 0b10000000) {        
-        switch ((mode & 0b01100000) >> 5) {
-            case 0x00: result += "2 colors | ";     div *= 8.0f; break;
-            case 0x01: result += "4 colors | ";     div *= 4.0f; break;
-            case 0x02: result += "16 colors | ";    div *= 2.0f; break;
-            case 0x03: result += "256 colors | ";   div *= 1.0f; break;
-        }
-    } else {
-        result += "bg/fg | ";
-    }
-    // h.over
-    switch ((mode & 0b00011000) >> 3) {
-        case 0x00: width /= 1.0f; result += "W/1 | "; break;
-        case 0x01: width /= 2.0f; result += "W/2 | "; break;
-        case 0x02: width /= 3.0f; result += "W/3 | "; break;
-        case 0x03: width /= 4.0f; result += "W/4 | "; break;    
-    }
-    // v.over
-    switch ((mode & 0b00000110) >> 1) {
-        case 0x00: height /= 1.0f; result += "H/1 | "; break;
-        case 0x01: height /= 2.0f; result += "H/2 | "; break;
-        case 0x02: height /= 3.0f; result += "H/3 | "; break;
-        case 0x03: height /= 4.0f; result += "H/4 | "; break;    
-    }
-    // timing
-    // result += std::to_string(w) + "x" + std::to_string(h) + " | ";    
-    result += std::to_string((int)width) + "x" + std::to_string((int)height) + " | ";    
-    // text resolution
-    if ((mode & 0b10000000)==0) {
-        width /= 8;
-        height /= 8;
-        div = 0.5f;
-    }
-    result += std::to_string((int)width) + "x" + std::to_string((int)height) + " | ";
-    // buffer
-    float buffer = (width * height) / div;
-    result += std::to_string((int)buffer) + " bytes | ";
-    if (buffer > 8000)  
-        return "";
-    return result;
-}
-
-
-std::string ext_gfx_mode(unsigned char mode) {
-    std::string result = "| ";
-    float width = 512.0f;
-    float height = 320.0f;
-    if (mode & 0b00000001) {
-        width = 640.0f;
-        height = 400.0f;
-    }
-    // int w = (int)width;
-    // int h = (int)height;
-    float div = 1.0f;
-    // mode:
-    result += clr::pad("0x" + clr::hex(mode,2) + " | ", 6);
-    // screen
-    if (mode & 0b10000000) {
-        result += clr::pad("bitmap | ", 6);
-    } else {
-        result += clr::pad("tiled  | ", 6);
-    }
-    // colors
-    switch ((mode & 0b01100000) >> 5) {
-        case 0x00: result += "2 colors | ";     div *= 8.0f; break;
-        case 0x01: result += "4 colors | ";     div *= 4.0f; break;
-        case 0x02: result += "16 colors | ";    div *= 2.0f; break;
-        case 0x03: result += "256 colors | ";   div *= 1.0f; break;
-    }
-    // h.over
-    switch ((mode & 0b00011000) >> 3) {
-        case 0x00: width /= 1.0f; result += "W/1 | "; break;
-        case 0x01: width /= 2.0f; result += "W/2 | "; break;
-        case 0x02: width /= 3.0f; result += "W/3 | "; break;
-        case 0x03: width /= 4.0f; result += "W/4 | "; break;    
-    }
-    // v.over
-    switch ((mode & 0b00000110) >> 1) {
-        case 0x00: height /= 1.0f; result += "H/1 | "; break;
-        case 0x01: height /= 2.0f; result += "H/2 | "; break;
-        case 0x02: height /= 3.0f; result += "H/3 | "; break;
-        case 0x03: height /= 4.0f; result += "H/4 | "; break;    
-    }
-    // timing
-    // result += std::to_string(w) + "x" + std::to_string(h) + " | ";    
-    result += std::to_string((int)width) + "x" + std::to_string((int)height) + " | ";    
-
-    // displayed tilemap resolution
-    if ((mode & 0b10000000)==0) {
-        width /= 16.0f;
-        height /= 16.0f;
-        div = 1.0f;
-    }
-    result += std::to_string((int)width) + "x" + std::to_string((int)height) + " | ";
-    // buffer
-    float buffer = (width * height) / div;
-    result += std::to_string((int)buffer) + " bytes | ";
-    if (buffer > 64000.0f)  
-        return "";
-    return result;
-}
-
-
 
 int main() {
     // home the cursor | COLORS
@@ -239,43 +116,117 @@ int main() {
     #if DISPLAY_MODE_LIST
         // display the standard text modes:
         std::cout << clr::RETURN;
-        std::cout << "Standard Text Modes:\n";
-        std::cout << "| MODE | SCREEN | COLORS | H.OVER | V.OVER | TIMING | RESOLUTION | BUFFER |\n";
-        std::cout << "|:----:|:------:|:------:|:------:|:------:|:------:|:----------:|:------:|\n";
-        for (int i = 0; i < 32; i++) {
-            if (std_gfx_mode(i) != "")
-                std::cout << std_gfx_mode(i) << " \n";
+        std::cout << "\n# Standard Graphics modes:\n";
+        std::cout << "\n## Standard Text Modes:\n\n";
+        std::cout << "| MODE | WIDTH | HEIGHT | COLUMNS |  ROWS  | BUFFER |\n";
+        std::cout << "|:----:|:-----:|:------:|:-------:|:------:|:------:|\n";        
+        for (int i=0; i < 8; i++) {
+            int width = 320, height = 200;
+            if (i & 1) { width = 256; height = 160; }
+            std::cout << "$" << clr::hex(i,2) << " | ";
+            // Over-Scan
+            int HS = 8, VS = 8;
+            switch (i&7) {
+                case 0:  { HS = 1; VS = 1; break; }
+                case 1:  { HS = 1; VS = 1; break; }
+                case 2:  { HS = 1; VS = 2; break; }
+                case 3:  { HS = 1; VS = 2; break; }
+                case 4:  { HS = 2; VS = 1; break; }
+                case 5:  { HS = 2; VS = 1; break; }               
+                case 6:  { HS = 2; VS = 2; break; }
+                case 7:  { HS = 2; VS = 2; break; }
+            }
+            std::cout << (width/HS) << " | ";
+            std::cout << (height/VS) << " | ";
+            std::cout << (width/HS)/8 << " | ";
+            std::cout << (height/VS)/8 << " | ";
+            std::cout << (((width/HS)/8) * ((height/VS)/8)) * 2 << " |\n";
         }
+        std::cout << "--- \n";
 
         // display the standard graphics modes:
-        std::cout << clr::RETURN;
-        std::cout << "Standard Graphics Modes:\n";
-        std::cout << "| MODE | SCREEN | COLORS | H.OVER | V.OVER | TIMING | RESOLUTION | BUFFER |\n";
-        std::cout << "|:----:|:------:|:------:|:------:|:------:|:----------:|:------:|:------:|\n";
-        for (int i = 128; i < 256; i++) {
-            if (std_gfx_mode(i) != "")
-                std::cout << std_gfx_mode(i) << " \n";
-        }
+        std::cout << "\n## Standard Graphics Modes:\n\n";
+        std::cout << "| MODE | WIDTH | HEIGHT |  1-bpp | COLORS | BUFFER |\n";
+        std::cout << "|:----:|:-----:|:------:|:------:|:------:|:------:|\n";
+        for (int i=0; i < 32; i++) {
+            int width = 320, height = 200;
+            //if (i%8==0) std::cout << std::endl;
+            if (i & 1) { width = 256; height = 160; }
+            std::cout << "| $" << clr::hex(i,2) << " | ";
+            // Over-Scan
+            int HS = 8, VS = 8;
+            switch (i&7) {
+                case 0:  { HS = 1; VS = 1; break; }
+                case 1:  { HS = 1; VS = 1; break; }
+                case 2:  { HS = 1; VS = 2; break; }
+                case 3:  { HS = 1; VS = 2; break; }
+                case 4:  { HS = 2; VS = 1; break; }
+                case 5:  { HS = 2; VS = 1; break; }               
+                case 6:  { HS = 2; VS = 2; break; }
+                case 7:  { HS = 2; VS = 2; break; }
+            }
+            std::cout << (width/HS) << " | ";
+            std::cout << (height/VS) << " | ";
 
-        // display the extended tile modes:
-        std::cout << clr::RETURN;
-        std::cout << "Extended Tile Modes:\n";
-        std::cout << "| MODE | SCREEN | COLORS | H.OVER | V.OVER | TIMING | RESOLUTION | BUFFER |\n";
-        std::cout << "|:----:|:------:|:------:|:------:|:------:|:------:|:----------:|:------:|\n";
-        for (int i = 0; i < 128; i++) {
-            if (ext_gfx_mode(i) != "")
-                std::cout << ext_gfx_mode(i) << " \n";
+            int b = 1<<((i>>3) & 7);
+            int buffer = ((width/HS) * (height/VS))/8;
+            std::cout << buffer << " | ";
+
+            switch (b) {
+                case 1:  { std::cout << "2-colors | ";      buffer *= 1; break; }
+                case 2:  { std::cout << "4-colors | ";      buffer *= 2; break; }
+                case 4:  { std::cout << "16-colors | ";     buffer *= 4; break; }
+                case 8:  { std::cout << "256-colors | ";    buffer *= 8; break; }
+            }
+            if (buffer > 8000)
+                std::cout << "(" << buffer << ")*" << " |\n";
+            else
+                std::cout << buffer << " |\n";                
         }
+        std::cout << "* Modes with buffers > 8000 will have their color depth reduced until the buffer fits.\n";
+        std::cout << "--- \n";
 
         // display the extended graphics modes:
-        std::cout << clr::RETURN;
-        std::cout << "Extended Graphics Modes:\n";
-        std::cout << "| MODE | SCREEN | COLORS | H.OVER | V.OVER | TIMING | RESOLUTION | BUFFER |\n";
-        std::cout << "|:----:|:------:|:------:|:------:|:------:|:------:|:----------:|:------:|\n";
-        for (int i = 128; i < 256; i++) {
-            if (ext_gfx_mode(i) != "")
-                std::cout << ext_gfx_mode(i) << " \n";
+        std::cout << "\n# Extended Graphics Modes:\n";
+        std::cout << "\n## Extended Bitmap Modes:\n";
+        std::cout << "| MODE | WIDTH | HEIGHT |  1-bpp | COLORS | BUFFER |\n";
+        std::cout << "|:----:|:-----:|:------:|:------:|:------:|:------:|\n";
+        for (int i=0; i < 32; i++) {
+            int width = 320, height = 200;
+            //if (i%8==0) std::cout << std::endl;
+            if (i & 1) { width = 256; height = 160; }
+            std::cout << "| $" << clr::hex(i,2) << " | ";
+            // Over-Scan
+            int HS = 8, VS = 8;
+            switch (i&7) {
+                case 0:  { HS = 1; VS = 1; break; }
+                case 1:  { HS = 1; VS = 1; break; }
+                case 2:  { HS = 1; VS = 2; break; }
+                case 3:  { HS = 1; VS = 2; break; }
+                case 4:  { HS = 2; VS = 1; break; }
+                case 5:  { HS = 2; VS = 1; break; }               
+                case 6:  { HS = 2; VS = 2; break; }
+                case 7:  { HS = 2; VS = 2; break; }
+            }
+            std::cout << (width/HS) << " | ";
+            std::cout << (height/VS) << " | ";
+
+            int b = 1<<((i>>3) & 7);
+            int buffer = ((width/HS) * (height/VS))/8;
+            std::cout << buffer << " | ";
+
+            switch (b) {
+                case 1:  { std::cout << "2-colors | ";      buffer *= 1; break; }
+                case 2:  { std::cout << "4-colors | ";      buffer *= 2; break; }
+                case 4:  { std::cout << "16-colors | ";     buffer *= 4; break; }
+                case 8:  { std::cout << "256-colors | ";    buffer *= 8; break; }
+            }
+            if (buffer > 64000)
+                std::cout << "(" << buffer << ")*" << " |\n";
+            else
+                std::cout << buffer << " |\n";                
         }
+        std::cout << "--- \n";
 
     #endif
 
