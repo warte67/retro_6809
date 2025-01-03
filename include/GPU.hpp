@@ -88,8 +88,8 @@ private: // PRIVATE MEMBERS
     // Byte _gpu_std_mode  = 0x8B;   // 0x8B = 320x200 (40x25) Monochrome
     // Byte _gpu_ext_mode  = 0xEB;   // 0xBF = 320x200 256 colors
     
-    Byte _gpu_std_mode  = 0x8B;
-    Byte _gpu_ext_mode  = 0xEB;
+    Byte _gpu_std_mode  = 0x05; //0x04 seg fault?
+    Byte _gpu_ext_mode  = 0x85; //0x84 seg fault?
     
 
     Byte _gpu_emu_mode  = 0b00000000;
