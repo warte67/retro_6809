@@ -67,7 +67,152 @@
 #include "Bus.hpp"
 #include "clr.hpp"
 
+/**
+ * Displays a list of available display modes in a tabular format.
+ * The function categorizes display modes into three sections:
+ * 
+ * 1. Standard Graphics Modes:
+ *    - Includes standard text modes and standard graphics modes.
+ *    - Displays mode, width, height, columns, rows, buffer size, and color information.
+ * 
+ * 2. Standard Text Modes:
+ *    - Displays mode, width, height, columns, rows, and buffer size for standard text.
+ * 
+ * 3. Extended Graphics Modes:
+ *    - Includes extended bitmap modes.
+ *    - Displays mode, width, height, bits per pixel, colors, and buffer size.
+ * 
+ * Each section is printed with a header and a table format, with modes 
+ * iteratively calculated and displayed. Modes with buffer sizes above
+ * a certain threshold have their color depth reduced to fit the buffer.
+ */
 
+void DisplayModeList() 
+{
+    // display the standard text modes:
+    std::cout << clr::RETURN;
+    std::cout << "\n# Standard Graphics modes:\n";
+    std::cout << "\n## Standard Text Modes:\n\n";
+    std::cout << "| MODE | WIDTH | HEIGHT | COLUMNS |  ROWS  | BUFFER |\n";
+    std::cout << "|:----:|:-----:|:------:|:-------:|:------:|:------:|\n";        
+    for (int i=0; i < 8; i++) {
+        int width = 320, height = 200;
+        if (i & 1) { width = 256; height = 160; }
+        std::cout << "$" << clr::hex(i,2) << " | ";
+        // Over-Scan
+        int HS = 8, VS = 8;
+        switch (i&7) {
+            case 0:  { HS = 1; VS = 1; break; }
+            case 1:  { HS = 1; VS = 1; break; }
+            case 2:  { HS = 1; VS = 2; break; }
+            case 3:  { HS = 1; VS = 2; break; }
+            case 4:  { HS = 2; VS = 1; break; }
+            case 5:  { HS = 2; VS = 1; break; }               
+            case 6:  { HS = 2; VS = 2; break; }
+            case 7:  { HS = 2; VS = 2; break; }
+        }
+        std::cout << (width/HS) << " | ";
+        std::cout << (height/VS) << " | ";
+        std::cout << (width/HS)/8 << " | ";
+        std::cout << (height/VS)/8 << " | ";
+        std::cout << (((width/HS)/8) * ((height/VS)/8)) * 2 << " |\n";
+    }
+    std::cout << "--- \n";
+
+    // display the standard graphics modes:
+    std::cout << "\n## Standard Graphics Modes:\n\n";
+    std::cout << "| MODE | WIDTH | HEIGHT |  1-bpp | COLORS | BUFFER |\n";
+    std::cout << "|:----:|:-----:|:------:|:------:|:------:|:------:|\n";
+    for (int i=0; i < 32; i++) {
+        int width = 320, height = 200;
+        //if (i%8==0) std::cout << std::endl;
+        if (i & 1) { width = 256; height = 160; }
+        std::cout << "| $" << clr::hex(i,2) << " | ";
+        // Over-Scan
+        int HS = 8, VS = 8;
+        switch (i&7) {
+            case 0:  { HS = 1; VS = 1; break; }
+            case 1:  { HS = 1; VS = 1; break; }
+            case 2:  { HS = 1; VS = 2; break; }
+            case 3:  { HS = 1; VS = 2; break; }
+            case 4:  { HS = 2; VS = 1; break; }
+            case 5:  { HS = 2; VS = 1; break; }               
+            case 6:  { HS = 2; VS = 2; break; }
+            case 7:  { HS = 2; VS = 2; break; }
+        }
+        std::cout << (width/HS) << " | ";
+        std::cout << (height/VS) << " | ";
+
+        int b = 1<<((i>>3) & 7);
+        int buffer = ((width/HS) * (height/VS))/8;
+        std::cout << buffer << " | ";
+
+        switch (b) {
+            case 1:  { std::cout << "2-colors | ";      buffer *= 1; break; }
+            case 2:  { std::cout << "4-colors | ";      buffer *= 2; break; }
+            case 4:  { std::cout << "16-colors | ";     buffer *= 4; break; }
+            case 8:  { std::cout << "256-colors | ";    buffer *= 8; break; }
+        }
+        if (buffer > 8000)
+            std::cout << "(" << buffer << ")*" << " |\n";
+        else
+            std::cout << buffer << " |\n";                
+    }
+    std::cout << "* Modes with buffers > 8000 will have their color depth reduced until the buffer fits.\n";
+    std::cout << "--- \n";
+
+    // display the extended graphics modes:
+    std::cout << "\n# Extended Graphics Modes:\n";
+    std::cout << "\n## Extended Bitmap Modes:\n";
+    std::cout << "| MODE | WIDTH | HEIGHT |  1-bpp | COLORS | BUFFER |\n";
+    std::cout << "|:----:|:-----:|:------:|:------:|:------:|:------:|\n";
+    for (int i=0; i < 32; i++) {
+        int width = 320, height = 200;
+        //if (i%8==0) std::cout << std::endl;
+        if (i & 1) { width = 256; height = 160; }
+        std::cout << "| $" << clr::hex(i,2) << " | ";
+        // Over-Scan
+        int HS = 8, VS = 8;
+        switch (i&7) {
+            case 0:  { HS = 1; VS = 1; break; }
+            case 1:  { HS = 1; VS = 1; break; }
+            case 2:  { HS = 1; VS = 2; break; }
+            case 3:  { HS = 1; VS = 2; break; }
+            case 4:  { HS = 2; VS = 1; break; }
+            case 5:  { HS = 2; VS = 1; break; }               
+            case 6:  { HS = 2; VS = 2; break; }
+            case 7:  { HS = 2; VS = 2; break; }
+        }
+        std::cout << (width/HS) << " | ";
+        std::cout << (height/VS) << " | ";
+
+        int b = 1<<((i>>3) & 7);
+        int buffer = ((width/HS) * (height/VS))/8;
+        std::cout << buffer << " | ";
+
+        switch (b) {
+            case 1:  { std::cout << "2-colors | ";      buffer *= 1; break; }
+            case 2:  { std::cout << "4-colors | ";      buffer *= 2; break; }
+            case 4:  { std::cout << "16-colors | ";     buffer *= 4; break; }
+            case 8:  { std::cout << "256-colors | ";    buffer *= 8; break; }
+        }
+        if (buffer > 64000)
+            std::cout << "(" << buffer << ")*" << " |\n";
+        else
+            std::cout << buffer << " |\n";                
+    }
+    std::cout << "--- \n";
+}
+
+/**
+ * @brief The main entry point of the program.
+ *
+ * This function initializes the bus and runs it. The bus is the main
+ * interface to the program. It provides all the necessary methods to
+ * interact with the program.
+ *
+ * @return 0 if the program terminated normally, 1 otherwise.
+ */
 int main() {
     // home the cursor | COLORS
     std::cout << clr::erase_in_display(3);
@@ -112,122 +257,9 @@ int main() {
 
     // Bus::Error("Something like a simulated error happened!");
     
-    #define DISPLAY_MODE_LIST true
+    #define DISPLAY_MODE_LIST false
     #if DISPLAY_MODE_LIST
-        // display the standard text modes:
-        std::cout << clr::RETURN;
-        std::cout << "\n# Standard Graphics modes:\n";
-        std::cout << "\n## Standard Text Modes:\n\n";
-        std::cout << "| MODE | WIDTH | HEIGHT | COLUMNS |  ROWS  | BUFFER |\n";
-        std::cout << "|:----:|:-----:|:------:|:-------:|:------:|:------:|\n";        
-        for (int i=0; i < 8; i++) {
-            int width = 320, height = 200;
-            if (i & 1) { width = 256; height = 160; }
-            std::cout << "$" << clr::hex(i,2) << " | ";
-            // Over-Scan
-            int HS = 8, VS = 8;
-            switch (i&7) {
-                case 0:  { HS = 1; VS = 1; break; }
-                case 1:  { HS = 1; VS = 1; break; }
-                case 2:  { HS = 1; VS = 2; break; }
-                case 3:  { HS = 1; VS = 2; break; }
-                case 4:  { HS = 2; VS = 1; break; }
-                case 5:  { HS = 2; VS = 1; break; }               
-                case 6:  { HS = 2; VS = 2; break; }
-                case 7:  { HS = 2; VS = 2; break; }
-            }
-            std::cout << (width/HS) << " | ";
-            std::cout << (height/VS) << " | ";
-            std::cout << (width/HS)/8 << " | ";
-            std::cout << (height/VS)/8 << " | ";
-            std::cout << (((width/HS)/8) * ((height/VS)/8)) * 2 << " |\n";
-        }
-        std::cout << "--- \n";
-
-        // display the standard graphics modes:
-        std::cout << "\n## Standard Graphics Modes:\n\n";
-        std::cout << "| MODE | WIDTH | HEIGHT |  1-bpp | COLORS | BUFFER |\n";
-        std::cout << "|:----:|:-----:|:------:|:------:|:------:|:------:|\n";
-        for (int i=0; i < 32; i++) {
-            int width = 320, height = 200;
-            //if (i%8==0) std::cout << std::endl;
-            if (i & 1) { width = 256; height = 160; }
-            std::cout << "| $" << clr::hex(i,2) << " | ";
-            // Over-Scan
-            int HS = 8, VS = 8;
-            switch (i&7) {
-                case 0:  { HS = 1; VS = 1; break; }
-                case 1:  { HS = 1; VS = 1; break; }
-                case 2:  { HS = 1; VS = 2; break; }
-                case 3:  { HS = 1; VS = 2; break; }
-                case 4:  { HS = 2; VS = 1; break; }
-                case 5:  { HS = 2; VS = 1; break; }               
-                case 6:  { HS = 2; VS = 2; break; }
-                case 7:  { HS = 2; VS = 2; break; }
-            }
-            std::cout << (width/HS) << " | ";
-            std::cout << (height/VS) << " | ";
-
-            int b = 1<<((i>>3) & 7);
-            int buffer = ((width/HS) * (height/VS))/8;
-            std::cout << buffer << " | ";
-
-            switch (b) {
-                case 1:  { std::cout << "2-colors | ";      buffer *= 1; break; }
-                case 2:  { std::cout << "4-colors | ";      buffer *= 2; break; }
-                case 4:  { std::cout << "16-colors | ";     buffer *= 4; break; }
-                case 8:  { std::cout << "256-colors | ";    buffer *= 8; break; }
-            }
-            if (buffer > 8000)
-                std::cout << "(" << buffer << ")*" << " |\n";
-            else
-                std::cout << buffer << " |\n";                
-        }
-        std::cout << "* Modes with buffers > 8000 will have their color depth reduced until the buffer fits.\n";
-        std::cout << "--- \n";
-
-        // display the extended graphics modes:
-        std::cout << "\n# Extended Graphics Modes:\n";
-        std::cout << "\n## Extended Bitmap Modes:\n";
-        std::cout << "| MODE | WIDTH | HEIGHT |  1-bpp | COLORS | BUFFER |\n";
-        std::cout << "|:----:|:-----:|:------:|:------:|:------:|:------:|\n";
-        for (int i=0; i < 32; i++) {
-            int width = 320, height = 200;
-            //if (i%8==0) std::cout << std::endl;
-            if (i & 1) { width = 256; height = 160; }
-            std::cout << "| $" << clr::hex(i,2) << " | ";
-            // Over-Scan
-            int HS = 8, VS = 8;
-            switch (i&7) {
-                case 0:  { HS = 1; VS = 1; break; }
-                case 1:  { HS = 1; VS = 1; break; }
-                case 2:  { HS = 1; VS = 2; break; }
-                case 3:  { HS = 1; VS = 2; break; }
-                case 4:  { HS = 2; VS = 1; break; }
-                case 5:  { HS = 2; VS = 1; break; }               
-                case 6:  { HS = 2; VS = 2; break; }
-                case 7:  { HS = 2; VS = 2; break; }
-            }
-            std::cout << (width/HS) << " | ";
-            std::cout << (height/VS) << " | ";
-
-            int b = 1<<((i>>3) & 7);
-            int buffer = ((width/HS) * (height/VS))/8;
-            std::cout << buffer << " | ";
-
-            switch (b) {
-                case 1:  { std::cout << "2-colors | ";      buffer *= 1; break; }
-                case 2:  { std::cout << "4-colors | ";      buffer *= 2; break; }
-                case 4:  { std::cout << "16-colors | ";     buffer *= 4; break; }
-                case 8:  { std::cout << "256-colors | ";    buffer *= 8; break; }
-            }
-            if (buffer > 64000)
-                std::cout << "(" << buffer << ")*" << " |\n";
-            else
-                std::cout << buffer << " |\n";                
-        }
-        std::cout << "--- \n";
-
+        DisplayModeList();
     #endif
 
 

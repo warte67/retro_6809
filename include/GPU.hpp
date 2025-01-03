@@ -73,60 +73,51 @@ private: // PRIVATE MEMBERS
     // internal hardware register states:
     Byte _gpu_enable    = ENABLE_STD | ENABLE_EXT;
 
-    // Byte _gpu_std_mode  = 0xBE;   // 0x1E = 16x10 (128x80)
-    // Byte _gpu_ext_mode  = 0xFE;   // 0xFE = 128x80 x 256-colors
 
-    // Byte _gpu_std_mode  = 0x0A;   // 0x0A = 32x20 (256x160)
-    // Byte _gpu_ext_mode  = 0xEA;   // 0xEA = 256x160 x 256-colors
+    Byte _gpu_std_mode  = 0x8B;   // 0x8B = 320x200 (40x25) Monochrome
+    Byte _gpu_ext_mode  = 0xEB;   // 0xBF = 320x200 256 colors   
 
-    // Byte _gpu_std_mode  = 0x0B;   // 0x0B = 40x25 (320x200)
-    // Byte _gpu_ext_mode  = 0xEB;   // 0x0xEB = 320x200 x 256-colors
 
-    // Byte _gpu_std_mode  = 0x1F;   // 0x1F = 20x12 (160x100) 
-    // Byte _gpu_ext_mode  = 0xBF;   // 0xBF = 160x100
+    // remove these
+                        Byte _gpu_emu_mode  = 0b00000000;
+                        bool _video_hires = false;          // true: 640x400, false: 512x384 
+                        float _screen_width = 0.0f;
+                        float _screen_height = 0.0f;
 
-    // Byte _gpu_std_mode  = 0x8B;   // 0x8B = 320x200 (40x25) Monochrome
-    // Byte _gpu_ext_mode  = 0xEB;   // 0xBF = 320x200 256 colors
-    
-    Byte _gpu_std_mode  = 0x05; //0x04 seg fault?
-    Byte _gpu_ext_mode  = 0x85; //0x84 seg fault?
-    
+                        // standard display flags
+                        bool _is_std_text_mode = false;
+                        bool _is_std_bitmap_mode = false;
+                        Byte _std_color_depth = 0;
+                        float _std_overscan_horiz = 1.0f;
+                        float _std_overscan_vert = 1.0f;
+                        float _std_width = 0.0f;
+                        float _std_height = 0.0f;
 
-    Byte _gpu_emu_mode  = 0b00000000;
-    bool _video_hires = false;          // true: 640x400, false: 512x384 
-    float _screen_width = 0.0f;
-    float _screen_height = 0.0f;
+                        // extended display flags
+                        bool _is_ext_tile_mode = false;
+                        bool _is_ext_bitmap_mode = false;
+                        Byte _ext_color_depth = 0;
+                        float _ext_overscan_horiz = 1.0f;
+                        float _ext_overscan_vert = 1.0f;
+                        float _ext_width = 0.0f;
+                        float _ext_height = 0.0f;
+    // These need to be removed
 
-    // standard display flags
-    bool _is_std_text_mode = false;
-    bool _is_std_bitmap_mode = false;
-    Byte _std_color_depth = 0;
-    float _std_overscan_horiz = 1.0f;
-    float _std_overscan_vert = 1.0f;
-    float _std_width = 0.0f;
-    float _std_height = 0.0f;
 
-    // extended display flags
-    bool _is_ext_tile_mode = false;
-    bool _is_ext_bitmap_mode = false;
-    Byte _ext_color_depth = 0;
-    float _ext_overscan_horiz = 1.0f;
-    float _ext_overscan_vert = 1.0f;
-    float _ext_width = 0.0f;
-    float _ext_height = 0.0f;
+    // THESE NEED TO BE REVISED
+                        Byte _change_gpu_enable(Byte data);
+                        Byte _change_std_mode(Byte data);
+                        Byte _change_ext_mode(Byte data);
+                        Byte _change_emu_mode(Byte data);
+                        void _render_extended_graphics();
+                        void _render_standard_graphics();
+                        void _update_text_buffer();
+                        // void _update_tile_buffer();
+    // THESE NEED TO BE REVISED
 
-    Byte _change_gpu_enable(Byte data);
-    Byte _change_std_mode(Byte data);
-    Byte _change_ext_mode(Byte data);
-    Byte _change_emu_mode(Byte data);
-    void _render_extended_graphics();
-    void _render_standard_graphics();
     void _setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_index, bool bIgnoreAlpha);
     void _build_palette();
-    void _update_text_buffer();
-    // void _update_tile_buffer();
     void _clear_texture(SDL_Texture* texture, Byte red, Byte grn, Byte blu, Byte alpha);
-
 
 	// SDL stuff
     int initial_width = 640*2.125;
