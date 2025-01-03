@@ -246,7 +246,12 @@ bool GPU::OnInit()
     int bfr_size = 64*1024;
     _ext_video_buffer.reserve(bfr_size);
     
-    for (int i=0; i<bfr_size; i++) _ext_video_buffer[i] = rand() % 256; // fill with random data
+    // for (int i=0; i<bfr_size; i++) _ext_video_buffer[i] = rand() % 256; // fill with random data
+
+    // initialize the font glyph buffer
+    for (int i=0; i<256; i++)
+        for (int r=0; r<8; r++)
+            _gfx_glyph_data[i][r] = font8x8_system[i][r];    
 
     std::cout << clr::indent() << clr::CYAN << "GPU::OnInit() Exit" << clr::RETURN;
     return true;
@@ -392,7 +397,7 @@ bool GPU::OnEvent(SDL_Event* evnt)
             if (evnt->key.key == SDLK_V)
             {   // [V] Toggle VSYNC
                 Byte data = Memory::Read( MAP(GPU_EMULATION) );
-                if (data & 0b10000000) {
+                if (data &  0b10000000) {
                     data &= 0b01111111;
                 } else {
                     data |= 0b10000000;
@@ -403,10 +408,10 @@ bool GPU::OnEvent(SDL_Event* evnt)
             if (evnt->key.key == SDLK_F)
             {   // [F] Toggle Fullscreen
                 Byte data = Memory::Read( MAP(GPU_EMULATION) );
-                if (data & 0b01000000) {
-                    data &= 0b10111111;
+                if (data &  0b0100'0000) {
+                    data &= 0b1011'1111;
                 } else {
-                    data |= 0b01000000;
+                    data |= 0b0100'0000;
                 }
                 Memory::Write(MAP(GPU_EMULATION), data);
             } // END: if (evnt->key.key == SDLK_F)
@@ -414,24 +419,48 @@ bool GPU::OnEvent(SDL_Event* evnt)
             // [E] Extended Display Enable Toggle
             if (evnt->key.key == SDLK_E)
             {
-                Byte data = Memory::Read( MAP(GPU_ENABLE) );
-                if (data & 0b00000100) {
-                    data &= 0b11111011;
-                } else {
-                    data |= 0b00000100;
+                SDL_Keymod mod = SDL_GetModState();
+                if (mod & SDL_KMOD_SHIFT)
+                { // [SHIFT] + [E]  // toggle between tilemap and graphics mode
+                    Byte data = Memory::Read( MAP(GPU_EXT_MODE) );
+                    if (data &  0b1000'0000) {
+                        data &= 0b0111'1111;
+                    } else {
+                        data |= 0b1000'0000;
+                    }
+                    Memory::Write(MAP(GPU_EXT_MODE), data);
+                } else { // [E]
+                    Byte data = Memory::Read( MAP(GPU_ENABLE) );
+                    if (data &  0b0000'0100) {
+                        data &= 0b1111'1011;
+                    } else {
+                        data |= 0b0000'0100;
+                    }
+                    Memory::Write(MAP(GPU_ENABLE), data);
                 }
-                Memory::Write(MAP(GPU_ENABLE), data);
             }
             // [S] Standard Display Enable Toggle
             if (evnt->key.key == SDLK_S)
             {
-                Byte data = Memory::Read( MAP(GPU_ENABLE) );
-                if (data & 0b00001000) {
-                    data &= 0b11110111;
-                } else {
-                    data |= 0b00001000;
+                SDL_Keymod mod = SDL_GetModState();
+                if (mod & SDL_KMOD_SHIFT)
+                { // [SHIFT] + [S]  // toggle between text and graphics mode
+                    Byte data = Memory::Read( MAP(GPU_STD_MODE) );
+                    if (data &  0b1000'0000) {
+                        data &= 0b0111'1111;
+                    } else {
+                        data |= 0b1000'0000;
+                    }
+                    Memory::Write(MAP(GPU_STD_MODE), data);
+                } else { // [S]
+                    Byte data = Memory::Read( MAP(GPU_ENABLE) );
+                    if (data &  0b0000'1000) {
+                        data &= 0b1111'0111;
+                    } else {
+                        data |= 0b0000'1000;
+                    }
+                    Memory::Write(MAP(GPU_ENABLE), data);
                 }
-                Memory::Write(MAP(GPU_ENABLE), data);
             }
 
             // active monitor [1-4]
@@ -514,18 +543,24 @@ bool GPU::OnUpdate(float fElapsedTime)
         SDL_SetWindowTitle(pWindow, Bus::GetTitle().c_str());
         // std::cout << "FPS: " << Bus::FPS() << std::endl;
 
+        // animate some background pixels
         int bfr_size = 64*1024;
         static Byte c = 0;
         for (int i=0; i<bfr_size; i++) { _ext_video_buffer[i] = c++; } 
         c++;
 
+        // animate some foreground data
+        static Byte data = 0;
+        static Byte color = 0x00;
+        // for (int i=MAP(VIDEO_START); i<MAP(VIDEO_TOP); i++) { Memory::Write(i, data++);  }
+        for (int i=MAP(VIDEO_START); i<MAP(VIDEO_TOP); i+=2) { 
+            // if (data ==0)  color++; 
+            Memory::Write(i+0, color++);  
+            Memory::Write(i+1, data++);  
+        }
     }
     runningTime += fElapsedTime;
     // std::cout << fElapsedTime << std::endl;
-
-
-    Word *pixels;
-    int pitch;
     
     // is extended graphics enabled?
     if (Memory::Read(GPU_ENABLE) & 0b00000100)
@@ -533,45 +568,12 @@ bool GPU::OnUpdate(float fElapsedTime)
         _render_extended_graphics();       
     }
 
-    // // is standard graphics enabled?
-    // if (Memory::Read(GPU_ENABLE) & 0b00001000)
-    // {
-    //     _render_standard_graphics();
-    // }
-
+    // is standard graphics enabled?
     if (Memory::Read(GPU_ENABLE) & 0b00001000)
-    // if (false)
-    { // Fill the Standard Display with Some Text
-        SDL_LockTexture(pStd_Texture, NULL, (void **)&pixels, &pitch); // Lock the texture for write accesspExt_Texture
-        // Byte glyph = '@';
-        int ch = 0;
-        //std::string hello = "Hello, World!";        
-        std::string hello = clr::pad(Bus::GetTitle(), _std_width/8);
-        for (auto &g : hello) {
-            Byte glyph = (int)g;
-            for (int y=0; y<8; y++) {
-                for (int h=0; h<8; h++) {
-                    int x = h + (ch*8); 
-                    int bit = 1 << (7-h);
-                    Word a = 12;
-                    Word r = 0;
-                    Word g = 0;
-                    Word b = 0;
-                    Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));
-                    if (font8x8_system[glyph][y] & bit) {
-                        a = 12;
-                        r = 15;
-                        g = 15;
-                        b = 15;
-                        *dst = ( (a<<12) | (r<<8) | (g<<4) | (b) );
-                    }
-                    *dst = ( (a<<12) | (r<<8) | (g<<4) | (b) );
-                }  
-            }
-            ch++; 
-        }
-        SDL_UnlockTexture(pStd_Texture);
+    {
+        _render_standard_graphics();
     }
+
     //std::cout << clr::indent() << clr::CYAN << "GPU::OnUpdate() Exit" << clr::RETURN;
     return true;
 } // END: GPU::OnUpdate()
@@ -988,7 +990,7 @@ void GPU::_render_extended_graphics()
     //                 10: 16 colors, 
     //                 11: 256 colors
     int bpp = ((Memory::Read(GPU_EXT_MODE) & 0b0110'0000) >> 5) & 0b000'0011;
-    bpp = 1<<bpp;
+    bpp = 1<<bpp; // 1, 2, 4, or 8
 
     //    - bits 3-4 = horizontal overscan: 
     //                 00:H/1 (512 or 640)
@@ -1026,9 +1028,15 @@ void GPU::_render_extended_graphics()
         case 1: _width = 640/dh; _height = 400/dv; break;
     }
 
+
+    // clear the extended texture
+    _clear_texture(pExt_Texture, 0, 0, 0, 0);
+
     if (bIsTiled) {
         // TODO: render tiled graphics
-        std::cout << "Displaying extended tilemap buffer" << std::endl;
+        // std::cout << "Displaying extended tilemap buffer" << std::endl;
+
+        // _update_tile_buffer();
     } else {
         // display the extended bitmap buffer
         Word pixel_index = 0x0000;
@@ -1045,14 +1053,12 @@ void GPU::_render_extended_graphics()
                     // 256 color mode
                     if (bpp == 8)
                     {
-    // printf("256-colors\n");
                         Byte index = _ext_video_buffer[pixel_index++];
                         _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
                     }
                     // 16 color mode
                     else if (bpp == 4)
                     {
-    // printf("16-colors\n");
                         Byte data = _ext_video_buffer[pixel_index++];
                         Byte index = (data >> 4);
                         _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
@@ -1062,7 +1068,6 @@ void GPU::_render_extended_graphics()
                     // 4 color mode
                     else if (bpp == 2)
                     {
-    // printf("4-colors\n");
                         Byte data = _ext_video_buffer[pixel_index++];
                         Byte index = (data >> 6) & 0x03;
                         _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
@@ -1076,7 +1081,6 @@ void GPU::_render_extended_graphics()
                     // 2 color mode
                     else if (bpp == 1)
                     {
-    // printf("2-colors\n");
                         Byte data = _ext_video_buffer[pixel_index++];
                         Byte index = (data >> 7) & 1;
                         _setPixel_unlocked(pixels, pitch, x++, y, index, true); 
@@ -1095,55 +1099,199 @@ void GPU::_render_extended_graphics()
                         index = (data >> 0) & 1;
                         _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
                     }
-                    // if (pixel_index > _ext_video_buffer.size())
-                    //     Bus::Error("Pixel index out of range");
+                    if (pixel_index >  _ext_video_buffer.capacity()) {
+                        std::string err = "Pixel index out of range: " + std::to_string(pixel_index);
+                        Bus::Error(err.c_str());
+                        return;
+                    }
                 }
             }
             SDL_UnlockTexture(pExt_Texture); 
-        }
-
-        
+        }        
     }
-
-
 } // END: GPU::_render_extended_graphics()
 
 void GPU::_render_standard_graphics()
 {
     //    GPU_STD_MODE          = 0xFE01, // (Byte) Standard Graphics Mode
+    int _width = _std_width;
+    int _height = _std_height;
 
     //    - bit  7   = 0: screen is text, 
     //                 1: screen is bitmap
-    // ...
+    bool bIsText = (Memory::Read(GPU_STD_MODE) & 0x80) == 0x80;
 
     //    - bits 5-6 = bitmap color depth:
     //                 00: 2 colors,
     //                 01: 4 colors,
     //                 10: 16 colors, 
     //                 11: 256 colors
-    // ...
+    int bpp = ((Memory::Read(GPU_STD_MODE) & 0b0110'0000) >> 5) & 0b000'0011;
+    bpp = 1<<bpp; // 1, 2, 4, or 8
 
     //    - bits 3-4 = horizontal overscan: 
     //                 00:H/1 (512 or 640)
     //                 01:H/2 (256 or 320)
     //                 10:H/3 (170 or 213)
     //                 11:H/4 (128 or 160)
-    // ...
+    int dh = ((Memory::Read(GPU_STD_MODE) & 0b0001'1000) >> 3) & 0b000'0011;
+    switch(dh) {
+        case 0: dh = 1; break;
+        case 1: dh = 2; break;
+        case 2: dh = 3; break;
+        case 3: dh = 4; break;
+    }
 
     //    - bits 1-2 = vertical overscan: 
     //                 00:V/1 (320 or 400)
     //                 01:V/2 (160 or 200)
     //                 10:V/3 (106 or 133)
     //                 11:V/4 (80 or 100)
-    // ...
+    int dv = ((Memory::Read(GPU_STD_MODE) & 0b0000'0110) >> 1) & 0b000'0011;
+    switch(dv) {
+        case 0: dv = 1; break;
+        case 1: dv = 2; break;
+        case 2: dv = 3; break;
+        case 3: dv = 4; break;
+    }
 
     //    - bit  0   = Video Timing:
     //                 0: H:512 x V:320
     //                 1: H:640 x V:400
     //                 (Overrides EXT_MODE)
-    // ...
+    int timing = (Memory::Read(GPU_STD_MODE) & 0b0000'0001) & 0b000'0001;
+    switch (timing) {
+        case 0: _width = 512/dh; _height = 320/dv; break;
+        case 1: _width = 640/dh; _height = 400/dv; break;
+    }
 
+    // clear the standard texture
+    _clear_texture(pStd_Texture, 0, 0, 0, 0);
+
+    // Render the Standard Display Buffer
+    if (bIsText) {
+        // display the standard text buffer
+        _update_text_buffer();        
+    } else {
+        // display the standard bitmap buffer
+        Word pixel_index = MAP(VIDEO_START);
+        void *pixels;
+        int pitch;
+        if (!SDL_LockTexture(pStd_Texture, NULL, (void **)&pixels, &pitch))
+            Bus::Error(SDL_GetError());	
+        else
+        {
+            for (int y = 0; y < _height; y++)
+            {
+                for (int x = 0; x < _width; )
+                {
+                    // 256 color mode
+                    if (bpp == 8)
+                    {
+                        // Byte index = _ext_video_buffer[pixel_index++];
+                        Byte index = Memory::Read(pixel_index++);
+                        _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    }
+                    // 16 color mode
+                    else if (bpp == 4)
+                    {
+                        //Byte data = _ext_video_buffer[pixel_index++];
+                        Byte data = Memory::Read(pixel_index++);
+                        Byte index = (data >> 4);
+                        _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                        index = (data & 0x0f);
+                        _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    }
+                    // 4 color mode
+                    else if (bpp == 2)
+                    {
+                        //Byte data = _ext_video_buffer[pixel_index++];
+                        Byte data = Memory::Read(pixel_index++);
+                        Byte index = (data >> 6) & 0x03;
+                        _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                        index = (data >> 4) & 0x03;
+                        _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                        index = (data >> 2) & 0x03;
+                        _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                        index = (data >> 0) & 0x03;
+                        _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    }
+                    // 2 color mode
+                    else if (bpp == 1)
+                    {
+                        //Byte data = _ext_video_buffer[pixel_index++];
+                        Byte data = Memory::Read(pixel_index++);
+                        Byte index = (data >> 7) & 1;
+                        _setPixel_unlocked(pixels, pitch, x++, y, index, true); 
+                        index = (data >> 6) & 1;
+                        _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                        index = (data >> 5) & 1;
+                        _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                        index = (data >> 4) & 1;
+                        _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                        index = (data >> 3) & 1;
+                        _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                        index = (data >> 2) & 1;
+                        _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                        index = (data >> 1) & 1;
+                        _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                        index = (data >> 0) & 1;
+                        _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    }
+                    if (pixel_index > MAP(VIDEO_END)) {
+                        std::string err = "Pixel index out of range: $" + clr::hex(pixel_index, 4);
+                        Bus::Error(err.c_str());
+                        return;
+                    }
+                }
+            }
+            SDL_UnlockTexture(pStd_Texture); 
+        }        
+    }
 } // END: GPU::_render_standard_graphics()
+
+void GPU::_update_text_buffer() {
+
+    bool ignore_alpha = false;
+    void *pixels;
+    int pitch;
+
+    // lock the standard texture
+    if (!SDL_LockTexture(pStd_Texture, NULL, &pixels, &pitch)) {
+        Bus::Error(SDL_GetError());
+    }
+    else
+    { // Render the text
+        Byte col = _std_width / 8;
+        Byte row = _std_height / 8;
+        Word end = ((col*row)*2) + VIDEO_START;
+        // Word end  = VIDEO_START+128;
+		Word addr = VIDEO_START;
+		for (; addr < end; addr += 2)
+		{
+			Byte at = Memory::Read(addr+0, true);
+			Byte ch = Memory::Read(addr+1, true);
+			Byte bg = at >> 4;
+			Byte fg = at & 0x0f;
+			Word index = addr - VIDEO_START;
+			Byte width = _std_width / 8;
+			int x = ((index / 2) % width) * 8;
+			int y = ((index / 2) / width) * 8;
+			for (int v = 0; v < 8; v++)
+			{
+				for (int h = 0; h < 8; h++)
+				{
+					int color = bg;
+                    Byte gd = GetGlyphData(ch, v);
+					if (gd & (1 << (7 - h)))
+						color = fg;
+					_setPixel_unlocked(pixels, pitch, x + h, y + v, color, ignore_alpha);
+				}
+			}
+		}
+        SDL_UnlockTexture(pStd_Texture); 
+    }
+} 
 
 /**
  * Sets a pixel in the given surface without locking the surface.
@@ -1222,6 +1370,29 @@ void GPU::_setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_i
     }
 } // END: GPU::_setPixel_unlocked()
 
+void GPU::_clear_texture(SDL_Texture* texture, Byte r, Byte g, Byte b, Byte a)
+{
+    void *pixels;
+    int pitch;
+    if (!SDL_LockTexture(texture, NULL, &pixels, &pitch)) {
+        Bus::Error(SDL_GetError());
+    } else {
+        for (int y = 0; y < _std_height; y++)
+        {
+            for (int x = 0; x < _std_width; x++)
+            {
+                Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));
+                *dst = (
+                    (a<<12) | 
+                    (r<<8)  | 
+                    (g<<4)  | 
+                    (b<<0) );          
+
+            }
+        }
+        SDL_UnlockTexture(texture); 
+    }    
+}
 
 /**
  * Initializes the palette data by filling it with the following:

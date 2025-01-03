@@ -44,6 +44,8 @@ public: // PUBLIC ACCESSORS
     SDL_Window* GetWindow() { return pWindow; }         // get the SDL window
     SDL_Renderer* GetRenderer() { return pRenderer; }   // get the SDL renderer
 
+    const Byte GetGlyphData(Byte index, Byte row) { return _gfx_glyph_data[index][row]; }
+
     // palette stuff
     union PALETTE {
         Word color;
@@ -71,7 +73,7 @@ private: // PRIVATE MEMBERS
     // internal hardware register states:
     Byte _gpu_enable    = ENABLE_STD | ENABLE_EXT;
 
-    // Byte _gpu_std_mode  = 0x1E;   // 0x1E = 16x10 (128x80)
+    // Byte _gpu_std_mode  = 0xBE;   // 0x1E = 16x10 (128x80)
     // Byte _gpu_ext_mode  = 0xFE;   // 0xFE = 128x80 x 256-colors
 
     // Byte _gpu_std_mode  = 0x0A;   // 0x0A = 32x20 (256x160)
@@ -83,8 +85,9 @@ private: // PRIVATE MEMBERS
     // Byte _gpu_std_mode  = 0x1F;   // 0x1F = 20x12 (160x100) 
     // Byte _gpu_ext_mode  = 0xBF;   // 0xBF = 160x100
 
-    // Byte _gpu_std_mode  = 0x01;   // 0x1F = 20x12 (160x100) 
-    // Byte _gpu_ext_mode  = 0x81;   // 0xBF = 160x100
+    // Byte _gpu_std_mode  = 0x8B;   // 0x8B = 320x200 (40x25) Monochrome
+    // Byte _gpu_ext_mode  = 0xEB;   // 0xBF = 320x200 256 colors
+    
 
     Byte _gpu_emu_mode  = 0b00000000;
     bool _video_hires = false;          // true: 640x400, false: 512x384 
@@ -117,10 +120,12 @@ private: // PRIVATE MEMBERS
     void _render_standard_graphics();
     void _setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_index, bool bIgnoreAlpha);
     void _build_palette();
+    void _update_text_buffer();
+    // void _update_tile_buffer();
+    void _clear_texture(SDL_Texture* texture, Byte red, Byte grn, Byte blu, Byte alpha);
+
 
 	// SDL stuff
-    // int initial_width = 640*2.75;
-    // int initial_height = 400*2.75;
     int initial_width = 640*2.125;
     int initial_height = 400*2.125;
 	SDL_Window* pWindow = nullptr;
@@ -133,9 +138,12 @@ private: // PRIVATE MEMBERS
 	Uint32 window_flags = SDL_WINDOW_RESIZABLE;
     Uint32 renderer_flags = SDL_RENDERER_VSYNC_DISABLED;
 
-    std::vector<PALETTE> _palette;          // color palette
+    // Glyph and Palette Data
     std::vector<Byte> _ext_video_buffer;    // 64k extended video buffer
-
+    std::vector<PALETTE> _palette;          // color palette
+    Byte _gfx_pal_idx = 0x00;               // GFX_PAL_IDX
+    Byte _gfx_glyph_idx = 0x00;             // GFX_GLYPH_IDX
+    Byte _gfx_glyph_data[256][8]{0};        // GFX_GLYPH_DATA (Customizeable)
 
 
     int _num_displays;
