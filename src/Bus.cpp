@@ -484,8 +484,7 @@ bool Bus::_onEvent(SDL_Event* __na)
         }
         // forward the event to all of the memory devices
         if (_memory.OnEvent(&evnt) == false)
-            return false;
-	
+            return false;	
     }     
     return true;
 }
