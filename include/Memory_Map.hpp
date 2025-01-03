@@ -49,7 +49,43 @@ enum MEMMAP
     KERNEL_TOP            = 0xFE00, // Top of Kernel Rom Space
 
     GPU_DEVICE            = 0xFE00, // START: GPU Device Hardware Registers
-    GPU_ENABLE            = 0xFE00, // (Byte) Bitflag Enables
+    GPU_OPTIONS           = 0xFE00, // (Byte) Bitflag Enables
+                                    //    - bit 7    = Extended Bitmap:
+                                    //                  0: Tilemap Display
+                                    //                  1: Bitmap Display
+                                    //    - bits 5-6 = Extended Color Mode:
+                                    //                  00: 2-Colors
+                                    //                  01: 4-Colors
+                                    //                  10: 16-Colors
+                                    //                  11: 256-Colors
+                                    //    - bits 4   = Extended Display Enable
+                                    //                 0: Disabled
+                                    //                 1: Enabled
+                                    //    - bits 3   = Application Screen Mode
+                                    //                 0: Windowed
+                                    //                 1: Fullscreen
+                                    //    - bits 2   = Debug Enable
+                                    //                 0: Disabled
+                                    //                 1: Enabled
+                                    //    - bits 1   = Sprite Enable
+                                    //                 0: Disabled
+                                    //                 1: Enabled
+                                    //    - bit  0   = Standard Display Enable
+                                    //                 0: Disabled
+                                    //                 1: Enabled
+                                    // 
+    GPU_MODE              = 0xFE01, // (Byte) Bitflag Enables
+                                    //    - bit 7    = Standard Bitmap:
+                                    //                  0: Text Display
+                                    //                  1: Bitmap Display
+                                    //    - bits 5-6 = Standard Color Mode:
+                                    //                  00: 2-Colors
+                                    //                  01: 4-Colors
+                                    //                  10: 16-Colors
+                                    //                  11: 256-Colors
+                                    //    - bits 0-4 = Display Mode (0-31)
+                                    // 
+    GPU_ENABLE            = 0xFE02, // (Byte) Bitflag Enables
                                     //    - bits 5-7 = (reserved)
                                     //    - bits 3   = 0: Disable Standard Mode,
                                     //                 1: Enable Standard Mode
@@ -60,7 +96,7 @@ enum MEMMAP
                                     //    - bit  0   = 0: Disable Mouse Cursor,
                                     //                 1: Enable Mouse Cursor
                                     // 
-    GPU_STD_MODE          = 0xFE01, // (Byte) Standard Graphics Mode
+    GPU_STD_MODE          = 0xFE03, // (Byte) Standard Graphics Mode
                                     //    - bit  7   = 0: screen is text, 
                                     //                 1: screen is bitmap
                                     //    - bits 5-6 = bitmap color depth:
@@ -83,7 +119,7 @@ enum MEMMAP
                                     //                 1: H:640 x V:400
                                     //                 (Overrides EXT_MODE)
                                     // 
-    GPU_EXT_MODE          = 0xFE02, // (Byte) Extended Graphics Mode
+    GPU_EXT_MODE          = 0xFE04, // (Byte) Extended Graphics Mode
                                     //    - bit  7   = 0: screen is tiled,
                                     //                 1: screen is bitmap
                                     //    - bits 5-6 = bitmap color depth:
@@ -106,7 +142,7 @@ enum MEMMAP
                                     //                 1: H:640 x V:400
                                     //                 (Overrides STD_MODE)
                                     // 
-    GPU_EMULATION         = 0xFE03, // (Byte) Emulation Flags
+    GPU_EMULATION         = 0xFE05, // (Byte) Emulation Flags
                                     //    - bit  7    = vsync: 0=off, 1=on
                                     //    - bit  6    = main: 0=windowed,
                                     //                  1=fullscreen
@@ -117,8 +153,8 @@ enum MEMMAP
                                     //    - bits 0-1  = Debug Monitor 0-3
                                     // 
 
-    HDW_RESERVED_DEVICE   = 0xFE04, // START: Reserved Register Space
-    HDW_REG_END           = 0xFFEF, // 491 bytes reserved for future use.
+    HDW_RESERVED_DEVICE   = 0xFE06, // START: Reserved Register Space
+    HDW_REG_END           = 0xFFEF, // 489 bytes reserved for future use.
 
     ROM_VECTS_DEVICE      = 0xFFF0, // START: Hardware Interrupt Vectors
     HARD_EXEC             = 0xFFF0, // EXEC Hardware Interrupt Vector

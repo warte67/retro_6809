@@ -45,7 +45,7 @@
  *          Functions   - https://patorjk.com/software/taag/#p=display&h=0&v=0&c=c%2B%2B&f=Small
  * 
  *      Class Identifier Convensions:
- *      - public should be in CamelCase (w/leading cap)
+ *      - public should be in CamelCase (w/leading= cap)
  *      - private underscore case with leading _'s
  *      - static should have leading s_
  *

@@ -44,7 +44,7 @@ public: // PUBLIC ACCESSORS
     SDL_Window* GetWindow() { return pWindow; }         // get the SDL window
     SDL_Renderer* GetRenderer() { return pRenderer; }   // get the SDL renderer
 
-    const Byte GetGlyphData(Byte index, Byte row) { return _gfx_glyph_data[index][row]; }
+    Byte GetGlyphData(Byte index, Byte row) { return _gfx_glyph_data[index][row]; }
 
     // palette stuff
     union PALETTE {

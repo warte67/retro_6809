@@ -122,81 +122,122 @@ int  GPU::OnAttach(int nextAddr)
     this->heading = "GPU Device Hardware Registers";
 
     register_node new_node;
+    
+     new_node = { "GPU_OPTIONS", nextAddr,  {   "(Byte) Bitflag Enables",
+                                "   - bit 7    = Extended Bitmap:",
+                                "                 0: Tilemap Display",
+                                "                 1: Bitmap Display",
+                                "   - bits 5-6 = Extended Color Mode:",
+                                "                 00: 2-Colors",
+                                "                 01: 4-Colors",
+                                "                 10: 16-Colors",
+                                "                 11: 256-Colors",
+                                "   - bits 4   = Extended Display Enable",
+                                "                0: Disabled",
+                                "                1: Enabled",
+                                "   - bits 3   = Application Screen Mode",
+                                "                0: Windowed",
+                                "                1: Fullscreen",
+                                "   - bits 2   = Debug Enable",
+                                "                0: Disabled",
+                                "                1: Enabled",
+                                "   - bits 1   = Sprite Enable",
+                                "                0: Disabled",
+                                "                1: Enabled",
+                                "   - bit  0   = Standard Display Enable",
+                                "                0: Disabled",
+                                "                1: Enabled",
+                                "" } }; nextAddr+=1;
+    mapped_register.push_back(new_node);    
 
-    new_node = { "GPU_ENABLE", nextAddr,  {   "(Byte) Bitflag Enables",
-                                            "   - bits 5-7 = (reserved)",
-                                            "   - bits 3   = 0: Disable Standard Mode,",
-                                            "                1: Enable Standard Mode",   
-                                            "   - bit  2   = 0: Disable Extended Mode,",
-                                            "                1: Enable Extended Mode",
-                                            "   - bit  1   = 0: Disable Sprites,",
-                                            "                1: Enable Sprites",
-                                            "   - bit  0   = 0: Disable Mouse Cursor,",
-                                            "                1: Enable Mouse Cursor",
-                                            "" } }; nextAddr+=1;
+     new_node = { "GPU_MODE", nextAddr,  {   "(Byte) Bitflag Enables",
+                                "   - bit 7    = Standard Bitmap:",
+                                "                 0: Text Display",
+                                "                 1: Bitmap Display",
+                                "   - bits 5-6 = Standard Color Mode:",
+                                "                 00: 2-Colors",
+                                "                 01: 4-Colors",
+                                "                 10: 16-Colors",
+                                "                 11: 256-Colors",
+                                "   - bits 0-4 = Display Mode (0-31)",
+                                "" } }; nextAddr+=1;
     mapped_register.push_back(new_node);
+// REMOVE THESE
+                        new_node = { "GPU_ENABLE", nextAddr,  {   "(Byte) Bitflag Enables",
+                                "   - bits 5-7 = (reserved)",
+                                "   - bits 3   = 0: Disable Standard Mode,",
+                                "                1: Enable Standard Mode",   
+                                "   - bit  2   = 0: Disable Extended Mode,",
+                                "                1: Enable Extended Mode",
+                                "   - bit  1   = 0: Disable Sprites,",
+                                "                1: Enable Sprites",
+                                "   - bit  0   = 0: Disable Mouse Cursor,",
+                                "                1: Enable Mouse Cursor",
+                                "" } }; nextAddr+=1;
+                        mapped_register.push_back(new_node);
 
-    new_node = { "GPU_STD_MODE", nextAddr,  {   "(Byte) Standard Graphics Mode",
-                                            "   - bit  7   = 0: screen is text, ",
-                                            "                1: screen is bitmap",
-                                            "   - bits 5-6 = bitmap color depth:",
-                                            "                00: 2 colors,",
-                                            "                01: 4 colors,",
-                                            "                10: 16 colors, ",
-                                            "                11: 256 colors",
-                                            "   - bits 3-4 = horizontal overscan: ",
-                                            "                00:H/1 (512 or 640)",
-                                            "                01:H/2 (256 or 320)",
-                                            "                10:H/3 (170 or 213)",
-                                            "                11:H/4 (128 or 160)",
-                                            "   - bits 1-2 = vertical overscan: ",
-                                            "                00:V/1 (320 or 400)",
-                                            "                01:V/2 (160 or 200)",
-                                            "                10:V/3 (106 or 133)",
-                                            "                11:V/4 (80 or 100)",
-                                            "   - bit  0   = Video Timing:",
-                                            "                0: H:512 x V:320",
-                                            "                1: H:640 x V:400",
-                                            "                (Overrides EXT_MODE)",
-                                            "" } }; nextAddr+=1;
-    mapped_register.push_back(new_node);
+                        new_node = { "GPU_STD_MODE", nextAddr,  {   "(Byte) Standard Graphics Mode",
+                                "   - bit  7   = 0: screen is text, ",
+                                "                1: screen is bitmap",
+                                "   - bits 5-6 = bitmap color depth:",
+                                "                00: 2 colors,",
+                                "                01: 4 colors,",
+                                "                10: 16 colors, ",
+                                "                11: 256 colors",
+                                "   - bits 3-4 = horizontal overscan: ",
+                                "                00:H/1 (512 or 640)",
+                                "                01:H/2 (256 or 320)",
+                                "                10:H/3 (170 or 213)",
+                                "                11:H/4 (128 or 160)",
+                                "   - bits 1-2 = vertical overscan: ",
+                                "                00:V/1 (320 or 400)",
+                                "                01:V/2 (160 or 200)",
+                                "                10:V/3 (106 or 133)",
+                                "                11:V/4 (80 or 100)",
+                                "   - bit  0   = Video Timing:",
+                                "                0: H:512 x V:320",
+                                "                1: H:640 x V:400",
+                                "                (Overrides EXT_MODE)",
+                                "" } }; nextAddr+=1;
+                        mapped_register.push_back(new_node);
 
-    new_node = { "GPU_EXT_MODE", nextAddr,  {   "(Byte) Extended Graphics Mode",
-                                            "   - bit  7   = 0: screen is tiled,",
-                                            "                1: screen is bitmap",
-                                            "   - bits 5-6 = bitmap color depth:",
-                                            "                00: 2 colors,",
-                                            "                01: 4 colors,",
-                                            "                10: 16 colors, ",
-                                            "                11: 256 colors",
-                                            "   - bits 3-4 = horizontal overscan: ",
-                                            "                00:H/1 (512 or 640)",
-                                            "                01:H/2 (256 or 320)",
-                                            "                10:H/3 (170 or 213)",
-                                            "                11:H/4 (128 or 160)",
-                                            "   - bits 1-2 = vertical overscan: ",
-                                            "                00:V/1 (320 or 400)",
-                                            "                01:V/2 (160 or 200)",
-                                            "                10:V/3 (106 or 133)",
-                                            "                11:V/4 (80 or 100)",
-                                            "   - bit  0   = Video Timing:",
-                                            "                0: H:512 x V:320",
-                                            "                1: H:640 x V:400",
-                                            "                (Overrides STD_MODE)",
-                                            "" } }; nextAddr+=1;
-    mapped_register.push_back(new_node);
+                        new_node = { "GPU_EXT_MODE", nextAddr,  {   "(Byte) Extended Graphics Mode",
+                                "   - bit  7   = 0: screen is tiled,",
+                                "                1: screen is bitmap",
+                                "   - bits 5-6 = bitmap color depth:",
+                                "                00: 2 colors,",
+                                "                01: 4 colors,",
+                                "                10: 16 colors, ",
+                                "                11: 256 colors",
+                                "   - bits 3-4 = horizontal overscan: ",
+                                "                00:H/1 (512 or 640)",
+                                "                01:H/2 (256 or 320)",
+                                "                10:H/3 (170 or 213)",
+                                "                11:H/4 (128 or 160)",
+                                "   - bits 1-2 = vertical overscan: ",
+                                "                00:V/1 (320 or 400)",
+                                "                01:V/2 (160 or 200)",
+                                "                10:V/3 (106 or 133)",
+                                "                11:V/4 (80 or 100)",
+                                "   - bit  0   = Video Timing:",
+                                "                0: H:512 x V:320",
+                                "                1: H:640 x V:400",
+                                "                (Overrides STD_MODE)",
+                                "" } }; nextAddr+=1;
+                        mapped_register.push_back(new_node);
 
-    new_node = { "GPU_EMULATION", nextAddr,  {    "(Byte) Emulation Flags",
-                                            "   - bit  7    = vsync: 0=off, 1=on",
-                                            "   - bit  6    = main: 0=windowed,",
-                                            "                 1=fullscreen",
-                                            "   - bit  5    = debug: 0=windowed, ",
-                                            "                 1=fullscreen",                                                                                        
-                                            "   - bit  4    = debug: 0=off, 1=on",
-                                            "   - bits 2-3  = Active Monitor 0-3",
-                                            "   - bits 0-1  = Debug Monitor 0-3",
-                                            "" } }; nextAddr+=1;
-    mapped_register.push_back(new_node);
+                        new_node = { "GPU_EMULATION", nextAddr,  {    "(Byte) Emulation Flags",
+                                "   - bit  7    = vsync: 0=off, 1=on",
+                                "   - bit  6    = main: 0=windowed,",
+                                "                 1=fullscreen",
+                                "   - bit  5    = debug: 0=windowed, ",
+                                "                 1=fullscreen",                                                                                        
+                                "   - bit  4    = debug: 0=off, 1=on",
+                                "   - bits 2-3  = Active Monitor 0-3",
+                                "   - bits 0-1  = Debug Monitor 0-3",
+                                "" } }; nextAddr+=1;
+                        mapped_register.push_back(new_node);
+    // REMOVE THESE
 
     _size = nextAddr - old_address;
     std::cout << clr::indent() << clr::CYAN << "GPU::OnAttach() Exit" << clr::RETURN;
@@ -563,13 +604,13 @@ bool GPU::OnUpdate(float fElapsedTime)
     // std::cout << fElapsedTime << std::endl;
     
     // is extended graphics enabled?
-    if (Memory::Read(GPU_ENABLE) & 0b00000100)
+    if (Memory::Read(MAP(GPU_ENABLE)) & 0b00000100)
     {
         _render_extended_graphics();       
     }
 
     // is standard graphics enabled?
-    if (Memory::Read(GPU_ENABLE) & 0b00001000)
+    if (Memory::Read(MAP(GPU_ENABLE)) & 0b00001000)
     {
         _render_standard_graphics();
     }
@@ -599,7 +640,7 @@ bool GPU::OnRender()
     SDL_RenderClear(pRenderer);
 
     // render Extended Graphics
-    if (Memory::Read(GPU_ENABLE) & 0b00000100)
+    if (Memory::Read(MAP(GPU_ENABLE)) & 0b00000100)
     {
         // SDL_SetTextureScaleMode(pExt_Texture, SDL_SCALEMODE_LINEAR);   // blurry
         SDL_SetTextureScaleMode(pExt_Texture, SDL_SCALEMODE_NEAREST);     // clear
@@ -607,7 +648,7 @@ bool GPU::OnRender()
     }
 
     // render Standard Graphics
-    if (Memory::Read(GPU_ENABLE) & 0b00001000)
+    if (Memory::Read(MAP(GPU_ENABLE)) & 0b00001000)
     {
         // SDL_SetTextureScaleMode(pStd_Texture, SDL_SCALEMODE_LINEAR);   // blurry
         SDL_SetTextureScaleMode(pStd_Texture, SDL_SCALEMODE_NEAREST);     // clear
@@ -980,7 +1021,7 @@ void GPU::_render_extended_graphics()
     int _width = _ext_width;
     int _height = _ext_height;
 
-    Byte data = Memory::Read(GPU_EXT_MODE);
+    Byte data = Memory::Read(MAP(GPU_EXT_MODE));
 
     //    - bit  7   = 0: screen is tiled,
     //                 1: screen is bitmap
@@ -1120,7 +1161,7 @@ void GPU::_render_standard_graphics()
     int _width = _std_width;
     int _height = _std_height;
 
-    Byte data = Memory::Read(GPU_STD_MODE);
+    Byte data = Memory::Read(MAP(GPU_STD_MODE));
 
     //    - bit  7   = 0: screen is text, 
     //                 1: screen is bitmap
@@ -1270,16 +1311,16 @@ void GPU::_update_text_buffer() {
     { // Render the text
         Byte col = _std_width / 8;
         Byte row = _std_height / 8;
-        Word end = ((col*row)*2) + VIDEO_START;
+        Word end = ((col*row)*2) + MAP(VIDEO_START);
         // Word end  = VIDEO_START+128;
-		Word addr = VIDEO_START;
+		Word addr = MAP(VIDEO_START);
 		for (; addr < end; addr += 2)
 		{
 			Byte at = Memory::Read(addr+0, true);
 			Byte ch = Memory::Read(addr+1, true);
 			Byte bg = at >> 4;
 			Byte fg = at & 0x0f;
-			Word index = addr - VIDEO_START;
+			Word index = addr - MAP(VIDEO_START);
 			Byte width = _std_width / 8;
 			int x = ((index / 2) % width) * 8;
 			int y = ((index / 2) / width) * 8;
@@ -1348,13 +1389,7 @@ void GPU::_setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_i
                 (r<<8) | 
                 (g<<4) | 
                 (b)
-            );          
-            // *dst = (
-            //     (a2<<12) |       // utilize the alpha channel
-            //     (r<<8) | 
-            //     (g<<4) | 
-            //     (b)
-            // );          
+            );                
 		}	
     }
     else
