@@ -79,14 +79,17 @@ private: // PRIVATE MEMBERS
     // Byte _gpu_std_mode  = 0x0A;   // 0x0A = 32x20 (256x160)
     // Byte _gpu_ext_mode  = 0xEA;   // 0xEA = 256x160 x 256-colors
 
-    Byte _gpu_std_mode  = 0x0B;   // 0x0B = 40x25 (320x200)
-    Byte _gpu_ext_mode  = 0xEB;   // 0x0xEB = 320x200 x 256-colors
+    // Byte _gpu_std_mode  = 0x0B;   // 0x0B = 40x25 (320x200)
+    // Byte _gpu_ext_mode  = 0xEB;   // 0x0xEB = 320x200 x 256-colors
 
     // Byte _gpu_std_mode  = 0x1F;   // 0x1F = 20x12 (160x100) 
     // Byte _gpu_ext_mode  = 0xBF;   // 0xBF = 160x100
 
     // Byte _gpu_std_mode  = 0x8B;   // 0x8B = 320x200 (40x25) Monochrome
     // Byte _gpu_ext_mode  = 0xEB;   // 0xBF = 320x200 256 colors
+    
+    Byte _gpu_std_mode  = 0x8B;
+    Byte _gpu_ext_mode  = 0xEB;
     
 
     Byte _gpu_emu_mode  = 0b00000000;

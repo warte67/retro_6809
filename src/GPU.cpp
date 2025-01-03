@@ -980,16 +980,18 @@ void GPU::_render_extended_graphics()
     int _width = _ext_width;
     int _height = _ext_height;
 
+    Byte data = Memory::Read(GPU_EXT_MODE);
+
     //    - bit  7   = 0: screen is tiled,
     //                 1: screen is bitmap
-    bool bIsTiled = !(Memory::Read(GPU_EXT_MODE) & 0b1000'0000) ? true : false;
+    bool bIsTiled =  ((data & 0x80)==0);
 
     //    - bits 5-6 = bitmap color depth:
     //                 00: 2 colors,
     //                 01: 4 colors,
     //                 10: 16 colors, 
     //                 11: 256 colors
-    int bpp = ((Memory::Read(GPU_EXT_MODE) & 0b0110'0000) >> 5) & 0b000'0011;
+    int bpp = ((data & 0b0110'0000) >> 5) & 0b000'0011;
     bpp = 1<<bpp; // 1, 2, 4, or 8
 
     //    - bits 3-4 = horizontal overscan: 
@@ -997,7 +999,7 @@ void GPU::_render_extended_graphics()
     //                 01:H/2 (256 or 320)
     //                 10:H/3 (170 or 213)
     //                 11:H/4 (128 or 160)
-    int dh = ((Memory::Read(GPU_EXT_MODE) & 0b0001'1000) >> 3) & 0b000'0011;
+    int dh = ((data & 0b0001'1000) >> 3) & 0b000'0011;
     switch(dh) {
         case 0: dh = 1; break;
         case 1: dh = 2; break;
@@ -1010,7 +1012,7 @@ void GPU::_render_extended_graphics()
     //                 01:V/2 (160 or 200)
     //                 10:V/3 (106 or 133)
     //                 11:V/4 (80 or 100)
-    int dv = ((Memory::Read(GPU_EXT_MODE) & 0b0000'0110) >> 1) & 0b000'0011;
+    int dv = ((data & 0b0000'0110) >> 1) & 0b000'0011;
     switch(dv) {
         case 0: dv = 1; break;
         case 1: dv = 2; break;
@@ -1022,7 +1024,7 @@ void GPU::_render_extended_graphics()
     //                 0: H:512 x V:320
     //                 1: H:640 x V:400
     //                 (Overrides STD_MODE)
-    int timing = (Memory::Read(GPU_EXT_MODE) & 0b0000'0001) & 0b000'0001;
+    int timing = (data & 0b0000'0001) & 0b000'0001;
     switch (timing) {
         case 0: _width = 512/dh; _height = 320/dv; break;
         case 1: _width = 640/dh; _height = 400/dv; break;
@@ -1100,8 +1102,9 @@ void GPU::_render_extended_graphics()
                         _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
                     }
                     if (pixel_index >  _ext_video_buffer.capacity()) {
-                        std::string err = "Pixel index out of range: " + std::to_string(pixel_index);
-                        Bus::Error(err.c_str());
+                        // std::string err = "Pixel index out of range: " + std::to_string(pixel_index);
+                        // Bus::Error(err.c_str());
+                        SDL_UnlockTexture(pExt_Texture);
                         return;
                     }
                 }
@@ -1117,16 +1120,18 @@ void GPU::_render_standard_graphics()
     int _width = _std_width;
     int _height = _std_height;
 
+    Byte data = Memory::Read(GPU_STD_MODE);
+
     //    - bit  7   = 0: screen is text, 
     //                 1: screen is bitmap
-    bool bIsText = (Memory::Read(GPU_STD_MODE) & 0x80) == 0x80;
+    bool bIsText = ((data & 0x80)==0);
 
     //    - bits 5-6 = bitmap color depth:
     //                 00: 2 colors,
     //                 01: 4 colors,
     //                 10: 16 colors, 
     //                 11: 256 colors
-    int bpp = ((Memory::Read(GPU_STD_MODE) & 0b0110'0000) >> 5) & 0b000'0011;
+    int bpp = ((data & 0b0110'0000) >> 5) & 0b000'0011;
     bpp = 1<<bpp; // 1, 2, 4, or 8
 
     //    - bits 3-4 = horizontal overscan: 
@@ -1134,7 +1139,7 @@ void GPU::_render_standard_graphics()
     //                 01:H/2 (256 or 320)
     //                 10:H/3 (170 or 213)
     //                 11:H/4 (128 or 160)
-    int dh = ((Memory::Read(GPU_STD_MODE) & 0b0001'1000) >> 3) & 0b000'0011;
+    int dh = ((data & 0b0001'1000) >> 3) & 0b000'0011;
     switch(dh) {
         case 0: dh = 1; break;
         case 1: dh = 2; break;
@@ -1147,7 +1152,7 @@ void GPU::_render_standard_graphics()
     //                 01:V/2 (160 or 200)
     //                 10:V/3 (106 or 133)
     //                 11:V/4 (80 or 100)
-    int dv = ((Memory::Read(GPU_STD_MODE) & 0b0000'0110) >> 1) & 0b000'0011;
+    int dv = ((data & 0b0000'0110) >> 1) & 0b000'0011;
     switch(dv) {
         case 0: dv = 1; break;
         case 1: dv = 2; break;
@@ -1159,7 +1164,7 @@ void GPU::_render_standard_graphics()
     //                 0: H:512 x V:320
     //                 1: H:640 x V:400
     //                 (Overrides EXT_MODE)
-    int timing = (Memory::Read(GPU_STD_MODE) & 0b0000'0001) & 0b000'0001;
+    int timing = (data & 0b0000'0001) & 0b000'0001;
     switch (timing) {
         case 0: _width = 512/dh; _height = 320/dv; break;
         case 1: _width = 640/dh; _height = 400/dv; break;
@@ -1239,8 +1244,9 @@ void GPU::_render_standard_graphics()
                         _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
                     }
                     if (pixel_index > MAP(VIDEO_END)) {
-                        std::string err = "Pixel index out of range: $" + clr::hex(pixel_index, 4);
-                        Bus::Error(err.c_str());
+                        // std::string err = "Pixel index out of range: $" + clr::hex(pixel_index, 4);
+                        // Bus::Error(err.c_str());
+                        SDL_UnlockTexture(pStd_Texture); 
                         return;
                     }
                 }

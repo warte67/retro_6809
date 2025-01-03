@@ -75,8 +75,8 @@ std::string std_gfx_mode(unsigned char mode) {
         width = 640.0f;
         height = 400.0f;
     }
-    int w = (int)width;
-    int h = (int)height;
+    // int w = (int)width;
+    // int h = (int)height;
     float div = 1.0f;
     // mode:
     result += clr::pad("0x" + clr::hex(mode,2) + " | ", 6);
@@ -112,7 +112,8 @@ std::string std_gfx_mode(unsigned char mode) {
         case 0x03: height /= 4.0f; result += "H/4 | "; break;    
     }
     // timing
-    result += std::to_string(w) + "x" + std::to_string(h) + " | ";    
+    // result += std::to_string(w) + "x" + std::to_string(h) + " | ";    
+    result += std::to_string((int)width) + "x" + std::to_string((int)height) + " | ";    
     // text resolution
     if ((mode & 0b10000000)==0) {
         width /= 8;
@@ -137,8 +138,8 @@ std::string ext_gfx_mode(unsigned char mode) {
         width = 640.0f;
         height = 400.0f;
     }
-    int w = (int)width;
-    int h = (int)height;
+    // int w = (int)width;
+    // int h = (int)height;
     float div = 1.0f;
     // mode:
     result += clr::pad("0x" + clr::hex(mode,2) + " | ", 6);
@@ -170,7 +171,8 @@ std::string ext_gfx_mode(unsigned char mode) {
         case 0x03: height /= 4.0f; result += "H/4 | "; break;    
     }
     // timing
-    result += std::to_string(w) + "x" + std::to_string(h) + " | ";    
+    // result += std::to_string(w) + "x" + std::to_string(h) + " | ";    
+    result += std::to_string((int)width) + "x" + std::to_string((int)height) + " | ";    
 
     // displayed tilemap resolution
     if ((mode & 0b10000000)==0) {
@@ -233,7 +235,7 @@ int main() {
 
     // Bus::Error("Something like a simulated error happened!");
     
-    #define DISPLAY_MODE_LIST false
+    #define DISPLAY_MODE_LIST true
     #if DISPLAY_MODE_LIST
         // display the standard text modes:
         std::cout << clr::RETURN;
