@@ -584,9 +584,7 @@ bool GPU::OnUpdate(float fElapsedTime)
         // animate some foreground data
         static Byte data = 0;
         static Byte color = 0x00;
-        // for (int i=MAP(VIDEO_START); i<MAP(VIDEO_TOP); i++) { Memory::Write(i, data++);  }
         for (int i=MAP(VIDEO_START); i<MAP(VIDEO_TOP); i+=2) { 
-            // if (data ==0)  color++; 
             Memory::Write(i+0, color++);  
             Memory::Write(i+1, data++);  
         }
@@ -677,18 +675,18 @@ void GPU::_render_extended_graphics()
     {   // IS Extended Display In Tiled Mode?
 
         // TODO: render tiled graphics
-        std::cout << "GPU::_render_extended_graphics() ---> Displaying extended tilemap buffer" << std::endl;
+        //std::cout << "GPU::_render_extended_graphics() ---> Displaying extended tilemap buffer" << std::endl;
 
-        // _update_tile_buffer();
+        _update_tile_buffer();
     } else {
 
         int bpp = 0;
-        switch((_gpu_options & 0b0011'0000)>>4)    // extended color mode bits 5-
+        switch((_gpu_options & 0b0110'0000)>>5)    // extended color mode bits 5-
         {
-            case 0x00: bpp = 8; break;
-            case 0x01: bpp = 4; break;
-            case 0x02: bpp = 2; break;
-            case 0x03: bpp = 1; break;
+            case 0x00: bpp = 1; break;
+            case 0x01: bpp = 2; break;
+            case 0x02: bpp = 4; break;
+            case 0x03: bpp = 8; break;
         }
         // display the extended bitmap buffer
         Word pixel_index = 0x0000;
@@ -785,14 +783,13 @@ void GPU::_render_standard_graphics()
     } 
     else
     { // Standard Display Rendering Graphics
-
         int bpp = 0;
-        switch((_gpu_mode & 0b0011'0000)>>4)    // standard color mode bits 5-
+        switch((_gpu_mode & 0b0110'0000)>>5)    // standard color mode bits 5-
         {
-            case 0x00: bpp = 8; break;
-            case 0x01: bpp = 4; break;
-            case 0x02: bpp = 2; break;
-            case 0x03: bpp = 1; break;
+            case 0x00: bpp = 1; break;
+            case 0x01: bpp = 2; break;
+            case 0x02: bpp = 4; break;
+            case 0x03: bpp = 8; break;
         }
 
         // display the standard bitmap buffer
@@ -915,6 +912,38 @@ void GPU::_update_text_buffer() {
         SDL_UnlockTexture(pStd_Texture); 
     }
 } 
+
+
+void GPU::_update_tile_buffer()
+{
+    // for now just color cycle the extended video buffer
+    static Byte clr = 1;
+    static int delta = 1;
+    static Byte r = 0;
+    static Byte g = 0;
+    static Byte b = 0;
+    Byte a = 15;
+
+    static Uint64 _last_time = SDL_GetTicks();
+    if (SDL_GetTicks() - _last_time > 25) {
+        _last_time = SDL_GetTicks();
+    
+        if (clr & 0b0000'0100)  r+=delta;
+        if (clr & 0b0000'0010)  g+=delta;
+        if (clr & 0b0000'0001)  b+=delta;
+
+        // reverse delta
+        if (r == 8 || g == 8 || b == 8) { delta *= -1; }
+        if (r == 0 || g == 0 || b == 0) {
+            delta *= -1;
+            clr ++;
+            if (clr > 15)
+                clr = 1;
+        }
+    }
+    _clear_texture(pExt_Texture, r, g, b, a);
+}
+
 
 /**
  * Sets a pixel in the given surface without locking the surface.
@@ -1165,20 +1194,34 @@ Byte GPU::_verify_gpu_mode_change(Byte data, Word map_register)
                 SDL_SetWindowFullscreen(pWindow, true);
             } else {
                 SDL_SetWindowFullscreen(pWindow, false);
-            } 
-        }
-
-        // // if nothing else but the extended enable has changed
-        // if ( (data & 0b0001'0000) != (_gpu_options & 0b0001'0000) )
-        // {
-        //     if (data & 0b0001'0000) {
-        //         data &= 0b1110'1111;
-        //     } else {
-        //         data |= 0b0001'0000;
-        //     } 
-        // }
-        _gpu_options = data;
+            }             
+        }     
+        _gpu_options = data;   
     }
+
+    // toggle standard display (odd workaround)
+    if (map_register == MAP(GPU_MODE))
+    {
+        // if nothing else but the application fullscreen state has changed
+        if ( (data & 0b1000'0000) != (_gpu_mode & 0b1000'0000) )
+        {
+            if (data & 0b1000'0000) {
+                _gpu_mode |= 0b1000'0000;
+            } else {
+                _gpu_mode &= ~0b1000'0000;
+            }             
+        }     
+    }
+
+    // options
+    bool extended_is_bitmap         = (saved_options & 0x80)>>7;
+    int  extended_color_mode        = (saved_options & 0x60)>>5;
+    bool extended_display_enable    = (saved_options & 0x10)>>4;
+    bool standard_display_enable    = (saved_options & 0x01)>>0;
+    // mode
+    bool standard_is_bitmap         = (saved_mode & 0x80)>>7;
+    int  standard_color_mode        = (saved_mode & 0x60)>>5;
+    int  display_mode               = (saved_mode & 0x1F);
 
 
     int buffer_size = 0;   
@@ -1187,27 +1230,15 @@ Byte GPU::_verify_gpu_mode_change(Byte data, Word map_register)
     {    
         recalc = false;        
 
-        // options
-        bool extended_is_bitmap         = (saved_options & 0x80)>>7;
-        int  extended_color_mode        = (saved_options & 0x60)>>5;
-        bool extended_display_enable    = (saved_options & 0x10)>>4;
-        bool standard_display_enable    = (saved_options & 0x01)>>0;
-        // mode
-        bool standard_is_bitmap         = (saved_mode & 0x80)>>7;
-        int  standard_color_mode        = (saved_mode & 0x60)>>5;
-        int  display_mode               = (saved_mode & 0x1F);
-
         int width = 0;
         int height = 0;
         _display_mode_helper(display_mode, width, height);
-        _screen_width = width;
-        _screen_height = height;
-
-        // these four may not be needed, verify then remove
-                    _ext_width = width;
-                    _ext_height = height;
-                    _std_width = width;
-                    _std_height = height;
+        // _screen_width = width;
+        // _screen_height = height;
+        _ext_width = width;
+        _ext_height = height;
+        _std_width = width;
+        _std_height = height;
 
         // calculate the extended buffer size
         if (map_register == MAP(GPU_OPTIONS) )
@@ -1231,18 +1262,21 @@ Byte GPU::_verify_gpu_mode_change(Byte data, Word map_register)
                 // calculate the extended buffer size
                 if (extended_is_bitmap)
                 { // bitmap mode
-                    buffer_size = (width * height)/bpp;
-                    if (buffer_size >= 64000) 
+                    // buffer_size = ((_ext_width/bpp) * (_ext_height/bpp));
+                    buffer_size = (_ext_width * _ext_height)/bpp;
+                    if (buffer_size > 64000) 
                     { 
                         // reduce the extended color depth
                         data = (data & 0b1001'1111) | ((extended_color_mode-1)<<5);
                         recalc = true; 
+                        // std::cout << "GPU: Reducing Extended Bitmap Color Depth\n";
+                        _gpu_options = data;
                     }
                 }
                 else
                 { // tilemap mode
-                    buffer_size = ((width/16) * (height/16))/bpp;
-                    if (buffer_size >= 64000) 
+                    buffer_size = ((_ext_width/16) * (_ext_height/16))/bpp;
+                    if (buffer_size > 64000) 
                     { 
                         // reduce the extended color depth
                         data = (data & 0b1001'1111) | ((extended_color_mode-1)<<5);
@@ -1272,30 +1306,29 @@ Byte GPU::_verify_gpu_mode_change(Byte data, Word map_register)
                 // calculate the standard buffer size
                 if (standard_is_bitmap)
                 { // bitmap mode
-                    buffer_size = (width * height)/bpp;
-                    if (buffer_size >= 8000) 
+                    // buffer_size = ((_std_width/bpp) * (_std_height/bpp));
+                    buffer_size = (_std_width * _std_height)/bpp;
+                    if (buffer_size > 8000) 
                     { 
-                        // reduce the extended color depth
+                        // reduce the standard bitmap color depth
                         data = (data & 0b1001'1111) | ((standard_color_mode-1)<<5);
                         recalc = true; 
+                        std::cout << "GPU: Reducing Standard Bitmap Color Depth\n";
+                        _gpu_mode = data;
                     }
                 }
                 else
                 { // text mode
-                    buffer_size = ((width/8) * (height/8))*2;
-                    if (buffer_size >= 8000) 
+                    buffer_size = ((_std_width/8) * (_std_height/8))*2;
+                    if (buffer_size > 8000) 
                     { 
-                        // reduce the extended color depth
-                        data = (data & 0b1001'1111) | ((standard_color_mode-1)<<5);
-                        recalc = true; 
+                        // // reduce the extended color depth
+                        // data = (data & 0b1001'1111) | ((standard_color_mode-1)<<5);
+                        // recalc = true; 
                     }
                 }
             }            
         }
-        if (recalc)
-        {
-            std::cout << "GPU: Reducing Color Depth\n";
-        }   
     } while (recalc);   // buffer was too big, reduce the color depth and try again
 
     return data;

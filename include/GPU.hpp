@@ -74,20 +74,20 @@ public: // PUBLIC ACCESSORS
 private: // PRIVATE MEMBERS
     // internal hardware register states:
 
-    float _screen_width = 0.0f;
-    float _screen_height = 0.0f;
+    float _screen_width = 640.0f;
+    float _screen_height = 400.0f;
     float _ext_width = 0.0f;
     float _ext_height = 0.0f;
     float _std_width = 0.0f;
     float _std_height = 0.0f;
 
     Byte _gpu_options = 0b1111'0001;     // default: 
-    Byte _gpu_mode = 0b0100'0001;     // default:
+    Byte _gpu_mode = 0b0010'0001;     // default:
 
     void _render_extended_graphics();
     void _render_standard_graphics();
     void _update_text_buffer();
-    // void _update_tile_buffer();
+    void _update_tile_buffer();
 
     void _display_mode_helper(Byte mode, int &width, int &height);
 
