@@ -515,7 +515,7 @@ bool GPU::OnUpdate(float fElapsedTime)
     {   static Word video_mode = 0x0180;    
         static float delta_change = fElapsedTime;
         static float video_running_time = fElapsedTime;
-        if (video_running_time > delta_change + 0.500f) 
+        if (video_running_time > delta_change + 0.125f) 
         {
             delta_change = fElapsedTime;
             video_running_time = fElapsedTime;
