@@ -46,13 +46,6 @@ Byte GPU::OnRead(Word offset)
     if (offset == MAP(GPU_OPTIONS))     { data = _gpu_options;  }
     else if (offset == MAP(GPU_MODE))   { data = _gpu_mode;     }
 
-
-
-    // if (offset == MAP(GPU_ENABLE))           { data = _gpu_enable;   }
-    // else if (offset == MAP(GPU_STD_MODE))    { data = _gpu_std_mode; }
-    // else if (offset == MAP(GPU_EXT_MODE))    { data = _gpu_ext_mode; }
-    // else if (offset == MAP(GPU_EMULATION))   { data = _gpu_emu_mode; }
-
     return data;
 } // END: GPU::OnRead()
 
@@ -76,18 +69,13 @@ void GPU::OnWrite(Word offset, Byte data)
     if (offset == MAP(GPU_OPTIONS))         
     { 
         data = _verify_gpu_mode_change(data, offset);   
+        // _verify_gpu_mode_change(_gpu_mode, MAP(GPU_MODE));
     }
     else if (offset == MAP(GPU_MODE))   
     { 
         data = _verify_gpu_mode_change(data, offset);  
+        // _verify_gpu_mode_change(_gpu_options, MAP(GPU_OPTIONS));
     }
-
-
-
-    // if (offset == MAP(GPU_ENABLE))          { data = _change_gpu_enable(data); } 
-    // else if (offset == MAP(GPU_STD_MODE))   { data = _change_std_mode(data);   }  
-    // else if (offset == MAP(GPU_EXT_MODE))   { data = _change_ext_mode(data);   }
-    // else if (offset == MAP(GPU_EMULATION))  { data = _change_emu_mode(data);   }
 
     IDevice::OnWrite( offset, data);
 } // END: GPU::OnWrite()
@@ -178,82 +166,6 @@ int  GPU::OnAttach(int nextAddr)
                                 "   - bits 0-4 = Display Mode (0-31)",
                                 "" } }; nextAddr+=1;
     mapped_register.push_back(new_node);
-//// REMOVE THESE
-//                        new_node = { "GPU_ENABLE", nextAddr,  {   "(Byte) Bitflag Enables",
-//                                "   - bits 5-7 = (reserved)",
-//                                "   - bits 3   = 0: Disable Standard Mode,",
-//                                "                1: Enable Standard Mode",   
-//                                "   - bit  2   = 0: Disable Extended Mode,",
-//                                "                1: Enable Extended Mode",
-//                                "   - bit  1   = 0: Disable Sprites,",
-//                                "                1: Enable Sprites",
-//                                "   - bit  0   = 0: Disable Mouse Cursor,",
-//                                "                1: Enable Mouse Cursor",
-//                                "" } }; nextAddr+=1;
-//                        mapped_register.push_back(new_node);
-//
-//                        new_node = { "GPU_STD_MODE", nextAddr,  {   "(Byte) Standard Graphics Mode",
-//                                "   - bit  7   = 0: screen is text, ",
-//                                "                1: screen is bitmap",
-//                                "   - bits 5-6 = bitmap color depth:",
-//                                "                00: 2 colors,",
-//                                "                01: 4 colors,",
-//                                "                10: 16 colors, ",
-//                                "                11: 256 colors",
-//                                "   - bits 3-4 = horizontal overscan: ",
-//                                "                00:H/1 (512 or 640)",
-//                                "                01:H/2 (256 or 320)",
-//                                "                10:H/3 (170 or 213)",
-//                                "                11:H/4 (128 or 160)",
-//                                "   - bits 1-2 = vertical overscan: ",
-//                                "                00:V/1 (320 or 400)",
-//                                "                01:V/2 (160 or 200)",
-//                                "                10:V/3 (106 or 133)",
-//                                "                11:V/4 (80 or 100)",
-//                                "   - bit  0   = Video Timing:",
-//                                "                0: H:512 x V:320",
-//                                "                1: H:640 x V:400",
-//                                "                (Overrides EXT_MODE)",
-//                                "" } }; nextAddr+=1;
-//                        mapped_register.push_back(new_node);
-//
-//                        new_node = { "GPU_EXT_MODE", nextAddr,  {   "(Byte) Extended Graphics Mode",
-//                                "   - bit  7   = 0: screen is tiled,",
-//                                "                1: screen is bitmap",
-//                                "   - bits 5-6 = bitmap color depth:",
-//                                "                00: 2 colors,",
-//                                "                01: 4 colors,",
-//                                "                10: 16 colors, ",
-//                                "                11: 256 colors",
-//                                "   - bits 3-4 = horizontal overscan: ",
-//                                "                00:H/1 (512 or 640)",
-//                                "                01:H/2 (256 or 320)",
-//                                "                10:H/3 (170 or 213)",
-//                                "                11:H/4 (128 or 160)",
-//                                "   - bits 1-2 = vertical overscan: ",
-//                                "                00:V/1 (320 or 400)",
-//                                "                01:V/2 (160 or 200)",
-//                                "                10:V/3 (106 or 133)",
-//                                "                11:V/4 (80 or 100)",
-//                                "   - bit  0   = Video Timing:",
-//                                "                0: H:512 x V:320",
-//                                "                1: H:640 x V:400",
-//                                "                (Overrides STD_MODE)",
-//                                "" } }; nextAddr+=1;
-//                        mapped_register.push_back(new_node);
-//
-//                        new_node = { "GPU_EMULATION", nextAddr,  {    "(Byte) Emulation Flags",
-//                                "   - bit  7    = vsync: 0=off, 1=on",
-//                                "   - bit  6    = main: 0=windowed,",
-//                                "                 1=fullscreen",
-//                                "   - bit  5    = debug: 0=windowed, ",
-//                                "                 1=fullscreen",                                                                                        
-//                                "   - bit  4    = debug: 0=off, 1=on",
-//                                "   - bits 2-3  = Active Monitor 0-3",
-//                                "   - bits 0-1  = Debug Monitor 0-3",
-//                                "" } }; nextAddr+=1;
-//                        mapped_register.push_back(new_node);
-//    // REMOVE THESE
 
     _size = nextAddr - old_address;
     std::cout << clr::indent() << clr::CYAN << "GPU::OnAttach() Exit" << clr::RETURN;
@@ -287,17 +199,33 @@ bool GPU::OnInit()
         pWindow = SDL_CreateWindow("SDL3 Retro_6809", initial_width, initial_height, window_flags); 
         SDL_ShowWindow(pWindow);
 
+        // create the renderer
+        pRenderer = SDL_CreateRenderer(pWindow, NULL);
+
+        // the extended video mode should determine the overall renderer logical presentation area
+        SDL_SetRenderLogicalPresentation(pRenderer, (int)_screen_width, (int)_screen_height, SDL_LOGICAL_PRESENTATION_LETTERBOX);
+
+
+        // build the textures
+        pExt_Texture = SDL_CreateTexture(pRenderer, 
+                SDL_PIXELFORMAT_ARGB4444, 
+                SDL_TEXTUREACCESS_STREAMING, 
+                (int)_screen_width/2, (int)_screen_height/2);
+
+        pStd_Texture = SDL_CreateTexture(pRenderer, 
+                SDL_PIXELFORMAT_ARGB4444, 
+                SDL_TEXTUREACCESS_STREAMING, 
+                (int)_screen_width/2, (int)_screen_height/2);
+
+        pMain_Texture = SDL_CreateTexture(pRenderer, 
+                SDL_PIXELFORMAT_ARGB4444, 
+                SDL_TEXTUREACCESS_TARGET, 
+                (int)_screen_width, (int)_screen_height);
         
     } // END OF SDL3 Initialization
 
     // Build The Color Palette
     _build_palette();
-
-    // initialize the default values
-    // _change_gpu_enable(_gpu_enable);
-    // _change_std_mode(_gpu_std_mode);
-    // _change_ext_mode(_gpu_ext_mode);    
-    // _change_emu_mode(_gpu_emu_mode);
 
     // Reserve 64k for the extended video buffer
     int bfr_size = 64*1024;
@@ -310,9 +238,11 @@ bool GPU::OnInit()
         for (int r=0; r<8; r++)
             _gfx_glyph_data[i][r] = font8x8_system[i][r];    
 
-    // initialize the initial default display mode   
+    // // initialize the initial default display mode   
     Memory::Write(MAP(GPU_OPTIONS), _gpu_options);
     Memory::Write(MAP(GPU_MODE), _gpu_mode);
+    // _gpu_options = _verify_gpu_mode_change(_gpu_options, MAP(GPU_OPTIONS));
+    // _gpu_mode = _verify_gpu_mode_change(_gpu_mode, MAP(GPU_MODE));
 
     std::cout << clr::indent() << clr::CYAN << "GPU::OnInit() Exit" << clr::RETURN;
     return true;
@@ -334,6 +264,21 @@ bool GPU::OnQuit()
     std::cout << clr::indent() << clr::CYAN << "GPU::OnQuit() Entry" << clr::RETURN;
     
     { // BEGIN OF SDL3 Shutdown
+
+        // destroy the textures
+        if (pExt_Texture) { 
+            SDL_DestroyTexture(pExt_Texture);
+            pExt_Texture = nullptr;
+        }
+        if (pStd_Texture) { 
+            SDL_DestroyTexture(pStd_Texture);
+            pStd_Texture = nullptr;
+        }
+        if (pMain_Texture) { 
+            SDL_DestroyTexture(pMain_Texture);
+            pMain_Texture = nullptr;
+        }   
+     
         if (pRenderer)
         { // destroy the renderer
             SDL_DestroyRenderer(pRenderer);
@@ -366,31 +311,8 @@ bool GPU::OnQuit()
  ***********************/
 bool GPU::OnActivate()
 {
-    std::cout << clr::indent() << clr::CYAN << "GPU::OnActivate() Entry" << clr::RETURN;
-
-    // create the renderer
-    pRenderer = SDL_CreateRenderer(pWindow, NULL);
-
-    // the extended video mode should determine the overall renderer logical presentation area
-    SDL_SetRenderLogicalPresentation(pRenderer, (int)_screen_width, (int)_screen_height, SDL_LOGICAL_PRESENTATION_LETTERBOX);
-
-    // build the textures
-    pExt_Texture = SDL_CreateTexture(pRenderer, 
-            SDL_PIXELFORMAT_ARGB4444, 
-            SDL_TEXTUREACCESS_STREAMING, 
-            (int)_ext_width, (int)_ext_height);
-
-    pStd_Texture = SDL_CreateTexture(pRenderer, 
-            SDL_PIXELFORMAT_ARGB4444, 
-            SDL_TEXTUREACCESS_STREAMING, 
-            (int)_std_width, (int)_std_height);
-
-    pMain_Texture = SDL_CreateTexture(pRenderer, 
-            SDL_PIXELFORMAT_ARGB4444, 
-            SDL_TEXTUREACCESS_TARGET, 
-            (int)_screen_width, (int)_screen_height);
-
-    std::cout << clr::indent() << clr::CYAN << "GPU::OnActivate() Exit" << clr::RETURN;
+    // std::cout << clr::indent() << clr::CYAN << "GPU::OnActivate() Entry" << clr::RETURN;
+    // std::cout << clr::indent() << clr::CYAN << "GPU::OnActivate() Exit" << clr::RETURN;
     return true;
 } // END: GPU::OnActivate()
 
@@ -408,28 +330,8 @@ bool GPU::OnActivate()
  ***********************/
 bool GPU::OnDeactivate()
 {
-    std::cout << clr::indent() << clr::CYAN << "GPU::OnDeactivate() Entry" << clr::RETURN;
-
-    // destroy the renderer
-    if (pRenderer) { 
-        SDL_DestroyRenderer(pRenderer);
-        pRenderer = nullptr;
-    }
-    // destroy the textures
-    if (pExt_Texture) { 
-        SDL_DestroyTexture(pExt_Texture);
-        pExt_Texture = nullptr;
-    }
-    if (pStd_Texture) { 
-        SDL_DestroyTexture(pStd_Texture);
-        pStd_Texture = nullptr;
-    }
-    if (pMain_Texture) { 
-        SDL_DestroyTexture(pMain_Texture);
-        pMain_Texture = nullptr;
-    }   
-    
-    std::cout << clr::indent() << clr::CYAN << "GPU::OnDeactivate() Exit" << clr::RETURN;
+    // std::cout << clr::indent() << clr::CYAN << "GPU::OnDeactivate() Entry" << clr::RETURN;       
+    // std::cout << clr::indent() << clr::CYAN << "GPU::OnDeactivate() Exit" << clr::RETURN;
     return true;
 } // END: GPU::OnDeactivate()
 
@@ -477,6 +379,19 @@ bool GPU::OnEvent(SDL_Event* evnt)
                 Memory::Write(MAP(GPU_OPTIONS), data);
             } // END: if (evnt->key.key == SDLK_F)
 
+            if (evnt->key.key == SDLK_RIGHT)
+            {
+                Byte data = Memory::Read( MAP(GPU_MODE) );
+                data++;
+                Memory::Write(MAP(GPU_MODE), data);
+            }
+            if (evnt->key.key == SDLK_LEFT)
+            {
+                Byte data = Memory::Read( MAP(GPU_MODE) );
+                data--;
+                Memory::Write(MAP(GPU_MODE), data);
+            }
+
             // [E] Extended Display Enable Toggle
             if (evnt->key.key == SDLK_E)
             {
@@ -512,6 +427,7 @@ bool GPU::OnEvent(SDL_Event* evnt)
                     } else {
                         data |= 0b1000'0000;
                     }
+                    // Memory::Write(MAP(GPU_OPTIONS), Memory::Read( MAP(GPU_OPTIONS) ));
                     Memory::Write(MAP(GPU_MODE), data);
                 } else { // [S] Standard Display Enable
                     Byte data = Memory::Read( MAP(GPU_OPTIONS) );
@@ -521,6 +437,7 @@ bool GPU::OnEvent(SDL_Event* evnt)
                         data |= 0b0000'0001;
                     }
                     Memory::Write(MAP(GPU_OPTIONS), data);
+                    // Memory::Write(MAP(GPU_MODE), Memory::Read( MAP(GPU_MODE) ));
                 }
             }
 
@@ -592,6 +509,24 @@ bool GPU::OnUpdate(float fElapsedTime)
     runningTime += fElapsedTime;
     // std::cout << fElapsedTime << std::endl;
     
+
+    // mode changes
+    if (true)
+    {   static Word video_mode = 0x0180;    
+        static float delta_change = fElapsedTime;
+        static float video_running_time = fElapsedTime;
+        if (video_running_time > delta_change + 0.050f) 
+        {
+            delta_change = fElapsedTime;
+            video_running_time = fElapsedTime;
+            video_mode++;
+            Word mode = video_mode | 0b0001'0001'0000'0000;
+            // mode |= 0b0000'1000'0000'0000;
+            Memory::Write_Word(MAP(GPU_OPTIONS), mode);
+    std::cout << "(0x" << clr::hex(video_mode,4) << ") Video Mode: " << clr::hex(mode,4) << std::endl;
+        }
+        video_running_time += fElapsedTime;
+    }   
     // is extended graphics enabled?
     if (_gpu_options & 0b0001'0000)
     {
@@ -623,7 +558,7 @@ bool GPU::OnUpdate(float fElapsedTime)
 bool GPU::OnRender()
 {
     //std::cout << clr::indent() << clr::CYAN << "GPU::OnRender() Entry" << clr::RETURN;
-    // SDL_FRect r{0.0f, 0.0f, _screen_width, _screen_height};
+    SDL_FRect r{0.0f, 0.0f, _ext_width, _ext_height};
 
     // clear the primary texture
     SDL_SetRenderTarget(pRenderer, pMain_Texture);
@@ -635,7 +570,7 @@ bool GPU::OnRender()
     {
         // SDL_SetTextureScaleMode(pExt_Texture, SDL_SCALEMODE_LINEAR);   // blurry
         SDL_SetTextureScaleMode(pExt_Texture, SDL_SCALEMODE_NEAREST);     // clear
-        SDL_RenderTexture(pRenderer, pExt_Texture, NULL, NULL);
+        SDL_RenderTexture(pRenderer, pExt_Texture, &r, NULL);
     }
 
     // render Standard Graphics
@@ -643,7 +578,7 @@ bool GPU::OnRender()
     {
         // SDL_SetTextureScaleMode(pStd_Texture, SDL_SCALEMODE_LINEAR);   // blurry
         SDL_SetTextureScaleMode(pStd_Texture, SDL_SCALEMODE_NEAREST);     // clear
-        SDL_RenderTexture(pRenderer, pStd_Texture, NULL, NULL);
+        SDL_RenderTexture(pRenderer, pStd_Texture, &r, NULL);
     }
 
     // Set the render target to the window
@@ -765,8 +700,8 @@ void GPU::_render_extended_graphics()
 void GPU::_render_standard_graphics()
 {
     //    GPU_STD_MODE          = 0xFE01, // (Byte) Standard Graphics Mode
-    int _width = _std_width;
-    int _height = _std_height;
+    //int _width = _std_width;
+    //int _height = _std_height;
 
     // clear the standard texture
     _clear_texture(pStd_Texture, 0, 0, 0, 0);
@@ -778,19 +713,29 @@ void GPU::_render_standard_graphics()
     // Render the Standard Display Buffer
     if ( (_gpu_mode & 0b1000'0000) == 0) 
     { // IS Standard Display Rendering Text?
-        // display the standard text buffer
         _update_text_buffer();        
     } 
     else
     { // Standard Display Rendering Graphics
         int bpp = 0;
-        switch((_gpu_mode & 0b0110'0000)>>5)    // standard color mode bits 5-
+        int div = 0;
+        int std_color_mode = (_gpu_mode & 0b0110'0000) >> 5;
+        int buffer_size;
+
+        // Reduce the standard color mode if necessary. This
+        // should already fit, but this is a safety check.
+        do
         {
-            case 0x00: bpp = 1; break;
-            case 0x01: bpp = 2; break;
-            case 0x02: bpp = 4; break;
-            case 0x03: bpp = 8; break;
-        }
+            switch(std_color_mode)
+            {
+                case 0x00: div = 8; bpp = 1; break;
+                case 0x01: div = 4; bpp = 2; break;
+                case 0x02: div = 2; bpp = 4; break;
+                case 0x03: div = 1; bpp = 8; break;
+            }            
+            buffer_size = (_std_width * _std_height)/div;
+            std_color_mode--;
+        } while (buffer_size > 8000);
 
         // display the standard bitmap buffer
         Word pixel_index = MAP(VIDEO_START);
@@ -800,21 +745,19 @@ void GPU::_render_standard_graphics()
             Bus::Error(SDL_GetError());	
         else
         {
-            for (int y = 0; y < _height; y++)
+            for (int y = 0; y < _std_height; y++)
             {
-                for (int x = 0; x < _width; )
+                for (int x = 0; x < _std_width; )
                 {
                     // 256 color mode
                     if (bpp == 8)
                     {
-                        // Byte index = _ext_video_buffer[pixel_index++];
                         Byte index = Memory::Read(pixel_index++);
                         _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
                     }
                     // 16 color mode
                     else if (bpp == 4)
                     {
-                        //Byte data = _ext_video_buffer[pixel_index++];
                         Byte data = Memory::Read(pixel_index++);
                         Byte index = (data >> 4);
                         _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
@@ -824,7 +767,6 @@ void GPU::_render_standard_graphics()
                     // 4 color mode
                     else if (bpp == 2)
                     {
-                        //Byte data = _ext_video_buffer[pixel_index++];
                         Byte data = Memory::Read(pixel_index++);
                         Byte index = (data >> 6) & 0x03;
                         _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
@@ -838,7 +780,6 @@ void GPU::_render_standard_graphics()
                     // 2 color mode
                     else if (bpp == 1)
                     {
-                        //Byte data = _ext_video_buffer[pixel_index++];
                         Byte data = Memory::Read(pixel_index++);
                         Byte index = (data >> 7) & 1;
                         _setPixel_unlocked(pixels, pitch, x++, y, index, true); 
@@ -857,9 +798,10 @@ void GPU::_render_standard_graphics()
                         index = (data >> 0) & 1;
                         _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
                     }
+
                     if (pixel_index > MAP(VIDEO_END)) {
-                        // std::string err = "Pixel index out of range: $" + clr::hex(pixel_index, 4);
-                        // Bus::Error(err.c_str());
+                        std::string err = "Pixel index out of range: $" + clr::hex(pixel_index, 4);
+                        Bus::Error(err.c_str(), __FILE__, __LINE__);
                         SDL_UnlockTexture(pStd_Texture); 
                         return;
                     }
@@ -1142,7 +1084,7 @@ void GPU::_build_palette()
 
 void GPU::_display_mode_helper(Byte mode, int &width, int &height)
 {
-    switch(mode)
+    switch(mode & 0x1F)
     {
         case 0x00: width = 320; height = 200; break;
         case 0x01: width = 256; height = 160; break;
@@ -1181,8 +1123,77 @@ void GPU::_display_mode_helper(Byte mode, int &width, int &height)
 
 Byte GPU::_verify_gpu_mode_change(Byte data, Word map_register)
 {
-    Byte saved_options = _gpu_options;
-    Byte saved_mode = _gpu_mode;
+    // Byte saved_options = _gpu_options;
+    // Byte saved_mode = _gpu_mode;
+
+    // toggle fullscreen / windowed
+    if (map_register == MAP(GPU_OPTIONS)) 
+    {
+        // if nothing else but the application fullscreen state has changed
+        if ( (data & 0b0000'1000) != (_gpu_options & 0b0000'1000) )
+        {
+            if (data & 0b0000'1000) {
+                SDL_SetWindowFullscreen(pWindow, true);
+            } else {
+                SDL_SetWindowFullscreen(pWindow, false);
+            }             
+        }     
+        _gpu_options = data;   
+    }
+
+    if (map_register == MAP(GPU_MODE))
+    {
+        int width, height;
+        _display_mode_helper( (data & 0x1f) , width, height);
+
+        _ext_width  = (float)width;
+        _ext_height = (float)height;
+        _std_width  = (float)width;
+        _std_height = (float)height;
+
+        int buffer_size = 99999;
+        while (buffer_size > 8000)
+        {
+            int div = 0;
+            int std_color_mode = (data & 0b0110'0000) >> 5;
+            switch(std_color_mode)
+            {
+                case 0x00: div = 8; break;
+                case 0x01: div = 4; break;
+                case 0x02: div = 2; break;
+                case 0x03: div = 1; break;
+            }            
+            buffer_size = (_std_width * _std_height)/div;
+            if (buffer_size > 8000) 
+            { 
+                // reduce the standard bitmap color depth
+                data = (data & 0b1001'1111) | ((std_color_mode-1)<<5);
+                std::cout << "GPU: Reducing Standard Bitmap Color Depth: " << buffer_size << "\n";
+                _gpu_mode = data;
+            }
+        }
+    }
+    return data;
+}
+
+
+// END: GPU.cpp
+
+
+
+
+/***************************************
+ 
+
+
+
+
+
+
+Byte GPU::_verify_gpu_mode_change(Byte data, Word map_register)
+{
+    // Byte saved_options = _gpu_options;
+    // Byte saved_mode = _gpu_mode;
 
     // toggle fullscreen / windowed
     if (map_register == MAP(GPU_OPTIONS)) 
@@ -1214,15 +1225,29 @@ Byte GPU::_verify_gpu_mode_change(Byte data, Word map_register)
     }
 
     // options
-    bool extended_is_bitmap         = (saved_options & 0x80)>>7;
-    int  extended_color_mode        = (saved_options & 0x60)>>5;
-    bool extended_display_enable    = (saved_options & 0x10)>>4;
-    bool standard_display_enable    = (saved_options & 0x01)>>0;
+    bool extended_is_bitmap         = (_gpu_options & 0x80)>>7;
+    int  extended_color_mode        = (_gpu_options & 0x60)>>5;
+    bool extended_display_enable    = (_gpu_options & 0x10)>>4;
+    bool standard_display_enable    = (_gpu_options & 0x01)>>0;
     // mode
-    bool standard_is_bitmap         = (saved_mode & 0x80)>>7;
-    int  standard_color_mode        = (saved_mode & 0x60)>>5;
-    int  display_mode               = (saved_mode & 0x1F);
+    bool standard_is_bitmap         = (_gpu_mode & 0x80)>>7;
+    int  standard_color_mode        = (_gpu_mode & 0x60)>>5;
+    int  display_mode               = (_gpu_mode & 0x1F);
 
+    // options
+    if (map_register == MAP(GPU_OPTIONS) )
+    {
+        extended_is_bitmap         = (data & 0x80)>>7;
+        extended_color_mode        = (data & 0x60)>>5;
+        extended_display_enable    = (data & 0x10)>>4;
+        standard_display_enable    = (data & 0x01)>>0;
+    }
+    else
+    {// mode
+        standard_is_bitmap         = (data & 0x80)>>7;
+        standard_color_mode        = (data & 0x60)>>5;
+        display_mode               = (data & 0x1F);
+    }
 
     int buffer_size = 0;   
     bool recalc = false;     
@@ -1331,8 +1356,16 @@ Byte GPU::_verify_gpu_mode_change(Byte data, Word map_register)
         }
     } while (recalc);   // buffer was too big, reduce the color depth and try again
 
+    static int last_width = _ext_width;
+    static int last_height = _ext_height;
+    if (last_width != _ext_width || last_height != _ext_height)
+    {
+        Bus::IsDirty(true);
+        last_width = _ext_width;
+        last_height = _ext_height;
+        std::cout << "GPU: Resized: display mode: " << display_mode << " " << _ext_width << "x" << _ext_height << std::endl;
+    }
+
     return data;
 }
-
-
-// END: GPU.cpp
+****************************/

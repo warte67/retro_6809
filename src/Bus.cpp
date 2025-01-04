@@ -203,6 +203,8 @@ bool Bus::Run()
             // only present for GfxCore            
             if (_pGPU) { _pGPU->RenderPresent(); }
 
+            SDL_Delay(1);
+
             // (( TESTING ))
             // Bus::IsRunning(false);
             // Bus::Error("Something like a simulated error happened!", __FILE__, __LINE__);
@@ -395,14 +397,14 @@ bool Bus::_onQuit()
  */
 bool Bus::_onActivate(void) 
 {
-    std::cout << clr::indent_push() << clr::CYAN << "Bus::_onActivate() Entry" << clr::RETURN;    
+    //std::cout << clr::indent_push() << clr::CYAN << "Bus::_onActivate() Entry" << clr::RETURN;    
     if (_memory.OnActivate() == false)
     {
         std::cout << clr::indent_pop() << clr::ORANGE << "Bus::_onActivate() Error" << clr::RETURN;
 		Bus::Error("Device Failed to Activate!", __FILE__, __LINE__);
 		return false;
 	}
-    std::cout << clr::indent_pop() << clr::CYAN << "Bus::_onActivate() Exit" << clr::RETURN;
+    //std::cout << clr::indent_pop() << clr::CYAN << "Bus::_onActivate() Exit" << clr::RETURN;
     return true;
 }
 
@@ -418,14 +420,14 @@ bool Bus::_onActivate(void)
 
 bool Bus::_onDeactivate(void) 
 {
-    std::cout << clr::indent_push() << clr::CYAN << "Bus::_onDeactivate() Entry" << clr::RETURN;
+    //std::cout << clr::indent_push() << clr::CYAN << "Bus::_onDeactivate() Entry" << clr::RETURN;
     if (_memory.OnDeactivate() == false)
 	{
         std::cout << clr::indent_pop() << clr::ORANGE << "Bus::_onDeactivate() Error" << clr::RETURN;
 		Bus::Error("Device Failed to Deactivate!", __FILE__, __LINE__);		        
         return false;
 	}
-    std::cout << clr::indent_pop() << clr::CYAN << "Bus::_onDeactivate() Exit" << clr::RETURN;
+    //std::cout << clr::indent_pop() << clr::CYAN << "Bus::_onDeactivate() Exit" << clr::RETURN;
     return true;
 }
 

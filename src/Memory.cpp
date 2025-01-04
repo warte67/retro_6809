@@ -104,7 +104,7 @@ bool Memory::OnQuit()
 
 bool Memory::OnActivate() 
 {
-    std::cout << clr::indent_push() << clr::CYAN << "Memory::OnActivate() Entry" << clr::RETURN;
+    //std::cout << clr::indent_push() << clr::CYAN << "Memory::OnActivate() Entry" << clr::RETURN;
     bool ret = true;
 	for (auto &d : Memory::_memory_nodes) {
 		if ( d->OnActivate() == false ) {
@@ -112,7 +112,7 @@ bool Memory::OnActivate()
 			ret = false;
         }
     }
-    std::cout << clr::indent_pop() << clr::CYAN << "Memory::OnActivate() Exit" << clr::RETURN;
+    //std::cout << clr::indent_pop() << clr::CYAN << "Memory::OnActivate() Exit" << clr::RETURN;
 	return ret;
 }
 
@@ -128,7 +128,7 @@ bool Memory::OnActivate()
  */
 bool Memory::OnDeactivate() 
 {
-    std::cout << clr::indent_push() << clr::CYAN << "Memory::OnDeactivate() Entry" << clr::RETURN;
+    //std::cout << clr::indent_push() << clr::CYAN << "Memory::OnDeactivate() Entry" << clr::RETURN;
     bool ret = true;
 	for (auto &d : Memory::_memory_nodes) {
 		if ( d->OnDeactivate() == false ) {
@@ -136,7 +136,7 @@ bool Memory::OnDeactivate()
 			ret = false;
         }
     }
-    std::cout << clr::indent_pop() << clr::CYAN << "Memory::OnDeactivate() Exit" << clr::RETURN;
+    //std::cout << clr::indent_pop() << clr::CYAN << "Memory::OnDeactivate() Exit" << clr::RETURN;
 	return ret;
 }
 
