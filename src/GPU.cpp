@@ -76,7 +76,7 @@ void GPU::OnWrite(Word offset, Byte data)
     if (offset == MAP(GPU_OPTIONS))         
     { 
         data = _verify_gpu_mode_change(data, offset);   
-        }
+    }
     else if (offset == MAP(GPU_MODE))   
     { 
         data = _verify_gpu_mode_change(data, offset);  
@@ -783,7 +783,7 @@ void GPU::_render_standard_graphics()
         // display the standard text buffer
         _update_text_buffer();        
     } 
-    else 
+    else
     { // Standard Display Rendering Graphics
 
         int bpp = 0;
@@ -1181,10 +1181,12 @@ Byte GPU::_verify_gpu_mode_change(Byte data, Word map_register)
     }
 
 
-    int buffer_size = 0;    
-    bool recalc = false;
+    int buffer_size = 0;   
+    bool recalc = false;     
     do
     {    
+        recalc = false;        
+
         // options
         bool extended_is_bitmap         = (saved_options & 0x80)>>7;
         int  extended_color_mode        = (saved_options & 0x60)>>5;
@@ -1290,6 +1292,10 @@ Byte GPU::_verify_gpu_mode_change(Byte data, Word map_register)
                 }
             }            
         }
+        if (recalc)
+        {
+            std::cout << "GPU: Reducing Color Depth\n";
+        }   
     } while (recalc);   // buffer was too big, reduce the color depth and try again
 
     return data;
