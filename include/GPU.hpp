@@ -62,60 +62,70 @@ public: // PUBLIC ACCESSORS
     Uint8 alf(Uint8 index) { Uint8 c = _palette[index].a;  return c; }      
 
     // REMOVE THIS
-                        // GPU enable flags
-                        enum _GPU_ENABLE{
-                            ENABLE_STD      = 0b00001000,
-                            ENABLE_EXT      = 0b00000100,
-                            ENABLE_SPRITES  = 0b00000010,
-                            ENABLE_CURSOR   = 0b00000001
-                        };
+                        // // GPU enable flags
+                        // enum _GPU_ENABLE{
+                        //     ENABLE_STD      = 0b00001000,
+                        //     ENABLE_EXT      = 0b00000100,
+                        //     ENABLE_SPRITES  = 0b00000010,
+                        //     ENABLE_CURSOR   = 0b00000001
+                        // };
     // REMOVE THIS
 
 private: // PRIVATE MEMBERS
     // internal hardware register states:
-    Byte _gpu_enable    = ENABLE_STD | ENABLE_EXT;
+
+    float _screen_width = 0.0f;
+    float _screen_height = 0.0f;
+    float _ext_width = 0.0f;
+    float _ext_height = 0.0f;
+    float _std_width = 0.0f;
+    float _std_height = 0.0f;
+
+    Byte _gpu_options = 0b1111'0001;     // default: 
+    Byte _gpu_mode = 0b0100'0001;     // default:
+
+    void _render_extended_graphics();
+    void _render_standard_graphics();
+    void _update_text_buffer();
+    // void _update_tile_buffer();
+
+    void _display_mode_helper(Byte mode, int &width, int &height);
+
+    Byte _verify_gpu_mode_change(Byte data, Word map_register);
 
 
-    Byte _gpu_std_mode  = 0x8B;   // 0x8B = 320x200 (40x25) Monochrome
-    Byte _gpu_ext_mode  = 0xEB;   // 0xBF = 320x200 256 colors   
+                    // REMOVE THIS
+                                        // Byte _gpu_enable    = ENABLE_STD | ENABLE_EXT;
+                                        // Byte _gpu_std_mode  = 0x8B;   // 0x8B = 320x200 (40x25) Monochrome
+                                        // Byte _gpu_ext_mode  = 0xEB;   // 0xBF = 320x200 256 colors   
+
+                                        // Byte _gpu_emu_mode  = 0b00000000;
+                                        // bool _video_hires = false;          // true: 640x400, false: 512x384 
+
+                                        // // standard display flags
+                                        // bool _is_std_text_mode = false;
+                                        // bool _is_std_bitmap_mode = false;
+                                        // Byte _std_color_depth = 0;
+                                        // float _std_overscan_horiz = 1.0f;
+                                        // float _std_overscan_vert = 1.0f;
+
+                                        // // extended display flags
+                                        // bool _is_ext_tile_mode = false;
+                                        // bool _is_ext_bitmap_mode = false;
+                                        // Byte _ext_color_depth = 0;
+                                        // float _ext_overscan_horiz = 1.0f;
+                                        // float _ext_overscan_vert = 1.0f;
+                    // These need to be removed
 
 
-    // REMOVE THIS
-                        Byte _gpu_emu_mode  = 0b00000000;
-                        bool _video_hires = false;          // true: 640x400, false: 512x384 
-                        float _screen_width = 0.0f;
-                        float _screen_height = 0.0f;
-
-                        // standard display flags
-                        bool _is_std_text_mode = false;
-                        bool _is_std_bitmap_mode = false;
-                        Byte _std_color_depth = 0;
-                        float _std_overscan_horiz = 1.0f;
-                        float _std_overscan_vert = 1.0f;
-                        float _std_width = 0.0f;
-                        float _std_height = 0.0f;
-
-                        // extended display flags
-                        bool _is_ext_tile_mode = false;
-                        bool _is_ext_bitmap_mode = false;
-                        Byte _ext_color_depth = 0;
-                        float _ext_overscan_horiz = 1.0f;
-                        float _ext_overscan_vert = 1.0f;
-                        float _ext_width = 0.0f;
-                        float _ext_height = 0.0f;
-    // These need to be removed
+                    // THESE NEED TO BE REVISED
+                                        // Byte _change_gpu_enable(Byte data);
+                                        // Byte _change_std_mode(Byte data);
+                                        // Byte _change_ext_mode(Byte data);
+                                        // Byte _change_emu_mode(Byte data);
+                    // THESE NEED TO BE REVISED
 
 
-    // THESE NEED TO BE REVISED
-                        Byte _change_gpu_enable(Byte data);
-                        Byte _change_std_mode(Byte data);
-                        Byte _change_ext_mode(Byte data);
-                        Byte _change_emu_mode(Byte data);
-                        void _render_extended_graphics();
-                        void _render_standard_graphics();
-                        void _update_text_buffer();
-                        // void _update_tile_buffer();
-    // THESE NEED TO BE REVISED
 
     void _setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_index, bool bIgnoreAlpha);
     void _build_palette();

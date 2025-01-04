@@ -85,76 +85,9 @@ enum MEMMAP
                                     //                  11: 256-Colors
                                     //    - bits 0-4 = Display Mode (0-31)
                                     // 
-    GPU_ENABLE            = 0xFE02, // (Byte) Bitflag Enables
-                                    //    - bits 5-7 = (reserved)
-                                    //    - bits 3   = 0: Disable Standard Mode,
-                                    //                 1: Enable Standard Mode
-                                    //    - bit  2   = 0: Disable Extended Mode,
-                                    //                 1: Enable Extended Mode
-                                    //    - bit  1   = 0: Disable Sprites,
-                                    //                 1: Enable Sprites
-                                    //    - bit  0   = 0: Disable Mouse Cursor,
-                                    //                 1: Enable Mouse Cursor
-                                    // 
-    GPU_STD_MODE          = 0xFE03, // (Byte) Standard Graphics Mode
-                                    //    - bit  7   = 0: screen is text, 
-                                    //                 1: screen is bitmap
-                                    //    - bits 5-6 = bitmap color depth:
-                                    //                 00: 2 colors,
-                                    //                 01: 4 colors,
-                                    //                 10: 16 colors, 
-                                    //                 11: 256 colors
-                                    //    - bits 3-4 = horizontal overscan: 
-                                    //                 00:H/1 (512 or 640)
-                                    //                 01:H/2 (256 or 320)
-                                    //                 10:H/3 (170 or 213)
-                                    //                 11:H/4 (128 or 160)
-                                    //    - bits 1-2 = vertical overscan: 
-                                    //                 00:V/1 (320 or 400)
-                                    //                 01:V/2 (160 or 200)
-                                    //                 10:V/3 (106 or 133)
-                                    //                 11:V/4 (80 or 100)
-                                    //    - bit  0   = Video Timing:
-                                    //                 0: H:512 x V:320
-                                    //                 1: H:640 x V:400
-                                    //                 (Overrides EXT_MODE)
-                                    // 
-    GPU_EXT_MODE          = 0xFE04, // (Byte) Extended Graphics Mode
-                                    //    - bit  7   = 0: screen is tiled,
-                                    //                 1: screen is bitmap
-                                    //    - bits 5-6 = bitmap color depth:
-                                    //                 00: 2 colors,
-                                    //                 01: 4 colors,
-                                    //                 10: 16 colors, 
-                                    //                 11: 256 colors
-                                    //    - bits 3-4 = horizontal overscan: 
-                                    //                 00:H/1 (512 or 640)
-                                    //                 01:H/2 (256 or 320)
-                                    //                 10:H/3 (170 or 213)
-                                    //                 11:H/4 (128 or 160)
-                                    //    - bits 1-2 = vertical overscan: 
-                                    //                 00:V/1 (320 or 400)
-                                    //                 01:V/2 (160 or 200)
-                                    //                 10:V/3 (106 or 133)
-                                    //                 11:V/4 (80 or 100)
-                                    //    - bit  0   = Video Timing:
-                                    //                 0: H:512 x V:320
-                                    //                 1: H:640 x V:400
-                                    //                 (Overrides STD_MODE)
-                                    // 
-    GPU_EMULATION         = 0xFE05, // (Byte) Emulation Flags
-                                    //    - bit  7    = vsync: 0=off, 1=on
-                                    //    - bit  6    = main: 0=windowed,
-                                    //                  1=fullscreen
-                                    //    - bit  5    = debug: 0=windowed, 
-                                    //                  1=fullscreen
-                                    //    - bit  4    = debug: 0=off, 1=on
-                                    //    - bits 2-3  = Active Monitor 0-3
-                                    //    - bits 0-1  = Debug Monitor 0-3
-                                    // 
 
-    HDW_RESERVED_DEVICE   = 0xFE06, // START: Reserved Register Space
-    HDW_REG_END           = 0xFFEF, // 489 bytes reserved for future use.
+    HDW_RESERVED_DEVICE   = 0xFE02, // START: Reserved Register Space
+    HDW_REG_END           = 0xFFEF, // 493 bytes reserved for future use.
 
     ROM_VECTS_DEVICE      = 0xFFF0, // START: Hardware Interrupt Vectors
     HARD_EXEC             = 0xFFF0, // EXEC Hardware Interrupt Vector
