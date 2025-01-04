@@ -499,19 +499,26 @@ bool GPU::OnUpdate(float fElapsedTime)
         c++;
 
         // animate some foreground data
-        static Byte data = 0;
-        static Byte color = 0x00;
-        for (int i=MAP(VIDEO_START); i<MAP(VIDEO_TOP); i+=2) { 
-            Memory::Write(i+0, color++);  
-            Memory::Write(i+1, data++);  
+        static int count = 0;
+        if (count++ > 12) 
+        { 
+            count = 0; 
+            static Byte data = 0;
+            static Byte color = 0x00;
+            for (int i=MAP(VIDEO_START); i<MAP(VIDEO_TOP); i+=2) { 
+                Memory::Write(i+0, color++);  
+                Memory::Write(i+1, data++);  
+            }
+            color--;
+            data++;
         }
     }
     runningTime += fElapsedTime;
     // std::cout << fElapsedTime << std::endl;
     
 
-    // mode changes
-    if (true)
+    // TESTING... video mode changes
+    if (false)
     {   static Word video_mode = 0x0180;    
         static float delta_change = fElapsedTime;
         static float video_running_time = fElapsedTime;
@@ -524,10 +531,13 @@ bool GPU::OnUpdate(float fElapsedTime)
             Word mode = video_mode | 0b0001'0001'0000'0000;
             //mode |= 0b1000'1000'0000'0000;   // force full screen
             Memory::Write_Word(MAP(GPU_OPTIONS), mode);
-    std::cout << "(0x" << clr::hex(video_mode,4) << ") Video Mode: " << clr::hex(mode,4) << std::endl;
+            // std::cout << "(0x" << clr::hex(video_mode,4) << ") Video Mode: " << clr::hex(mode,4) << std::endl;
         }
         video_running_time += fElapsedTime;
-    }   
+    }  // ... END OF TESTING 
+
+
+
     // is extended graphics enabled?
     if (_gpu_options & 0b0001'0000)
     {
@@ -1000,14 +1010,14 @@ void GPU::_build_palette()
     {
         // BASIC COLORS (0-15) CUSTOM DEFAULT COLORS
         std::vector<PALETTE> ref = {    
-			{ 0x0000 },		// 0: black    0xF000
+			{ 0xF000 },		// 0: black    
 			{ 0xF555 },		// 1: dk gray
 			{ 0xF007 },		// 2: dk blue
 			{ 0xF600 },		// 3: dk red
-			{ 0x0140 },		// 4: dk green
+			{ 0xF140 },		// 4: dk green
 			{ 0xF840 },		// 5: brown
 			{ 0xF406 },		// 6: purple          
-			{ 0xF046 },		// 7: deep sea           	
+			{ 0x0046 },		// 7: deep sea          // 0xF046  	
 			{ 0xF888 },		// 8: lt gray
 			{ 0xF22F },		// 9: blue
 			{ 0xFd00 },		// A: red

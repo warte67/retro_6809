@@ -71,8 +71,42 @@ private: // PRIVATE MEMBERS
     float _std_width = 0.0f;
     float _std_height = 0.0f;
 
-    Byte _gpu_options = 0b0000'0010;     // default: 
-    Byte _gpu_mode = 0b1110'0010;     // default:
+    Byte _gpu_options = 0b1111'0001;    // (Byte) Bitflag Enables
+                                        //    - bit 7    = Extended Bitmap:
+                                        //                  0: Tilemap Display
+                                        //                  1: Bitmap Display
+                                        //    - bits 5-6 = Extended Color Mode:
+                                        //                  00: 2-Colors
+                                        //                  01: 4-Colors
+                                        //                  10: 16-Colors
+                                        //                  11: 256-Colors
+                                        //    - bits 4   = Extended Display Enable
+                                        //                 0: Disabled
+                                        //                 1: Enabled
+                                        //    - bits 3   = Application Screen Mode
+                                        //                 0: Windowed
+                                        //                 1: Fullscreen
+                                        //    - bits 2   = Debug Enable
+                                        //                 0: Disabled
+                                        //                 1: Enabled
+                                        //    - bits 1   = Sprite Enable
+                                        //                 0: Disabled
+                                        //                 1: Enabled
+                                        //    - bit  0   = Standard Display Enable
+                                        //                 0: Disabled
+                                        //                 1: Enabled
+                                        // 
+    Byte _gpu_mode = 0b0110'0001;       // (Byte) Bitflag Enables
+                                        //    - bit 7    = Standard Bitmap:
+                                        //                  0: Text Display
+                                        //                  1: Bitmap Display
+                                        //    - bits 5-6 = Standard Color Mode:
+                                        //                  00: 2-Colors
+                                        //                  01: 4-Colors
+                                        //                  10: 16-Colors
+                                        //                  11: 256-Colors
+                                        //    - bits 0-4 = Display Mode (0-31)
+                                        // 
 
     void _render_extended_graphics();
     void _render_standard_graphics();
