@@ -522,7 +522,7 @@ bool GPU::OnUpdate(float fElapsedTime)
             video_mode++;
             if (video_mode & 0b0001'1110'0000'0000) video_mode += 0b0001'1110'0000'0000;
             Word mode = video_mode | 0b0001'0001'0000'0000;
-            mode |= 0b1000'1000'0000'0000;   // force full screen
+            //mode |= 0b1000'1000'0000'0000;   // force full screen
             Memory::Write_Word(MAP(GPU_OPTIONS), mode);
     std::cout << "(0x" << clr::hex(video_mode,4) << ") Video Mode: " << clr::hex(mode,4) << std::endl;
         }
