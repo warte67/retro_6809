@@ -193,27 +193,38 @@ bool GPU::OnInit()
 
     { // BEGIN OF SDL3 Initialization
         // initialize SDL3
-        if (!SDL_InitSubSystem(SDL_INIT_VIDEO))
+        if (!SDL_InitSubSystem(SDL_INIT_VIDEO | SDL_INIT_EVENTS))
         {
             std::cout << clr::indent_pop() << clr::ORANGE << "Bus::_onInit() Error" << clr::RETURN;
             Bus::Error(SDL_GetError(), __FILE__, __LINE__);
             return false;
         }
-        // fetch the current desktop dimensions
-        SDL_DisplayID* display = SDL_GetDisplays(NULL);
-        const SDL_DisplayMode* pDM = SDL_GetCurrentDisplayMode(display[0]);
-        if (!pDM)   
-        {
-            Bus::Error(SDL_GetError(), __FILE__, __LINE__);
-            return false;
-        }
-        auto Width = pDM->w;
-        int initial_width = Width * 0.75f;          // 75% of the display width
-        int initial_height = (initial_width / 1.6f);
 
         // create the main window
         pWindow = SDL_CreateWindow("SDL3 Retro_6809", initial_width, initial_height, window_flags); 
         SDL_ShowWindow(pWindow);
+
+
+        // // Scale the window to the current display
+        // SDL_DisplayID dis_id = SDL_GetDisplayForWindow(pWindow);
+        // const SDL_DisplayMode* pDM = SDL_GetCurrentDisplayMode(dis_id);
+        // if (!pDM)   
+        // {
+        //     Bus::Error(SDL_GetError(), __FILE__, __LINE__);
+        //     return false;
+        // }
+        // auto Width = pDM->w;
+        // auto Height = pDM->h;
+        // float scale = 0.75f;
+        // float aspect = 1.6f;
+        // if (Width > Height)
+        //     initial_width = Width * scale; 
+        // else
+        //     initial_width = Height * scale; 
+        // initial_height = (initial_width / aspect);
+        // SDL_SetWindowSize(pWindow, initial_width, initial_height);
+        // std::cout << "GPU::OnInit() Width:" << Width << " Height:" << Height << " Scale:" << scale << " Aspect:" << aspect << clr::RETURN;
+
 
         // create the renderer
         pRenderer = SDL_CreateRenderer(pWindow, NULL);
@@ -227,17 +238,19 @@ bool GPU::OnInit()
                 SDL_PIXELFORMAT_ARGB4444, 
                 SDL_TEXTUREACCESS_STREAMING, 
                 (int)_screen_width/2, (int)_screen_height/2);
+        SDL_SetTextureScaleMode(pExt_Texture, SDL_SCALEMODE_NEAREST);            
 
         pStd_Texture = SDL_CreateTexture(pRenderer, 
                 SDL_PIXELFORMAT_ARGB4444, 
                 SDL_TEXTUREACCESS_STREAMING, 
                 (int)_screen_width/2, (int)_screen_height/2);
-
+        SDL_SetTextureScaleMode(pStd_Texture, SDL_SCALEMODE_NEAREST);            
 
         pMain_Texture = SDL_CreateTexture(pRenderer, 
                 SDL_PIXELFORMAT_ARGB4444, 
                 SDL_TEXTUREACCESS_TARGET, 
                 (int)_screen_width, (int)_screen_height);
+        SDL_SetTextureScaleMode(pMain_Texture, SDL_SCALEMODE_NEAREST); 
 
     } // END OF SDL3 Initialization
 
@@ -392,11 +405,16 @@ bool GPU::OnDeactivate()
  ********************************************************************/
 bool GPU::OnEvent(SDL_Event* evnt)
 {
-    //std::cout << clr::indent() << clr::CYAN << "GPU::OnEvent() Entry" << clr::RETURN;
-    if (evnt) { ; } // stop the compiler from complaining
-    
+    // if not a main window event, just return now
+    if (!(SDL_GetWindowFlags(pWindow) & SDL_WINDOW_INPUT_FOCUS)) 
+        return true;
+
     switch (evnt->type) 
     {
+        case SDL_EVENT_WINDOW_CLOSE_REQUESTED:  
+            Bus::IsRunning(false);
+            break;
+
         case SDL_EVENT_KEY_DOWN:
         {
             if (evnt->key.key == SDLK_V)
@@ -591,30 +609,17 @@ bool GPU::OnRender()
     // render Extended Graphics
     if (Memory::Read(MAP(GPU_OPTIONS)) & 0b0001'0000)
     {
-    // _clear_texture(pExt_Texture, 0, 0, 0, 0);
-    // _clear_texture(pStd_Texture, 15, 15, 15, 15);
-
-        // SDL_SetTextureScaleMode(pExt_Texture, SDL_SCALEMODE_LINEAR);   // blurry
-        SDL_SetTextureScaleMode(pExt_Texture, SDL_SCALEMODE_NEAREST);     // clear        
         SDL_RenderTexture(pRenderer, pExt_Texture, &r, NULL);
     }
 
     // render Standard Graphics
     if (Memory::Read(MAP(GPU_OPTIONS)) & 0b0000'0001)
     {
-    // _clear_texture(pExt_Texture, 15, 15, 15, 15);
-    // _clear_texture(pStd_Texture, 15, 15, 15, 15);
-
-        // SDL_SetTextureScaleMode(pStd_Texture, SDL_SCALEMODE_LINEAR);   // blurry
-        SDL_SetTextureScaleMode(pStd_Texture, SDL_SCALEMODE_NEAREST);     // clear
         SDL_RenderTexture(pRenderer, pStd_Texture, &r, NULL);
     }
 
     // Set the render target to the window
     SDL_SetRenderTarget(pRenderer, NULL);
-
-    // SDL_SetTextureScaleMode(pMain_Texture, SDL_SCALEMODE_LINEAR);   // blurry
-    SDL_SetTextureScaleMode(pMain_Texture, SDL_SCALEMODE_NEAREST);     // clear
     SDL_RenderTexture(pRenderer, pMain_Texture, NULL, NULL);
 
     //std::cout << clr::indent() << clr::CYAN << "GPU::OnRender() Exit" << clr::RETURN;

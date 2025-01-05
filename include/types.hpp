@@ -17,7 +17,7 @@
     // GENERATE_MEMORY_MAP: Generate a memory map definition file?
     //      true:  generate Memory_Map.hpp and use the local unordered map
     //      false: to use enums from Memory_Map.hpp
-    #define GENERATE_MEMORY_MAP     true
+    #define GENERATE_MEMORY_MAP     false
 
     #define MEMORY_MAP_OUTPUT_FILE_HPP  "./include/Memory_Map.hpp"
     #define MEMORY_MAP_OUTPUT_FILE_ASM  "./include/Memory_Map.asm"

@@ -7,7 +7,7 @@
  *     |_____/ \___|_.__/ \__,_|\__, (_)_| |_| .__/| .__/ 
  *                               __/ |       | |   | |    
  *                              |___/        |_|   |_|                                                                                      | |     | |    
- *                                                                                     |_|     |_|    
+ *
  ************************************/
 
 #pragma once
@@ -39,6 +39,9 @@ public: // PUBLIC ACCESSORS
 
 private: // PRIVATE MEMBERS
 
+    void _clear_texture(SDL_Texture* texture, Byte r, Byte g, Byte b, Byte a);
+    void _setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte r, Byte g, Byte b, Byte a);
+
     // hardware registers
     Word _dbg_brk_addr  = 0;    // DBG_BRK_ADDR
     Byte _dbg_flags     = 0;    // DBG_FLAGS
@@ -51,6 +54,19 @@ private: // PRIVATE MEMBERS
     //                          // - bit 2: IRQ   (on low to high edge)
     //                          // - bit 1: NMI   (on low to high edge)
     //                          // - bit 0: RESET (on low to high edge)
+
+    int _dbg_logical_width = 1024;
+    int _dbg_logical_height = 640;
+    int _dbg_window_width = 640*2.125;
+    int _dbg_window_height = 400*2.125;
+
+	Uint32 _dbg_window_flags = SDL_WINDOW_RESIZABLE;
+    Uint32 _dbg_renderer_flags = SDL_RENDERER_VSYNC_DISABLED;
+
+    SDL_Window*   _dbg_window   = nullptr;
+    SDL_Renderer* _dbg_renderer = nullptr;
+    SDL_Texture*  _dbg_texture  = nullptr;
+
 };
 
 // END: Debug.hpp

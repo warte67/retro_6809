@@ -65,8 +65,8 @@ public: // PUBLIC ACCESSORS
 private: // PRIVATE MEMBERS
     // internal hardware register states:
 
-    float _screen_width = 640.0f;
-    float _screen_height = 400.0f;
+    float _screen_width = 640.0f;       // display mode timing 640x400 @ 70hz
+    float _screen_height = 400.0f;      // display mode timing 640x400 @ 70hz
     float _ext_width = 0.0f;
     float _ext_height = 0.0f;
     float _std_width = 0.0f;

@@ -11,6 +11,7 @@
  ************************************/
 
 #include "Debug.hpp"
+#include "Bus.hpp"
 #include "Memory.hpp"
 
 
@@ -112,7 +113,29 @@ int  Debug::OnAttach(int nextAddr)
 bool Debug::OnInit()
 {
     std::cout << clr::indent() << clr::LT_BLUE << "Debug::OnInit() Entry" << clr::RETURN;
-    // ...
+        
+    // create the debugger window
+    _dbg_window = SDL_CreateWindow("Debugger", 
+        _dbg_window_width, 
+        _dbg_window_height, 
+        _dbg_window_flags); 
+    SDL_ShowWindow(_dbg_window);
+
+    // create the renderer
+    _dbg_renderer = SDL_CreateRenderer(_dbg_window, NULL);    
+    SDL_SetRenderLogicalPresentation(_dbg_renderer, 
+        _dbg_logical_width, 
+        _dbg_logical_height, 
+        SDL_LOGICAL_PRESENTATION_DISABLED);
+
+    // create the main debug texture
+    _dbg_texture = SDL_CreateTexture(_dbg_renderer, 
+        SDL_PIXELFORMAT_ARGB4444,         
+        SDL_TEXTUREACCESS_STREAMING, 
+        _dbg_logical_width, _dbg_logical_height);
+    SDL_SetTextureScaleMode(_dbg_texture, SDL_SCALEMODE_NEAREST);            
+
+ 
     std::cout << clr::indent() << clr::LT_BLUE << "Debug::OnInit() Exit" << clr::RETURN;
     return true;
 }
@@ -122,7 +145,25 @@ bool Debug::OnInit()
 bool Debug::OnQuit()
 {
     std::cout << clr::indent() << clr::LT_BLUE << "Debug::OnQuit() Entry" << clr::RETURN;
-    // ...
+     
+    if (_dbg_texture) 
+    { // destroy the texture
+        SDL_DestroyTexture(_dbg_texture);
+        _dbg_texture = nullptr;
+    }   
+    
+    if (_dbg_renderer)
+    { // destroy the renderer
+        SDL_DestroyRenderer(_dbg_renderer);
+        _dbg_renderer = nullptr;
+    }
+
+    if (_dbg_window)
+    { // destroy the debugger window
+        SDL_DestroyWindow(_dbg_window);
+        _dbg_window = nullptr;
+    }    
+    
     std::cout << clr::indent() << clr::LT_BLUE << "Debug::OnQuit() Exit" << clr::RETURN;
     return true;
 }
@@ -132,7 +173,8 @@ bool Debug::OnQuit()
 bool Debug::OnActivate()
 {
     std::cout << clr::indent() << clr::LT_BLUE << "Debug::OnActivate() Entry" << clr::RETURN;
-    // ...
+  
+
     std::cout << clr::indent() << clr::LT_BLUE << "Debug::OnActivate() Exit" << clr::RETURN;
     return true;
 }
@@ -142,7 +184,7 @@ bool Debug::OnActivate()
 bool Debug::OnDeactivate()
 {
     std::cout << clr::indent() << clr::LT_BLUE << "Debug::OnDeactivate() Entry" << clr::RETURN;
-    // ...
+
     std::cout << clr::indent() << clr::LT_BLUE << "Debug::OnDeactivate() Exit" << clr::RETURN;
     return true;
 }
@@ -150,8 +192,19 @@ bool Debug::OnDeactivate()
 
 bool Debug::OnEvent(SDL_Event* evnt)
 {
-    if (evnt) { ; } // stop the compiler from complaining
-    // ...
+    // if not a debug event, just return now
+    if (!(SDL_GetWindowFlags(_dbg_window) & SDL_WINDOW_INPUT_FOCUS)) 
+        return true;
+
+    switch (evnt->type) 
+    {
+        // handle default events SDL_QUIT and ALT-X quits
+
+        case SDL_EVENT_WINDOW_CLOSE_REQUESTED:  
+            SDL_MinimizeWindow(_dbg_window);
+            break;
+
+    }
     return true;
 }
 
@@ -159,17 +212,94 @@ bool Debug::OnEvent(SDL_Event* evnt)
 bool Debug::OnUpdate(float fElapsedTime)
 {
     if (fElapsedTime==0.0f) { ; } // stop the compiler from complaining
+
+    // if the debugger is not active, just return
     // ...
-     return true;
+
+    // _clear_texture(_dbg_texture, 1, 2, 0, 15);
+
+    // restrict the debugger update rate to reduce CPU usage    
+    static float reference_time = 0.025f;
+    static float delta_time = 99999.0f;
+    if (delta_time > (fElapsedTime + reference_time) ) {
+        delta_time = fElapsedTime;
+    } else {
+        delta_time += fElapsedTime;
+        return true;
+    }
+
+    // clear the debugger texture
+    _clear_texture(_dbg_texture, 1, 2, 0, 15);
+
+    // fill the debugger texture with colored bars
+    void *pixels;
+    int pitch;
+    Byte r = 1, g = 2, b = 0, a = 15;
+    if (!SDL_LockTexture(_dbg_texture, NULL, &pixels, &pitch)) {
+        Bus::Error(SDL_GetError());
+    } else {
+        for (int y = 0; y < _dbg_logical_height; y++) {
+            for (int x = 0; x < _dbg_logical_width; x++) {
+                Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));
+                *dst = ( (a<<12) | (r<<8) | (g<<4) | (b<<0) );
+                r++; r&=0x0f;
+                if (r==0) { g++; g&=0x0f; }
+                if (r==0 && g==0) { b++; b&=0x0f; }                
+            }
+        }
+        SDL_UnlockTexture(_dbg_texture); 
+    }          
+
+    return true;
 }
 
 
 bool Debug::OnRender()
 {
+    // if the debugger is not active, just return
     // ...
+
+    if (_dbg_renderer)
+    {
+        // clear the background
+        SDL_SetRenderDrawColor(_dbg_renderer, 0, 0, 0, 255);
+        SDL_RenderClear(_dbg_renderer);
+
+        // render the debug texture        
+        SDL_RenderTexture(_dbg_renderer, _dbg_texture, NULL, NULL);
+
+        // update the debugger window display
+        SDL_RenderPresent(_dbg_renderer);
+    }
     return true;
 }
 
+
+void Debug::_clear_texture(SDL_Texture* texture, Byte r, Byte g, Byte b, Byte a)
+{
+    r &= 0x0f; g &= 0x0f; b &= 0x0f; a &= 0x0f;
+    void *pixels;
+    int pitch;
+    if (!SDL_LockTexture(texture, NULL, &pixels, &pitch)) {
+        Bus::Error(SDL_GetError());
+    } else {
+        for (int y = 0; y < _dbg_logical_height; y++) {
+            for (int x = 0; x < _dbg_logical_width; x++) {
+                Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));
+                *dst = ( (a<<12) | (r<<8) | (g<<4) | (b<<0) );
+            }
+        }
+        SDL_UnlockTexture(texture); 
+    }    
+}
+
+
+void Debug::_setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte r, Byte g, Byte b, Byte a)
+{
+    r &= 0x0f; g &= 0x0f; b &= 0x0f; a &= 0x0f;
+    Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));
+    *dst = ( (a<<12) | (r<<8) | (g<<4) | (b<<0) );
+}
 
 
 // END: Debug.cpp
