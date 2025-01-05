@@ -11,13 +11,13 @@
  ***************************************/ 
 
 // #pragma once    // (Easy Mode Header Guard)
-#ifndef __TYPES_HPP__
-    #define __TYPES_HPP__
+// #ifndef __TYPES_HPP__
+//     #define __TYPES_HPP__
 
     // GENERATE_MEMORY_MAP: Generate a memory map definition file?
     //      true:  generate Memory_Map.hpp and use the local unordered map
     //      false: to use enums from Memory_Map.hpp
-    #define GENERATE_MEMORY_MAP     false
+    #define GENERATE_MEMORY_MAP     true
 
     #define MEMORY_MAP_OUTPUT_FILE_HPP  "./include/Memory_Map.hpp"
     #define MEMORY_MAP_OUTPUT_FILE_ASM  "./include/Memory_Map.asm"
@@ -50,4 +50,4 @@
         #define MAP(key) key                
     #endif  // END: GENERATE_MEMORY_MAP == true
 
-#endif  // __TYPES_HPP__
+//#endif  // __TYPES_HPP__

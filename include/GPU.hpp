@@ -15,6 +15,7 @@
 
 #pragma once
 
+#include <SDL3/SDL.h>
 #include "IDevice.hpp"
 #include "font8x8_system.hpp"
 

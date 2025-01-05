@@ -13,11 +13,9 @@
  * 
  ************************************/
 
-
 #include "Bus.hpp"
 #include "GPU.hpp"
 #include "Memory.hpp"
-
 
 /****************
  * Read / Write *
