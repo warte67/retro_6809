@@ -142,9 +142,6 @@ private: // PRIVATE MEMBERS
     Byte _gfx_pal_idx = 0x00;               // GFX_PAL_IDX
     Byte _gfx_glyph_idx = 0x00;             // GFX_GLYPH_IDX
     Byte _gfx_glyph_data[256][8]{0};        // GFX_GLYPH_DATA (Customizeable)
-
-    int _num_displays;
-    SDL_DisplayID* _displays = nullptr;
 };
 
 /*** NOTES: ****************************************

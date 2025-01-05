@@ -199,6 +199,18 @@ bool GPU::OnInit()
             Bus::Error(SDL_GetError(), __FILE__, __LINE__);
             return false;
         }
+        // fetch the current desktop dimensions
+        SDL_DisplayID* display = SDL_GetDisplays(NULL);
+        const SDL_DisplayMode* pDM = SDL_GetCurrentDisplayMode(display[0]);
+        if (!pDM)   
+        {
+            Bus::Error(SDL_GetError(), __FILE__, __LINE__);
+            return false;
+        }
+        auto Width = pDM->w;
+        int initial_width = Width * 0.75f;          // 75% of the display width
+        int initial_height = (initial_width / 1.6f);
+
         // create the main window
         pWindow = SDL_CreateWindow("SDL3 Retro_6809", initial_width, initial_height, window_flags); 
         SDL_ShowWindow(pWindow);
