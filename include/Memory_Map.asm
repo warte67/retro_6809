@@ -111,8 +111,24 @@ GPU_END               equ   0xFE04    ; End of GPU Register Space
 GPU_TOP               equ   0xFE05    ; Top of GPU Register Space
 ; _______________________________________________________________________
 
-HDW_RESERVED_DEVICE   equ   0xFE05    ; START: Reserved Register Space
-HDW_REG_END           equ   0xFFEF    ; 490 bytes reserved for future use.
+DEBUG_DEVICE          equ   0xFE05    ; START: Debug Hardware Registers:
+DBG_BRK_ADDR          equ   0xFE05    ; (Word) Address of current breakpoint
+DBG_FLAGS             equ   0xFE07    ; (Byte) Debug Specific Hardware Flags:
+                                      ; - bit 7: Debug Enable
+                                      ; - bit 6: Single Step Enable
+                                      ; - bit 5: Clear All Breakpoints
+                                      ; - bit 4: Update Breakpoint at DEBUG_BRK_ADDR
+                                      ; - bit 3: FIRQ  (on low {0} to high {1} edge)
+                                      ; - bit 2: IRQ   (on low {0} to high {1} edge)
+                                      ; - bit 1: NMI   (on low {0} to high {1} edge)
+                                      ; - bit 0: RESET (on low {0} to high {1} edge)
+                                      ; 
+DBG_END               equ   0xFE07    ; End of Debug Registers
+DBG_TOP               equ   0xFE08    ; Top of Debug Registers
+; _______________________________________________________________________
+
+HDW_RESERVED_DEVICE   equ   0xFE08    ; START: Reserved Register Space
+HDW_REG_END           equ   0xFFEF    ; 487 bytes reserved for future use.
 ; _______________________________________________________________________
 
 ROM_VECTS_DEVICE      equ   0xFFF0    ; START: Hardware Interrupt Vectors

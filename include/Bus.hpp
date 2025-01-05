@@ -32,8 +32,7 @@
 #include "Memory.hpp"
 #include "Tests.hpp"
 #include "GPU.hpp"
-
-
+#include "Debug.hpp"
 
 class Bus
 {
@@ -84,6 +83,7 @@ private: // INTERNAL PRIVATES
     // quick and dirty reference to the Gfx object:
     inline static GPU* _pGPU = nullptr;   // singlular but not necessarily a singleton
     inline static Tests* _pTests = nullptr;
+    inline static Debug* _pDebug = nullptr;
 
     // static Memory Management Device:
     Memory& _memory = Memory::GetInstance();   

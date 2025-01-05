@@ -38,6 +38,7 @@
     #include <string>
     #include <vector>
     #include <iostream>
+
     #include "clr.hpp"
 
     // Create an appropriate MAP() macro
@@ -48,6 +49,7 @@
     #else // use the enumeration
         #include "Memory_Map.hpp"
         #define MAP(key) key                
-    #endif  // END: GENERATE_MEMORY_MAP == true
+    #endif  // END: GENERATE_MEMORY_MAP
+
 
 //#endif  // __TYPES_HPP__

@@ -21,10 +21,10 @@
 #include <unordered_map>
 #include <mutex>
 
+
 #include "IDevice.hpp"
 #include "types.hpp"
 #include "clr.hpp"
-
 
 class Memory : public IDevice
 {
@@ -78,7 +78,9 @@ public:     // PUBLIC ACCESSORS
     static int NextAddress() { return _next_address; }
     static void Generate_Memory_Map();
     
-    static Word Map(std::string name);    // Map a device name to its address
+    
+    static Word Map(std::string name);  // Map a device name to its address
+
 
 
 private:

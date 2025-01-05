@@ -255,6 +255,7 @@ bool Bus::_onInit()
 
     _pTests = Memory::Attach<Tests>();  
     _pGPU = Memory::Attach<GPU>();
+    _pDebug = Memory::Attach<Debug>();
 
     Memory::Attach<HDW_RESERVED>();     // reserved space for future use
     Memory::Attach<ROM_VECTS>();        // 0xFFF0 - 0xFFFF      (System ROM Vectors)
