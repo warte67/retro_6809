@@ -27,7 +27,7 @@ class IDevice
                         // parent container for these objects.
 
 public: // PUBLIC CONSTRUCTOR / DESTRUCTOR
-    IDevice() { _device_name = "IDevice"; }
+    IDevice() { _device_name = "IDevice Device"; }
     IDevice(std::string sName) : _device_name(sName) {}
     virtual ~IDevice() {}
 
@@ -256,7 +256,7 @@ class SOFT_VECTORS : public IDevice
             mapped_register.push_back(new_node);
             new_node = { "SOFT_NMI", nextAddr,   { "NMI Software Interrupt Vector"} }; nextAddr+=2;
             mapped_register.push_back(new_node);
-            new_node = { "SOFT_RESET", nextAddr, { "RESET Software Interrupt Vector"} }; nextAddr+=2;
+            new_node = { "SOFT_RESET", nextAddr, { "RESET Software Interrupt Vector", "---"} }; nextAddr+=2;
             mapped_register.push_back(new_node);
 
             _size = nextAddr - old_address;
@@ -308,7 +308,7 @@ class SYSTEM_MEMORY : public IDevice
             mapped_register.push_back(new_node);
             new_node = { "SYSTEM_STACK", nextAddr,  { "Bottom of the system stack spcace"} }; nextAddr=0x400;
             mapped_register.push_back(new_node);
-            new_node = { "SSTACK_TOP", nextAddr,    { "Top of the system statck space"} };
+            new_node = { "SSTACK_TOP", nextAddr,    { "Top of the system statck space", "---"} };
             mapped_register.push_back(new_node);
 
             _size = nextAddr - old_address;
@@ -358,7 +358,7 @@ class VIDEO_BUFFER : public IDevice
             mapped_register.push_back(new_node);
             new_node = { "VIDEO_END", nextAddr,     { "End of standard video buffer"} }; nextAddr+=1;
             mapped_register.push_back(new_node);
-            new_node = { "VIDEO_TOP", nextAddr,     { "Top of standard video buffer"} };             
+            new_node = { "VIDEO_TOP", nextAddr,     { "Top of standard video buffer", "---"} };             
             mapped_register.push_back(new_node);
 
             _size = nextAddr - old_address;
@@ -433,7 +433,7 @@ class USER_MEMORY : public IDevice
             mapped_register.push_back(new_node);
             new_node = { "USER_RAM_END", nextAddr,  { "End User Accessable RAM"} }; nextAddr+=1;
             mapped_register.push_back(new_node);
-            new_node = { "USER_RAM_TOP", nextAddr,  { "Top User Accessable RAM"} };             
+            new_node = { "USER_RAM_TOP", nextAddr,  { "Top User Accessable RAM", "---"} };             
             mapped_register.push_back(new_node);
 
             _size = nextAddr - old_address;
@@ -485,7 +485,7 @@ class MEMBANK : public IDevice
             mapped_register.push_back(new_node);
             new_node = { "MEMBANK_END", nextAddr,  { "End of Banked Memory Region"} }; nextAddr+=1;            
             mapped_register.push_back(new_node);
-            new_node = { "MEMBANK_TOP", nextAddr,  { "TOP of Banked Memory Region"} }; 
+            new_node = { "MEMBANK_TOP", nextAddr,  { "TOP of Banked Memory Region", "---"} }; 
             mapped_register.push_back(new_node);
 
             _size = nextAddr - old_address;
@@ -547,61 +547,8 @@ class KERNEL_ROM : public IDevice
             mapped_register.push_back(new_node);
             new_node = { "KERNEL_END", nextAddr,  { "End of Kernel Rom Space"} }; nextAddr+=1;
             mapped_register.push_back(new_node);
-            new_node = { "KERNEL_TOP", nextAddr,  { "Top of Kernel Rom Space"} };
+            new_node = { "KERNEL_TOP", nextAddr,  { "Top of Kernel Rom Space", "---"} };
             mapped_register.push_back(new_node);
-
-            _size = nextAddr - old_address;
-            return _size; 
-        }  
-};
-
-
-/*** class HDW_REGISTERS *******************************************************
- *
- * ██╗  ██╗██████╗ ██╗    ██╗        ██████╗ ███████╗ ██████╗ ██╗███████╗████████╗███████╗██████╗ ███████╗
- * ██║  ██║██╔══██╗██║    ██║        ██╔══██╗██╔════╝██╔════╝ ██║██╔════╝╚══██╔══╝██╔════╝██╔══██╗██╔════╝
- * ███████║██║  ██║██║ █╗ ██║        ██████╔╝█████╗  ██║  ███╗██║███████╗   ██║   █████╗  ██████╔╝███████╗
- * ██╔══██║██║  ██║██║███╗██║        ██╔══██╗██╔══╝  ██║   ██║██║╚════██║   ██║   ██╔══╝  ██╔══██╗╚════██║
- * ██║  ██║██████╔╝╚███╔███╔╝███████╗██║  ██║███████╗╚██████╔╝██║███████║   ██║   ███████╗██║  ██║███████║
- * ╚═╝  ╚═╝╚═════╝  ╚══╝╚══╝ ╚══════╝╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝╚══════╝
- * 
- * (This will be moved to its own files)
- * Currently using a RAM model for testing.
- ****************************************************************/
-class HDW_REGISTERS : public IDevice
-{
-    public:
-        HDW_REGISTERS() {
-            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
-            _size = 16 * 1024;
-            _device_name = "HDW_REGISTERS_DEVICE";
-        }
-        virtual ~HDW_REGISTERS() {
-            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
-        }    
-
-		bool OnInit() override 						{ return true; }
-		bool OnQuit() override 						{ return true; }
-		bool OnActivate() override 					{ return true; }
-		bool OnDeactivate() override 				{ return true; }
-		// bool OnEvent(SDL_Event* evnt) override 		{ return true; }
-		bool OnEvent(SDL_Event* evnt) override 		{ return (evnt==nullptr); }         // return true
-		bool OnUpdate(float fElapsedTime) override 	{ return (fElapsedTime==0.0f); }    // { return true; }           
-		bool OnRender() override 					{ return true; } 
-
-		int OnAttach(int nextAddr) override       { 
-            Word old_address=nextAddr;
-            this->heading = "Hardware Register Space";
-            register_node new_node;
-            new_node = { "HDW_REG_START", nextAddr,  { "Start of Register Space"} }; nextAddr+=2;
-            mapped_register.push_back(new_node);
-
-            // // reserve space for future use
-            // int bank_size = 0xFFF0-nextAddr;      
-            // std::string res = std::to_string(bank_size);
-            // res += " bytes reserved for future use.";
-            // new_node = { "HDW_RESERVED", nextAddr,  { res } }; nextAddr+=bank_size;
-            // mapped_register.push_back(new_node);        
 
             _size = nextAddr - old_address;
             return _size; 
@@ -640,7 +587,7 @@ class HDW_RESERVED : public IDevice
             std::string res = std::to_string(bank_size);
             res += " bytes reserved for future use.";
             nextAddr+=bank_size;
-            new_node = { "HDW_REG_END", nextAddr,  { res } }; // nextAddr+=1;
+            new_node = { "HDW_REG_END", nextAddr,  { res , "---"} }; // nextAddr+=1;
             mapped_register.push_back(new_node);     
 
             _size = nextAddr - old_address;          

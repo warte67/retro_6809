@@ -251,12 +251,12 @@ bool Bus::_onInit()
     Memory::Attach<VIDEO_BUFFER>();     // 0x0400 - 0x23FF      (8k video buffer)
     Memory::Attach<USER_MEMORY>();      // 0x2400 - 0xAFFF      (42k user RAM)    
     Memory::Attach<MEMBANK>();          // 0xB000 - 0xEFFF      (16k banked memory)
-    Memory::Attach<KERNEL_ROM>();       // 0xF000 - 0xFDFF      (3.5k kernel ROM)
-    // Memory::Attach<HDW_REGISTERS>();    // 0xFE00 - 0xFFEF      (Hardware Registers)
+    Memory::Attach<KERNEL_ROM>();       // 0xF000 - 0xFDFF      (3.5k kernel ROM)    
 
+    _pTests = Memory::Attach<Tests>();  
     _pGPU = Memory::Attach<GPU>();
 
-    Memory::Attach<HDW_RESERVED>();     // unused ...
+    Memory::Attach<HDW_RESERVED>();     // reserved space for future use
     Memory::Attach<ROM_VECTS>();        // 0xFFF0 - 0xFFFF      (System ROM Vectors)
 
     // Error Checking

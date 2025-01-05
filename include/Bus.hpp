@@ -30,7 +30,7 @@
 
 #include "types.hpp"
 #include "Memory.hpp"
-
+#include "Tests.hpp"
 #include "GPU.hpp"
 
 
@@ -83,6 +83,7 @@ private: // INTERNAL PRIVATES
 
     // quick and dirty reference to the Gfx object:
     inline static GPU* _pGPU = nullptr;   // singlular but not necessarily a singleton
+    inline static Tests* _pTests = nullptr;
 
     // static Memory Management Device:
     Memory& _memory = Memory::GetInstance();   

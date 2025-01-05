@@ -399,6 +399,21 @@ void Memory::Write_DWord(Word offset, DWord data, bool debug)
 }
 
 
+
+
+
+
+// Map a device name to its address
+Word Memory::Map(std::string name) 
+{ 
+    if (_map.find(name) == _map.end()) 
+    {
+        Bus::Error("Memory node '" + name + "' not found!");    
+        return 0;
+    }
+    return _map[name]; 
+}
+
 /**
  * Attaches the specified device to the memory map and allocates space
  * for it.
@@ -477,7 +492,7 @@ void Memory::Generate_Memory_Map()
     { // Generate C++ Memory_Map.hpp
         constexpr int FIRST_TAB = 4;
         constexpr int VAR_LEN = 22;
-        constexpr int COMMENT_START = 32;
+        constexpr int COMMENT_START = 34;
 
         std::ofstream fout(MEMORY_MAP_OUTPUT_FILE_HPP);
         if (fout.is_open())
@@ -498,13 +513,20 @@ void Memory::Generate_Memory_Map()
                 for (auto &r : node->mapped_register)
                 {
                     std::string _out = clr::pad(clr::pad(r.name, VAR_LEN) + "= 0x" + clr::hex(r.address, 4) +",", COMMENT_START);
+                    // comments
                     for (auto &c : r.comment)
                     {
-                        if (_out.length() > 0) { 
-                            fout << clr::pad(" ",FIRST_TAB) << _out << "// " << c << std::endl;   
-                            _out = "";                  
+                        // horizontal rule
+                        if (c == "---") {
+                            fout << "// _______________________________________________________________________\n";
                         } else {
-                            fout << clr::pad(" ",FIRST_TAB) << clr::pad(" ", COMMENT_START) << "// " << c << std::endl;
+                            // comment
+                            if (_out.length() > 0) { 
+                                fout << clr::pad(" ",FIRST_TAB) << _out << "// " << c << std::endl;   
+                                _out = "";                  
+                            } else {
+                                fout << clr::pad(" ",FIRST_TAB) << clr::pad(" ", COMMENT_START) << "// " << c << std::endl;
+                            }
                         }
                     }
                 }
@@ -549,13 +571,20 @@ void Memory::Generate_Memory_Map()
                 for (auto &r : node->mapped_register)
                 {
                     std::string _out = clr::pad(clr::pad(r.name, VAR_LEN) + "equ   0x" + clr::hex(r.address, 4), COMMENT_START);
+                    // comments
                     for (auto &c : r.comment)
                     {
-                        if (_out.length() > 0) { 
-                            fout << clr::pad("",FIRST_TAB) << _out << "; " << c << std::endl;   
-                            _out = "";                  
+                        // horizontal rule
+                        if (c == "---") {
+                            fout << "; _______________________________________________________________________\n";
                         } else {
-                            fout << clr::pad("",FIRST_TAB) << clr::pad("", COMMENT_START) << "; " << c << std::endl;
+                            // comment                        
+                            if (_out.length() > 0) { 
+                                fout << clr::pad("",FIRST_TAB) << _out << "; " << c << std::endl;   
+                                _out = "";                  
+                            } else {
+                                fout << clr::pad("",FIRST_TAB) << clr::pad("", COMMENT_START) << "; " << c << std::endl;
+                            }
                         }
                     }
                 }

@@ -86,7 +86,7 @@ private: // PRIVATE MEMBERS
                                         //    - bits 3   = Application Screen Mode
                                         //                 0: Windowed
                                         //                 1: Fullscreen
-                                        //    - bits 2   = Debug Enable
+                                        //    - bits 2   = VSync Enable
                                         //                 0: Disabled
                                         //                 1: Enabled
                                         //    - bits 1   = Sprite Enable
@@ -96,7 +96,7 @@ private: // PRIVATE MEMBERS
                                         //                 0: Disabled
                                         //                 1: Enabled
                                         // 
-    Byte _gpu_mode = 0b0110'0001;       // (Byte) Bitflag Enables
+    Byte _gpu_mode = 0b0110'1001;       // (Byte) Bitflag Enables
                                         //    - bit 7    = Standard Bitmap:
                                         //                  0: Text Display
                                         //                  1: Bitmap Display

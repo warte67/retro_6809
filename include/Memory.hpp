@@ -25,6 +25,7 @@
 #include "types.hpp"
 #include "clr.hpp"
 
+
 class Memory : public IDevice
 {
 private:    // PRIVATE SINGLETON STUFF
@@ -77,12 +78,8 @@ public:     // PUBLIC ACCESSORS
     static int NextAddress() { return _next_address; }
     static void Generate_Memory_Map();
     
-    static Word Map(std::string name) { return _map[name]; }    // Map a device name to its address
-    // #define MAP_IMPL(key) Memory::Map(#key)                     
-    // #define MAP(key) MAP_IMPL(key)    
+    static Word Map(std::string name);    // Map a device name to its address
 
-    // #define MAP(key) key    // Simply substitute the key
- 
 
 private:
     static int _attach(IDevice* device);

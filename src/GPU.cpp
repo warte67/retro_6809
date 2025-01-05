@@ -128,44 +128,50 @@ int  GPU::OnAttach(int nextAddr)
     register_node new_node;
     
      new_node = { "GPU_OPTIONS", nextAddr,  {   "(Byte) Bitflag Enables",
-                                "   - bit 7    = Extended Bitmap:",
-                                "                 0: Tilemap Display",
-                                "                 1: Bitmap Display",
-                                "   - bits 5-6 = Extended Color Mode:",
-                                "                 00: 2-Colors",
-                                "                 01: 4-Colors",
-                                "                 10: 16-Colors",
-                                "                 11: 256-Colors",
-                                "   - bits 4   = Extended Display Enable",
-                                "                0: Disabled",
-                                "                1: Enabled",
-                                "   - bits 3   = Application Screen Mode",
-                                "                0: Windowed",
-                                "                1: Fullscreen",
-                                "   - bits 2   = Debug Enable",
-                                "                0: Disabled",
-                                "                1: Enabled",
-                                "   - bits 1   = Sprite Enable",
-                                "                0: Disabled",
-                                "                1: Enabled",
-                                "   - bit  0   = Standard Display Enable",
-                                "                0: Disabled",
-                                "                1: Enabled",
-                                "" } }; nextAddr+=1;
+                                "- bit 7    = Extended Bitmap:",
+                                "              0: Tilemap Display",
+                                "              1: Bitmap Display",
+                                "- bits 5-6 = Extended Color Mode:",
+                                "              00: 2-Colors",
+                                "              01: 4-Colors",
+                                "              10: 16-Colors",
+                                "              11: 256-Colors",
+                                "- bits 4   = Extended Display Enable",
+                                "              0: Disabled",
+                                "              1: Enabled",
+                                "- bits 3   = Application Screen Mode",
+                                "              0: Windowed",
+                                "              1: Fullscreen",
+                                "- bits 2   = VSync Enable",
+                                "              0: Disabled",
+                                "              1: Enabled",
+                                "- bits 1   = Sprite Enable",
+                                "              0: Disabled",
+                                "              1: Enabled",
+                                "- bit  0   = Standard Display Enable",
+                                "              0: Disabled",
+                                "              1: Enabled", ""} }; nextAddr+=1;
     mapped_register.push_back(new_node);    
 
      new_node = { "GPU_MODE", nextAddr,  {   "(Byte) Bitflag Enables",
-                                "   - bit 7    = Standard Bitmap:",
-                                "                 0: Text Display",
-                                "                 1: Bitmap Display",
-                                "   - bits 5-6 = Standard Color Mode:",
-                                "                 00: 2-Colors",
-                                "                 01: 4-Colors",
-                                "                 10: 16-Colors",
-                                "                 11: 256-Colors",
-                                "   - bits 0-4 = Display Mode (0-31)",
-                                "" } }; nextAddr+=1;
+                                "- bit 7    = Standard Bitmap:",
+                                "              0: Text Display",
+                                "              1: Bitmap Display",
+                                "- bits 5-6 = Standard Color Mode:",
+                                "              00: 2-Colors",
+                                "              01: 4-Colors",
+                                "              10: 16-Colors",
+                                "              11: 256-Colors",
+                                "- bits 0-4 = Display Mode (0-31)", "" } }; nextAddr+=1;
     mapped_register.push_back(new_node);
+
+    nextAddr--;
+    new_node = { "GPU_END", nextAddr,  { "End of GPU Register Space"} };
+    mapped_register.push_back(new_node);    
+    
+    nextAddr++;
+    new_node = { "GPU_TOP", nextAddr,  { "Top of GPU Register Space", "---"} };
+    mapped_register.push_back(new_node);    
 
     _size = nextAddr - old_address;
     std::cout << clr::indent() << clr::CYAN << "GPU::OnAttach() Exit" << clr::RETURN;
@@ -217,11 +223,12 @@ bool GPU::OnInit()
                 SDL_TEXTUREACCESS_STREAMING, 
                 (int)_screen_width/2, (int)_screen_height/2);
 
+
         pMain_Texture = SDL_CreateTexture(pRenderer, 
                 SDL_PIXELFORMAT_ARGB4444, 
                 SDL_TEXTUREACCESS_TARGET, 
                 (int)_screen_width, (int)_screen_height);
-        
+
     } // END OF SDL3 Initialization
 
     // Build The Color Palette
@@ -312,6 +319,31 @@ bool GPU::OnQuit()
 bool GPU::OnActivate()
 {
     // std::cout << clr::indent() << clr::CYAN << "GPU::OnActivate() Entry" << clr::RETURN;
+
+    // clear out the standard video buffer
+    Byte at = 0;
+    Byte ch = 64;
+    for (int s=MAP(VIDEO_START); s<MAP(VIDEO_TOP); s+=2)
+    {
+        Memory::Write(s+0, at);
+        Memory::Write(s+1, ch);
+        ch++;
+        if(ch==0) at++;
+        if (at>0) at++;
+    }
+
+    // clear out the extended video buffer
+    Word d=0;
+    for (int i=0; i<(64*1024); i++) { _ext_video_buffer[i] = d++; }
+
+    // _clear_texture(pExt_Texture, 15, 15, 15, 15);
+    // _clear_texture(pStd_Texture, 15, 15, 15, 15);
+
+    // // clear the primary texture
+    // SDL_SetRenderTarget(pRenderer, pMain_Texture);
+    // SDL_SetRenderDrawColor(pRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+    // SDL_RenderClear(pRenderer);    
+
     // std::cout << clr::indent() << clr::CYAN << "GPU::OnActivate() Exit" << clr::RETURN;
     return true;
 } // END: GPU::OnActivate()
@@ -357,16 +389,16 @@ bool GPU::OnEvent(SDL_Event* evnt)
     {
         case SDL_EVENT_KEY_DOWN:
         {
-            // if (evnt->key.key == SDLK_V)
-            // {   // [V] Toggle VSYNC
-            //     Byte data = Memory::Read( MAP(GPU_EMULATION) );
-            //     if (data &  0b10000000) {
-            //         data &= 0b01111111;
-            //     } else {
-            //         data |= 0b10000000;
-            //     }
-            //     Memory::Write(MAP(GPU_EMULATION), data);
-            // }
+            if (evnt->key.key == SDLK_V)
+            {   // [V] Toggle VSYNC
+                Byte data = Memory::Read( MAP(GPU_OPTIONS) );
+                if (data &  0b0000'0100) {
+                    data &= 0b1111'1011;
+                } else {
+                    data |= 0b0000'0100;
+                }
+                Memory::Write(MAP(GPU_OPTIONS), data);
+            }
             
             if (evnt->key.key == SDLK_F)
             {   // [F] Toggle Fullscreen
@@ -484,6 +516,7 @@ bool GPU::OnUpdate(float fElapsedTime)
     //std::cout << clr::indent() << clr::CYAN << "GPU::OnUpdate() Entry" << clr::RETURN;
     if (fElapsedTime==0.0f) { ; } // stop the compiler from complaining
 
+
     static float deltaTime = fElapsedTime;
     static float runningTime = fElapsedTime;
     if (runningTime > deltaTime + 0.01f) {
@@ -492,49 +525,18 @@ bool GPU::OnUpdate(float fElapsedTime)
         SDL_SetWindowTitle(pWindow, Bus::GetTitle().c_str());
         // std::cout << "FPS: " << Bus::FPS() << std::endl;
 
-        // animate some background pixels
-        int bfr_size = 64*1024;
-        static Byte c = 0;
-        for (int i=0; i<bfr_size; i++) { _ext_video_buffer[i] = c++; } 
-        c++;
-
-        // animate some foreground data
-        static int count = 0;
-        if (count++ > 12) 
-        { 
-            count = 0; 
-            static Byte data = 0;
-            static Byte color = 0x00;
-            for (int i=MAP(VIDEO_START); i<MAP(VIDEO_TOP); i+=2) { 
-                Memory::Write(i+0, color++);  
-                Memory::Write(i+1, data++);  
-            }
-            color--;
-            data++;
+        if (Memory::Read(MAP(TESTS_ONE)) & Tests::TestFlags::TEST_ENABLE )
+        {
+            if (Memory::Read(MAP(TESTS_ONE)) & Tests::TestFlags::TEST_ANIM_BG )
+            { // animate some background pixels
+                int bfr_size = 64*1024;
+                static Byte c = 0;
+                for (int i=0; i<bfr_size; i++) { _ext_video_buffer[i] = c++; } 
+                c++;
+            }      
         }
     }
-    runningTime += fElapsedTime;
-    // std::cout << fElapsedTime << std::endl;
-    
-
-    // TESTING... video mode changes
-    if (false)
-    {   static Word video_mode = 0x0180;    
-        static float delta_change = fElapsedTime;
-        static float video_running_time = fElapsedTime;
-        if (video_running_time > delta_change + 0.125f) 
-        {
-            delta_change = fElapsedTime;
-            video_running_time = fElapsedTime;
-            video_mode++;
-            if (video_mode & 0b0001'1110'0000'0000) video_mode += 0b0001'1110'0000'0000;
-            Word mode = video_mode | 0b0001'0001'0000'0000;
-            //mode |= 0b1000'1000'0000'0000;   // force full screen
-            Memory::Write_Word(MAP(GPU_OPTIONS), mode);
-            // std::cout << "(0x" << clr::hex(video_mode,4) << ") Video Mode: " << clr::hex(mode,4) << std::endl;
-        }
-        video_running_time += fElapsedTime;
-    }  // ... END OF TESTING 
+    runningTime += fElapsedTime;   
 
 
 
@@ -579,14 +581,20 @@ bool GPU::OnRender()
     // render Extended Graphics
     if (Memory::Read(MAP(GPU_OPTIONS)) & 0b0001'0000)
     {
+    // _clear_texture(pExt_Texture, 0, 0, 0, 0);
+    // _clear_texture(pStd_Texture, 15, 15, 15, 15);
+
         // SDL_SetTextureScaleMode(pExt_Texture, SDL_SCALEMODE_LINEAR);   // blurry
-        SDL_SetTextureScaleMode(pExt_Texture, SDL_SCALEMODE_NEAREST);     // clear
+        SDL_SetTextureScaleMode(pExt_Texture, SDL_SCALEMODE_NEAREST);     // clear        
         SDL_RenderTexture(pRenderer, pExt_Texture, &r, NULL);
     }
 
     // render Standard Graphics
     if (Memory::Read(MAP(GPU_OPTIONS)) & 0b0000'0001)
     {
+    // _clear_texture(pExt_Texture, 15, 15, 15, 15);
+    // _clear_texture(pStd_Texture, 15, 15, 15, 15);
+
         // SDL_SetTextureScaleMode(pStd_Texture, SDL_SCALEMODE_LINEAR);   // blurry
         SDL_SetTextureScaleMode(pStd_Texture, SDL_SCALEMODE_NEAREST);     // clear
         SDL_RenderTexture(pRenderer, pStd_Texture, &r, NULL);
@@ -1010,7 +1018,7 @@ void GPU::_build_palette()
     {
         // BASIC COLORS (0-15) CUSTOM DEFAULT COLORS
         std::vector<PALETTE> ref = {    
-			{ 0xF000 },		// 0: black    
+			{ 0x0000 },		// 0: black             // 0xF000
 			{ 0xF555 },		// 1: dk gray
 			{ 0xF007 },		// 2: dk blue
 			{ 0xF600 },		// 3: dk red
@@ -1149,6 +1157,15 @@ Byte GPU::_verify_gpu_mode_change(Byte data, Word map_register)
                 SDL_SetWindowFullscreen(pWindow, false);
             }             
         }     
+        // VSync changed
+        if ( (data & 0b0000'0100) != (_gpu_options & 0b0000'0100) )
+        {
+            if (data & 0b0000'0100) {
+                SDL_SetRenderVSync(pRenderer, 1);
+            } else {
+                SDL_SetRenderVSync(pRenderer, 0);
+            } 
+        }
         _gpu_options = data;   
     }
 
