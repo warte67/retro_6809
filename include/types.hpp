@@ -10,9 +10,18 @@
  * 
  ***************************************/ 
 
-// #pragma once    // (Easy Mode Header Guard)
+#pragma once    // (Easy Mode Header Guard)
 // #ifndef __TYPES_HPP__
 //     #define __TYPES_HPP__
+
+    #include <cstddef>
+
+    // common includes
+    #include <SDL3/SDL.h>
+    #include <string>
+    #include <vector>
+    #include <iostream>
+
 
     // GENERATE_MEMORY_MAP: Generate a memory map definition file?
     //      true:  generate Memory_Map.hpp and use the local unordered map
@@ -33,13 +42,20 @@
         #define DWord Uint32
     #endif
 
-    // common includes
-    #include <SDL3/SDL.h>
-    #include <string>
-    #include <vector>
-    #include <iostream>
-
     #include "clr.hpp"
+
+    // Debug Device Constants:
+    const Word DEBUG_WIDTH = 800;
+    const Word DEBUG_HEIGHT = DEBUG_WIDTH / 1.333333333333333;
+
+    const float DEBUG_WINDOW_SCALE = 1.7f;
+    // const float DEBUG_WINDOW_SCALE = 1.325f;
+
+    const int DEBUG_WINDOW_WIDTH = DEBUG_WIDTH * DEBUG_WINDOW_SCALE;
+    const int DEBUG_WINDOW_HEIGHT = DEBUG_HEIGHT * DEBUG_WINDOW_SCALE;
+    const size_t DEBUG_BUFFER_SIZE = (DEBUG_WIDTH/8)*(DEBUG_HEIGHT/8);
+    constexpr bool DEBUG_STARTS_ACTIVE = false;
+    constexpr bool DEBUG_SINGLE_STEP = false;
 
     // Create an appropriate MAP() macro
     #if GENERATE_MEMORY_MAP == true

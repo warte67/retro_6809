@@ -124,18 +124,33 @@ bool Debug::OnInit()
     // create the renderer
     _dbg_renderer = SDL_CreateRenderer(_dbg_window, NULL);    
     SDL_SetRenderLogicalPresentation(_dbg_renderer, 
-        _dbg_logical_width, 
-        _dbg_logical_height, 
+        _dbg_width, 
+        _dbg_height, 
         SDL_LOGICAL_PRESENTATION_DISABLED);
 
     // create the main debug texture
     _dbg_texture = SDL_CreateTexture(_dbg_renderer, 
         SDL_PIXELFORMAT_ARGB4444,         
         SDL_TEXTUREACCESS_STREAMING, 
-        _dbg_logical_width, _dbg_logical_height);
-    SDL_SetTextureScaleMode(_dbg_texture, SDL_SCALEMODE_NEAREST);            
+        _dbg_width, _dbg_height);
+    SDL_SetTextureScaleMode(_dbg_texture, SDL_SCALEMODE_NEAREST);        
 
- 
+    // create the character buffer
+    _db_bfr.clear();
+    for (unsigned int t=0; t<DEBUG_BUFFER_SIZE; t++)
+    {
+        D_GLYPH dg;
+        dg.attr = 0x0f;
+        dg.chr = 'A';
+        _db_bfr.push_back(dg);
+    }
+    Byte at=0x0f;
+    for (auto& c : _db_bfr)
+    {
+        c.attr = at;
+        c.chr = ' ';
+    }
+
     std::cout << clr::indent() << clr::LT_BLUE << "Debug::OnInit() Exit" << clr::RETURN;
     return true;
 }
@@ -228,27 +243,30 @@ bool Debug::OnUpdate(float fElapsedTime)
         return true;
     }
 
-    // clear the debugger texture
-    _clear_texture(_dbg_texture, 1, 2, 0, 15);
 
-    // fill the debugger texture with colored bars
-    void *pixels;
-    int pitch;
-    Byte r = 1, g = 2, b = 0, a = 15;
-    if (!SDL_LockTexture(_dbg_texture, NULL, &pixels, &pitch)) {
-        Bus::Error(SDL_GetError());
-    } else {
-        for (int y = 0; y < _dbg_logical_height; y++) {
-            for (int x = 0; x < _dbg_logical_width; x++) {
-                Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));
-                *dst = ( (a<<12) | (r<<8) | (g<<4) | (b<<0) );
-                r++; r&=0x0f;
-                if (r==0) { g++; g&=0x0f; }
-                if (r==0 && g==0) { b++; b&=0x0f; }                
-            }
-        }
-        SDL_UnlockTexture(_dbg_texture); 
-    }          
+    _updateDebugScreen();
+
+    // // clear the debugger texture
+    // _clear_texture(_dbg_texture, 1, 2, 0, 15);
+    //
+    // // fill the debugger texture with colored bars
+    // void *pixels;
+    // int pitch;
+    // Byte r = 1, g = 2, b = 0, a = 15;
+    // if (!SDL_LockTexture(_dbg_texture, NULL, &pixels, &pitch)) {
+    //     Bus::Error(SDL_GetError());
+    // } else {
+    //     for (int y = 0; y < _dbg_height; y++) {
+    //         for (int x = 0; x < _dbg_width; x++) {
+    //             Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));
+    //             *dst = ( (a<<12) | (r<<8) | (g<<4) | (b<<0) );
+    //             r++; r&=0x0f;
+    //             if (r==0) { g++; g&=0x0f; }
+    //             if (r==0 && g==0) { b++; b&=0x0f; }                
+    //         }
+    //     }
+    //     SDL_UnlockTexture(_dbg_texture); 
+    // }          
 
     return true;
 }
@@ -283,8 +301,8 @@ void Debug::_clear_texture(SDL_Texture* texture, Byte r, Byte g, Byte b, Byte a)
     if (!SDL_LockTexture(texture, NULL, &pixels, &pitch)) {
         Bus::Error(SDL_GetError());
     } else {
-        for (int y = 0; y < _dbg_logical_height; y++) {
-            for (int x = 0; x < _dbg_logical_width; x++) {
+        for (int y = 0; y < _dbg_height; y++) {
+            for (int x = 0; x < _dbg_width; x++) {
                 Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));
                 *dst = ( (a<<12) | (r<<8) | (g<<4) | (b<<0) );
             }
@@ -294,12 +312,79 @@ void Debug::_clear_texture(SDL_Texture* texture, Byte r, Byte g, Byte b, Byte a)
 }
 
 
-void Debug::_setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte r, Byte g, Byte b, Byte a)
+void Debug::_setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte palette_index)
 {
-    r &= 0x0f; g &= 0x0f; b &= 0x0f; a &= 0x0f;
+    palette_index &= 0x0f;
+    Byte r = _debug_palette[palette_index].r;
+    Byte g = _debug_palette[palette_index].g;
+    Byte b = _debug_palette[palette_index].b;
+    Byte a = _debug_palette[palette_index].a;  
     Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));
     *dst = ( (a<<12) | (r<<8) | (g<<4) | (b<<0) );
 }
 
+void Debug::OutGlyph(int col, int row, Byte glyph, Byte color_attr)
+{
+    Word index = row*(DEBUG_WIDTH/8) + col;
+    _db_bfr[index].chr = glyph;
+    _db_bfr[index].attr = color_attr;
+}
+
+int Debug::OutText(int col, int row, std::string text, Byte color_attr)
+{
+    int pos = 0;
+    for (auto& a : text)
+    {
+        OutGlyph(col++, row, a, color_attr);
+        pos++;
+    }
+    return pos;
+}
+
+std::string Debug::_hex(Uint32 n, Uint8 d)
+{
+    std::string s(d, '0');
+    for (int i = d - 1; i >= 0; i--, n >>= 4)
+        s[i] = "0123456789ABCDEF"[n & 0xF];
+    return s;
+}
+
+void Debug::_updateDebugScreen() 
+{
+    void *pixels;
+    int pitch;
+
+    if (!SDL_LockTexture(_dbg_texture, NULL, &pixels, &pitch)) {
+        // SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't lock texture: %s\n", SDL_GetError());
+        Bus::Error(SDL_GetError(), __FILE__, __LINE__);
+    }
+    else
+    {
+        Byte width = DEBUG_WIDTH / 8;
+        // int i=0;
+        Word i_size = _db_bfr.size();
+        for (Word i=0; i<i_size; i++)
+        {
+            Byte ch = _db_bfr[i].chr;
+            Byte at = _db_bfr[i].attr;
+			Byte bg = at >> 4;
+			Byte fg = at & 0x0f;
+            int x = (i % width) * 8;
+            int y = (i / width) * 8;
+			for (int v = 0; v < 8; v++)
+			{
+				for (int h = 0; h < 8; h++)
+				{
+					int color = bg;
+                    Byte gd = GPU::GetGlyphData(ch, v);                    
+					if (gd & (1 << (7 - h)))
+						color = fg;
+					_setPixel_unlocked(pixels, pitch, x + h, y + v, color);
+				}
+			}
+        }
+        SDL_UnlockTexture(_dbg_texture); 
+    }
+} 
 
 // END: Debug.cpp

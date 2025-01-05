@@ -45,7 +45,7 @@ public: // PUBLIC ACCESSORS
     SDL_Window* GetWindow() { return pWindow; }         // get the SDL window
     SDL_Renderer* GetRenderer() { return pRenderer; }   // get the SDL renderer
 
-    Byte GetGlyphData(Byte index, Byte row) { return _gfx_glyph_data[index][row]; }
+    static Byte GetGlyphData(Byte index, Byte row) { return _gfx_glyph_data[index][row]; }
 
     // palette stuff
     union PALETTE {
@@ -141,7 +141,7 @@ private: // PRIVATE MEMBERS
     std::vector<PALETTE> _palette;          // color palette
     Byte _gfx_pal_idx = 0x00;               // GFX_PAL_IDX
     Byte _gfx_glyph_idx = 0x00;             // GFX_GLYPH_IDX
-    Byte _gfx_glyph_data[256][8]{0};        // GFX_GLYPH_DATA (Customizeable)
+    inline static Byte _gfx_glyph_data[256][8]{0};        // GFX_GLYPH_DATA (Customizeable)
 };
 
 /*** NOTES: ****************************************
