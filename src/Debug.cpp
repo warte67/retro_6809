@@ -110,7 +110,7 @@ int  Debug::OnAttach(int nextAddr)
 
 
 
-bool Debug::OnInit()
+void Debug::OnInit()
 {
     std::cout << clr::indent() << clr::LT_BLUE << "Debug::OnInit() Entry" << clr::RETURN;
         
@@ -155,12 +155,11 @@ bool Debug::OnInit()
     keybfr = SDL_GetKeyboardState(NULL);
 
     std::cout << clr::indent() << clr::LT_BLUE << "Debug::OnInit() Exit" << clr::RETURN;
-    return true;
 }
 
 
 
-bool Debug::OnQuit()
+void Debug::OnQuit()
 {
     std::cout << clr::indent() << clr::LT_BLUE << "Debug::OnQuit() Entry" << clr::RETURN;
      
@@ -183,34 +182,31 @@ bool Debug::OnQuit()
     }    
     
     std::cout << clr::indent() << clr::LT_BLUE << "Debug::OnQuit() Exit" << clr::RETURN;
-    return true;
 }
 
 
 
-bool Debug::OnActivate()
+void Debug::OnActivate()
 {
     std::cout << clr::indent() << clr::LT_BLUE << "Debug::OnActivate() Entry" << clr::RETURN;
   
 
     std::cout << clr::indent() << clr::LT_BLUE << "Debug::OnActivate() Exit" << clr::RETURN;
-    return true;
 }
 
 
 
-bool Debug::OnDeactivate()
+void Debug::OnDeactivate()
 {
     std::cout << clr::indent() << clr::LT_BLUE << "Debug::OnDeactivate() Entry" << clr::RETURN;
 
     std::cout << clr::indent() << clr::LT_BLUE << "Debug::OnDeactivate() Exit" << clr::RETURN;
-    return true;
 }
 
 
-bool Debug::OnEvent(SDL_Event* evnt)
+void Debug::OnEvent(SDL_Event* evnt)
 {
-    if (SDL_GetWindowFromEvent(evnt) != _dbg_window) { return true; }
+    if (SDL_GetWindowFromEvent(evnt) != _dbg_window) { return; }
 
     switch (evnt->type) 
     {
@@ -318,11 +314,10 @@ bool Debug::OnEvent(SDL_Event* evnt)
     // SDL_EVENT_WINDOW_DESTROYED,         /**< The window with the associated ID is being or has been destroyed. If this message is being handled
          
     }
-    return true;
 }
 
 
-bool Debug::OnUpdate(float fElapsedTime)
+void Debug::OnUpdate(float fElapsedTime)
 {
     if (fElapsedTime==0.0f) { ; } // stop the compiler from complaining
 
@@ -400,11 +395,10 @@ bool Debug::OnUpdate(float fElapsedTime)
             // _clear_texture(_dbg_texture, 1, 2, 0, 15);
         }
     }
-    return true;
 }
 
 
-bool Debug::OnRender()
+void Debug::OnRender()
 {
     // if the debugger is not active, just return
     // ...
@@ -421,7 +415,6 @@ bool Debug::OnRender()
         // update the debugger window display
         SDL_RenderPresent(_dbg_renderer);
     }
-    return true;
 }
 
 

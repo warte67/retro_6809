@@ -30,13 +30,13 @@ public: // VIRTUAL METHODS
     virtual void OnWrite(Word offset, Byte data);   // write
     // =============================================
     virtual int  OnAttach(int nextAddr);            // attach to the memory map
-    virtual bool OnInit();                          // initialize
-    virtual bool OnQuit();                          // shutdown
-    virtual bool OnActivate();                      // activate
-    virtual bool OnDeactivate();                    // deactivate
-    virtual bool OnEvent(SDL_Event* evnt);          // handle events
-    virtual bool OnUpdate(float fElapsedTime);      // update
-    virtual bool OnRender();                        // render
+    virtual void OnInit();                          // initialize
+    virtual void OnQuit();                          // shutdown
+    virtual void OnActivate();                      // activate
+    virtual void OnDeactivate();                    // deactivate
+    virtual void OnEvent(SDL_Event* evnt);          // handle events
+    virtual void OnUpdate(float fElapsedTime);      // update
+    virtual void OnRender();                        // render
 
 public: // PUBLIC ACCESSORS
     void RenderPresent() {

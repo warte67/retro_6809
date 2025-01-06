@@ -41,173 +41,75 @@ Memory::~Memory()
 // PUBLIC VIRTUAL DISPATCHERS //
 ////////////////////////////////
 
-/**
- * OnInit() is a virtual method that is called when the bus is initialized.
- * OnInit() will call OnInit() on all of the attached devices.
- * OnInit() will return true if all of the devices OnInit() methods return true,
- * otherwise OnInit() will return false.
- */
-bool Memory::OnInit() 
+
+void Memory::OnInit() 
 {
     std::cout << clr::indent_push() << clr::CYAN << "Memory::OnInit() Entry" << clr::RETURN;
-    bool ret = true;
     for (auto &d : Memory::_memory_nodes) {
-        if (d->OnInit() == false) {
-            std::cout << clr::indent_pop() << clr::ORANGE << "Memory::OnInit() Error" << clr::RETURN;
-            ret = false;
-        }
+        d->OnInit();
     }    
     // _build_map();
     std::cout << clr::indent_pop() << clr::CYAN << "Memory::OnInit() Exit" << clr::RETURN;                
-    return ret;
 }
 
 
-/**
- * OnQuit() is a virtual method that is called when the system is shutting down.
- * It iterates over all memory nodes and calls their OnQuit() methods.
- * If any node returns false, an error message is logged and the function
- * returns false. After calling OnQuit() on all nodes, it deletes each node
- * to properly release the memory. The function logs the entry and exit of
- * the process and returns true if all nodes successfully quit.
- *
- * @return True if all memory nodes successfully quit, otherwise false.
- */
 
-bool Memory::OnQuit() 
+void Memory::OnQuit() 
 {
     std::cout << clr::indent_push() << clr::CYAN << "Memory::OnQuit() Entry" << clr::RETURN;
-    bool ret = true;
 	for (auto &d : Memory::_memory_nodes) {
-        if ( d->OnQuit() == false) {
-            std::cout << clr::indent_pop() << clr::ORANGE << "Memory::OnQuit() Error" << clr::RETURN;
-            ret = false;
-        }
+        d->OnQuit();
     }
     for (auto &d : Memory::_memory_nodes) {
         delete d;  // Add this line to properly release memory for each device
     }    
     std::cout << clr::indent_pop() << clr::CYAN << "Memory::OnQuit() Exit" << clr::RETURN;
-    return ret;
 }
 
 
-/**
- * OnActivate() is a virtual method that is called to activate all memory nodes.
- * It iterates over each memory node and calls their OnActivate() method.
- * If any node fails to activate, an error message is logged and the function
- * will return false. The function logs the entry and exit of the activation
- * process and returns true if all nodes successfully activate.
- *
- * @return True if all memory nodes are successfully activated, otherwise false.
- */
-
-bool Memory::OnActivate() 
+void Memory::OnActivate() 
 {
     //std::cout << clr::indent_push() << clr::CYAN << "Memory::OnActivate() Entry" << clr::RETURN;
-    bool ret = true;
 	for (auto &d : Memory::_memory_nodes) {
-		if ( d->OnActivate() == false ) {
-            std::cout << clr::indent_pop() << clr::ORANGE << "Memory::OnActivate() Error" << clr::RETURN;
-			ret = false;
-        }
+		d->OnActivate();
     }
     //std::cout << clr::indent_pop() << clr::CYAN << "Memory::OnActivate() Exit" << clr::RETURN;
-	return ret;
 }
 
 
-/**
- * OnDeactivate() is a virtual method that is called to deactivate all memory nodes.
- * It iterates over each memory node and calls their OnDeactivate() method.
- * If any node fails to deactivate, an error message is logged and the function
- * will return false. The function logs the entry and exit of the deactivation
- * process and returns true if all nodes successfully deactivate.
- *
- * @return True if all memory nodes are successfully deactivated, otherwise false.
- */
-bool Memory::OnDeactivate() 
+void Memory::OnDeactivate() 
 {
     //std::cout << clr::indent_push() << clr::CYAN << "Memory::OnDeactivate() Entry" << clr::RETURN;
-    bool ret = true;
 	for (auto &d : Memory::_memory_nodes) {
-		if ( d->OnDeactivate() == false ) {
-            std::cout << clr::indent_pop() << clr::ORANGE << "Memory::OnDeactivate() Error" << clr::RETURN;
-			ret = false;
-        }
+		d->OnDeactivate();
     }
     //std::cout << clr::indent_pop() << clr::CYAN << "Memory::OnDeactivate() Exit" << clr::RETURN;
-	return ret;
 }
 
 
 
-/**
- * OnEvent() is a virtual method called to process an SDL_Event for each memory node.
- * It iterates over all memory nodes and calls their OnEvent() method with the provided event.
- * If any node returns false, indicating failure to process the event, the function returns false.
- * The function returns true if all nodes successfully handle the event.
- *
- * @param evnt A pointer to an SDL_Event structure that contains the event data.
- * 
- * @return True if all memory nodes successfully handle the event, otherwise false.
- */
-
-bool Memory::OnEvent(SDL_Event* evnt) 
+void Memory::OnEvent(SDL_Event* evnt) 
 {
-    bool ret = true;
 	for (auto &d : Memory::_memory_nodes) {
 		d->OnEvent(evnt);
-		// if ( d->OnEvent(evnt) == false ) {
-		// 	ret = false;
-        // }
     }
-	return ret;
 }
 
 
-/**
- * OnUpdate() is a virtual method called to update all memory nodes.
- * It iterates over all memory nodes and calls their OnUpdate() method with the provided
- * time since the last update.
- * If any node returns false, indicating failure to update, the function returns false.
- * The function returns true if all nodes successfully update.
- *
- * @param fElapsedTime The time, in seconds, that has elapsed since the last update.
- * 
- * @return True if all memory nodes successfully update, otherwise false.
- */
-bool Memory::OnUpdate(float fElapsedTime) 
+void Memory::OnUpdate(float fElapsedTime) 
 {
-    bool ret = true;
 	for (auto &d : Memory::_memory_nodes) {
 		d->OnUpdate(fElapsedTime);
-		// if ( d->OnUpdate(fElapsedTime) == false ) {
-		// 	ret = false;
-        // }
     }
-    return true;
-	// return ret;
 }
 
 
-/**
- * OnRender() is a virtual method called to render all memory nodes.
- * It iterates over all memory nodes and calls their OnRender() method.
- * If any node returns false, indicating failure to render, the function returns false.
- * The function returns true if all nodes successfully render.
- *
- * @return True if all memory nodes successfully render, otherwise false.
- */
-bool Memory::OnRender() 
+
+void Memory::OnRender() 
 {
-    bool ret = true;
 	for (auto &d : Memory::_memory_nodes) {
-		if ( d->OnRender() == false ) {
-			ret = false;
-        }
+		d->OnRender();
     }
-	return ret;
 }
 
 
@@ -216,25 +118,6 @@ bool Memory::OnRender()
 //////////////////////
 
 
-
-/**
- * Reads a byte from memory at the specified offset.
- * 
- * This function iterates over the memory nodes to find the appropriate
- * device node that contains the specified offset. If found, it reads 
- * a byte from the device's memory. If the debug flag is set, it directly 
- * accesses the device's memory array; otherwise, it calls the device's
- * OnRead method to perform the read operation.
- * 
- * If the offset is out of range, the function returns a default value 
- * of 0xCC to indicate an error.
- *
- * @param offset The memory offset from which to read.
- * @param debug A boolean flag indicating whether to perform a debug read.
- * 
- * @return The byte read from the specified memory offset, or 0xCC if the
- *         offset is out of range.
- */
 
 Byte Memory::Read(Word offset, bool debug)
 {
@@ -252,21 +135,7 @@ Byte Memory::Read(Word offset, bool debug)
 }
 
 
-/**
- * Writes a byte to memory at the specified offset.
- * 
- * This function iterates over the memory nodes to find the appropriate
- * device node that contains the specified offset. If found, it writes 
- * a byte to the device's memory. If the debug flag is set, it directly 
- * accesses the device's memory array; otherwise, it calls the device's
- * OnWrite method to perform the write operation.
- * 
- * If the offset is out of range, the function does nothing.
- * 
- * @param offset The memory offset to which to write.
- * @param data The byte to be written to the specified memory offset.
- * @param debug A boolean flag indicating whether to perform a debug write.
- */
+
 void Memory::Write(Word offset, Byte data, bool debug)
 {
     for (auto& a : Memory::_memory_nodes)
@@ -285,25 +154,6 @@ void Memory::Write(Word offset, Byte data, bool debug)
 }
 
 
-/**
- * Reads a 16-bit word from memory at the specified offset.
- * 
- * This function reads two consecutive bytes from memory at the specified
- * offset and combines them into a 16-bit word. The upper byte is read
- * from the offset and the lower byte is read from the offset + 1.
- * 
- * If the debug flag is set, it directly accesses the device's memory array;
- * otherwise, it calls the device's OnRead method to perform the read operation.
- * 
- * If the offset is out of range, the function returns a default value of 0x0000
- * to indicate an error.
- *
- * @param offset The memory offset from which to read the word.
- * @param debug A boolean flag indicating whether to perform a debug read.
- * 
- * @return The word read from the specified memory offset, or 0x0000 if the
- *         offset is out of range.
- */
 Word Memory::Read_Word(Word offset, bool debug)
 {
     if (debug) {;}  // stop the unused argument warning
@@ -313,23 +163,7 @@ Word Memory::Read_Word(Word offset, bool debug)
 }
 
 
-/**
- * Writes a 16-bit word to memory at the specified offset.
- * 
- * This function splits the given word into two bytes, the upper byte and the
- * lower byte, and writes each byte to consecutive memory offsets. The upper
- * byte is written to the specified offset and the lower byte is written to the
- * offset + 1.
- * 
- * If the debug flag is set, it directly accesses the device's memory array;
- * otherwise, it calls the device's OnWrite method to perform the write operation.
- * 
- * If the offset is out of range, the function does nothing.
- * 
- * @param offset The memory offset to which to write the word.
- * @param data The 16-bit word to be written to the specified memory offset.
- * @param debug A boolean flag indicating whether to perform a debug write.
- */
+
 void Memory::Write_Word(Word offset, Word data, bool debug)
 {    
     if (debug) {;}  // stop the unused argument warning
@@ -341,27 +175,7 @@ void Memory::Write_Word(Word offset, Word data, bool debug)
 }
 
 
-/**
- * Reads a 32-bit double word from memory at the specified offset.
- * 
- * This function reads four consecutive bytes from memory at the specified
- * offset and combines them into a 32-bit double word. The upper byte is read
- * from the offset, the upper-middle byte is read from the offset + 1, the
- * lower-middle byte is read from the offset + 2, and the lower byte is read
- * from the offset + 3.
- * 
- * If the debug flag is set, it directly accesses the device's memory array;
- * otherwise, it calls the device's OnRead method to perform the read operation.
- * 
- * If the offset is out of range, the function returns a default value of 0x00000000
- * to indicate an error.
- *
- * @param offset The memory offset from which to read the double word.
- * @param debug A boolean flag indicating whether to perform a debug read.
- * 
- * @return The double word read from the specified memory offset, or 0x00000000 if the
- *         offset is out of range.
- */
+
 DWord Memory::Read_DWord(Word offset, bool debug)
 {
     if (debug) {;}  // stop the unused argument warning
@@ -374,22 +188,7 @@ DWord Memory::Read_DWord(Word offset, bool debug)
 }
 
 
-/**
- * Writes a 32-bit double word to memory at the specified offset.
- * 
- * This function splits the given double word into four bytes and writes 
- * each byte to consecutive memory offsets. The most significant byte is 
- * written to the specified offset, followed by the next most significant 
- * byte, and so on, until the least significant byte is written to 
- * offset + 3.
- * 
- * If the debug flag is set, it performs no additional actions 
- * but suppresses unused variable warnings.
- * 
- * @param offset The memory offset to which to write the double word.
- * @param data The 32-bit double word to be written to the specified memory offset.
- * @param debug A boolean flag used to suppress unused variable warnings.
- */
+
 void Memory::Write_DWord(Word offset, DWord data, bool debug)
 {
     if (debug) {;}  // stop the unused argument warning
@@ -401,31 +200,6 @@ void Memory::Write_DWord(Word offset, DWord data, bool debug)
 }
 
 
-
-
-
-
-/**
- * Attaches the specified device to the memory map and allocates space
- * for it.
- *
- * The device is given the opportunity to build its own device descriptor
- * node by calling its OnAttach method. If the device returns a non-zero size,
- * the device is added to the memory map and its base and size are set to
- * the value returned by OnAttach. The memory map is then updated by adding
- * the device's mapped registers to the map.
- *
- * If the device returns a size of zero, an error is generated and the
- * emulator is halted.
- *
- * If the device is attached beyond the 64k boundary, an error is generated
- * and the emulator is halted.
- *
- * @param device The device to be attached to the memory map.
- *
- * @return The size of the device, if it was successfully attached;
- *         zero, otherwise.
- */
 int Memory::_attach(IDevice* device)
 {    
     int size = 0;
@@ -466,18 +240,6 @@ int Memory::_attach(IDevice* device)
 }
 
 
-/**
- * Generates C++ and Assembly memory map files for the system.
- * 
- * This function creates two output files, MEMORY_MAP_OUTPUT_FILE_HPP and MEMORY_MAP_OUTPUT_FILE_ASM,
- * containing memory map definitions for C++ and Assembly, respectively. It iterates through the 
- * memory nodes and mapped registers, formatting and writing their names, addresses, and comments 
- * to the output files.
- * 
- * If the files cannot be opened for writing or reading, an error is reported via the Bus::Error 
- * function. The C++ file defines an enum of memory map symbols, while the Assembly file defines 
- * equivalent symbols using 'equ'.
- */
 void Memory::Generate_Memory_Map() 
 {
     { // Generate C++ Memory_Map.hpp

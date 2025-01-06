@@ -41,14 +41,13 @@ public:      // PUBLIC SINGLETON STUFF
 
 
 public:		// PUBLIC VIRTUAL METHODS
-    bool OnInit() override;
-    bool OnQuit() override;
-    bool OnActivate() override;
-    bool OnDeactivate() override;
-    //bool OnEvent(SDL_Event* evnt) override;
-    bool OnEvent(SDL_Event* evnt) override;
-    bool OnUpdate(float fElapsedTime) override;
-    bool OnRender() override;
+    void OnInit() override;
+    void OnQuit() override;
+    void OnActivate() override;
+    void OnDeactivate() override;
+    void OnEvent(SDL_Event* evnt) override;
+    void OnUpdate(float fElapsedTime) override;
+    void OnRender() override;
 
     int OnAttach(int nextAddr) override 		{ if (nextAddr) { return 0; } return 0; } // stop the argument not used warning
 

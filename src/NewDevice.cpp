@@ -80,71 +80,64 @@ int  NewDevice::OnAttach(int nextAddr)
 
 
 
-bool NewDevice::OnInit()
+void NewDevice::OnInit()
 {
     std::cout << clr::indent() << clr::LT_BLUE << "NewDevice::OnInit() Entry" << clr::RETURN;
     // ...
     std::cout << clr::indent() << clr::LT_BLUE << "NewDevice::OnInit() Exit" << clr::RETURN;
-    return true;
 }
 
 
 
-bool NewDevice::OnQuit()
+void NewDevice::OnQuit()
 {
     std::cout << clr::indent() << clr::LT_BLUE << "NewDevice::OnQuit() Entry" << clr::RETURN;
     // ...
     std::cout << clr::indent() << clr::LT_BLUE << "NewDevice::OnQuit() Exit" << clr::RETURN;
-    return true;
 }
 
 
 
-bool NewDevice::OnActivate()
+void NewDevice::OnActivate()
 {
     std::cout << clr::indent() << clr::LT_BLUE << "NewDevice::OnActivate() Entry" << clr::RETURN;
     // ...
     std::cout << clr::indent() << clr::LT_BLUE << "NewDevice::OnActivate() Exit" << clr::RETURN;
-    return true;
 }
 
 
 
-bool NewDevice::OnDeactivate()
+void NewDevice::OnDeactivate()
 {
     std::cout << clr::indent() << clr::LT_BLUE << "NewDevice::OnDeactivate() Entry" << clr::RETURN;
     // ...
     std::cout << clr::indent() << clr::LT_BLUE << "NewDevice::OnDeactivate() Exit" << clr::RETURN;
-    return true;
 }
 
 
-bool NewDevice::OnEvent(SDL_Event* evnt)
+void NewDevice::OnEvent(SDL_Event* evnt)
 {
     //std::cout << clr::indent() << clr::LT_BLUE << "NewDevice::OnEvent() Entry" << clr::RETURN;
     if (evnt) { ; } // stop the compiler from complaining
     // ...
     //std::cout << clr::indent() << clr::LT_BLUE << "NewDevice::OnEvent() Exit" << clr::RETURN;
-    return true;
 }
 
 
-bool NewDevice::OnUpdate(float fElapsedTime)
+void NewDevice::OnUpdate(float fElapsedTime)
 {
     //std::cout << clr::indent() << clr::LT_BLUE << "NewDevice::OnUpdate() Entry" << clr::RETURN;
     if (fElapsedTime==0.0f) { ; } // stop the compiler from complaining
     // ...
     //std::cout << clr::indent() << clr::LT_BLUE << "NewDevice::OnUpdate() Exit" << clr::RETURN;
-    return true;
 }
 
 
-bool NewDevice::OnRender()
+void NewDevice::OnRender()
 {
     //std::cout << clr::indent() << clr::LT_BLUE << "NewDevice::OnRender() Entry" << clr::RETURN;
     // ...
     //std::cout << clr::indent() << clr::LT_BLUE << "NewDevice::OnRender() Exit" << clr::RETURN;
-    return true;
 }
 
 

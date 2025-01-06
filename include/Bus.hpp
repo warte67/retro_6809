@@ -52,14 +52,13 @@ private: // PRIVATE STATICS
     inline static bool s_bIsDirty = true;
 
 private: // PRIVATE DISPATCHER METHODS
-    bool _onInit(void);
-    bool _onQuit(void);
-    bool _onActivate(void);
-    bool _onDeactivate(void);	
-    // bool _onEvent(SDL_Event* evnt); 
-    bool _onEvent(SDL_Event* evnt); 
-    bool _onUpdate(float fElapsedTime);
-    bool _onRender(void);
+    void _onInit(void);
+    void _onQuit(void);
+    void _onActivate(void);
+    void _onDeactivate(void);	
+    void _onEvent(SDL_Event* evnt); 
+    void _onUpdate(float fElapsedTime);
+    void _onRender(void);
 
 public: // PUBLIC METHODS
     bool Run(void);

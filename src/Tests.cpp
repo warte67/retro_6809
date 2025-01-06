@@ -60,17 +60,6 @@ Tests::~Tests()
 ******************/
 
 
-/*****************************************************************
- * virtual int OnAttach(int nextAddr):
- * 
- * This is a virtual method that is called by the Memory class.
- * It is called when the device is attached to the memory map.
- * The device is responsible for allocating its own memory space
- * and returning the size of the allocation.
- * 
- * @param nextAddr The current address in the memory map.
- * @return The size of the allocation.
- ********************/
 int  Tests::OnAttach(int nextAddr)
 {
     std::cout << clr::indent() << clr::LT_BLUE << "Tests::OnAttach() Entry" << clr::RETURN;
@@ -109,121 +98,46 @@ int  Tests::OnAttach(int nextAddr)
 }
 
 
-/*****************************************************************
- * bool OnInit():
- * 
- * This is a virtual method that is called by the Memory class.
- * It is called when the device is initialized.
- * The device is responsible for initializing its internal state
- * and returning true if the initialization was successful.
- * 
- * @return True if the initialization was successful.
- *********************/
-bool Tests::OnInit()
+void Tests::OnInit()
 {
     std::cout << clr::indent() << clr::LT_BLUE << "Tests::OnInit() Entry" << clr::RETURN;
     // ...
     std::cout << clr::indent() << clr::LT_BLUE << "Tests::OnInit() Exit" << clr::RETURN;
-    return true;
 }
 
-
-/******************************************************************
- * virtual bool OnQuit(): 
- * 
- * This is a virtual method that is called by the Memory class.
- * It is called when the device is being shut down.
- * The device is responsible for releasing any allocated memory
- * and any other resources.
- *
- * @return True if the shutdown was successful.
- **********************/
-bool Tests::OnQuit()
+void Tests::OnQuit()
 {
     std::cout << clr::indent() << clr::LT_BLUE << "Tests::OnQuit() Entry" << clr::RETURN;
     // ...
     std::cout << clr::indent() << clr::LT_BLUE << "Tests::OnQuit() Exit" << clr::RETURN;
-    return true;
 }
 
 
-/******************************************************************
- * virtual bool OnActivate():
- * 
- * This is a virtual method that is called to activate the device.
- * It is responsible for preparing the device to be operational,
- * ensuring that all necessary conditions are met for the device to
- * function.
- * 
- * @return True if the device was successfully activated, false
- *          otherwise.
- ***********************/
-bool Tests::OnActivate()
+void Tests::OnActivate()
 {
     std::cout << clr::indent() << clr::LT_BLUE << "Tests::OnActivate() Entry" << clr::RETURN;
     // ...
     std::cout << clr::indent() << clr::LT_BLUE << "Tests::OnActivate() Exit" << clr::RETURN;
-    return true;
 }
 
 
-/******************************************************************
- * virtual bool OnDeactivate():
- *
- * This is a virtual method that is called to deactivate the device.
- * It is responsible for releasing any resources that were allocated
- * when the device was activated, and for ensuring that all necessary
- * conditions are met for the device to be safely deactivated.
- * 
- * @return True if the device was successfully deactivated, false 
- *          otherwise.
- ***********************/
-bool Tests::OnDeactivate()
+void Tests::OnDeactivate()
 {
     std::cout << clr::indent() << clr::LT_BLUE << "Tests::OnDeactivate() Entry" << clr::RETURN;
     // ...
     std::cout << clr::indent() << clr::LT_BLUE << "Tests::OnDeactivate() Exit" << clr::RETURN;
-    return true;
 }
 
-
-/********************************************************************
- * virtual bool OnEvent(SDL_Event* evnt):
- * 
- * This is a virtual method that handles events sent to the device.
- * It processes the given SDL_Event and performs the necessary actions
- * based on the event type. 
- *
- * @param evnt A pointer to an SDL_Event structure that contains 
- * the event data to be processed.
- *
- * @return True if the event was handled successfully, false otherwise.
- ********************************************************************/
-
-bool Tests::OnEvent(SDL_Event* evnt)
+void Tests::OnEvent(SDL_Event* evnt)
 {
     //std::cout << clr::indent() << clr::LT_BLUE << "Tests::OnEvent() Entry" << clr::RETURN;
     if (evnt) { ; } // stop the compiler from complaining
     // ...
     //std::cout << clr::indent() << clr::LT_BLUE << "Tests::OnEvent() Exit" << clr::RETURN;
-    return true;
 }
 
 
-/****************************************************************
- * virtual bool OnUpdate(float fElapsedTime):
- *
- * This is a virtual method that is called periodically to allow the
- * device to update its internal state. The frequency of the calls
- * is determined by the Memory class, and the time since the last
- * call is given in the fElapsedTime parameter.
- *
- * @param fElapsedTime The time, in seconds, that has elapsed since
- *  the last call to OnUpdate.
- *
- * @return True if the update was successful, false otherwise.
- ************************************************************************/
-bool Tests::OnUpdate(float fElapsedTime)
+void Tests::OnUpdate(float fElapsedTime)
 {
     //std::cout << clr::indent() << clr::LT_BLUE << "Tests::OnUpdate() Entry" << clr::RETURN;
 
@@ -266,16 +180,14 @@ bool Tests::OnUpdate(float fElapsedTime)
     running_time += fElapsedTime;
 
     //std::cout << clr::indent() << clr::LT_BLUE << "Tests::OnUpdate() Exit" << clr::RETURN;
-    return true;
 }
 
 
-bool Tests::OnRender()
+void Tests::OnRender()
 {
     //std::cout << clr::indent() << clr::LT_BLUE << "Tests::OnRender() Entry" << clr::RETURN;
     // ...
     //std::cout << clr::indent() << clr::LT_BLUE << "Tests::OnRender() Exit" << clr::RETURN;
-    return true;
 }
 
 

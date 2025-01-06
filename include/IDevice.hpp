@@ -35,14 +35,14 @@ public: // VIRTUAL METHODS
     virtual void OnWrite(Word offset, Byte data);
 
 public: // INTERFACE (PURE VIRTUAL METHODS)
-    virtual bool OnInit() = 0;
-    virtual bool OnQuit() = 0;
-    virtual bool OnActivate() = 0;
-    virtual bool OnDeactivate() = 0;
+    virtual void OnInit() = 0;
+    virtual void OnQuit() = 0;
+    virtual void OnActivate() = 0;
+    virtual void OnDeactivate() = 0;
     // virtual bool OnEvent(SDL_Event* evnt) = 0;
-    virtual bool OnEvent(SDL_Event* evnt) = 0;
-    virtual bool OnUpdate(float fElapsedTime) = 0;
-    virtual bool OnRender() = 0;
+    virtual void OnEvent(SDL_Event* evnt) = 0;
+    virtual void OnUpdate(float fElapsedTime) = 0;
+    virtual void OnRender() = 0;
 
     // ToDo:
     //      create a basic implementation of this to use
@@ -114,15 +114,12 @@ class RAM : public IDevice
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
         }    
 
-		int OnAttach(int nextAddr) override        { return nextAddr; }  
-		bool OnInit() override 						{ return true; }
-		bool OnQuit() override 						{ return true; }
-		bool OnActivate() override 					{ return true; }
-		bool OnDeactivate() override 				{ return true; }
-		// bool OnEvent(SDL_Event* evnt) override 		{ return true; }
-		bool OnEvent(SDL_Event* evnt) override 		{ return (evnt==nullptr); }         // return true
-		bool OnUpdate(float fElapsedTime) override 	{ return (fElapsedTime==0.0f); }    // { return true; }           
-		bool OnRender() override 					{ return true; } 
+		int OnAttach(int nextAddr) override         { return nextAddr; }  
+		void OnInit() override 					    {}
+		void OnQuit() override 					    {}
+		void OnActivate() override 				    {}
+		void OnDeactivate() override 				{}
+		void OnRender() override 					{}
 };
 
 /*** class ROM *******************************************************
@@ -143,16 +140,14 @@ class ROM : public IDevice
         ROM(std::string sName) { name(sName); }
         virtual ~ROM() {}    
 
-		int OnAttach(int nextAddr) override       { if (nextAddr==0) { ; }  return _size; }  
-		bool OnInit() override 						{ return true; }
-		bool OnQuit() override 						{ return true; }
-		bool OnActivate() override 					{ return true; }
-		bool OnDeactivate() override 				{ return true; }
-        void OnWrite(Word offset, Byte data) override { if (offset || data) { ; } }
-		// bool OnEvent(SDL_Event* evnt) override 		{ return true; }
-		bool OnEvent(SDL_Event* evnt) override 		{ return (evnt==nullptr); }         // return true
-		bool OnUpdate(float fElapsedTime) override 	{ return (fElapsedTime==0.0f); }    // { return true; } 
-		bool OnRender() override 					{ return true; }        
+		int OnAttach(int nextAddr) override             { if (nextAddr==0) { ; }  return _size; }  
+		void OnInit() override 						    {}
+		void OnQuit() override 						    {}
+		void OnActivate() override 					    {}
+		void OnDeactivate() override 				    {}
+        void OnWrite(Word offset, Byte data) override   { if (offset==data) {;} }
+		void OnUpdate(float fElapsedTime) override 	    { if (fElapsedTime==0) {;} }
+		void OnRender() override 					    {}
 
 		// helper to set initial ROM values
         void write_to_rom(Word offset, Byte data);
@@ -181,14 +176,13 @@ class RAM_64K : public IDevice
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
         }    
 
-		bool OnInit() override 						{ return true; }
-		bool OnQuit() override 						{ return true; }
-		bool OnActivate() override 					{ return true; }
-		bool OnDeactivate() override 				{ return true; }
-		// bool OnEvent(SDL_Event* evnt) override 		{ return true; }
-		bool OnEvent(SDL_Event* evnt) override 		{ return (evnt==nullptr); }         // return true
-		bool OnUpdate(float fElapsedTime) override 	{ return (fElapsedTime==0.0f); }    // { return true; }           
-		bool OnRender() override 					{ return true; } 
+		void OnInit() override 						{}
+		void OnQuit() override 						{}
+		void OnActivate() override 					{}
+		void OnDeactivate() override 				{}
+		void OnEvent(SDL_Event* evnt) override 		{ if (evnt==nullptr) {;}; }
+		void OnUpdate(float fElapsedTime) override 	{ if (fElapsedTime==0) {;} }
+		void OnRender() override 					{}
 
 		int OnAttach(int nextAddr) override       { 
             int old_address=nextAddr;
@@ -228,14 +222,13 @@ class SOFT_VECTORS : public IDevice
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
         }    
 
-		bool OnInit() override 						{ return true; }
-		bool OnQuit() override 						{ return true; }
-		bool OnActivate() override 					{ return true; }
-		bool OnDeactivate() override 				{ return true; }
-		// bool OnEvent(SDL_Event* evnt) override 		{ return true; }
-		bool OnEvent(SDL_Event* evnt) override 		{ return (evnt==nullptr); }         // return true
-		bool OnUpdate(float fElapsedTime) override 	{ return (fElapsedTime==0.0f); }    // { return true; }           
-		bool OnRender() override 					{ return true; } 
+		void OnInit() override 						{}
+		void OnQuit() override 						{}
+		void OnActivate() override 					{}
+		void OnDeactivate() override 				{}		
+		void OnEvent(SDL_Event* evnt) override 		{ if (evnt==nullptr) {;} }
+		void OnUpdate(float fElapsedTime) override 	{ if (fElapsedTime==0) {;} }
+		void OnRender() override 					{}
 
 		int OnAttach(int nextAddr) override       { 
             Word old_address=nextAddr;
@@ -286,14 +279,13 @@ class SYSTEM_MEMORY : public IDevice
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
         }    
 
-		bool OnInit() override 						{ return true; }
-		bool OnQuit() override 						{ return true; }
-		bool OnActivate() override 					{ return true; }
-		bool OnDeactivate() override 				{ return true; }
-		// bool OnEvent(SDL_Event* evnt) override 		{ return true; }
-		bool OnEvent(SDL_Event* evnt) override 		{ return (evnt==nullptr); }         // return true
-		bool OnUpdate(float fElapsedTime) override 	{ return (fElapsedTime==0.0f); }    // { return true; }           
-		bool OnRender() override 					{ return true; } 
+		void OnInit() override 						{}
+		void OnQuit() override 						{}
+		void OnActivate() override 					{}
+		void OnDeactivate() override 				{}		
+		void OnEvent(SDL_Event* evnt) override 		{ if (evnt==nullptr) {;} }
+		void OnUpdate(float fElapsedTime) override 	{ if (fElapsedTime==0) {;} }
+		void OnRender() override 					{}
 
 		int OnAttach(int nextAddr) override       { 
             Word old_address=nextAddr;
@@ -339,14 +331,13 @@ class VIDEO_BUFFER : public IDevice
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
         }    
 
-		bool OnInit() override 						{ return true; }
-		bool OnQuit() override 						{ return true; }
-		bool OnActivate() override 					{ return true; }
-		bool OnDeactivate() override 				{ return true; }
-		// bool OnEvent(SDL_Event* evnt) override 		{ return true; }
-		bool OnEvent(SDL_Event* evnt) override 		{ return (evnt==nullptr); }         // return true
-		bool OnUpdate(float fElapsedTime) override 	{ return (fElapsedTime==0.0f); }    // { return true; }           
-		bool OnRender() override 					{ return true; } 
+		void OnInit() override 						{}
+		void OnQuit() override 						{}
+		void OnActivate() override 					{}
+		void OnDeactivate() override 				{}		
+		void OnEvent(SDL_Event* evnt) override 		{ if (evnt==nullptr) {;} }
+		void OnUpdate(float fElapsedTime) override 	{ if (fElapsedTime==0) {;} }
+		void OnRender() override 					{}
 
 		int OnAttach(int nextAddr) override       { 
             constexpr int vbfr_size = 8*1024;
@@ -414,14 +405,13 @@ class USER_MEMORY : public IDevice
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
         }    
 
-		bool OnInit() override 						{ return true; }
-		bool OnQuit() override 						{ return true; }
-		bool OnActivate() override 					{ return true; }
-		bool OnDeactivate() override 				{ return true; }
-		// bool OnEvent(SDL_Event* evnt) override 		{ return true; }
-		bool OnEvent(SDL_Event* evnt) override 		{ return (evnt==nullptr); }         // return true
-		bool OnUpdate(float fElapsedTime) override 	{ return (fElapsedTime==0.0f); }    // { return true; }           
-		bool OnRender() override 					{ return true; } 
+		void OnInit() override 						{}
+		void OnQuit() override 						{}
+		void OnActivate() override 					{}
+		void OnDeactivate() override 				{}
+		void OnEvent(SDL_Event* evnt) override 		{ if (evnt==nullptr) {;} }
+		void OnUpdate(float fElapsedTime) override 	{ if (fElapsedTime==0) {;} }       
+		void OnRender() override 					{}
 
 		int OnAttach(int nextAddr) override       { 
             int ram_size = 0xAFFF-nextAddr;
@@ -464,14 +454,13 @@ class MEMBANK : public IDevice
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
         }    
 
-		bool OnInit() override 						{ return true; }
-		bool OnQuit() override 						{ return true; }
-		bool OnActivate() override 					{ return true; }
-		bool OnDeactivate() override 				{ return true; }
-		// bool OnEvent(SDL_Event* evnt) override 		{ return true; }
-		bool OnEvent(SDL_Event* evnt) override 		{ return (evnt==nullptr); }         // return true
-		bool OnUpdate(float fElapsedTime) override 	{ return (fElapsedTime==0.0f); }    // { return true; }           
-		bool OnRender() override 					{ return true; } 
+		void OnInit() override 						{}
+		void OnQuit() override 						{}
+		void OnActivate() override 					{}
+		void OnDeactivate() override 				{}
+		void OnEvent(SDL_Event* evnt) override 		{ if (evnt==nullptr) {;} }
+		void OnUpdate(float fElapsedTime) override 	{ if (fElapsedTime==0) {;} }    
+		void OnRender() override 					{}
 
 		int OnAttach(int nextAddr) override       { 
             int bank_size = 8*1024;
@@ -527,15 +516,14 @@ class KERNEL_ROM : public IDevice
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
         }    
 
-		bool OnInit() override 						{ return true; }
-		bool OnQuit() override 						{ return true; }
-		bool OnActivate() override 					{ return true; }
-		bool OnDeactivate() override 				{ return true; }
-		// bool OnEvent(SDL_Event* evnt) override 		{ return true; }
-		bool OnEvent(SDL_Event* evnt) override 		{ return (evnt==nullptr); }         // return true
-		bool OnUpdate(float fElapsedTime) override 	{ return (fElapsedTime==0.0f); }    // { return true; }           
-		bool OnRender() override 					{ return true; } 
-        void OnWrite(Word offset, Byte data) override { if (offset || data) { ; } }
+		void OnInit() override 						    {}
+		void OnQuit() override 						    {}
+		void OnActivate() override 					    {}
+		void OnDeactivate() override 				    {}
+		void OnEvent(SDL_Event* evnt) override 		    { if (evnt==nullptr) {;} }
+		void OnUpdate(float fElapsedTime) override 	    { if (fElapsedTime==0) {;} }         
+		void OnRender() override 					    {}
+        void OnWrite(Word offset, Byte data) override   { if (offset==data) {;} }
 
 		int OnAttach(int nextAddr) override       { 
             int bank_size = 3.5f*1024;
@@ -567,14 +555,13 @@ class HDW_RESERVED : public IDevice
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
         }    
 
-        bool OnInit() override 						{ return true; }
-        bool OnQuit() override 						{ return true; }
-        bool OnActivate() override 					{ return true; }
-        bool OnDeactivate() override 				{ return true; }
-        // bool OnEvent(SDL_Event* evnt) override 		{ return true; }
-        bool OnEvent(SDL_Event* evnt) override 		{ return (evnt==nullptr); }         // return true
-        bool OnUpdate(float fElapsedTime) override 	{ return (fElapsedTime==0.0f); }    // { return true; }           
-        bool OnRender() override 					{ return true; } 
+        void OnInit() override 						{}
+        void OnQuit() override 						{}
+        void OnActivate() override 					{}
+        void OnDeactivate() override 				{}
+        void OnEvent(SDL_Event* evnt) override 		{ if (evnt==nullptr) {;} }
+        void OnUpdate(float fElapsedTime) override 	{ if (fElapsedTime==0) {;} }
+        void OnRender() override 					{}
 
         int OnAttach(int nextAddr) override       {
             Word old_address=nextAddr-1;
@@ -616,14 +603,13 @@ class ROM_VECTS : public IDevice
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
         }    
 
-		bool OnInit() override 						{ return true; }
-		bool OnQuit() override 						{ return true; }
-		bool OnActivate() override 					{ return true; }
-		bool OnDeactivate() override 				{ return true; }
-		// bool OnEvent(SDL_Event* evnt) override 		{ return true; }
-		bool OnEvent(SDL_Event* evnt) override 		{ return (evnt==nullptr); }         // return true
-		bool OnUpdate(float fElapsedTime) override 	{ return (fElapsedTime==0.0f); }    // { return true; }           
-		bool OnRender() override 					{ return true; } 
+		void OnInit() override 						{}
+		void OnQuit() override 						{}
+		void OnActivate() override 					{}
+		void OnDeactivate() override 				{}
+		void OnEvent(SDL_Event* evnt) override 		{ if (evnt==nullptr) {;} }
+		void OnUpdate(float fElapsedTime) override 	{ if (fElapsedTime==0) {;} }
+		void OnRender() override 					{}
 
 		int OnAttach(int nextAddr) override       { 
             Word old_address=nextAddr;

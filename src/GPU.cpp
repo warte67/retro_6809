@@ -21,21 +21,7 @@
  * Read / Write *
  ***************/ 
 
-/**
- * This is the read callback for the GPU device. It is called whenever the CPU
- * reads from a location in the device's memory space.
- *
- * The read callback is responsible for returning the value stored at the
- * specified memory location.
- *
- * If the offset is out of range, the function returns a default value of 0xCC
- * to indicate an error.
- *
- * @param offset The memory offset from which to read.
- * 
- * @return The value read from the specified memory location, or 0xCC if the
- *         offset is out of range.
- */
+
 Byte GPU::OnRead(Word offset) 
 { 
     Byte data = IDevice::OnRead(offset);    // use this for other devices
@@ -47,19 +33,6 @@ Byte GPU::OnRead(Word offset)
     return data;
 } // END: GPU::OnRead()
 
-
-/**
- * This is the write callback for the GPU device. It is called whenever the CPU
- * writes to a location in the device's memory space.
- *
- * The write callback is responsible for modifying the device state according
- * to the value written to the specified memory location.
- *
- * If the offset is out of range, the function does nothing.
- *
- * @param offset The memory offset to which to write.
- * @param data The value to be written to the specified memory location.
- */
 void GPU::OnWrite(Word offset, Byte data) 
 { 
     // std::cout << clr::indent() << clr::CYAN << "GPU::OnWrite($" << clr::hex(offset,4) << ", $" << clr::hex(data,2) << ")\n" << clr::RESET;
@@ -104,17 +77,6 @@ GPU::~GPU()
 ******************/
 
 
-/*****************************************************************
- * virtual int OnAttach(int nextAddr):
- * 
- * This is a virtual method that is called by the Memory class.
- * It is called when the device is attached to the memory map.
- * The device is responsible for allocating its own memory space
- * and returning the size of the allocation.
- * 
- * @param nextAddr The current address in the memory map.
- * @return The size of the allocation.
- ********************/
 int  GPU::OnAttach(int nextAddr)
 {
     std::cout << clr::indent() << clr::CYAN << "GPU::OnAttach() Entry" << clr::RETURN;
@@ -177,17 +139,7 @@ int  GPU::OnAttach(int nextAddr)
 } // END: GPU::OnAttach()
 
 
-/*****************************************************************
- * bool OnInit():
- * 
- * This is a virtual method that is called by the Memory class.
- * It is called when the device is initialized.
- * The device is responsible for initializing its internal state
- * and returning true if the initialization was successful.
- * 
- * @return True if the initialization was successful.
- *********************/
-bool GPU::OnInit()
+void GPU::OnInit()
 {
     std::cout << clr::indent() << clr::CYAN << "GPU::OnInit() Entry" << clr::RETURN;
 
@@ -197,7 +149,6 @@ bool GPU::OnInit()
         {
             std::cout << clr::indent_pop() << clr::ORANGE << "Bus::_onInit() Error" << clr::RETURN;
             Bus::Error(SDL_GetError(), __FILE__, __LINE__);
-            return false;
         }
 
         // create the main window
@@ -275,21 +226,10 @@ bool GPU::OnInit()
     // _gpu_mode = _verify_gpu_mode_change(_gpu_mode, MAP(GPU_MODE));
 
     std::cout << clr::indent() << clr::CYAN << "GPU::OnInit() Exit" << clr::RETURN;
-    return true;
 } // END: GPU::OnInit()
 
 
-/******************************************************************
- * virtual bool OnQuit(): 
- * 
- * This is a virtual method that is called by the Memory class.
- * It is called when the device is being shut down.
- * The device is responsible for releasing any allocated memory
- * and any other resources.
- *
- * @return True if the shutdown was successful.
- **********************/
-bool GPU::OnQuit()
+void GPU::OnQuit()
 {
     std::cout << clr::indent() << clr::CYAN << "GPU::OnQuit() Entry" << clr::RETURN;
     
@@ -324,22 +264,11 @@ bool GPU::OnQuit()
     } // END OF SDL3 Shutdown
 
     std::cout << clr::indent() << clr::CYAN << "GPU::OnQuit() Exit" << clr::RETURN;
-    return true;
 } // END: GPU::OnQuit()
 
 
-/******************************************************************
- * virtual bool OnActivate():
- * 
- * This is a virtual method that is called to activate the device.
- * It is responsible for preparing the device to be operational,
- * ensuring that all necessary conditions are met for the device to
- * function.
- * 
- * @return True if the device was successfully activated, false
- *          otherwise.
- ***********************/
-bool GPU::OnActivate()
+
+void GPU::OnActivate()
 {
     // std::cout << clr::indent() << clr::CYAN << "GPU::OnActivate() Entry" << clr::RETURN;
 
@@ -368,45 +297,21 @@ bool GPU::OnActivate()
     // SDL_RenderClear(pRenderer);    
 
     // std::cout << clr::indent() << clr::CYAN << "GPU::OnActivate() Exit" << clr::RETURN;
-    return true;
 } // END: GPU::OnActivate()
 
 
-/******************************************************************
- * virtual bool OnDeactivate():
- *
- * This is a virtual method that is called to deactivate the device.
- * It is responsible for releasing any resources that were allocated
- * when the device was activated, and for ensuring that all necessary
- * conditions are met for the device to be safely deactivated.
- * 
- * @return True if the device was successfully deactivated, false 
- *          otherwise.
- ***********************/
-bool GPU::OnDeactivate()
+
+void GPU::OnDeactivate()
 {
     // std::cout << clr::indent() << clr::CYAN << "GPU::OnDeactivate() Entry" << clr::RETURN;       
     // std::cout << clr::indent() << clr::CYAN << "GPU::OnDeactivate() Exit" << clr::RETURN;
-    return true;
 } // END: GPU::OnDeactivate()
 
 
-/********************************************************************
- * virtual bool OnEvent(SDL_Event* evnt):
- * 
- * This is a virtual method that handles events sent to the device.
- * It processes the given SDL_Event and performs the necessary actions
- * based on the event type. 
- *
- * @param evnt A pointer to an SDL_Event structure that contains 
- * the event data to be processed.
- *
- * @return True if the event was handled successfully, false otherwise.
- ********************************************************************/
-bool GPU::OnEvent(SDL_Event* evnt)
+void GPU::OnEvent(SDL_Event* evnt)
 {
     // if not a main window event, just return now
-    if (SDL_GetWindowFromEvent(evnt) != pWindow) { return true; }
+    if (SDL_GetWindowFromEvent(evnt) != pWindow) { return; }
 
 
     switch (evnt->type) 
@@ -522,24 +427,10 @@ bool GPU::OnEvent(SDL_Event* evnt)
     } // END: switch  (evnt->type) 
 
     //std::cout << clr::indent() << clr::CYAN << "GPU::OnEvent() Exit" << clr::RETURN;
-    return true;
 } // END: GPU::OnEvent()
 
 
-/****************************************************************
- * virtual bool OnUpdate(float fElapsedTime):
- *
- * This is a virtual method that is called periodically to allow the
- * device to update its internal state. The frequency of the calls
- * is determined by the Memory class, and the time since the last
- * call is given in the fElapsedTime parameter.
- *
- * @param fElapsedTime The time, in seconds, that has elapsed since
- *  the last call to OnUpdate.
- *
- * @return True if the update was successful, false otherwise.
- ************************************************************************/
-bool GPU::OnUpdate(float fElapsedTime)
+void GPU::OnUpdate(float fElapsedTime)
 {
     //std::cout << clr::indent() << clr::CYAN << "GPU::OnUpdate() Entry" << clr::RETURN;
     if (fElapsedTime==0.0f) { ; } // stop the compiler from complaining
@@ -583,20 +474,10 @@ bool GPU::OnUpdate(float fElapsedTime)
     }
 
     //std::cout << clr::indent() << clr::CYAN << "GPU::OnUpdate() Exit" << clr::RETURN;
-    return true;
 } // END: GPU::OnUpdate()
 
 
-/*************************************************************************
- * virtual bool OnRender():
- *
- * This is a virtual method that is called to draw the device's user
- * interface. It is responsible for rendering all necessary graphics
- * and for updating the display.
- * 
- * @return True if the render was successful, false otherwise.
- *************************************************************************/
-bool GPU::OnRender()
+void GPU::OnRender()
 {
     //std::cout << clr::indent() << clr::CYAN << "GPU::OnRender() Entry" << clr::RETURN;
     SDL_FRect r{0.0f, 0.0f, _ext_width, _ext_height};
@@ -623,7 +504,6 @@ bool GPU::OnRender()
     SDL_RenderTexture(pRenderer, pMain_Texture, NULL, NULL);
 
     //std::cout << clr::indent() << clr::CYAN << "GPU::OnRender() Exit" << clr::RETURN;
-    return true;
 } // END: GPU::OnRender()
 
 
