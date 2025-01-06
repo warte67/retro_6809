@@ -86,6 +86,9 @@ private: // PRIVATE MEMBERS
 
     void MouseStuff();
 
+    void DrawCursor(float fElapsedTime);
+
+
     // hardware registers
     Word _dbg_brk_addr  = 0;    // DBG_BRK_ADDR
     enum _DBG_FLAGS {
@@ -122,10 +125,10 @@ private: // PRIVATE MEMBERS
     };    
     int csr_x = 0;
     int csr_y = 0;
-    int csr_at = CSR_AT::CSR_AT_NONE;    
+    int csr_at = CSR_AT::CSR_AT_NONE;   
+    char mouse_wheel = 0; 
+    bool bIsCursorVisible = false;
     bool bIsMouseOver = false;
-    //int Mouse_X = 0; // mouse X
-    //int Mouse_Y = 0; // mouse Y
 
     struct D_GLYPH 
     { 

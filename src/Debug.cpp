@@ -208,25 +208,80 @@ bool Debug::OnDeactivate()
 bool Debug::OnEvent(SDL_Event* evnt)
 {
     // if not a debug event, just return now
-    if (evnt->window.windowID != SDL_GetWindowID(_dbg_window)) { return true; }
+    // if (evnt->window.windowID != SDL_GetWindowID(_dbg_window)) { return true; }
 
     // if the debugger is not active, just return
-    if (!(_dbg_flags & _DBG_FLAGS::DBGF_DEBUG_ENABLE)) { return true; }
-
-    // SDL_ConvertEventToRenderCoordinates(_dbg_renderer, evnt);
+    // if (!(_dbg_flags & _DBG_FLAGS::DBGF_DEBUG_ENABLE)) { return true; }
 
     switch (evnt->type) 
     {
-        // handle default events SDL_QUIT and ALT-X quits
+        // handle default events SDL_QUIT and ALT-X quits        
         case SDL_EVENT_WINDOW_CLOSE_REQUESTED:  
-            SDL_MinimizeWindow(_dbg_window);
-            break;
-
-        case SDL_EVENT_MOUSE_MOTION:
         {
-            // Mouse_X = (int)evnt->motion.x;
-            // Mouse_Y = (int)evnt->motion.y;
-        } break;
+            if (_dbg_flags & _DBG_FLAGS::DBGF_DEBUG_ENABLE)
+            {
+                SDL_MinimizeWindow(_dbg_window);
+            }
+            break;
+        }
+
+        case SDL_EVENT_MOUSE_WHEEL:
+        {
+            mouse_wheel = evnt->wheel.y;
+            break;            
+        }
+
+        case SDL_EVENT_WINDOW_MINIMIZED:
+        {
+            //s_bIsDebugActive = false;
+            break;
+        }
+        case SDL_EVENT_WINDOW_RESTORED:
+        {
+            //s_bIsDebugActive = true;
+            break;
+        }
+        case SDL_EVENT_WINDOW_MOUSE_ENTER:
+        {
+            bIsMouseOver = true;
+            break;
+        }
+        case SDL_EVENT_WINDOW_MOUSE_LEAVE:
+        {
+            bIsMouseOver = false;
+            break;
+        }
+        case SDL_EVENT_WINDOW_FOCUS_LOST:
+        {
+            bIsCursorVisible = false;
+            break;
+        }   
+
+    // SDL_EVENT_WINDOW_SHOWN = 0x202,     /**< Window has been shown */
+    // SDL_EVENT_WINDOW_HIDDEN,            /**< Window has been hidden */
+    // SDL_EVENT_WINDOW_EXPOSED,           /**< Window has been exposed and should be redrawn, and can be redrawn directly from event watchers for this event */
+    // SDL_EVENT_WINDOW_MOVED,             /**< Window has been moved to data1, data2 */
+    // SDL_EVENT_WINDOW_RESIZED,           /**< Window has been resized to data1xdata2 */
+    // SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED,/**< The pixel size of the window has changed to data1xdata2 */
+    // SDL_EVENT_WINDOW_METAL_VIEW_RESIZED,/**< The pixel size of a Metal view associated with the window has changed */
+    // SDL_EVENT_WINDOW_MINIMIZED,         /**< Window has been minimized */
+    // SDL_EVENT_WINDOW_MAXIMIZED,         /**< Window has been maximized */
+    // SDL_EVENT_WINDOW_RESTORED,          /**< Window has been restored to normal size and position */
+    // SDL_EVENT_WINDOW_MOUSE_ENTER,       /**< Window has gained mouse focus */
+    // SDL_EVENT_WINDOW_MOUSE_LEAVE,       /**< Window has lost mouse focus */
+    // SDL_EVENT_WINDOW_FOCUS_GAINED,      /**< Window has gained keyboard focus */
+    // SDL_EVENT_WINDOW_FOCUS_LOST,        /**< Window has lost keyboard focus */
+    // SDL_EVENT_WINDOW_CLOSE_REQUESTED,   /**< The window manager requests that the window be closed */
+    // SDL_EVENT_WINDOW_HIT_TEST,          /**< Window had a hit test that wasn't SDL_HITTEST_NORMAL */
+    // SDL_EVENT_WINDOW_ICCPROF_CHANGED,   /**< The ICC profile of the window's display has changed */
+    // SDL_EVENT_WINDOW_DISPLAY_CHANGED,   /**< Window has been moved to display data1 */
+    // SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED, /**< Window display scale has been changed */
+    // SDL_EVENT_WINDOW_SAFE_AREA_CHANGED, /**< The window safe area has been changed */
+    // SDL_EVENT_WINDOW_OCCLUDED,          /**< The window has been occluded */
+    // SDL_EVENT_WINDOW_ENTER_FULLSCREEN,  /**< The window has entered fullscreen mode */
+    // SDL_EVENT_WINDOW_LEAVE_FULLSCREEN,  /**< The window has left fullscreen mode */
+    // SDL_EVENT_WINDOW_DESTROYED,         /**< The window with the associated ID is being or has been destroyed. If this message is being handled
+         
     }
     return true;
 }
@@ -261,7 +316,7 @@ bool Debug::OnUpdate(float fElapsedTime)
             }
 
             // call update functions
-            // MouseStuff();
+            MouseStuff();
             // KeyboardStuff();
 
             DumpMemory(1,  1, mem_bank[0]);
@@ -277,7 +332,7 @@ bool Debug::OnUpdate(float fElapsedTime)
             // DrawBreakpoints();
 
             // if (!EditRegister(fElapsedTime))
-            //     DrawCursor(fElapsedTime);
+                DrawCursor(fElapsedTime);
 
             // instruction text
             OutText(1, 51, "[SPACE]    Step", 0x80);
@@ -460,7 +515,7 @@ void Debug::DumpMemory(int col, int row, Word addr)
 
 bool Debug::CoordIsValid(int x, int y)
 {
-    if (y > 0 && y < 30 && y != 10 && y != 20)
+    if (y > 0 && y < 40 && y != 10 && y != 20 && y != 30)
     {
         // at an address
         if (x > 0 && x < 5)
@@ -469,7 +524,7 @@ bool Debug::CoordIsValid(int x, int y)
             return true;
         }
         // at a data entry
-        if (x > 5 && x < 29 && (x + 1) % 3)
+        if (x > 5 && x < 53 && (x + 1) % 3)
         {
             csr_at = CSR_AT::CSR_AT_DATA;
             return true;
@@ -488,17 +543,18 @@ void Debug::MouseStuff()
     _correct_mouse_coords(mx, my);
     Uint32 btns = SDL_GetRelativeMouseState(NULL, NULL);
 
-    // // mouse wheel
-    // if (mouse_wheel)
-    // {
-    //     // scroll memory banks
-    //     if (mx > 0 && mx < 29)
-    //     {
-    //         if (my > 0 && my < 10)	mem_bank[0] -= mouse_wheel * 8;
-    //         if (my > 10 && my < 20)	mem_bank[1] -= mouse_wheel * 8;
-    //         if (my > 20 && my < 30)	mem_bank[2] -= mouse_wheel * 8;
-    //         bIsCursorVisible = false;
-    //     }
+    // mouse wheel
+    if (mouse_wheel)
+    {
+        // scroll memory banks
+        if (mx > 0 && mx < 70)
+        {
+            if (my > 0 && my < 10)	mem_bank[0] -= mouse_wheel * 8;
+            if (my > 10 && my < 20)	mem_bank[1] -= mouse_wheel * 8;
+            if (my > 20 && my < 30)	mem_bank[2] -= mouse_wheel * 8;
+            if (my > 30 && my < 40)	mem_bank[3] -= mouse_wheel * 8;
+            bIsCursorVisible = false;
+        }
     //     // Scroll the Code
     //     if (mx > 38 && mx < 64 && my > 5 && my < 30)
     //     {
@@ -519,14 +575,15 @@ void Debug::MouseStuff()
     //         // printf("mouse_wheel: %d\n", mouse_wheel);
     //         mw_brk_offset -= mouse_wheel;
     //     }
-    //     // reset the wheel
-    //     mouse_wheel = 0;
-    // }
+
+        // reset the mouse wheel
+        mouse_wheel = 0;
+    }
 
     // // left mouse button clicked?
-    // static bool last_LMB = false;
-    // if ((btns & 1) && !last_LMB)
-    // {
+    static bool last_LMB = false;
+    if ((btns & 1) && !last_LMB)
+    {
     //     // left-clicked on breakpoint
     //     if (mx >= 55 && my >= 33)
     //     {
@@ -540,20 +597,19 @@ void Debug::MouseStuff()
     //             printf("LEFT CLICK: $%04X\n", breakpoints[index]);
     //         //mapBreakpoints[breakpoints[index]] = false;
     //     }
-
-    //     // click to select
-    //     if (btns & 1)
-    //     {
-    //         if (CoordIsValid(mx, my))
-    //         {
-    //             csr_x = mx;
-    //             csr_y = my;
-    //             bIsCursorVisible = true;
-    //         }
-    //         else
-    //             bIsCursorVisible = false;
-    //         //printf("MX:%d  MY:%d\n", mx, my);
-    //     }
+        // click to select
+        if (btns & 1)
+        {
+            if (CoordIsValid(mx, my))
+            {
+                csr_x = mx;
+                csr_y = my;
+                bIsCursorVisible = true;
+            }
+            else
+                bIsCursorVisible = false;
+            // printf("MX:%d  MY:%d\n", mx, my);
+        }
     //     // condition code clicked?
     //     if (my == 1)
     //     {
@@ -593,12 +649,12 @@ void Debug::MouseStuff()
     //             mapBreakpoints[offset] = false :
     //             mapBreakpoints[offset] = true;
     //     }
-    // }
-    // last_LMB = (btns & 1);
-    // // right mouse button clicked
-    // static bool last_RMB = false;
-    // if (btns & 4 && !last_RMB)
-    // {
+    }
+    last_LMB = (btns & 1);
+    // right mouse button clicked
+    static bool last_RMB = false;
+    if (btns & 4 && !last_RMB)
+    {
     //     // right-clicked on breakpoint
     //     if (mx >= 55 && my >= 33)
     //     {
@@ -614,7 +670,6 @@ void Debug::MouseStuff()
     //             mapBreakpoints[breakpoints[index]] = false;
     //         }
     //     }
-
     //     // on PC register
     //     if (my == 4 && mx > 42 && mx < 47)
     //     {
@@ -632,14 +687,14 @@ void Debug::MouseStuff()
     //         if (mapBreakpoints[offset] == true)
     //             s_bSingleStep = false;
     //     }
-    // }
-    // last_RMB = (btns & 4);
+    }
+    last_RMB = (btns & 4);
 }
 
 void Debug::_correct_mouse_coords(int& mx, int& my)
 { 
     float mouse_x, mouse_y;
-    SDL_MouseButtonFlags buttons = SDL_GetMouseState(&mouse_x, &mouse_y);
+    SDL_GetMouseState(&mouse_x, &mouse_y);
     SDL_GetWindowSize(_dbg_window, &_dbg_window_width, &_dbg_window_height);
     float ax = (float)_dbg_width / (float)_dbg_window_width;
     float ay =  (float)_dbg_height / (float)_dbg_window_height;
@@ -647,5 +702,65 @@ void Debug::_correct_mouse_coords(int& mx, int& my)
     my = (int)(mouse_y * ay)/8;
     return;
 }
+
+void Debug::DrawCursor(float fElapsedTime)
+{
+    if (!bIsCursorVisible)	return;
+    
+    // C6809* cpu = Bus::GetC6809();
+    std::string ch = " ";
+
+    // which character is under the cursor?
+    switch (csr_at)
+    {
+        case CSR_AT::CSR_AT_ADDRESS:
+        {
+            Word addr = 0;
+            if (csr_y < 10)      addr = mem_bank[0] + ((csr_y - 1 ) * 8);
+            else if (csr_y < 20) addr = mem_bank[1] + ((csr_y - 11) * 8);
+            else if (csr_y < 30) addr = mem_bank[2] + ((csr_y - 21) * 8);
+            else if (csr_y < 40) addr = mem_bank[3] + ((csr_y - 31) * 8);
+            Byte digit = csr_x - 1;
+            Byte num = 0;
+            if (digit == 0)	num = ((addr & 0xf000) >> 12);
+            if (digit == 1)	num = ((addr & 0x0f00) >> 8);
+            if (digit == 2)	num = ((addr & 0x00f0) >> 4);
+            if (digit == 3)	num = ((addr & 0x000f) >> 0);
+            ch = _hex(num, 1);
+            break;
+        }
+        case CSR_AT::CSR_AT_DATA:
+        {
+            Byte ofs = ((csr_x - 5) / 3) + ((csr_y - 1) * 8);
+            Byte digit = ((csr_x + 1) % 3) - 1;
+            Byte num = 0;
+            Word addr = mem_bank[0];
+            if (csr_y > 10 && csr_y < 20) { ofs -= 80;  addr = mem_bank[1]; }
+            if (csr_y > 20 && csr_y < 30) { ofs -= 160; addr = mem_bank[2]; }
+            if (csr_y > 30 && csr_y < 40) { ofs -= 240; addr = mem_bank[3]; }
+
+            Byte data = Memory::Read(addr + ofs, true);
+            if (digit == 0) num = (data & 0xf0) >> 4;
+            if (digit == 1) num = (data & 0x0f) >> 0;
+            ch = _hex(num, 1);
+            break;
+        }
+    }
+    // display the reversed character
+    static Byte attr = 0;
+
+    const float delay = 1.0f / 60.0f;
+    static float delayAcc = fElapsedTime;
+    delayAcc += fElapsedTime;
+    if (delayAcc >= delay)
+    {
+        delayAcc -= delay;
+        attr++;
+        attr &= 0x0f;
+    }
+    // OutGlyph(csr_x, csr_y, ch[0], (rand() % 16)<<0);
+    OutGlyph(csr_x, csr_y, ch[0], attr);    
+}
+
 
 // END: Debug.cpp

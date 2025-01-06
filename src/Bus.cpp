@@ -488,6 +488,10 @@ bool Bus::_onEvent(SDL_Event* __na)
         // forward the event to all of the memory devices
         if (_memory.OnEvent(&evnt) == false)
             return false;	
+
+        // flush events? This does seem to help the input lag, 
+        // but more still needs to be done.
+        // SDL_FlushEvents(SDL_EVENT_FIRST, SDL_EVENT_LAST);
     }     
     return true;
 }
