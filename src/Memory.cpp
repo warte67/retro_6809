@@ -157,9 +157,10 @@ bool Memory::OnEvent(SDL_Event* evnt)
 {
     bool ret = true;
 	for (auto &d : Memory::_memory_nodes) {
-		if ( d->OnEvent(evnt) == false ) {
-			ret = false;
-        }
+		d->OnEvent(evnt);
+		// if ( d->OnEvent(evnt) == false ) {
+		// 	ret = false;
+        // }
     }
 	return ret;
 }
@@ -180,12 +181,13 @@ bool Memory::OnUpdate(float fElapsedTime)
 {
     bool ret = true;
 	for (auto &d : Memory::_memory_nodes) {
-		if ( d->OnUpdate(fElapsedTime) == false ) {
-			ret = false;
-        }
+		d->OnUpdate(fElapsedTime);
+		// if ( d->OnUpdate(fElapsedTime) == false ) {
+		// 	ret = false;
+        // }
     }
     return true;
-	return ret;
+	// return ret;
 }
 
 

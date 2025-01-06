@@ -22,7 +22,7 @@ Byte Tests::OnRead(Word offset)
     Byte data = IDevice::OnRead(offset);
 
     if (offset == MAP(TESTS_ONE))        { data = _tests_one;  }
-    else if (offset == MAP(TESTS_TWO))   { data = _tests_two;     }
+    else if (offset == MAP(TESTS_TWO))   { data = _tests_two;  }
 
     return data; 
 } // END: Tests::OnRead()

@@ -774,7 +774,7 @@ void Debug::DrawCursor(float fElapsedTime)
             if (csr_y > 20 && csr_y < 30) { ofs -= 64; addr = mem_bank[2]; }
             if (csr_y > 30 && csr_y < 40) { ofs -= 224; addr = mem_bank[3]; }
 
-            Byte data = Memory::Read(addr + ofs, true);
+            Byte data = Memory::Read(addr + ofs);//, true);
             if (digit == 0) num = (data & 0xf0) >> 4;
             if (digit == 1) num = (data & 0x0f) >> 0;
             ch = _hex(num, 1);
