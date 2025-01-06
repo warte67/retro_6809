@@ -193,7 +193,7 @@ bool GPU::OnInit()
 
     { // BEGIN OF SDL3 Initialization
         // initialize SDL3
-        if (!SDL_InitSubSystem(SDL_INIT_VIDEO | SDL_INIT_EVENTS))
+        if (!SDL_InitSubSystem(SDL_INIT_VIDEO))// | SDL_INIT_EVENTS))
         {
             std::cout << clr::indent_pop() << clr::ORANGE << "Bus::_onInit() Error" << clr::RETURN;
             Bus::Error(SDL_GetError(), __FILE__, __LINE__);
@@ -406,8 +406,8 @@ bool GPU::OnDeactivate()
 bool GPU::OnEvent(SDL_Event* evnt)
 {
     // if not a main window event, just return now
-    if (!(SDL_GetWindowFlags(pWindow) & SDL_WINDOW_INPUT_FOCUS)) 
-        return true;
+    if (SDL_GetWindowFromEvent(evnt) != pWindow) { return true; }
+
 
     switch (evnt->type) 
     {

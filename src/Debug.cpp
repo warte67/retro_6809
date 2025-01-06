@@ -207,21 +207,14 @@ bool Debug::OnDeactivate()
 
 bool Debug::OnEvent(SDL_Event* evnt)
 {
-    // if not a debug event, just return now
-    // if (evnt->window.windowID != SDL_GetWindowID(_dbg_window)) { return true; }
-
-    // if the debugger is not active, just return
-    // if (!(_dbg_flags & _DBG_FLAGS::DBGF_DEBUG_ENABLE)) { return true; }
+    if (SDL_GetWindowFromEvent(evnt) != _dbg_window) { return true; }
 
     switch (evnt->type) 
     {
         // handle default events SDL_QUIT and ALT-X quits        
         case SDL_EVENT_WINDOW_CLOSE_REQUESTED:  
         {
-            if (_dbg_flags & _DBG_FLAGS::DBGF_DEBUG_ENABLE)
-            {
-                SDL_MinimizeWindow(_dbg_window);
-            }
+            SDL_MinimizeWindow(_dbg_window);
             break;
         }
 
@@ -355,7 +348,7 @@ bool Debug::OnUpdate(float fElapsedTime)
 
                 static int delta = 0;
                 std::string d = "Delta: " + std::to_string(delta++);
-            OutText(1, 68, d, 0x80);
+
             // END: ... TESTING
 
 
