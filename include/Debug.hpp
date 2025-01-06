@@ -85,6 +85,7 @@ private: // PRIVATE MEMBERS
     void _correct_mouse_coords(int& mx, int& my);
 
     void MouseStuff();
+    void KeyboardStuff();
 
     void DrawCursor(float fElapsedTime);
 
@@ -116,7 +117,7 @@ private: // PRIVATE MEMBERS
     SDL_Renderer* _dbg_renderer = nullptr;
     SDL_Texture*  _dbg_texture  = nullptr;
 
-    std::vector <Word> mem_bank = { SSTACK_TOP - 0x0048, VIDEO_START, USER_RAM, MAP(GPU_OPTIONS) };
+    std::vector <Word> mem_bank = { SSTACK_TOP - 0x0048, VIDEO_START, USER_RAM, 0xFE00 };
 
 
     // debugger stuctures
@@ -129,6 +130,8 @@ private: // PRIVATE MEMBERS
     char mouse_wheel = 0; 
     bool bIsCursorVisible = false;
     bool bIsMouseOver = false;
+
+    const bool* keybfr = SDL_GetKeyboardState(NULL);
 
     struct D_GLYPH 
     { 

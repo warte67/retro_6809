@@ -29,14 +29,8 @@ Byte Tests::OnRead(Word offset)
 
 void Tests::OnWrite(Word offset, Byte data) 
 { 
-    // if (offset == MAP(TESTS_ONE))         
-    // { 
-    //     data = _verify_gpu_mode_change(data, offset);   
-    // }
-    // else if (offset == MAP(TESTS_TWO))   
-    // { 
-    //     data = _verify_gpu_mode_change(data, offset);  
-    // }
+    if (offset == MAP(TESTS_ONE))       { _tests_one = data; }
+    else if (offset == MAP(TESTS_TWO))  { _tests_two = data; } 
 
     IDevice::OnWrite( offset, data);
 } // END: Tests::OnWrite()

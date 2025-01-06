@@ -151,6 +151,9 @@ bool Debug::OnInit()
         c.chr = ' ';
     }
 
+    // get the keybuffer
+    keybfr = SDL_GetKeyboardState(NULL);
+
     std::cout << clr::indent() << clr::LT_BLUE << "Debug::OnInit() Exit" << clr::RETURN;
     return true;
 }
@@ -217,6 +220,45 @@ bool Debug::OnEvent(SDL_Event* evnt)
             SDL_MinimizeWindow(_dbg_window);
             break;
         }
+
+        case SDL_EVENT_KEY_DOWN:
+        {
+            // if debugger is active
+            if (_dbg_flags & _DBG_FLAGS::DBGF_DEBUG_ENABLE)
+            {
+                if (evnt->key.key == SDLK_ESCAPE)
+                    bIsCursorVisible = false;
+                if (bIsCursorVisible)
+                {
+                    if (evnt->key.key == SDLK_LEFT || evnt->key.key == SDLK_BACKSPACE)
+                        if (csr_x > 1)
+                            while (!CoordIsValid(--csr_x, csr_y));
+                    if (evnt->key.key == SDLK_RIGHT)
+                        if (csr_x < 52)
+                            while (!CoordIsValid(++csr_x, csr_y));
+                    if (evnt->key.key == SDLK_UP)
+                    {
+                        if (csr_y == 1)			mem_bank[0] -= 16;
+                        else if (csr_y == 11)	mem_bank[1] -= 16;
+                        else if (csr_y == 21)	mem_bank[2] -= 16;
+                        else if (csr_y == 31)	mem_bank[3] -= 16;
+                        else if (csr_y > 1)		while (!CoordIsValid(csr_x, --csr_y));
+                    }
+                    if (evnt->key.key == SDLK_DOWN)
+                    {
+                        if (csr_y == 9)			mem_bank[0] += 16;
+                        else if (csr_y == 19)	mem_bank[1] += 16;
+                        else if (csr_y == 29)	mem_bank[2] += 16;
+                        else if (csr_y == 39)	mem_bank[3] += 16;
+                        else if (csr_y < 40)	while (!CoordIsValid(csr_x, ++csr_y));
+                    }
+                    if (evnt->key.key == SDLK_RETURN)
+                        bIsCursorVisible = false;
+                }    
+            }
+            break;
+        }
+
 
         case SDL_EVENT_MOUSE_WHEEL:
         {
@@ -288,7 +330,7 @@ bool Debug::OnUpdate(float fElapsedTime)
     // return true;
 
 
-    const float delay = 1.0f / 30.0f;
+    const float delay = 1.0f / 60.0f;
     static float delayAcc = fElapsedTime;
     delayAcc += fElapsedTime;
     if (delayAcc >= delay)
@@ -310,7 +352,7 @@ bool Debug::OnUpdate(float fElapsedTime)
 
             // call update functions
             MouseStuff();
-            // KeyboardStuff();
+            KeyboardStuff();
 
             DumpMemory(1,  1, mem_bank[0]);
             DumpMemory(1, 11, mem_bank[1]);
@@ -483,7 +525,7 @@ void Debug::DumpMemory(int col, int row, Word addr)
     const bool use_debug_read = false;
     int line = 0;
     int width = 16;
-    for (int ofs = addr; ofs < addr + 0x48; ofs += 8)
+    for (int ofs = addr; ofs < addr + 0x90; ofs += 16)
     {
         int c = col;
         std::string out = _hex(ofs, 4) + " ";
@@ -709,10 +751,10 @@ void Debug::DrawCursor(float fElapsedTime)
         case CSR_AT::CSR_AT_ADDRESS:
         {
             Word addr = 0;
-            if (csr_y < 10)      addr = mem_bank[0] + ((csr_y - 1 ) * 8);
-            else if (csr_y < 20) addr = mem_bank[1] + ((csr_y - 11) * 8);
-            else if (csr_y < 30) addr = mem_bank[2] + ((csr_y - 21) * 8);
-            else if (csr_y < 40) addr = mem_bank[3] + ((csr_y - 31) * 8);
+            if (csr_y < 10)      addr = mem_bank[0] + ((csr_y - 1 ) * 16);
+            else if (csr_y < 20) addr = mem_bank[1] + ((csr_y - 11) * 16);
+            else if (csr_y < 30) addr = mem_bank[2] + ((csr_y - 21) * 16);
+            else if (csr_y < 40) addr = mem_bank[3] + ((csr_y - 31) * 16);
             Byte digit = csr_x - 1;
             Byte num = 0;
             if (digit == 0)	num = ((addr & 0xf000) >> 12);
@@ -724,13 +766,13 @@ void Debug::DrawCursor(float fElapsedTime)
         }
         case CSR_AT::CSR_AT_DATA:
         {
-            Byte ofs = ((csr_x - 5) / 3) + ((csr_y - 1) * 8);
+            Byte ofs = ((csr_x - 5) / 3) + ((csr_y - 1) * 16);
             Byte digit = ((csr_x + 1) % 3) - 1;
             Byte num = 0;
             Word addr = mem_bank[0];
-            if (csr_y > 10 && csr_y < 20) { ofs -= 80;  addr = mem_bank[1]; }
-            if (csr_y > 20 && csr_y < 30) { ofs -= 160; addr = mem_bank[2]; }
-            if (csr_y > 30 && csr_y < 40) { ofs -= 240; addr = mem_bank[3]; }
+            if (csr_y > 10 && csr_y < 20) { ofs += 96 ; addr = mem_bank[1]; }
+            if (csr_y > 20 && csr_y < 30) { ofs -= 64; addr = mem_bank[2]; }
+            if (csr_y > 30 && csr_y < 40) { ofs -= 224; addr = mem_bank[3]; }
 
             Byte data = Memory::Read(addr + ofs, true);
             if (digit == 0) num = (data & 0xf0) >> 4;
@@ -755,5 +797,75 @@ void Debug::DrawCursor(float fElapsedTime)
     OutGlyph(csr_x, csr_y, ch[0], attr);    
 }
 
+
+void Debug::KeyboardStuff()
+{
+    if (!bIsCursorVisible)	return;
+
+    SDL_Keycode hx[] = { SDL_SCANCODE_0, SDL_SCANCODE_1, SDL_SCANCODE_2, SDL_SCANCODE_3,
+                         SDL_SCANCODE_4, SDL_SCANCODE_5, SDL_SCANCODE_6, SDL_SCANCODE_7,
+                         SDL_SCANCODE_8, SDL_SCANCODE_9, SDL_SCANCODE_A, SDL_SCANCODE_B,
+                         SDL_SCANCODE_C, SDL_SCANCODE_D, SDL_SCANCODE_E, SDL_SCANCODE_F };
+    char d[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+    static bool state[16] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+
+    // check for valid key presses
+    bool bKeyPressed = false;
+    Byte ch = 0;
+    for (int t = 0; t < 16; t++)
+    {
+        if (state[t] == 0 && keybfr[hx[t]])
+        {
+            state[t] = 1;
+            bKeyPressed = true;
+            ch = d[t];
+        }
+        // reset the key
+        if (state[t] == 1 && !keybfr[hx[t]])	state[t] = 0;
+    }
+
+    // respond to [DEL]
+    // ...
+
+    if (!bKeyPressed)	return;
+
+    switch (csr_at)
+    {
+        case CSR_AT::CSR_AT_ADDRESS:
+        {
+            Word addr = 0;
+            if (csr_y < 10)      addr = mem_bank[0] + ((csr_y - 1)  * 16);
+            else if (csr_y < 20) addr = mem_bank[1] + ((csr_y - 11) * 16);
+            else if (csr_y < 30) addr = mem_bank[2] + ((csr_y - 21) * 16);
+            else if (csr_y < 40) addr = mem_bank[3] + ((csr_y - 31) * 16);
+            Byte digit = csr_x - 1;
+            if (digit == 0)	addr = (addr & 0x0fff) | (ch << 12);
+            if (digit == 1)	addr = (addr & 0xf0ff) | (ch << 8);
+            if (digit == 2)	addr = (addr & 0xff0f) | (ch << 4);
+            if (digit == 3)	addr = (addr & 0xfff0) | (ch << 0);
+            if (csr_y < 10)			mem_bank[0] = addr - ((csr_y - 1)  * 16);
+            else if (csr_y < 20)	mem_bank[1] = addr - ((csr_y - 11) * 16);
+            else if (csr_y < 30)	mem_bank[2] = addr - ((csr_y - 21) * 16);
+            else if (csr_y < 40)	mem_bank[3] = addr - ((csr_y - 31) * 16);
+            if (csr_x < 5)	while (!CoordIsValid(++csr_x, csr_y));
+            break;
+        }
+        case CSR_AT::CSR_AT_DATA:
+        {
+            Byte ofs = ((csr_x - 5) / 3) + ((csr_y - 1) * 16);
+            Byte digit = ((csr_x + 1) % 3) - 1;
+            Word addr = mem_bank[0];
+            if (csr_y > 10 && csr_y < 20) { ofs += 96 ; addr = mem_bank[1]; }
+            if (csr_y > 20 && csr_y < 30) { ofs -= 64; addr = mem_bank[2]; }
+            if (csr_y > 30 && csr_y < 40) { ofs -= 224; addr = mem_bank[3]; }
+            Byte data = Memory::Read(addr + ofs);//,true);
+            if (digit == 0)		data = (data & 0x0f) | (ch << 4);
+            if (digit == 1)		data = (data & 0xf0) | (ch << 0);
+            Memory::Write(addr + ofs, data);
+            if (csr_x < 53)		while (!CoordIsValid(++csr_x, csr_y));
+            break;
+        }
+    }    
+}
 
 // END: Debug.cpp
