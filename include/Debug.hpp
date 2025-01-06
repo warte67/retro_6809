@@ -77,21 +77,30 @@ private: // PRIVATE MEMBERS
     void OutGlyph(int col, int row, Byte glyph, Byte color_attr);
     int OutText(int col, int row, std::string text, Byte color_attr);
     std::string _hex(Uint32 n, Uint8 d);
-    void _updateDebugScreen();
+    void _update_debug_screen();
+    // void _update_mouse_pos(); 
+
+    void DumpMemory(int col, int row, Word addr);
+    bool CoordIsValid(int x, int y);
+    void _correct_mouse_coords(int& mx, int& my);
+
+    void MouseStuff();
 
     // hardware registers
     Word _dbg_brk_addr  = 0;    // DBG_BRK_ADDR
-    Byte _dbg_flags     = 0;    // DBG_FLAGS
-    // DBG_FLAGS    = 0xFE07,   // (Byte) Debug Specific Hardware Flags:
-    //                          // - bit 7: Debug Enable
-    //                          // - bit 6: Single Step Enable
-    //                          // - bit 5: Clear All Breakpoints
-    //                          // - bit 4: Update Breakpoint at DEBUG_BRK_ADDR
-    //                          // - bit 3: FIRQ  (on low to high edge)
-    //                          // - bit 2: IRQ   (on low to high edge)
-    //                          // - bit 1: NMI   (on low to high edge)
-    //                          // - bit 0: RESET (on low to high edge)
+    enum _DBG_FLAGS {
+        DBGF_DEBUG_ENABLE       = 0x80, // - bit 7: Debug Enable
+        DBGF_SINGLE_STEP_ENABLE = 0x40, // - bit 6: Single Step Enable
+        DBGF_CLEAR_ALL_BRKPT    = 0x20, // - bit 5: Clear All Breakpoints
+        DBGF_UPDATE_BRKPT       = 0x10, // - bit 4: Update Breakpoint at DEBUG_BRK_ADDR
+        DBGF_FIRQ               = 0x08, // - bit 3: FIRQ  (on low to high edge)
+        DBGF_IRQ                = 0x04, // - bit 2: IRQ   (on low to high edge)
+        DBGF_NMI                = 0x02, // - bit 1: NMI   (on low to high edge)
+        DBGF_RESET              = 0x01  // - bit 0: RESET (on low to high edge)       
+    };
+    Byte _dbg_flags     = DBGF_DEBUG_ENABLE;    // DBG_FLAGS
 
+    // debug display
     int _dbg_width = DEBUG_WIDTH;
     int _dbg_height = DEBUG_HEIGHT;
     int _dbg_window_width = DEBUG_WINDOW_WIDTH;
@@ -104,7 +113,19 @@ private: // PRIVATE MEMBERS
     SDL_Renderer* _dbg_renderer = nullptr;
     SDL_Texture*  _dbg_texture  = nullptr;
 
+    std::vector <Word> mem_bank = { SSTACK_TOP - 0x0048, VIDEO_START, USER_RAM, MAP(GPU_OPTIONS) };
 
+
+    // debugger stuctures
+    enum CSR_AT {
+        CSR_AT_NONE, CSR_AT_ADDRESS, CSR_AT_DATA, CSR_AT_REGISTER
+    };    
+    int csr_x = 0;
+    int csr_y = 0;
+    int csr_at = CSR_AT::CSR_AT_NONE;    
+    bool bIsMouseOver = false;
+    //int Mouse_X = 0; // mouse X
+    //int Mouse_Y = 0; // mouse Y
 
     struct D_GLYPH 
     { 
