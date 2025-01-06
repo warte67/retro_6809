@@ -32,7 +32,7 @@ public: // VIRTUAL METHODS
 
 public: // PUBLIC ACCESSORS
     enum TestFlags {
-        TEST_NONDES         = 0b0000'0000,
+        TEST_NONE           = 0b0000'0000,
         TEST_ENABLE         = 0b1000'0000,
         TEST_ANIM_BG        = 0b0100'0000,
         TEST_FLAG_5         = 0b0010'0000,
@@ -45,10 +45,10 @@ public: // PUBLIC ACCESSORS
 
 private: // PRIVATE MEMBERS
 
-    // Byte _tests_one = 0;
+    // Byte _tests_one = TEST_NONE;
     // Byte _tests_one = TEST_ENABLE;
-    // Byte _tests_one = TEST_ENABLE | TEST_ANIM_FG;
-    Byte _tests_one = TEST_ANIM_FG | TEST_ANIM_BG;
+    Byte _tests_one = TEST_ENABLE | TEST_ANIM_FG;
+    // Byte _tests_one = TEST_ENABLE | TEST_ANIM_FG | TEST_ANIM_BG;
     // Byte _tests_one = TEST_ENABLE | TEST_INC_VID_MODES;
     // Byte _tests_one = 0;
     Byte _tests_two = 0b0000'0000;

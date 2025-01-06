@@ -491,7 +491,7 @@ bool Bus::_onEvent(SDL_Event* __na)
 
         // flush events? This does seem to help the input lag, 
         // but more still needs to be done.
-        // SDL_FlushEvents(SDL_EVENT_FIRST, SDL_EVENT_LAST);
+        SDL_FlushEvents(SDL_EVENT_FIRST, SDL_EVENT_LAST);
     }     
     return true;
 }
