@@ -60,6 +60,11 @@ void C6809::ThreadProc()
         // 1000.f = 1mhz, 500.0f = 2mhz, etc...
         float cycle_time = 8000.0f;     // in nanohertz
         // int cpu_speed = Bus::Inst()._sys_state;
+
+
+		s_sys_state = 0x0E;		// temp: hard coded CPU speed.
+
+
         int cpu_speed = s_sys_state;
         switch (cpu_speed)
         {

@@ -11,6 +11,7 @@
 
 start		ldd	#$0100
 lp2		ldx	#VIDEO_START		
+		addd	#1
 lp1		std	,x++
 		addd	#1
 		cmpx	#VIDEO_START + $0500
