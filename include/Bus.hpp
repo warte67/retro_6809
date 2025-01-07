@@ -28,11 +28,15 @@
 // #include <SDL2/SDL.h>
 // #include <string>
 
+#include <thread>
+
 #include "types.hpp"
 #include "Memory.hpp"
 #include "Tests.hpp"
 #include "GPU.hpp"
-#include "Debug.hpp"
+
+class C6809;
+class Debug;
 
 class Bus
 {
@@ -46,10 +50,6 @@ public: // PUBLIC SINGLETON STUFF
     Bus& operator=(const Bus&) = delete;	// delete the copy assignment operator
     Bus& operator=(Bus&&) = delete;			// delete the move assignment operator
 	static Bus& GetInstance() { static Bus inst; return inst; }
-
-private: // PRIVATE STATICS
-    inline static bool s_bIsRunning = true;
-    inline static bool s_bIsDirty = true;
 
 private: // PRIVATE DISPATCHER METHODS
     void _onInit(void);
@@ -66,23 +66,43 @@ public: // PUBLIC METHODS
     static void IsRunning(bool b);
     static bool IsDirty();
     static void IsDirty(bool b);
+    static Debug* GetDebug() { return _pDebug; }
+    inline static C6809* GetC6809() { return s_c6809; }
+    inline static float GetAvgCpuCycleTime() { return s_avg_cpu_cycle_time; }
+    inline static void SetAvgCpuCycleTime(float f) { s_avg_cpu_cycle_time = f; }
+    
+    void load_hex(const char* filename);
 
     static void Error(std::string err_msg, std::string file=__FILE__, int line=__LINE__);
     #define ERROR(msg) Bus::Error(#msg, __FILE__, __LINE__)
 
+    static Byte Read(Word offset)               { return Memory::Read(offset); }
+    static void Write(Word offset, Byte data)   { Memory::Write(offset, data); } 
+    static void Write_Word(Word offset, Word data) { Memory::Write_Word(offset, data); }
+    static Word Read_Word(Word offset)          { return Memory::Read_Word(offset); }
+    
     static float FPS() { return _fps; }
     static std::string GetTitle() { return _s_title; }
 
 private: // INTERNAL PRIVATES
 	bool _bWasInit = false;
+    inline static bool s_bIsRunning = true;
+    inline static bool s_bIsDirty = true;
+    inline static float s_avg_cpu_cycle_time = 0;
+    inline static Byte _clock_div = 0;				// SYS_CLOCK_DIV (Byte) 60 hz Clock Divider  (Read Only) 
+    inline static Word _clock_timer = 0;			// SYS_TIMER	(R/W Word) increments at 0.46875 hz
+    inline static Word _sys_cpu_speed = 0;			// SYS_SPEED	(Read Byte) register
+    inline static std::thread s_cpuThread;
 
     inline static std::mutex _mutex_IsDirty;
     inline static std::mutex _mutex_IsRunning;
 
+
     // quick and dirty reference to the Gfx object:
-    inline static GPU* _pGPU = nullptr;   // singlular but not necessarily a singleton
+    inline static GPU*   _pGPU   = nullptr;   // singlular but not necessarily a singleton
     inline static Tests* _pTests = nullptr;
     inline static Debug* _pDebug = nullptr;
+    inline static C6809* s_c6809 = nullptr;
 
     // static Memory Management Device:
     Memory& _memory = Memory::GetInstance();   
@@ -90,5 +110,9 @@ private: // INTERNAL PRIVATES
     // frames per second
     inline static float _fps;
     inline static std::string _s_title;
+
+
+    Byte _fread_hex_byte(std::ifstream& ifs);
+    Word _fread_hex_word(std::ifstream& ifs);
 
 };

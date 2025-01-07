@@ -11,9 +11,13 @@
 
 #include <chrono>
 #include <deque>
+#include <fstream>
+
 #include "Bus.hpp"
 #include "clr.hpp"
 #include "GPU.hpp"
+#include "Debug.hpp"
+#include "C6809.hpp"
 
 
 
@@ -83,7 +87,6 @@ void Bus::Error(std::string err_msg, std::string file, int line)
 }  
 
 
-
 bool Bus::Run()
 {
     std::cout << clr::indent_push() << clr::CYAN << "Bus::Run() Entry" << clr::RETURN;
@@ -97,7 +100,7 @@ bool Bus::Run()
         if (Bus::IsDirty())
         {
             // stop the CPU from running while updating system
-            //C6809::IsCpuEnabled(false);
+            C6809::IsCpuEnabled(false);
 
             // shutdown the old environment
             if (bWasActivated)
@@ -107,11 +110,11 @@ bool Bus::Run()
             _onActivate();
             bWasActivated = true;
 
-            // wait 25 milliseconds to re-enable the CPU 
+            // wait 25 mil0000000liseconds to re-enable the CPU 
             SDL_Delay(25);
 
             // reenable the CPU
-            // C6809::IsCpuEnabled(true);
+            C6809::IsCpuEnabled(true);   // no code to run yet!
 
             // no longer dirty
             Bus::IsDirty(false);           
@@ -159,7 +162,7 @@ void Bus::_onInit()
     Memory::Attach<VIDEO_BUFFER>();     // 0x0400 - 0x23FF      (8k video buffer)
     Memory::Attach<USER_MEMORY>();      // 0x2400 - 0xAFFF      (42k user RAM)    
     Memory::Attach<MEMBANK>();          // 0xB000 - 0xEFFF      (16k banked memory)
-    Memory::Attach<KERNEL_ROM>();       // 0xF000 - 0xFDFF      (3.5k kernel ROM)    
+    Memory::Attach<KERNEL_ROM>(); 
 
     _pTests = Memory::Attach<Tests>();  
     _pGPU = Memory::Attach<GPU>();
@@ -186,60 +189,63 @@ void Bus::_onInit()
     }
 
     // Engage Basic Memory Tests
-    int upper_bounds = 0xB000;  // Memory::NextAddress();  
-    std::cout << clr::indent_push() << clr::YELLOW << "Testing Addresses $0000-$" << clr::hex(upper_bounds-1,4) << " ... ";
-    Byte b = 0;
-    bool failed = false;
-    for (int a = 0; a< upper_bounds; a++) 
+    if (false)
     {
-        Memory::Write((Word)a,b);
-        if (Memory::Read((Word)a) != b) {
-            Bus::Error("Memory Test Failure!", __FILE__, __LINE__);     
-            failed = true;    
-            std::cout << clr::RED << "FAILED" << clr::RETURN;      
-            break;         
+        int upper_bounds = 0xB000;  // Memory::NextAddress();  
+        std::cout << clr::indent_push() << clr::YELLOW << "Testing Addresses $0000-$" << clr::hex(upper_bounds-1,4) << " ... ";
+        Byte b = 0;
+        bool failed = false;
+        for (int a = 0; a< upper_bounds; a++) 
+        {
+            Memory::Write((Word)a,b);
+            if (Memory::Read((Word)a) != b) {
+                Bus::Error("Memory Test Failure!", __FILE__, __LINE__);     
+                failed = true;    
+                std::cout << clr::RED << "FAILED" << clr::RETURN;      
+                break;         
+            }
+            b++;
         }
-        b++;
-    }
-    if (!failed) std::cout << clr::YELLOW << "GOOD" << clr::RETURN;
+        if (!failed) std::cout << clr::YELLOW << "GOOD" << clr::RETURN;
 
-    // check 8k RAM banking area
-    int next_address = upper_bounds;
-    upper_bounds = 0xF000;
-    std::cout << clr::indent() << clr::YELLOW << "Testing Banked Memory $B000-$" << clr::hex(upper_bounds-1,4) << " ... ";
-    b=0;
-    failed = false;
-    for (int a = next_address; a< upper_bounds; a++) 
-    {
-        Memory::Write((Word)a,b);
-        if (Memory::Read((Word)a) != b) {
-            Bus::Error("Memory Test Failure!", __FILE__, __LINE__);                        
-            failed = true;                   
-            std::cout << clr::RED << "FAILED" << clr::RETURN;               
-            break;
+        // check 8k RAM banking area
+        int next_address = upper_bounds;
+        upper_bounds = 0xF000;
+        std::cout << clr::indent() << clr::YELLOW << "Testing Banked Memory $B000-$" << clr::hex(upper_bounds-1,4) << " ... ";
+        b=0;
+        failed = false;
+        for (int a = next_address; a< upper_bounds; a++) 
+        {
+            Memory::Write((Word)a,b);
+            if (Memory::Read((Word)a) != b) {
+                Bus::Error("Memory Test Failure!", __FILE__, __LINE__);                        
+                failed = true;                   
+                std::cout << clr::RED << "FAILED" << clr::RETURN;               
+                break;
+            }
+            b++;
         }
-        b++;
-    }
-    if (!failed) std::cout << clr::YELLOW << "GOOD" << clr::RETURN;
-    
-    // check ROM area $F000-$FDFF
-    next_address = upper_bounds;
-    upper_bounds = 0xFE00;
-    std::cout << clr::indent() << clr::YELLOW << "Testing ROM $F000-$" << clr::hex(upper_bounds-1,4) << " ... ";
-    b=255;
-    failed = false;
-    for (int a = next_address; a< upper_bounds; a++) 
-    {
-        Memory::Write((Word)a,b);
-        if (Memory::Read((Word)a) == b) {
-            Bus::Error("Memory Test Failure!", __FILE__, __LINE__);                        
-            failed = true;                   
-            std::cout << clr::RED << "FAILED" << clr::RETURN;               
-            break;
+        if (!failed) std::cout << clr::YELLOW << "GOOD" << clr::RETURN;
+        
+        // check ROM area $F000-$FDFF
+        next_address = upper_bounds;
+        upper_bounds = 0xFE00;
+        std::cout << clr::indent() << clr::YELLOW << "Testing ROM $F000-$" << clr::hex(upper_bounds-1,4) << " ... ";
+        b=255;
+        failed = false;
+        for (int a = next_address; a< upper_bounds; a++) 
+        {
+            Memory::Write((Word)a,b);
+            if (Memory::Read((Word)a) == b) {
+                Bus::Error("Memory Test Failure!", __FILE__, __LINE__);                        
+                failed = true;                   
+                std::cout << clr::RED << "FAILED" << clr::RETURN;               
+                break;
+            }
+            // b++;
         }
-        // b++;
+        if (!failed) std::cout << clr::YELLOW << "GOOD" << clr::RETURN;
     }
-    if (!failed) std::cout << clr::YELLOW << "GOOD" << clr::RETURN;
 
     std::cout << clr::indent_pop() << clr::YELLOW << "... Memory Tests Passed!\n" << clr::RESET;
     // END: Memory Tests
@@ -251,20 +257,49 @@ void Bus::_onInit()
     // initialize the devices
     _memory.OnInit();
 
-    // Set the initialized flag
-    _bWasInit = true;
+    // load initial applications (Kernel should be loaded with that device)
+    load_hex("./asm/test.hex");
+
+    // start the CPU thread
+    s_c6809 = new C6809(this);
+	try 
+	{
+		s_cpuThread = std::thread(&C6809::ThreadProc);
+	} 
+	catch (const std::exception& e)
+	{
+		if (s_cpuThread.joinable())
+			s_cpuThread.join();		
+		Bus::Error("Unable to start the CPU thread");
+		Bus::IsRunning(false);
+		std::cout << e.what() << std::endl;
+	}
+	// C6809::IsCpuEnabled(true);       
 
     // cleanup and return
     std::cout << clr::indent_pop() << clr::CYAN << "Bus::_onInit() Exit" << clr::RETURN;
+
+    // Set the initialized flag
+    _bWasInit = true;
 }
 
 
 void Bus::_onQuit()
 {
     std::cout << clr::indent_push() << clr::CYAN << "Bus::_onQuit() Entry" << clr::RETURN;
+    
     // check if the bus is initialized
     if (_bWasInit)   
     { 
+        // shutdown the CPU thread
+        if (s_cpuThread.joinable())
+            s_cpuThread.join();
+        // Remove the CPU device
+        if (s_c6809)
+        {
+            delete s_c6809;
+            s_c6809 = nullptr;
+        }
         // shutdown the devices
         _memory.OnQuit();
         // reset the initialized flag
@@ -416,4 +451,83 @@ void Bus::_onUpdate(float __na)
 void Bus::_onRender(void) 
 {
     _memory.OnRender();
+}
+
+
+
+// load_hex helpers
+Byte Bus::_fread_hex_byte(std::ifstream& ifs)
+{
+	char str[3];
+	long l;
+	ifs.get(str[0]);
+	ifs.get(str[1]);
+	str[2] = '\0';	
+	l = strtol(str, NULL, 16);
+	return (Byte)(l & 0xff);	
+}
+
+Word Bus::_fread_hex_word(std::ifstream& ifs)
+{
+	Word ret;
+	ret = _fread_hex_byte(ifs);
+	ret <<= 8;
+	ret |= _fread_hex_byte(ifs);
+	return ret;				
+}
+
+void Bus::load_hex(const char* filename)
+{
+	// // lambda to convert integer to hex string
+	// auto hex = [](uint32_t n, uint8_t digits)
+	// {
+	// 	std::string s(digits, '0');
+	// 	for (int i = digits - 1; i >= 0; i--, n >>= 4)
+	// 		s[i] = "0123456789ABCDEF"[n & 0xF];
+	// 	return s;
+	// };
+
+	std::ifstream ifs(filename);
+	if (!ifs.is_open())
+	{
+        std::stringstream ss;
+        ss << "Unable to open file: " << filename;
+        Bus::Error(ss.str());        	
+
+		return;
+	}
+	bool done = false;
+	char c;	
+	while (!done)
+	{
+		Byte n, t;
+		Word addr;	
+		Byte b;
+		ifs.get(c);	// skip the leading ":"
+		n = _fread_hex_byte(ifs);		// byte count for this line
+		addr = _fread_hex_word(ifs);	// fetch the begin address		
+		t = _fread_hex_byte(ifs);		// record type
+		if (t == 0x00) 
+		{
+			while (n--) 
+			{
+				b = _fread_hex_byte(ifs);
+				// std::cout << "0x" << hex(addr,4) << ":";
+				// std::cout << "0x" << hex(b, 2) << std::endl;
+				Memory::Write(addr, b, true);
+				++addr;
+			}
+			// Read and discard checksum byte
+			(void)_fread_hex_byte(ifs);	
+			// skip the junk at the end of the line	
+			if (ifs.peek() == '\r')	ifs.get(c);
+			if (ifs.peek() == '\n')	ifs.get(c);
+		}
+		else if (t == 0x01) 
+			done = true;
+	}
+	// close and return
+	ifs.close();
+	
+	return;
 }

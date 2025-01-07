@@ -14,6 +14,8 @@
 
 #include "IDevice.hpp"
 #include "font8x8_system.hpp"
+#include <list>
+#include <unordered_map>
 
 class Debug : public IDevice {
 
@@ -70,6 +72,10 @@ public: // PUBLIC ACCESSORS
         { 0xFFFF }		// F: white
     };
 
+    bool SingleStep();
+    void ContinueSingleStep();
+
+
 private: // PRIVATE MEMBERS
 
     void _clear_texture(SDL_Texture* texture, Byte r, Byte g, Byte b, Byte a);
@@ -117,19 +123,27 @@ private: // PRIVATE MEMBERS
     SDL_Renderer* _dbg_renderer = nullptr;
     SDL_Texture*  _dbg_texture  = nullptr;
 
-    std::vector <Word> mem_bank = { SSTACK_TOP - 0x0048, VIDEO_START, USER_RAM, 0xFE00 };
-
-
     // debugger stuctures
     enum CSR_AT {
         CSR_AT_NONE, CSR_AT_ADDRESS, CSR_AT_DATA, CSR_AT_REGISTER
     };    
+
+    std::vector <Word> mem_bank = { SSTACK_TOP - 0x0048, VIDEO_START, 0xFE00 };
+    std::vector <Word> sDisplayedAsm;
+    std::unordered_map<Word, bool> mapBreakpoints;	
+    std::list<Word> asmHistory;		// track last several asm addresses
+
     int csr_x = 0;
     int csr_y = 0;
     int csr_at = CSR_AT::CSR_AT_NONE;   
     char mouse_wheel = 0; 
+    bool bIsStepPaused = true;
     bool bIsCursorVisible = false;
     bool bIsMouseOver = false;
+
+    inline static bool s_bIsDebugActive = DEBUG_STARTS_ACTIVE;
+    inline static bool s_bSingleStep = DEBUG_SINGLE_STEP;
+    inline static bool s_bIsStepPaused = true;        
 
     const bool* keybfr = SDL_GetKeyboardState(NULL);
 

@@ -13,6 +13,7 @@
 #include "Debug.hpp"
 #include "Bus.hpp"
 #include "Memory.hpp"
+#include "C6809.hpp"
 
 
 
@@ -860,5 +861,34 @@ void Debug::KeyboardStuff()
         }
     }    
 }
+
+
+bool Debug::SingleStep()
+{
+    // do nothing if singlestep is disabled
+    if (!s_bSingleStep)
+        return true;
+    // wait for space
+    if (s_bIsStepPaused)
+        return false;
+    return true;
+}
+
+void Debug::ContinueSingleStep() {
+    // C6809* cpu = Bus::Inst().m_cpu;
+    C6809* cpu = Bus::GetC6809();
+    // if breakpoint reached... enable singlestep
+    if (mapBreakpoints[cpu->getPC()] == true)
+    {
+        s_bIsDebugActive = true;
+        s_bSingleStep = true;
+    }
+    // continue from paused state?
+    s_bIsStepPaused = s_bSingleStep;
+}
+
+
+
+
 
 // END: Debug.cpp

@@ -512,11 +512,17 @@ class KERNEL_ROM : public IDevice
             _size = 16 * 1024;
             _device_name = "KERNEL_ROM_DEVICE";
         }
+        KERNEL_ROM(const char* hexfile) : hex_filename(hexfile) {
+            _size = 16 * 1024;
+            _device_name = "KERNEL_ROM_DEVICE";
+            // todo: load the kernel rom hex file
+            // ...
+        }        
         virtual ~KERNEL_ROM() {
             //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
         }    
 
-		void OnInit() override 						    {}
+		void OnInit() override 						    { }
 		void OnQuit() override 						    {}
 		void OnActivate() override 					    {}
 		void OnDeactivate() override 				    {}
@@ -540,6 +546,9 @@ class KERNEL_ROM : public IDevice
             _size = nextAddr - old_address;
             return _size; 
         }  
+
+    private:
+        std::string hex_filename;
 };
 
 

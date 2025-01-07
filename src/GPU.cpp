@@ -211,9 +211,7 @@ void GPU::OnInit()
     // Reserve 64k for the extended video buffer
     int bfr_size = 64*1024;
     _ext_video_buffer.reserve(bfr_size);
-    
-    // for (int i=0; i<bfr_size; i++) _ext_video_buffer[i] = rand() % 256; // fill with random data
-
+  
     // initialize the font glyph buffer
     for (int i=0; i<256; i++)
         for (int r=0; r<8; r++)
@@ -272,21 +270,21 @@ void GPU::OnActivate()
 {
     // std::cout << clr::indent() << clr::CYAN << "GPU::OnActivate() Entry" << clr::RETURN;
 
-    // clear out the standard video buffer
-    Byte at = 0;
-    Byte ch = 64;
-    for (int s=MAP(VIDEO_START); s<MAP(VIDEO_TOP); s+=2)
-    {
-        Memory::Write(s+0, at);
-        Memory::Write(s+1, ch);
-        ch++;
-        if(ch==0) at++;
-        if (at>0) at++;
-    }
+    // // clear out the standard video buffer
+    // Byte at = 0;
+    // Byte ch = 64;
+    // for (int s=MAP(VIDEO_START); s<MAP(VIDEO_TOP); s+=2)
+    // {
+    //     Memory::Write(s+0, at);
+    //     Memory::Write(s+1, ch);
+    //     ch++;
+    //     if(ch==0) at++;
+    //     if (at>0) at++;
+    // }
 
     // clear out the extended video buffer
-    Word d=0;
-    for (int i=0; i<(64*1024); i++) { _ext_video_buffer[i] = d++; }
+    // Word d=0;
+    // for (int i=0; i<(64*1024); i++) { _ext_video_buffer[i] = d++; }
 
     // _clear_texture(pExt_Texture, 15, 15, 15, 15);
     // _clear_texture(pStd_Texture, 15, 15, 15, 15);

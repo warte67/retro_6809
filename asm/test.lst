@@ -1,0 +1,169 @@
+                      ; test.asm
+                      ;
+                      
+0000                                  INCLUDE "Memory_Map.asm"
+                      
+                      
+                      ;    memory_map.asm
+                      ;
+                      ;   **********************************************
+                      ;   * Allocated 64k Memory Mapped System Symbols *
+                      ;   **********************************************
+                      ;
+                      
+0000                  SOFT_VECTORS_DEVICE   equ   0x0000    ; START: Software Interrupt Vectors
+0000                  SOFT_EXEC             equ   0x0000    ; Exec Software Interrupt Vector
+0002                  SOFT_SWI3             equ   0x0002    ; SWI3 Software Interrupt Vector
+0004                  SOFT_SWI2             equ   0x0004    ; SWI2 Software Interrupt Vector
+0006                  SOFT_FIRQ             equ   0x0006    ; FIRQ Software Interrupt Vector
+0008                  SOFT_IRQ              equ   0x0008    ; IRQ Software Interrupt Vector
+000A                  SOFT_SWI              equ   0x000A    ; SWI / SYS Software Interrupt Vector
+000C                  SOFT_NMI              equ   0x000C    ; NMI Software Interrupt Vector
+000E                  SOFT_RESET            equ   0x000E    ; RESET Software Interrupt Vector
+                      ; _______________________________________________________________________
+                      
+0010                  SYSTEM_MEMORY_DEVICE  equ   0x0010    ; START: System Memory
+0010                  ZERO_PAGE             equ   0x0010    ; Zero Page System and User Variables
+0100                  FIO_BUFFER            equ   0x0100    ; START: File Input/Output Buffer
+01FF                  FIO_BFR_END           equ   0x01FF    ; END: File Input/Output Buffer
+0200                  SYSTEM_STACK          equ   0x0200    ; Bottom of the system stack spcace
+0400                  SSTACK_TOP            equ   0x0400    ; Top of the system statck space
+                      ; _______________________________________________________________________
+                      
+0400                  VIDEO_BUFFER_DEVICE   equ   0x0400    ; START: Video Buffer (8K)
+0400                  VIDEO_START           equ   0x0400    ; Start of standard video buffer
+23FF                  VIDEO_END             equ   0x23FF    ; End of standard video buffer
+2400                  VIDEO_TOP             equ   0x2400    ; Top of standard video buffer
+                      ; _______________________________________________________________________
+                      
+2400                  USER_MEMORY_DEVICE    equ   0x2400    ; START: User Memory (34K)
+2400                  USER_RAM              equ   0x2400    ; User Accessable RAM
+AFFF                  USER_RAM_END          equ   0xAFFF    ; End User Accessable RAM
+B000                  USER_RAM_TOP          equ   0xB000    ; Top User Accessable RAM
+                      ; _______________________________________________________________________
+                      
+B000                  MEMBANK_DEVICE        equ   0xB000    ; START: Banked Memory Region (16K)
+B000                  MEMBANK_ONE           equ   0xB000    ; Banked Memory Page One (8K)
+D000                  MEMBANK_TWO           equ   0xD000    ; Banked Memory Page Two (8K)
+EFFF                  MEMBANK_END           equ   0xEFFF    ; End of Banked Memory Region
+F000                  MEMBANK_TOP           equ   0xF000    ; TOP of Banked Memory Region
+                      ; _______________________________________________________________________
+                      
+F000                  KERNEL_ROM_DEVICE     equ   0xF000    ; START: Kernel Rom (3.5K)
+F000                  KERNEL_START          equ   0xF000    ; Start of Kernel Rom Space
+FDFF                  KERNEL_END            equ   0xFDFF    ; End of Kernel Rom Space
+FE00                  KERNEL_TOP            equ   0xFE00    ; Top of Kernel Rom Space
+                      ; _______________________________________________________________________
+                      
+FE00                  TESTS_DEVICE          equ   0xFE00    ; START: TESTS_DEVICE
+FE00                  TESTS_START           equ   0xFE00    ; Start of Test Registers Space
+FE00                  TESTS_ONE             equ   0xFE00    ; (Byte) First Test Register
+                                                            ; - bit 7    = TEST_ENABLE
+                                                            ; - bit 6    = (reserved)
+                                                            ; - bit 5    = (reserved)
+                                                            ; - bit 4    = (reserved)
+                                                            ; - bit 3    = (reserved)
+                                                            ; - bit 2    = (reserved)
+                                                            ; - bit 1    = (reserved)
+                                                            ; - bit 0    = TEST_INC_VID_MODES
+                                                            ; 
+FE01                  TESTS_TWO             equ   0xFE01    ; (Byte) Second Test Register
+                                                            ; - bits 0-7  = (reserved)
+                                                            ; 
+FE02                  TESTS_END             equ   0xFE02    ; End of Tests Registers Space
+FE03                  TESTS_TOP             equ   0xFE03    ; Top of Tests Registers Space
+                      ; _______________________________________________________________________
+                      
+FE03                  GPU_DEVICE            equ   0xFE03    ; START: GPU Device Hardware Registers
+FE03                  GPU_OPTIONS           equ   0xFE03    ; (Byte) Bitflag Enables
+                                                            ; - bit 7    = Extended Bitmap:
+                                                            ;               0: Tilemap Display
+                                                            ;               1: Bitmap Display
+                                                            ; - bits 5-6 = Extended Color Mode:
+                                                            ;               00: 2-Colors
+                                                            ;               01: 4-Colors
+                                                            ;               10: 16-Colors
+                                                            ;               11: 256-Colors
+                                                            ; - bits 4   = Extended Display Enable
+                                                            ;               0: Disabled
+                                                            ;               1: Enabled
+                                                            ; - bits 3   = Application Screen Mode
+                                                            ;               0: Windowed
+                                                            ;               1: Fullscreen
+                                                            ; - bits 2   = VSync Enable
+                                                            ;               0: Disabled
+                                                            ;               1: Enabled
+                                                            ; - bits 1   = Sprite Enable
+                                                            ;               0: Disabled
+                                                            ;               1: Enabled
+                                                            ; - bit  0   = Standard Display Enable
+                                                            ;               0: Disabled
+                                                            ;               1: Enabled
+                                                            ; 
+FE04                  GPU_MODE              equ   0xFE04    ; (Byte) Bitflag Enables
+                                                            ; - bit 7    = Standard Bitmap:
+                                                            ;               0: Text Display
+                                                            ;               1: Bitmap Display
+                                                            ; - bits 5-6 = Standard Color Mode:
+                                                            ;               00: 2-Colors
+                                                            ;               01: 4-Colors
+                                                            ;               10: 16-Colors
+                                                            ;               11: 256-Colors
+                                                            ; - bits 0-4 = Display Mode (0-31)
+                                                            ; 
+FE04                  GPU_END               equ   0xFE04    ; End of GPU Register Space
+FE05                  GPU_TOP               equ   0xFE05    ; Top of GPU Register Space
+                      ; _______________________________________________________________________
+                      
+FE05                  DEBUG_DEVICE          equ   0xFE05    ; START: Debug Hardware Registers:
+FE05                  DBG_BRK_ADDR          equ   0xFE05    ; (Word) Address of current breakpoint
+FE07                  DBG_FLAGS             equ   0xFE07    ; (Byte) Debug Specific Hardware Flags:
+                                                            ; - bit 7: Debug Enable
+                                                            ; - bit 6: Single Step Enable
+                                                            ; - bit 5: Clear All Breakpoints
+                                                            ; - bit 4: Update Breakpoint at DEBUG_BRK_ADDR
+                                                            ; - bit 3: FIRQ  (on low {0} to high {1} edge)
+                                                            ; - bit 2: IRQ   (on low {0} to high {1} edge)
+                                                            ; - bit 1: NMI   (on low {0} to high {1} edge)
+                                                            ; - bit 0: RESET (on low {0} to high {1} edge)
+                                                            ; 
+FE07                  DBG_END               equ   0xFE07    ; End of Debug Registers
+FE08                  DBG_TOP               equ   0xFE08    ; Top of Debug Registers
+                      ; _______________________________________________________________________
+                      
+FE08                  HDW_RESERVED_DEVICE   equ   0xFE08    ; START: Reserved Register Space
+FFEF                  HDW_REG_END           equ   0xFFEF    ; 487 bytes reserved for future use.
+                      ; _______________________________________________________________________
+                      
+FFF0                  ROM_VECTS_DEVICE      equ   0xFFF0    ; START: Hardware Interrupt Vectors
+FFF0                  HARD_EXEC             equ   0xFFF0    ; EXEC Hardware Interrupt Vector
+FFF2                  HARD_SWI3             equ   0xFFF2    ; SWI3 Hardware Interrupt Vector
+FFF4                  HARD_SWI2             equ   0xFFF4    ; SWI2 Hardware Interrupt Vector
+FFF6                  HARD_FIRQ             equ   0xFFF6    ; FIRQ Hardware Interrupt Vector
+FFF8                  HARD_IRQ              equ   0xFFF8    ; IRQ Hardware Interrupt Vector
+FFFA                  HARD_SWI              equ   0xFFFA    ; SWI / SYS Hardware Interrupt Vector
+FFFC                  HARD_NMI              equ   0xFFFC    ; NMI Hardware Interrupt Vector
+FFFE                  HARD_RESET            equ   0xFFFE    ; RESET Hardware Interrupt Vector
+                      
+                      
+                      ; END of memory_map.asm definitions
+                      
+                      
+                      
+FFF0                                  org     0xFFF0
+FFF0  2400                            fdb     start
+                      
+                      
+2400                                  org $2400
+                      
+2400  CC0100          start           ldd     #$0100
+2403  8E0400          lp2             ldx     #VIDEO_START            
+2406  ED81            lp1             std     ,x++
+2408  C30001                          addd    #1
+240B  8C0900                          cmpx    #VIDEO_START + $0500
+240E  2DF6                            blt     lp1
+2410  20F1                            bra     lp2
+                      
+                      
+                      
+                      

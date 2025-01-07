@@ -45,9 +45,9 @@ public: // PUBLIC ACCESSORS
 
 private: // PRIVATE MEMBERS
 
-    // Byte _tests_one = TEST_NONE;
+    Byte _tests_one = TEST_NONE;
     // Byte _tests_one = TEST_ENABLE;
-    Byte _tests_one = TEST_ENABLE | TEST_ANIM_FG;
+    // Byte _tests_one = TEST_ENABLE | TEST_ANIM_FG;
     // Byte _tests_one = TEST_ENABLE | TEST_ANIM_FG | TEST_ANIM_BG;
     // Byte _tests_one = TEST_ENABLE | TEST_INC_VID_MODES;
     // Byte _tests_one = 0;
