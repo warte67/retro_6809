@@ -62,7 +62,7 @@ void C6809::ThreadProc()
         // int cpu_speed = Bus::Inst()._sys_state;
 
 
-		s_sys_state = 0x0E;		// temp: hard coded CPU speed.
+		s_sys_state = 0x0A;		// temp: hard coded CPU speed.
 
 
         int cpu_speed = s_sys_state;
