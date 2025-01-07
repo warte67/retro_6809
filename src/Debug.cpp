@@ -25,11 +25,48 @@ Byte Debug::OnRead(Word offset)
 { 
     Byte data = IDevice::OnRead(offset);
 
-    if (MAP(SYS_DBG_BRK_ADDR) == offset) { 
+    // system registers
+    if (offset == MAP(SYS_STATE)) 
+    {
+        Byte err = C6809::s_sys_state & 0xF0;
+        C6809::s_sys_state &= 0x0F;
+        data = C6809::s_sys_state | err; 
+    } 
+    else if (offset == MAP(SYS_SPEED) + 0) 
+    {
+        data = Bus::GetCpuSpeed() >> 8;
+    } 
+    else if (offset == MAP(SYS_SPEED) + 1) 
+    {
+        data = Bus::GetCpuSpeed() & 0xFF;
+    } 
+    else if (offset == MAP(SYS_CLOCK_DIV)) 
+    {
+        data = Bus::GetClockDiv();
+    } 
+    else if (offset == MAP( SYS_TIMER) + 0) 
+    {
+        data = Bus::GetClockTimer() >> 8;
+    } 
+    else if (offset == MAP(SYS_TIMER) + 1) 
+    {
+        data = Bus::GetClockTimer() & 0xff;
+    } 
+    else if (offset == MAP(SYS_DBG_BRK_ADDR)) 
+    { 
         data = _dbg_brk_addr; 
     } 
-    else if (MAP(SYS_DBG_FLAGS) == offset) { 
-        data = _dbg_flags; 
+    else if (offset == MAP(SYS_DBG_FLAGS) ) 
+    {
+        (s_bIsDebugActive) ? reg_flags |= 0x80 : reg_flags &= ~0x80; // Enable
+        (s_bSingleStep)     ? reg_flags |= 0x40 : reg_flags &= ~0x40; // Single-Step
+        reg_flags &= ~0x20;     // zero for Clear all Breakpoints
+        (mapBreakpoints[reg_brk_addr]) ? reg_flags |= 0x10 : reg_flags &= ~0x10;
+        reg_flags &= ~0x08;     // FIRQ
+        reg_flags &= ~0x04;     // IRQ
+        reg_flags &= ~0x02;     // NMI
+        reg_flags &= ~0x01;     // RESET
+        data = reg_flags;              
     }
 
     return data; 
@@ -37,6 +74,52 @@ Byte Debug::OnRead(Word offset)
 
 void Debug::OnWrite(Word offset, Byte data) 
 { 
+    if ( offset == MAP(SYS_STATE) ) 
+    {  
+        C6809::s_sys_state = data;
+    } 
+    else if ( offset == MAP(SYS_TIMER) + 0 ) 
+    {
+        Bus::SetClockTimer( (data << 8) );
+    } 
+    else if ( offset == MAP(SYS_TIMER) + 1 ) 
+    {
+        Bus::SetClockTimer( (data << 0) );
+    } 
+    else if ( offset == MAP(SYS_DBG_BRK_ADDR) + 0 ) 
+    {
+        reg_brk_addr = (reg_brk_addr & 0x00ff) | (data << 8);
+    } 
+    else if ( offset == MAP(SYS_DBG_BRK_ADDR) + 1 ) 
+    {
+        reg_brk_addr = (reg_brk_addr & 0xff00) | (data << 0);
+    }
+    else if ( offset == MAP(SYS_DBG_FLAGS) )
+    {
+        reg_flags = data;
+        (reg_flags & 0x80) ? s_bIsDebugActive = true : s_bIsDebugActive = false;
+        (reg_flags & 0x40) ? s_bSingleStep = true : s_bSingleStep = false;
+        if (reg_flags & 0x20)  cbClearBreaks();
+        (reg_flags & 0x10) ? mapBreakpoints[reg_brk_addr] = true : mapBreakpoints[reg_brk_addr] = false;
+        if (reg_flags & 0x08)   cbFIRQ();
+        if (reg_flags & 0x04)   cbIRQ();
+        if (reg_flags & 0x02)   cbNMI();
+        if (reg_flags & 0x01)   cbReset();
+        // activate or deactivate the debugger
+        if (s_bIsDebugActive)   // activate
+        {
+            SDL_ShowWindow( Bus::GetGPU()->GetWindow() );
+            // SDL_RaiseWindow(Debug::GetSDLWindow());
+            SDL_RaiseWindow( _dbg_window );
+        }
+        else                    // deactivate      
+        {      
+            SDL_HideWindow(_dbg_window);
+            // SDL_RaiseWindow(Gfx::GetSDLWindow());
+            SDL_RaiseWindow(Bus::GetGPU()->GetWindow());
+        }        
+    }
+
     IDevice::OnWrite( offset, data);
 } // END: Debug::OnWrite()
 
@@ -365,7 +448,7 @@ void Debug::OnUpdate(float fElapsedTime)
     // return true;
 
 
-    const float delay = 1.0f / 60.0f;
+    const float delay = 1.0f / 15.0f;
     static float delayAcc = fElapsedTime;
     delayAcc += fElapsedTime;
     if (delayAcc >= delay)
@@ -394,7 +477,7 @@ void Debug::OnUpdate(float fElapsedTime)
             DumpMemory(1, 21, mem_bank[2]);
             DumpMemory(1, 31, mem_bank[3]);
 
-            // DrawCpu(39, 1);
+            DrawCpu(71, 1);  // was (39,1)
             // DrawCode(39, 6);
 
             // DrawButtons();    
@@ -487,6 +570,67 @@ void Debug::_setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte palet
     Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));
     *dst = ( (a<<12) | (r<<8) | (g<<4) | (b<<0) );
 }
+
+
+void Debug::DrawCpu(int x, int y)
+{
+    C6809* cpu = Bus::GetC6809();
+
+    int RamX = x, RamY = y;
+    // Condition Codes
+    RamX += OutText(RamX, RamY, "CC($", 0xB0);
+    RamX += OutText(RamX, RamY, _hex(cpu->getCC(), 2).c_str(), 0xC0);
+    RamX += OutText(RamX, RamY, "): ", 0xB0);
+    if (cpu->getCC_E())		RamX += OutText(RamX, RamY, "E", 0xC0);
+    else RamX += OutText(RamX, RamY, "e", 0xB0);
+    if (cpu->getCC_F())		RamX += OutText(RamX, RamY, "F", 0xC0);
+    else RamX += OutText(RamX, RamY, "f", 0xB0);
+    if (cpu->getCC_H())		RamX += OutText(RamX, RamY, "H", 0xC0);
+    else RamX += OutText(RamX, RamY, "h", 0xB0);
+    if (cpu->getCC_I())		RamX += OutText(RamX, RamY, "I", 0xC0);
+    else RamX += OutText(RamX, RamY, "i", 0xB0);
+    if (cpu->getCC_N())		RamX += OutText(RamX, RamY, "N", 0xC0);
+    else RamX += OutText(RamX, RamY, "n", 0xB0);
+    if (cpu->getCC_Z())		RamX += OutText(RamX, RamY, "Z", 0xC0);
+    else RamX += OutText(RamX, RamY, "z", 0xB0);
+    if (cpu->getCC_V())		RamX += OutText(RamX, RamY, "V", 0xC0);
+    else RamX += OutText(RamX, RamY, "v", 0xB0);
+    if (cpu->getCC_C())		RamX += OutText(RamX, RamY, "C", 0xC0);
+    else RamX += OutText(RamX, RamY, "c", 0xB0);
+    RamX = x; RamY++;	// carraige return(ish)
+
+    // D = (A<<8) | B & 0x00FF
+    RamX += OutText(RamX, RamY, "D:$", 0xB0);
+    RamX += OutText(RamX, RamY, _hex(cpu->getD(), 4), 0xC0);
+    RamX += OutText(RamX, RamY, " (A:$", 0xB0);
+    RamX += OutText(RamX, RamY, _hex(cpu->getA(), 2), 0xC0);
+    RamX += OutText(RamX, RamY, " B:$", 0xB0);
+    RamX += OutText(RamX, RamY, _hex(cpu->getB(), 2), 0xC0);
+    RamX += OutText(RamX, RamY, ")", 0xB0);
+    RamX = x; RamY++;	// carraige return(ish)
+
+    // X
+    RamX += OutText(RamX, RamY, " X:$", 0xB0);
+    RamX += OutText(RamX, RamY, _hex(cpu->getX(), 4), 0xC0);
+    // Y
+    RamX += OutText(RamX, RamY, " Y:$", 0xB0);
+    RamX += OutText(RamX, RamY, _hex(cpu->getY(), 4), 0xC0);
+    // U
+    RamX += OutText(RamX, RamY, " U:$", 0xB0);
+    RamX += OutText(RamX, RamY, _hex(cpu->getU(), 4), 0xC0);
+    RamX = x; RamY++;	// carraige return(ish)
+    // PC
+    RamX += OutText(RamX, RamY, "PC:$", 0xB0);
+    RamX += OutText(RamX, RamY, _hex(cpu->getPC(), 4), 0xC0);
+    // S
+    RamX += OutText(RamX, RamY, " S:$", 0xB0);
+    RamX += OutText(RamX, RamY, _hex(cpu->getS(), 4), 0xC0);
+    // DP
+    RamX += OutText(RamX, RamY, " DP:$", 0xB0);
+    RamX += OutText(RamX, RamY, _hex(cpu->getDP(), 2), 0xC0);
+    RamX = x; RamY++;	// carraige return(ish)
+}
+
 
 void Debug::OutGlyph(int col, int row, Byte glyph, Byte color_attr)
 {
@@ -928,6 +1072,79 @@ void Debug::ContinueSingleStep() {
 
 
 
+// ********************
+// * Button Callbacks *
+// ********************
+
+void Debug::cbClearBreaks()
+{
+    if (mapBreakpoints.size() > 0)
+        mapBreakpoints.clear();
+}
+void Debug::cbReset()
+{
+    C6809* cpu = Bus::GetC6809();
+    cpu->reset();
+    mousewheel_offset = 0;
+    bMouseWheelActive = false;
+    s_bSingleStep = true;
+    s_bIsStepPaused = true;
+}
+void Debug::cbNMI()
+{
+    C6809* cpu = Bus::GetC6809();
+    cpu->nmi();
+    s_bIsStepPaused = false;
+}
+void Debug::cbIRQ()
+{
+    C6809* cpu = Bus::GetC6809();
+    cpu->irq();
+    s_bIsStepPaused = false;
+}
+void Debug::cbFIRQ()
+{    
+    C6809* cpu = Bus::GetC6809();
+    cpu->firq();
+    s_bIsStepPaused = false;
+}
+void Debug::cbRunStop()
+{
+    (s_bSingleStep) ? s_bSingleStep = false : s_bSingleStep = true;
+    s_bIsStepPaused = s_bSingleStep;
+    nRegisterBeingEdited.reg = Debug::EDIT_REGISTER::EDIT_NONE;	// cancel any register edits
+    bMouseWheelActive = false;
+}
+void Debug::cbHide()
+{
+    bMouseWheelActive = false;
+    s_bSingleStep = false;
+    s_bIsStepPaused = s_bSingleStep;
+    nRegisterBeingEdited.reg = Debug::EDIT_REGISTER::EDIT_NONE;	// cancel any register edits
+
+    s_bIsDebugActive = false;
+    SDL_MinimizeWindow(_dbg_window);
+}
+void Debug::cbStepIn()  //F11
+{
+    s_bSingleStep = true;
+    s_bIsStepPaused = false;
+    nRegisterBeingEdited.reg = Debug::EDIT_REGISTER::EDIT_NONE;	// cancel any register edits
+    bMouseWheelActive = false;
+}
+void Debug::cbStepOver() //F10
+{
+    s_bSingleStep = true;
+    s_bIsStepPaused = false;
+    nRegisterBeingEdited.reg = Debug::EDIT_REGISTER::EDIT_NONE;	// cancel any register edits
+    bMouseWheelActive = false;
+}
+void Debug::cbAddBrk()
+{
+    printf("Add Breakpoint\n");
+    bEditingBreakpoint = true;
+    nRegisterBeingEdited.reg = Debug::EDIT_REGISTER::EDIT_BREAK;
+}
 
 
 // END: Debug.cpp

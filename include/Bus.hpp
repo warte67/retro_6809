@@ -83,6 +83,14 @@ public: // PUBLIC METHODS
     static float FPS() { return _fps; }
     static std::string GetTitle() { return _s_title; }
 
+    // static void SetCpuSpeed(Byte speed) { _sys_cpu_speed = speed; }
+    static Word GetCpuSpeed() { return _sys_cpu_speed; }
+    static Byte GetClockDiv() { return _clock_div; }
+    static Word GetClockTimer() { return _clock_timer; }
+    static Word SetClockTimer(Word timer) { return _clock_timer = timer; }
+
+    static GPU* GetGPU() { return _pGPU; }
+
 private: // INTERNAL PRIVATES
 	bool _bWasInit = false;
     inline static bool s_bIsRunning = true;
