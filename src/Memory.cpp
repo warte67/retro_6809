@@ -370,11 +370,11 @@ void Memory::Generate_Memory_Map()
 //       attached to the memory map during initialization. 
 //       Use if/else instead.
 //
- Word Memory::Map(std::string name)    
+ Word Memory::Map(std::string name, std::string file = __FILE__, int line = __LINE__)   
 { 
     if (_map.find(name) == _map.end()) 
     {
-        Bus::Error("Memory node '" + name + "' not found!");    
+        Bus::Error("Memory node '" + name + "' not found!", file, line);    
         return 0;
     }
     return _map[name]; 

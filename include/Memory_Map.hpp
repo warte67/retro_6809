@@ -54,27 +54,61 @@ enum MEMMAP
     KERNEL_TOP            = 0xFE00,   // Top of Kernel Rom Space
 // _______________________________________________________________________
 
-    TESTS_DEVICE          = 0xFE00,   // START: TESTS_DEVICE
-    TESTS_START           = 0xFE00,   // Start of Test Registers Space
-    TESTS_ONE             = 0xFE00,   // (Byte) First Test Register
-                                      // - bit 7    = TEST_ENABLE
-                                      // - bit 6    = (reserved)
-                                      // - bit 5    = (reserved)
-                                      // - bit 4    = (reserved)
-                                      // - bit 3    = (reserved)
-                                      // - bit 2    = (reserved)
-                                      // - bit 1    = (reserved)
-                                      // - bit 0    = TEST_INC_VID_MODES
+    SYS_DEVICE            = 0xFE00,   // START: System and Debug Hardware Registers:
+    SYS_BEGIN             = 0xFE00,   // Start of System Registers
+    SYS_STATE             = 0xFE00,   // (Byte) System State Register
+                                      // SYS_STATE: ABCD.SSSS                          
+                                      // - bit  7   = Error: Standard Buffer Overflow  
+                                      // - bit  6   = Error: Extended Buffer Overflow  
+                                      // - bit  5   = Error: Reserved                  
+                                      // - bit  4   = Error: Reserved                  
+                                      // - bits 0-3 = CPU Speed (0-15):                
+                                      //    0 ($0)  = CPU Clock  25 khz.               
+                                      //    1 ($1)  = CPU Clock  50 khz.               
+                                      //    2 ($2)  = CPU Clock 100 khz.               
+                                      //    3 ($3)  = CPU Clock 200 khz.               
+                                      //    4 ($4)  = CPU Clock 333 khz.               
+                                      //    5 ($5)  = CPU Clock 416 khz.               
+                                      //    6 ($6)  = CPU Clock 500 khz.               
+                                      //    7 ($7)  = CPU Clock 625 khz.               
+                                      //    8 ($8)  = CPU Clock 769 khz.               
+                                      //    9 ($9)  = CPU Clock 833 khz.               
+                                      //   10 ($A)  = CPU Clock 1.0 mhz.               
+                                      //   11 ($B)  = CPU Clock 1.4 mhz.               
+                                      //   12 ($C)  = CPU Clock 2.0 mhz.               
+                                      //   13 ($D)  = CPU Clock 3.3 mhz.               
+                                      //   14 ($E)  = CPU Clock 5.0 mhz.               
+                                      //   15 ($F)  = CPU Clock ~10.0 mhz. (unmetered) 
                                       // 
-    TESTS_TWO             = 0xFE01,   // (Byte) Second Test Register
-                                      // - bits 0-7  = (reserved)
+    SYS_SPEED             = 0xFE01,   // (Word) Average CPU Clock Speed (Read Only)
+    SYS_CLOCK_DIV         = 0xFE03,   // (Byte) 70 hz Clock Divider Register (Read Only)
+                                      // - bit 7: 0.546875 hz
+                                      // - bit 6: 1.09375 hz
+                                      // - bit 5: 2.1875 hz
+                                      // - bit 4: 4.375 hz
+                                      // - bit 3: 8.75 hz
+                                      // - bit 2: 17.5 hz
+                                      // - bit 1: 35.0 hz
+                                      // - bit 0: 70.0 hz
                                       // 
-    TESTS_END             = 0xFE02,   // End of Tests Registers Space
-    TESTS_TOP             = 0xFE03,   // Top of Tests Registers Space
-// _______________________________________________________________________
+    SYS_TIMER             = 0xFE04,   // (Word) Increments at 0.546875 hz
+    SYS_DBG_BRK_ADDR      = 0xFE06,   // (Word) Address of current debug breakpoint
+    SYS_DBG_FLAGS         = 0xFE08,   // (Byte) Debug Specific Hardware Flags:
+                                      // - bit 7: Debug Enable
+                                      // - bit 6: Single Step Enable
+                                      // - bit 5: Clear All Breakpoints
+                                      // - bit 4: Update Breakpoint at DEBUG_BRK_ADDR
+                                      // - bit 3: FIRQ  (on low {0} to high {1} edge)
+                                      // - bit 2: IRQ   (on low {0} to high {1} edge)
+                                      // - bit 1: NMI   (on low {0} to high {1} edge)
+                                      // - bit 0: RESET (on low {0} to high {1} edge)
+                                      // 
+    SYS_END               = 0xFE08,   // End of System Registers
+    SYS_TOP               = 0xFE09,   // Top of System Registers
+                                      // 
 
-    GPU_DEVICE            = 0xFE03,   // START: GPU Device Hardware Registers
-    GPU_OPTIONS           = 0xFE03,   // (Byte) Bitflag Enables
+    GPU_DEVICE            = 0xFE09,   // START: GPU Device Hardware Registers
+    GPU_OPTIONS           = 0xFE09,   // (Byte) Bitflag Enables
                                       // - bit 7    = Extended Bitmap:
                                       //               0: Tilemap Display
                                       //               1: Bitmap Display
@@ -99,7 +133,7 @@ enum MEMMAP
                                       //               0: Disabled
                                       //               1: Enabled
                                       // 
-    GPU_MODE              = 0xFE04,   // (Byte) Bitflag Enables
+    GPU_MODE              = 0xFE0A,   // (Byte) Bitflag Enables
                                       // - bit 7    = Standard Bitmap:
                                       //               0: Text Display
                                       //               1: Bitmap Display
@@ -110,28 +144,12 @@ enum MEMMAP
                                       //               11: 256-Colors
                                       // - bits 0-4 = Display Mode (0-31)
                                       // 
-    GPU_END               = 0xFE04,   // End of GPU Register Space
-    GPU_TOP               = 0xFE05,   // Top of GPU Register Space
+    GPU_END               = 0xFE0A,   // End of GPU Register Space
+    GPU_TOP               = 0xFE0B,   // Top of GPU Register Space
 // _______________________________________________________________________
 
-    DEBUG_DEVICE          = 0xFE05,   // START: Debug Hardware Registers:
-    DBG_BRK_ADDR          = 0xFE05,   // (Word) Address of current breakpoint
-    DBG_FLAGS             = 0xFE07,   // (Byte) Debug Specific Hardware Flags:
-                                      // - bit 7: Debug Enable
-                                      // - bit 6: Single Step Enable
-                                      // - bit 5: Clear All Breakpoints
-                                      // - bit 4: Update Breakpoint at DEBUG_BRK_ADDR
-                                      // - bit 3: FIRQ  (on low {0} to high {1} edge)
-                                      // - bit 2: IRQ   (on low {0} to high {1} edge)
-                                      // - bit 1: NMI   (on low {0} to high {1} edge)
-                                      // - bit 0: RESET (on low {0} to high {1} edge)
-                                      // 
-    DBG_END               = 0xFE07,   // End of Debug Registers
-    DBG_TOP               = 0xFE08,   // Top of Debug Registers
-// _______________________________________________________________________
-
-    HDW_RESERVED_DEVICE   = 0xFE08,   // START: Reserved Register Space
-    HDW_REG_END           = 0xFFEF,   // 487 bytes reserved for future use.
+    HDW_RESERVED_DEVICE   = 0xFE0B,   // START: Reserved Register Space
+    HDW_REG_END           = 0xFFEF,   // 484 bytes reserved for future use.
 // _______________________________________________________________________
 
     ROM_VECTS_DEVICE      = 0xFFF0,   // START: Hardware Interrupt Vectors

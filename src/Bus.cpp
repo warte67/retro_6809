@@ -20,6 +20,34 @@
 #include "C6809.hpp"
 
 
+class BusException : public std::exception
+{
+public:
+    BusException(const std::string& err_msg, const std::string& file, int line)
+        : err_msg_(err_msg), file_(file), line_(line) {}
+
+    const char* what() const throw()
+    {
+        return err_msg_.c_str();
+    }
+
+    std::string get_file() const
+    {
+        return file_;
+    }
+
+    int get_line() const
+    {
+        return line_;
+    }
+
+private:
+    std::string err_msg_;
+    std::string file_;
+    int line_;
+};
+
+
 
 Bus::Bus()  
 { 
@@ -64,26 +92,10 @@ void Bus::IsDirty(bool b)
 
 void Bus::Error(std::string err_msg, std::string file, int line)
 {
-	std::cout << std::endl;
-	std::cout << clr::RED << "  ╭──" << clr::YELLOW << "  ERROR:  " << clr::RED << "────────====####" << clr::RETURN;
-	std::cout << clr::RED << "  │" << clr::NORMAL << " in file: " << clr::WHITE << file << clr::RETURN;
-	std::cout << clr::RED << "  │" << clr::NORMAL << " on line: " << clr::WHITE << line << clr::RETURN;
-	std::cout << clr::RED << "  │" << clr::RETURN;// printw("\n");
-	std::cout << clr::RED << "  │" << clr::NORMAL << clr::WHITE << "   " << err_msg << clr::RETURN;
-	std::cout << clr::RED << "  │" << clr::RETURN;
-	std::cout << clr::RED << "  ╰────────────────────====####" << clr::RETURN;
-	std::cout << std::endl;
+    Bus::IsDirty(true);  
+    Bus::IsRunning(false);
 
-    SDL_Window* pWin = _pGPU->GetWindow();
-    if (pWin)
-    {
-        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, 
-            "Error", 
-            err_msg.c_str(), 
-            pWin);
-    }
-
-	Bus::IsRunning(false);
+    throw BusException(err_msg, file, line);
 }  
 
 
@@ -92,59 +104,87 @@ bool Bus::Run()
     std::cout << clr::indent_push() << clr::CYAN << "Bus::Run() Entry" << clr::RETURN;
     bool bWasActivated = false;
 
-    _onInit();
-    // terminate the app when the 'bIsRunning' flag is no longer true
-    while (Bus::IsRunning())
-    {
-        // something changed (is dirty). rebuild the environment
-        if (Bus::IsDirty())
+    try
+    {   
+        _onInit();
+        // terminate the app when the 'bIsRunning' flag is no longer true
+        while (Bus::IsRunning())
         {
-            // stop the CPU from running while updating system
-            C6809::IsCpuEnabled(false);
+            // something changed (is dirty). rebuild the environment
+            if (Bus::IsDirty())
+            {
+                // stop the CPU from running while updating system
+                C6809::IsCpuEnabled(false);
 
-            // shutdown the old environment
-            if (bWasActivated)
-                _onDeactivate();
+                // shutdown the old environment
+                if (bWasActivated)
+                    _onDeactivate();
 
-            // create a new environment
-            _onActivate();
-            bWasActivated = true;
+                // create a new environment
+                _onActivate();
+                bWasActivated = true;
 
-            // wait 25 mil0000000liseconds to re-enable the CPU 
-            SDL_Delay(25);
+                // wait 25 mil0000000liseconds to re-enable the CPU 
+                SDL_Delay(25);
 
-            // reenable the CPU
-            C6809::IsCpuEnabled(true);   // no code to run yet!
+                // reenable the CPU
+                C6809::IsCpuEnabled(true);   // no code to run yet!
 
-            // no longer dirty
-            Bus::IsDirty(false);           
+                // no longer dirty
+                Bus::IsDirty(false);           
+            }
+            // update all of the attached devices
+            _onUpdate(0);
+            
+            // dispatch SDL events to the devices
+            _onEvent(0);
+            
+            // render all of the devices to the screen buffers
+            _onRender();      
+
+            // only present for GfxCore            
+            if (_pGPU) { _pGPU->RenderPresent(); }
+
+            SDL_Delay(1);
         }
-        // update all of the attached devices
-        _onUpdate(0);
-        
-        // dispatch SDL events to the devices
-        _onEvent(0);
-        
-        // render all of the devices to the screen buffers
-        _onRender();      
+        // shutdown the environment
+        _onDeactivate();    
 
-        // only present for GfxCore            
-        if (_pGPU) { _pGPU->RenderPresent(); }
+        // shutdown SDL2 and return with status
+        std::cout << clr::indent_pop() << clr::CYAN << "Bus::Run() Exit" << clr::RETURN;
+        _onQuit();
 
-        SDL_Delay(1);
+        return true;
     }
-    // shutdown the environment
-    _onDeactivate();    
+    catch (BusException& e)
+    {
+        std::string err_msg = e.what();
+        std::string file = e.get_file();
+        int line = e.get_line();    
+        std::cout << std::endl;
+        std::cout << clr::RED << "  ╭──" << clr::YELLOW << "  ERROR:  " << clr::RED << "────────====####" << clr::RETURN;
+        std::cout << clr::RED << "  │" << clr::NORMAL << " in file: " << clr::WHITE << file << clr::RETURN;
+        std::cout << clr::RED << "  │" << clr::NORMAL << " on line: " << clr::WHITE << line << clr::RETURN;
+        std::cout << clr::RED << "  │" << clr::RETURN;// printw("\n");
+        std::cout << clr::RED << "  │" << clr::NORMAL << clr::WHITE << "   " << err_msg << clr::RETURN;
+        std::cout << clr::RED << "  │" << clr::RETURN;
+        std::cout << clr::RED << "  ╰────────────────────====####" << clr::RETURN;
+        std::cout << std::endl;
+        SDL_Window* pWin = _pGPU->GetWindow();
+        if (pWin)
+        {
+            err_msg += "\n\nFile: " + file + "\nLine: " + std::to_string(line);
+            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, 
+                "Error", 
+                err_msg.c_str(), 
+                pWin);
+        }
 
-    // shutdown SDL2 and return with status
-    std::cout << clr::indent_pop() << clr::CYAN << "Bus::Run() Exit" << clr::RETURN;
-    _onQuit();
-
-    // handle exceptions and return false when needed
-    // ...
-
-
-    return true;
+        _onDeactivate();
+        _onQuit();
+        std::cout << clr::indent_pop() << clr::CYAN << "Bus::Run() Exit" << clr::RETURN;
+        return false;
+    }
 }
 
 
@@ -164,9 +204,8 @@ void Bus::_onInit()
     Memory::Attach<MEMBANK>();          // 0xB000 - 0xEFFF      (16k banked memory)
     Memory::Attach<KERNEL_ROM>(); 
 
-    _pTests = Memory::Attach<Tests>();  
-    _pGPU = Memory::Attach<GPU>();
     _pDebug = Memory::Attach<Debug>();
+    _pGPU = Memory::Attach<GPU>();
 
     Memory::Attach<HDW_RESERVED>();     // reserved space for future use
     Memory::Attach<ROM_VECTS>();        // 0xFFF0 - 0xFFFF      (System ROM Vectors)
@@ -257,8 +296,8 @@ void Bus::_onInit()
     // initialize the devices
     _memory.OnInit();
 
-    // load initial applications (Kernel should be loaded with that device)
-    load_hex("./asm/test.hex");
+    // load initial applications (Kernel should be loaded with the KERNEL_ROM device)
+    load_hex(INITIAL_ASM_APPLICATION);
 
     // start the CPU thread
     s_c6809 = new C6809(this);

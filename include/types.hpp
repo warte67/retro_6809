@@ -26,10 +26,11 @@
     // GENERATE_MEMORY_MAP: Generate a memory map definition file?
     //      true:  generate Memory_Map.hpp and use the local unordered map
     //      false: to use enums from Memory_Map.hpp
-    #define GENERATE_MEMORY_MAP     false
+    #define GENERATE_MEMORY_MAP     true
 
     #define MEMORY_MAP_OUTPUT_FILE_HPP  "./include/Memory_Map.hpp"
     #define MEMORY_MAP_OUTPUT_FILE_ASM  "./include/Memory_Map.asm"
+    #define INITIAL_ASM_APPLICATION     "./asm/test.hex"
 
     // simple types for 8-bit archetecture 
     #ifndef Byte
@@ -57,15 +58,35 @@
     constexpr bool DEBUG_STARTS_ACTIVE = false;
     constexpr bool DEBUG_SINGLE_STEP = false;
 
-    // Create an appropriate MAP() macro
+    // // Create an appropriate MAP() macro
+    // #if GENERATE_MEMORY_MAP == true
+    //     // use the unordered map
+    //     #define MAP_IMPL(key) Memory::Map(#key)                     
+    //     #define MAP(key) MAP_IMPL(key)
+    // #else // use the enumeration
+    //     #include "Memory_Map.hpp"
+    //     #define MAP(key) static_cast<Word>(key)
+    // #endif  // END: GENERATE_MEMORY_MAP
+
+    // #if GENERATE_MEMORY_MAP == true
+    // // use the unordered map
+    // #define MAP_IMPL(key) static_cast<Word>(Memory::Map(std::string(#key)))                     
+    // #define MAP(key) MAP_IMPL(key)
+    // #else // use the enumeration
+    //     #include "Memory_Map.hpp"
+    //     #define MAP(key) static_cast<Word>(key)
+    // #endif  // END: GENERATE_MEMORY_MAP
+
     #if GENERATE_MEMORY_MAP == true
         // use the unordered map
-        #define MAP_IMPL(key) Memory::Map(#key)                     
+        #define MAP_IMPL(key) Memory::Map(std::string(#key), __FILE__, __LINE__)
         #define MAP(key) MAP_IMPL(key)
     #else // use the enumeration
         #include "Memory_Map.hpp"
-        #define MAP(key) key                
+        #define MAP(key) static_cast<Word>(key)
     #endif  // END: GENERATE_MEMORY_MAP
+
+
 
 
 //#endif  // __TYPES_HPP__

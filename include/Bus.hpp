@@ -32,7 +32,6 @@
 
 #include "types.hpp"
 #include "Memory.hpp"
-#include "Tests.hpp"
 #include "GPU.hpp"
 
 class C6809;
@@ -100,7 +99,6 @@ private: // INTERNAL PRIVATES
 
     // quick and dirty reference to the Gfx object:
     inline static GPU*   _pGPU   = nullptr;   // singlular but not necessarily a singleton
-    inline static Tests* _pTests = nullptr;
     inline static Debug* _pDebug = nullptr;
     inline static C6809* s_c6809 = nullptr;
 

@@ -12,10 +12,13 @@
 
 #pragma once
 
-#include "IDevice.hpp"
-#include "font8x8_system.hpp"
 #include <list>
 #include <unordered_map>
+
+#include "types.hpp"
+#include "Memory.hpp"
+#include "IDevice.hpp"
+#include "font8x8_system.hpp"
 
 class Debug : public IDevice {
 
@@ -128,7 +131,7 @@ private: // PRIVATE MEMBERS
         CSR_AT_NONE, CSR_AT_ADDRESS, CSR_AT_DATA, CSR_AT_REGISTER
     };    
 
-    std::vector <Word> mem_bank = { SSTACK_TOP - 0x0048, VIDEO_START, 0xFE00 };
+    std::vector <Word> mem_bank = { static_cast<Word>(MAP(SSTACK_TOP) - 0x0048), MAP(VIDEO_START), 0xFE00 };
     std::vector <Word> sDisplayedAsm;
     std::unordered_map<Word, bool> mapBreakpoints;	
     std::list<Word> asmHistory;		// track last several asm addresses

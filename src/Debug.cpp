@@ -24,21 +24,11 @@
 Byte Debug::OnRead(Word offset) 
 { 
     Byte data = IDevice::OnRead(offset);
-    // DBG_BRK_ADDR          = 0xFE05,   // (Word) Address of current breakpoint
-    // DBG_FLAGS             = 0xFE07,   // (Byte) Debug Specific Hardware Flags:
-    //           - bit 7: Debug Enable
-    //           - bit 6: Single Step Enable
-    //           - bit 5: Clear All Breakpoints
-    //           - bit 4: Update Breakpoint at DEBUG_BRK_ADDR
-    //           - bit 3: FIRQ  (on low (0) to high (1) edge)
-    //           - bit 2: IRQ   (on low (0) to high (1) edge)
-    //           - bit 1: NMI   (on low (0) to high (1) edge)
-    //           - bit 0: RESET (on low (0) to high (1) edge)
 
-    if (MAP(DBG_BRK_ADDR) == offset) { 
+    if (MAP(SYS_DBG_BRK_ADDR) == offset) { 
         data = _dbg_brk_addr; 
     } 
-    else if (MAP(DBG_FLAGS) == offset) { 
+    else if (MAP(SYS_DBG_FLAGS) == offset) { 
         data = _dbg_flags; 
     }
 
@@ -59,7 +49,7 @@ void Debug::OnWrite(Word offset, Byte data)
 Debug::Debug() 
 { 
     std::cout << clr::indent_push() << clr::LT_BLUE << "Debug Created" << clr::RETURN;
-    _device_name = "DEBUG_DEVICE"; 
+    _device_name = "SYS_DEVICE"; 
 } // END: Debug()
 
 Debug::~Debug() 
@@ -81,12 +71,61 @@ int  Debug::OnAttach(int nextAddr)
     if (nextAddr == 0) { ; } // stop the compiler from complaining
     
     Word old_address=nextAddr;
-    this->heading = "Debug Hardware Registers:";
+    this->heading = "System and Debug Hardware Registers:";
     register_node new_node;
-    new_node = { "DBG_BRK_ADDR", nextAddr,  { "(Word) Address of current breakpoint"} }; nextAddr+=2;
+
+    new_node = { "SYS_BEGIN", nextAddr,  { "Start of System Registers"} };
     mapped_register.push_back(new_node);
 
-    new_node = { "DBG_FLAGS", nextAddr,  {  "(Byte) Debug Specific Hardware Flags:",
+    new_node = { "SYS_STATE", nextAddr,  { "(Byte) System State Register",
+        "SYS_STATE: ABCD.SSSS                          ",
+        "- bit  7   = Error: Standard Buffer Overflow  ",
+        "- bit  6   = Error: Extended Buffer Overflow  ",
+        "- bit  5   = Error: Reserved                  ",
+        "- bit  4   = Error: Reserved                  ",  
+        "- bits 0-3 = CPU Speed (0-15):                ", 
+        "   0 ($0)  = CPU Clock  25 khz.               ",
+        "   1 ($1)  = CPU Clock  50 khz.               ",
+        "   2 ($2)  = CPU Clock 100 khz.               ",
+        "   3 ($3)  = CPU Clock 200 khz.               ",
+        "   4 ($4)  = CPU Clock 333 khz.               ",
+        "   5 ($5)  = CPU Clock 416 khz.               ",
+        "   6 ($6)  = CPU Clock 500 khz.               ",
+        "   7 ($7)  = CPU Clock 625 khz.               ",
+        "   8 ($8)  = CPU Clock 769 khz.               ",
+        "   9 ($9)  = CPU Clock 833 khz.               ",
+        "  10 ($A)  = CPU Clock 1.0 mhz.               ",
+        "  11 ($B)  = CPU Clock 1.4 mhz.               ",
+        "  12 ($C)  = CPU Clock 2.0 mhz.               ",
+        "  13 ($D)  = CPU Clock 3.3 mhz.               ",
+        "  14 ($E)  = CPU Clock 5.0 mhz.               ",
+        "  15 ($F)  = CPU Clock ~10.0 mhz. (unmetered) ", 
+        ""} }; nextAddr+=1;
+    mapped_register.push_back(new_node);
+
+    new_node = { "SYS_SPEED", nextAddr,  { "(Word) Average CPU Clock Speed (Read Only)"} }; nextAddr+=2;
+    mapped_register.push_back(new_node);
+
+    new_node = { "SYS_CLOCK_DIV", nextAddr,  
+        { "(Byte) 70 hz Clock Divider Register (Read Only)",
+        "- bit 7: 0.546875 hz",
+        "- bit 6: 1.09375 hz",
+        "- bit 5: 2.1875 hz",
+        "- bit 4: 4.375 hz",
+        "- bit 3: 8.75 hz",
+        "- bit 2: 17.5 hz",
+        "- bit 1: 35.0 hz",
+        "- bit 0: 70.0 hz",
+        ""} }; nextAddr+=1;
+    mapped_register.push_back(new_node);
+
+    new_node = { "SYS_TIMER", nextAddr,  { "(Word) Increments at 0.546875 hz"} }; nextAddr+=2;
+    mapped_register.push_back(new_node);
+
+    new_node = { "SYS_DBG_BRK_ADDR", nextAddr,  { "(Word) Address of current debug breakpoint"} }; nextAddr+=2;
+    mapped_register.push_back(new_node);
+
+    new_node = { "SYS_DBG_FLAGS", nextAddr,  {  "(Byte) Debug Specific Hardware Flags:",
                                             "- bit 7: Debug Enable",
                                             "- bit 6: Single Step Enable",
                                             "- bit 5: Clear All Breakpoints",
@@ -98,10 +137,10 @@ int  Debug::OnAttach(int nextAddr)
                                             "" } }; // nextAddr+=1;
     mapped_register.push_back(new_node);
 
-    new_node = { "DBG_END", nextAddr,  { "End of Debug Registers"} }; nextAddr++;
+    new_node = { "SYS_END", nextAddr,  { "End of System Registers"} }; nextAddr++;
     mapped_register.push_back(new_node);
 
-    new_node = { "DBG_TOP", nextAddr,  { "Top of Debug Registers", "---"} }; // nextAddr++;
+    new_node = { "SYS_TOP", nextAddr,  { "Top of System Registers", ""} }; // nextAddr++;
     mapped_register.push_back(new_node);
 
     std::cout << clr::indent() << clr::LT_BLUE << "Debug::OnAttach() Exit" << clr::RETURN;    
