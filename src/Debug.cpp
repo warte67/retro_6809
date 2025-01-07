@@ -477,14 +477,14 @@ void Debug::OnUpdate(float fElapsedTime)
             DumpMemory(1, 21, mem_bank[2]);
             DumpMemory(1, 31, mem_bank[3]);
 
-            DrawCpu(71, 1);  // was (39,1)
-            // DrawCode(39, 6);
+            DrawCpu(71, 1);     // was (39,1)
+            DrawCode(71, 6);    // was (39,6)
 
-            // DrawButtons();    
-            // HandleButtons();
-            // DrawBreakpoints();
+            DrawButtons();    
+            HandleButtons();
+            DrawBreakpoints();
 
-            // if (!EditRegister(fElapsedTime))
+            if (!EditRegister(fElapsedTime))
                 DrawCursor(fElapsedTime);
 
             // instruction text
@@ -767,48 +767,48 @@ void Debug::MouseStuff()
             if (my > 30 && my < 40)	mem_bank[3] -= mouse_wheel * 8;
             bIsCursorVisible = false;
         }
-    //     // Scroll the Code
-    //     if (mx > 38 && mx < 64 && my > 5 && my < 30)
-    //     {
-    //         if (bMouseWheelActive == false)
-    //         {
-    //             mousewheel_offset = -25;
-    //             bMouseWheelActive = true;
-    //         }
-    //         s_bSingleStep = true;	// scrollwheel enters into single step mode
-    //         nRegisterBeingEdited.reg = Debug::EDIT_REGISTER::EDIT_NONE;	// cancel any register edits
-    //         mousewheel_offset -= mouse_wheel * 1;		// slow scroll
-    //         if (SDL_GetModState() & KMOD_CTRL)	// is CTRL down?
-    //             mousewheel_offset -= mouse_wheel * 3;	// faster scroll			
-    //     }
-    //     // scroll the break point display window (bottom right corner)
-    //     if (mx >= 55 && my >= 33)
-    //     {
-    //         // printf("mouse_wheel: %d\n", mouse_wheel);
-    //         mw_brk_offset -= mouse_wheel;
-    //     }
+        // Scroll the Code
+        if (mx > 38 && mx < 64 && my > 5 && my < 30)
+        {
+            if (bMouseWheelActive == false)
+            {
+                mousewheel_offset = -25;
+                bMouseWheelActive = true;
+            }
+            s_bSingleStep = true;	// scrollwheel enters into single step mode
+            nRegisterBeingEdited.reg = Debug::EDIT_REGISTER::EDIT_NONE;	// cancel any register edits
+            mousewheel_offset -= mouse_wheel * 1;		// slow scroll
+            if (SDL_GetModState() & SDL_KMOD_CTRL)	// is CTRL down?
+                mousewheel_offset -= mouse_wheel * 3;	// faster scroll			
+        }
+        // scroll the break point display window (bottom right corner)
+        if (mx >= 55 && my >= 33)
+        {
+            // printf("mouse_wheel: %d\n", mouse_wheel);
+            mw_brk_offset -= mouse_wheel;
+        }
 
         // reset the mouse wheel
         mouse_wheel = 0;
     }
 
-    // // left mouse button clicked?
+    // left mouse button clicked?
     static bool last_LMB = false;
     if ((btns & 1) && !last_LMB)
     {
-    //     // left-clicked on breakpoint
-    //     if (mx >= 55 && my >= 33)
-    //     {
-    //         int index = (my - 33) + mw_brk_offset;
-    //         // build a vector of active breakpoints
-    //         std::vector<Word> breakpoints;
-    //         for (auto& bp : mapBreakpoints)
-    //             if (bp.second)
-    //                 breakpoints.push_back(bp.first);
-    //         if ((unsigned)index < breakpoints.size())
-    //             printf("LEFT CLICK: $%04X\n", breakpoints[index]);
-    //         //mapBreakpoints[breakpoints[index]] = false;
-    //     }
+        // left-clicked on breakpoint
+        if (mx >= 55 && my >= 33)
+        {
+            int index = (my - 33) + mw_brk_offset;
+            // build a vector of active breakpoints
+            std::vector<Word> breakpoints;
+            for (auto& bp : mapBreakpoints)
+                if (bp.second)
+                    breakpoints.push_back(bp.first);
+            if ((unsigned)index < breakpoints.size())
+                printf("LEFT CLICK: $%04X\n", breakpoints[index]);
+            //mapBreakpoints[breakpoints[index]] = false;
+        }
         // click to select
         if (btns & 1)
         {
@@ -820,85 +820,86 @@ void Debug::MouseStuff()
             }
             else
                 bIsCursorVisible = false;
-            // printf("MX:%d  MY:%d\n", mx, my);
         }
-    //     // condition code clicked?
-    //     if (my == 1)
-    //     {
-    //         if (mx == 48) cpu->setCC_E(!cpu->getCC_E());
-    //         if (mx == 49) cpu->setCC_F(!cpu->getCC_F());
-    //         if (mx == 50) cpu->setCC_H(!cpu->getCC_H());
-    //         if (mx == 51) cpu->setCC_I(!cpu->getCC_I());
-    //         if (mx == 52) cpu->setCC_N(!cpu->getCC_N());
-    //         if (mx == 53) cpu->setCC_Z(!cpu->getCC_Z());
-    //         if (mx == 54) cpu->setCC_V(!cpu->getCC_V());
-    //         if (mx == 55) cpu->setCC_C(!cpu->getCC_C());
-    //     }
-    //     // Register Clicked?
-    //     bool bFound = false;
-    //     for (auto& a : register_info)
-    //     {
-    //         if (a.y_pos == my && mx >= a.x_min && mx <= a.x_max)
-    //         {
-    //             // begin editing a register
-    //             nRegisterBeingEdited.reg = a.reg;
-    //             nRegisterBeingEdited.value = a.value;
-    //             nRegisterBeingEdited.y_pos = a.y_pos;
-    //             nRegisterBeingEdited.x_min = a.x_min;
-    //             nRegisterBeingEdited.x_max = a.x_max;
-    //             csr_x = mx;
-    //             csr_y = my;
-    //             bFound = true;
-    //         }
-    //     }
-    //     if (!bFound)
-    //         nRegisterBeingEdited.reg = EDIT_NONE;
-    //     // left-click on code line toggles breakpoint
-    //     if (mx > 38 && mx < 64 && my > 5 && my < 30 && s_bSingleStep)
-    //     {
-    //         Word offset = sDisplayedAsm[my - 6];
-    //         (mapBreakpoints[offset]) ?
-    //             mapBreakpoints[offset] = false :
-    //             mapBreakpoints[offset] = true;
-    //     }
+        // condition code clicked?
+        if (my == 1)
+        {
+            C6809* cpu = Bus::GetC6809();
+            if (mx == 80) cpu->setCC_E(!cpu->getCC_E());
+            if (mx == 81) cpu->setCC_F(!cpu->getCC_F());
+            if (mx == 82) cpu->setCC_H(!cpu->getCC_H());
+            if (mx == 83) cpu->setCC_I(!cpu->getCC_I());
+            if (mx == 84) cpu->setCC_N(!cpu->getCC_N());
+            if (mx == 85) cpu->setCC_Z(!cpu->getCC_Z());
+            if (mx == 86) cpu->setCC_V(!cpu->getCC_V());
+            if (mx == 87) cpu->setCC_C(!cpu->getCC_C());
+        }
+        // Register Clicked?
+        bool bFound = false;
+        for (auto& a : register_info)
+        {
+            if (a.y_pos == my && mx >= a.x_min && mx <= a.x_max)
+            {
+                // begin editing a register
+                nRegisterBeingEdited.reg = a.reg;
+                nRegisterBeingEdited.value = a.value;
+                nRegisterBeingEdited.y_pos = a.y_pos;
+                nRegisterBeingEdited.x_min = a.x_min;
+                nRegisterBeingEdited.x_max = a.x_max;
+                csr_x = mx;
+                csr_y = my;
+                bFound = true;
+            }
+        }
+        if (!bFound)
+            nRegisterBeingEdited.reg = EDIT_NONE;
+
+        // left-click on code line toggles breakpoint
+        if (mx > 38 && mx < 64 && my > 5 && my < 30 && s_bSingleStep)
+        {
+            Word offset = sDisplayedAsm[my - 6];
+            (mapBreakpoints[offset]) ?
+                mapBreakpoints[offset] = false :
+                mapBreakpoints[offset] = true;
+        }
     }
     last_LMB = (btns & 1);
     // right mouse button clicked
     static bool last_RMB = false;
     if (btns & 4 && !last_RMB)
     {
-    //     // right-clicked on breakpoint
-    //     if (mx >= 55 && my >= 33)
-    //     {
-    //         int index = (my - 33) + mw_brk_offset;
-    //         // build a vector of active breakpoints
-    //         std::vector<Word> breakpoints;
-    //         for (auto& bp : mapBreakpoints)
-    //             if (bp.second)
-    //                 breakpoints.push_back(bp.first);
-    //         if ((unsigned)index < breakpoints.size())
-    //         {
-    //             //printf("RIGHT CLICK: $%04X\n", breakpoints[index]);
-    //             mapBreakpoints[breakpoints[index]] = false;
-    //         }
-    //     }
-    //     // on PC register
-    //     if (my == 4 && mx > 42 && mx < 47)
-    //     {
-    //         s_bSingleStep = !s_bSingleStep;
-    //         if (!s_bSingleStep)
-    //             nRegisterBeingEdited.reg = Debug::EDIT_REGISTER::EDIT_NONE;	// cancel any register edits
-    //     }
-    //     // right-click on code line toggles breakpoint and resumes execution
-    //     if (mx > 38 && mx < 64 && my > 5 && my < 30 && s_bSingleStep)
-    //     {
-    //         Word offset = sDisplayedAsm[my - 6];
-    //         (mapBreakpoints[offset]) ?
-    //             mapBreakpoints[offset] = false :
-    //             mapBreakpoints[offset] = true;
-    //         if (mapBreakpoints[offset] == true)
-    //             s_bSingleStep = false;
-    //     }
+        // right-clicked on breakpoint
+        if (mx >= 55 && my >= 33)
+        {
+            int index = (my - 33) + mw_brk_offset;
+            // build a vector of active breakpoints
+            std::vector<Word> breakpoints;
+            for (auto& bp : mapBreakpoints)
+                if (bp.second)
+                    breakpoints.push_back(bp.first);
+            if ((unsigned)index < breakpoints.size())
+            {
+                //printf("RIGHT CLICK: $%04X\n", breakpoints[index]);
+                mapBreakpoints[breakpoints[index]] = false;
+            }
+        }
+        // on PC register
+        if (my == 4 && mx > 42 && mx < 47)
+        {
+            s_bSingleStep = !s_bSingleStep;
+            if (!s_bSingleStep)
+                nRegisterBeingEdited.reg = Debug::EDIT_REGISTER::EDIT_NONE;	// cancel any register edits
+        }
+        // right-click on code line toggles breakpoint and resumes execution
+        if (mx > 38 && mx < 64 && my > 5 && my < 30 && s_bSingleStep)
+        {
+            Word offset = sDisplayedAsm[my - 6];
+            (mapBreakpoints[offset]) ?
+                mapBreakpoints[offset] = false :
+                mapBreakpoints[offset] = true;
+            if (mapBreakpoints[offset] == true)
+                s_bSingleStep = false;
+        }
     }
     last_RMB = (btns & 4);
 }
@@ -972,6 +973,361 @@ void Debug::DrawCursor(float fElapsedTime)
     }
     // OutGlyph(csr_x, csr_y, ch[0], (rand() % 16)<<0);
     OutGlyph(csr_x, csr_y, ch[0], attr);    
+}
+
+void Debug::DrawCode(int col, int row)
+{
+    C6809* cpu = Bus::GetC6809();
+
+    std::string code = "";
+    int line = 0;
+    Word next = 0;
+    sDisplayedAsm.clear();
+
+    if (bMouseWheelActive)
+    {
+        Word cpu_PC = cpu->getPC();
+        Word offset = cpu_PC + mousewheel_offset;
+        while (line < 24)
+        {
+            if (offset < cpu_PC)
+            {
+                bool atBreak = false;
+                if (mapBreakpoints[offset])	atBreak = true;
+                sDisplayedAsm.push_back(offset);
+                code = cpu->disasm(offset, offset);
+                if (atBreak)
+                    OutText(col, row + line, code, 0xA0);    // red
+                else
+                    OutText(col, row + line, code, 0x40);    // dk green
+                line++;
+            }
+            if (offset == cpu_PC)
+            {
+                bool atBreak = false;
+                if (mapBreakpoints[offset])	atBreak = true;
+                sDisplayedAsm.push_back(offset);
+                code = cpu->disasm(offset, offset);
+                if (atBreak)
+                    OutText(col, row + line, code, 0x50);  // brown
+                else
+                    OutText(col, row + line, code, 0xC0);    // yellow
+                line++;
+            }
+            if (offset > cpu_PC)
+            {
+                bool atBreak = false;
+                if (mapBreakpoints[offset])	atBreak = true;
+                sDisplayedAsm.push_back(offset);
+                code = cpu->disasm(offset, offset);
+                if (atBreak)
+                    OutText(col, row + line, code, 0x30);   // dk red
+                else
+                    OutText(col, row + line, code, 0xB0);   // lt green
+                line++;
+            }
+
+        }
+
+    }
+    else
+    {
+        // draw the last several lines
+        for (auto& a : asmHistory)
+        {
+            if (a != cpu->getPC())
+            {
+                bool atBreak = false;
+                if (mapBreakpoints[a])	atBreak = true;
+                sDisplayedAsm.push_back(a);
+                code = cpu->disasm(a, next);
+                if (atBreak)
+                    OutText(col, row + line++, code, 0x30);      // 0x30 dk red
+                else
+                    OutText(col, row + line++, code, 0x10);    // 0x10 DK gray
+            }
+        }
+        // draw the current line
+        sDisplayedAsm.push_back(cpu->getPC());
+        code = cpu->disasm(cpu->getPC(), next);
+        if (mapBreakpoints[cpu->getPC()])
+            OutText(col, row + line++, code, 0xA0);              // 0xA0 red
+        else
+            OutText(col, row + line++, code, 0xF0);            // 0xF0 white
+        // create a history of addresses to display in the future
+        static Word last = cpu->getPC();
+        if (last != cpu->getPC())
+        {
+            last = cpu->getPC();
+            asmHistory.push_back(cpu->getPC());
+            while (asmHistory.size() > 12)
+                asmHistory.pop_front();
+        }
+        // draw the next several future lines
+        while (line < 24)
+        {
+            bool atBreak = false;
+            if (mapBreakpoints[next])	atBreak = true;
+            sDisplayedAsm.push_back(next);
+            code = cpu->disasm(next, next);
+            if (atBreak)
+                OutText(col, row + line++, code, 0X30);          // 0X30 DK RED
+            else
+                OutText(col, row + line++, code,0X80);        // 0X80 LT GRAY
+        }
+    }
+}
+
+
+void Debug::DrawButtons()
+{
+    // C6809* cpu = Bus::GetC6809();
+
+    // change the run/stop according to the single step state
+    if (s_bSingleStep)
+    {
+        vButton[5].text = " RUN!";
+        vButton[5].x_min = 17;
+        vButton[5].clr_index = 0xB;
+    }
+    else {
+        vButton[5].text = " STOP";
+        vButton[5].x_min = 17;
+        vButton[5].clr_index = 0xA;
+    }
+    if (bEditingBreakpoint)
+    {
+        vButton[9].text = "[$";
+        vButton[9].text += _hex(new_breakpoint, 4);
+        vButton[9].text += "]";
+        vButton[9].x_min = 48;
+        vButton[9].clr_index = 0xC;
+    }
+    else
+    {
+        vButton[9].text = "ADD BRK";
+        vButton[9].x_min = 48;
+        vButton[9].clr_index = 0xC;
+    }
+    // draw the buttons
+    for (auto& a : vButton)
+    {
+        int x1 = a.x_min;
+        int x2 = a.x_max;
+        int y = a.y_pos;
+        // background
+        int p = (a.clr_index % 16) | ((a.clr_index % 16)<<4);
+        for (int x = x1; x <= x2; x++)
+        {
+            OutGlyph(x, y, 0x8f, p);
+        }
+        // foreground
+        int sX = x1 + ((x2 - x1) / 2) - (int)a.text.size() / 2;
+        OutText(sX, y, a.text, a.clr_index % 16);
+    }
+}
+
+void Debug::HandleButtons()
+{
+    // C6809* cpu = Bus::GetC6809();
+    int mx, my;
+    _correct_mouse_coords(mx, my);
+    Uint32 btns = SDL_GetRelativeMouseState(NULL, NULL);
+
+    static bool last_LMB = false;
+    if (btns & 1 && !last_LMB)
+    {
+        for (auto& a : vButton)
+        {
+            if (my == a.y_pos && mx >= a.x_min && mx <= a.x_max)
+            {
+                if (a.cbFunction)	(this->*a.cbFunction)();
+            }
+        }
+    }
+    last_LMB = (btns & 1);
+}
+
+void Debug::DrawBreakpoints()
+{
+    // C6809* cpu = Bus::GetC6809();
+
+    int x = 56, y = 33;		// y <= 38
+    // Uint8 ci = 0x0C;
+
+    // build a vector of active breakpoints
+    std::vector<Word> breakpoints;
+    for (auto& bp : mapBreakpoints)
+        if (bp.second)
+            breakpoints.push_back(bp.first);
+    // standard display
+    if (breakpoints.size() < 8)
+    {
+        for (Word t = 0; t < breakpoints.size(); t++)
+        {
+            std::string strBkpt = "[$";
+            strBkpt += _hex(breakpoints[t], 4);
+            strBkpt += "]";
+            OutText(x, y, strBkpt, 0xA0);
+            y++;
+        }
+    }
+    // oversized, mousewheel scrollable, display
+    else
+    {
+        if (mw_brk_offset < 0)							
+            mw_brk_offset = 0;
+        if ((unsigned)mw_brk_offset + 7 > breakpoints.size())		
+            mw_brk_offset = breakpoints.size() - 7;
+
+        int index = mw_brk_offset;
+        for (int t = 0; t < 7; t++)
+        {
+            std::string strBkpt;
+
+            if (t == 0 && mw_brk_offset > 0)
+                strBkpt = "[ ... ]";
+            else if (t == 6 && (unsigned)index != breakpoints.size() - 1)
+                strBkpt = "[ ... ]";
+            else
+            {
+                strBkpt = "[$";
+                strBkpt += _hex(breakpoints[index], 4);
+                strBkpt += "]";
+            }
+            OutText(x, y, strBkpt, 0xA0);
+            y++;
+            index++;
+        }
+    }
+}
+
+bool Debug::EditRegister(float fElapsedTime)
+{
+    if (nRegisterBeingEdited.reg == EDIT_REGISTER::EDIT_NONE)
+        return false;
+
+    C6809* cpu = Bus::GetC6809();
+
+    static float delay = 0.0625f;
+    static float delayAcc = fElapsedTime;
+    static int ci = 9;
+    delayAcc += fElapsedTime;
+    std::string ch = " ";
+
+    if (delayAcc > delay + fElapsedTime)
+    {
+        delayAcc -= delay;
+        ci++;
+        if (ci > 15)	ci = 9;
+    }
+    // OutGlyph(csr_x, csr_y, 0x8f, (rand() % 16)<<4);
+
+    Word data = 0;
+    switch (nRegisterBeingEdited.reg) {
+        case EDIT_CC:	data = (Word)cpu->getCC() << 8; break;
+        case EDIT_D:	data = cpu->getD(); break;
+        case EDIT_A:	data = (Word)cpu->getA() << 8; break;
+        case EDIT_B:	data = (Word)cpu->getB() << 8; break;
+        case EDIT_X:	data = cpu->getX(); break;
+        case EDIT_Y:	data = cpu->getY(); break;
+        case EDIT_U:	data = cpu->getU(); break;
+        case EDIT_PC:	data = cpu->getPC(); s_bSingleStep = true;  break;
+        case EDIT_S:	data = cpu->getS(); break;
+        case EDIT_DP:	data = (Word)cpu->getDP() << 8; break;
+        case EDIT_BREAK: data = new_breakpoint; break;
+        case EDIT_NONE: break;
+    }
+    Byte digit = csr_x - nRegisterBeingEdited.x_min;
+    Byte num = 0;
+    if (digit == 0)	num = ((data & 0xf000) >> 12);
+    if (digit == 1)	num = ((data & 0x0f00) >> 8);
+    if (digit == 2)	num = ((data & 0x00f0) >> 4);
+    if (digit == 3)	num = ((data & 0x000f) >> 0);
+    ch = _hex(num, 1);
+    // OutGlyph(csr_x, csr_y, ch[0], 0);
+    OutGlyph(csr_x, csr_y, ch[0], (rand() % 16)<<0);
+
+    // respond to numeric keys
+    SDL_Keycode hx[] = { SDL_SCANCODE_0, SDL_SCANCODE_1, SDL_SCANCODE_2, SDL_SCANCODE_3,
+                         SDL_SCANCODE_4, SDL_SCANCODE_5, SDL_SCANCODE_6, SDL_SCANCODE_7,
+                         SDL_SCANCODE_8, SDL_SCANCODE_9, SDL_SCANCODE_A, SDL_SCANCODE_B,
+                         SDL_SCANCODE_C, SDL_SCANCODE_D, SDL_SCANCODE_E, SDL_SCANCODE_F };
+    // char k[] = { '0', '1', '2', '3', '4', '5', '6', '7',
+    //              '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+    char d[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+    static bool state[] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+    // const Uint8* keybfr = SDL_GetKeyboardState(NULL);    // already defined
+    Word n = 0;
+    bool bKeyPressed = false;
+    for (int t = 0; t < 16; t++)
+    {
+        if (state[t] == 0 && keybfr[hx[t]])
+        {
+            n = d[t];
+            bKeyPressed = true;
+            state[t] = 1;
+        }
+        // reset the key
+        if (state[t] == 1 && !keybfr[hx[t]])	state[t] = 0;
+    }
+
+    if (bKeyPressed)
+    {
+        //printf("pressed\n");
+        if (digit == 0)		data = (data & 0x0fff) | (n << 12);
+        if (digit == 1)		data = (data & 0xf0ff) | (n << 8);
+        if (digit == 2)		data = (data & 0xff0f) | (n << 4);
+        if (digit == 3)		data = (data & 0xfff0) | (n << 0);
+
+        switch (nRegisterBeingEdited.reg) {
+            case EDIT_CC:	cpu->setCC(data >> 8);  break;
+            case EDIT_D:	cpu->setD(data);		break;
+            case EDIT_A:	cpu->setA(data >> 8);	break;
+            case EDIT_B:	cpu->setB(data >> 8);	break;
+            case EDIT_X:	cpu->setX(data);		break;
+            case EDIT_Y:	cpu->setY(data);		break;
+            case EDIT_U:	cpu->setU(data);		break;
+            case EDIT_PC:	cpu->setPC(data);		bMouseWheelActive = false;  break;
+            case EDIT_S:	cpu->setS(data);		break;
+            case EDIT_DP:	cpu->setDP(data >> 8);  break;
+            case EDIT_BREAK: new_breakpoint = data; break;
+            case EDIT_NONE: break;
+        }
+        if (csr_x < nRegisterBeingEdited.x_max)
+            csr_x++;
+    }
+    SDL_Keycode ex[] = { SDL_SCANCODE_LEFT , SDL_SCANCODE_RIGHT , SDL_SCANCODE_RETURN , SDL_SCANCODE_ESCAPE };
+    static bool bEx[] = { 0, 0, 0, 0 };
+    for (int t = 0; t < 4; t++)
+    {
+        if (bEx[t] == 0 && keybfr[ex[t]])
+        {
+            // left
+            if (ex[t] == SDL_SCANCODE_LEFT)
+                if (csr_x > nRegisterBeingEdited.x_min)
+                    csr_x--;
+            // right
+            if (ex[t] == SDL_SCANCODE_RIGHT)
+                if (csr_x < nRegisterBeingEdited.x_max)
+                    csr_x++;
+            // enter updates and saves the register
+            if (ex[t] == SDL_SCANCODE_RETURN || ex[t] == SDL_SCANCODE_ESCAPE)
+            {
+                if (nRegisterBeingEdited.reg == EDIT_REGISTER::EDIT_BREAK)
+                {
+                    mapBreakpoints[new_breakpoint] = true;
+                    nRegisterBeingEdited.reg = EDIT_REGISTER::EDIT_NONE;
+                    bEditingBreakpoint = false;
+                }
+                nRegisterBeingEdited.reg = EDIT_REGISTER::EDIT_NONE;
+            }
+            bEx[t] = 1;
+        }
+        else if (bEx[t] == 1 && !keybfr[ex[t]])
+            bEx[t] = 0;
+    }
+    return true;
 }
 
 

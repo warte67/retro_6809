@@ -69,15 +69,13 @@ public:
 
 	static void ThreadProc();
 
-inline static auto hex(uint32_t n, Byte d)
-{
-	std::string s(d, '0');
-	for (int i = d - 1; i >= 0; i--, n >>= 4)
-		s[i] = "0123456789ABCDEF"[n & 0xF];
-	return s;
-};
-
-
+    inline static auto hex(uint32_t n, Byte d)
+    {
+        std::string s(d, '0');
+        for (int i = d - 1; i >= 0; i--, n >>= 4)
+            s[i] = "0123456789ABCDEF"[n & 0xF];
+        return s;
+    };
 	
 	std::string disasm(Word addr, Word& next);	// returns standard string containing instruction pointed to by addr
 

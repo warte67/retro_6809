@@ -91,7 +91,13 @@ private: // PRIVATE MEMBERS
 
     void DumpMemory(int col, int row, Word addr);
     void DrawCpu(int x, int y);
-    
+    void DrawCode(int col, int row);
+    void DrawButtons();
+    void HandleButtons();
+    void DrawBreakpoints();
+    bool EditRegister(float fElapsedTime);
+
+
     bool CoordIsValid(int x, int y);
     void _correct_mouse_coords(int& mx, int& my);
 
@@ -177,8 +183,6 @@ private: // PRIVATE MEMBERS
     struct BUTTON_NODE {
         std::string text;		// button text
         SDL_Scancode key;		// shortcut key scancode
-        // color attribute
-        // ...
         Uint16 x_min;			// button left
         Uint16 x_max;			// button right
         Uint16 y_pos;
@@ -186,16 +190,16 @@ private: // PRIVATE MEMBERS
         void (Debug::* cbFunction)();	// button callback
     };
     std::vector<BUTTON_NODE> vButton = {	
-        {" Clr Breaks",		SDL_SCANCODE_C,		51, 62, 31, 0xC, &Debug::cbClearBreaks},
-        {"Reset",			SDL_SCANCODE_R,		43, 49, 31, 0xB, &Debug::cbReset },
-        {"NMI",				SDL_SCANCODE_N,		37, 41, 31, 0xD, &Debug::cbNMI },
-        {"IRQ",				SDL_SCANCODE_I,		31, 35, 31, 0xD, &Debug::cbIRQ },
-        {" FIRQ",			SDL_SCANCODE_F,		24, 29, 31, 0xD, &Debug::cbFIRQ },
-        {" RUN",			SDL_SCANCODE_D,		17, 22, 31, 0xB, &Debug::cbRunStop },
-        {" EXIT",			SDL_SCANCODE_H,		17, 22, 33, 0xB, &Debug::cbHide },
-        {"STEP_INTO",		SDL_SCANCODE_SPACE,	24, 34, 33, 0x9, &Debug::cbStepIn },
-        {"STEP_OVER",		SDL_SCANCODE_O,		36, 46, 33, 0x9, &Debug::cbStepOver },
-        {"ADD BRK",			SDL_SCANCODE_B,		48, 54, 33, 0xC, &Debug::cbAddBrk },
+        {" Clr Breaks",		SDL_SCANCODE_C,		51, 62, 41, 0xC, &Debug::cbClearBreaks},
+        {"Reset",			SDL_SCANCODE_R,		43, 49, 41, 0xB, &Debug::cbReset },
+        {"NMI",				SDL_SCANCODE_N,		37, 41, 41, 0xD, &Debug::cbNMI },
+        {"IRQ",				SDL_SCANCODE_I,		31, 35, 41, 0xD, &Debug::cbIRQ },
+        {" FIRQ",			SDL_SCANCODE_F,		24, 29, 41, 0xD, &Debug::cbFIRQ },
+        {" RUN",			SDL_SCANCODE_D,		17, 22, 41, 0xB, &Debug::cbRunStop },
+        {" EXIT",			SDL_SCANCODE_H,		17, 22, 43, 0xB, &Debug::cbHide },
+        {"STEP_INTO",		SDL_SCANCODE_SPACE,	24, 34, 43, 0x9, &Debug::cbStepIn },
+        {"STEP_OVER",		SDL_SCANCODE_O,		36, 46, 43, 0x9, &Debug::cbStepOver },
+        {"ADD BRK",			SDL_SCANCODE_B,		48, 54, 43, 0xC, &Debug::cbAddBrk },
     };
 
     std::vector <Word> mem_bank = { static_cast<Word>(MAP(SSTACK_TOP) - 0x0048), MAP(VIDEO_START), 0xFE00 };
