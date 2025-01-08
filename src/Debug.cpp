@@ -772,20 +772,23 @@ void Debug::MouseStuff()
             if (my > 30 && my < 40)	mem_bank[3] -= mouse_wheel * 8;
             bIsCursorVisible = false;
         }
-        // // Scroll the Code
-        // if (mx > 38 && mx < 64 && my > 5 && my < 30)
-        // {
-        //     if (bMouseWheelActive == false)
-        //     {
-        //         mousewheel_offset = -25;
-        //         bMouseWheelActive = true;
-        //     }
-        //     s_bSingleStep = true;	// scrollwheel enters into single step mode
-        //     nRegisterBeingEdited.reg = Debug::EDIT_REGISTER::EDIT_NONE;	// cancel any register edits
-        //     mousewheel_offset -= mouse_wheel * 1;		// slow scroll
-        //     if (SDL_GetModState() & SDL_KMOD_CTRL)	// is CTRL down?
-        //         mousewheel_offset -= mouse_wheel * 3;	// faster scroll			
-        // }
+
+        // Scroll the Code
+        if (mx > 70 && mx < 100 && my > 5 && my < 40)
+        {
+            if (bMouseWheelActive == false)
+            {
+                mousewheel_offset = 0;  //-25;
+                bMouseWheelActive = true;
+            }
+            s_bSingleStep = true;	// scrollwheel enters into single step mode
+            nRegisterBeingEdited.reg = Debug::EDIT_REGISTER::EDIT_NONE;	// cancel any register edits
+            mousewheel_offset -= mouse_wheel * 1;		// slow scroll
+            // if (SDL_GetModState() & SDL_KMOD_CTRL)	// is CTRL down?
+            //     mousewheel_offset -= mouse_wheel * 3;	// faster scroll	
+
+std::cout << "mousewheel_offset: " << mousewheel_offset << std::endl;		
+        }
 
 
         // scroll the break point display window (bottom right corner)
@@ -902,8 +905,7 @@ void Debug::MouseStuff()
         }
         // right-click on code line toggles breakpoint and resumes execution
         if (mx > 70 && mx < 100 && my > 5 && my < 40 && s_bSingleStep)
-        {
-            Word offset = my - 6;
+        {            
             if (sDisplayedAsm[my - 6] >= 0)
             {
                 Word offset = sDisplayedAsm[my - 6];
@@ -997,13 +999,11 @@ void Debug::DrawCode(int col, int row) {
     // Reset the displayed disassembly buffer
     for (auto &d : sDisplayedAsm) { d = -1; }
 
-
     // Display previous 16 instructions
     int top_rows = row + 16;
     _display_previous_instructions(col, top_rows);
 
     // Display current instruction
-    // _display_single_instruction(col, row, nextAddress);
     int lower_rows = row + 17;
     _display_single_instruction(col, lower_rows, nextAddress);
 
@@ -1019,7 +1019,8 @@ void Debug::_display_previous_instructions(int col, int& row)
     
     int threshold = 100;
     int count = 16;
-    for (int i = cpu->getPC()-1; i > 0; i--)
+    int start_addr = (cpu->getPC()-1);              // + mousewheel_offset;
+    for (int i = start_addr; i > 0; i--)
     {
         if (cpu->WasVisited_Memory(i))
         {
@@ -1063,10 +1064,10 @@ void Debug::_display_next_instructions(int col, int& row, Word& nextAddress)
         std::string code = cpu->disasm(nextAddress, nextAddress);
 
         // Output the disassembled instruction
-        if (cpu->WasVisited_Memory(currentAddress)) {
+        //if (cpu->WasVisited_Memory(currentAddress)) {
             sDisplayedAsm[row-6] = currentAddress;
             OutText(col, row++, code, atBreak ? 0x30 : 0x10);
-        }
+        //}
 
         // Increment count
         ++count;
@@ -1465,6 +1466,8 @@ void Debug::cbRunStop()
     s_bIsStepPaused = s_bSingleStep;
     nRegisterBeingEdited.reg = Debug::EDIT_REGISTER::EDIT_NONE;	// cancel any register edits
     bMouseWheelActive = false;
+
+    mousewheel_offset = 0;
 }
 void Debug::cbHide()
 {

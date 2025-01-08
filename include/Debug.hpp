@@ -219,7 +219,7 @@ private: // PRIVATE MEMBERS
     char mouse_wheel = 0; 
     bool bIsStepPaused = true;
     bool bIsCursorVisible = false;
-    Word mousewheel_offset = 0;		// applies to code scroll
+    int mousewheel_offset = 0;		// applies to code scroll
     bool bMouseWheelActive = false; // applies to code scroll
     int mw_brk_offset = 0;			// mouse wheel adjusts the offset    
     bool bIsMouseOver = false;
