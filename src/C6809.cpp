@@ -49,6 +49,16 @@ C6809::~C6809()
 
 void C6809::ThreadProc()
 {
+    C6809* cpu = Bus::GetC6809();
+    cpu->reset();
+    // std::this_thread::sleep_for(std::chrono::microseconds(1000));
+    // 
+    {
+        std::lock_guard<std::mutex> lock(cpu->mtx);
+        cpu->isCpuThreadReady = true;
+    }
+    cpu->cv.notify_one();  // Notify the main thread that the CPU thread is ready
+
     while (Bus::IsRunning())
     {
         // main CPU clock
@@ -106,10 +116,9 @@ void C6809::ThreadProc()
 
 void C6809::clock_input()
 {
-	// printf("C6809::clock_input() -- PC:$%04X\n", PC);
-	// Bus& bus = Bus::Inst();
-	// Gfx* gfx = bus.m_gfx;
-	// GfxDebug* debug = gfx->m_debug;
+    // std::lock_guard<std::mutex> lock(_register_mutex);
+    std::unique_lock<std::mutex> lock(_register_mutex);
+
     Debug* debug = Bus::GetDebug();
 
 	// if (s_bHalted)	return;
@@ -121,6 +130,9 @@ void C6809::clock_input()
 		{
 			if (cycles == 0)
 			{
+                // Mark the current address as visited before reading the opcode
+                SetVisited_Memory(PC);  // Update bitfield for current PC address
+
 				// read the opcode
 				opcode = read(PC);
 				PC++;
@@ -138,10 +150,14 @@ void C6809::clock_input()
 				{
 					std::string er = "Invalid Instruction at $";
 					er += C6809::hex(PC, 4);
-					Bus::Error(er.c_str());
+                    // lock.unlock();
+					Bus::Error(er.c_str(), __FILE__, __LINE__);
 				}
-				 if (!waiting_cwai && !waiting_sync)
+				if (!waiting_cwai && !waiting_sync)
+                {
+                    lock.unlock();  // without this unlock the app will hang
 				 	debug->ContinueSingleStep();
+                }
 				return;
 			}
 			cycles--;
@@ -233,6 +249,9 @@ bool C6809::do_interrupts() {
 
 void C6809::reset() {
 	PC = read_word(0xfffe);
+
+    // Clear the whole bitfield atomically
+    ClearVisited_Memory();  
 
 	cycles = 0;
 	DP = 0x00;
@@ -1530,7 +1549,7 @@ std::string C6809::disasm(Word addr, Word& next)
 {
 	std::string ret = "";
 	Byte InstTab = 14;
-	Byte PostTab = 19;
+	Byte PostTab = 20;
 
 	auto hex = [](uint32_t n, uint8_t d)
 	{

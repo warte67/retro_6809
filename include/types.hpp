@@ -55,8 +55,9 @@
     const int DEBUG_WINDOW_WIDTH = DEBUG_WIDTH * DEBUG_WINDOW_SCALE;
     const int DEBUG_WINDOW_HEIGHT = DEBUG_HEIGHT * DEBUG_WINDOW_SCALE;
     const size_t DEBUG_BUFFER_SIZE = (DEBUG_WIDTH/8)*(DEBUG_HEIGHT/8);
-    constexpr bool DEBUG_STARTS_ACTIVE = false;
+    constexpr bool DEBUG_STARTS_ACTIVE = true;
     constexpr bool DEBUG_SINGLE_STEP = false;
+    constexpr int DEBUG_HISTORY_SIZE = 16;
 
     // // Create an appropriate MAP() macro
     // #if GENERATE_MEMORY_MAP == true

@@ -106,7 +106,9 @@ bool Bus::Run()
 
     try
     {   
+        // initialize everything
         _onInit();
+
         // terminate the app when the 'bIsRunning' flag is no longer true
         while (Bus::IsRunning())
         {
@@ -299,11 +301,21 @@ void Bus::_onInit()
     // load initial applications (Kernel should be loaded with the KERNEL_ROM device)
     load_hex(INITIAL_ASM_APPLICATION);
 
+    // std::cout << "Bus::_onInit() --> $" << clr::hex(Memory::Read_Word(0xfffe),4) << std::endl;
+
     // start the CPU thread
     s_c6809 = new C6809(this);
 	try 
 	{
 		s_cpuThread = std::thread(&C6809::ThreadProc);
+
+
+        // Wait until the CPU thread is ready
+        C6809* cpu = Bus::GetC6809();
+        std::unique_lock<std::mutex> lock(cpu->mtx);
+        cpu->cv.wait(lock, [cpu]{ return cpu->isCpuThreadReady; });
+
+
 	} 
 	catch (const std::exception& e)
 	{

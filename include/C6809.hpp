@@ -23,6 +23,8 @@
 #include <string>
 #include <list>
 #include <unordered_map>
+#include <condition_variable>
+#include <cstring>
 
 class Bus;
 class Debug;
@@ -79,6 +81,13 @@ public:
 	
 	std::string disasm(Word addr, Word& next);	// returns standard string containing instruction pointed to by addr
 
+    Byte GetInstructionSize(Word opcode) { 
+        if ((opcode & 0xFF00) == 0x1000 || (opcode & 0xFF00) == 0x1100) {
+            return opMap[opcode].size; 
+        }
+        return opMap[((opcode>>8)&0xFF)].size; 
+    }
+
 	void clock_input(); // this one doesnt need to inherit from device
 
 	// pin states
@@ -87,51 +96,113 @@ public:
 	void firq(); // true to false transition triggers FIRQ
 	void reset();
 
-	// getters and setters
+	// getters
+	Word getPC()    { std::lock_guard<std::mutex> lock(_register_mutex); return PC; }
+	Word getU()     { std::lock_guard<std::mutex> lock(_register_mutex); return U; }
+	Word getS()     { std::lock_guard<std::mutex> lock(_register_mutex); return S; }
+	Word getX()     { std::lock_guard<std::mutex> lock(_register_mutex); return X; }
+	Word getY()     { std::lock_guard<std::mutex> lock(_register_mutex); return Y; }
+	Byte getDP()    { std::lock_guard<std::mutex> lock(_register_mutex); return DP; }
+	Byte getA()     { std::lock_guard<std::mutex> lock(_register_mutex); return A; }
+	Byte getB()     { std::lock_guard<std::mutex> lock(_register_mutex); return B; }
+	Word getD()     { std::lock_guard<std::mutex> lock(_register_mutex); return D; }
+	Byte getCC()    { std::lock_guard<std::mutex> lock(_register_mutex); return CC.all; }
+	bool getCC_E()  { std::lock_guard<std::mutex> lock(_register_mutex); return CC.bit.E != 0; }
+	bool getCC_F()  { std::lock_guard<std::mutex> lock(_register_mutex); return CC.bit.F != 0; }
+	bool getCC_H()  { std::lock_guard<std::mutex> lock(_register_mutex); return CC.bit.H != 0; }
+	bool getCC_I()  { std::lock_guard<std::mutex> lock(_register_mutex); return CC.bit.I != 0; }
+	bool getCC_N()  { std::lock_guard<std::mutex> lock(_register_mutex); return CC.bit.N != 0; }
+	bool getCC_Z()  { std::lock_guard<std::mutex> lock(_register_mutex); return CC.bit.Z != 0; }
+	bool getCC_V()  { std::lock_guard<std::mutex> lock(_register_mutex); return CC.bit.V != 0; }
+	bool getCC_C()  { std::lock_guard<std::mutex> lock(_register_mutex); return CC.bit.C != 0; }
+	Byte getCycles(){ std::lock_guard<std::mutex> lock(_register_mutex); return cycles; }
+    // setters
+	void setPC(Word pPc)    { std::lock_guard<std::mutex> lock(_register_mutex); PC = pPc; }
+	void setU(Word pU)      { std::lock_guard<std::mutex> lock(_register_mutex); U = pU; }
+	void setS(Word pS)      { std::lock_guard<std::mutex> lock(_register_mutex); S = pS; }
+	void setX(Word pX)      { std::lock_guard<std::mutex> lock(_register_mutex); X = pX; }
+	void setY(Word pY)      { std::lock_guard<std::mutex> lock(_register_mutex); Y = pY; }
+	void setD(Word pD)      { std::lock_guard<std::mutex> lock(_register_mutex); D = pD; }
+	void setA(Byte pA)      { std::lock_guard<std::mutex> lock(_register_mutex); A = pA; }
+	void setB(Byte pB)      { std::lock_guard<std::mutex> lock(_register_mutex); B = pB; }
+	void setCC(Byte pCC)    { std::lock_guard<std::mutex> lock(_register_mutex); CC.all = pCC; }
+	void setCC_E(bool bSet) { std::lock_guard<std::mutex> lock(_register_mutex); CC.bit.E = bSet; }
+	void setCC_F(bool bSet) { std::lock_guard<std::mutex> lock(_register_mutex); CC.bit.F = bSet; }
+	void setCC_H(bool bSet) { std::lock_guard<std::mutex> lock(_register_mutex); CC.bit.H = bSet; }
+	void setCC_I(bool bSet) { std::lock_guard<std::mutex> lock(_register_mutex); CC.bit.I = bSet; }
+	void setCC_N(bool bSet) { std::lock_guard<std::mutex> lock(_register_mutex); CC.bit.N = bSet; }
+	void setCC_Z(bool bSet) { std::lock_guard<std::mutex> lock(_register_mutex); CC.bit.Z = bSet; }
+	void setCC_V(bool bSet) { std::lock_guard<std::mutex> lock(_register_mutex); CC.bit.V = bSet; }
+	void setCC_C(bool bSet) { std::lock_guard<std::mutex> lock(_register_mutex); CC.bit.C = bSet; }
+	void setDP(Byte pDP)    { std::lock_guard<std::mutex> lock(_register_mutex); DP = pDP; }
 
-	Word getPC() { return PC; }
-	Word getU() { return U; }
-	Word getS() { return S; }
-	Word getX() { return X; }
-	Word getY() { return Y; }
-	Byte getDP() { return DP; }
-	Byte getA() { return A; }
-	Byte getB() { return B; }
-	Word getD() { return D; }
-	Byte getCC() { return CC.all; }
-	bool getCC_E() { return CC.bit.E != 0; }
-	bool getCC_F() { return CC.bit.F != 0; }
-	bool getCC_H() { return CC.bit.H != 0; }
-	bool getCC_I() { return CC.bit.I != 0; }
-	bool getCC_N() { return CC.bit.N != 0; }
-	bool getCC_Z() { return CC.bit.Z != 0; }
-	bool getCC_V() { return CC.bit.V != 0; }
-	bool getCC_C() { return CC.bit.C != 0; }
-	Byte getCycles() { return cycles; }
+	// memory access
 
-	//Bus* getBus() { return bus; }
+	Byte fetch_byte() { Byte data = read(PC); PC++; return data; }
+	Word fetch_word() { Word data = read_word(PC); PC += 2; return data; }
 
-	void setPC(Word pPc) { PC = pPc; }
-	void setU(Word pU) { U = pU; }
-	void setS(Word pS) { S = pS; }
-	void setX(Word pX) { X = pX; }
-	void setY(Word pY) { Y = pY; }
-	void setD(Word pD) { D = pD; }
-	void setA(Byte pA) { A = pA; }
-	void setB(Byte pB) { B = pB; }
-	void setCC(Byte pCC) { CC.all = pCC; }
-	void setCC_E(bool bSet) { CC.bit.E = bSet; }
-	void setCC_F(bool bSet) { CC.bit.F = bSet; }
-	void setCC_H(bool bSet) { CC.bit.H = bSet; }
-	void setCC_I(bool bSet) { CC.bit.I = bSet; }
-	void setCC_N(bool bSet) { CC.bit.N = bSet; }
-	void setCC_Z(bool bSet) { CC.bit.Z = bSet; }
-	void setCC_V(bool bSet) { CC.bit.V = bSet; }
-	void setCC_C(bool bSet) { CC.bit.C = bSet; }
-	void setDP(Byte pDP) { DP = pDP; }
+	Byte read(Word offset)						
+	{ 
+		Byte d = Bus::Read(offset);
+		return d; 
+	}
+	void write(Word offset, Byte data)			
+	{ 
+		Bus::Write(offset, data);
+	}
+	Word read_word(Word offset)					{ return Memory::Read_Word(offset); }
+	void write_word(Word offset, Word data)		{ Memory::Write_Word(offset, data); }
+
+	Byte debug_read(Word offset)				{ return Memory::Read(offset, true);}
+	void debug_write(Word offset, Byte data)	{ Memory::Write(offset, data, true); }
+	Word debug_read_word(Word offset)			{ return Memory::Read_Word(offset, true); }
+	void debug_write_word(Word offset, Word data) { Memory::Write_Word(offset, data, true); }
+
+
+private:
+	// Registers
+    std::mutex _register_mutex;
+
+	Word U, S;
+	Word X, Y;
+	Byte DP;
+	Word PC;
+	union {
+		Word D;
+		struct {
+			Byte B;
+			Byte A;
+		} byte;
+	} acc;
+	Byte& A;
+	Byte& B;
+	Word& D;
+	union {
+		Byte all;
+		struct {
+			Byte C : 1; // Carry
+			Byte V : 1; // Overflow
+			Byte Z : 1; // Zero
+			Byte N : 1; // Negative
+			Byte I : 1; // IRQ disable
+			Byte H : 1; // Half carry
+			Byte F : 1; // FIRQ disable
+			Byte E : 1;	// Entire
+		} bit;
+	} CC;
+
+	struct INSTRUCTION {
+		std::string mnem = "";							// text version of the mnemonic
+		void (C6809::* operation)(void) = nullptr;	// the operation member function
+		Word(C6809::* addrmode)(void) = nullptr;	// the address_mode function
+		Byte cycles = 0;			// base cycles (not including internal increases)
+		Byte size = 0;				// how many bytes long is this instruction?
+	};
+
+	Word* ptrReg[4] = { &X, &Y, &U, &S };
+
 
 	// addressing modes:
-
 	Word inh();		// INHERENT
 	Word immb();	// IMMEDIATE 8-BIT
 	Word immw();	// IMMEDIATE 16-BIT
@@ -178,67 +249,6 @@ public:
 	void bvc(void);		void lbvc(void);	void bvs(void);		void lbvs(void);
 	void pg2(void);		void pg3(void);		void null();
 
-	// memory access
-
-	Byte fetch_byte() { Byte data = read(PC); PC++; return data; }
-	Word fetch_word() { Word data = read_word(PC); PC += 2; return data; }
-
-	Byte read(Word offset)						
-	{ 
-		Byte d = Bus::Read(offset);
-		return d; 
-	}
-	void write(Word offset, Byte data)			
-	{ 
-		Bus::Write(offset, data);
-	}
-	Word read_word(Word offset)					{ return Memory::Read_Word(offset); }
-	void write_word(Word offset, Word data)		{ Memory::Write_Word(offset, data); }
-
-	Byte debug_read(Word offset)				{ return Memory::Read(offset, true);}
-	void debug_write(Word offset, Byte data)	{ Memory::Write(offset, data, true); }
-	Word debug_read_word(Word offset)			{ return Memory::Read_Word(offset, true); }
-	void debug_write_word(Word offset, Word data) { Memory::Write_Word(offset, data, true); }
-
-	// Registers
-
-	Word U, S;
-	Word X, Y;
-	Byte DP;
-	Word PC;
-	union {
-		Word D;
-		struct {
-			Byte B;
-			Byte A;
-		} byte;
-	} acc;
-	Byte& A;
-	Byte& B;
-	Word& D;
-	union {
-		Byte all;
-		struct {
-			Byte C : 1; // Carry
-			Byte V : 1; // Overflow
-			Byte Z : 1; // Zero
-			Byte N : 1; // Negative
-			Byte I : 1; // IRQ disable
-			Byte H : 1; // Half carry
-			Byte F : 1; // FIRQ disable
-			Byte E : 1;	// Entire
-		} bit;
-	} CC;
-
-	struct INSTRUCTION {
-		std::string mnem = "";							// text version of the mnemonic
-		void (C6809::* operation)(void) = nullptr;	// the operation member function
-		Word(C6809::* addrmode)(void) = nullptr;	// the address_mode function
-		Byte cycles = 0;			// base cycles (not including internal increases)
-		Byte size = 0;				// how many bytes long is this instruction?
-	};
-
-	Word* ptrReg[4] = { &X, &Y, &U, &S };
 
 	// HELPER FUNCTIONS
 
@@ -287,6 +297,10 @@ public:
 	void do_st(Byte x);		void do_st(Word x);		void do_sub(Byte& x);	void do_sub(Word& x);
 	void do_tst(Byte& x);	void do_br(bool test);	void do_lbr(bool test);
 
+    bool isCpuThreadReady = false;
+    std::mutex mtx;
+    std::condition_variable cv;
+
 protected:
 
 	// interrupts
@@ -314,13 +328,58 @@ protected:
 	Bus* m_bus = nullptr;
 	// Debug* m_debug = nullptr;
 
-public:	
 
-	// disassembly stuff
-	std::list<Word> lstPrevInstructions;
-	std::string stCurrentInstruction;
-	std::list<Word> lstNextInstructions;
+    // disassembly stuff (REFACTORING in progress)
+// private:
+//     std::mutex _bitfield_mutex;       // Mutex to protect the bitfield
+//     uint8_t _bitfield_visited[8192] = {0};    // 8 KB bitfield for tracking visited addresses (64k bits)
+// public:
+//     inline void SetVisited_Memory(uint16_t address) {
+//         _bitfield_mutex.lock();  // Lock the mutex manually
+//         _bitfield_visited[address / 8] |= (1 << (address % 8));
+//         _bitfield_mutex.unlock();   // Unlock the mutex manually
+//     }
 
+//     inline bool WasVisited_Memory(uint16_t address) {
+//         _bitfield_mutex.lock();  // Lock the mutex manually
+//         bool result = (_bitfield_visited[address / 8] & (1 << (address % 8))) != 0;  // Check if the bit is set
+//         _bitfield_mutex.unlock();  // Unlock the mutex manually
+//         return result;
+//     }
+
+//     inline void ClearVisited_Memory() {
+//         _bitfield_mutex.lock();  // Lock the mutex manually
+//         std::memset(_bitfield_visited, 0, sizeof(_bitfield_visited));
+//         _bitfield_mutex.unlock();   // Unlock the mutex manually
+//     }   
+
+private:
+    std::atomic<uint8_t> _bitfield_visited[8192];  // Atomic bitfield for visited memory
+
+public:
+    inline void SetVisited_Memory(uint16_t address) {
+        uint16_t index = address / 8;
+        uint8_t bit_pos = address % 8;
+        // Atomically set the bit at the corresponding position
+        _bitfield_visited[index].fetch_or(1 << bit_pos, std::memory_order_relaxed);
+    }
+
+    inline bool WasVisited_Memory(uint16_t address) {
+        uint16_t index = address / 8;
+        uint8_t bit_pos = address % 8;
+        // Atomically check if the bit is set
+        return (_bitfield_visited[index].load(std::memory_order_relaxed) & (1 << bit_pos)) != 0;
+    }
+
+    // Be sure to call this function to clear the visited memory
+    // or when loading a new program or in the case of self-modifying code.
+    // Another good place to call this is when the debugger is enabled or re-enabled.
+    inline void ClearVisited_Memory() {
+        // Clear the whole bitfield atomically
+        for (size_t i = 0; i < 8192; ++i) {
+            _bitfield_visited[i].store(0, std::memory_order_relaxed);
+        }
+    }
 };
 
 

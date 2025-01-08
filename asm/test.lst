@@ -150,8 +150,8 @@ FFFE                  HARD_RESET            equ   0xFFFE    ; RESET Hardware Int
                       
                       
                       
-FFF0                                  org     0xFFF0
-FFF0  2400                            fdb     start
+FFFE                                  org     $FFFE
+FFFE  2400                            fdb     start
                       
                       
 2400                                  org $2400

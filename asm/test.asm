@@ -3,7 +3,7 @@
 
 		INCLUDE "Memory_Map.asm"
 
-		org	0xFFF0
+		org	$FFFE
 		fdb	start
 
 

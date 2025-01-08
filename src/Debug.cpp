@@ -10,6 +10,7 @@
  *  
  ************************************/
 
+#include <deque>
 #include "Debug.hpp"
 #include "Bus.hpp"
 #include "Memory.hpp"
@@ -58,14 +59,14 @@ Byte Debug::OnRead(Word offset)
     } 
     else if (offset == MAP(SYS_DBG_FLAGS) ) 
     {
-        (s_bIsDebugActive) ? reg_flags |= 0x80 : reg_flags &= ~0x80; // Enable
-        (s_bSingleStep)     ? reg_flags |= 0x40 : reg_flags &= ~0x40; // Single-Step
-        reg_flags &= ~0x20;     // zero for Clear all Breakpoints
-        (mapBreakpoints[reg_brk_addr]) ? reg_flags |= 0x10 : reg_flags &= ~0x10;
-        reg_flags &= ~0x08;     // FIRQ
-        reg_flags &= ~0x04;     // IRQ
-        reg_flags &= ~0x02;     // NMI
-        reg_flags &= ~0x01;     // RESET
+        (s_bIsDebugActive) ? reg_flags |= DBGF_DEBUG_ENABLE : reg_flags &= ~DBGF_DEBUG_ENABLE; // Enable
+        (s_bSingleStep)     ? reg_flags |= DBGF_SINGLE_STEP_ENABLE : reg_flags &= ~DBGF_SINGLE_STEP_ENABLE; // Single-Step
+        reg_flags &= ~DBGF_CLEAR_ALL_BRKPT;     // zero for Clear all Breakpoints
+        (mapBreakpoints[reg_brk_addr]) ? reg_flags |= DBGF_UPDATE_BRKPT : reg_flags &= ~DBGF_UPDATE_BRKPT;
+        reg_flags &= ~DBGF_FIRQ;     // FIRQ
+        reg_flags &= ~DBGF_IRQ;     // IRQ
+        reg_flags &= ~DBGF_NMI;     // NMI
+        reg_flags &= ~DBGF_RESET;     // RESET
         data = reg_flags;              
     }
 
@@ -97,25 +98,26 @@ void Debug::OnWrite(Word offset, Byte data)
     else if ( offset == MAP(SYS_DBG_FLAGS) )
     {
         reg_flags = data;
-        (reg_flags & 0x80) ? s_bIsDebugActive = true : s_bIsDebugActive = false;
-        (reg_flags & 0x40) ? s_bSingleStep = true : s_bSingleStep = false;
-        if (reg_flags & 0x20)  cbClearBreaks();
-        (reg_flags & 0x10) ? mapBreakpoints[reg_brk_addr] = true : mapBreakpoints[reg_brk_addr] = false;
-        if (reg_flags & 0x08)   cbFIRQ();
-        if (reg_flags & 0x04)   cbIRQ();
-        if (reg_flags & 0x02)   cbNMI();
-        if (reg_flags & 0x01)   cbReset();
+        (reg_flags & DBGF_DEBUG_ENABLE) ? s_bIsDebugActive = true : s_bIsDebugActive = false;
+        (reg_flags & DBGF_SINGLE_STEP_ENABLE) ? s_bSingleStep = true : s_bSingleStep = false;
+        if (reg_flags & DBGF_CLEAR_ALL_BRKPT)  cbClearBreaks();
+        (reg_flags & DBGF_UPDATE_BRKPT) ? mapBreakpoints[reg_brk_addr] = true : mapBreakpoints[reg_brk_addr] = false;
+        if (reg_flags & DBGF_FIRQ)   cbFIRQ();
+        if (reg_flags & DBGF_IRQ)   cbIRQ();
+        if (reg_flags & DBGF_NMI)   cbNMI();
+        if (reg_flags & DBGF_RESET)   cbReset();
         // activate or deactivate the debugger
-        if (s_bIsDebugActive)   // activate
+        if (s_bIsDebugActive)   // activate the debugger
         {
             SDL_ShowWindow( Bus::GetGPU()->GetWindow() );
-            // SDL_RaiseWindow(Debug::GetSDLWindow());
+            // reset the visited memory 
+            C6809* cpu = Bus::GetC6809();
+            cpu->ClearVisited_Memory();
             SDL_RaiseWindow( _dbg_window );
         }
-        else                    // deactivate      
+        else                    // deactivate the debugger     
         {      
             SDL_HideWindow(_dbg_window);
-            // SDL_RaiseWindow(Gfx::GetSDLWindow());
             SDL_RaiseWindow(Bus::GetGPU()->GetWindow());
         }        
     }
@@ -243,6 +245,14 @@ void Debug::OnInit()
         _dbg_window_height, 
         _dbg_window_flags); 
     SDL_ShowWindow(_dbg_window);
+
+    if (DEBUG_STARTS_ACTIVE) {
+        _dbg_flags |= DBGF_DEBUG_ENABLE;
+        SDL_ShowWindow(_dbg_window);
+    } else {
+        _dbg_flags &= ~DBGF_DEBUG_ENABLE;
+        SDL_HideWindow(_dbg_window);
+    }
 
     // create the renderer
     _dbg_renderer = SDL_CreateRenderer(_dbg_window, NULL);    
@@ -442,81 +452,76 @@ void Debug::OnEvent(SDL_Event* evnt)
 
 void Debug::OnUpdate(float fElapsedTime)
 {
-    if (fElapsedTime==0.0f) { ; } // stop the compiler from complaining
-
     // if the debugger is not active, just return
-    // return true;
+    if (!( _dbg_flags & DBGF_DEBUG_ENABLE))   { return; }   
 
-
-    const float delay = 1.0f / 15.0f;
+    // only update once every so often
+    const float delay = 1.0f / 30.0f;
     static float delayAcc = fElapsedTime;
     delayAcc += fElapsedTime;
     if (delayAcc >= delay)
     {
         delayAcc -= delay;
 
-        if (_dbg_flags & _DBG_FLAGS::DBGF_DEBUG_ENABLE)
-        { 
-            // update internals
-            //_update_mouse_pos(); 
+        // update internals
+        //_update_mouse_pos(); 
 
-            // render the debugger
-            // clear the text buffer
-            for (auto &c : _db_bfr)
-            {
-                c.attr = 0xf0;
-                c.chr = ' ';
-            }
-
-            // call update functions
-            MouseStuff();
-            KeyboardStuff();
-
-            DumpMemory(1,  1, mem_bank[0]);
-            DumpMemory(1, 11, mem_bank[1]);
-            DumpMemory(1, 21, mem_bank[2]);
-            DumpMemory(1, 31, mem_bank[3]);
-
-            DrawCpu(71, 1);     // was (39,1)
-            DrawCode(71, 6);    // was (39,6)
-
-            DrawButtons();    
-            HandleButtons();
-            DrawBreakpoints();
-
-            if (!EditRegister(fElapsedTime))
-                DrawCursor(fElapsedTime);
-
-            // instruction text
-            OutText(1, 51, "[SPACE]    Step", 0x80);
-            OutText(1, 52, "[ALT-X]    Quit", 0x80);
-            OutText(1, 53, "[ALT-D] ~ Debug", 0x80);
-            OutText(1, 54, "[ALT-R] RunStop", 0x80);
-            OutText(1, 55, "[ALT-ENTER] Toggles between Fullscreen and Windowed", 0x80);
-
-
-
-            // TESTING ...
-                int mx, my;
-                _correct_mouse_coords(mx, my);
-
-                std::string s = "Mouse          - X: " + std::to_string(mx) + " Y: " + std::to_string(my);
-                OutText(1, 63, s, 0x80);
-
-                std::string q = "Window -- width: " + std::to_string(_dbg_window_width) + " height: " + std::to_string(_dbg_window_height);
-                OutText(1, 65, q, 0x80);
-
-                static int delta = 0;
-                std::string d = "Delta: " + std::to_string(delta++);
-
-            // END: ... TESTING
-
-
-            // _clear_texture(_dbg_texture, rand()%15, rand()%15, rand()%15, 15);
-            _update_debug_screen();
-        } else {
-            // _clear_texture(_dbg_texture, 1, 2, 0, 15);
+        // render the debugger
+        // clear the text buffer
+        for (auto &c : _db_bfr)
+        {
+            c.attr = 0xf0;
+            c.chr = ' ';
         }
+
+        // call update functions
+        MouseStuff();
+        KeyboardStuff();
+
+        DumpMemory(1,  1, mem_bank[0]);
+        DumpMemory(1, 11, mem_bank[1]);
+        DumpMemory(1, 21, mem_bank[2]);
+        DumpMemory(1, 31, mem_bank[3]);
+
+        DrawCpu(71, 1);     // was (39,1)
+        DrawCode(71, 6);    // was (39,6)
+
+        DrawButtons();    
+        HandleButtons();
+        DrawBreakpoints();
+
+        if (!EditRegister(fElapsedTime))
+            DrawCursor(fElapsedTime);
+
+        // instruction text
+        OutText(1, 51, "[SPACE]    Step", 0x80);
+        OutText(1, 52, "[ALT-X]    Quit", 0x80);
+        OutText(1, 53, "[ALT-D] ~ Debug", 0x80);
+        OutText(1, 54, "[ALT-R] RunStop", 0x80);
+        OutText(1, 55, "[ALT-ENTER] Toggles between Fullscreen and Windowed", 0x80);
+
+
+
+        // TESTING ...
+            int mx, my;
+            _correct_mouse_coords(mx, my);
+
+            std::string s = "Mouse          - X: " + std::to_string(mx) + " Y: " + std::to_string(my);
+            OutText(1, 63, s, 0x80);
+
+            std::string q = "Window -- width: " + std::to_string(_dbg_window_width) + " height: " + std::to_string(_dbg_window_height);
+            OutText(1, 65, q, 0x80);
+
+            std::string r = "s_bSingleStep: " + std::to_string(s_bSingleStep);
+            OutText(1, 67, r, 0x80);
+
+        // END: ... TESTING
+
+
+        // _clear_texture(_dbg_texture, rand()%15, rand()%15, rand()%15, 15);
+        _update_debug_screen();
+    } else {
+        // _clear_texture(_dbg_texture, 1, 2, 0, 15);
     }
 }
 
@@ -600,13 +605,13 @@ void Debug::DrawCpu(int x, int y)
     RamX = x; RamY++;	// carraige return(ish)
 
     // D = (A<<8) | B & 0x00FF
-    RamX += OutText(RamX, RamY, "D:$", 0xB0);
+    RamX += OutText(RamX, RamY, " D:$", 0xB0);
     RamX += OutText(RamX, RamY, _hex(cpu->getD(), 4), 0xC0);
-    RamX += OutText(RamX, RamY, " (A:$", 0xB0);
+    RamX += OutText(RamX, RamY, " A:$", 0xB0);
     RamX += OutText(RamX, RamY, _hex(cpu->getA(), 2), 0xC0);
-    RamX += OutText(RamX, RamY, " B:$", 0xB0);
+    RamX += OutText(RamX, RamY, "   B:$", 0xB0);
     RamX += OutText(RamX, RamY, _hex(cpu->getB(), 2), 0xC0);
-    RamX += OutText(RamX, RamY, ")", 0xB0);
+    // RamX += OutText(RamX, RamY, ")", 0xB0);
     RamX = x; RamY++;	// carraige return(ish)
 
     // X
@@ -975,108 +980,210 @@ void Debug::DrawCursor(float fElapsedTime)
     OutGlyph(csr_x, csr_y, ch[0], attr);    
 }
 
-void Debug::DrawCode(int col, int row)
+
+
+void Debug::DrawCode(int col, int row) {
+    C6809* cpu = Bus::GetC6809();
+    Word nextAddress = cpu->getPC();
+
+    // Display previous 16 instructions
+    int top_rows = row + 16;
+    _display_previous_instructions(col, top_rows);
+
+    // Display current instruction
+    // _display_single_instruction(col, row, nextAddress);
+    int lower_rows = row + 17;
+    _display_single_instruction(col, lower_rows, nextAddress);
+
+    // Display next 16 instructions
+    _display_next_instructions(col, lower_rows, nextAddress);
+
+}
+
+
+void Debug::_display_previous_instructions(int col, int& row) 
+{
+    C6809* cpu = Bus::GetC6809();
+    
+    int threshold = 100;
+    int count = 16;
+    for (int i = cpu->getPC()-1; i > 0; i--)
+    {
+        if (cpu->WasVisited_Memory(i))
+        {
+            bool atBreak = false;
+            if (mapBreakpoints[i])	atBreak = true;
+            Word throw_away;
+            std::string code = cpu->disasm(i, throw_away);
+            OutText(col, row--, code, atBreak ? 0x50 : 0x80);
+            count--;
+            if (count == 0) break;
+        }
+        if (threshold-- < 0) break;
+    }
+}
+
+void Debug::_display_single_instruction(int col, int& row, Word &nextAddress) 
+{
+    C6809* cpu = Bus::GetC6809();
+    // current address
+    Word currentAddress = nextAddress;
+
+    // display the current instruction
+    bool atBreak = mapBreakpoints[currentAddress];    
+    std::string code = cpu->disasm(currentAddress, nextAddress);   // this updates nextAddress 
+    OutText(col, row++, code, atBreak ? 0xA0 : 0xF0);
+}
+
+void Debug::_display_next_instructions(int col, int& row, Word& nextAddress) 
 {
     C6809* cpu = Bus::GetC6809();
 
-    std::string code = "";
-    int line = 0;
-    Word next = 0;
-    sDisplayedAsm.clear();
+    // Display the next 16 instructions
+    int count = 0;
+    while (count < 16) {
+        bool atBreak = mapBreakpoints[nextAddress];
 
-    if (bMouseWheelActive)
-    {
-        Word cpu_PC = cpu->getPC();
-        Word offset = cpu_PC + mousewheel_offset;
-        while (line < 24)
-        {
-            if (offset < cpu_PC)
-            {
-                bool atBreak = false;
-                if (mapBreakpoints[offset])	atBreak = true;
-                sDisplayedAsm.push_back(offset);
-                code = cpu->disasm(offset, offset);
-                if (atBreak)
-                    OutText(col, row + line, code, 0xA0);    // red
-                else
-                    OutText(col, row + line, code, 0x40);    // dk green
-                line++;
-            }
-            if (offset == cpu_PC)
-            {
-                bool atBreak = false;
-                if (mapBreakpoints[offset])	atBreak = true;
-                sDisplayedAsm.push_back(offset);
-                code = cpu->disasm(offset, offset);
-                if (atBreak)
-                    OutText(col, row + line, code, 0x50);  // brown
-                else
-                    OutText(col, row + line, code, 0xC0);    // yellow
-                line++;
-            }
-            if (offset > cpu_PC)
-            {
-                bool atBreak = false;
-                if (mapBreakpoints[offset])	atBreak = true;
-                sDisplayedAsm.push_back(offset);
-                code = cpu->disasm(offset, offset);
-                if (atBreak)
-                    OutText(col, row + line, code, 0x30);   // dk red
-                else
-                    OutText(col, row + line, code, 0xB0);   // lt green
-                line++;
-            }
+        // Disassemble the current instruction and update nextAddress to the next instruction
+        Word currentAddress = nextAddress;
+        std::string code = cpu->disasm(nextAddress, nextAddress);
 
-        }
+        // Output the disassembled instruction
+        if (cpu->WasVisited_Memory(currentAddress))
+            OutText(col, row++, code, atBreak ? 0x30 : 0x10);
 
-    }
-    else
-    {
-        // draw the last several lines
-        for (auto& a : asmHistory)
-        {
-            if (a != cpu->getPC())
-            {
-                bool atBreak = false;
-                if (mapBreakpoints[a])	atBreak = true;
-                sDisplayedAsm.push_back(a);
-                code = cpu->disasm(a, next);
-                if (atBreak)
-                    OutText(col, row + line++, code, 0x30);      // 0x30 dk red
-                else
-                    OutText(col, row + line++, code, 0x10);    // 0x10 DK gray
-            }
-        }
-        // draw the current line
-        sDisplayedAsm.push_back(cpu->getPC());
-        code = cpu->disasm(cpu->getPC(), next);
-        if (mapBreakpoints[cpu->getPC()])
-            OutText(col, row + line++, code, 0xA0);              // 0xA0 red
-        else
-            OutText(col, row + line++, code, 0xF0);            // 0xF0 white
-        // create a history of addresses to display in the future
-        static Word last = cpu->getPC();
-        if (last != cpu->getPC())
-        {
-            last = cpu->getPC();
-            asmHistory.push_back(cpu->getPC());
-            while (asmHistory.size() > 12)
-                asmHistory.pop_front();
-        }
-        // draw the next several future lines
-        while (line < 24)
-        {
-            bool atBreak = false;
-            if (mapBreakpoints[next])	atBreak = true;
-            sDisplayedAsm.push_back(next);
-            code = cpu->disasm(next, next);
-            if (atBreak)
-                OutText(col, row + line++, code, 0X30);          // 0X30 DK RED
-            else
-                OutText(col, row + line++, code,0X80);        // 0X80 LT GRAY
-        }
+        // Increment count
+        ++count;
     }
 }
+
+
+
+
+// void Debug::_display_instructions(int col, int& row, Word& nextAddress) {
+//     C6809* cpu = Bus::GetC6809();
+
+//     // Locate the iterator for nextAddress
+//     auto currentItr = _instruction_map.find(nextAddress);
+
+//     // If nextAddress is not in the map, decode and add it
+//     if (currentItr == _instruction_map.end()) {
+//         Word tempAddress = nextAddress;
+//         std::string code = cpu->disasm(tempAddress, tempAddress); // Disassemble current line
+//         _instruction_map[nextAddress] = Bus::ReadByte(nextAddress);
+//         nextAddress = tempAddress; // Update nextAddress for future use
+//         currentItr = _instruction_map.find(nextAddress); // Re-locate iterator
+//     }
+//     // Display the previous 15 instructions
+//     auto prevItr = currentItr;
+//     for (int i = 0; i < 15 && prevItr != _instruction_map.begin(); ++i) {
+//         --prevItr;
+//         Word address = prevItr->first;
+//         Word opcode = prevItr->second;
+//         std::string code = cpu->disasm(address, address); // Get disassembled string
+//         bool atBreak = mapBreakpoints[address];
+//         OutText(col, row++, code, atBreak ? 0x30 : 0x10); // Display with appropriate color
+//     }
+//     // Display the current instruction
+//     if (currentItr != _instruction_map.end()) {
+//         Word address = currentItr->first;
+//         Word opcode = currentItr->second;
+//         std::string code = cpu->disasm(address, address); // Get disassembled string
+//         bool atBreak = mapBreakpoints[address];
+//         OutText(col, row++, code, atBreak ? 0xA0 : 0xF0); // Highlight the current line
+//     }
+//     // Display the next 15 instructions
+//     auto nextItr = currentItr;
+//     for (int i = 0; i < 15 && nextItr != _instruction_map.end(); ++i) {
+//         ++nextItr;
+//         if (nextItr == _instruction_map.end()) break;
+//         Word address = nextItr->first;
+//         Word opcode = nextItr->second;
+//         std::string code = cpu->disasm(address, address); // Get disassembled string
+//         bool atBreak = mapBreakpoints[address];
+//         OutText(col, row++, code, atBreak ? 0x30 : 0x80); // Display with appropriate color
+//     }
+// }
+
+
+
+// void Debug::DrawCode(int col, int row)
+// {
+//     C6809* cpu = Bus::GetC6809();
+//     Word cpu_PC = cpu->getPC();    
+
+//     // Draw the history of addresses
+//     _draw_history(col, row, cpu_PC);
+
+//     // Draw the current line
+//     _draw_current_line(col, row, cpu_PC);
+
+//     // Draw the future lines
+//     _draw_future_lines(col, row, cpu_PC);
+// }
+
+// void Debug::_draw_history(int col, int &row, Word cpu_PC) {
+
+//     if (!s_bSingleStep)
+//         _update_history(cpu_PC);
+//     C6809* cpu = Bus::GetC6809();
+
+//     // Draw each address in the history
+//     for (auto& address : _instruction_history_) {
+//         bool atBreak = mapBreakpoints[address];
+//         Word nextAddress;   // just a placeholder (refactor later)
+//         std::string code = cpu->disasm(address, nextAddress);
+//         OutText(col, row++, code, atBreak ? 0x30 : 0x10);
+//     }
+// }
+
+// void Debug::_draw_current_line(int col, int &row, Word &nextAddress) {
+//     C6809* cpu = Bus::GetC6809();
+//     bool atBreak = mapBreakpoints[nextAddress];
+//     // Word nextAddress;   // just a placeholder (refactor later)
+//     std::string code = cpu->disasm(nextAddress, nextAddress);
+//     OutText(col, row++, code, atBreak ? 0xA0 : 0xF0);
+// }
+
+// void Debug::_draw_future_lines(int col, int &row, Word cpu_PC) {
+//     C6809* cpu = Bus::GetC6809();
+//     Word next = cpu_PC;
+//     while (row < 40) {
+//         bool atBreak = mapBreakpoints[next];
+//         Word nextAddress;   // just a placeholder (refactor later)
+//         std::string code = cpu->disasm(next, nextAddress);
+//         OutText(col, row++, code, atBreak ? 0x30 : 0x80);
+//         next++;
+//     }
+// }
+
+// void Debug::_update_history(Word cpu_PC) {
+//     _instruction_history_.push_front(cpu_PC);
+//     while (_instruction_history_.size() > DEBUG_HISTORY_SIZE) {
+//         _instruction_history_.pop_back();
+//     }
+// }
+
+
+// void Debug::_update_history(Word cpu_PC) {
+//     auto it = std::find(_instruction_history_.begin(), _instruction_history_.end(), cpu_PC);
+//     if (it == _instruction_history_.end()) {
+//         // check if the new address is greater than all addresses in the history
+//         bool isNewAddressGreater = true;
+//         for (auto& address : _instruction_history_) {
+//             if (cpu_PC <= address) {
+//                 isNewAddressGreater = false;
+//                 break;
+//             }
+//         }
+//         if (isNewAddressGreater) {
+//             _instruction_history_.push_front(cpu_PC);
+//             while (_instruction_history_.size() > DEBUG_HISTORY_SIZE) {
+//                 _instruction_history_.pop_back();
+//             }
+//         }
+//     }
+// }
 
 
 void Debug::DrawButtons()

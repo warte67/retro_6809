@@ -65,8 +65,6 @@ public: // PUBLIC METHODS
     static void IsRunning(bool b);
     static bool IsDirty();
     static void IsDirty(bool b);
-    static Debug* GetDebug() { return _pDebug; }
-    inline static C6809* GetC6809() { return s_c6809; }
     inline static float GetAvgCpuCycleTime() { return s_avg_cpu_cycle_time; }
     inline static void SetAvgCpuCycleTime(float f) { s_avg_cpu_cycle_time = f; }
     
@@ -89,7 +87,9 @@ public: // PUBLIC METHODS
     static Word GetClockTimer() { return _clock_timer; }
     static Word SetClockTimer(Word timer) { return _clock_timer = timer; }
 
+    static Debug* GetDebug() { return _pDebug; }
     static GPU* GetGPU() { return _pGPU; }
+    static C6809* GetC6809() { return s_c6809; }
 
 private: // INTERNAL PRIVATES
 	bool _bWasInit = false;

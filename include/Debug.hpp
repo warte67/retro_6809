@@ -14,6 +14,7 @@
 
 #include <list>
 #include <unordered_map>
+#include <map>
 
 #include "types.hpp"
 #include "Memory.hpp"
@@ -92,6 +93,10 @@ private: // PRIVATE MEMBERS
     void DumpMemory(int col, int row, Word addr);
     void DrawCpu(int x, int y);
     void DrawCode(int col, int row);
+    void _display_previous_instructions(int col, int& row);
+    void _display_single_instruction(int col, int& row, Word &nextAddress);
+    void _display_next_instructions(int col, int& row, Word &nextAddress);
+
     void DrawButtons();
     void HandleButtons();
     void DrawBreakpoints();
@@ -109,7 +114,7 @@ private: // PRIVATE MEMBERS
 
     // hardware registers
     Word _dbg_brk_addr  = 0;    // DBG_BRK_ADDR
-    enum _DBG_FLAGS {
+    enum _DBG_FLAGS : Byte {
         DBGF_DEBUG_ENABLE       = 0x80, // - bit 7: Debug Enable
         DBGF_SINGLE_STEP_ENABLE = 0x40, // - bit 6: Single Step Enable
         DBGF_CLEAR_ALL_BRKPT    = 0x20, // - bit 5: Clear All Breakpoints
@@ -127,7 +132,7 @@ private: // PRIVATE MEMBERS
     int _dbg_window_width = DEBUG_WINDOW_WIDTH;
     int _dbg_window_height = DEBUG_WINDOW_HEIGHT;
 
-	Uint32 _dbg_window_flags = SDL_WINDOW_RESIZABLE;
+	Uint32 _dbg_window_flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN;
     Uint32 _dbg_renderer_flags = SDL_RENDERER_VSYNC_DISABLED;
 
     SDL_Window*   _dbg_window   = nullptr;
@@ -165,18 +170,18 @@ private: // PRIVATE MEMBERS
         Uint16 x_max = 0;
     };
     std::vector<REGISTER_NODE> register_info = {
-        { EDIT_REGISTER::EDIT_NONE, 0, 0, 0, 0 },
-        { EDIT_REGISTER::EDIT_CC, 0, 1, 43, 44 },
-        { EDIT_REGISTER::EDIT_D, 0, 2, 42, 45 },
-        { EDIT_REGISTER::EDIT_A, 0, 2, 51, 52 },
-        { EDIT_REGISTER::EDIT_B, 0, 2, 57, 58 },
-        { EDIT_REGISTER::EDIT_X, 0, 3, 43, 46 },
-        { EDIT_REGISTER::EDIT_Y, 0, 3, 51, 54 },
-        { EDIT_REGISTER::EDIT_U, 0, 3, 59, 62 },
-        { EDIT_REGISTER::EDIT_PC, 0, 4, 43, 46 },
-        { EDIT_REGISTER::EDIT_S, 0, 4, 51, 54 },
-        { EDIT_REGISTER::EDIT_DP, 0, 4, 60, 61 },
-        { EDIT_REGISTER::EDIT_BREAK, 0, 33, 50, 53 },
+        { EDIT_REGISTER::EDIT_NONE,  0,  0,  0,  0   },
+        { EDIT_REGISTER::EDIT_CC,    0,  1, 75, 76 },
+        { EDIT_REGISTER::EDIT_D,     0,  2, 75, 78 },
+        { EDIT_REGISTER::EDIT_A,     0,  2, 83, 84 },
+        { EDIT_REGISTER::EDIT_B,     0,  2, 91, 92 },
+        { EDIT_REGISTER::EDIT_X,     0,  3, 75, 78 },
+        { EDIT_REGISTER::EDIT_Y,     0,  3, 83, 86 },
+        { EDIT_REGISTER::EDIT_U,     0,  3, 91, 94 },
+        { EDIT_REGISTER::EDIT_PC,    0,  4, 75, 78 },
+        { EDIT_REGISTER::EDIT_S,     0,  4, 83, 86 },
+        { EDIT_REGISTER::EDIT_DP,    0,  4, 92, 93 },
+        { EDIT_REGISTER::EDIT_BREAK, 0, 33, 82, 85 },
     };
     REGISTER_NODE nRegisterBeingEdited = { EDIT_NONE,0,0,0,0 };
 
