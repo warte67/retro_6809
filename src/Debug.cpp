@@ -787,7 +787,7 @@ void Debug::MouseStuff()
             }
             s_bSingleStep = true;	// scrollwheel enters into single step mode
             nRegisterBeingEdited.reg = Debug::EDIT_REGISTER::EDIT_NONE;	// cancel any register edits
-            if (SDL_GetModState() & SDL_KMOD_CTRL)	// is CTRL down?
+            if ( (SDL_GetModState() & SDL_KMOD_CTRL) || (SDL_GetModState() & SDL_KMOD_SHIFT) )
                 mousewheel_offset -= mouse_wheel * 1;	// fine scroll	
             else
                 mousewheel_offset -= mouse_wheel * 3;		// fast scroll
