@@ -113,7 +113,6 @@ private: // PRIVATE MEMBERS
 
 
     // hardware registers
-    Word _dbg_brk_addr  = 0;    // DBG_BRK_ADDR
     enum _DBG_FLAGS : Byte {
         DBGF_DEBUG_ENABLE       = 0x80, // - bit 7: Debug Enable
         DBGF_SINGLE_STEP_ENABLE = 0x40, // - bit 6: Single Step Enable
@@ -124,7 +123,6 @@ private: // PRIVATE MEMBERS
         DBGF_NMI                = 0x02, // - bit 1: NMI   (on low to high edge)
         DBGF_RESET              = 0x01  // - bit 0: RESET (on low to high edge)       
     };
-    Byte _dbg_flags     = DBGF_DEBUG_ENABLE;    // DBG_FLAGS
 
     // debug display
     int _dbg_width = DEBUG_WIDTH;
@@ -225,8 +223,12 @@ private: // PRIVATE MEMBERS
 
     bool bEditingBreakpoint = false;
     Word new_breakpoint = 0;		// working copy to be edited
-    Word reg_brk_addr = 0x0000;	    // break point hardware register
-    Byte reg_flags = 0x00;			// debug flags hardware register
+    // Word reg_brk_addr = 0x0000;	    // break point hardware register
+    // Byte reg_flags = 0x00;			// debug flags hardware register
+
+    Word _dbg_brk_addr  = 0;                    // break point hardware register
+    Byte _dbg_flags     = DBGF_DEBUG_ENABLE;    // debug flags hardware register
+
 
     inline static bool s_bIsDebugActive = DEBUG_STARTS_ACTIVE;
     inline static bool s_bSingleStep = DEBUG_SINGLE_STEP;

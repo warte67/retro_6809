@@ -59,15 +59,15 @@ Byte Debug::OnRead(Word offset)
     } 
     else if (offset == MAP(SYS_DBG_FLAGS) ) 
     {
-        (s_bIsDebugActive) ? reg_flags |= DBGF_DEBUG_ENABLE : reg_flags &= ~DBGF_DEBUG_ENABLE; // Enable
-        (s_bSingleStep)     ? reg_flags |= DBGF_SINGLE_STEP_ENABLE : reg_flags &= ~DBGF_SINGLE_STEP_ENABLE; // Single-Step
-        reg_flags &= ~DBGF_CLEAR_ALL_BRKPT;     // zero for Clear all Breakpoints
-        (mapBreakpoints[reg_brk_addr]) ? reg_flags |= DBGF_UPDATE_BRKPT : reg_flags &= ~DBGF_UPDATE_BRKPT;
-        reg_flags &= ~DBGF_FIRQ;     // FIRQ
-        reg_flags &= ~DBGF_IRQ;     // IRQ
-        reg_flags &= ~DBGF_NMI;     // NMI
-        reg_flags &= ~DBGF_RESET;     // RESET
-        data = reg_flags;              
+        (s_bIsDebugActive) ? _dbg_flags |= DBGF_DEBUG_ENABLE : _dbg_flags &= ~DBGF_DEBUG_ENABLE; // Enable
+        (s_bSingleStep)     ? _dbg_flags |= DBGF_SINGLE_STEP_ENABLE : _dbg_flags &= ~DBGF_SINGLE_STEP_ENABLE; // Single-Step
+        _dbg_flags &= ~DBGF_CLEAR_ALL_BRKPT;     // zero for Clear all Breakpoints
+        (mapBreakpoints[_dbg_brk_addr]) ? _dbg_flags |= DBGF_UPDATE_BRKPT : _dbg_flags &= ~DBGF_UPDATE_BRKPT;
+        _dbg_flags &= ~DBGF_FIRQ;     // FIRQ
+        _dbg_flags &= ~DBGF_IRQ;     // IRQ
+        _dbg_flags &= ~DBGF_NMI;     // NMI
+        _dbg_flags &= ~DBGF_RESET;     // RESET
+        data = _dbg_flags;              
     }
 
     return data; 
@@ -89,30 +89,30 @@ void Debug::OnWrite(Word offset, Byte data)
     } 
     else if ( offset == MAP(SYS_DBG_BRK_ADDR) + 0 ) 
     {
-        reg_brk_addr = (reg_brk_addr & 0x00ff) | (data << 8);
+        _dbg_brk_addr = (_dbg_brk_addr & 0x00ff) | (data << 8);
     } 
     else if ( offset == MAP(SYS_DBG_BRK_ADDR) + 1 ) 
     {
-        reg_brk_addr = (reg_brk_addr & 0xff00) | (data << 0);
+        _dbg_brk_addr = (_dbg_brk_addr & 0xff00) | (data << 0);
     }
     else if ( offset == MAP(SYS_DBG_FLAGS) )
     {
-        reg_flags = data;
-        (reg_flags & DBGF_DEBUG_ENABLE) ? s_bIsDebugActive = true : s_bIsDebugActive = false;
-        (reg_flags & DBGF_SINGLE_STEP_ENABLE) ? s_bSingleStep = true : s_bSingleStep = false;
-        if (reg_flags & DBGF_CLEAR_ALL_BRKPT)  cbClearBreaks();
-        (reg_flags & DBGF_UPDATE_BRKPT) ? mapBreakpoints[reg_brk_addr] = true : mapBreakpoints[reg_brk_addr] = false;
-        if (reg_flags & DBGF_FIRQ)   cbFIRQ();
-        if (reg_flags & DBGF_IRQ)   cbIRQ();
-        if (reg_flags & DBGF_NMI)   cbNMI();
-        if (reg_flags & DBGF_RESET)   cbReset();
+        _dbg_flags = data;
+        (_dbg_flags & DBGF_DEBUG_ENABLE) ? s_bIsDebugActive = true : s_bIsDebugActive = false;
+        (_dbg_flags & DBGF_SINGLE_STEP_ENABLE) ? s_bSingleStep = true : s_bSingleStep = false;
+        if (_dbg_flags & DBGF_CLEAR_ALL_BRKPT)  cbClearBreaks();
+        (_dbg_flags & DBGF_UPDATE_BRKPT) ? mapBreakpoints[_dbg_brk_addr] = true : mapBreakpoints[_dbg_brk_addr] = false;
+        if (_dbg_flags & DBGF_FIRQ)   cbFIRQ();
+        if (_dbg_flags & DBGF_IRQ)   cbIRQ();
+        if (_dbg_flags & DBGF_NMI)   cbNMI();
+        if (_dbg_flags & DBGF_RESET)   cbReset();
         // activate or deactivate the debugger
         if (s_bIsDebugActive)   // activate the debugger
         {
             SDL_ShowWindow( Bus::GetGPU()->GetWindow() );
             // reset the visited memory 
-            C6809* cpu = Bus::GetC6809();
-            cpu->ClearVisited_Memory();
+            // C6809* cpu = Bus::GetC6809();
+            // cpu->ClearVisited_Memory();
             SDL_RaiseWindow( _dbg_window );
         }
         else                    // deactivate the debugger     

@@ -71,10 +71,6 @@ void C6809::ThreadProc()
         float cycle_time = 8000.0f;     // in nanohertz
         // int cpu_speed = Bus::Inst()._sys_state;
 
-
-		s_sys_state = 0x0A;		// temp: hard coded CPU speed.
-
-
         int cpu_speed = s_sys_state;
         switch (cpu_speed)
         {
