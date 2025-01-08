@@ -1,6 +1,0 @@
-#!/bin/bash
-
-make clean
-
-echo "make -j 12 release=0"
-make -j 12 release=0

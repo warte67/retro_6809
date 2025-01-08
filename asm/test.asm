@@ -14,8 +14,7 @@ lp2		ldx	#VIDEO_START
 		addd	#1
 lp1		std	,x++
 		addd	#1
-		; cmpx	#VIDEO_START
-		cmpx	#VIDEO_START + $0500
+		cmpx	GPU_VIDEO_MAX
 		blt	lp1
 		bra	lp2
 

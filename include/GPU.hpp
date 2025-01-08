@@ -72,6 +72,9 @@ private: // PRIVATE MEMBERS
     float _std_width = 0.0f;
     float _std_height = 0.0f;
 
+    // GPU Registers
+
+    // GPU_OPTIONS
     Byte _gpu_options = 0b1111'0001;    // (Byte) Bitflag Enables
                                         //    - bit 7    = Extended Bitmap:
                                         //                  0: Tilemap Display
@@ -97,6 +100,7 @@ private: // PRIVATE MEMBERS
                                         //                 0: Disabled
                                         //                 1: Enabled
                                         // 
+    // GPU_MODE
     Byte _gpu_mode = 0b0110'1001;       // (Byte) Bitflag Enables
                                         //    - bit 7    = Standard Bitmap:
                                         //                  0: Text Display
@@ -108,6 +112,14 @@ private: // PRIVATE MEMBERS
                                         //                  11: 256-Colors
                                         //    - bits 0-4 = Display Mode (0-31)
                                         // 
+    // GPU_VIDEO_MAX
+    Word _gpu_video_max = 0x23FF;       // (Word) Video Buffer Maximum (Read Only)
+                                        //  Note: This will change to reflect
+                                        //        the size of the last cpu 
+                                        //        accessible memory location
+                                        //        of the currently active 
+                                        //        standard video mode.
+                                        //
 
     void _render_extended_graphics();
     void _render_standard_graphics();

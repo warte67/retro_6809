@@ -223,11 +223,22 @@ private: // PRIVATE MEMBERS
 
     bool bEditingBreakpoint = false;
     Word new_breakpoint = 0;		// working copy to be edited
-    // Word reg_brk_addr = 0x0000;	    // break point hardware register
-    // Byte reg_flags = 0x00;			// debug flags hardware register
 
-    Word _dbg_brk_addr  = 0;                    // break point hardware register
-    Byte _dbg_flags     = DBGF_DEBUG_ENABLE;    // debug flags hardware register
+
+    // SYS_DBG_BRK_ADDR               // (Word) Address of current debug breakpoint
+    Word _dbg_brk_addr  = 0;          
+    // SYS_DBG_FLAGS                  // (Byte) Debug Specific Hardware Flags
+    Byte _dbg_flags     = DBGF_DEBUG_ENABLE;
+                                      // - bit 7: Debug Enable
+                                      // - bit 6: Single Step Enable
+                                      // - bit 5: Clear All Breakpoints
+                                      // - bit 4: Update Breakpoint at DEBUG_BRK_ADDR
+                                      // - bit 3: FIRQ  (on low {0} to high {1} edge)
+                                      // - bit 2: IRQ   (on low {0} to high {1} edge)
+                                      // - bit 1: NMI   (on low {0} to high {1} edge)
+                                      // - bit 0: RESET (on low {0} to high {1} edge)
+                                      // 
+
 
 
     inline static bool s_bIsDebugActive = DEBUG_STARTS_ACTIVE;

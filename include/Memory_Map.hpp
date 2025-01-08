@@ -144,12 +144,19 @@ enum MEMMAP
                                       //               11: 256-Colors
                                       // - bits 0-4 = Display Mode (0-31)
                                       // 
-    GPU_END               = 0xFE0A,   // End of GPU Register Space
-    GPU_TOP               = 0xFE0B,   // Top of GPU Register Space
+    GPU_VIDEO_MAX         = 0xFE0B,   // (Word) Video Buffer Maximum (Read Only)
+                                      //  Note: This will change to reflect
+                                      //        the size of the last cpu
+                                      //        accessible memory location
+                                      //        of the currently active
+                                      //        standard video mode.
+                                      // 
+    GPU_END               = 0xFE0C,   // End of GPU Register Space
+    GPU_TOP               = 0xFE0D,   // Top of GPU Register Space
 // _______________________________________________________________________
 
-    HDW_RESERVED_DEVICE   = 0xFE0B,   // START: Reserved Register Space
-    HDW_REG_END           = 0xFFEF,   // 484 bytes reserved for future use.
+    HDW_RESERVED_DEVICE   = 0xFE0D,   // START: Reserved Register Space
+    HDW_REG_END           = 0xFFEF,   // 482 bytes reserved for future use.
 // _______________________________________________________________________
 
     ROM_VECTS_DEVICE      = 0xFFF0,   // START: Hardware Interrupt Vectors

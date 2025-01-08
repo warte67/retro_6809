@@ -126,7 +126,7 @@ bool Bus::Run()
                 _onActivate();
                 bWasActivated = true;
 
-                // wait 25 mil0000000liseconds to re-enable the CPU 
+                // wait 25 milliseconds to re-enable the CPU 
                 SDL_Delay(25);
 
                 // reenable the CPU
@@ -471,8 +471,7 @@ void Bus::_onUpdate(float __na)
 
         // _sys_cpu_speed = (int)(1.0f / (s_avg_cpu_cycle_time / 1000000.0f));
         // sTitle += "   CPU_SPEED: " + std::to_string(_sys_cpu_speed) + " khz.";
-    }    
-
+    }  
 
 
     // NOTE: This might be a good place to monitor the

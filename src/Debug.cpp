@@ -981,7 +981,6 @@ void Debug::DrawCursor(float fElapsedTime)
 }
 
 
-
 void Debug::DrawCode(int col, int row) {
     C6809* cpu = Bus::GetC6809();
     Word nextAddress = cpu->getPC();
@@ -1056,134 +1055,6 @@ void Debug::_display_next_instructions(int col, int& row, Word& nextAddress)
         ++count;
     }
 }
-
-
-
-
-// void Debug::_display_instructions(int col, int& row, Word& nextAddress) {
-//     C6809* cpu = Bus::GetC6809();
-
-//     // Locate the iterator for nextAddress
-//     auto currentItr = _instruction_map.find(nextAddress);
-
-//     // If nextAddress is not in the map, decode and add it
-//     if (currentItr == _instruction_map.end()) {
-//         Word tempAddress = nextAddress;
-//         std::string code = cpu->disasm(tempAddress, tempAddress); // Disassemble current line
-//         _instruction_map[nextAddress] = Bus::ReadByte(nextAddress);
-//         nextAddress = tempAddress; // Update nextAddress for future use
-//         currentItr = _instruction_map.find(nextAddress); // Re-locate iterator
-//     }
-//     // Display the previous 15 instructions
-//     auto prevItr = currentItr;
-//     for (int i = 0; i < 15 && prevItr != _instruction_map.begin(); ++i) {
-//         --prevItr;
-//         Word address = prevItr->first;
-//         Word opcode = prevItr->second;
-//         std::string code = cpu->disasm(address, address); // Get disassembled string
-//         bool atBreak = mapBreakpoints[address];
-//         OutText(col, row++, code, atBreak ? 0x30 : 0x10); // Display with appropriate color
-//     }
-//     // Display the current instruction
-//     if (currentItr != _instruction_map.end()) {
-//         Word address = currentItr->first;
-//         Word opcode = currentItr->second;
-//         std::string code = cpu->disasm(address, address); // Get disassembled string
-//         bool atBreak = mapBreakpoints[address];
-//         OutText(col, row++, code, atBreak ? 0xA0 : 0xF0); // Highlight the current line
-//     }
-//     // Display the next 15 instructions
-//     auto nextItr = currentItr;
-//     for (int i = 0; i < 15 && nextItr != _instruction_map.end(); ++i) {
-//         ++nextItr;
-//         if (nextItr == _instruction_map.end()) break;
-//         Word address = nextItr->first;
-//         Word opcode = nextItr->second;
-//         std::string code = cpu->disasm(address, address); // Get disassembled string
-//         bool atBreak = mapBreakpoints[address];
-//         OutText(col, row++, code, atBreak ? 0x30 : 0x80); // Display with appropriate color
-//     }
-// }
-
-
-
-// void Debug::DrawCode(int col, int row)
-// {
-//     C6809* cpu = Bus::GetC6809();
-//     Word cpu_PC = cpu->getPC();    
-
-//     // Draw the history of addresses
-//     _draw_history(col, row, cpu_PC);
-
-//     // Draw the current line
-//     _draw_current_line(col, row, cpu_PC);
-
-//     // Draw the future lines
-//     _draw_future_lines(col, row, cpu_PC);
-// }
-
-// void Debug::_draw_history(int col, int &row, Word cpu_PC) {
-
-//     if (!s_bSingleStep)
-//         _update_history(cpu_PC);
-//     C6809* cpu = Bus::GetC6809();
-
-//     // Draw each address in the history
-//     for (auto& address : _instruction_history_) {
-//         bool atBreak = mapBreakpoints[address];
-//         Word nextAddress;   // just a placeholder (refactor later)
-//         std::string code = cpu->disasm(address, nextAddress);
-//         OutText(col, row++, code, atBreak ? 0x30 : 0x10);
-//     }
-// }
-
-// void Debug::_draw_current_line(int col, int &row, Word &nextAddress) {
-//     C6809* cpu = Bus::GetC6809();
-//     bool atBreak = mapBreakpoints[nextAddress];
-//     // Word nextAddress;   // just a placeholder (refactor later)
-//     std::string code = cpu->disasm(nextAddress, nextAddress);
-//     OutText(col, row++, code, atBreak ? 0xA0 : 0xF0);
-// }
-
-// void Debug::_draw_future_lines(int col, int &row, Word cpu_PC) {
-//     C6809* cpu = Bus::GetC6809();
-//     Word next = cpu_PC;
-//     while (row < 40) {
-//         bool atBreak = mapBreakpoints[next];
-//         Word nextAddress;   // just a placeholder (refactor later)
-//         std::string code = cpu->disasm(next, nextAddress);
-//         OutText(col, row++, code, atBreak ? 0x30 : 0x80);
-//         next++;
-//     }
-// }
-
-// void Debug::_update_history(Word cpu_PC) {
-//     _instruction_history_.push_front(cpu_PC);
-//     while (_instruction_history_.size() > DEBUG_HISTORY_SIZE) {
-//         _instruction_history_.pop_back();
-//     }
-// }
-
-
-// void Debug::_update_history(Word cpu_PC) {
-//     auto it = std::find(_instruction_history_.begin(), _instruction_history_.end(), cpu_PC);
-//     if (it == _instruction_history_.end()) {
-//         // check if the new address is greater than all addresses in the history
-//         bool isNewAddressGreater = true;
-//         for (auto& address : _instruction_history_) {
-//             if (cpu_PC <= address) {
-//                 isNewAddressGreater = false;
-//                 break;
-//             }
-//         }
-//         if (isNewAddressGreater) {
-//             _instruction_history_.push_front(cpu_PC);
-//             while (_instruction_history_.size() > DEBUG_HISTORY_SIZE) {
-//                 _instruction_history_.pop_back();
-//             }
-//         }
-//     }
-// }
 
 
 void Debug::DrawButtons()
@@ -1502,7 +1373,7 @@ void Debug::KeyboardStuff()
             if (digit == 0)		data = (data & 0x0f) | (ch << 4);
             if (digit == 1)		data = (data & 0xf0) | (ch << 0);
             Memory::Write(addr + ofs, data);
-            if (csr_x < 53)		while (!CoordIsValid(++csr_x, csr_y));
+            if (csr_x < 52)		while (!CoordIsValid(++csr_x, csr_y));
             break;
         }
     }    

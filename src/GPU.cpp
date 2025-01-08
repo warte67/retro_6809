@@ -27,8 +27,16 @@ Byte GPU::OnRead(Word offset)
     Byte data = IDevice::OnRead(offset);    // use this for other devices
     // std::cout << clr::indent() << clr::CYAN << "GPU::OnRead($"<< clr::hex(offset,4) << ") = $" << clr::hex(data,2) << "\n" << clr::RESET;
 
-    if (offset == MAP(GPU_OPTIONS))     { data = _gpu_options;  }
-    else if (offset == MAP(GPU_MODE))   { data = _gpu_mode;     }
+    if (offset == MAP(GPU_OPTIONS))             { data = _gpu_options;  }
+    else if (offset == MAP(GPU_MODE))           { data = _gpu_mode;     }
+    else if (offset == MAP(GPU_VIDEO_MAX) + 0 ) 
+    {
+        data = _gpu_video_max >> 8;
+    } 
+    else if (offset == MAP(GPU_VIDEO_MAX) + 1 )
+    {
+        data = _gpu_video_max & 0xFF; 
+    } 
 
     return data;
 } // END: GPU::OnRead()
@@ -37,16 +45,23 @@ void GPU::OnWrite(Word offset, Byte data)
 { 
     // std::cout << clr::indent() << clr::CYAN << "GPU::OnWrite($" << clr::hex(offset,4) << ", $" << clr::hex(data,2) << ")\n" << clr::RESET;
 
-    if (offset == MAP(GPU_OPTIONS))         
-    { 
-        data = _verify_gpu_mode_change(data, offset);   
-        // _verify_gpu_mode_change(_gpu_mode, MAP(GPU_MODE));
-    }
-    else if (offset == MAP(GPU_MODE))   
-    { 
+    if (offset == MAP(GPU_OPTIONS)) { 
         data = _verify_gpu_mode_change(data, offset);  
-        // _verify_gpu_mode_change(_gpu_options, MAP(GPU_OPTIONS));
+        _gpu_options = data;
     }
+    else if (offset == MAP(GPU_MODE)) { 
+        data = _verify_gpu_mode_change(data, offset);  
+        _gpu_mode = data;
+    }
+    // READ ONLY:
+    // else if ( offset == MAP(GPU_VIDEO_MAX) + 0 ) 
+    // {
+    //     _gpu_video_max = (_gpu_video_max & 0x00ff) | (data << 8);
+    // } 
+    // else if ( offset == MAP(GPU_VIDEO_MAX) + 1 ) 
+    // {
+    //     _gpu_video_max = (_gpu_video_max & 0xff00) | (data << 0);
+    // }    
 
     IDevice::OnWrite( offset, data);
 } // END: GPU::OnWrite()
@@ -113,7 +128,7 @@ int  GPU::OnAttach(int nextAddr)
                                 "              1: Enabled", ""} }; nextAddr+=1;
     mapped_register.push_back(new_node);    
 
-     new_node = { "GPU_MODE", nextAddr,  {   "(Byte) Bitflag Enables",
+    new_node = { "GPU_MODE", nextAddr,  {   "(Byte) Bitflag Enables",
                                 "- bit 7    = Standard Bitmap:",
                                 "              0: Text Display",
                                 "              1: Bitmap Display",
@@ -123,6 +138,15 @@ int  GPU::OnAttach(int nextAddr)
                                 "              10: 16-Colors",
                                 "              11: 256-Colors",
                                 "- bits 0-4 = Display Mode (0-31)", "" } }; nextAddr+=1;
+    mapped_register.push_back(new_node);
+
+    new_node = { "GPU_VIDEO_MAX", nextAddr,  {   
+                                "(Word) Video Buffer Maximum (Read Only)",
+                                " Note: This will change to reflect",
+                                "       the size of the last cpu",
+                                "       accessible memory location",
+                                "       of the currently active",
+                                "       standard video mode.", "" } }; nextAddr+=2;
     mapped_register.push_back(new_node);
 
     nextAddr--;
@@ -283,8 +307,8 @@ void GPU::OnActivate()
     // }
 
     // clear out the extended video buffer
-    // Word d=0;
-    // for (int i=0; i<(64*1024); i++) { _ext_video_buffer[i] = d++; }
+    Word d=0;
+    for (int i=0; i<(64*1024); i++) { _ext_video_buffer[i] = d++; }
 
     // _clear_texture(pExt_Texture, 15, 15, 15, 15);
     // _clear_texture(pStd_Texture, 15, 15, 15, 15);
@@ -1038,6 +1062,8 @@ Byte GPU::_verify_gpu_mode_change(Byte data, Word map_register)
     // Byte saved_options = _gpu_options;
     // Byte saved_mode = _gpu_mode;
 
+    int buffer_size = 99999;
+
     // toggle fullscreen / windowed
     if (map_register == MAP(GPU_OPTIONS)) 
     {
@@ -1072,8 +1098,8 @@ Byte GPU::_verify_gpu_mode_change(Byte data, Word map_register)
         _std_width  = (float)width;
         _std_height = (float)height;
 
-        int buffer_size = 99999;
-        while (buffer_size > 8000)
+        // adjust color depth for the standard bitmap modes
+        do
         {
             int div = 0;
             int std_color_mode = (data & 0b0110'0000) >> 5;
@@ -1092,8 +1118,24 @@ Byte GPU::_verify_gpu_mode_change(Byte data, Word map_register)
                 //std::cout << "GPU: Reducing Standard Bitmap Color Depth: " << buffer_size << "\n";
                 _gpu_mode = data;
             }
-        }
+        } while (buffer_size > 8000);
     }
+
+    // set the GPU_VIDEO_MAX -- Standard Buffer
+    if (_gpu_mode & 0b1000'0000)
+    {   // bitmap mode
+        _gpu_video_max = ( ( MAP(VIDEO_START) + buffer_size ) / 4) - 1;
+    }
+    else
+    {   // text mode
+        buffer_size = ((_std_width/8) * (_std_height/8)) * 2;
+        _gpu_video_max = ( MAP(VIDEO_START) + buffer_size ) - 1;
+    }
+
+    // bounds checking Standard Buffer is between 0x0400 and 0x23FF
+    if (_gpu_video_max < MAP(VIDEO_START))  { _gpu_video_max = MAP(VIDEO_START); }
+    if (_gpu_video_max > MAP(VIDEO_END))    { _gpu_video_max = MAP(VIDEO_END); }
+
     return data;
 }
 
