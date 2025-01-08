@@ -9,7 +9,35 @@
 
 		org $2400
 
-start		ldd	#$0100
+start		
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		
+		ldd	#$0100
 lp2		ldx	#VIDEO_START		
 		addd	#1
 lp1		std	,x++

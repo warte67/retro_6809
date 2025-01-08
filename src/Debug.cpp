@@ -339,7 +339,8 @@ void Debug::OnDeactivate()
 
 void Debug::OnEvent(SDL_Event* evnt)
 {
-    if (SDL_GetWindowFromEvent(evnt) != _dbg_window) { return; }
+    // if (SDL_GetWindowFromEvent(evnt) != _dbg_window) { return; }
+    if (s_bIsDebugActive == false) { return; }
 
     switch (evnt->type) 
     {
@@ -355,8 +356,11 @@ void Debug::OnEvent(SDL_Event* evnt)
             // if debugger is active
             if (_dbg_flags & _DBG_FLAGS::DBGF_DEBUG_ENABLE)
             {
-                if (evnt->key.key == SDLK_ESCAPE)
+                if (evnt->key.key == SDLK_ESCAPE) 
+                {
                     bIsCursorVisible = false;
+                    bMouseWheelActive = false;
+                }
                 if (bIsCursorVisible)
                 {
                     if (evnt->key.key == SDLK_LEFT || evnt->key.key == SDLK_BACKSPACE)
@@ -778,16 +782,15 @@ void Debug::MouseStuff()
         {
             if (bMouseWheelActive == false)
             {
-                mousewheel_offset = 0;  //-25;
+                mousewheel_offset = -25;
                 bMouseWheelActive = true;
             }
             s_bSingleStep = true;	// scrollwheel enters into single step mode
             nRegisterBeingEdited.reg = Debug::EDIT_REGISTER::EDIT_NONE;	// cancel any register edits
-            mousewheel_offset -= mouse_wheel * 1;		// slow scroll
-            // if (SDL_GetModState() & SDL_KMOD_CTRL)	// is CTRL down?
-            //     mousewheel_offset -= mouse_wheel * 3;	// faster scroll	
-
-std::cout << "mousewheel_offset: " << mousewheel_offset << std::endl;		
+            if (SDL_GetModState() & SDL_KMOD_CTRL)	// is CTRL down?
+                mousewheel_offset -= mouse_wheel * 1;	// fine scroll	
+            else
+                mousewheel_offset -= mouse_wheel * 3;		// fast scroll
         }
 
 
@@ -814,8 +817,8 @@ std::cout << "mousewheel_offset: " << mousewheel_offset << std::endl;
             for (auto& bp : mapBreakpoints)
                 if (bp.second)
                     breakpoints.push_back(bp.first);
-            if ((unsigned)index < breakpoints.size())
-                printf("LEFT CLICK: $%04X\n", breakpoints[index]);
+            // if ((unsigned)index < breakpoints.size())
+            //     printf("LEFT CLICK: $%04X\n", breakpoints[index]);
             //mapBreakpoints[breakpoints[index]] = false;
         }
         // click to select
@@ -993,6 +996,12 @@ void Debug::DrawCursor(float fElapsedTime)
 
 
 void Debug::DrawCode(int col, int row) {
+
+    if (bMouseWheelActive) {
+        Old_DrawCode(col, row);
+        return;
+    }
+
     C6809* cpu = Bus::GetC6809();
     Word nextAddress = cpu->getPC();
 
@@ -1000,11 +1009,11 @@ void Debug::DrawCode(int col, int row) {
     for (auto &d : sDisplayedAsm) { d = -1; }
 
     // Display previous 16 instructions
-    int top_rows = row + 16;
+    int top_rows = row + 15;
     _display_previous_instructions(col, top_rows);
 
     // Display current instruction
-    int lower_rows = row + 17;
+    int lower_rows = row + 16;
     _display_single_instruction(col, lower_rows, nextAddress);
 
     // Display next 16 instructions
@@ -1035,6 +1044,7 @@ void Debug::_display_previous_instructions(int col, int& row)
         }
         if (threshold-- < 0) break;
     }
+
 }
 
 void Debug::_display_single_instruction(int col, int& row, Word &nextAddress) 
@@ -1056,7 +1066,7 @@ void Debug::_display_next_instructions(int col, int& row, Word& nextAddress)
 
     // Display the next 16 instructions
     int count = 0;
-    while (count < 16) {
+    while (count < 17) {
         bool atBreak = mapBreakpoints[nextAddress];
 
         // Disassemble the current instruction and update nextAddress to the next instruction
@@ -1073,6 +1083,113 @@ void Debug::_display_next_instructions(int col, int& row, Word& nextAddress)
         ++count;
     }
 }
+
+
+void Debug::Old_DrawCode(int col, int row)
+{
+    C6809* cpu = Bus::GetC6809();
+
+    std::string code = "";
+    int line = 0;
+    Word next = 0;
+    sDisplayedAsm.clear();
+
+    if (bMouseWheelActive)
+    {
+        Word cpu_PC = cpu->getPC();
+        Word offset = cpu_PC + mousewheel_offset;
+        int max_lines = 34;
+        while (line < max_lines)
+        {
+            if (offset < cpu_PC)
+            {
+                bool atBreak = false;
+                if (mapBreakpoints[offset])	atBreak = true;
+                sDisplayedAsm.push_back(offset);
+                code = cpu->disasm(offset, offset);
+                if (atBreak)
+                    OutText(col, row + line, code, 0xA0);    // red
+                else
+                    OutText(col, row + line, code, 0x40);    // dk green
+                line++;
+            }
+            if (offset == cpu_PC && line < max_lines)
+            {
+                bool atBreak = false;
+                if (mapBreakpoints[offset])	atBreak = true;
+                sDisplayedAsm.push_back(offset);
+                code = cpu->disasm(offset, offset);
+                if (atBreak)
+                    OutText(col, row + line, code, 0x50);  // brown
+                else
+                    OutText(col, row + line, code, 0xC0);    // yellow
+                line++;
+            }
+            if (offset > cpu_PC && line < max_lines)
+            {
+                bool atBreak = false;
+                if (mapBreakpoints[offset])	atBreak = true;
+                sDisplayedAsm.push_back(offset);
+                code = cpu->disasm(offset, offset);
+                if (atBreak)
+                    OutText(col, row + line, code, 0x30);   // dk red
+                else
+                    OutText(col, row + line, code, 0xB0);   // lt green
+                line++;
+            }
+
+        }
+
+    }
+    else
+    {
+        // draw the last several lines
+        for (auto& a : asmHistory)
+        {
+            if (a != cpu->getPC())
+            {
+                bool atBreak = false;
+                if (mapBreakpoints[a])	atBreak = true;
+                sDisplayedAsm.push_back(a);
+                code = cpu->disasm(a, next);
+                if (atBreak)
+                    OutText(col, row + line++, code, 0x30);      // 0x30 dk red
+                else
+                    OutText(col, row + line++, code, 0x10);    // 0x10 DK gray
+            }
+        }
+        // draw the current line
+        sDisplayedAsm.push_back(cpu->getPC());
+        code = cpu->disasm(cpu->getPC(), next);
+        if (mapBreakpoints[cpu->getPC()])
+            OutText(col, row + line++, code, 0xA0);              // 0xA0 red
+        else
+            OutText(col, row + line++, code, 0xF0);            // 0xF0 white
+        // create a history of addresses to display in the future
+        static Word last = cpu->getPC();
+        if (last != cpu->getPC())
+        {
+            last = cpu->getPC();
+            asmHistory.push_back(cpu->getPC());
+            while (asmHistory.size() > 12)
+                asmHistory.pop_front();
+        }
+        // draw the next several future lines
+        while (line < 24)
+        {
+            bool atBreak = false;
+            if (mapBreakpoints[next])	atBreak = true;
+            sDisplayedAsm.push_back(next);
+            code = cpu->disasm(next, next);
+            if (atBreak)
+                OutText(col, row + line++, code, 0X30);          // 0X30 DK RED
+            else
+                OutText(col, row + line++, code,0X80);        // 0X80 LT GRAY
+        }
+    }
+}
+
+
 
 
 void Debug::DrawButtons()
@@ -1467,7 +1584,7 @@ void Debug::cbRunStop()
     nRegisterBeingEdited.reg = Debug::EDIT_REGISTER::EDIT_NONE;	// cancel any register edits
     bMouseWheelActive = false;
 
-    mousewheel_offset = 0;
+    mousewheel_offset = -23;
 }
 void Debug::cbHide()
 {

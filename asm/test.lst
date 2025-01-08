@@ -181,14 +181,42 @@ FFFE  2400                            fdb     start
                       
 2400                                  org $2400
                       
-2400  CC0100          start           ldd     #$0100
-2403  8E0400          lp2             ldx     #VIDEO_START            
-2406  C30001                          addd    #1
-2409  ED81            lp1             std     ,x++
-240B  C30001                          addd    #1
-240E  BCFE0B                          cmpx    GPU_VIDEO_MAX
-2411  2DF6                            blt     lp1
-2413  20EE                            bra     lp2
+2400                  start           
+2400  12                              nop
+2401  12                              nop
+2402  12                              nop
+2403  12                              nop
+2404  12                              nop
+2405  12                              nop
+2406  12                              nop
+2407  12                              nop
+2408  12                              nop
+2409  12                              nop
+240A  12                              nop
+240B  12                              nop
+240C  12                              nop
+240D  12                              nop
+240E  12                              nop
+240F  12                              nop
+2410  12                              nop
+2411  12                              nop
+2412  12                              nop
+2413  12                              nop
+2414  12                              nop
+2415  12                              nop
+2416  12                              nop
+2417  12                              nop
+2418  12                              nop
+2419  12                              nop
+                                      
+241A  CC0100                          ldd     #$0100
+241D  8E0400          lp2             ldx     #VIDEO_START            
+2420  C30001                          addd    #1
+2423  ED81            lp1             std     ,x++
+2425  C30001                          addd    #1
+2428  BCFE0B                          cmpx    GPU_VIDEO_MAX
+242B  2DF6                            blt     lp1
+242D  20EE                            bra     lp2
                       
                       
                       

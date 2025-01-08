@@ -93,6 +93,9 @@ private: // PRIVATE MEMBERS
     void DumpMemory(int col, int row, Word addr);
     void DrawCpu(int x, int y);
     void DrawCode(int col, int row);
+
+    void Old_DrawCode(int col, int row);
+
     void _display_previous_instructions(int col, int& row);
     void _display_single_instruction(int col, int& row, Word &nextAddress);
     void _display_next_instructions(int col, int& row, Word &nextAddress);
