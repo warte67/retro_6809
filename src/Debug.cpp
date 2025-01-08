@@ -772,24 +772,25 @@ void Debug::MouseStuff()
             if (my > 30 && my < 40)	mem_bank[3] -= mouse_wheel * 8;
             bIsCursorVisible = false;
         }
-        // Scroll the Code
-        if (mx > 38 && mx < 64 && my > 5 && my < 30)
-        {
-            if (bMouseWheelActive == false)
-            {
-                mousewheel_offset = -25;
-                bMouseWheelActive = true;
-            }
-            s_bSingleStep = true;	// scrollwheel enters into single step mode
-            nRegisterBeingEdited.reg = Debug::EDIT_REGISTER::EDIT_NONE;	// cancel any register edits
-            mousewheel_offset -= mouse_wheel * 1;		// slow scroll
-            if (SDL_GetModState() & SDL_KMOD_CTRL)	// is CTRL down?
-                mousewheel_offset -= mouse_wheel * 3;	// faster scroll			
-        }
+        // // Scroll the Code
+        // if (mx > 38 && mx < 64 && my > 5 && my < 30)
+        // {
+        //     if (bMouseWheelActive == false)
+        //     {
+        //         mousewheel_offset = -25;
+        //         bMouseWheelActive = true;
+        //     }
+        //     s_bSingleStep = true;	// scrollwheel enters into single step mode
+        //     nRegisterBeingEdited.reg = Debug::EDIT_REGISTER::EDIT_NONE;	// cancel any register edits
+        //     mousewheel_offset -= mouse_wheel * 1;		// slow scroll
+        //     if (SDL_GetModState() & SDL_KMOD_CTRL)	// is CTRL down?
+        //         mousewheel_offset -= mouse_wheel * 3;	// faster scroll			
+        // }
+
+
         // scroll the break point display window (bottom right corner)
-        if (mx >= 55 && my >= 33)
+        if (mx >= 71 && my >= 41 && mx < 100 && my < 48)
         {
-            // printf("mouse_wheel: %d\n", mouse_wheel);
             mw_brk_offset -= mouse_wheel;
         }
 
@@ -802,9 +803,9 @@ void Debug::MouseStuff()
     if ((btns & 1) && !last_LMB)
     {
         // left-clicked on breakpoint
-        if (mx >= 55 && my >= 33)
+        if (mx >= 71 && my >= 41)
         {
-            int index = (my - 33) + mw_brk_offset;
+            int index = (my - 41) + mw_brk_offset;
             // build a vector of active breakpoints
             std::vector<Word> breakpoints;
             for (auto& bp : mapBreakpoints)
@@ -860,12 +861,15 @@ void Debug::MouseStuff()
             nRegisterBeingEdited.reg = EDIT_NONE;
 
         // left-click on code line toggles breakpoint
-        if (mx > 38 && mx < 64 && my > 5 && my < 30 && s_bSingleStep)
+        if (mx > 70 && mx < 100 && my > 5 && my < 40 && s_bSingleStep)
         {
-            Word offset = sDisplayedAsm[my - 6];
-            (mapBreakpoints[offset]) ?
-                mapBreakpoints[offset] = false :
-                mapBreakpoints[offset] = true;
+            if (sDisplayedAsm[my - 6] >= 0)
+            {
+                Word offset = sDisplayedAsm[my - 6];
+                (mapBreakpoints[offset]) ?
+                    mapBreakpoints[offset] = false :
+                    mapBreakpoints[offset] = true;
+            }
         }
     }
     last_LMB = (btns & 1);
@@ -874,9 +878,9 @@ void Debug::MouseStuff()
     if (btns & 4 && !last_RMB)
     {
         // right-clicked on breakpoint
-        if (mx >= 55 && my >= 33)
+        if (mx >= 71 && my >= 41)
         {
-            int index = (my - 33) + mw_brk_offset;
+            int index = (my - 41) + mw_brk_offset;
             // build a vector of active breakpoints
             std::vector<Word> breakpoints;
             for (auto& bp : mapBreakpoints)
@@ -888,22 +892,27 @@ void Debug::MouseStuff()
                 mapBreakpoints[breakpoints[index]] = false;
             }
         }
+
         // on PC register
-        if (my == 4 && mx > 42 && mx < 47)
+        if (my == 4 && mx > 74 && mx < 79)
         {
             s_bSingleStep = !s_bSingleStep;
             if (!s_bSingleStep)
                 nRegisterBeingEdited.reg = Debug::EDIT_REGISTER::EDIT_NONE;	// cancel any register edits
         }
         // right-click on code line toggles breakpoint and resumes execution
-        if (mx > 38 && mx < 64 && my > 5 && my < 30 && s_bSingleStep)
+        if (mx > 70 && mx < 100 && my > 5 && my < 40 && s_bSingleStep)
         {
-            Word offset = sDisplayedAsm[my - 6];
-            (mapBreakpoints[offset]) ?
-                mapBreakpoints[offset] = false :
-                mapBreakpoints[offset] = true;
-            if (mapBreakpoints[offset] == true)
-                s_bSingleStep = false;
+            Word offset = my - 6;
+            if (sDisplayedAsm[my - 6] >= 0)
+            {
+                Word offset = sDisplayedAsm[my - 6];
+                (mapBreakpoints[offset]) ?
+                    mapBreakpoints[offset] = false :
+                    mapBreakpoints[offset] = true;
+                if (mapBreakpoints[offset] == true)
+                    s_bSingleStep = false;
+            }
         }
     }
     last_RMB = (btns & 4);
@@ -985,6 +994,10 @@ void Debug::DrawCode(int col, int row) {
     C6809* cpu = Bus::GetC6809();
     Word nextAddress = cpu->getPC();
 
+    // Reset the displayed disassembly buffer
+    for (auto &d : sDisplayedAsm) { d = -1; }
+
+
     // Display previous 16 instructions
     int top_rows = row + 16;
     _display_previous_instructions(col, top_rows);
@@ -1014,6 +1027,7 @@ void Debug::_display_previous_instructions(int col, int& row)
             if (mapBreakpoints[i])	atBreak = true;
             Word throw_away;
             std::string code = cpu->disasm(i, throw_away);
+            sDisplayedAsm[row-6] = i;
             OutText(col, row--, code, atBreak ? 0x50 : 0x80);
             count--;
             if (count == 0) break;
@@ -1031,6 +1045,7 @@ void Debug::_display_single_instruction(int col, int& row, Word &nextAddress)
     // display the current instruction
     bool atBreak = mapBreakpoints[currentAddress];    
     std::string code = cpu->disasm(currentAddress, nextAddress);   // this updates nextAddress 
+    sDisplayedAsm[row-6] = currentAddress;
     OutText(col, row++, code, atBreak ? 0xA0 : 0xF0);
 }
 
@@ -1048,8 +1063,10 @@ void Debug::_display_next_instructions(int col, int& row, Word& nextAddress)
         std::string code = cpu->disasm(nextAddress, nextAddress);
 
         // Output the disassembled instruction
-        if (cpu->WasVisited_Memory(currentAddress))
+        if (cpu->WasVisited_Memory(currentAddress)) {
+            sDisplayedAsm[row-6] = currentAddress;
             OutText(col, row++, code, atBreak ? 0x30 : 0x10);
+        }
 
         // Increment count
         ++count;
@@ -1130,7 +1147,7 @@ void Debug::DrawBreakpoints()
 {
     // C6809* cpu = Bus::GetC6809();
 
-    int x = 56, y = 33;		// y <= 38
+    int x = 71, y = 41;		// y <= 38
     // Uint8 ci = 0x0C;
 
     // build a vector of active breakpoints
