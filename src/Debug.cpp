@@ -811,7 +811,7 @@ void Debug::MouseStuff()
         // left-clicked on breakpoint
         if (mx >= 71 && my >= 41)
         {
-            int index = (my - 41) + mw_brk_offset;
+            // int index = (my - 41) + mw_brk_offset;
             // build a vector of active breakpoints
             std::vector<Word> breakpoints;
             for (auto& bp : mapBreakpoints)
