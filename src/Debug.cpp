@@ -482,7 +482,7 @@ void Debug::OnUpdate(float fElapsedTime)
         MouseStuff();
         KeyboardStuff();
 
-        // DrawMemoryFrame(0,0);
+        DrawMemoryFrame(0,0);
         DumpMemory(1,  1, mem_bank[0]);
         DumpMemory(1, 10, mem_bank[1]);
         DumpMemory(1, 19, mem_bank[2]);
@@ -554,44 +554,60 @@ void Debug::OnRender()
 
 void Debug::DrawMemoryFrame(int col, int row)
 {
-    OutText(col, row++, "+-------------------------------------+ +------------------------+", 0x80);
-    OutText(col, row++, "|                                     | |                        |", 0x80);
-    OutText(col, row++, "|                                     | |                        |", 0x80);
-    OutText(col, row++, "|                                     | |                        |", 0x80);
-    OutText(col, row++, "|                                     | |                        |", 0x80);
-    OutText(col, row++, "|                                     | +------------------------+", 0x80);
-    OutText(col, row++, "|                                     |", 0x80);
-    OutText(col, row++, "|                                     |", 0x80);
-    OutText(col, row++, "|                                     |", 0x80);
-    OutText(col, row++, "+-------------------------------------+", 0x80);
-    OutText(col, row++, "|                                     |", 0x80);
-    OutText(col, row++, "|                                     |", 0x80);
-    OutText(col, row++, "|                                     |", 0x80);
-    OutText(col, row++, "|                                     |", 0x80);
-    OutText(col, row++, "|                                     |", 0x80);
-    OutText(col, row++, "|                                     |", 0x80);
-    OutText(col, row++, "|                                     |", 0x80);
-    OutText(col, row++, "|                                     |", 0x80);
-    OutText(col, row++, "+-------------------------------------+", 0x80);
-    OutText(col, row++, "|                                     |", 0x80);
-    OutText(col, row++, "|                                     |", 0x80);
-    OutText(col, row++, "|                                     |", 0x80);
-    OutText(col, row++, "|                                     |", 0x80);
-    OutText(col, row++, "|                                     |", 0x80);
-    OutText(col, row++, "|                                     |", 0x80);
-    OutText(col, row++, "|                                     |", 0x80);
-    OutText(col, row++, "|                                     |", 0x80);
-    OutText(col, row++, "+-------------------------------------+", 0x80);
-    OutText(col, row++, "|                                     |", 0x80);
-    OutText(col, row++, "|                                     |", 0x80);
-    OutText(col, row++, "|                                     |", 0x80);
-    OutText(col, row++, "|                                     |", 0x80);
-    OutText(col, row++, "|                                     |", 0x80);
-    OutText(col, row++, "|                                     |", 0x80);
-    OutText(col, row++, "|                                     |", 0x80);
-    OutText(col, row++, "|                                     |", 0x80);
-    OutText(col, row++, "+-------------------------------------+", 0x80);
+    // 0xb3 = top left
+    // 0xb5 = horizontal (both top and bottom)
+    // 0xb6 = top right
+    // 0xb9 = bottom left
+    // 0xba = vertical (both left and right)
+    // 0xbb = left side and right horizontal
+    // 0xbc = bottom right
+    // 0xBE = right side and left horizontal
+
+    // BLUE Memory Dump Frames
+    std::string s = "";
+    Byte clr = 0x70;
+    s += (char)0xb3; s += std::string(37, (char)0xb5); s += (char)0xb6;
+    OutText(col, row++, s, clr);
+    for (int r = 0; r < 3; r++)
+    {
+        s = "";
+        s += (char)0xba; s += std::string(37, (char)0x20); s += (char)0xba;
+        for (int t = 0; t < 8; t++)
+            OutText(col, row++, s, clr);
+        s = "";
+        s += (char)0xbb; s += std::string(37, (char)0xb5); s += (char)0xbe;
+        OutText(col, row++, s, clr);
+    }
+    s = "";
+    s += (char)0xba; s += std::string(37, (char)0x20); s += (char)0xba;
+    for (int t = 0; t < 8; t++)
+        OutText(col, row++, s, clr);
+    s = "";
+    s += (char)0xb9; s += std::string(37, (char)0xb5); s += (char)0xbc;
+    OutText(col, row++, s, clr);
+
+    // GREEN Register Display Frame
+    // ...
+
+    // GRAY Code Display Frame
+    // ...
+
+    // RED Breakpoint Display Frame
+    // ...
+
+    // BUTTONS:  
+    // 0xA1 = top left
+    // 0xA2 = top right
+    // 0xA3 = top horizontal
+    // 0xA4 = bottom left
+    // 0xA5 = left vertical
+    // 0xA8 = bottom right
+    // 0xAC = bottom horizontal
+
 }
+    
+
+
 
 
 void Debug::_clear_texture(SDL_Texture* texture, Byte r, Byte g, Byte b, Byte a)
@@ -1011,9 +1027,9 @@ void Debug::DrawCursor(float fElapsedTime)
             Byte digit = ((csr_x + 1) % 3) - 1;
             Byte num = 0;
             Word addr = mem_bank[0];
-            if (csr_y > 10 && csr_y < 20) { ofs -= 72 ; addr = mem_bank[1]; }
-            if (csr_y > 20 && csr_y < 30) { ofs -= 144; addr = mem_bank[2]; }
-            if (csr_y > 30 && csr_y < 40) { ofs -= 216; addr = mem_bank[3]; }
+            if (csr_y >  9 && csr_y < 18) { ofs -= 72 ; addr = mem_bank[1]; }
+            if (csr_y > 18 && csr_y < 27) { ofs -= 144; addr = mem_bank[2]; }
+            if (csr_y > 27 && csr_y < 36) { ofs -= 216; addr = mem_bank[3]; }
 
             Byte data = Memory::Read(addr + ofs);//, true);
             if (digit == 0) num = (data & 0xf0) >> 4;
@@ -1244,12 +1260,12 @@ void Debug::DrawButtons()
     if (s_bSingleStep)
     {
         vButton[5].text = " RUN!";
-        vButton[5].x_min = 17;
+        vButton[5].x_min = 02;
         vButton[5].clr_index = 0xB;
     }
     else {
         vButton[5].text = " STOP";
-        vButton[5].x_min = 17;
+        vButton[5].x_min = 02;
         vButton[5].clr_index = 0xA;
     }
     if (bEditingBreakpoint)
@@ -1271,16 +1287,39 @@ void Debug::DrawButtons()
     {
         int x1 = a.x_min;
         int x2 = a.x_max;
-        int y = a.y_pos;
-        // background
-        int p = (a.clr_index % 16) | ((a.clr_index % 16)<<4);
-        for (int x = x1; x <= x2; x++)
+        int y1 = a.y_min;
+        int y2 = a.y_max;
+        int p = ((a.clr_index % 16)<<4);
+
+    // BUTTONS:  
+    // 0xA1 = top left
+    // 0xA2 = top right
+    // 0xA3 = top horizontal
+    // 0xA4 = bottom left
+    // 0xA5 = left vertical
+    // 0xA8 = bottom right
+    // 0xAA = right vertical
+    // 0xAC = bottom horizontal
+
+        OutGlyph(x1, y1, 0xA1, p);          // top left
+        for (int x = x1+1; x < x2; x++)
+            OutGlyph(x, y1, 0xA3, p);       // top horizontal
+        OutGlyph(x2, y1, 0xA2, p);          // top right
+        for (int y = y1+1; y < y2; y++)
         {
-            OutGlyph(x, y, 0x8f, p);
+            OutGlyph(x1, y, 0xA5, p);        // left vertical
+            for (int x = x1+1; x < x2; x++)
+                OutGlyph(x, y, 0x8F, p);     // solid
+            OutGlyph(x2  , y, 0xAA, p);      // right vertical
         }
+        OutGlyph(x1, y2, 0xA4, p);          // bottom left
+        for (int x = x1+1; x < x2; x++)
+            OutGlyph(x, y2, 0xAC, p);       // bottom horizontal
+        OutGlyph(x2, y2, 0xA8, p);          // bottom right
+
         // foreground
         int sX = x1 + ((x2 - x1) / 2) - (int)a.text.size() / 2;
-        OutText(sX, y, a.text, a.clr_index % 16);
+        OutText(sX, y1+1, a.text, a.clr_index % 16);
     }
 }
 
@@ -1296,7 +1335,7 @@ void Debug::HandleButtons()
     {
         for (auto& a : vButton)
         {
-            if (my == a.y_pos && mx >= a.x_min && mx <= a.x_max)
+            if (my >= a.y_min && my <= a.y_max && mx >= a.x_min && mx <= a.x_max)
             {
                 if (a.cbFunction)	(this->*a.cbFunction)();
             }

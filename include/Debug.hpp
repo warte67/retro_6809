@@ -193,21 +193,22 @@ private: // PRIVATE MEMBERS
         SDL_Scancode key;		// shortcut key scancode
         Uint16 x_min;			// button left
         Uint16 x_max;			// button right
-        Uint16 y_pos;
+        Uint16 y_min;           // button top
+        Uint16 y_max;           // button bottom
         Byte clr_index;			// color index
         void (Debug::* cbFunction)();	// button callback
     };
-    std::vector<BUTTON_NODE> vButton = {	
-        {" Clr Breaks",		SDL_SCANCODE_C,		51, 62, 41, 0xC, &Debug::cbClearBreaks},
-        {"Reset",			SDL_SCANCODE_R,		43, 49, 41, 0xB, &Debug::cbReset },
-        {"NMI",				SDL_SCANCODE_N,		37, 41, 41, 0xD, &Debug::cbNMI },
-        {"IRQ",				SDL_SCANCODE_I,		31, 35, 41, 0xD, &Debug::cbIRQ },
-        {" FIRQ",			SDL_SCANCODE_F,		24, 29, 41, 0xD, &Debug::cbFIRQ },
-        {" RUN",			SDL_SCANCODE_D,		17, 22, 41, 0xB, &Debug::cbRunStop },
-        {" EXIT",			SDL_SCANCODE_H,		17, 22, 43, 0xB, &Debug::cbHide },
-        {"STEP_INTO",		SDL_SCANCODE_SPACE,	24, 34, 43, 0x9, &Debug::cbStepIn },
-        {"STEP_OVER",		SDL_SCANCODE_O,		36, 46, 43, 0x9, &Debug::cbStepOver },
-        {"ADD BRK",			SDL_SCANCODE_B,		48, 54, 43, 0xC, &Debug::cbAddBrk },
+    std::vector<BUTTON_NODE> vButton = {   //   X1  X2  Y1  Y2  CLR  CB
+        {"Clear Breaks",    SDL_SCANCODE_C,		46, 62, 38, 40, 0x5, &Debug::cbClearBreaks},
+        {"Reset",			SDL_SCANCODE_R,		02, 10, 41, 43, 0xD, &Debug::cbReset },         // Reset
+        {" NMI",			SDL_SCANCODE_N,		28, 36, 41, 43, 0xD, &Debug::cbNMI },
+        {"IRQ",             SDL_SCANCODE_I,		20, 27, 41, 43, 0xD, &Debug::cbIRQ },
+        {"FIRQ",			SDL_SCANCODE_F,		11, 19, 41, 43, 0xD, &Debug::cbFIRQ },
+        {"RUN",			    SDL_SCANCODE_D,		02, 10, 38, 40, 0xB, &Debug::cbRunStop },       // Run / Stop
+        {" EXIT",			SDL_SCANCODE_H,		71, 78, 01, 03, 0x1, &Debug::cbHide },          // Exit / Hide
+        {"STEP_INTO",		SDL_SCANCODE_SPACE,	11, 23, 38, 40, 0x9, &Debug::cbStepIn },
+        {"STEP_OVER",		SDL_SCANCODE_O,		24, 36, 38, 40, 0x9, &Debug::cbStepOver },
+        {"Add Breakpoint ",	SDL_SCANCODE_B,		46, 62, 41, 43, 0x5, &Debug::cbAddBrk },
     };
 
     // std::vector<Word> mem_bank = { static_cast<Word>(MAP(SSTACK_TOP) - 0x0048), MAP(VIDEO_START), 0xFE00, 0x0000 };
