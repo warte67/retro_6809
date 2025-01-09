@@ -90,6 +90,8 @@ private: // PRIVATE MEMBERS
     void _update_debug_screen();
     // void _update_mouse_pos(); 
 
+    void DrawMemoryFrame(int col, int row);
+
     void DumpMemory(int col, int row, Word addr);
     void DrawCpu(int x, int y);
     void DrawCode(int col, int row);
@@ -172,16 +174,16 @@ private: // PRIVATE MEMBERS
     };
     std::vector<REGISTER_NODE> register_info = {
         { EDIT_REGISTER::EDIT_NONE,  0,  0,  0,  0   },
-        { EDIT_REGISTER::EDIT_CC,    0,  1, 75, 76 },
-        { EDIT_REGISTER::EDIT_D,     0,  2, 75, 78 },
-        { EDIT_REGISTER::EDIT_A,     0,  2, 83, 84 },
-        { EDIT_REGISTER::EDIT_B,     0,  2, 91, 92 },
-        { EDIT_REGISTER::EDIT_X,     0,  3, 75, 78 },
-        { EDIT_REGISTER::EDIT_Y,     0,  3, 83, 86 },
-        { EDIT_REGISTER::EDIT_U,     0,  3, 91, 94 },
-        { EDIT_REGISTER::EDIT_PC,    0,  4, 75, 78 },
-        { EDIT_REGISTER::EDIT_S,     0,  4, 83, 86 },
-        { EDIT_REGISTER::EDIT_DP,    0,  4, 92, 93 },
+        { EDIT_REGISTER::EDIT_CC,    0,  1, 44, 45 },
+        { EDIT_REGISTER::EDIT_D,     0,  2, 44, 47 },
+        { EDIT_REGISTER::EDIT_A,     0,  2, 52, 53 },
+        { EDIT_REGISTER::EDIT_B,     0,  2, 60, 61 },
+        { EDIT_REGISTER::EDIT_X,     0,  3, 44, 47 },
+        { EDIT_REGISTER::EDIT_Y,     0,  3, 52, 55 },
+        { EDIT_REGISTER::EDIT_U,     0,  3, 60, 63 },
+        { EDIT_REGISTER::EDIT_PC,    0,  4, 44, 47 },
+        { EDIT_REGISTER::EDIT_S,     0,  4, 52, 55 },
+        { EDIT_REGISTER::EDIT_DP,    0,  4, 61, 62 },
         { EDIT_REGISTER::EDIT_BREAK, 0, 43, 50, 53 },
     };
     REGISTER_NODE nRegisterBeingEdited = { EDIT_NONE,0,0,0,0 };
@@ -208,7 +210,8 @@ private: // PRIVATE MEMBERS
         {"ADD BRK",			SDL_SCANCODE_B,		48, 54, 43, 0xC, &Debug::cbAddBrk },
     };
 
-    std::vector<Word> mem_bank = { static_cast<Word>(MAP(SSTACK_TOP) - 0x0048), MAP(VIDEO_START), 0xFE00, 0x0000 };
+    // std::vector<Word> mem_bank = { static_cast<Word>(MAP(SSTACK_TOP) - 0x0048), MAP(VIDEO_START), 0xFE00, 0x0000 };
+    std::vector<Word> mem_bank = { 0x23B8, 0x2400, 0x2440, 0x2480 };
 
 
     std::vector<int> sDisplayedAsm = std::vector<int>(34, -1);  // 0-33 are valid, otherwise invalid or not displayed

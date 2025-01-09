@@ -1544,8 +1544,8 @@ void C6809::Init()
 std::string C6809::disasm(Word addr, Word& next)
 {
 	std::string ret = "";
-	Byte InstTab = 14;
-	Byte PostTab = 20;
+	Byte InstTab = 20;  // was 14
+	Byte PostTab = 26;  // was 20
 
 	auto hex = [](uint32_t n, uint8_t d)
 	{
@@ -1573,6 +1573,7 @@ std::string C6809::disasm(Word addr, Word& next)
 	{
 		Byte data = read(addr + t);
 		sOperation += hex(data, 2);
+        sOperation += " ";
 	}
 	addr += ofs;
 	// disasemble the operand
@@ -1636,6 +1637,7 @@ std::string C6809::disasm(Word addr, Word& next)
 	else if (opMap[opcode].addrmode == &C6809::idx) {
 		Byte post = read(addr);
 		sOperation += hex(read(addr + 1), 2);
+        sOperation += " ";
 		sOperation += hex(read(addr + 2), 2);
 		addr++;
 

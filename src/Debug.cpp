@@ -367,23 +367,23 @@ void Debug::OnEvent(SDL_Event* evnt)
                         if (csr_x > 1)
                             while (!CoordIsValid(--csr_x, csr_y));
                     if (evnt->key.key == SDLK_RIGHT)
-                        if (csr_x < 52)
+                        if (csr_x < 28)
                             while (!CoordIsValid(++csr_x, csr_y));
                     if (evnt->key.key == SDLK_UP)
                     {
-                        if (csr_y == 1)			mem_bank[0] -= 16;
-                        else if (csr_y == 11)	mem_bank[1] -= 16;
-                        else if (csr_y == 21)	mem_bank[2] -= 16;
-                        else if (csr_y == 31)	mem_bank[3] -= 16;
+                        if (csr_y == 1)			mem_bank[0] -= 8;
+                        else if (csr_y == 10)	mem_bank[1] -= 8;
+                        else if (csr_y == 19)	mem_bank[2] -= 8;
+                        else if (csr_y == 28)	mem_bank[3] -= 8;
                         else if (csr_y > 1)		while (!CoordIsValid(csr_x, --csr_y));
                     }
                     if (evnt->key.key == SDLK_DOWN)
                     {
-                        if (csr_y == 9)			mem_bank[0] += 16;
-                        else if (csr_y == 19)	mem_bank[1] += 16;
-                        else if (csr_y == 29)	mem_bank[2] += 16;
-                        else if (csr_y == 39)	mem_bank[3] += 16;
-                        else if (csr_y < 40)	while (!CoordIsValid(csr_x, ++csr_y));
+                        if (csr_y == 8)			mem_bank[0] += 8;
+                        else if (csr_y == 17)	mem_bank[1] += 8;
+                        else if (csr_y == 26)	mem_bank[2] += 8;
+                        else if (csr_y == 35)	mem_bank[3] += 8;
+                        else if (csr_y < 35)	while (!CoordIsValid(csr_x, ++csr_y));
                     }
                     if (evnt->key.key == SDLK_RETURN)
                         bIsCursorVisible = false;
@@ -482,13 +482,14 @@ void Debug::OnUpdate(float fElapsedTime)
         MouseStuff();
         KeyboardStuff();
 
+        // DrawMemoryFrame(0,0);
         DumpMemory(1,  1, mem_bank[0]);
-        DumpMemory(1, 11, mem_bank[1]);
-        DumpMemory(1, 21, mem_bank[2]);
-        DumpMemory(1, 31, mem_bank[3]);
+        DumpMemory(1, 10, mem_bank[1]);
+        DumpMemory(1, 19, mem_bank[2]);
+        DumpMemory(1, 28, mem_bank[3]);
 
-        DrawCpu(71, 1);     // was (39,1)
-        DrawCode(71, 6);    // was (39,6)
+        DrawCpu(40, 1);     // was (39,1)
+        DrawCode(40, 6);    // was (39,6)
 
         DrawButtons();    
         HandleButtons();
@@ -508,16 +509,17 @@ void Debug::OnUpdate(float fElapsedTime)
 
         // TESTING ...
             int mx, my;
+            int row = 45;
             _correct_mouse_coords(mx, my);
 
             std::string s = "Mouse          - X: " + std::to_string(mx) + " Y: " + std::to_string(my);
-            OutText(1, 63, s, 0x80);
+            OutText(1, row++, s, 0x80);
 
             std::string q = "Window -- width: " + std::to_string(_dbg_window_width) + " height: " + std::to_string(_dbg_window_height);
-            OutText(1, 65, q, 0x80);
+            OutText(1, row++, q, 0x80);
 
             std::string r = "s_bSingleStep: " + std::to_string(s_bSingleStep);
-            OutText(1, 67, r, 0x80);
+            OutText(1, row++, r, 0x80);
 
         // END: ... TESTING
 
@@ -547,6 +549,48 @@ void Debug::OnRender()
         // update the debugger window display
         SDL_RenderPresent(_dbg_renderer);
     }
+}
+
+
+void Debug::DrawMemoryFrame(int col, int row)
+{
+    OutText(col, row++, "+-------------------------------------+ +------------------------+", 0x80);
+    OutText(col, row++, "|                                     | |                        |", 0x80);
+    OutText(col, row++, "|                                     | |                        |", 0x80);
+    OutText(col, row++, "|                                     | |                        |", 0x80);
+    OutText(col, row++, "|                                     | |                        |", 0x80);
+    OutText(col, row++, "|                                     | +------------------------+", 0x80);
+    OutText(col, row++, "|                                     |", 0x80);
+    OutText(col, row++, "|                                     |", 0x80);
+    OutText(col, row++, "|                                     |", 0x80);
+    OutText(col, row++, "+-------------------------------------+", 0x80);
+    OutText(col, row++, "|                                     |", 0x80);
+    OutText(col, row++, "|                                     |", 0x80);
+    OutText(col, row++, "|                                     |", 0x80);
+    OutText(col, row++, "|                                     |", 0x80);
+    OutText(col, row++, "|                                     |", 0x80);
+    OutText(col, row++, "|                                     |", 0x80);
+    OutText(col, row++, "|                                     |", 0x80);
+    OutText(col, row++, "|                                     |", 0x80);
+    OutText(col, row++, "+-------------------------------------+", 0x80);
+    OutText(col, row++, "|                                     |", 0x80);
+    OutText(col, row++, "|                                     |", 0x80);
+    OutText(col, row++, "|                                     |", 0x80);
+    OutText(col, row++, "|                                     |", 0x80);
+    OutText(col, row++, "|                                     |", 0x80);
+    OutText(col, row++, "|                                     |", 0x80);
+    OutText(col, row++, "|                                     |", 0x80);
+    OutText(col, row++, "|                                     |", 0x80);
+    OutText(col, row++, "+-------------------------------------+", 0x80);
+    OutText(col, row++, "|                                     |", 0x80);
+    OutText(col, row++, "|                                     |", 0x80);
+    OutText(col, row++, "|                                     |", 0x80);
+    OutText(col, row++, "|                                     |", 0x80);
+    OutText(col, row++, "|                                     |", 0x80);
+    OutText(col, row++, "|                                     |", 0x80);
+    OutText(col, row++, "|                                     |", 0x80);
+    OutText(col, row++, "|                                     |", 0x80);
+    OutText(col, row++, "+-------------------------------------+", 0x80);
 }
 
 
@@ -710,8 +754,8 @@ void Debug::DumpMemory(int col, int row, Word addr)
 {
     const bool use_debug_read = false;
     int line = 0;
-    int width = 16;
-    for (int ofs = addr; ofs < addr + 0x90; ofs += 16)
+    int width = 8;
+    for (int ofs = addr; ofs < addr + 0x40; ofs += 8)
     {
         int c = col;
         std::string out = _hex(ofs, 4) + " ";
@@ -736,7 +780,7 @@ void Debug::DumpMemory(int col, int row, Word addr)
 
 bool Debug::CoordIsValid(int x, int y)
 {
-    if (y > 0 && y < 40 && y != 10 && y != 20 && y != 30)
+    if (y > 0 && y < 36 && y != 9 && y != 18 && y != 27)
     {
         // at an address
         if (x > 0 && x < 5)
@@ -745,7 +789,7 @@ bool Debug::CoordIsValid(int x, int y)
             return true;
         }
         // at a data entry
-        if (x > 5 && x < 53 && (x + 1) % 3)
+        if (x > 5 && x < 29 && (x + 1) % 3)
         {
             csr_at = CSR_AT::CSR_AT_DATA;
             return true;
@@ -768,21 +812,21 @@ void Debug::MouseStuff()
     if (mouse_wheel)
     {
         // scroll memory banks
-        if (mx > 0 && mx < 70)
+        if (mx > 0 && mx < 38)
         {
-            if (my > 0 && my < 10)	mem_bank[0] -= mouse_wheel * 8;
-            if (my > 10 && my < 20)	mem_bank[1] -= mouse_wheel * 8;
-            if (my > 20 && my < 30)	mem_bank[2] -= mouse_wheel * 8;
-            if (my > 30 && my < 40)	mem_bank[3] -= mouse_wheel * 8;
+            if (my > 0 && my < 9)	mem_bank[0] -= mouse_wheel * 8;
+            if (my > 9 && my < 18)	mem_bank[1] -= mouse_wheel * 8;
+            if (my > 18 && my < 27)	mem_bank[2] -= mouse_wheel * 8;
+            if (my > 27 && my < 36)	mem_bank[3] -= mouse_wheel * 8;
             bIsCursorVisible = false;
         }
 
         // Scroll the Code
-        if (mx > 70 && mx < 100 && my > 5 && my < 40)
+        if (mx > 39 && mx < 80 && my > 5 && my < 36)
         {
             if (bMouseWheelActive == false)
             {
-                mousewheel_offset = -25;
+                mousewheel_offset = -18;
                 bMouseWheelActive = true;
             }
             s_bSingleStep = true;	// scrollwheel enters into single step mode
@@ -837,14 +881,14 @@ void Debug::MouseStuff()
         if (my == 1)
         {
             C6809* cpu = Bus::GetC6809();
-            if (mx == 80) cpu->setCC_E(!cpu->getCC_E());
-            if (mx == 81) cpu->setCC_F(!cpu->getCC_F());
-            if (mx == 82) cpu->setCC_H(!cpu->getCC_H());
-            if (mx == 83) cpu->setCC_I(!cpu->getCC_I());
-            if (mx == 84) cpu->setCC_N(!cpu->getCC_N());
-            if (mx == 85) cpu->setCC_Z(!cpu->getCC_Z());
-            if (mx == 86) cpu->setCC_V(!cpu->getCC_V());
-            if (mx == 87) cpu->setCC_C(!cpu->getCC_C());
+            if (mx == 49) cpu->setCC_E(!cpu->getCC_E());
+            if (mx == 50) cpu->setCC_F(!cpu->getCC_F());
+            if (mx == 51) cpu->setCC_H(!cpu->getCC_H());
+            if (mx == 52) cpu->setCC_I(!cpu->getCC_I());
+            if (mx == 53) cpu->setCC_N(!cpu->getCC_N());
+            if (mx == 54) cpu->setCC_Z(!cpu->getCC_Z());
+            if (mx == 55) cpu->setCC_V(!cpu->getCC_V());
+            if (mx == 56) cpu->setCC_C(!cpu->getCC_C());
         }
         // Register Clicked?
         bool bFound = false;
@@ -867,7 +911,7 @@ void Debug::MouseStuff()
             nRegisterBeingEdited.reg = EDIT_NONE;
 
         // left-click on code line toggles breakpoint
-        if (mx > 70 && mx < 100 && my > 5 && my < 40 && s_bSingleStep)
+        if (mx > 39 && mx < 80 && my > 5 && my < 36 && s_bSingleStep)
         {
             if (sDisplayedAsm[my - 6] >= 0)
             {
@@ -884,7 +928,7 @@ void Debug::MouseStuff()
     if (btns & 4 && !last_RMB)
     {
         // right-clicked on breakpoint
-        if (mx >= 71 && my >= 41)
+        if (mx >= 39 && my >= 41)
         {
             int index = (my - 41) + mw_brk_offset;
             // build a vector of active breakpoints
@@ -907,7 +951,7 @@ void Debug::MouseStuff()
                 nRegisterBeingEdited.reg = Debug::EDIT_REGISTER::EDIT_NONE;	// cancel any register edits
         }
         // right-click on code line toggles breakpoint and resumes execution
-        if (mx > 70 && mx < 100 && my > 5 && my < 40 && s_bSingleStep)
+        if (mx > 39 && mx < 80 && my > 5 && my < 36 && s_bSingleStep)
         {            
             if (sDisplayedAsm[my - 6] >= 0)
             {
@@ -948,10 +992,10 @@ void Debug::DrawCursor(float fElapsedTime)
         case CSR_AT::CSR_AT_ADDRESS:
         {
             Word addr = 0;
-            if (csr_y < 10)      addr = mem_bank[0] + ((csr_y - 1 ) * 16);
-            else if (csr_y < 20) addr = mem_bank[1] + ((csr_y - 11) * 16);
-            else if (csr_y < 30) addr = mem_bank[2] + ((csr_y - 21) * 16);
-            else if (csr_y < 40) addr = mem_bank[3] + ((csr_y - 31) * 16);
+            if (csr_y < 10)      addr = mem_bank[0] + ((csr_y - 1 ) * 8);
+            else if (csr_y < 19) addr = mem_bank[1] + ((csr_y - 10) * 8);
+            else if (csr_y < 28) addr = mem_bank[2] + ((csr_y - 19) * 8);
+            else if (csr_y < 36) addr = mem_bank[3] + ((csr_y - 28) * 8);
             Byte digit = csr_x - 1;
             Byte num = 0;
             if (digit == 0)	num = ((addr & 0xf000) >> 12);
@@ -963,13 +1007,13 @@ void Debug::DrawCursor(float fElapsedTime)
         }
         case CSR_AT::CSR_AT_DATA:
         {
-            Byte ofs = ((csr_x - 5) / 3) + ((csr_y - 1) * 16);
+            Byte ofs = ((csr_x - 5) / 3) + ((csr_y - 1) * 8);
             Byte digit = ((csr_x + 1) % 3) - 1;
             Byte num = 0;
             Word addr = mem_bank[0];
-            if (csr_y > 10 && csr_y < 20) { ofs += 96 ; addr = mem_bank[1]; }
-            if (csr_y > 20 && csr_y < 30) { ofs -= 64; addr = mem_bank[2]; }
-            if (csr_y > 30 && csr_y < 40) { ofs -= 224; addr = mem_bank[3]; }
+            if (csr_y > 10 && csr_y < 20) { ofs -= 72 ; addr = mem_bank[1]; }
+            if (csr_y > 20 && csr_y < 30) { ofs -= 144; addr = mem_bank[2]; }
+            if (csr_y > 30 && csr_y < 40) { ofs -= 216; addr = mem_bank[3]; }
 
             Byte data = Memory::Read(addr + ofs);//, true);
             if (digit == 0) num = (data & 0xf0) >> 4;
@@ -1008,15 +1052,15 @@ void Debug::DrawCode(int col, int row) {
     // Reset the displayed disassembly buffer
     for (auto &d : sDisplayedAsm) { d = -1; }
 
-    // Display previous 16 instructions
-    int top_rows = row + 15;
+    // Display previous several instructions
+    int top_rows = row + 13;
     _display_previous_instructions(col, top_rows);
 
     // Display current instruction
-    int lower_rows = row + 16;
+    int lower_rows = row + 14;
     _display_single_instruction(col, lower_rows, nextAddress);
 
-    // Display next 16 instructions
+    // Display next several instructions
     _display_next_instructions(col, lower_rows, nextAddress);
 
 }
@@ -1027,7 +1071,7 @@ void Debug::_display_previous_instructions(int col, int& row)
     C6809* cpu = Bus::GetC6809();
     
     int threshold = 100;
-    int count = 16;
+    int count = 14;
     int start_addr = (cpu->getPC()-1);              // + mousewheel_offset;
     for (int i = start_addr; i > 0; i--)
     {
@@ -1064,9 +1108,9 @@ void Debug::_display_next_instructions(int col, int& row, Word& nextAddress)
 {
     C6809* cpu = Bus::GetC6809();
 
-    // Display the next 16 instructions
+    // Display the next several instructions
     int count = 0;
-    while (count < 17) {
+    while (count < 15) {
         bool atBreak = mapBreakpoints[nextAddress];
 
         // Disassemble the current instruction and update nextAddress to the next instruction
@@ -1098,7 +1142,7 @@ void Debug::Old_DrawCode(int col, int row)
     {
         Word cpu_PC = cpu->getPC();
         Word offset = cpu_PC + mousewheel_offset;
-        int max_lines = 34;
+        int max_lines = 30;
         while (line < max_lines)
         {
             if (offset < cpu_PC)
@@ -1480,35 +1524,35 @@ void Debug::KeyboardStuff()
         case CSR_AT::CSR_AT_ADDRESS:
         {
             Word addr = 0;
-            if (csr_y < 10)      addr = mem_bank[0] + ((csr_y - 1)  * 16);
-            else if (csr_y < 20) addr = mem_bank[1] + ((csr_y - 11) * 16);
-            else if (csr_y < 30) addr = mem_bank[2] + ((csr_y - 21) * 16);
-            else if (csr_y < 40) addr = mem_bank[3] + ((csr_y - 31) * 16);
+            if (csr_y < 9)       addr = mem_bank[0] + ((csr_y -  1) * 8);
+            else if (csr_y < 18) addr = mem_bank[1] + ((csr_y - 10) * 8);
+            else if (csr_y < 27) addr = mem_bank[2] + ((csr_y - 19) * 8);
+            else if (csr_y < 36) addr = mem_bank[3] + ((csr_y - 28) * 8);
             Byte digit = csr_x - 1;
             if (digit == 0)	addr = (addr & 0x0fff) | (ch << 12);
             if (digit == 1)	addr = (addr & 0xf0ff) | (ch << 8);
             if (digit == 2)	addr = (addr & 0xff0f) | (ch << 4);
             if (digit == 3)	addr = (addr & 0xfff0) | (ch << 0);
-            if (csr_y < 10)			mem_bank[0] = addr - ((csr_y - 1)  * 16);
-            else if (csr_y < 20)	mem_bank[1] = addr - ((csr_y - 11) * 16);
-            else if (csr_y < 30)	mem_bank[2] = addr - ((csr_y - 21) * 16);
-            else if (csr_y < 40)	mem_bank[3] = addr - ((csr_y - 31) * 16);
+            if (csr_y < 9)			mem_bank[0] = addr - ((csr_y -  1) * 8);
+            else if (csr_y < 18)	mem_bank[1] = addr - ((csr_y - 10) * 8);
+            else if (csr_y < 27)	mem_bank[2] = addr - ((csr_y - 19) * 8);
+            else if (csr_y < 36)	mem_bank[3] = addr - ((csr_y - 28) * 8);
             if (csr_x < 5)	while (!CoordIsValid(++csr_x, csr_y));
             break;
         }
         case CSR_AT::CSR_AT_DATA:
         {
-            Byte ofs = ((csr_x - 5) / 3) + ((csr_y - 1) * 16);
+            Byte ofs = ((csr_x - 5) / 3) + ((csr_y - 1) * 8);
             Byte digit = ((csr_x + 1) % 3) - 1;
             Word addr = mem_bank[0];
-            if (csr_y > 10 && csr_y < 20) { ofs += 96 ; addr = mem_bank[1]; }
-            if (csr_y > 20 && csr_y < 30) { ofs -= 64; addr = mem_bank[2]; }
-            if (csr_y > 30 && csr_y < 40) { ofs -= 224; addr = mem_bank[3]; }
+            if (csr_y >  9 && csr_y < 18) { ofs -= 72 ; addr = mem_bank[1]; }
+            if (csr_y > 18 && csr_y < 27) { ofs -= 144; addr = mem_bank[2]; }
+            if (csr_y > 27 && csr_y < 36) { ofs -= 216; addr = mem_bank[3]; }
             Byte data = Memory::Read(addr + ofs);//,true);
             if (digit == 0)		data = (data & 0x0f) | (ch << 4);
             if (digit == 1)		data = (data & 0xf0) | (ch << 0);
             Memory::Write(addr + ofs, data);
-            if (csr_x < 52)		while (!CoordIsValid(++csr_x, csr_y));
+            if (csr_x < 28)		while (!CoordIsValid(++csr_x, csr_y));
             break;
         }
     }    
@@ -1584,7 +1628,7 @@ void Debug::cbRunStop()
     nRegisterBeingEdited.reg = Debug::EDIT_REGISTER::EDIT_NONE;	// cancel any register edits
     bMouseWheelActive = false;
 
-    mousewheel_offset = -23;
+    mousewheel_offset = -18;        // approx. middle of the dispayed listing
 }
 void Debug::cbHide()
 {
