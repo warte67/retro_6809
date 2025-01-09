@@ -46,7 +46,7 @@
     #include "clr.hpp"
 
     // Debug Device Constants:
-    const Word DEBUG_WIDTH = 800;
+    const Word DEBUG_WIDTH = 960;
     const Word DEBUG_HEIGHT = DEBUG_WIDTH / 1.333333333333333;
 
     const float DEBUG_WINDOW_SCALE = 1.7f;
