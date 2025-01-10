@@ -59,6 +59,12 @@ void C6809::ThreadProc()
     }
     cpu->cv.notify_one();  // Notify the main thread that the CPU thread is ready
 
+
+    // Variables to measure frequency
+    int callCount = 0; // Counts the number of calls to `clock_input`
+    auto startMeasure = std::chrono::steady_clock::now(); // Start time for measurement
+
+
     while (Bus::IsRunning())
     {
         // main CPU clock
@@ -68,43 +74,54 @@ void C6809::ThreadProc()
         const sec duration = clock::now() - before_CPU;
 
         // 1000.f = 1mhz, 500.0f = 2mhz, etc...
-        float cycle_time = 8000.0f;     // in nanohertz
-        // int cpu_speed = Bus::Inst()._sys_state;
+        double cycle_time = 8000.0f;     // in nanohertz
 
         int cpu_speed = s_sys_state;
         switch (cpu_speed)
         {
-            case 0x00: cycle_time = 39900.0f;   break;      // 25 khz
-            case 0x01: cycle_time = 19900.0f;   break;      // 50 khz
-            case 0x02: cycle_time = 9900.0f;    break;      // 100 khz
-            case 0x03: cycle_time = 4900.0f;    break;      // 200 khz
-            case 0x04: cycle_time = 2900.0f;    break;      // 333 khz
-            case 0x05: cycle_time = 2300.0f;    break;      // 416 khz
-            case 0x06: cycle_time = 1900.0f;    break;      // 500 khz
-            case 0x07: cycle_time = 1500.0f;    break;      // 625 khz
-            case 0x08: cycle_time = 1200.0f;    break;      // 769 khz
-            case 0x09: cycle_time = 1100.0f;    break;      // 833 khz
-            case 0x0A: cycle_time = 900.0f;     break;      // 1.0 mhz
-            case 0x0B: cycle_time = 600.0f;     break;      // 1.4 mhz
-            case 0x0C: cycle_time = 400.0f;     break;      // 2.0 mhz
-            case 0x0D: cycle_time = 200.0f;     break;      // 3.3 mhz
-            case 0x0E: cycle_time = 100.0f;     break;      // 5 mhz
-            case 0x0F: cycle_time = 0.0f;       break;      // Unmetered (10 mhz)
-        }
-        //if (cpu_speed)
+			case 0x00: cycle_time = 100'000.00; break;		// 10,000 Hz (10 kHz)
+			case 0x01: cycle_time =  64'152.92; break;		// 15,587.76 Hz
+			case 0x02: cycle_time =  41'155.97; break;		// 24,297.81 Hz
+			case 0x03: cycle_time =  26'402.76; break;		// 37,874.83 Hz
+			case 0x04: cycle_time =  16'938.14; break;		// 59,038.36 Hz
+			case 0x05: cycle_time =  10'866.31; break;		// 92,027.55 Hz
+			case 0x06: cycle_time =   6'971.06; break;		// 143,450.29 Hz
+			case 0x07: cycle_time =   4'472.14; break;		// 223,606.80 Hz
+			case 0x08: cycle_time =   2'869.01; break;		// 348,552.80 Hz
+			case 0x09: cycle_time =   1'840.55; break;		// 543,315.56 Hz
+			case 0x0A: cycle_time =   1'180.77; break;		// 846,906.99 Hz
+			case 0x0B: cycle_time =     757.50; break;		// 1,320,137.87 Hz
+			case 0x0C: cycle_time =     485.96; break;		// 2,057,798.57 Hz
+			case 0x0D: cycle_time =     311.76; break;		// 3,207,646.00 Hz
+			case 0x0E: cycle_time =     200.00; break;		// 5,000,000 Hz (5 MHz)
+			case 0x0F: cycle_time =       0.00; break;		// Unmetered   
+		}
+		if (duration.count() > cycle_time)
+		{
+			before_CPU = clock::now();
+			if (s_bCpuEnabled)
+			{
+				Bus::GetC6809()->clock_input();
+				Bus::SetAvgCpuCycleTime( duration.count() );
+				// Increment call counter
+				callCount++;                
+			}				
+		}
+
+        // Measure frequency every second
+        auto now = std::chrono::steady_clock::now();
+        if (std::chrono::duration_cast<std::chrono::seconds>(now - startMeasure).count() >= 1)
         {
-            if (duration.count() > cycle_time)
-            {
-                before_CPU = clock::now();
-                //if (!C6809::s_bHalted)
-                if (s_bCpuEnabled)
-                {
-                    Bus::GetC6809()->clock_input();
-                    //Bus::Inst()._avg_cpu_cycle_time = duration.count();
-                    Bus::SetAvgCpuCycleTime( duration.count() );
-                }
-            }
+            // Calculate and print frequency
+            double frequency = callCount / 1.0; // Calls per second
+            std::cout << "Actual Frequency: " << frequency / 1000.0 << " kHz" << std::endl;
+
+            // Reset counter and start time
+            callCount = 0;
+            startMeasure = now;
         }
+
+
     }
 }
 
