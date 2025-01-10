@@ -51,12 +51,12 @@ public:
 											// 07:  350 kHz
 											// 08:  500 kHz
 											// 09:  750 kHz
-											// 10:  900 kHz
-											// 11: 1000 khz
-											// 12: 2000 khz
-											// 13: 3000 khz
-											// 14: 4000 khz
-											// 15: Unmetered  (10.0 mhz)
+											// 0A:  900 kHz
+											// 0B: 1000 khz
+											// 0C: 2000 khz
+											// 0D: 3000 khz
+											// 0E: 4000 khz
+											// 0F: Unmetered  (10.0 mhz)
 
 
 	private:

@@ -212,7 +212,7 @@ private: // PRIVATE MEMBERS
     };
 
     // std::vector<Word> mem_bank = { static_cast<Word>(MAP(SSTACK_TOP) - 0x0048), MAP(VIDEO_START), 0xFE00, 0x0000 };
-    std::vector<Word> mem_bank = { 0x23B8, 0x2400, 0x2440, 0x2480 };
+    std::vector<Word> mem_bank = { 0x0000, 0x0400, 0x2400, 0xFE00 };
 
 
     std::vector<int> sDisplayedAsm = std::vector<int>(34, -1);  // 0-33 are valid, otherwise invalid or not displayed
