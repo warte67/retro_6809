@@ -1041,7 +1041,7 @@ void Debug::DrawCursor(float fElapsedTime)
     // display the reversed character
     static Byte attr = 0;
 
-    const float delay = 1.0f / 60.0f;
+    const float delay = 1.0f / 120.0f;
     static float delayAcc = fElapsedTime;
     delayAcc += fElapsedTime;
     if (delayAcc >= delay)

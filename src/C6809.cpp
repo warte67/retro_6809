@@ -94,7 +94,7 @@ void C6809::ThreadProc()
 			case 0x0C: cycle_time =     485.96; break;		// 2,057,798.57 Hz
 			case 0x0D: cycle_time =     311.76; break;		// 3,207,646.00 Hz
 			case 0x0E: cycle_time =     200.00; break;		// 5,000,000 Hz (5 MHz)
-			case 0x0F: cycle_time =     50.00; break;		// Unmetered   
+			case 0x0F: cycle_time =     100.00; break;		// Unmetered   
 		}
 		if (duration.count() > cycle_time)
 		{
