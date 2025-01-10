@@ -581,3 +581,10 @@ void Bus::load_hex(const char* filename)
 	
 	return;
 }
+
+Word Bus::GetCpuSpeed()
+{ 
+    return C6809::_cpu_speed; 
+}
+
+

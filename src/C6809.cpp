@@ -69,7 +69,7 @@ void C6809::ThreadProc()
     {
         // main CPU clock
         using clock = std::chrono::system_clock;
-        using sec = std::chrono::duration<double, std::nano>;
+        using sec = std::chrono::duration<double, std::pico>;
         static auto before_CPU = clock::now();
         const sec duration = clock::now() - before_CPU;
 
@@ -79,30 +79,29 @@ void C6809::ThreadProc()
         int cpu_speed = s_sys_state;
         switch (cpu_speed)
         {
-			case 0x00: cycle_time = 100'000.00; break;		// 10,000 Hz (10 kHz)
-			case 0x01: cycle_time =  64'152.92; break;		// 15,587.76 Hz
-			case 0x02: cycle_time =  41'155.97; break;		// 24,297.81 Hz
-			case 0x03: cycle_time =  26'402.76; break;		// 37,874.83 Hz
-			case 0x04: cycle_time =  16'938.14; break;		// 59,038.36 Hz
-			case 0x05: cycle_time =  10'866.31; break;		// 92,027.55 Hz
-			case 0x06: cycle_time =   6'971.06; break;		// 143,450.29 Hz
-			case 0x07: cycle_time =   4'472.14; break;		// 223,606.80 Hz
-			case 0x08: cycle_time =   2'869.01; break;		// 348,552.80 Hz
-			case 0x09: cycle_time =   1'840.55; break;		// 543,315.56 Hz
-			case 0x0A: cycle_time =   1'180.77; break;		// 846,906.99 Hz
-			case 0x0B: cycle_time =     757.50; break;		// 1,320,137.87 Hz
-			case 0x0C: cycle_time =     485.96; break;		// 2,057,798.57 Hz
-			case 0x0D: cycle_time =     311.76; break;		// 3,207,646.00 Hz
-			case 0x0E: cycle_time =     200.00; break;		// 5,000,000 Hz (5 MHz)
-			case 0x0F: cycle_time =     100.00; break;		// Unmetered   
+			case 0x00: cycle_time = 100'000.00; break;		//   10 kHz
+			case 0x01: cycle_time =  40'000.00; break;		//   25 kHz
+			case 0x02: cycle_time =  20'000.00; break;		//   50 kHz
+			case 0x03: cycle_time =  13'333.33; break;		//   75 kHz
+			case 0x04: cycle_time =  10'000.00; break;		//  100 kHz
+			case 0x05: cycle_time =   6'666.67; break;		//  150 kHz
+			case 0x06: cycle_time =   4'444.44; break;		//  225 kHz
+			case 0x07: cycle_time =   2'857.14; break;		//  350 kHz
+			case 0x08: cycle_time =   2'000.00; break;		//  500 kHz
+			case 0x09: cycle_time =   1'333.33; break;		//  750 kHz
+			case 0x0A: cycle_time =   1'111.11; break;		//  900 kHz
+			case 0x0B: cycle_time =   1'000.11; break;		// 1000 khz
+			case 0x0C: cycle_time =     500.00; break;		// 2000 khz
+			case 0x0D: cycle_time =     333.33; break;		// 3000 khz
+			case 0x0E: cycle_time =     250.00; break;		// 4000 khz
+			case 0x0F: cycle_time =       0.00; break;		// Unmetered  
 		}
-		if (duration.count() > cycle_time)
+		if (duration.count() > cycle_time*1000.0)
 		{
 			before_CPU = clock::now();
 			if (s_bCpuEnabled)
 			{
 				Bus::GetC6809()->clock_input();
-				Bus::SetAvgCpuCycleTime( duration.count() );
 				// Increment call counter
 				callCount++;                
 			}				
@@ -114,7 +113,10 @@ void C6809::ThreadProc()
         {
             // Calculate and print frequency
             double frequency = callCount / 1.0; // Calls per second
-            std::cout << "Actual Frequency: " << frequency / 1000.0 << " kHz" << std::endl;
+std::cout << "Actual Frequency: " << frequency / 1000.0 << " kHz" << std::endl;
+
+			// Bus::SetCpuSpeed((Word)(frequency / 1000.0));
+			_cpu_speed = (Word)(frequency / 1000.0);
 
             // Reset counter and start time
             callCount = 0;
@@ -129,7 +131,6 @@ void C6809::ThreadProc()
 
 void C6809::clock_input()
 {
-    // std::lock_guard<std::mutex> lock(_register_mutex);
     std::unique_lock<std::mutex> lock(_register_mutex);
 
     Debug* debug = Bus::GetDebug();
@@ -163,7 +164,7 @@ void C6809::clock_input()
 				{
 					std::string er = "Invalid Instruction at $";
 					er += C6809::hex(PC, 4);
-                    // lock.unlock();
+                    lock.unlock();
 					Bus::Error(er.c_str(), __FILE__, __LINE__);
 				}
 				if (!waiting_cwai && !waiting_sync)

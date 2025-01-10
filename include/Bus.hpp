@@ -34,6 +34,7 @@
 #include "Memory.hpp"
 #include "GPU.hpp"
 
+
 class C6809;
 class Debug;
 
@@ -65,8 +66,8 @@ public: // PUBLIC METHODS
     static void IsRunning(bool b);
     static bool IsDirty();
     static void IsDirty(bool b);
-    inline static float GetAvgCpuCycleTime() { return s_avg_cpu_cycle_time; }
-    inline static void SetAvgCpuCycleTime(float f) { s_avg_cpu_cycle_time = f; }
+    // inline static float GetAvgCpuCycleTime() { return s_avg_cpu_cycle_time; }
+    // inline static void SetAvgCpuCycleTime(float f) { s_avg_cpu_cycle_time = f; }
     
     void load_hex(const char* filename);
 
@@ -81,8 +82,7 @@ public: // PUBLIC METHODS
     static float FPS() { return _fps; }
     static std::string GetTitle() { return _s_title; }
 
-    // static void SetCpuSpeed(Byte speed) { _sys_cpu_speed = speed; }
-    static Word GetCpuSpeed() { return _sys_cpu_speed; }
+    static Word GetCpuSpeed();
     static Byte GetClockDiv() { return _clock_div; }
     static Word GetClockTimer() { return _clock_timer; }
     static Word SetClockTimer(Word timer) { return _clock_timer = timer; }
@@ -98,7 +98,6 @@ private: // INTERNAL PRIVATES
     inline static float s_avg_cpu_cycle_time = 0;
     inline static Byte _clock_div = 0;				// SYS_CLOCK_DIV (Byte) 60 hz Clock Divider  (Read Only) 
     inline static Word _clock_timer = 0;			// SYS_TIMER	(R/W Word) increments at 0.46875 hz
-    inline static Word _sys_cpu_speed = 0;			// SYS_SPEED	(Read Byte) register
     inline static std::thread s_cpuThread;
 
     inline static std::mutex _mutex_IsDirty;

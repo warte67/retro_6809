@@ -41,22 +41,22 @@ public:
 
 	// Device type registers
 	inline static int s_sys_state = 0x0A;		// system speed 0-15
-    										// 	0x00 = 25 khz
-    										// 	0x01 = 50 khz
-    										// 	0x02 = 100 khz
-    										// 	0x03 = 200 khz
-    										// 	0x04 = 333 khz
-    										// 	0x05 = 416 khz
-    										// 	0x06 = 500 khz
-    										// 	0x07 = 625 khz
-    										// 	0x08 = 769 khz
-    										// 	0x09 = 833 khz
-    										// 	0x0A = 1.0 mhz
-    										// 	0x0B = 1.4 mhz
-    										// 	0x0C = 2.0 mhz
-    										// 	0x0D = 3.3 mhz
-    										// 	0x0E = 5 mhz
-    										// 	0x0F = Unmetered (10 mhz)	
+											// 00:   10 kHz
+											// 01:   25 kHz
+											// 02:   50 kHz
+											// 03:   75 kHz
+											// 04:  100 kHz
+											// 05:  150 kHz
+											// 06:  225 kHz
+											// 07:  350 kHz
+											// 08:  500 kHz
+											// 09:  750 kHz
+											// 10:  900 kHz
+											// 11: 1000 khz
+											// 12: 2000 khz
+											// 13: 3000 khz
+											// 14: 4000 khz
+											// 15: Unmetered  (10.0 mhz)
 
 
 	private:
@@ -380,6 +380,9 @@ public:
             _bitfield_visited[i].store(0, std::memory_order_relaxed);
         }
     }
+
+	// CPU speed as measured over the last second
+	inline static Word _cpu_speed;
 };
 
 

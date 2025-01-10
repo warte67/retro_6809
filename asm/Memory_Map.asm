@@ -60,21 +60,21 @@ SYS_STATE             equ   0xFE00    ; (Byte) System State Register
                                       ; - bit  5   = Error: Reserved                  
                                       ; - bit  4   = Error: Reserved                  
                                       ; - bits 0-3 = CPU Speed (0-15):                
-                                      ;    0 ($0)  = CPU Clock  25 khz.               
-                                      ;    1 ($1)  = CPU Clock  50 khz.               
-                                      ;    2 ($2)  = CPU Clock 100 khz.               
-                                      ;    3 ($3)  = CPU Clock 200 khz.               
-                                      ;    4 ($4)  = CPU Clock 333 khz.               
-                                      ;    5 ($5)  = CPU Clock 416 khz.               
-                                      ;    6 ($6)  = CPU Clock 500 khz.               
-                                      ;    7 ($7)  = CPU Clock 625 khz.               
-                                      ;    8 ($8)  = CPU Clock 769 khz.               
-                                      ;    9 ($9)  = CPU Clock 833 khz.               
-                                      ;   10 ($A)  = CPU Clock 1.0 mhz.               
-                                      ;   11 ($B)  = CPU Clock 1.4 mhz.               
-                                      ;   12 ($C)  = CPU Clock 2.0 mhz.               
-                                      ;   13 ($D)  = CPU Clock 3.3 mhz.               
-                                      ;   14 ($E)  = CPU Clock 5.0 mhz.               
+                                      ;    0 ($0)  = CPU Clock   10 kHz            
+                                      ;    1 ($1)  = CPU Clock   25 kHz            
+                                      ;    2 ($2)  = CPU Clock   50 kHz            
+                                      ;    3 ($3)  = CPU Clock   75 kHz            
+                                      ;    4 ($4)  = CPU Clock  100 kHz            
+                                      ;    5 ($5)  = CPU Clock  150 kHz            
+                                      ;    6 ($6)  = CPU Clock  225 kHz            
+                                      ;    7 ($7)  = CPU Clock  350 kHz            
+                                      ;    8 ($8)  = CPU Clock  500 kHz            
+                                      ;    9 ($9)  = CPU Clock  750 kHz            
+                                      ;   10 ($A)  = CPU Clock  900 kHz            
+                                      ;   11 ($B)  = CPU Clock 1000 khz            
+                                      ;   12 ($C)  = CPU Clock 2000 khz            
+                                      ;   13 ($D)  = CPU Clock 3000 khz            
+                                      ;   14 ($E)  = CPU Clock 4000 khz            
                                       ;   15 ($F)  = CPU Clock ~10.0 mhz. (unmetered) 
                                       ; 
 SYS_SPEED             equ   0xFE01    ; (Word) Average CPU Clock Speed (Read Only)
