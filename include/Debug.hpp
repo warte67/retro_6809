@@ -173,18 +173,19 @@ private: // PRIVATE MEMBERS
         Uint16 x_max = 0;
     };
     std::vector<REGISTER_NODE> register_info = {
-        { EDIT_REGISTER::EDIT_NONE,  0,  0,  0,  0   },
-        { EDIT_REGISTER::EDIT_CC,    0,  1, 44, 45 },
-        { EDIT_REGISTER::EDIT_D,     0,  2, 44, 47 },
-        { EDIT_REGISTER::EDIT_A,     0,  2, 52, 53 },
-        { EDIT_REGISTER::EDIT_B,     0,  2, 60, 61 },
-        { EDIT_REGISTER::EDIT_X,     0,  3, 44, 47 },
-        { EDIT_REGISTER::EDIT_Y,     0,  3, 52, 55 },
-        { EDIT_REGISTER::EDIT_U,     0,  3, 60, 63 },
-        { EDIT_REGISTER::EDIT_PC,    0,  4, 44, 47 },
-        { EDIT_REGISTER::EDIT_S,     0,  4, 52, 55 },
-        { EDIT_REGISTER::EDIT_DP,    0,  4, 61, 62 },
-        { EDIT_REGISTER::EDIT_BREAK, 0, 43, 50, 53 },
+        // REGISTER               value, y_pos, x_min, x_max
+        { EDIT_REGISTER::EDIT_NONE,  0,    0,      0,     0     },
+        { EDIT_REGISTER::EDIT_CC,    0,    1,     44,    45     },
+        { EDIT_REGISTER::EDIT_D,     0,    2,     44,    47     },
+        { EDIT_REGISTER::EDIT_A,     0,    2,     52,    53     },
+        { EDIT_REGISTER::EDIT_B,     0,    2,     60,    61     },
+        { EDIT_REGISTER::EDIT_X,     0,    3,     44,    47     },
+        { EDIT_REGISTER::EDIT_Y,     0,    3,     52,    55     },
+        { EDIT_REGISTER::EDIT_U,     0,    3,     60,    63     },
+        { EDIT_REGISTER::EDIT_PC,    0,    4,     44,    47     },
+        { EDIT_REGISTER::EDIT_S,     0,    4,     52,    55     },
+        { EDIT_REGISTER::EDIT_DP,    0,    4,     61,    62     },
+        { EDIT_REGISTER::EDIT_BREAK, 0,   43,     50,    53     },
     };
     REGISTER_NODE nRegisterBeingEdited = { EDIT_NONE,0,0,0,0 };
 
@@ -208,7 +209,7 @@ private: // PRIVATE MEMBERS
         {" EXIT",			SDL_SCANCODE_H,		71, 78, 01, 03, 0x1, &Debug::cbHide },          // Exit / Hide
         {"STEP_INTO",		SDL_SCANCODE_SPACE,	11, 23, 38, 40, 0x9, &Debug::cbStepIn },
         {"STEP_OVER",		SDL_SCANCODE_O,		24, 36, 38, 40, 0x9, &Debug::cbStepOver },
-        {"Add Breakpoint ",	SDL_SCANCODE_B,		46, 62, 41, 43, 0x5, &Debug::cbAddBrk },
+        {"Add Breakpoint ",	SDL_SCANCODE_B,		44, 62, 41, 43, 0x5, &Debug::cbAddBrk },
     };
 
     // std::vector<Word> mem_bank = { static_cast<Word>(MAP(SSTACK_TOP) - 0x0048), MAP(VIDEO_START), 0xFE00, 0x0000 };

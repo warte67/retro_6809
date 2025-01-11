@@ -1273,14 +1273,14 @@ void Debug::DrawButtons()
         vButton[9].text = "[$";
         vButton[9].text += _hex(new_breakpoint, 4);
         vButton[9].text += "]";
-        vButton[9].x_min = 48;
-        vButton[9].clr_index = 0xC;
+        vButton[9].x_min = 46;
+        vButton[9].clr_index = 0x5;
     }
     else
     {
-        vButton[9].text = "ADD BRK";
-        vButton[9].x_min = 48;
-        vButton[9].clr_index = 0xC;
+        vButton[9].text = "Add Breakpoint ";
+        vButton[9].x_min = 46;
+        vButton[9].clr_index = 0x5;
     }
     // draw the buttons
     for (auto& a : vButton)
@@ -1695,7 +1695,7 @@ void Debug::cbStepOver() //F10
 }
 void Debug::cbAddBrk()
 {
-    printf("Add Breakpoint\n");
+    // printf("Add Breakpoint\n");
     bEditingBreakpoint = true;
     nRegisterBeingEdited.reg = Debug::EDIT_REGISTER::EDIT_BREAK;
 }
