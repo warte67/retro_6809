@@ -136,10 +136,10 @@ bool Bus::Run()
                 Bus::IsDirty(false);           
             }
             // update all of the attached devices
-            _onUpdate(0);
+            _onUpdate();
             
             // dispatch SDL events to the devices
-            _onEvent(0);
+            _onEvent();
             
             // render all of the devices to the screen buffers
             _onRender();      
@@ -380,12 +380,9 @@ void Bus::_onDeactivate(void)
 
 
 
-void Bus::_onEvent(SDL_Event* __na)
+void Bus::_onEvent()
 {
     // std::cout << "Bus::_onEvent()\n";
-
-    // stop the unused argument warning
-    if (__na == nullptr) { ; }
 
     // SDL_Event evnt;
     SDL_Event evnt;
@@ -426,13 +423,79 @@ void Bus::_onEvent(SDL_Event* __na)
     }     
 }
 
+Byte Bus::clock_div(Byte& cl_div, int bit)
+{
+    if (bit > 7)    bit = 7;
+    if (bit < 0)    bit = 0;
+    double count[] =
+    { 
+        // cycle time       frequency
+        //   (ms):          (hz):
+          14.28571,         // 70 hz
+          28.57143,         // 35 hz
+          57.14286,         // 17.5 hz
+         114.28571,         // 8.75 hz
+         228.57143,         // 4.375 hz
+         471.42857,         // 2.1875 hz
+         942.85714,         // 1.09375 hz
+        1888.57143,         // 0.546875 hz
+    };
+    using clock = std::chrono::system_clock;
+    using sec = std::chrono::duration<double, std::milli>;
+    static auto before0 = clock::now();
+    static auto before1 = clock::now();
+    static auto before2 = clock::now();
+    static auto before3 = clock::now();
+    static auto before4 = clock::now();
+    static auto before5 = clock::now();
+    static auto before6 = clock::now();
+    static auto before7 = clock::now();
+    static auto before = clock::now();
+    switch (bit)
+    {
+        case 0: before = before0; break;
+        case 1: before = before1; break;
+        case 2: before = before2; break;
+        case 3: before = before3; break;
+        case 4: before = before4; break;
+        case 5: before = before5; break;
+        case 6: before = before6; break;
+        case 7: before = before7; break;
+    }
+    const sec duration = clock::now() - before;
+    if (duration.count() > count[bit])
+    {
+        before = clock::now();
+        switch (bit)
+        {
+            case 0: before0 = clock::now();  break; //_clock_timer++;  break;
+            case 1: before1 = clock::now();  break;
+            case 2: before2 = clock::now();  break;
+            case 3: before3 = clock::now();  break;
+            case 4: before4 = clock::now();  break;
+            case 5: before5 = clock::now();  break;
+            case 6: before6 = clock::now();  break;
+            case 7: before7 = clock::now();  break;
+        }
+        cl_div = (cl_div & (0x01 << bit)) ? cl_div & ~(0x01 << bit) : cl_div | (0x01 << bit);
+    }
+    return cl_div;
+}
 
-void Bus::_onUpdate(float __na) 
+
+void Bus::clockDivider()
+{
+    // static Byte cl_div = 0;
+    for (int bit = 0; bit < 8; bit++)
+        clock_div(_clock_div, bit);
+}
+
+void Bus::_onUpdate() 
 {
     // std::cout << "Bus::_onUpdate()\n";
 
-    // stop the unused argument warning
-    if (__na == 0.0f) { ; }
+    // update the clock divider
+    clockDivider();    
 
     // handle timing
     static std::chrono::time_point<std::chrono::system_clock> tp1 = std::chrono::system_clock::now();
@@ -451,8 +514,6 @@ void Bus::_onUpdate(float __na)
     {
         static std::deque<float> fps_queue;
         frame_acc -= 0.25f;
-		// _fps = frame_count * 4;
-
         // get an FPS average over the last several iterations
         float f = frame_count * 4;
         fps_queue.push_back(f);
@@ -468,9 +529,9 @@ void Bus::_onUpdate(float __na)
         _s_title = "R6809"; // "Retro 6809";
 		_s_title += " FPS:";		
 		_s_title += std::to_string((int)_fps);
-
-        // _sys_cpu_speed = (int)(1.0f / (s_avg_cpu_cycle_time / 1000000.0f));
-        // sTitle += "   CPU_SPEED: " + std::to_string(_sys_cpu_speed) + " khz.";
+        _s_title += " ___ CPU: ~ ";		
+        _s_title += std::to_string((int)GetCpuSpeed());
+		_s_title += " kHz.";		
     }  
 
 
@@ -494,6 +555,8 @@ void Bus::_onUpdate(float __na)
         // ...
         // std::cout << "Terminal Resized: W:" << std::to_string(w) << " H:" << std::to_string(h) << "\n";
     }
+
+    _sys_update_event++; // increment the clock each update cycle
     _memory.OnUpdate(fElapsedTime);
 }
 

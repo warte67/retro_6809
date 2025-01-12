@@ -113,7 +113,7 @@ void C6809::ThreadProc()
         {
             // Calculate and print frequency
             double frequency = callCount / 1.0; // Calls per second
-std::cout << "Actual Frequency: " << frequency / 1000.0 << " kHz" << std::endl;
+// std::cout << "Actual Frequency: " << frequency / 1000.0 << " kHz" << std::endl;
 
 			// Bus::SetCpuSpeed((Word)(frequency / 1000.0));
 			_cpu_speed = (Word)(frequency / 1000.0);

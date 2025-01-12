@@ -45,18 +45,29 @@ Byte Debug::OnRead(Word offset)
     {
         data = Bus::GetClockDiv();
     } 
-    else if (offset == MAP( SYS_TIMER) + 0) 
+    // program update cycles count since last reset
+    else if (offset == MAP( SYS_UPDATE_COUNT) + 0) 
     {
-        data = Bus::GetClockTimer() >> 8;
+        data = (Byte)(Bus::GetUpdateCount() >> 24);
     } 
-    else if (offset == MAP(SYS_TIMER) + 1) 
+    else if (offset == MAP(SYS_UPDATE_COUNT) + 1) 
     {
-        data = Bus::GetClockTimer() & 0xff;
+        data = (Byte)(Bus::GetUpdateCount() >> 16);
     } 
+    else if (offset == MAP( SYS_UPDATE_COUNT) + 2) 
+    {
+        data = (Byte)(Bus::GetUpdateCount() >> 8);
+    } 
+    else if (offset == MAP(SYS_UPDATE_COUNT) + 3) 
+    {
+        data = (Byte)(Bus::GetUpdateCount() & 0xff);
+    } 
+    // debug breakpoint address
     else if (offset == MAP(SYS_DBG_BRK_ADDR)) 
     { 
         data = _dbg_brk_addr; 
     } 
+    // debug flags
     else if (offset == MAP(SYS_DBG_FLAGS) ) 
     {
         (s_bIsDebugActive) ? _dbg_flags |= DBGF_DEBUG_ENABLE : _dbg_flags &= ~DBGF_DEBUG_ENABLE; // Enable
@@ -79,14 +90,24 @@ void Debug::OnWrite(Word offset, Byte data)
     {  
         C6809::s_sys_state = data;
     } 
-    else if ( offset == MAP(SYS_TIMER) + 0 ) 
+    // program update cycles count since last reset
+    else if ( offset == MAP(SYS_UPDATE_COUNT) + 0 ) 
     {
-        Bus::SetClockTimer( (data << 8) );
+        Bus::SetUpdateCount( (data << 24) );
     } 
-    else if ( offset == MAP(SYS_TIMER) + 1 ) 
+    else if ( offset == MAP(SYS_UPDATE_COUNT) + 1 ) 
     {
-        Bus::SetClockTimer( (data << 0) );
+        Bus::SetUpdateCount( (data << 16) );
     } 
+    else if ( offset == MAP(SYS_UPDATE_COUNT) + 2 ) 
+    {
+        Bus::SetUpdateCount( (data << 8) );
+    } 
+    else if ( offset == MAP(SYS_UPDATE_COUNT) + 3 ) 
+    {
+        Bus::SetUpdateCount( (data << 0) );
+    } 
+    // debug break address
     else if ( offset == MAP(SYS_DBG_BRK_ADDR) + 0 ) 
     {
         _dbg_brk_addr = (_dbg_brk_addr & 0x00ff) | (data << 8);
@@ -95,6 +116,7 @@ void Debug::OnWrite(Word offset, Byte data)
     {
         _dbg_brk_addr = (_dbg_brk_addr & 0xff00) | (data << 0);
     }
+    // debug flags
     else if ( offset == MAP(SYS_DBG_FLAGS) )
     {
         _dbg_flags = data;
@@ -192,7 +214,7 @@ int  Debug::OnAttach(int nextAddr)
     mapped_register.push_back(new_node);
 
     new_node = { "SYS_CLOCK_DIV", nextAddr,  
-        { "(Byte) 70 hz Clock Divider Register (Read Only)",
+        { "(Byte) 60 hz Clock Divider Register (Read Only)",
         "- bit 7: 0.546875 hz",
         "- bit 6: 1.09375 hz",
         "- bit 5: 2.1875 hz",
@@ -204,7 +226,7 @@ int  Debug::OnAttach(int nextAddr)
         ""} }; nextAddr+=1;
     mapped_register.push_back(new_node);
 
-    new_node = { "SYS_TIMER", nextAddr,  { "(Word) Increments at 0.546875 hz"} }; nextAddr+=2;
+    new_node = { "SYS_UPDATE_COUNT", nextAddr,  { "(DWord) Increments with each update event"} }; nextAddr+=4;
     mapped_register.push_back(new_node);
 
     new_node = { "SYS_DBG_BRK_ADDR", nextAddr,  { "(Word) Address of current debug breakpoint"} }; nextAddr+=2;

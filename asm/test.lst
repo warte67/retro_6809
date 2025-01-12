@@ -64,25 +64,25 @@ FE00                  SYS_STATE             equ   0xFE00    ; (Byte) System Stat
                                                             ; - bit  5   = Error: Reserved                  
                                                             ; - bit  4   = Error: Reserved                  
                                                             ; - bits 0-3 = CPU Speed (0-15):                
-                                                            ;    0 ($0)  = CPU Clock  25 khz.               
-                                                            ;    1 ($1)  = CPU Clock  50 khz.               
-                                                            ;    2 ($2)  = CPU Clock 100 khz.               
-                                                            ;    3 ($3)  = CPU Clock 200 khz.               
-                                                            ;    4 ($4)  = CPU Clock 333 khz.               
-                                                            ;    5 ($5)  = CPU Clock 416 khz.               
-                                                            ;    6 ($6)  = CPU Clock 500 khz.               
-                                                            ;    7 ($7)  = CPU Clock 625 khz.               
-                                                            ;    8 ($8)  = CPU Clock 769 khz.               
-                                                            ;    9 ($9)  = CPU Clock 833 khz.               
-                                                            ;   10 ($A)  = CPU Clock 1.0 mhz.               
-                                                            ;   11 ($B)  = CPU Clock 1.4 mhz.               
-                                                            ;   12 ($C)  = CPU Clock 2.0 mhz.               
-                                                            ;   13 ($D)  = CPU Clock 3.3 mhz.               
-                                                            ;   14 ($E)  = CPU Clock 5.0 mhz.               
+                                                            ;    0 ($0)  = CPU Clock   10 kHz            
+                                                            ;    1 ($1)  = CPU Clock   25 kHz            
+                                                            ;    2 ($2)  = CPU Clock   50 kHz            
+                                                            ;    3 ($3)  = CPU Clock   75 kHz            
+                                                            ;    4 ($4)  = CPU Clock  100 kHz            
+                                                            ;    5 ($5)  = CPU Clock  150 kHz            
+                                                            ;    6 ($6)  = CPU Clock  225 kHz            
+                                                            ;    7 ($7)  = CPU Clock  350 kHz            
+                                                            ;    8 ($8)  = CPU Clock  500 kHz            
+                                                            ;    9 ($9)  = CPU Clock  750 kHz            
+                                                            ;   10 ($A)  = CPU Clock  900 kHz            
+                                                            ;   11 ($B)  = CPU Clock 1000 khz            
+                                                            ;   12 ($C)  = CPU Clock 2000 khz            
+                                                            ;   13 ($D)  = CPU Clock 3000 khz            
+                                                            ;   14 ($E)  = CPU Clock 4000 khz            
                                                             ;   15 ($F)  = CPU Clock ~10.0 mhz. (unmetered) 
                                                             ; 
 FE01                  SYS_SPEED             equ   0xFE01    ; (Word) Average CPU Clock Speed (Read Only)
-FE03                  SYS_CLOCK_DIV         equ   0xFE03    ; (Byte) 70 hz Clock Divider Register (Read Only)
+FE03                  SYS_CLOCK_DIV         equ   0xFE03    ; (Byte) 60 hz Clock Divider Register (Read Only)
                                                             ; - bit 7: 0.546875 hz
                                                             ; - bit 6: 1.09375 hz
                                                             ; - bit 5: 2.1875 hz
@@ -92,9 +92,9 @@ FE03                  SYS_CLOCK_DIV         equ   0xFE03    ; (Byte) 70 hz Clock
                                                             ; - bit 1: 35.0 hz
                                                             ; - bit 0: 70.0 hz
                                                             ; 
-FE04                  SYS_TIMER             equ   0xFE04    ; (Word) Increments at 0.546875 hz
-FE06                  SYS_DBG_BRK_ADDR      equ   0xFE06    ; (Word) Address of current debug breakpoint
-FE08                  SYS_DBG_FLAGS         equ   0xFE08    ; (Byte) Debug Specific Hardware Flags:
+FE04                  SYS_UPDATE_COUNT      equ   0xFE04    ; (DWord) Increments with each update event
+FE08                  SYS_DBG_BRK_ADDR      equ   0xFE08    ; (Word) Address of current debug breakpoint
+FE0A                  SYS_DBG_FLAGS         equ   0xFE0A    ; (Byte) Debug Specific Hardware Flags:
                                                             ; - bit 7: Debug Enable
                                                             ; - bit 6: Single Step Enable
                                                             ; - bit 5: Clear All Breakpoints
@@ -104,12 +104,12 @@ FE08                  SYS_DBG_FLAGS         equ   0xFE08    ; (Byte) Debug Speci
                                                             ; - bit 1: NMI   (on low {0} to high {1} edge)
                                                             ; - bit 0: RESET (on low {0} to high {1} edge)
                                                             ; 
-FE08                  SYS_END               equ   0xFE08    ; End of System Registers
-FE09                  SYS_TOP               equ   0xFE09    ; Top of System Registers
+FE0A                  SYS_END               equ   0xFE0A    ; End of System Registers
+FE0B                  SYS_TOP               equ   0xFE0B    ; Top of System Registers
                                                             ; 
                       
-FE09                  GPU_DEVICE            equ   0xFE09    ; START: GPU Device Hardware Registers
-FE09                  GPU_OPTIONS           equ   0xFE09    ; (Byte) Bitflag Enables
+FE0B                  GPU_DEVICE            equ   0xFE0B    ; START: GPU Device Hardware Registers
+FE0B                  GPU_OPTIONS           equ   0xFE0B    ; (Byte) Bitflag Enables
                                                             ; - bit 7    = Extended Bitmap:
                                                             ;               0: Tilemap Display
                                                             ;               1: Bitmap Display
@@ -134,7 +134,7 @@ FE09                  GPU_OPTIONS           equ   0xFE09    ; (Byte) Bitflag Ena
                                                             ;               0: Disabled
                                                             ;               1: Enabled
                                                             ; 
-FE0A                  GPU_MODE              equ   0xFE0A    ; (Byte) Bitflag Enables
+FE0C                  GPU_MODE              equ   0xFE0C    ; (Byte) Bitflag Enables
                                                             ; - bit 7    = Standard Bitmap:
                                                             ;               0: Text Display
                                                             ;               1: Bitmap Display
@@ -145,19 +145,35 @@ FE0A                  GPU_MODE              equ   0xFE0A    ; (Byte) Bitflag Ena
                                                             ;               11: 256-Colors
                                                             ; - bits 0-4 = Display Mode (0-31)
                                                             ; 
-FE0B                  GPU_VIDEO_MAX         equ   0xFE0B    ; (Word) Video Buffer Maximum (Read Only)
+FE0D                  GPU_VIDEO_MAX         equ   0xFE0D    ; (Word) Video Buffer Maximum (Read Only)
                                                             ;  Note: This will change to reflect
                                                             ;        the size of the last cpu
                                                             ;        accessible memory location
                                                             ;        of the currently active
                                                             ;        standard video mode.
                                                             ; 
-FE0C                  GPU_END               equ   0xFE0C    ; End of GPU Register Space
-FE0D                  GPU_TOP               equ   0xFE0D    ; Top of GPU Register Space
+FE0F                  GPU_HRES              equ   0xFE0F    ; (Word) Horizontal Resolution (Read Only)
+                                                            ;   Note: This will reflect the number of
+                                                            ;        pixel columns for bitmap modes.
+                                                            ; 
+FE11                  GPU_VRES              equ   0xFE11    ; (Word) Vertical Resolution (Read Only)
+                                                            ;   Note: This will reflect the number of
+                                                            ;        pixel rows for bitmap modes.
+                                                            ; 
+FE13                  GPU_TCOLS             equ   0xFE13    ; (Byte) Text Horizontal Columns (Read Only)
+                                                            ;   Note: This will reflect the number of
+                                                            ;        glyph columns for text modes.
+                                                            ; 
+FE14                  GPU_TROWS             equ   0xFE14    ; (Byte) Text Vertical Rows (Read Only)
+                                                            ;   Note: This will reflect the number of
+                                                            ;        glyph rows for text modes.
+                                                            ; 
+FE14                  GPU_END               equ   0xFE14    ; End of GPU Register Space
+FE15                  GPU_TOP               equ   0xFE15    ; Top of GPU Register Space
                       ; _______________________________________________________________________
                       
-FE0D                  HDW_RESERVED_DEVICE   equ   0xFE0D    ; START: Reserved Register Space
-FFEF                  HDW_REG_END           equ   0xFFEF    ; 482 bytes reserved for future use.
+FE15                  HDW_RESERVED_DEVICE   equ   0xFE15    ; START: Reserved Register Space
+FFEF                  HDW_REG_END           equ   0xFFEF    ; 474 bytes reserved for future use.
                       ; _______________________________________________________________________
                       
 FFF0                  ROM_VECTS_DEVICE      equ   0xFFF0    ; START: Hardware Interrupt Vectors
@@ -214,7 +230,7 @@ FFFE  2400                            fdb     start
 2420  C30001                          addd    #1
 2423  ED81            lp1             std     ,x++
 2425  C30001                          addd    #1
-2428  BCFE0B                          cmpx    GPU_VIDEO_MAX
+2428  BCFE0D                          cmpx    GPU_VIDEO_MAX
 242B  2DF6                            blt     lp1
 242D  20EE                            bra     lp2
                       

@@ -56,9 +56,12 @@ private: // PRIVATE DISPATCHER METHODS
     void _onQuit(void);
     void _onActivate(void);
     void _onDeactivate(void);	
-    void _onEvent(SDL_Event* evnt); 
-    void _onUpdate(float fElapsedTime);
+    void _onEvent(); 
+    void _onUpdate();
     void _onRender(void);
+
+    Byte clock_div(Byte& cl_div, int bit);
+    void clockDivider();
 
 public: // PUBLIC METHODS
     bool Run(void);
@@ -84,8 +87,8 @@ public: // PUBLIC METHODS
 
     static Word GetCpuSpeed();
     static Byte GetClockDiv() { return _clock_div; }
-    static Word GetClockTimer() { return _clock_timer; }
-    static Word SetClockTimer(Word timer) { return _clock_timer = timer; }
+    static DWord GetUpdateCount() { return _sys_update_event; }
+    static DWord SetUpdateCount(DWord count) { return _sys_update_event = count; }
 
     static Debug* GetDebug() { return _pDebug; }
     static GPU* GetGPU() { return _pGPU; }
@@ -97,7 +100,7 @@ private: // INTERNAL PRIVATES
     inline static bool s_bIsDirty = true;
     inline static float s_avg_cpu_cycle_time = 0;
     inline static Byte _clock_div = 0;				// SYS_CLOCK_DIV (Byte) 60 hz Clock Divider  (Read Only) 
-    inline static Word _clock_timer = 0;			// SYS_TIMER	(R/W Word) increments at 0.46875 hz
+    inline static DWord _sys_update_event = 0;			// SYS_TIMER	(R/W Word) increments with update event
     inline static std::thread s_cpuThread;
 
     inline static std::mutex _mutex_IsDirty;

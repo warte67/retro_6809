@@ -203,6 +203,9 @@ private: // PRIVATE MEMBERS
     SDL_UnlockTexture(texture);
 
 
+    //
+    // Color Palette Registers
+    //
         
     GFX_PAL_IDX      = 0xFE08, //  (Byte) Color Palette Index
         // GFX_PAL_IDX: 0-255
@@ -215,6 +218,10 @@ private: // PRIVATE MEMBERS
         //     Write to DSP_PAL_IDX with the index within the color palette
         //     prior to reading or writing the color data in the GFX_PAL_CLR register.
         
+    //
+    // Text Glyph Registers
+    //
+
     GFX_GLYPH_IDX    = 0xFE0B, //  (Byte) Text Glyph Index
         // GFX_GLYPH_IDX: 0-256
         // Note: Set this register to index a specific text glyph. Set this value
@@ -226,8 +233,33 @@ private: // PRIVATE MEMBERS
         //     array represents the top line of 8 pixels. Each array entry represents
         //     a row of 8 pixels. 
 
+    //
+    // Extended Graphics Registers
+    //
+        
+    MEM_DSPLY_SIZE   = 0xFF83, // (Word) Extended Graphics Buffer Size
+        
+    MEM_EXT_ADDR     = 0xFF85, // (Word) Extended Memory Address Port
+    MEM_EXT_PITCH    = 0xFF87, // (Word) number of bytes per line
+    MEM_EXT_WIDTH    = 0xFF89, // (Word) width before skipping to next line
+    MEM_EXT_DATA     = 0xFF8B, // (Byte) External Memory Data Port
+        
+    MEM_DYN_SIZE     = 0xFF8C, // (Word) dynamic memory block size
+        //      Notes: Memory allocation occurs when the 
+        //             least-significant byte is written.
+        //             Reads as total number of bytes allocated
+        //             or freed. When $0000 is written to this 
+        //             port, memory node at MEM_DYN_ADDR is freed.
+    MEM_DYN_ADDR     = 0xFF8E, // (Word) address of a dynamic memory node
+    MEM_DYN_AVAIL    = 0xFF90, // (Word) number of non-allocated bytes
 
+    //
+    // Sprite Registers
+    //
 
+    //
+    // Tilemap Registers
+    // 
 
 
 

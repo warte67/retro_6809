@@ -81,7 +81,7 @@ enum MEMMAP
                                       //   15 ($F)  = CPU Clock ~10.0 mhz. (unmetered) 
                                       // 
     SYS_SPEED             = 0xFE01,   // (Word) Average CPU Clock Speed (Read Only)
-    SYS_CLOCK_DIV         = 0xFE03,   // (Byte) 70 hz Clock Divider Register (Read Only)
+    SYS_CLOCK_DIV         = 0xFE03,   // (Byte) 60 hz Clock Divider Register (Read Only)
                                       // - bit 7: 0.546875 hz
                                       // - bit 6: 1.09375 hz
                                       // - bit 5: 2.1875 hz
@@ -91,9 +91,9 @@ enum MEMMAP
                                       // - bit 1: 35.0 hz
                                       // - bit 0: 70.0 hz
                                       // 
-    SYS_TIMER             = 0xFE04,   // (Word) Increments at 0.546875 hz
-    SYS_DBG_BRK_ADDR      = 0xFE06,   // (Word) Address of current debug breakpoint
-    SYS_DBG_FLAGS         = 0xFE08,   // (Byte) Debug Specific Hardware Flags:
+    SYS_UPDATE_COUNT      = 0xFE04,   // (DWord) Increments with each update event
+    SYS_DBG_BRK_ADDR      = 0xFE08,   // (Word) Address of current debug breakpoint
+    SYS_DBG_FLAGS         = 0xFE0A,   // (Byte) Debug Specific Hardware Flags:
                                       // - bit 7: Debug Enable
                                       // - bit 6: Single Step Enable
                                       // - bit 5: Clear All Breakpoints
@@ -103,12 +103,12 @@ enum MEMMAP
                                       // - bit 1: NMI   (on low {0} to high {1} edge)
                                       // - bit 0: RESET (on low {0} to high {1} edge)
                                       // 
-    SYS_END               = 0xFE08,   // End of System Registers
-    SYS_TOP               = 0xFE09,   // Top of System Registers
+    SYS_END               = 0xFE0A,   // End of System Registers
+    SYS_TOP               = 0xFE0B,   // Top of System Registers
                                       // 
 
-    GPU_DEVICE            = 0xFE09,   // START: GPU Device Hardware Registers
-    GPU_OPTIONS           = 0xFE09,   // (Byte) Bitflag Enables
+    GPU_DEVICE            = 0xFE0B,   // START: GPU Device Hardware Registers
+    GPU_OPTIONS           = 0xFE0B,   // (Byte) Bitflag Enables
                                       // - bit 7    = Extended Bitmap:
                                       //               0: Tilemap Display
                                       //               1: Bitmap Display
@@ -133,7 +133,7 @@ enum MEMMAP
                                       //               0: Disabled
                                       //               1: Enabled
                                       // 
-    GPU_MODE              = 0xFE0A,   // (Byte) Bitflag Enables
+    GPU_MODE              = 0xFE0C,   // (Byte) Bitflag Enables
                                       // - bit 7    = Standard Bitmap:
                                       //               0: Text Display
                                       //               1: Bitmap Display
@@ -144,35 +144,35 @@ enum MEMMAP
                                       //               11: 256-Colors
                                       // - bits 0-4 = Display Mode (0-31)
                                       // 
-    GPU_VIDEO_MAX         = 0xFE0B,   // (Word) Video Buffer Maximum (Read Only)
+    GPU_VIDEO_MAX         = 0xFE0D,   // (Word) Video Buffer Maximum (Read Only)
                                       //  Note: This will change to reflect
                                       //        the size of the last cpu
                                       //        accessible memory location
                                       //        of the currently active
                                       //        standard video mode.
                                       // 
-    GPU_HRES              = 0xFE0D,   // (Word) Horizontal Resolution (Read Only)
+    GPU_HRES              = 0xFE0F,   // (Word) Horizontal Resolution (Read Only)
                                       //   Note: This will reflect the number of
                                       //        pixel columns for bitmap modes.
                                       // 
-    GPU_VRES              = 0xFE0F,   // (Word) Vertical Resolution (Read Only)
+    GPU_VRES              = 0xFE11,   // (Word) Vertical Resolution (Read Only)
                                       //   Note: This will reflect the number of
                                       //        pixel rows for bitmap modes.
                                       // 
-    GPU_TCOLS             = 0xFE11,   // (Byte) Text Horizontal Columns (Read Only)
+    GPU_TCOLS             = 0xFE13,   // (Byte) Text Horizontal Columns (Read Only)
                                       //   Note: This will reflect the number of
                                       //        glyph columns for text modes.
                                       // 
-    GPU_TROWS             = 0xFE12,   // (Byte) Text Vertical Rows (Read Only)
+    GPU_TROWS             = 0xFE14,   // (Byte) Text Vertical Rows (Read Only)
                                       //   Note: This will reflect the number of
                                       //        glyph rows for text modes.
                                       // 
-    GPU_END               = 0xFE12,   // End of GPU Register Space
-    GPU_TOP               = 0xFE13,   // Top of GPU Register Space
+    GPU_END               = 0xFE14,   // End of GPU Register Space
+    GPU_TOP               = 0xFE15,   // Top of GPU Register Space
 // _______________________________________________________________________
 
-    HDW_RESERVED_DEVICE   = 0xFE13,   // START: Reserved Register Space
-    HDW_REG_END           = 0xFFEF,   // 476 bytes reserved for future use.
+    HDW_RESERVED_DEVICE   = 0xFE15,   // START: Reserved Register Space
+    HDW_REG_END           = 0xFFEF,   // 474 bytes reserved for future use.
 // _______________________________________________________________________
 
     ROM_VECTS_DEVICE      = 0xFFF0,   // START: Hardware Interrupt Vectors
