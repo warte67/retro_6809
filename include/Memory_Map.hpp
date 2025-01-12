@@ -151,12 +151,28 @@ enum MEMMAP
                                       //        of the currently active
                                       //        standard video mode.
                                       // 
-    GPU_END               = 0xFE0C,   // End of GPU Register Space
-    GPU_TOP               = 0xFE0D,   // Top of GPU Register Space
+    GPU_HRES              = 0xFE0D,   // (Word) Horizontal Resolution (Read Only)
+                                      //   Note: This will reflect the number of
+                                      //        pixel columns for bitmap modes.
+                                      // 
+    GPU_VRES              = 0xFE0F,   // (Word) Vertical Resolution (Read Only)
+                                      //   Note: This will reflect the number of
+                                      //        pixel rows for bitmap modes.
+                                      // 
+    GPU_TCOLS             = 0xFE11,   // (Byte) Text Horizontal Columns (Read Only)
+                                      //   Note: This will reflect the number of
+                                      //        glyph columns for text modes.
+                                      // 
+    GPU_TROWS             = 0xFE12,   // (Byte) Text Vertical Rows (Read Only)
+                                      //   Note: This will reflect the number of
+                                      //        glyph rows for text modes.
+                                      // 
+    GPU_END               = 0xFE12,   // End of GPU Register Space
+    GPU_TOP               = 0xFE13,   // Top of GPU Register Space
 // _______________________________________________________________________
 
-    HDW_RESERVED_DEVICE   = 0xFE0D,   // START: Reserved Register Space
-    HDW_REG_END           = 0xFFEF,   // 482 bytes reserved for future use.
+    HDW_RESERVED_DEVICE   = 0xFE13,   // START: Reserved Register Space
+    HDW_REG_END           = 0xFFEF,   // 476 bytes reserved for future use.
 // _______________________________________________________________________
 
     ROM_VECTS_DEVICE      = 0xFFF0,   // START: Hardware Interrupt Vectors

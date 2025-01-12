@@ -209,7 +209,7 @@ private: // PRIVATE MEMBERS
         {" EXIT",			SDL_SCANCODE_H,		71, 78, 01, 03, 0x1, &Debug::cbHide },          // Exit / Hide
         {"STEP_INTO",		SDL_SCANCODE_SPACE,	11, 23, 38, 40, 0x9, &Debug::cbStepIn },
         {"STEP_OVER",		SDL_SCANCODE_O,		24, 36, 38, 40, 0x9, &Debug::cbStepOver },
-        {"Add Breakpoint ",	SDL_SCANCODE_B,		44, 62, 41, 43, 0x5, &Debug::cbAddBrk },
+        {"Add Breakpoint ",	SDL_SCANCODE_B,		46, 62, 41, 43, 0x5, &Debug::cbAddBrk },
     };
 
     // std::vector<Word> mem_bank = { static_cast<Word>(MAP(SSTACK_TOP) - 0x0048), MAP(VIDEO_START), 0xFE00, 0x0000 };

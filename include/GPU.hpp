@@ -119,7 +119,27 @@ private: // PRIVATE MEMBERS
                                         //        accessible memory location
                                         //        of the currently active 
                                         //        standard video mode.
-                                        //
+                                        //                                        
+    // GPU_HRES             
+    Word _gpu_hres = 0;                 // (Word) Horizontal Resolution (Read Only)
+                                        //   Note: This will reflect the number of
+                                        //        pixel columns for bitmap modes.
+                                        // 
+    // GPU_VRES              
+    Word _gpu_vres = 0;                 // (Word) Vertical Resolution (Read Only)
+                                        //   Note: This will reflect the number of
+                                        //        pixel rows for bitmap modes.
+                                        // 
+    // GPU_TCOLS 
+    Byte _gpu_tcols = 0;                // (Byte) Text Horizontal Columns (Read Only)
+                                        //   Note: This will reflect the number of
+                                        //        glyph columns for text modes.
+                                        // 
+    // GPU_TROWS
+    Byte _gpu_trows = 0;                // (Byte) Text Vertical Rows (Read Only)
+                                        //   Note: This will reflect the number of
+                                        //        glyph rows for text modes.
+                                        // 
 
     void _render_extended_graphics();
     void _render_standard_graphics();
@@ -182,7 +202,36 @@ private: // PRIVATE MEMBERS
     //Unlock a texture, uploading the changes to video memory
     SDL_UnlockTexture(texture);
 
-******************************************************/
 
+        
+    GFX_PAL_IDX      = 0xFE08, //  (Byte) Color Palette Index
+        // GFX_PAL_IDX: 0-255
+        // Note: Use this register to set the index into theColor Palette. 
+        //       Set this value prior referencing color data (GFX_PAL_CLR).
+        
+    GFX_PAL_CLR      = 0xFE09, //  (Word) Indexed Color Palette Data
+        // GFX_PAL_CLR: Color Data A4R4G4B4 format
+        // Note: This is the color data for an individual palette entry.
+        //     Write to DSP_PAL_IDX with the index within the color palette
+        //     prior to reading or writing the color data in the GFX_PAL_CLR register.
+        
+    GFX_GLYPH_IDX    = 0xFE0B, //  (Byte) Text Glyph Index
+        // GFX_GLYPH_IDX: 0-256
+        // Note: Set this register to index a specific text glyph. Set this value
+        //     prior to updating glyph pixel data.
+        
+    GFX_GLYPH_DATA   = 0xFE0C, //  (8-Bytes) Text Glyph Pixel Data Array
+        // GFX_GLYPH_DATA: 8 rows of binary encoded glyph pixel data
+        // Note: Each 8x8 text glyph is composed of 8 bytes. The first byte in this 
+        //     array represents the top line of 8 pixels. Each array entry represents
+        //     a row of 8 pixels. 
+
+
+
+
+
+
+
+******************************************************/
 
 // END: Gfx.hpp

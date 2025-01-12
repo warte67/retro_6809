@@ -29,6 +29,8 @@ Byte GPU::OnRead(Word offset)
 
     if (offset == MAP(GPU_OPTIONS))             { data = _gpu_options;  }
     else if (offset == MAP(GPU_MODE))           { data = _gpu_mode;     }
+
+    // GPU_VIDEO_MAX
     else if (offset == MAP(GPU_VIDEO_MAX) + 0 ) 
     {
         data = _gpu_video_max >> 8;
@@ -37,6 +39,39 @@ Byte GPU::OnRead(Word offset)
     {
         data = _gpu_video_max & 0xFF; 
     } 
+    
+    // GPU_HRES (Read Only)
+    else if (offset == MAP(GPU_HRES) + 0 ) 
+    {
+        data = _gpu_hres >> 8;
+    } 
+    else if (offset == MAP(GPU_HRES) + 1 )
+    {
+        data = _gpu_hres & 0xFF; 
+    } 
+    
+    // GPU_VRES (Read Only)
+    else if (offset == MAP(GPU_VRES) + 0 ) 
+    {
+        data = _gpu_vres >> 8;
+    } 
+    else if (offset == MAP(GPU_VRES) + 1 )
+    {
+        data = _gpu_vres & 0xFF; 
+    } 
+    
+    // GPU_TCOLS (Read Only)
+    else if (offset == MAP(GPU_TCOLS) ) 
+    {
+        data = _gpu_tcols;
+    } 
+    
+    // GPU_TROWS (Read Only)
+    else if (offset == MAP(GPU_TROWS) ) 
+    {
+        data = _gpu_trows;
+    }     
+
 
     return data;
 } // END: GPU::OnRead()
@@ -147,6 +182,34 @@ int  GPU::OnAttach(int nextAddr)
                                 "       accessible memory location",
                                 "       of the currently active",
                                 "       standard video mode.", "" } }; nextAddr+=2;
+    mapped_register.push_back(new_node);
+
+    new_node = { "GPU_HRES", nextAddr,  {   
+                                "(Word) Horizontal Resolution (Read Only)",
+                                "  Note: This will reflect the number of",
+                                "       pixel columns for bitmap modes.",
+                                "" } }; nextAddr+=2;
+    mapped_register.push_back(new_node);
+
+    new_node = { "GPU_VRES", nextAddr,  {   
+                                "(Word) Vertical Resolution (Read Only)",
+                                "  Note: This will reflect the number of",
+                                "       pixel rows for bitmap modes.",
+                                "" } }; nextAddr+=2;
+    mapped_register.push_back(new_node);
+
+    new_node = { "GPU_TCOLS", nextAddr,  {   
+                                "(Byte) Text Horizontal Columns (Read Only)",
+                                "  Note: This will reflect the number of",
+                                "       glyph columns for text modes.",
+                                "" } }; nextAddr+=1;
+    mapped_register.push_back(new_node);
+
+    new_node = { "GPU_TROWS", nextAddr,  {   
+                                "(Byte) Text Vertical Rows (Read Only)",
+                                "  Note: This will reflect the number of",
+                                "       glyph rows for text modes.",
+                                "" } }; nextAddr+=1;
     mapped_register.push_back(new_node);
 
     nextAddr--;
@@ -1093,10 +1156,19 @@ Byte GPU::_verify_gpu_mode_change(Byte data, Word map_register)
         int width, height;
         _display_mode_helper( (data & 0x1f) , width, height);
 
+        // TODO:  Remove _ext_width and _ext_height
+        //    ... Remove _std_width and _std_height
+        //
         _ext_width  = (float)width;
         _ext_height = (float)height;
         _std_width  = (float)width;
         _std_height = (float)height;
+
+        // set GPU_HRES and GPU_VRES as appropriate
+        _gpu_hres = width;
+        _gpu_vres = height;
+        _gpu_tcols = width / 8;
+        _gpu_trows = height / 8;
 
         // adjust color depth for the standard bitmap modes
         do
