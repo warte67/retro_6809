@@ -131,7 +131,7 @@ void C6809::ThreadProc()
 
 void C6809::clock_input()
 {
-    std::unique_lock<std::mutex> lock(_register_mutex);
+    // std::unique_lock<std::mutex> lock(_register_mutex);
 
     Debug* debug = Bus::GetDebug();
 
@@ -164,12 +164,12 @@ void C6809::clock_input()
 				{
 					std::string er = "Invalid Instruction at $";
 					er += C6809::hex(PC, 4);
-                    lock.unlock();
+                    // lock.unlock();
 					Bus::Error(er.c_str(), __FILE__, __LINE__);
 				}
 				if (!waiting_cwai && !waiting_sync)
                 {
-                    lock.unlock();  // without this unlock the app will hang
+                    // lock.unlock();  // without this unlock the app will hang
 				 	debug->ContinueSingleStep();
                 }
 				return;

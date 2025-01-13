@@ -43,7 +43,7 @@ void IDevice::OnWrite(Word offset, Byte data)
 /// @return The base address of the device
 Word IDevice::base() 
 { 
-    std::lock_guard<std::mutex> guard(_mutex_base); 
+    // std::lock_guard<std::mutex> guard(_mutex_base); 
     return _base; 
 }
 
@@ -54,7 +54,7 @@ Word IDevice::base()
 ///          memory vector.
 void IDevice::base(Word addr) 
 { 
-    std::lock_guard<std::mutex> guard(_mutex_base); 
+    // std::lock_guard<std::mutex> guard(_mutex_base); 
     _base = addr; 
 }
 
@@ -66,8 +66,8 @@ void IDevice::base(Word addr)
 /// @return The current size of the device's memory
 int IDevice::size() 
 { 
-    std::lock_guard<std::mutex> guard(_mutex_size); 
-    std::lock_guard<std::mutex> mem_guard(_mutex_memory); 
+    // std::lock_guard<std::mutex> guard(_mutex_size); 
+    // std::lock_guard<std::mutex> mem_guard(_mutex_memory); 
     return _size = _memory.size();
 }
 
@@ -80,8 +80,8 @@ int IDevice::size()
 /// @param[in] size The new size of the device's memory
 void IDevice::size(int size) 
 { 
-    std::lock_guard<std::mutex> guard(_mutex_size); 
-    std::lock_guard<std::mutex> mem_guard(_mutex_memory); 
+    // std::lock_guard<std::mutex> guard(_mutex_size); 
+    // std::lock_guard<std::mutex> mem_guard(_mutex_memory); 
     _size = size; _memory.resize(size); 
 }
 
@@ -92,7 +92,7 @@ void IDevice::size(int size)
 /// @return The name of the device as a string
 std::string IDevice::name()  
 { 
-    std::lock_guard<std::mutex> guard(_mutex_device_name); 
+    // std::lock_guard<std::mutex> guard(_mutex_device_name); 
     return _device_name; 
 }
 
@@ -103,7 +103,7 @@ std::string IDevice::name()
 /// @param[in] n The new name of the device as a string
 void IDevice::name(std::string n) 
 { 
-    std::lock_guard<std::mutex> guard(_mutex_device_name); 
+    // std::lock_guard<std::mutex> guard(_mutex_device_name); 
     _device_name = n; 
 }
 
@@ -115,7 +115,7 @@ void IDevice::name(std::string n)
 /// @return The value at the given offset in the device's memory
 Byte IDevice::memory(Word ofs) 
 { 
-    std::lock_guard<std::mutex> guard(_mutex_memory);
+    // std::lock_guard<std::mutex> guard(_mutex_memory);
     return _memory[ofs]; 
 }
 
@@ -127,7 +127,7 @@ Byte IDevice::memory(Word ofs)
 /// @param[in] data The value to be written to the device's memory
 void IDevice::memory(Word ofs, Byte data) 
 { 
-    std::lock_guard<std::mutex> guard(_mutex_memory);
+    // std::lock_guard<std::mutex> guard(_mutex_memory);
     _memory[ofs] = data; 
 }
 

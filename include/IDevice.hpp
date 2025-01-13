@@ -64,10 +64,14 @@ protected: // PROTECTED ACCESSORS
     Byte memory_no_lock(Word ofs);
     void memory_no_lock(Word ofs, Byte data);
 
-    Uint16 _base = 0;					    std::mutex _mutex_base;		
-    int _size = 0;						    std::mutex _mutex_size;		
-    std::string _device_name = "??DEV??";	std::mutex _mutex_device_name;				
-    std::vector<Uint8> _memory;				std::mutex _mutex_memory;
+    Uint16 _base = 0;					    
+    // std::mutex _mutex_base;		
+    int _size = 0;						    
+    // std::mutex _mutex_size;		
+    std::string _device_name = "??DEV??";	
+    // std::mutex _mutex_device_name;				
+    std::vector<Uint8> _memory;				
+    // std::mutex _mutex_memory;
 
 
     // device memory map description
