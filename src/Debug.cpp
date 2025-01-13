@@ -48,19 +48,20 @@ Byte Debug::OnRead(Word offset)
     // program update cycles count since last reset
     else if (offset == MAP( SYS_UPDATE_COUNT) + 0) 
     {
-        data = (Byte)(Bus::GetUpdateCount() >> 24);
+        data = (Byte)((Bus::GetUpdateCount() & 0xFF000000) >> 24);
     } 
     else if (offset == MAP(SYS_UPDATE_COUNT) + 1) 
     {
-        data = (Byte)(Bus::GetUpdateCount() >> 16);
+        data = (Byte)((Bus::GetUpdateCount() & 0x00FF0000) >> 16);
     } 
     else if (offset == MAP( SYS_UPDATE_COUNT) + 2) 
     {
-        data = (Byte)(Bus::GetUpdateCount() >> 8);
+        //data = (Byte)(Bus::GetUpdateCount() >> 8);
+        data = (Byte)((Bus::GetUpdateCount() & 0x0000FF00) >> 16);
     } 
     else if (offset == MAP(SYS_UPDATE_COUNT) + 3) 
     {
-        data = (Byte)(Bus::GetUpdateCount() & 0xff);
+        data = (Byte)((Bus::GetUpdateCount() & 0x000000FF) >> 0);
     } 
     // debug breakpoint address
     else if (offset == MAP(SYS_DBG_BRK_ADDR)) 
