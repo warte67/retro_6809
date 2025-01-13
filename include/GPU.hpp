@@ -264,6 +264,193 @@ private: // PRIVATE MEMBERS
 
 
 
+    TODO:
+
+            struct MAP_NODE {
+                std::string label;                  // Register label (e.g., "GPU_OPTIONS")
+                Word address;                       // Memory-mapped address
+                std::function<Byte()> read;         // Read handler (lambda or function pointer)
+                std::function<void(Byte)> write;    // Write handler (lambda or function pointer)
+                std::vector<std::string> comments;  // List of comments/documentation lines
+            };
+
+
+            std::vector<RegisterRange> registerRanges;
+
+            Byte GPU::OnRead(Word offset) {
+                if (readHandlers.count(offset)) {
+                    return readHandlers[offset]();
+                }
+                return IDevice::OnRead(offset); // Fallback for unknown offsets
+            }
+
+            void GPU::OnWrite(Word offset, Byte data) {
+                if (writeHandlers.count(offset)) {
+                    writeHandlers[offset](data);
+                } else {
+                    IDevice::OnWrite(offset, data); // Fallback for unknown offsets
+                }
+            }
+
+... 
+
+            void GPU::OnAttach(Word baseAddr) {
+                baseAddress = baseAddr;
+
+                registerMap.push_back({
+                    "GPU_OPTIONS",
+                    baseAddr + 0x00,
+                    [this]() { return _gpu_options; },
+                    [this](Byte value) { _gpu_options = value; },
+                    {
+                        "(Byte) Bitflag Enables",
+                        "- bit 7    = Extended Bitmap:",
+                        "              0: Tilemap Display",
+                        "              1: Bitmap Display",
+                        "- bits 5-6 = Extended Color Mode:",
+                        "              00: 2-Colors",
+                        "              01: 4-Colors",
+                        "              10: 16-Colors",
+                        "              11: 256-Colors",
+                        "- bits 4   = Extended Display Enable",
+                        "              0: Disabled",
+                        "              1: Enabled",
+                        "- bits 3   = Application Screen Mode",
+                        "              0: Windowed",
+                        "              1: Fullscreen",
+                        "- bits 2   = VSync Enable",
+                        "              0: Disabled",
+                        "              1: Enabled",
+                        "- bits 1   = Sprite Enable",
+                        "              0: Disabled",
+                        "              1: Enabled",
+                        "- bit  0   = Standard Display Enable",
+                        "              0: Disabled",
+                        "              1: Enabled"
+                    }
+                });
+
+                registerMap.push_back({
+                    "GPU_MODE",
+                    baseAddr + 0x01,
+                    [this]() { return _gpu_mode; },
+                    [this](Byte value) { _gpu_mode = value; },
+                    {
+                        "(Byte) Bitflag Enables",
+                        "- bit 7    = Standard Bitmap:",
+                        "              0: Text Display",
+                        "              1: Bitmap Display",
+                        "- bits 5-6 = Standard Color Mode:",
+                        "              00: 2-Colors",
+                        "              01: 4-Colors",
+                        "              10: 16-Colors",
+                        "              11: 256-Colors",
+                        "- bits 0-4 = Display Mode (0-31)"
+                    }
+                });
+
+                // Continue adding registers...
+            }
+
+    ... and / or ...
+
+            std::vector<MAP_NODE> registerMap;
+            Word baseAddress = 0; // Base offset for the device
+
+            void GPU::OnAttach(Word baseAddr) {
+                baseAddress = baseAddr;
+
+                registerMap.push_back({
+                    "GPU_OPTIONS",
+                    baseAddr + 0x00,
+                    [this]() { return _gpu_options; },
+                    [this](Byte value) { _gpu_options = value; }
+                });
+
+                registerMap.push_back({
+                    "GPU_MODE",
+                    baseAddr + 0x01,
+                    [this]() { return _gpu_mode; },
+                    [this](Byte value) { _gpu_mode = value; }
+                });
+
+                registerMap.push_back({
+                    "GPU_VIDEO_MAX_HIGH",
+                    baseAddr + 0x02,
+                    [this]() { return _gpu_video_max >> 8; },
+                    nullptr // Read-only
+                });
+
+                registerMap.push_back({
+                    "GPU_VIDEO_MAX_LOW",
+                    baseAddr + 0x03,
+                    [this]() { return _gpu_video_max & 0xFF; },
+                    nullptr // Read-only
+                });
+
+                registerMap.push_back({
+                    "GPU_HRES_HIGH",
+                    baseAddr + 0x04,
+                    [this]() { return _gpu_hres >> 8; },
+                    nullptr // Read-only
+                });
+
+                registerMap.push_back({
+                    "GPU_HRES_LOW",
+                    baseAddr + 0x05,
+                    [this]() { return _gpu_hres & 0xFF; },
+                    nullptr // Read-only
+                });
+
+                // Continue for other registers...
+            }
+
+
+            // Lambda Hember Macros: Reduce boilerplate during register 
+            // initialization for easier debugging
+            #define READ_ONLY(name, var) { #name, [this]() { return var; }, nullptr }
+            #define READ_WRITE(name, var) { #name, [this]() { return var; }, [this](Byte value) { var = value; } }
+
+            void GPU::OnAttach(Word nextAddr) {
+                baseAddress = nextAddr;
+
+                registerMap.push_back(READ_WRITE(GPU_OPTIONS, _gpu_options));
+                registerMap.push_back(READ_WRITE(GPU_MODE, _gpu_mode));
+                registerMap.push_back(READ_ONLY(GPU_VIDEO_MAX_HIGH, _gpu_video_max >> 8));
+                registerMap.push_back(READ_ONLY(GPU_VIDEO_MAX_LOW, _gpu_video_max & 0xFF));
+            }
+
+    ... and ...
+
+
+            void GPU::ExportASM(const std::string& fileName) {
+                std::ofstream asmFile(fileName);
+                if (!asmFile.is_open()) {
+                    std::cerr << "Error: Unable to open file " << fileName << " for writing.\n";
+                    return;
+                }
+
+                asmFile << "; Auto-generated memory map for GPU registers\n\n";
+                asmFile << "GPU_DEVICE            equ   " << std::hex << baseAddress << "\n\n";
+
+                for (const auto& reg : registerMap) {
+                    // Write the register definition
+                    asmFile << reg.label << "   equ   0x" << std::hex << reg.address << "\n";
+
+                    // Write associated comments
+                    for (const auto& comment : reg.comments) {
+                        asmFile << "                                      ; " << comment << "\n";
+                    }
+
+                    asmFile << "\n"; // Add a blank line between definitions
+                }
+
+                asmFile.close();
+                std::cout << "Memory map successfully exported to " << fileName << ".\n";
+            }
+
+
+
 ******************************************************/
 
 // END: Gfx.hpp
