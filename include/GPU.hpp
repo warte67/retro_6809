@@ -449,6 +449,44 @@ private: // PRIVATE MEMBERS
                 std::cout << "Memory map successfully exported to " << fileName << ".\n";
             }
 
+    ... in the Memory device itself ...ADJ_STATUS
+
+            Byte Memory::Read(Word offset, bool debug) {
+                for (auto& node : _memory_nodes) {
+                    if (offset >= node->baseAddress && offset < node->baseAddress + node->size) {
+                        Word relativeOffset = offset - node->baseAddress;
+
+                        // Debug mode handling, if applicable
+                        if (debug) {
+                            // You can add any debug-specific behavior here
+                        }
+
+                        // Call the node's read handler
+                        if (node->read) {
+                            return node->read(relativeOffset);
+                        }
+                        break; // No valid read handler
+                    }
+                }
+                return 0xCC; // Return a default invalid value
+            }
+
+            void Memory::Write(Word offset, Byte data, bool debug) {
+                for (auto& node : _memory_nodes) {
+                    if (offset >= node->baseAddress && offset < node->baseAddress + node->size) {
+                        Word relativeOffset = offset - node->baseAddress;
+
+                        // Special handling for ROM writes in debug mode
+                        ROM* isROM = dynamic_cast<ROM*>(node);
+                        if (debug && isROM) {
+                            isROM->write_to_rom(relativeOffset, data);
+                        } else if (node->write) {
+                            node->write(relativeOffset, data);
+                        }
+                        return;
+                    }
+                }
+            }
 
 
 ******************************************************/
