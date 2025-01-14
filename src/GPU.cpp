@@ -137,7 +137,7 @@ int  GPU::OnAttach(int nextAddr)
 
     register_node new_node;
     
-     new_node = { "GPU_OPTIONS", nextAddr,  {   "(Byte) Bitflag Enables",
+     new_node = { "GPU_OPTIONS", nextAddr, nullptr, nullptr,  {   "(Byte) Bitflag Enables",
                                 "- bit 7    = Extended Bitmap:",
                                 "              0: Tilemap Display",
                                 "              1: Bitmap Display",
@@ -163,7 +163,7 @@ int  GPU::OnAttach(int nextAddr)
                                 "              1: Enabled", ""} }; nextAddr+=1;
     mapped_register.push_back(new_node);    
 
-    new_node = { "GPU_MODE", nextAddr,  {   "(Byte) Bitflag Enables",
+    new_node = { "GPU_MODE", nextAddr, nullptr, nullptr,  {   "(Byte) Bitflag Enables",
                                 "- bit 7    = Standard Bitmap:",
                                 "              0: Text Display",
                                 "              1: Bitmap Display",
@@ -175,7 +175,7 @@ int  GPU::OnAttach(int nextAddr)
                                 "- bits 0-4 = Display Mode (0-31)", "" } }; nextAddr+=1;
     mapped_register.push_back(new_node);
 
-    new_node = { "GPU_VIDEO_MAX", nextAddr,  {   
+    new_node = { "GPU_VIDEO_MAX", nextAddr, nullptr, nullptr,  {   
                                 "(Word) Video Buffer Maximum (Read Only)",
                                 " Note: This will change to reflect",
                                 "       the size of the last cpu",
@@ -184,28 +184,28 @@ int  GPU::OnAttach(int nextAddr)
                                 "       standard video mode.", "" } }; nextAddr+=2;
     mapped_register.push_back(new_node);
 
-    new_node = { "GPU_HRES", nextAddr,  {   
+    new_node = { "GPU_HRES", nextAddr, nullptr, nullptr,  {   
                                 "(Word) Horizontal Resolution (Read Only)",
                                 "  Note: This will reflect the number of",
                                 "       pixel columns for bitmap modes.",
                                 "" } }; nextAddr+=2;
     mapped_register.push_back(new_node);
 
-    new_node = { "GPU_VRES", nextAddr,  {   
+    new_node = { "GPU_VRES", nextAddr, nullptr, nullptr,  {   
                                 "(Word) Vertical Resolution (Read Only)",
                                 "  Note: This will reflect the number of",
                                 "       pixel rows for bitmap modes.",
                                 "" } }; nextAddr+=2;
     mapped_register.push_back(new_node);
 
-    new_node = { "GPU_TCOLS", nextAddr,  {   
+    new_node = { "GPU_TCOLS", nextAddr, nullptr, nullptr,  {   
                                 "(Byte) Text Horizontal Columns (Read Only)",
                                 "  Note: This will reflect the number of",
                                 "       glyph columns for text modes.",
                                 "" } }; nextAddr+=1;
     mapped_register.push_back(new_node);
 
-    new_node = { "GPU_TROWS", nextAddr,  {   
+    new_node = { "GPU_TROWS", nextAddr, nullptr, nullptr,  {   
                                 "(Byte) Text Vertical Rows (Read Only)",
                                 "  Note: This will reflect the number of",
                                 "       glyph rows for text modes.",
@@ -213,11 +213,11 @@ int  GPU::OnAttach(int nextAddr)
     mapped_register.push_back(new_node);
 
     nextAddr--;
-    new_node = { "GPU_END", nextAddr,  { "End of GPU Register Space"} };
+    new_node = { "GPU_END", nextAddr, nullptr, nullptr,  { "End of GPU Register Space"} };
     mapped_register.push_back(new_node);    
     
     nextAddr++;
-    new_node = { "GPU_TOP", nextAddr,  { "Top of GPU Register Space", "---"} };
+    new_node = { "GPU_TOP", nextAddr, nullptr, nullptr,  { "Top of GPU Register Space", "---"} };
     mapped_register.push_back(new_node);    
 
     _size = nextAddr - old_address;

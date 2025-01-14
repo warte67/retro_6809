@@ -17,6 +17,7 @@
 #include <string>
 #include <vector>
 #include <mutex>
+#include <functional>
 
 #include "types.hpp"
 
@@ -79,6 +80,8 @@ protected: // PROTECTED ACCESSORS
     struct register_node {
         std::string name;                   // register label
         int address;                        // register starting address
+        std::function<Byte()> read;         // Read handler (lambda or function pointer)
+        std::function<void(Byte)> write;    // Write handler (lambda or function pointer)
         std::vector<std::string> comment;   // register comments (can be multiple lines)
     };
     std::vector<register_node> mapped_register;
@@ -165,51 +168,6 @@ class ROM : public IDevice
         void write_to_rom(Word offset, Byte data);
 };
 
-/*** class RAM_64K *******************************************************
- * 
- * ██████╗  █████╗ ███╗   ███╗         ██████╗ ██╗  ██╗██╗  ██╗
- * ██╔══██╗██╔══██╗████╗ ████║        ██╔════╝ ██║  ██║██║ ██╔╝
- * ██████╔╝███████║██╔████╔██║        ███████╗ ███████║█████╔╝ 
- * ██╔══██╗██╔══██║██║╚██╔╝██║        ██╔═══██╗╚════██║██╔═██╗ 
- * ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗╚██████╔╝     ██║██║  ██╗
- * ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝ ╚═════╝      ╚═╝╚═╝  ╚═╝
- * 
- * (This may be moved to its own files)
- ****************************************************************/
-class RAM_64K : public IDevice
-{
-    public:
-        RAM_64K(int size) {
-            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
-            _size = size;
-            _device_name = "RAM_64K_DEVICE";
-        }
-        virtual ~RAM_64K() {
-            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
-        }    
-
-		void OnInit() override 						{}
-		void OnQuit() override 						{}
-		void OnActivate() override 					{}
-		void OnDeactivate() override 				{}
-		void OnEvent(SDL_Event* evnt) override 		{ if (evnt==nullptr) {;}; }
-		void OnUpdate(float fElapsedTime) override 	{ if (fElapsedTime==0) {;} }
-		void OnRender() override 					{}
-
-		int OnAttach(int nextAddr) override       { 
-            int old_address=nextAddr;
-            this->heading = "Full Bank of System RAM";
-            register_node new_node;
-            new_node = { "SOFT_EXEC", nextAddr,  { "Exec Software Interrupt Vector"} }; nextAddr+=(64*1024);
-            mapped_register.push_back(new_node);
-
-            _size = nextAddr - old_address;
-            return _size; 
-        }  
-
-
-};
-
 
 /*** class SOFT_VECTORS *******************************************************
  * 
@@ -245,23 +203,15 @@ class SOFT_VECTORS : public IDevice
 		int OnAttach(int nextAddr) override       { 
             Word old_address=nextAddr;
             this->heading = "Software Interrupt Vectors";
-            register_node new_node;
-            new_node = { "SOFT_EXEC", nextAddr,  { "Exec Software Interrupt Vector"} }; nextAddr+=2;
-            mapped_register.push_back(new_node);
-            new_node = { "SOFT_SWI3", nextAddr,  { "SWI3 Software Interrupt Vector"} }; nextAddr+=2;
-            mapped_register.push_back(new_node);
-            new_node = { "SOFT_SWI2", nextAddr,  { "SWI2 Software Interrupt Vector"} }; nextAddr+=2;
-            mapped_register.push_back(new_node);
-            new_node = { "SOFT_FIRQ", nextAddr,  { "FIRQ Software Interrupt Vector"} }; nextAddr+=2;
-            mapped_register.push_back(new_node);
-            new_node = { "SOFT_IRQ", nextAddr,   { "IRQ Software Interrupt Vector"} }; nextAddr+=2;
-            mapped_register.push_back(new_node);
-            new_node = { "SOFT_SWI", nextAddr,   { "SWI / SYS Software Interrupt Vector"} }; nextAddr+=2;
-            mapped_register.push_back(new_node);
-            new_node = { "SOFT_NMI", nextAddr,   { "NMI Software Interrupt Vector"} }; nextAddr+=2;
-            mapped_register.push_back(new_node);
-            new_node = { "SOFT_RESET", nextAddr, { "RESET Software Interrupt Vector", "---"} }; nextAddr+=2;
-            mapped_register.push_back(new_node);
+
+            mapped_register.push_back({ "SOFT_EXEC", nextAddr, nullptr, nullptr,  { "Exec Software Interrupt Vector"} });   nextAddr+=2;
+            mapped_register.push_back({ "SOFT_SWI3", nextAddr, nullptr, nullptr,  { "SWI3 Software Interrupt Vector"} });   nextAddr+=2;
+            mapped_register.push_back({ "SOFT_SWI2", nextAddr, nullptr, nullptr,  { "SWI2 Software Interrupt Vector"} });   nextAddr+=2;
+            mapped_register.push_back({ "SOFT_FIRQ", nextAddr, nullptr, nullptr,  { "FIRQ Software Interrupt Vector"} });   nextAddr+=2;
+            mapped_register.push_back({ "SOFT_IRQ",  nextAddr, nullptr, nullptr,  { "IRQ Software Interrupt Vector"} });    nextAddr+=2;
+            mapped_register.push_back({ "SOFT_SWI",  nextAddr, nullptr, nullptr,  { "SWI / SYS Software Interrupt Vector"} }); nextAddr+=2;
+            mapped_register.push_back({ "SOFT_NMI",  nextAddr, nullptr, nullptr,  { "NMI Software Interrupt Vector"} });    nextAddr+=2;
+            mapped_register.push_back({ "SOFT_RESET", nextAddr, nullptr, nullptr, { "RESET Software Interrupt Vector", "---"} });  nextAddr+=2;
 
             _size = nextAddr - old_address;
             return _size; 
@@ -302,17 +252,12 @@ class SYSTEM_MEMORY : public IDevice
 		int OnAttach(int nextAddr) override       { 
             Word old_address=nextAddr;
             this->heading = "System Memory";
-            register_node new_node;
-            new_node = { "ZERO_PAGE", nextAddr,     { "Zero Page System and User Variables"} }; nextAddr=0x100;
-            mapped_register.push_back(new_node);
-            new_node = { "FIO_BUFFER", nextAddr,    { "START: File Input/Output Buffer"} }; nextAddr+=0xFF;
-            mapped_register.push_back(new_node);
-            new_node = { "FIO_BFR_END", nextAddr,   { "END: File Input/Output Buffer"} }; nextAddr+=1;
-            mapped_register.push_back(new_node);
-            new_node = { "SYSTEM_STACK", nextAddr,  { "Bottom of the system stack spcace"} }; nextAddr=0x400;
-            mapped_register.push_back(new_node);
-            new_node = { "SSTACK_TOP", nextAddr,    { "Top of the system statck space", "---"} };
-            mapped_register.push_back(new_node);
+
+            mapped_register.push_back({ "ZERO_PAGE",    nextAddr, nullptr, nullptr, { "Zero Page System and User Variables"} }); nextAddr=0x100;
+            mapped_register.push_back({ "FIO_BUFFER",   nextAddr, nullptr, nullptr, { "START: File Input/Output Buffer"} });     nextAddr+=0xFF;
+            mapped_register.push_back({ "FIO_BFR_END",  nextAddr, nullptr, nullptr, { "END: File Input/Output Buffer"} });       nextAddr+=1;
+            mapped_register.push_back({ "SYSTEM_STACK", nextAddr, nullptr, nullptr, { "Bottom of the system stack spcace"} });   nextAddr=0x400;
+            mapped_register.push_back({ "SSTACK_TOP",   nextAddr, nullptr, nullptr, { "Top of the system statck space", "---"} });
 
             _size = nextAddr - old_address;
             return _size; 
@@ -355,13 +300,10 @@ class VIDEO_BUFFER : public IDevice
             constexpr int vbfr_size = 8*1024;
             Word old_address=nextAddr;
             this->heading = "Video Buffer (" + std::to_string(vbfr_size/1024) + "K)";
-            register_node new_node;
-            new_node = { "VIDEO_START", nextAddr,   { "Start of standard video buffer"} }; nextAddr+=vbfr_size-1;
-            mapped_register.push_back(new_node);
-            new_node = { "VIDEO_END", nextAddr,     { "End of standard video buffer"} }; nextAddr+=1;
-            mapped_register.push_back(new_node);
-            new_node = { "VIDEO_TOP", nextAddr,     { "Top of standard video buffer", "---"} };             
-            mapped_register.push_back(new_node);
+
+            mapped_register.push_back({ "VIDEO_START", nextAddr, nullptr, nullptr,   { "Start of standard video buffer"} });    nextAddr+=vbfr_size-1;
+            mapped_register.push_back({ "VIDEO_END",   nextAddr, nullptr, nullptr,   { "End of standard video buffer"} });      nextAddr+=1;
+            mapped_register.push_back({ "VIDEO_TOP",   nextAddr, nullptr, nullptr,   { "Top of standard video buffer", "---"} });
 
             _size = nextAddr - old_address;
             return _size; 
@@ -429,13 +371,10 @@ class USER_MEMORY : public IDevice
             int ram_size = 0xAFFF-nextAddr;
             Word old_address=nextAddr;
             this->heading = "User Memory (" + std::to_string(ram_size/1024) + "K)";
-            register_node new_node;
-            new_node = { "USER_RAM", nextAddr,      { "User Accessable RAM"} }; nextAddr+=ram_size;
-            mapped_register.push_back(new_node);
-            new_node = { "USER_RAM_END", nextAddr,  { "End User Accessable RAM"} }; nextAddr+=1;
-            mapped_register.push_back(new_node);
-            new_node = { "USER_RAM_TOP", nextAddr,  { "Top User Accessable RAM", "---"} };             
-            mapped_register.push_back(new_node);
+
+            mapped_register.push_back({ "USER_RAM", nextAddr, nullptr, nullptr,      { "User Accessable RAM"} });       nextAddr+=ram_size;
+            mapped_register.push_back({ "USER_RAM_END", nextAddr, nullptr, nullptr,  { "End User Accessable RAM"} });   nextAddr+=1;
+            mapped_register.push_back({ "USER_RAM_TOP", nextAddr, nullptr, nullptr,  { "Top User Accessable RAM", "---"} });
 
             _size = nextAddr - old_address;
             return _size; 
@@ -478,15 +417,11 @@ class MEMBANK : public IDevice
             int bank_size = 8*1024;
             Word old_address=nextAddr;
             this->heading = "Banked Memory Region (" + std::to_string(bank_size/512) + "K)";
-            register_node new_node;
-            new_node = { "MEMBANK_ONE", nextAddr,  { "Banked Memory Page One (8K)"} }; nextAddr+=bank_size;
-            mapped_register.push_back(new_node);
-            new_node = { "MEMBANK_TWO", nextAddr,  { "Banked Memory Page Two (8K)"} }; nextAddr+=(bank_size-1);
-            mapped_register.push_back(new_node);
-            new_node = { "MEMBANK_END", nextAddr,  { "End of Banked Memory Region"} }; nextAddr+=1;            
-            mapped_register.push_back(new_node);
-            new_node = { "MEMBANK_TOP", nextAddr,  { "TOP of Banked Memory Region", "---"} }; 
-            mapped_register.push_back(new_node);
+
+            mapped_register.push_back({ "MEMBANK_ONE", nextAddr, nullptr, nullptr,  { "Banked Memory Page One (8K)"} }); nextAddr+=bank_size;
+            mapped_register.push_back({ "MEMBANK_TWO", nextAddr, nullptr, nullptr,  { "Banked Memory Page Two (8K)"} }); nextAddr+=(bank_size-1);
+            mapped_register.push_back({ "MEMBANK_END", nextAddr, nullptr, nullptr,  { "End of Banked Memory Region"} }); nextAddr+=1;
+            mapped_register.push_back({ "MEMBANK_TOP", nextAddr, nullptr, nullptr,  { "TOP of Banked Memory Region", "---"} });
 
             _size = nextAddr - old_address;
             return _size; 
@@ -547,13 +482,10 @@ class KERNEL_ROM : public IDevice
             int bank_size = 3.5f*1024;
             Word old_address=nextAddr;
             this->heading = "Kernel Rom (3.5K)";
-            register_node new_node;
-            new_node = { "KERNEL_START", nextAddr,  { "Start of Kernel Rom Space"} }; nextAddr+=(bank_size-1);
-            mapped_register.push_back(new_node);
-            new_node = { "KERNEL_END", nextAddr,  { "End of Kernel Rom Space"} }; nextAddr+=1;
-            mapped_register.push_back(new_node);
-            new_node = { "KERNEL_TOP", nextAddr,  { "Top of Kernel Rom Space", "---"} };
-            mapped_register.push_back(new_node);
+
+            mapped_register.push_back({ "KERNEL_START", nextAddr, nullptr, nullptr, { "Start of Kernel Rom Space"} });  nextAddr+=(bank_size-1);
+            mapped_register.push_back({ "KERNEL_END", nextAddr, nullptr, nullptr,   { "End of Kernel Rom Space"} });    nextAddr+=1;
+            mapped_register.push_back({ "KERNEL_TOP", nextAddr, nullptr, nullptr,   { "Top of Kernel Rom Space", "---"} });
 
             _size = nextAddr - old_address;
             return _size; 
@@ -594,8 +526,10 @@ class HDW_RESERVED : public IDevice
             std::string res = std::to_string(bank_size);
             res += " bytes reserved for future use.";
             nextAddr+=bank_size;
-            new_node = { "HDW_REG_END", nextAddr,  { res , "---"} }; // nextAddr+=1;
-            mapped_register.push_back(new_node);     
+            // new_node = { "HDW_REG_END", nextAddr, nullptr, nullptr,  { res , "---"} }; // nextAddr+=1;
+            // mapped_register.push_back(new_node);     
+
+            mapped_register.push_back({ "HDW_REG_END", nextAddr, nullptr, nullptr,  { res , "---"} } );
 
             _size = nextAddr - old_address;          
             return _size;
@@ -635,23 +569,15 @@ class ROM_VECTS : public IDevice
 		int OnAttach(int nextAddr) override       { 
             Word old_address=nextAddr;
             this->heading = "Hardware Interrupt Vectors";
-            register_node new_node;
-            new_node = { "HARD_EXEC", nextAddr,     { "EXEC Hardware Interrupt Vector" } }; nextAddr+=2;
-            mapped_register.push_back(new_node);
-            new_node = { "HARD_SWI3", nextAddr,     { "SWI3 Hardware Interrupt Vector" } }; nextAddr+=2;
-            mapped_register.push_back(new_node);
-            new_node = { "HARD_SWI2", nextAddr,     { "SWI2 Hardware Interrupt Vector" } }; nextAddr+=2;
-            mapped_register.push_back(new_node);
-            new_node = { "HARD_FIRQ", nextAddr,     { "FIRQ Hardware Interrupt Vector" } }; nextAddr+=2;
-            mapped_register.push_back(new_node);
-            new_node = { "HARD_IRQ", nextAddr,      { "IRQ Hardware Interrupt Vector" } }; nextAddr+=2;
-            mapped_register.push_back(new_node);
-            new_node = { "HARD_SWI", nextAddr,      { "SWI / SYS Hardware Interrupt Vector" } }; nextAddr+=2;
-            mapped_register.push_back(new_node);
-            new_node = { "HARD_NMI", nextAddr,      { "NMI Hardware Interrupt Vector" } }; nextAddr+=2;
-            mapped_register.push_back(new_node);
-            new_node = { "HARD_RESET", nextAddr,    { "RESET Hardware Interrupt Vector" } }; nextAddr+=2;
-            mapped_register.push_back(new_node);
+
+            mapped_register.push_back({ "HARD_EXEC", nextAddr, nullptr, nullptr,     { "EXEC Hardware Interrupt Vector" } }); nextAddr+=2;
+            mapped_register.push_back({ "HARD_SWI3", nextAddr, nullptr, nullptr,     { "SWI3 Hardware Interrupt Vector" } }); nextAddr+=2;
+            mapped_register.push_back({ "HARD_SWI2", nextAddr, nullptr, nullptr,     { "SWI2 Hardware Interrupt Vector" } }); nextAddr+=2;
+            mapped_register.push_back({ "HARD_FIRQ", nextAddr, nullptr, nullptr,     { "FIRQ Hardware Interrupt Vector" } }); nextAddr+=2;
+            mapped_register.push_back({ "HARD_IRQ", nextAddr, nullptr, nullptr,      { "IRQ Hardware Interrupt Vector" } }); nextAddr+=2;
+            mapped_register.push_back({ "HARD_SWI", nextAddr, nullptr, nullptr,      { "SWI / SYS Hardware Interrupt Vector" } }); nextAddr+=2;
+            mapped_register.push_back({ "HARD_NMI", nextAddr, nullptr, nullptr,      { "NMI Hardware Interrupt Vector" } }); nextAddr+=2;
+            mapped_register.push_back({ "HARD_RESET", nextAddr, nullptr, nullptr,    { "RESET Hardware Interrupt Vector" } }); nextAddr+=2;
 
             _size = nextAddr - old_address;
             return _size; 

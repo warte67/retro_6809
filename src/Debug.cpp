@@ -182,10 +182,10 @@ int  Debug::OnAttach(int nextAddr)
     this->heading = "System and Debug Hardware Registers:";
     register_node new_node;
 
-    new_node = { "SYS_BEGIN", nextAddr,  { "Start of System Registers"} };
+    new_node = { "SYS_BEGIN", nextAddr, nullptr, nullptr,  { "Start of System Registers"} };
     mapped_register.push_back(new_node);
 
-    new_node = { "SYS_STATE", nextAddr,  { "(Byte) System State Register",
+    new_node = { "SYS_STATE", nextAddr, nullptr, nullptr,  { "(Byte) System State Register",
         "SYS_STATE: ABCD.SSSS                          ",
         "- bit  7   = Error: Standard Buffer Overflow  ",
         "- bit  6   = Error: Extended Buffer Overflow  ",
@@ -211,10 +211,10 @@ int  Debug::OnAttach(int nextAddr)
         ""} }; nextAddr+=1;
     mapped_register.push_back(new_node);
 
-    new_node = { "SYS_SPEED", nextAddr,  { "(Word) Average CPU Clock Speed (Read Only)"} }; nextAddr+=2;
+    new_node = { "SYS_SPEED", nextAddr, nullptr, nullptr,  { "(Word) Average CPU Clock Speed (Read Only)"} }; nextAddr+=2;
     mapped_register.push_back(new_node);
 
-    new_node = { "SYS_CLOCK_DIV", nextAddr,  
+    new_node = { "SYS_CLOCK_DIV", nextAddr, nullptr, nullptr,  
         { "(Byte) 60 hz Clock Divider Register (Read Only)",
         "- bit 7: 0.546875 hz",
         "- bit 6: 1.09375 hz",
@@ -227,13 +227,13 @@ int  Debug::OnAttach(int nextAddr)
         ""} }; nextAddr+=1;
     mapped_register.push_back(new_node);
 
-    new_node = { "SYS_UPDATE_COUNT", nextAddr,  { "(DWord) Increments with each update event"} }; nextAddr+=4;
+    new_node = { "SYS_UPDATE_COUNT", nextAddr, nullptr, nullptr,  { "(DWord) Increments with each update event"} }; nextAddr+=4;
     mapped_register.push_back(new_node);
 
-    new_node = { "SYS_DBG_BRK_ADDR", nextAddr,  { "(Word) Address of current debug breakpoint"} }; nextAddr+=2;
+    new_node = { "SYS_DBG_BRK_ADDR", nextAddr, nullptr, nullptr,  { "(Word) Address of current debug breakpoint"} }; nextAddr+=2;
     mapped_register.push_back(new_node);
 
-    new_node = { "SYS_DBG_FLAGS", nextAddr,  {  "(Byte) Debug Specific Hardware Flags:",
+    new_node = { "SYS_DBG_FLAGS", nextAddr, nullptr, nullptr,  {  "(Byte) Debug Specific Hardware Flags:",
                                             "- bit 7: Debug Enable",
                                             "- bit 6: Single Step Enable",
                                             "- bit 5: Clear All Breakpoints",
@@ -245,10 +245,10 @@ int  Debug::OnAttach(int nextAddr)
                                             "" } }; // nextAddr+=1;
     mapped_register.push_back(new_node);
 
-    new_node = { "SYS_END", nextAddr,  { "End of System Registers"} }; nextAddr++;
+    new_node = { "SYS_END", nextAddr, nullptr, nullptr,  { "End of System Registers"} }; nextAddr++;
     mapped_register.push_back(new_node);
 
-    new_node = { "SYS_TOP", nextAddr,  { "Top of System Registers", ""} }; // nextAddr++;
+    new_node = { "SYS_TOP", nextAddr, nullptr, nullptr,  { "Top of System Registers", ""} }; // nextAddr++;
     mapped_register.push_back(new_node);
 
     std::cout << clr::indent() << clr::LT_BLUE << "Debug::OnAttach() Exit" << clr::RETURN;    

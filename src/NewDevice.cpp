@@ -69,7 +69,7 @@ int  NewDevice::OnAttach(int nextAddr)
     Word old_address=nextAddr;
     this->heading = "Default New Device";
     register_node new_node;
-    new_node = { "NEW_DEVICE", nextAddr,  { "Default New Device"} }; nextAddr+=2;
+    new_node = { "NEW_DEVICE", nextAddr, nullptr, nullptr,  { "Default New Device"} }; nextAddr+=2;
     mapped_register.push_back(new_node);
 
     std::cout << clr::indent() << clr::LT_BLUE << "NewDevice::OnAttach() Exit" << clr::RETURN;
