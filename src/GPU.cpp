@@ -135,90 +135,130 @@ int  GPU::OnAttach(int nextAddr)
     Word old_address=nextAddr;
     this->heading = "GPU Device Hardware Registers";
 
-    register_node new_node;
-    
-     new_node = { "GPU_OPTIONS", nextAddr, nullptr, nullptr,  {   "(Byte) Bitflag Enables",
-                                "- bit 7    = Extended Bitmap:",
-                                "              0: Tilemap Display",
-                                "              1: Bitmap Display",
-                                "- bits 5-6 = Extended Color Mode:",
-                                "              00: 2-Colors",
-                                "              01: 4-Colors",
-                                "              10: 16-Colors",
-                                "              11: 256-Colors",
-                                "- bits 4   = Extended Display Enable",
-                                "              0: Disabled",
-                                "              1: Enabled",
-                                "- bits 3   = Application Screen Mode",
-                                "              0: Windowed",
-                                "              1: Fullscreen",
-                                "- bits 2   = VSync Enable",
-                                "              0: Disabled",
-                                "              1: Enabled",
-                                "- bits 1   = Sprite Enable",
-                                "              0: Disabled",
-                                "              1: Enabled",
-                                "- bit  0   = Standard Display Enable",
-                                "              0: Disabled",
-                                "              1: Enabled", ""} }; nextAddr+=1;
-    mapped_register.push_back(new_node);    
+    // (Byte)
+    // GPU_OPTIONS
+    //
+    mapped_register.push_back({ "GPU_OPTIONS", nextAddr, 
+        [this]() { return _gpu_options; },              // read
+        [this](Byte data) { _gpu_options = data; },     // write
+        {   "(Byte) Bitflag Enables",
+            "- bit 7    = Extended Bitmap:",
+            "              0: Tilemap Display",
+            "              1: Bitmap Display",
+            "- bits 5-6 = Extended Color Mode:",
+            "              00: 2-Colors",
+            "              01: 4-Colors",
+            "              10: 16-Colors",
+            "              11: 256-Colors",
+            "- bits 4   = Extended Display Enable",
+            "              0: Disabled",
+            "              1: Enabled",
+            "- bits 3   = Application Screen Mode",
+            "              0: Windowed",
+            "              1: Fullscreen",
+            "- bits 2   = VSync Enable",
+            "              0: Disabled",
+            "              1: Enabled",
+            "- bits 1   = Sprite Enable",
+            "              0: Disabled",
+            "              1: Enabled",
+            "- bits 0   = Sprite Priority",
+            "              0: Disabled",
+            "              1: Enabled", "" } });   nextAddr+=1;
 
-    new_node = { "GPU_MODE", nextAddr, nullptr, nullptr,  {   "(Byte) Bitflag Enables",
-                                "- bit 7    = Standard Bitmap:",
-                                "              0: Text Display",
-                                "              1: Bitmap Display",
-                                "- bits 5-6 = Standard Color Mode:",
-                                "              00: 2-Colors",
-                                "              01: 4-Colors",
-                                "              10: 16-Colors",
-                                "              11: 256-Colors",
-                                "- bits 0-4 = Display Mode (0-31)", "" } }; nextAddr+=1;
-    mapped_register.push_back(new_node);
+    // (Byte)
+    // GPU_MODE 
+    //
+    mapped_register.push_back({ "GPU_MODE", nextAddr, 
+        [this]() { return _gpu_mode; }, // read
+        [this](Byte data) { _gpu_mode = data; }, // write
+        {   "(Byte) Bitflag Enables",
+            "- bit 7    = Standard Bitmap:",
+            "              0: Text Display",
+            "              1: Bitmap Display",
+            "- bits 5-6 = Standard Color Mode:",
+            "              00: 2-Colors",
+            "              01: 4-Colors",
+            "              10: 16-Colors",
+            "              11: 256-Colors",
+            "- bits 0-4 = Display Mode (0-31)", "" } });   nextAddr+=1;
 
-    new_node = { "GPU_VIDEO_MAX", nextAddr, nullptr, nullptr,  {   
-                                "(Word) Video Buffer Maximum (Read Only)",
-                                " Note: This will change to reflect",
-                                "       the size of the last cpu",
-                                "       accessible memory location",
-                                "       of the currently active",
-                                "       standard video mode.", "" } }; nextAddr+=2;
-    mapped_register.push_back(new_node);
+    // (Word)
+    // GPU_VIDEO_MAX (Read Only)
+    //              
+    mapped_register.push_back({ "GPU_VIDEO_MAX", nextAddr, 
+        [this]() { return _gpu_video_max >> 8; }, // read MSB
+        nullptr,     // read only
+        {   "(Word) Video Buffer Maximum MSB (Read Only)",
+            "  Note: This will change to reflect",
+            "        the size of the last cpu",
+            "        accessible memory location",
+            "        of the currently active",
+            "        standard video mode.", "" } });   nextAddr+=1;                
+    mapped_register.push_back({ "", nextAddr, 
+        [this]() { return _gpu_video_max & 0xFF; }, // read LSB
+        nullptr,     // read only
+        { "" } });   nextAddr+=1;
 
-    new_node = { "GPU_HRES", nextAddr, nullptr, nullptr,  {   
-                                "(Word) Horizontal Resolution (Read Only)",
-                                "  Note: This will reflect the number of",
-                                "       pixel columns for bitmap modes.",
-                                "" } }; nextAddr+=2;
-    mapped_register.push_back(new_node);
+    // (Word)
+    // GPU_HRES (Read Only)
+    //              
+    mapped_register.push_back({ "GPU_HRES", nextAddr,  
+        [this]() { return _gpu_hres >> 8; }, // read
+        nullptr,     // read only
+        {   "(Word) Horizontal Resolution (Read Only)",
+            "  Note: This will reflect the number of",
+            "       pixel columns for bitmap modes.",
+            "" } });   nextAddr+=1;
+    mapped_register.push_back({ "", nextAddr,
+        [this]() { return _gpu_hres & 0xFF; }, // read LSB
+        nullptr,     // read only
+        { "" } });   nextAddr+=1;
 
-    new_node = { "GPU_VRES", nextAddr, nullptr, nullptr,  {   
-                                "(Word) Vertical Resolution (Read Only)",
-                                "  Note: This will reflect the number of",
-                                "       pixel rows for bitmap modes.",
-                                "" } }; nextAddr+=2;
-    mapped_register.push_back(new_node);
+    // (Word)
+    // GPU_VRES (Read Only)
+    //              
+    mapped_register.push_back({ "GPU_VRES", nextAddr,  
+        [this]() { return _gpu_vres >> 8; }, // read
+        nullptr,     // read only
+        {   "(Word) Vertical Resolution (Read Only)",
+            "  Note: This will reflect the number of",
+            "       pixel rows for bitmap modes.",
+            "" } });   nextAddr+=1;
+    mapped_register.push_back({ "", nextAddr,
+        [this]() { return _gpu_vres & 0xFF; }, // read LSB
+        nullptr,     // read only
+        { "" } });   nextAddr+=1;
 
-    new_node = { "GPU_TCOLS", nextAddr, nullptr, nullptr,  {   
-                                "(Byte) Text Horizontal Columns (Read Only)",
-                                "  Note: This will reflect the number of",
-                                "       glyph columns for text modes.",
-                                "" } }; nextAddr+=1;
-    mapped_register.push_back(new_node);
+    // (Byte)
+    // GPU_TCOLS (Read Only)
+    //              
+    mapped_register.push_back({ "GPU_TCOLS", nextAddr,
+        [this]() { return _gpu_tcols; }, // read
+        nullptr,     // read only
+        {   "(Byte) Text Horizontal Columns (Read Only)",
+            "  Note: This will reflect the number of",
+            "       glyph columns for text modes.",
+            "" } });   nextAddr+=1;
 
-    new_node = { "GPU_TROWS", nextAddr, nullptr, nullptr,  {   
-                                "(Byte) Text Vertical Rows (Read Only)",
-                                "  Note: This will reflect the number of",
-                                "       glyph rows for text modes.",
-                                "" } }; nextAddr+=1;
-    mapped_register.push_back(new_node);
+    // (Byte)
+    // GPU_TROWS (Read Only)
+    //              
+    mapped_register.push_back({ "GPU_TROWS", nextAddr,
+        [this]() { return _gpu_trows; }, // read
+        nullptr,     // read only
+        {   "(Byte) Text Vertical Rows (Read Only)",
+            "  Note: This will reflect the number of",
+            "       glyph rows for text modes.",
+            "" } });   nextAddr+=1;
 
+    // 
+    // GPU_END and GPU_TOP (Constants)
+    //
     nextAddr--;
-    new_node = { "GPU_END", nextAddr, nullptr, nullptr,  { "End of GPU Register Space"} };
-    mapped_register.push_back(new_node);    
-    
+    mapped_register.push_back({ "GPU_END", nextAddr, nullptr, nullptr,  { "End of GPU Register Space"} });    
     nextAddr++;
-    new_node = { "GPU_TOP", nextAddr, nullptr, nullptr,  { "Top of GPU Register Space", "---"} };
-    mapped_register.push_back(new_node);    
+    mapped_register.push_back({ "GPU_TOP", nextAddr, nullptr, nullptr,  { "Top of GPU Register Space", "---" } });
 
     _size = nextAddr - old_address;
     std::cout << clr::indent() << clr::CYAN << "GPU::OnAttach() Exit" << clr::RETURN;

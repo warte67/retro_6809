@@ -265,6 +265,8 @@ void Memory::Generate_Memory_Map()
                 fout << clr::pad(clr::pad(" ",FIRST_TAB) + clr::pad(node->name(), VAR_LEN) + "= 0x" + clr::hex(node->base(),4)+",", COMMENT_START+4) << "// START: " << node->heading << std::endl;
                 for (auto &r : node->mapped_register)
                 {
+                    if (r.name == "") { continue; }
+
                     std::string _out = clr::pad(clr::pad(r.name, VAR_LEN) + "= 0x" + clr::hex(r.address, 4) +",", COMMENT_START);
                     // comments
                     for (auto &c : r.comment)
@@ -323,6 +325,8 @@ void Memory::Generate_Memory_Map()
                 fout << clr::pad(clr::pad("",FIRST_TAB) + clr::pad(node->name(), VAR_LEN) + "equ   0x" + clr::hex(node->base(),4), COMMENT_START) << "; START: " << node->heading << std::endl;
                 for (auto &r : node->mapped_register)
                 {
+                    if (r.name == "") { continue; }
+                    
                     std::string _out = clr::pad(clr::pad(r.name, VAR_LEN) + "equ   0x" + clr::hex(r.address, 4), COMMENT_START);
                     // comments
                     for (auto &c : r.comment)

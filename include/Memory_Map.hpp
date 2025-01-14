@@ -129,7 +129,7 @@ enum MEMMAP
                                       // - bits 1   = Sprite Enable
                                       //               0: Disabled
                                       //               1: Enabled
-                                      // - bit  0   = Standard Display Enable
+                                      // - bits 0   = Sprite Priority
                                       //               0: Disabled
                                       //               1: Enabled
                                       // 
@@ -144,12 +144,12 @@ enum MEMMAP
                                       //               11: 256-Colors
                                       // - bits 0-4 = Display Mode (0-31)
                                       // 
-    GPU_VIDEO_MAX         = 0xFE0D,   // (Word) Video Buffer Maximum (Read Only)
-                                      //  Note: This will change to reflect
-                                      //        the size of the last cpu
-                                      //        accessible memory location
-                                      //        of the currently active
-                                      //        standard video mode.
+    GPU_VIDEO_MAX         = 0xFE0D,   // (Word) Video Buffer Maximum MSB (Read Only)
+                                      //   Note: This will change to reflect
+                                      //         the size of the last cpu
+                                      //         accessible memory location
+                                      //         of the currently active
+                                      //         standard video mode.
                                       // 
     GPU_HRES              = 0xFE0F,   // (Word) Horizontal Resolution (Read Only)
                                       //   Note: This will reflect the number of

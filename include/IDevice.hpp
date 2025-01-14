@@ -570,14 +570,14 @@ class ROM_VECTS : public IDevice
             Word old_address=nextAddr;
             this->heading = "Hardware Interrupt Vectors";
 
-            mapped_register.push_back({ "HARD_EXEC", nextAddr, nullptr, nullptr,     { "EXEC Hardware Interrupt Vector" } }); nextAddr+=2;
-            mapped_register.push_back({ "HARD_SWI3", nextAddr, nullptr, nullptr,     { "SWI3 Hardware Interrupt Vector" } }); nextAddr+=2;
-            mapped_register.push_back({ "HARD_SWI2", nextAddr, nullptr, nullptr,     { "SWI2 Hardware Interrupt Vector" } }); nextAddr+=2;
-            mapped_register.push_back({ "HARD_FIRQ", nextAddr, nullptr, nullptr,     { "FIRQ Hardware Interrupt Vector" } }); nextAddr+=2;
-            mapped_register.push_back({ "HARD_IRQ", nextAddr, nullptr, nullptr,      { "IRQ Hardware Interrupt Vector" } }); nextAddr+=2;
-            mapped_register.push_back({ "HARD_SWI", nextAddr, nullptr, nullptr,      { "SWI / SYS Hardware Interrupt Vector" } }); nextAddr+=2;
-            mapped_register.push_back({ "HARD_NMI", nextAddr, nullptr, nullptr,      { "NMI Hardware Interrupt Vector" } }); nextAddr+=2;
-            mapped_register.push_back({ "HARD_RESET", nextAddr, nullptr, nullptr,    { "RESET Hardware Interrupt Vector" } }); nextAddr+=2;
+            mapped_register.push_back({ "HARD_EXEC",  nextAddr, nullptr, nullptr,   { "EXEC Hardware Interrupt Vector" } });    nextAddr+=2;
+            mapped_register.push_back({ "HARD_SWI3",  nextAddr, nullptr, nullptr,   { "SWI3 Hardware Interrupt Vector" } });    nextAddr+=2;
+            mapped_register.push_back({ "HARD_SWI2",  nextAddr, nullptr, nullptr,   { "SWI2 Hardware Interrupt Vector" } });    nextAddr+=2;
+            mapped_register.push_back({ "HARD_FIRQ",  nextAddr, nullptr, nullptr,   { "FIRQ Hardware Interrupt Vector" } });    nextAddr+=2;
+            mapped_register.push_back({ "HARD_IRQ",   nextAddr, nullptr, nullptr,   { "IRQ Hardware Interrupt Vector" } });     nextAddr+=2;
+            mapped_register.push_back({ "HARD_SWI",   nextAddr, nullptr, nullptr,   { "SWI / SYS Hardware Interrupt Vector" } }); nextAddr+=2;
+            mapped_register.push_back({ "HARD_NMI",   nextAddr, nullptr, nullptr,   { "NMI Hardware Interrupt Vector" } });     nextAddr+=2;
+            mapped_register.push_back({ "HARD_RESET", nextAddr, nullptr, nullptr,   { "RESET Hardware Interrupt Vector" } });   nextAddr+=2;
 
             _size = nextAddr - old_address;
             return _size; 
