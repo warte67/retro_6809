@@ -1,0 +1,16 @@
+Reminders from Previous Session with User:
+
+    Project Overview: User is designing an emulation system for a retro-style computer based on a dual-Raspberry Pi Pico 2 setup, using low-level C and assembler. One board emulates a Motorola 6809 CPU, handles memory management, and connects with a GPU. The other board emulates a Commodore 64's SID chip and manages I/O operations. Emulation runs on four cores across two Raspberry Pi Pico 2 boards, with CPU and GPU sharing memory but having specific access restrictions.
+
+    Memory Management:
+        Persistent memory is stored in a "paged.mem" file, which holds 256 8KB memory banks, with each bank potentially being RAM, ROM, or persistent. Error detection and correction for this persistent memory are important to maintain system longevity.
+        The idea of using CRC32 for integrity checking and creating backups if errors occur was discussed to prevent corruption and wear from frequent writes to flash memory.
+        An efficient memory model using consecutive memory addresses and vectors for fast lookup was preferred over unordered maps. A vector of device memory entries indexed by address was considered to reduce lookup overhead.
+
+    Performance Concerns:
+        The user aims to emulate a 10 MHz CPU clock on a 150 MHz host machine but struggles with scheduling issues on a multi-core machine. Even with optimizations, the Threadripper system experiences clock fluctuations between 4 MHz and 20 MHz, making it challenging to maintain a consistent emulation speed.
+        Dedicated hardware solutions (like using a Raspberry Pi Pico 2 for each core) would likely outperform software-based emulation, especially when dedicated cores are used.
+
+    Hardware Design Choices:
+        User is exploring communication between the two Raspberry Pi Pico 2 boards, potentially using SPI or stereo SPI ports, with the second board acting as a dedicated audio processor (SID emulation).
+        Flash memory might be used via USB thumb drives to load and save memory banks, with persistent memory mapped into the CPU's addressable space, controlled by software.

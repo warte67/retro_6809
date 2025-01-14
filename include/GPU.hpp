@@ -482,11 +482,118 @@ private: // PRIVATE MEMBERS
                             isROM->write_to_rom(relativeOffset, data);
                         } else if (node->write) {
                             node->write(relativeOffset, data);
+
+
+
+        ... more in depth read and write functions
+
+                    
+            struct MAP_NODE {
+                std::string label;                  // Register label (e.g., "GPU_OPTIONS")
+                Word address;                       // Memory-mapped address
+                std::function<Byte()> read;         // Normal read handler
+                std::function<void(Byte)> write;    // Normal write handler
+                std::function<Byte()> debug_read;   // Debug read handler
+                std::function<void(Byte)> debug_write; // Debug write handler
+                std::vector<std::string> comments; // Documentation/comments for the register
+            };
+
+
+
+            Byte Memory::Read(Word offset, bool debug) {
+                for (const auto& device : _memory_nodes) {
+                    if (offset >= device->baseAddress && offset < device->baseAddress + device->size) {
+                        Word relativeOffset = offset - device->baseAddress;
+
+                        for (const auto& reg : device->registerMap) {
+                            if (relativeOffset == reg.address - device->baseAddress) {
+                                if (debug) {
+                                    // Use debug_read if available, otherwise fallback to read
+                                    if (reg.debug_read) {
+                                        return reg.debug_read();
+                                    }
+                                }
+
+                                // Use normal read if not in debug mode or debug_read is unavailable
+                                if (reg.read) {
+                                    return reg.read();
+                                }
+
+                                return 0x00; // Default value for unmapped reads
+                            }
                         }
-                        return;
+                    }
+                }
+                return 0xCC; // Default invalid value
+            }
+
+
+            void Memory::Write(Word offset, Byte data, bool debug) {
+                for (const auto& device : _memory_nodes) {
+                    if (offset >= device->baseAddress && offset < device->baseAddress + device->size) {
+                        Word relativeOffset = offset - device->baseAddress;
+
+                        for (const auto& reg : device->registerMap) {
+                            if (relativeOffset == reg.address - device->baseAddress) {
+                                if (debug) {
+                                    // Use debug_write if available, otherwise fallback to write
+                                    if (reg.debug_write) {
+                                        reg.debug_write(data);
+                                        return;
+                                    }
+                                }
+
+                                // Use normal write if not in debug mode or debug_write is unavailable
+                                if (reg.write) {
+                                    reg.write(data);
+                                    return;
+                                }
+                            }
+                        }
                     }
                 }
             }
+
+        ... potential example:
+
+            void KeyboardDevice::OnAttach(Word baseAddr) {
+                baseAddress = baseAddr;
+                size = 0x10; // Example size for Keyboard device
+
+                registerMap.push_back({
+                    "KEYBOARD_BUFFER",
+                    baseAddr + 0x00,
+                    [this]() { 
+                        // Normal read: Pops a value from the keyboard buffer
+                        Byte value = _buffer.front();
+                        _buffer.pop();
+                        return value;
+                    },
+                    nullptr, // No normal write
+                    [this]() { 
+                        // Debug read: Peek at the front of the queue without removing
+                        return _buffer.empty() ? 0x00 : _buffer.front();
+                    },
+                    nullptr, // No debug write
+                    {
+                        "Keyboard buffer register"
+                    }
+                });
+
+                registerMap.push_back({
+                    "KEYBOARD_STATUS",
+                    baseAddr + 0x01,
+                    [this]() { return _status; }, // Normal read
+                    [this](Byte value) { _status = value; }, // Normal write
+                    [this]() { return _status; }, // Debug read is same as normal read
+                    nullptr, // No debug write
+                    {
+                        "Keyboard status register"
+                    }
+                });
+            }
+
+
 
 
 ******************************************************/

@@ -78,10 +78,20 @@ protected: // PROTECTED ACCESSORS
     std::string heading;                    // string that describes the entire device
     struct register_node {
         std::string name;                   // register label
-        int address;                       // register starting address
+        int address;                        // register starting address
         std::vector<std::string> comment;   // register comments (can be multiple lines)
     };
     std::vector<register_node> mapped_register;
+
+    // struct MAP_NODE {
+    //     std::string label;                  // Register label (e.g., "GPU_OPTIONS")
+    //     Word address;                       // Memory-mapped address
+    //     std::function<Byte()> read;         // Read handler (lambda or function pointer)
+    //     std::function<void(Byte)> write;    // Write handler (lambda or function pointer)
+    //     std::vector<std::string> comments;  // List of comments/documentation lines
+    // };
+
+
 };
 
 
