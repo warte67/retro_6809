@@ -90,8 +90,6 @@ protected: // PROTECTED ACCESSORS
     //     std::function<void(Byte)> write;    // Write handler (lambda or function pointer)
     //     std::vector<std::string> comments;  // List of comments/documentation lines
     // };
-
-
 };
 
 
