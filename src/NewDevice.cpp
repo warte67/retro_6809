@@ -15,28 +15,6 @@
 #include "NewDevice.hpp"
 
 
-/****************
- * Read / Write *
- ***************/ 
-
-Byte NewDevice::OnRead(Word offset) 
-{ 
-    Byte data = IDevice::OnRead(offset);
-    // ...
-
-    // std::cout << "MAP(GFX_MODE) = $" << clr::hex(MAP(GFX_MODE),4) << "\n";
-    // std::cout << "MAP(GFX_EMU) = $" << clr::hex(MAP(GFX_EMU),4) << "\n";
-
-    // ...
-    return data; 
-} // END: NewDevice::OnRead()
-
-void NewDevice::OnWrite(Word offset, Byte data) 
-{ 
-    IDevice::OnWrite( offset, data);
-} // END: NewDevice::OnWrite()
-
-
 
 /***************************
 * Constructor / Destructor *
@@ -63,18 +41,23 @@ NewDevice::~NewDevice()
 
 int  NewDevice::OnAttach(int nextAddr)
 {
-    std::cout << clr::indent() << clr::LT_BLUE << "NewDevice::OnAttach() Entry" << clr::RETURN;
-    if (nextAddr == 0) { ; } // stop the compiler from complaining
+    SetBaseAddress(nextAddr);
     
-    Word old_address=nextAddr;
-    this->heading = "Default New Device";
-
-    mapped_register.push_back({ "NEW_DEVICE", nextAddr, nullptr, nullptr,  { "Default New Device"} }); nextAddr+=2;
-
-    std::cout << clr::indent() << clr::LT_BLUE << "NewDevice::OnAttach() Exit" << clr::RETURN;
+    // std::cout << clr::indent() << clr::LT_BLUE << "NewDevice::OnAttach() Entry" << clr::RETURN;
+    // if (nextAddr == 0) { ; } // stop the compiler from complaining
     
-    _size = nextAddr - old_address;
-    return _size; 
+    // Word old_address=nextAddr;
+    // this->heading = "Default New Device";
+    // register_node new_node;
+    // new_node = { "NEW_DEVICE", nextAddr,  { "Default New Device"} }; nextAddr+=2;
+    // mapped_register.push_back(new_node);
+
+    // std::cout << clr::indent() << clr::LT_BLUE << "NewDevice::OnAttach() Exit" << clr::RETURN;
+    
+
+    // return nextAddr - old_address;
+
+    return 0;
 }
 
 

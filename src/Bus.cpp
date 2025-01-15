@@ -63,13 +63,13 @@ Bus::~Bus()
 
 bool Bus::IsRunning()	    
 { 
-    std::lock_guard<std::mutex> guard(_mutex_IsRunning); 
+    // std::lock_guard<std::mutex> guard(_mutex_IsRunning); 
     return s_bIsRunning; 
 }
 
 void Bus::IsRunning(bool b)	
 { 
-    std::lock_guard<std::mutex> guard(_mutex_IsRunning); 
+    // std::lock_guard<std::mutex> guard(_mutex_IsRunning); 
     s_bIsRunning = b; 
 }
 
@@ -77,14 +77,14 @@ void Bus::IsRunning(bool b)
 
 bool Bus::IsDirty()			
 { 
-    std::lock_guard<std::mutex> guard(_mutex_IsDirty); 
+    // std::lock_guard<std::mutex> guard(_mutex_IsDirty); 
     return s_bIsDirty; 
 }
 
 
 void Bus::IsDirty(bool b)	
 { 
-    std::lock_guard<std::mutex> guard(_mutex_IsDirty); 
+    // std::lock_guard<std::mutex> guard(_mutex_IsDirty); 
     s_bIsDirty = b; 
 }
 
@@ -217,83 +217,12 @@ void Bus::_onInit()
         Bus::Error("Memory Limit Exceeded!", __FILE__, __LINE__);        
     }
 
-    // ######################################################################
-    // #   These are the tests that are used to verify the memory map.      #
-    // #                                                                    #
-    // # ToDo: Refactor these tests and move them to the device in question #
-    // #       so they will be responsible for doing their own tests.       #
-    // ######################################################################
-
-    // Check the Memory_Map.hpp enumerations against the new address space
-    if (!GENERATE_MEMORY_MAP) {
-        // ...
-    }
-
-    // Engage Basic Memory Tests
-    if (false)
-    {
-        int upper_bounds = 0xB000;  // Memory::NextAddress();  
-        std::cout << clr::indent_push() << clr::YELLOW << "Testing Addresses $0000-$" << clr::hex(upper_bounds-1,4) << " ... ";
-        Byte b = 0;
-        bool failed = false;
-        for (int a = 0; a< upper_bounds; a++) 
-        {
-            Memory::Write((Word)a,b);
-            if (Memory::Read((Word)a) != b) {
-                Bus::Error("Memory Test Failure!", __FILE__, __LINE__);     
-                failed = true;    
-                std::cout << clr::RED << "FAILED" << clr::RETURN;      
-                break;         
-            }
-            b++;
-        }
-        if (!failed) std::cout << clr::YELLOW << "GOOD" << clr::RETURN;
-
-        // check 8k RAM banking area
-        int next_address = upper_bounds;
-        upper_bounds = 0xF000;
-        std::cout << clr::indent() << clr::YELLOW << "Testing Banked Memory $B000-$" << clr::hex(upper_bounds-1,4) << " ... ";
-        b=0;
-        failed = false;
-        for (int a = next_address; a< upper_bounds; a++) 
-        {
-            Memory::Write((Word)a,b);
-            if (Memory::Read((Word)a) != b) {
-                Bus::Error("Memory Test Failure!", __FILE__, __LINE__);                        
-                failed = true;                   
-                std::cout << clr::RED << "FAILED" << clr::RETURN;               
-                break;
-            }
-            b++;
-        }
-        if (!failed) std::cout << clr::YELLOW << "GOOD" << clr::RETURN;
-        
-        // check ROM area $F000-$FDFF
-        next_address = upper_bounds;
-        upper_bounds = 0xFE00;
-        std::cout << clr::indent() << clr::YELLOW << "Testing ROM $F000-$" << clr::hex(upper_bounds-1,4) << " ... ";
-        b=255;
-        failed = false;
-        for (int a = next_address; a< upper_bounds; a++) 
-        {
-            Memory::Write((Word)a,b);
-            if (Memory::Read((Word)a) == b) {
-                Bus::Error("Memory Test Failure!", __FILE__, __LINE__);                        
-                failed = true;                   
-                std::cout << clr::RED << "FAILED" << clr::RETURN;               
-                break;
-            }
-            // b++;
-        }
-        if (!failed) std::cout << clr::YELLOW << "GOOD" << clr::RETURN;
-    }
-
-    std::cout << clr::indent_pop() << clr::YELLOW << "... Memory Tests Passed!\n" << clr::RESET;
-    // END: Memory Tests
-    
 
     // Dump the memory map
     if (GENERATE_MEMORY_MAP)    { Memory::Generate_Memory_Map(); }
+
+    // Generate the Device Map
+    Memory::Generate_Device_Map();
 
     // initialize the devices
     _memory.OnInit();
@@ -301,21 +230,15 @@ void Bus::_onInit()
     // load initial applications (Kernel should be loaded with the KERNEL_ROM device)
     load_hex(INITIAL_ASM_APPLICATION);
 
-    // std::cout << "Bus::_onInit() --> $" << clr::hex(Memory::Read_Word(0xfffe),4) << std::endl;
-
     // start the CPU thread
     s_c6809 = new C6809(this);
 	try 
 	{
 		s_cpuThread = std::thread(&C6809::ThreadProc);
-
-
         // Wait until the CPU thread is ready
         C6809* cpu = Bus::GetC6809();
         std::unique_lock<std::mutex> lock(cpu->mtx);
         cpu->cv.wait(lock, [cpu]{ return cpu->isCpuThreadReady; });
-
-
 	} 
 	catch (const std::exception& e)
 	{
@@ -325,7 +248,6 @@ void Bus::_onInit()
 		Bus::IsRunning(false);
 		std::cout << e.what() << std::endl;
 	}
-	// C6809::IsCpuEnabled(true);       
 
     // cleanup and return
     std::cout << clr::indent_pop() << clr::CYAN << "Bus::_onInit() Exit" << clr::RETURN;
@@ -419,7 +341,7 @@ void Bus::_onEvent()
 
         // flush events? This does seem to help the input lag, 
         // but more still needs to be done.
-        SDL_FlushEvents(SDL_EVENT_FIRST, SDL_EVENT_LAST);
+        // SDL_FlushEvents(SDL_EVENT_FIRST, SDL_EVENT_LAST);
     }     
 }
 

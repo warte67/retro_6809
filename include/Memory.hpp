@@ -28,6 +28,9 @@
 
 class Memory : public IDevice
 {
+    friend class IDevice;   // This is okay! The Memory device is 
+                            // the parent container of IDevices.
+
 private:    // PRIVATE SINGLETON STUFF
     Memory();
     ~Memory();       
@@ -52,12 +55,12 @@ public:		// PUBLIC VIRTUAL METHODS
     int OnAttach(int nextAddr) override 		{ if (nextAddr) { return 0; } return 0; } // stop the argument not used warning
 
 public:     // PUBLIC ACCESSORS
-    static Byte Read(Word offset, bool debug = false);
-    static void Write(Word offset, Byte data, bool debug = false);
-    static Word Read_Word(Word offset, bool debug = false);
-    static void Write_Word(Word offset, Word data, bool debug = false);     
-    static DWord Read_DWord(Word offset, bool debug = false);
-    static void Write_DWord(Word offset, DWord data, bool debug = false);   
+    static Byte Read(Word address, bool debug = false);
+    static void Write(Word address, Byte data, bool debug = false);
+    static Word Read_Word(Word address, bool debug = false);
+    static void Write_Word(Word address, Word data, bool debug = false);     
+    static DWord Read_DWord(Word address, bool debug = false);
+    static void Write_DWord(Word address, DWord data, bool debug = false);   
 
     // Template method for device attachment with flexible parameters
     template<typename T, typename... Args>
@@ -75,146 +78,26 @@ public:     // PUBLIC ACCESSORS
     }    
 
     static int NextAddress() { return _next_address; }
+    static void Generate_Device_Map();
     static void Generate_Memory_Map();
     
-    // Map a device name to its address
+    // Map a constants name to its address
     static Word Map(std::string name, std::string file, int line);
 
-
+protected:
+    inline static std::vector<Byte> _raw_cpu_memory;
 
 private:
     static int _attach(IDevice* device);
 
-    inline static int _next_address = 0;    // next assignable address
-    inline static std::vector<IDevice*> _memory_nodes;		
-    inline static std::unordered_map<std::string, Word> _map;
+    inline static int _next_address = 0;    // next available address    
+
+    inline static std::unordered_map<Word, REGISTER_NODE> _device_map;   // addressable hardware registers
+
+    inline static std::vector<IDevice*> _memory_nodes;  // all of the attached devices	
+    inline static std::unordered_map<std::string, Word> _map;   // constants
     bool bWasInit = false;
 };
 
 // end: Memory.hpp
 
-
-
-/***********************************************************
-
-#include <unordered_map>
-#include <functional>
-#include <string>
-#include <vector>
-
-// Register node for devices
-struct MAP_NODE {
-    std::string label;                  // Register label (e.g., "VIDEO_BUFFER_DEVICE")
-    Word address;                       // Memory-mapped address
-    std::function<Byte()> read;         // Read handler
-    std::function<void(Byte)> write;    // Write handler
-    std::function<Byte()> debug_read;   // Debug read handler
-    std::function<void(Byte)> debug_write; // Debug write handler
-    std::vector<std::string> comments;  // Documentation/comments
-};
-
-// Constant node (for static values)
-struct ConstantNode {
-    std::string label;   // Label for the constant
-    Word address;        // Memory-mapped address
-    Byte value;          // Static value of the constant
-    std::vector<std::string> comments; // Comments for the constant
-};
-
-class Memory {
-public:
-    // Store device registers in an unordered_map (O(1) lookup time)
-    std::unordered_map<Word, MAP_NODE> registerMap;
-
-    // Store constants in an unordered_map (O(1) lookup time)
-    std::unordered_map<Word, ConstantNode> constantMap;
-
-    // Method to attach a register device
-    void OnAttachDevice(const MAP_NODE& node) {
-        registerMap[node.address] = node;
-    }
-
-    // Method to attach a constant value
-    void OnAttachConstant(const ConstantNode& node) {
-        constantMap[node.address] = node;
-    }
-
-    // Macro for adding a constant to the memory
-    #define DEFINE_CONSTANT(label, address, value, ...) \
-        OnAttachConstant(ConstantNode{#label, address, value, {__VA_ARGS__}})
-
-    // Macro for adding a device register to the memory
-    #define DEFINE_DEVICE(label, address, readHandler, writeHandler, debugReadHandler, debugWriteHandler, ...) \
-        OnAttachDevice(MAP_NODE{#label, address, readHandler, writeHandler, debugReadHandler, debugWriteHandler, {__VA_ARGS__}})
-
-    // Memory read function (checks for both registers and constants)
-    Byte Read(Word address, bool debug) {
-        // Check if it's a register device
-        auto regIt = registerMap.find(address);
-        if (regIt != registerMap.end()) {
-            const MAP_NODE& node = regIt->second;
-
-            if (debug && node.debug_read) {
-                return node.debug_read();
-            }
-            if (node.read) {
-                return node.read();
-            }
-            return 0x00;  // Default value if no read function is defined
-        }
-
-        // Check if it's a constant value
-        auto constIt = constantMap.find(address);
-        if (constIt != constantMap.end()) {
-            return constIt->second.value;
-        }
-
-        return 0xCC;  // Invalid value if address not found
-    }
-
-    // Memory write function (for registers only)
-    void Write(Word address, Byte data, bool debug) {
-        // Check if it's a register device
-        auto regIt = registerMap.find(address);
-        if (regIt != registerMap.end()) {
-            MAP_NODE& node = regIt->second;
-
-            if (debug && node.debug_write) {
-                node.debug_write(data);
-                return;
-            }
-            if (node.write) {
-                node.write(data);
-                return;
-            }
-        }
-    }
-};
-
-// Example device and constant definitions:
-
-void OnAttach() {
-    // Define constants with comments
-    DEFINE_CONSTANT(SYS_STATE, 0x000C, 0x01, "System state register", "Controls system status");
-    DEFINE_CONSTANT(SYS_SPEED, 0x000E, 0x05, "CPU speed in high byte", "Speed value for system");
-    
-    // Define a device with comments
-    DEFINE_DEVICE(
-        VIDEO_BUFFER_DEVICE, 
-        0x0400, 
-        []() -> Byte { return 0xFF; },  // Normal read handler
-        nullptr,                         // No write handler
-        []() -> Byte { return 0xAA; },  // Debug read handler
-        nullptr,                         // No debug write handler
-        "Video buffer device register", "Contains the video frame data"
-    );
-}
-
-
-
-
-
-
-
-
- ***********************************************************/

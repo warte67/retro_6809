@@ -45,10 +45,14 @@ Memory::~Memory()
 void Memory::OnInit() 
 {
     std::cout << clr::indent_push() << clr::CYAN << "Memory::OnInit() Entry" << clr::RETURN;
+
+    // assign and clear out 64k of CPU addressable memnory
+    _raw_cpu_memory.assign(64*1024, 0);
+    
+    // Initialize all of the attached devices
     for (auto &d : Memory::_memory_nodes) {
         d->OnInit();
     }    
-    // _build_map();
     std::cout << clr::indent_pop() << clr::CYAN << "Memory::OnInit() Exit" << clr::RETURN;                
 }
 
@@ -119,89 +123,96 @@ void Memory::OnRender()
 
 
 
-Byte Memory::Read(Word offset, bool debug)
+
+Byte Memory::Read(Word address, bool debug)
 {
-    for (auto& a : Memory::_memory_nodes)
+    // debug mode just returns raw data
+    if (debug) { return memory(address); }
+
+    // find the device that is responsible for this address
+    auto itr = _device_map.find(address);
+    // device was found?
+    if (itr != _device_map.end()) 
     {
-        if (offset - a->base() < a->size())
+        if (itr->second.read != nullptr)
         {
-            if (debug)
-                if (offset - a->base() < a->size())
-                    return a->memory(offset - a->base() );
-            return a->OnRead(offset);
+            return itr->second.read(address);
         }
     }
-    return 0xCC;    
+
+    return memory(address);  
 }
 
 
 
-void Memory::Write(Word offset, Byte data, bool debug)
+void Memory::Write(Word address, Byte data, bool debug)
 {
-    for (auto& a : Memory::_memory_nodes)
+    // debug mode just writes the raw data
+    if (debug) { memory(address, data); return; }
+
+    // find the device that is responsible for this address
+    auto itr = _device_map.find(address);
+    // device was found?
+    if (itr != _device_map.end()) 
     {
-        if (offset - a->base() < a->size())
+        if (itr->second.read != nullptr)
         {
-            ROM* isROM = dynamic_cast<ROM*>(a);
-            if (debug && isROM) {
-                isROM->write_to_rom(offset, data);
-            } else {
-                a->OnWrite(offset, data);
-            }
-            return;
+            if (itr->second.write != nullptr)
+            {
+                itr->second.write(address, data);
+                return;
+            }        
         }
     }
+    // write to the fallback memory (for debug)
+    memory(address, data);
+    return;
 }
 
 
-Word Memory::Read_Word(Word offset, bool debug)
+Word Memory::Read_Word(Word address, bool debug)
 {
-    if (debug) {;}  // stop the unused argument warning
 
-    Word ret = (Memory::Read(offset) << 8) | Memory::Read(offset + 1);
+    Word ret = (Memory::Read(address, debug) << 8) | Memory::Read(address + 1, debug);
     return ret;
 }
 
 
 
-void Memory::Write_Word(Word offset, Word data, bool debug)
-{    
-    if (debug) {;}  // stop the unused argument warning
 
+void Memory::Write_Word(Word address, Word data, bool debug)
+{    
     Byte msb = (data >> 8) & 0xFF;
     Byte lsb = data & 0xff;
-    Memory::Write(offset, msb);
-    Memory::Write(offset + 1, lsb);
+    Memory::Write(address, msb, debug);
+    Memory::Write(address + 1, lsb, debug);
 }
 
 
 
-DWord Memory::Read_DWord(Word offset, bool debug)
+DWord Memory::Read_DWord(Word address, bool debug)
 {
-    if (debug) {;}  // stop the unused argument warning
-
-    DWord ret = (Memory::Read(offset+0)<<24) |
-                (Memory::Read(offset+1)<<16) | 
-                (Memory::Read(offset+2)<< 8) | 
-                (Memory::Read(offset+3)<< 0);
+    DWord ret = (Memory::Read(address+0, debug)<<24) |
+                (Memory::Read(address+1, debug)<<16) | 
+                (Memory::Read(address+2, debug)<< 8) | 
+                (Memory::Read(address+3, debug)<< 0);
     return ret;
 }
 
 
 
-void Memory::Write_DWord(Word offset, DWord data, bool debug)
+void Memory::Write_DWord(Word address, DWord data, bool debug)
 {
-    if (debug) {;}  // stop the unused argument warning
-
-    Memory::Write(offset+0, (data>>24) & 0xFF);
-    Memory::Write(offset+1, (data>>16) & 0xFF);
-    Memory::Write(offset+2, (data>> 8) & 0xFF);
-    Memory::Write(offset+3, (data>> 0) & 0xFF);
+    Memory::Write(address+0, (data>>24) & 0xFF, debug);
+    Memory::Write(address+1, (data>>16) & 0xFF, debug);
+    Memory::Write(address+2, (data>> 8) & 0xFF, debug);
+    Memory::Write(address+3, (data>> 0) & 0xFF, debug);
 }
 
 
 int Memory::_attach(IDevice* device)
 {    
+    // (void)device;
     int size = 0;
     if (device != nullptr)
     {
@@ -210,8 +221,6 @@ int Memory::_attach(IDevice* device)
         size = device->OnAttach(_next_address);     
         if (size > 0)
         {
-            device->base(_next_address);
-            device->size(size);
             _next_address += size;               
             Memory::_memory_nodes.push_back(device);
 
@@ -240,6 +249,20 @@ int Memory::_attach(IDevice* device)
 }
 
 
+void Memory::Generate_Device_Map()
+{
+    for (auto &node : Memory::_memory_nodes) {
+        for (auto &reg : node->mapped_register) {
+            if (reg.read != nullptr) {
+                _device_map[reg.address] = reg;
+// if (reg.name != "")
+//     std::cout << clr::RED << reg.name << " @ $" << clr::hex(reg.address,4) << clr::RESET << clr::RETURN;
+            }
+        }
+    }
+}
+
+
 void Memory::Generate_Memory_Map() 
 {
     { // Generate C++ Memory_Map.hpp
@@ -262,11 +285,10 @@ void Memory::Generate_Memory_Map()
             for (auto &node : Memory::_memory_nodes) 
             {
                 fout << std::endl;
-                fout << clr::pad(clr::pad(" ",FIRST_TAB) + clr::pad(node->name(), VAR_LEN) + "= 0x" + clr::hex(node->base(),4)+",", COMMENT_START+4) << "// START: " << node->heading << std::endl;
+                fout << clr::pad(clr::pad(" ",FIRST_TAB) + clr::pad(node->name(), VAR_LEN) + "= 0x" + clr::hex(node->GetBaseAddress(),4)+",", COMMENT_START+4) << "// START: " << node->heading << std::endl;
                 for (auto &r : node->mapped_register)
                 {
-                    if (r.name == "") { continue; }
-
+                    if (r.name == "") continue;
                     std::string _out = clr::pad(clr::pad(r.name, VAR_LEN) + "= 0x" + clr::hex(r.address, 4) +",", COMMENT_START);
                     // comments
                     for (auto &c : r.comment)
@@ -322,11 +344,10 @@ void Memory::Generate_Memory_Map()
             for (auto &node : Memory::_memory_nodes) 
             {
                 fout << std::endl;
-                fout << clr::pad(clr::pad("",FIRST_TAB) + clr::pad(node->name(), VAR_LEN) + "equ   0x" + clr::hex(node->base(),4), COMMENT_START) << "; START: " << node->heading << std::endl;
+                fout << clr::pad(clr::pad("",FIRST_TAB) + clr::pad(node->name(), VAR_LEN) + "equ   0x" + clr::hex(node->GetBaseAddress(),4), COMMENT_START) << "; START: " << node->heading << std::endl;
                 for (auto &r : node->mapped_register)
                 {
-                    if (r.name == "") { continue; }
-                    
+                    if (r.name == "") continue;
                     std::string _out = clr::pad(clr::pad(r.name, VAR_LEN) + "equ   0x" + clr::hex(r.address, 4), COMMENT_START);
                     // comments
                     for (auto &c : r.comment)
@@ -366,14 +387,6 @@ void Memory::Generate_Memory_Map()
 }
 
 // Map a device name to its address.
-
-// Note: This method will not compile properly with switch statements
-//       due to MAP() being a macro and it does not always reference
-//       the constants from 'Memory_map.hpp' but sometimes references
-//       the unordered_map '_map' that is generated by the devices 
-//       attached to the memory map during initialization. 
-//       Use if/else instead.
-//
  Word Memory::Map(std::string name, std::string file = __FILE__, int line = __LINE__)   
 { 
     if (_map.find(name) == _map.end()) 
