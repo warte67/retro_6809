@@ -26,8 +26,8 @@ public: // PUBLIC CONSTRUCTOR / DESTRUCTOR
     virtual ~GPU();
 
 public: // VIRTUAL METHODS
-    virtual Byte OnRead(Word offset);               // read
-    virtual void OnWrite(Word offset, Byte data);   // write
+    // virtual Byte OnRead(Word offset);               // read
+    // virtual void OnWrite(Word offset, Byte data);   // write
     // =============================================
     virtual int  OnAttach(int nextAddr);            // attach to the memory map
     virtual void OnInit();                          // initialize

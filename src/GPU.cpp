@@ -22,84 +22,76 @@
  ***************/ 
 
 
-Byte GPU::OnRead(Word offset) 
-{ 
-    Byte data = IDevice::OnRead(offset);    // use this for other devices
-    // std::cout << clr::indent() << clr::CYAN << "GPU::OnRead($"<< clr::hex(offset,4) << ") = $" << clr::hex(data,2) << "\n" << clr::RESET;
+// Byte GPU::OnRead(Word offset) 
+// { 
+//     Byte data = IDevice::memory(offset);
+//     // std::cout << clr::indent() << clr::CYAN << "GPU::OnRead($"<< clr::hex(offset,4) << ") = $" << clr::hex(data,2) << "\n" << clr::RESET;
 
-    if (offset == MAP(GPU_OPTIONS))             { data = _gpu_options;  }
-    else if (offset == MAP(GPU_MODE))           { data = _gpu_mode;     }
+//     // if (offset == MAP(GPU_OPTIONS))             { data = _gpu_options;  }
+//     // else if (offset == MAP(GPU_MODE))           { data = _gpu_mode;     }
 
-    // GPU_VIDEO_MAX
-    else if (offset == MAP(GPU_VIDEO_MAX) + 0 ) 
-    {
-        data = _gpu_video_max >> 8;
-    } 
-    else if (offset == MAP(GPU_VIDEO_MAX) + 1 )
-    {
-        data = _gpu_video_max & 0xFF; 
-    } 
+//     // // GPU_VIDEO_MAX
+//     // else if (offset == MAP(GPU_VIDEO_MAX) + 0 ) 
+//     // {
+//     //     data = _gpu_video_max >> 8;
+//     // } 
+//     // else if (offset == MAP(GPU_VIDEO_MAX) + 1 )
+//     // {
+//     //     data = _gpu_video_max & 0xFF; 
+//     // } 
     
-    // GPU_HRES (Read Only)
-    else if (offset == MAP(GPU_HRES) + 0 ) 
-    {
-        data = _gpu_hres >> 8;
-    } 
-    else if (offset == MAP(GPU_HRES) + 1 )
-    {
-        data = _gpu_hres & 0xFF; 
-    } 
+//     // // GPU_HRES (Read Only)
+//     // else if (offset == MAP(GPU_HRES) + 0 ) 
+//     // {
+//     //     data = _gpu_hres >> 8;
+//     // } 
+//     // else if (offset == MAP(GPU_HRES) + 1 )
+//     // {
+//     //     data = _gpu_hres & 0xFF; 
+//     // } 
     
-    // GPU_VRES (Read Only)
-    else if (offset == MAP(GPU_VRES) + 0 ) 
-    {
-        data = _gpu_vres >> 8;
-    } 
-    else if (offset == MAP(GPU_VRES) + 1 )
-    {
-        data = _gpu_vres & 0xFF; 
-    } 
+//     // // GPU_VRES (Read Only)
+//     // else if (offset == MAP(GPU_VRES) + 0 ) 
+//     // {
+//     //     data = _gpu_vres >> 8;
+//     // } 
+//     // else if (offset == MAP(GPU_VRES) + 1 )
+//     // {
+//     //     data = _gpu_vres & 0xFF; 
+//     // } 
     
-    // GPU_TCOLS (Read Only)
-    else if (offset == MAP(GPU_TCOLS) ) 
-    {
-        data = _gpu_tcols;
-    } 
+//     // // GPU_TCOLS (Read Only)
+//     // else if (offset == MAP(GPU_TCOLS) ) 
+//     // {
+//     //     data = _gpu_tcols;
+//     // } 
     
-    // GPU_TROWS (Read Only)
-    else if (offset == MAP(GPU_TROWS) ) 
-    {
-        data = _gpu_trows;
-    }     
+//     // // GPU_TROWS (Read Only)
+//     // else if (offset == MAP(GPU_TROWS) ) 
+//     // {
+//     //     data = _gpu_trows;
+//     // }     
 
 
-    return data;
-} // END: GPU::OnRead()
+//     return data;
+// } // END: GPU::OnRead()
 
-void GPU::OnWrite(Word offset, Byte data) 
-{ 
-    // std::cout << clr::indent() << clr::CYAN << "GPU::OnWrite($" << clr::hex(offset,4) << ", $" << clr::hex(data,2) << ")\n" << clr::RESET;
+// void GPU::OnWrite(Word offset, Byte data) 
+// { 
+//     // std::cout << clr::indent() << clr::CYAN << "GPU::OnWrite($" << clr::hex(offset,4) << ", $" << clr::hex(data,2) << ")\n" << clr::RESET;
 
-    if (offset == MAP(GPU_OPTIONS)) { 
-        data = _verify_gpu_mode_change(data, offset);  
-        _gpu_options = data;
-    }
-    else if (offset == MAP(GPU_MODE)) { 
-        data = _verify_gpu_mode_change(data, offset);  
-        _gpu_mode = data;
-    }
-    // READ ONLY:
-    // else if ( offset == MAP(GPU_VIDEO_MAX) + 0 ) 
-    // {
-    //     _gpu_video_max = (_gpu_video_max & 0x00ff) | (data << 8);
-    // } 
-    // else if ( offset == MAP(GPU_VIDEO_MAX) + 1 ) 
-    // {
-    //     _gpu_video_max = (_gpu_video_max & 0xff00) | (data << 0);
-    // }    
+//     // if (offset == MAP(GPU_OPTIONS)) { 
+//     //     data = _verify_gpu_mode_change(data, offset);  
+//     //     _gpu_options = data;
+//     // }
+//     // else if (offset == MAP(GPU_MODE)) { 
+//     //     data = _verify_gpu_mode_change(data, offset);  
+//     //     _gpu_mode = data;
+//     // }
 
-    IDevice::OnWrite( offset, data);
-} // END: GPU::OnWrite()
+
+//     IDevice::memory( offset, data);
+// } // END: GPU::OnWrite()
 
 
 
@@ -130,99 +122,137 @@ GPU::~GPU()
 int  GPU::OnAttach(int nextAddr)
 {
     std::cout << clr::indent() << clr::CYAN << "GPU::OnAttach() Entry" << clr::RETURN;
-    if (nextAddr == 0) { ; } // stop the compiler from complaining
-
+ 
+    SetBaseAddress(nextAddr);
     Word old_address=nextAddr;
     this->heading = "GPU Device Hardware Registers";
-
-    register_node new_node;
     
-     new_node = { "GPU_OPTIONS", nextAddr,  {   "(Byte) Bitflag Enables",
-                                "- bit 7    = Extended Bitmap:",
-                                "              0: Tilemap Display",
-                                "              1: Bitmap Display",
-                                "- bits 5-6 = Extended Color Mode:",
-                                "              00: 2-Colors",
-                                "              01: 4-Colors",
-                                "              10: 16-Colors",
-                                "              11: 256-Colors",
-                                "- bits 4   = Extended Display Enable",
-                                "              0: Disabled",
-                                "              1: Enabled",
-                                "- bits 3   = Application Screen Mode",
-                                "              0: Windowed",
-                                "              1: Fullscreen",
-                                "- bits 2   = VSync Enable",
-                                "              0: Disabled",
-                                "              1: Enabled",
-                                "- bits 1   = Sprite Enable",
-                                "              0: Disabled",
-                                "              1: Enabled",
-                                "- bit  0   = Standard Display Enable",
-                                "              0: Disabled",
-                                "              1: Enabled", ""} }; nextAddr+=1;
-    mapped_register.push_back(new_node);    
 
-    new_node = { "GPU_MODE", nextAddr,  {   "(Byte) Bitflag Enables",
-                                "- bit 7    = Standard Bitmap:",
-                                "              0: Text Display",
-                                "              1: Bitmap Display",
-                                "- bits 5-6 = Standard Color Mode:",
-                                "              00: 2-Colors",
-                                "              01: 4-Colors",
-                                "              10: 16-Colors",
-                                "              11: 256-Colors",
-                                "- bits 0-4 = Display Mode (0-31)", "" } }; nextAddr+=1;
-    mapped_register.push_back(new_node);
+    mapped_register.push_back( { "GPU_OPTIONS", nextAddr, 
+        [this]() { return _gpu_options; }, 
+        [this](Byte data) { _gpu_options = data; },           
+        {   
+            "(Byte) Bitflag Enables",
+            "- bit 7    = Extended Bitmap:",
+            "              0: Tilemap Display",
+            "              1: Bitmap Display",
+            "- bits 5-6 = Extended Color Mode:",
+            "              00: 2-Colors",
+            "              01: 4-Colors",
+            "              10: 16-Colors",
+            "              11: 256-Colors",
+            "- bits 4   = Extended Display Enable",
+            "              0: Disabled",
+            "              1: Enabled",
+            "- bits 3   = Application Screen Mode",
+            "              0: Windowed",
+            "              1: Fullscreen",
+            "- bits 2   = VSync Enable",
+            "              0: Disabled",
+            "              1: Enabled",
+            "- bits 1   = Sprite Enable",
+            "              0: Disabled",
+            "              1: Enabled",
+            "- bit  0   = Standard Display Enable",
+            "              0: Disabled",
+            "              1: Enabled", ""
+        }
+    }); nextAddr+=1;
 
-    new_node = { "GPU_VIDEO_MAX", nextAddr,  {   
-                                "(Word) Video Buffer Maximum (Read Only)",
-                                " Note: This will change to reflect",
-                                "       the size of the last cpu",
-                                "       accessible memory location",
-                                "       of the currently active",
-                                "       standard video mode.", "" } }; nextAddr+=2;
-    mapped_register.push_back(new_node);
 
-    new_node = { "GPU_HRES", nextAddr,  {   
-                                "(Word) Horizontal Resolution (Read Only)",
-                                "  Note: This will reflect the number of",
-                                "       pixel columns for bitmap modes.",
-                                "" } }; nextAddr+=2;
-    mapped_register.push_back(new_node);
 
-    new_node = { "GPU_VRES", nextAddr,  {   
-                                "(Word) Vertical Resolution (Read Only)",
-                                "  Note: This will reflect the number of",
-                                "       pixel rows for bitmap modes.",
-                                "" } }; nextAddr+=2;
-    mapped_register.push_back(new_node);
+    mapped_register.push_back( { "GPU_MODE", nextAddr, 
+        [this]() { return _gpu_mode; }, 
+        [this](Byte data) { _gpu_mode = data; }, 
+        {   
+            "(Byte) Bitflag Enables",
+            "- bit 7    = Standard Bitmap:",
+            "              0: Text Display",
+            "              1: Bitmap Display",
+            "- bits 5-6 = Standard Color Mode:",
+            "              00: 2-Colors",
+            "              01: 4-Colors",
+            "              10: 16-Colors",
+            "              11: 256-Colors",
+            "- bits 0-4 = Display Mode (0-31)", "" 
+        }
+    }); nextAddr+=1;
 
-    new_node = { "GPU_TCOLS", nextAddr,  {   
-                                "(Byte) Text Horizontal Columns (Read Only)",
-                                "  Note: This will reflect the number of",
-                                "       glyph columns for text modes.",
-                                "" } }; nextAddr+=1;
-    mapped_register.push_back(new_node);
 
-    new_node = { "GPU_TROWS", nextAddr,  {   
-                                "(Byte) Text Vertical Rows (Read Only)",
-                                "  Note: This will reflect the number of",
-                                "       glyph rows for text modes.",
-                                "" } }; nextAddr+=1;
-    mapped_register.push_back(new_node);
+
+    mapped_register.push_back( { "GPU_VIDEO_MAX", nextAddr,
+        [this]() { return _gpu_video_max >> 8; }, 
+        nullptr, {   
+            "(Word) Video Buffer Maximum (Read Only)",
+            " Note: This will change to reflect",
+            "       the size of the last cpu",
+            "       accessible memory location",
+            "       of the currently active",
+            "       standard video mode."
+        }}); nextAddr+=1;
+    mapped_register.push_back( { "", nextAddr,
+        [this]() { return _gpu_video_max & 0xFF; }, 
+        nullptr, {""}}); nextAddr+=1;
+
+
+
+    mapped_register.push_back({ "GPU_HRES", nextAddr, 
+        [this]() { return _gpu_hres >> 8; }, 
+        nullptr,  {
+            "(Word) Horizontal Resolution (Read Only)",
+            "  Note: This will reflect the number of",
+            "       pixel columns for bitmap modes.", 
+        }}); nextAddr+=1;        
+     mapped_register.push_back( { "", nextAddr,
+        [this]() { return _gpu_hres & 0xFF; }, 
+        nullptr, {""}}); nextAddr+=1;
+   
+    
+    mapped_register.push_back({ "GPU_VRES", nextAddr, 
+        [this]() { return _gpu_vres >> 8; }, 
+        nullptr,  {
+            "(Word) Vertical Resolution (Read Only)",
+            "  Note: This will reflect the number of",
+            "       pixel rows for bitmap modes.", 
+        }}); nextAddr+=1;        
+     mapped_register.push_back( { "", nextAddr,
+        [this]() { return _gpu_vres & 0xFF; }, 
+        nullptr, {""}}); nextAddr+=1;
+
+
+    mapped_register.push_back({ "GPU_TCOLS", nextAddr,  
+        [this]() { return _gpu_tcols >> 8; }, 
+        nullptr,  {
+            "(Byte) Text Horizontal Columns (Read Only)",
+            "  Note: This will reflect the number of",
+            "       glyph columns for text modes.",
+            ""}}); nextAddr+=1;
+    mapped_register.push_back( { "", nextAddr,
+        [this]() { return _gpu_tcols & 0xFF; }, 
+        nullptr, {""}}); nextAddr+=1;
+    
+
+    mapped_register.push_back({ "GPU_TROWS", nextAddr,  
+        [this]() { return _gpu_trows >> 8; }, 
+        nullptr,  {
+            "(Byte) Text Vertical Rows (Read Only)",
+            "  Note: This will reflect the number of",
+            "       glyph rows for text modes.",
+            ""}}); nextAddr+=1;
+    mapped_register.push_back( { "", nextAddr,
+        [this]() { return _gpu_trows & 0xFF; }, 
+        nullptr, {""}}); nextAddr+=1;
 
     nextAddr--;
-    new_node = { "GPU_END", nextAddr,  { "End of GPU Register Space"} };
-    mapped_register.push_back(new_node);    
-    
+    mapped_register.push_back({ "GPU_END", nextAddr, 
+        nullptr, nullptr,  { "End of GPU Register Space"} });
     nextAddr++;
-    new_node = { "GPU_TOP", nextAddr,  { "Top of GPU Register Space", "---"} };
-    mapped_register.push_back(new_node);    
+    mapped_register.push_back({ "GPU_TOP", nextAddr, 
+    nullptr, nullptr,  { "Top of GPU Register Space", "---"}});
+    
 
-    _size = nextAddr - old_address;
     std::cout << clr::indent() << clr::CYAN << "GPU::OnAttach() Exit" << clr::RETURN;
-    return _size;   // return the size of the allocation
+    return nextAddr - old_address;  // return the size of the allocation
 } // END: GPU::OnAttach()
 
 
@@ -241,27 +271,6 @@ void GPU::OnInit()
         // create the main window
         pWindow = SDL_CreateWindow("SDL3 Retro_6809", initial_width, initial_height, window_flags); 
         SDL_ShowWindow(pWindow);
-
-
-        // // Scale the window to the current display
-        // SDL_DisplayID dis_id = SDL_GetDisplayForWindow(pWindow);
-        // const SDL_DisplayMode* pDM = SDL_GetCurrentDisplayMode(dis_id);
-        // if (!pDM)   
-        // {
-        //     Bus::Error(SDL_GetError(), __FILE__, __LINE__);
-        //     return false;
-        // }
-        // auto Width = pDM->w;
-        // auto Height = pDM->h;
-        // float scale = 0.75f;
-        // float aspect = 1.6f;
-        // if (Width > Height)
-        //     initial_width = Width * scale; 
-        // else
-        //     initial_width = Height * scale; 
-        // initial_height = (initial_width / aspect);
-        // SDL_SetWindowSize(pWindow, initial_width, initial_height);
-        // std::cout << "GPU::OnInit() Width:" << Width << " Height:" << Height << " Scale:" << scale << " Aspect:" << aspect << clr::RETURN;
 
 
         // create the renderer
@@ -307,8 +316,6 @@ void GPU::OnInit()
     // // initialize the initial default display mode   
     Memory::Write(MAP(GPU_OPTIONS), _gpu_options);
     Memory::Write(MAP(GPU_MODE), _gpu_mode);
-    // _gpu_options = _verify_gpu_mode_change(_gpu_options, MAP(GPU_OPTIONS));
-    // _gpu_mode = _verify_gpu_mode_change(_gpu_mode, MAP(GPU_MODE));
 
     std::cout << clr::indent() << clr::CYAN << "GPU::OnInit() Exit" << clr::RETURN;
 } // END: GPU::OnInit()
@@ -357,29 +364,9 @@ void GPU::OnActivate()
 {
     // std::cout << clr::indent() << clr::CYAN << "GPU::OnActivate() Entry" << clr::RETURN;
 
-    // // clear out the standard video buffer
-    // Byte at = 0;
-    // Byte ch = 64;
-    // for (int s=MAP(VIDEO_START); s<MAP(VIDEO_TOP); s+=2)
-    // {
-    //     Memory::Write(s+0, at);
-    //     Memory::Write(s+1, ch);
-    //     ch++;
-    //     if(ch==0) at++;
-    //     if (at>0) at++;
-    // }
-
     // clear out the extended video buffer
     Word d=0;
     for (int i=0; i<(64*1024); i++) { _ext_video_buffer[i] = d++; }
-
-    // _clear_texture(pExt_Texture, 15, 15, 15, 15);
-    // _clear_texture(pStd_Texture, 15, 15, 15, 15);
-
-    // // clear the primary texture
-    // SDL_SetRenderTarget(pRenderer, pMain_Texture);
-    // SDL_SetRenderDrawColor(pRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-    // SDL_RenderClear(pRenderer);    
 
     // std::cout << clr::indent() << clr::CYAN << "GPU::OnActivate() Exit" << clr::RETURN;
 } // END: GPU::OnActivate()

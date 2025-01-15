@@ -22,131 +22,131 @@
  * Read / Write *
  ***************/ 
 
-Byte Debug::OnRead(Word offset) 
-{ 
-    Byte data = IDevice::OnRead(offset);
+// Byte Debug::OnRead(Word offset) 
+// { 
+//     Byte data = IDevice::memory(offset);
 
-    // system registers
-    if (offset == MAP(SYS_STATE)) 
-    {
-        Byte err = C6809::s_sys_state & 0xF0;
-        C6809::s_sys_state &= 0x0F;
-        data = C6809::s_sys_state | err; 
-    } 
-    else if (offset == MAP(SYS_SPEED) + 0) 
-    {
-        data = Bus::GetCpuSpeed() >> 8;
-    } 
-    else if (offset == MAP(SYS_SPEED) + 1) 
-    {
-        data = Bus::GetCpuSpeed() & 0xFF;
-    } 
-    else if (offset == MAP(SYS_CLOCK_DIV)) 
-    {
-        data = Bus::GetClockDiv();
-    } 
-    // program update cycles count since last reset
-    else if (offset == MAP( SYS_UPDATE_COUNT) + 0) 
-    {
-        data = (Byte)((Bus::GetUpdateCount() & 0xFF000000) >> 24);
-    } 
-    else if (offset == MAP(SYS_UPDATE_COUNT) + 1) 
-    {
-        data = (Byte)((Bus::GetUpdateCount() & 0x00FF0000) >> 16);
-    } 
-    else if (offset == MAP( SYS_UPDATE_COUNT) + 2) 
-    {
-        //data = (Byte)(Bus::GetUpdateCount() >> 8);
-        data = (Byte)((Bus::GetUpdateCount() & 0x0000FF00) >> 16);
-    } 
-    else if (offset == MAP(SYS_UPDATE_COUNT) + 3) 
-    {
-        data = (Byte)((Bus::GetUpdateCount() & 0x000000FF) >> 0);
-    } 
-    // debug breakpoint address
-    else if (offset == MAP(SYS_DBG_BRK_ADDR)) 
-    { 
-        data = _dbg_brk_addr; 
-    } 
-    // debug flags
-    else if (offset == MAP(SYS_DBG_FLAGS) ) 
-    {
-        (s_bIsDebugActive) ? _dbg_flags |= DBGF_DEBUG_ENABLE : _dbg_flags &= ~DBGF_DEBUG_ENABLE; // Enable
-        (s_bSingleStep)     ? _dbg_flags |= DBGF_SINGLE_STEP_ENABLE : _dbg_flags &= ~DBGF_SINGLE_STEP_ENABLE; // Single-Step
-        _dbg_flags &= ~DBGF_CLEAR_ALL_BRKPT;     // zero for Clear all Breakpoints
-        (mapBreakpoints[_dbg_brk_addr]) ? _dbg_flags |= DBGF_UPDATE_BRKPT : _dbg_flags &= ~DBGF_UPDATE_BRKPT;
-        _dbg_flags &= ~DBGF_FIRQ;     // FIRQ
-        _dbg_flags &= ~DBGF_IRQ;     // IRQ
-        _dbg_flags &= ~DBGF_NMI;     // NMI
-        _dbg_flags &= ~DBGF_RESET;     // RESET
-        data = _dbg_flags;              
-    }
+//     // system registers
+//     if (offset == MAP(SYS_STATE)) 
+//     {
+//         Byte err = C6809::s_sys_state & 0xF0;
+//         C6809::s_sys_state &= 0x0F;
+//         data = C6809::s_sys_state | err; 
+//     } 
+//     else if (offset == MAP(SYS_SPEED) + 0) 
+//     {
+//         data = Bus::GetCpuSpeed() >> 8;
+//     } 
+//     else if (offset == MAP(SYS_SPEED) + 1) 
+//     {
+//         data = Bus::GetCpuSpeed() & 0xFF;
+//     } 
+//     else if (offset == MAP(SYS_CLOCK_DIV)) 
+//     {
+//         data = Bus::GetClockDiv();
+//     } 
+//     // program update cycles count since last reset
+//     else if (offset == MAP( SYS_UPDATE_COUNT) + 0) 
+//     {
+//         data = (Byte)((Bus::GetUpdateCount() & 0xFF000000) >> 24);
+//     } 
+//     else if (offset == MAP(SYS_UPDATE_COUNT) + 1) 
+//     {
+//         data = (Byte)((Bus::GetUpdateCount() & 0x00FF0000) >> 16);
+//     } 
+//     else if (offset == MAP( SYS_UPDATE_COUNT) + 2) 
+//     {
+//         //data = (Byte)(Bus::GetUpdateCount() >> 8);
+//         data = (Byte)((Bus::GetUpdateCount() & 0x0000FF00) >> 16);
+//     } 
+//     else if (offset == MAP(SYS_UPDATE_COUNT) + 3) 
+//     {
+//         data = (Byte)((Bus::GetUpdateCount() & 0x000000FF) >> 0);
+//     } 
+//     // debug breakpoint address
+//     else if (offset == MAP(SYS_DBG_BRK_ADDR)) 
+//     { 
+//         data = _dbg_brk_addr; 
+//     } 
+//     // debug flags
+//     else if (offset == MAP(SYS_DBG_FLAGS) ) 
+//     {
+//         (s_bIsDebugActive) ? _dbg_flags |= DBGF_DEBUG_ENABLE : _dbg_flags &= ~DBGF_DEBUG_ENABLE; // Enable
+//         (s_bSingleStep)     ? _dbg_flags |= DBGF_SINGLE_STEP_ENABLE : _dbg_flags &= ~DBGF_SINGLE_STEP_ENABLE; // Single-Step
+//         _dbg_flags &= ~DBGF_CLEAR_ALL_BRKPT;     // zero for Clear all Breakpoints
+//         (mapBreakpoints[_dbg_brk_addr]) ? _dbg_flags |= DBGF_UPDATE_BRKPT : _dbg_flags &= ~DBGF_UPDATE_BRKPT;
+//         _dbg_flags &= ~DBGF_FIRQ;     // FIRQ
+//         _dbg_flags &= ~DBGF_IRQ;     // IRQ
+//         _dbg_flags &= ~DBGF_NMI;     // NMI
+//         _dbg_flags &= ~DBGF_RESET;     // RESET
+//         data = _dbg_flags;              
+//     }
 
-    return data; 
-} // END: Debug::OnRead()
+//     return data; 
+// } // END: Debug::OnRead()
 
-void Debug::OnWrite(Word offset, Byte data) 
-{ 
-    if ( offset == MAP(SYS_STATE) ) 
-    {  
-        C6809::s_sys_state = data;
-    } 
-    // program update cycles count since last reset
-    else if ( offset == MAP(SYS_UPDATE_COUNT) + 0 ) 
-    {
-        Bus::SetUpdateCount( (data << 24) );
-    } 
-    else if ( offset == MAP(SYS_UPDATE_COUNT) + 1 ) 
-    {
-        Bus::SetUpdateCount( (data << 16) );
-    } 
-    else if ( offset == MAP(SYS_UPDATE_COUNT) + 2 ) 
-    {
-        Bus::SetUpdateCount( (data << 8) );
-    } 
-    else if ( offset == MAP(SYS_UPDATE_COUNT) + 3 ) 
-    {
-        Bus::SetUpdateCount( (data << 0) );
-    } 
-    // debug break address
-    else if ( offset == MAP(SYS_DBG_BRK_ADDR) + 0 ) 
-    {
-        _dbg_brk_addr = (_dbg_brk_addr & 0x00ff) | (data << 8);
-    } 
-    else if ( offset == MAP(SYS_DBG_BRK_ADDR) + 1 ) 
-    {
-        _dbg_brk_addr = (_dbg_brk_addr & 0xff00) | (data << 0);
-    }
-    // debug flags
-    else if ( offset == MAP(SYS_DBG_FLAGS) )
-    {
-        _dbg_flags = data;
-        (_dbg_flags & DBGF_DEBUG_ENABLE) ? s_bIsDebugActive = true : s_bIsDebugActive = false;
-        (_dbg_flags & DBGF_SINGLE_STEP_ENABLE) ? s_bSingleStep = true : s_bSingleStep = false;
-        if (_dbg_flags & DBGF_CLEAR_ALL_BRKPT)  cbClearBreaks();
-        (_dbg_flags & DBGF_UPDATE_BRKPT) ? mapBreakpoints[_dbg_brk_addr] = true : mapBreakpoints[_dbg_brk_addr] = false;
-        if (_dbg_flags & DBGF_FIRQ)   cbFIRQ();
-        if (_dbg_flags & DBGF_IRQ)   cbIRQ();
-        if (_dbg_flags & DBGF_NMI)   cbNMI();
-        if (_dbg_flags & DBGF_RESET)   cbReset();
-        // activate or deactivate the debugger
-        if (s_bIsDebugActive)   // activate the debugger
-        {
-            SDL_ShowWindow( Bus::GetGPU()->GetWindow() );
-            // reset the visited memory 
-            // C6809* cpu = Bus::GetC6809();
-            // cpu->ClearVisited_Memory();
-            SDL_RaiseWindow( _dbg_window );
-        }
-        else                    // deactivate the debugger     
-        {      
-            SDL_HideWindow(_dbg_window);
-            SDL_RaiseWindow(Bus::GetGPU()->GetWindow());
-        }        
-    }
+// void Debug::OnWrite(Word offset, Byte data) 
+// { 
+//     if ( offset == MAP(SYS_STATE) ) 
+//     {  
+//         C6809::s_sys_state = data;
+//     } 
+//     // program update cycles count since last reset
+//     else if ( offset == MAP(SYS_UPDATE_COUNT) + 0 ) 
+//     {
+//         Bus::SetUpdateCount( (data << 24) );
+//     } 
+//     else if ( offset == MAP(SYS_UPDATE_COUNT) + 1 ) 
+//     {
+//         Bus::SetUpdateCount( (data << 16) );
+//     } 
+//     else if ( offset == MAP(SYS_UPDATE_COUNT) + 2 ) 
+//     {
+//         Bus::SetUpdateCount( (data << 8) );
+//     } 
+//     else if ( offset == MAP(SYS_UPDATE_COUNT) + 3 ) 
+//     {
+//         Bus::SetUpdateCount( (data << 0) );
+//     } 
+//     // debug break address
+//     else if ( offset == MAP(SYS_DBG_BRK_ADDR) + 0 ) 
+//     {
+//         _dbg_brk_addr = (_dbg_brk_addr & 0x00ff) | (data << 8);
+//     } 
+//     else if ( offset == MAP(SYS_DBG_BRK_ADDR) + 1 ) 
+//     {
+//         _dbg_brk_addr = (_dbg_brk_addr & 0xff00) | (data << 0);
+//     }
+//     // debug flags
+//     else if ( offset == MAP(SYS_DBG_FLAGS) )
+//     {
+//         _dbg_flags = data;
+//         (_dbg_flags & DBGF_DEBUG_ENABLE) ? s_bIsDebugActive = true : s_bIsDebugActive = false;
+//         (_dbg_flags & DBGF_SINGLE_STEP_ENABLE) ? s_bSingleStep = true : s_bSingleStep = false;
+//         if (_dbg_flags & DBGF_CLEAR_ALL_BRKPT)  cbClearBreaks();
+//         (_dbg_flags & DBGF_UPDATE_BRKPT) ? mapBreakpoints[_dbg_brk_addr] = true : mapBreakpoints[_dbg_brk_addr] = false;
+//         if (_dbg_flags & DBGF_FIRQ)   cbFIRQ();
+//         if (_dbg_flags & DBGF_IRQ)   cbIRQ();
+//         if (_dbg_flags & DBGF_NMI)   cbNMI();
+//         if (_dbg_flags & DBGF_RESET)   cbReset();
+//         // activate or deactivate the debugger
+//         if (s_bIsDebugActive)   // activate the debugger
+//         {
+//             SDL_ShowWindow( Bus::GetGPU()->GetWindow() );
+//             // reset the visited memory 
+//             // C6809* cpu = Bus::GetC6809();
+//             // cpu->ClearVisited_Memory();
+//             SDL_RaiseWindow( _dbg_window );
+//         }
+//         else                    // deactivate the debugger     
+//         {      
+//             SDL_HideWindow(_dbg_window);
+//             SDL_RaiseWindow(Bus::GetGPU()->GetWindow());
+//         }        
+//     }
 
-    IDevice::OnWrite( offset, data);
-} // END: Debug::OnWrite()
+//     IDevice::memory( offset, data);
+// } // END: Debug::OnWrite()
 
 
 
@@ -176,84 +176,164 @@ Debug::~Debug()
 int  Debug::OnAttach(int nextAddr)
 {
     std::cout << clr::indent() << clr::LT_BLUE << "Debug::OnAttach() Entry" << clr::RETURN;
-    if (nextAddr == 0) { ; } // stop the compiler from complaining
-    
+       
+    SetBaseAddress(nextAddr);
     Word old_address=nextAddr;
     this->heading = "System and Debug Hardware Registers:";
-    register_node new_node;
 
-    new_node = { "SYS_BEGIN", nextAddr,  { "Start of System Registers"} };
-    mapped_register.push_back(new_node);
+    REGISTER_NODE new_node;
 
-    new_node = { "SYS_STATE", nextAddr,  { "(Byte) System State Register",
-        "SYS_STATE: ABCD.SSSS                          ",
-        "- bit  7   = Error: Standard Buffer Overflow  ",
-        "- bit  6   = Error: Extended Buffer Overflow  ",
-        "- bit  5   = Error: Reserved                  ",
-        "- bit  4   = Error: Reserved                  ",  
-        "- bits 0-3 = CPU Speed (0-15):                ", 
-        "   0 ($0)  = CPU Clock   10 kHz            ",
-        "   1 ($1)  = CPU Clock   25 kHz            ",
-        "   2 ($2)  = CPU Clock   50 kHz            ",
-        "   3 ($3)  = CPU Clock   75 kHz            ",
-        "   4 ($4)  = CPU Clock  100 kHz            ",
-        "   5 ($5)  = CPU Clock  150 kHz            ",
-        "   6 ($6)  = CPU Clock  225 kHz            ",
-        "   7 ($7)  = CPU Clock  350 kHz            ",
-        "   8 ($8)  = CPU Clock  500 kHz            ",
-        "   9 ($9)  = CPU Clock  750 kHz            ",
-        "  10 ($A)  = CPU Clock  900 kHz            ",
-        "  11 ($B)  = CPU Clock 1000 khz            ",
-        "  12 ($C)  = CPU Clock 2000 khz            ",
-        "  13 ($D)  = CPU Clock 3000 khz            ",
-        "  14 ($E)  = CPU Clock 4000 khz            ",
-        "  15 ($F)  = CPU Clock ~10.0 mhz. (unmetered) ", 
-        ""} }; nextAddr+=1;
-    mapped_register.push_back(new_node);
+    mapped_register.push_back( { "SYS_BEGIN", nextAddr, 
+        nullptr, nullptr,  { "Start of System Registers"}});
+ 
 
-    new_node = { "SYS_SPEED", nextAddr,  { "(Word) Average CPU Clock Speed (Read Only)"} }; nextAddr+=2;
-    mapped_register.push_back(new_node);
 
-    new_node = { "SYS_CLOCK_DIV", nextAddr,  
+    mapped_register.push_back({ "SYS_STATE", nextAddr, 
+        [this]() { return C6809::s_sys_state; }, 
+        [this](Byte data) { C6809::s_sys_state = data; },  
+        { 
+            "(Byte) System State Register",
+            "SYS_STATE: ABCD.SSSS                          ",
+            "- bit  7   = Error: Standard Buffer Overflow  ",
+            "- bit  6   = Error: Extended Buffer Overflow  ",
+            "- bit  5   = Error: Reserved                  ",
+            "- bit  4   = Error: Reserved                  ",  
+            "- bits 0-3 = CPU Speed (0-15):                ", 
+            "   0 ($0)  = CPU Clock   10 kHz ",
+            "   1 ($1)  = CPU Clock   25 kHz ",
+            "   2 ($2)  = CPU Clock   50 kHz ",
+            "   3 ($3)  = CPU Clock   75 kHz ",
+            "   4 ($4)  = CPU Clock  100 kHz ",
+            "   5 ($5)  = CPU Clock  150 kHz ",
+            "   6 ($6)  = CPU Clock  225 kHz ",
+            "   7 ($7)  = CPU Clock  350 kHz ",
+            "   8 ($8)  = CPU Clock  500 kHz ",
+            "   9 ($9)  = CPU Clock  750 kHz ",
+            "  10 ($A)  = CPU Clock  900 kHz ",
+            "  11 ($B)  = CPU Clock 1000 khz ",
+            "  12 ($C)  = CPU Clock 2000 khz ",
+            "  13 ($D)  = CPU Clock 3000 khz ",
+            "  14 ($E)  = CPU Clock 4000 khz ",
+            "  15 ($F)  = CPU Clock ~10.0 mhz. (unmetered) ", 
+            ""
+        }
+    }); nextAddr+=1;
+        
+
+    mapped_register.push_back({ "SYS_SPEED", nextAddr, 
+        [this]() { return Bus::GetCpuSpeed() >> 8; }, nullptr,  
+        { "(Word) Average CPU Clock Speed (Read Only)"}}); nextAddr+=1;
+    mapped_register.push_back({ "", nextAddr, 
+        [this]() { return Bus::GetCpuSpeed() & 0xFF; }, nullptr,  
+        { ""}}); nextAddr+=1;
+
+
+    mapped_register.push_back({ "SYS_CLOCK_DIV", nextAddr,
+        [this]() { return Bus::GetClockDiv(); }, 
+        nullptr,  
         { "(Byte) 60 hz Clock Divider Register (Read Only)",
-        "- bit 7: 0.546875 hz",
-        "- bit 6: 1.09375 hz",
-        "- bit 5: 2.1875 hz",
-        "- bit 4: 4.375 hz",
-        "- bit 3: 8.75 hz",
-        "- bit 2: 17.5 hz",
-        "- bit 1: 35.0 hz",
-        "- bit 0: 70.0 hz",
-        ""} }; nextAddr+=1;
-    mapped_register.push_back(new_node);
+            "- bit 7: 0.546875 hz",
+            "- bit 6: 1.09375 hz",
+            "- bit 5: 2.1875 hz",
+            "- bit 4: 4.375 hz",
+            "- bit 3: 8.75 hz",
+            "- bit 2: 17.5 hz",
+            "- bit 1: 35.0 hz",
+            "- bit 0: 70.0 hz",
+            ""
+        }
+    }); nextAddr+=1;
 
-    new_node = { "SYS_UPDATE_COUNT", nextAddr,  { "(DWord) Increments with each update event"} }; nextAddr+=4;
-    mapped_register.push_back(new_node);
 
-    new_node = { "SYS_DBG_BRK_ADDR", nextAddr,  { "(Word) Address of current debug breakpoint"} }; nextAddr+=2;
-    mapped_register.push_back(new_node);
+    mapped_register.push_back({ "SYS_UPDATE_COUNT", nextAddr,    
+        [this]() { return Bus::GetUpdateCount() >> 24; }, 
+        [this](Byte data) { Bus::SetUpdateCount(data << 24); },  
+        { "(Byte) Update Count (Read Only)" }}); nextAddr+=1;    
+    mapped_register.push_back(
+        { "", nextAddr,    
+        [this]() { return Bus::GetUpdateCount() >> 16; }, 
+        [this](Byte data) { Bus::SetUpdateCount(data << 16); },  
+        { "" }}); nextAddr+=1;    
+    mapped_register.push_back(
+        { "", nextAddr,    
+        [this]() { return Bus::GetUpdateCount() >> 8; }, 
+        [this](Byte data) { Bus::SetUpdateCount(data << 8); },  
+        { "" }}); nextAddr+=1;   
+    mapped_register.push_back(
+        { "", nextAddr,    
+        [this]() { return Bus::GetUpdateCount() & 0xFF; }, 
+        [this](Byte data) { Bus::SetUpdateCount(data & 0xFF); },  
+        { "" }}); nextAddr+=1;    
 
-    new_node = { "SYS_DBG_FLAGS", nextAddr,  {  "(Byte) Debug Specific Hardware Flags:",
-                                            "- bit 7: Debug Enable",
-                                            "- bit 6: Single Step Enable",
-                                            "- bit 5: Clear All Breakpoints",
-                                            "- bit 4: Update Breakpoint at DEBUG_BRK_ADDR",
-                                            "- bit 3: FIRQ  (on low {0} to high {1} edge)",
-                                            "- bit 2: IRQ   (on low {0} to high {1} edge)",
-                                            "- bit 1: NMI   (on low {0} to high {1} edge)",
-                                            "- bit 0: RESET (on low {0} to high {1} edge)",
-                                            "" } }; // nextAddr+=1;
-    mapped_register.push_back(new_node);
 
-    new_node = { "SYS_END", nextAddr,  { "End of System Registers"} }; nextAddr++;
-    mapped_register.push_back(new_node);
+    mapped_register.push_back({ "SYS_DBG_BRK_ADDR", nextAddr, 
+        [this]() { return _dbg_brk_addr >> 8; }, 
+        [this](Byte data) { _dbg_brk_addr = (data << 8); },  
+        { "(Word) Address of current debug breakpoint"} }); nextAddr+=1;
+    mapped_register.push_back({ "", nextAddr, 
+        [this]() { return _dbg_brk_addr & 0xFF; }, 
+        [this](Byte data) { _dbg_brk_addr = (data & 0xFF8); },  
+        { "" }}); nextAddr+=1;
 
-    new_node = { "SYS_TOP", nextAddr,  { "Top of System Registers", ""} }; // nextAddr++;
-    mapped_register.push_back(new_node);
+
+
+    mapped_register.push_back({ "SYS_DBG_FLAGS", nextAddr, 
+        [this]() 
+        {
+            (s_bIsDebugActive) ? _dbg_flags |= DBGF_DEBUG_ENABLE : _dbg_flags &= ~DBGF_DEBUG_ENABLE; // Enable
+            (s_bSingleStep)     ? _dbg_flags |= DBGF_SINGLE_STEP_ENABLE : _dbg_flags &= ~DBGF_SINGLE_STEP_ENABLE; // Single-Step
+            _dbg_flags &= ~DBGF_CLEAR_ALL_BRKPT;     // zero for Clear all Breakpoints
+            (mapBreakpoints[_dbg_brk_addr]) ? _dbg_flags |= DBGF_UPDATE_BRKPT : _dbg_flags &= ~DBGF_UPDATE_BRKPT;
+            _dbg_flags &= ~DBGF_FIRQ;     // FIRQ
+            _dbg_flags &= ~DBGF_IRQ;     // IRQ
+            _dbg_flags &= ~DBGF_NMI;     // NMI
+            _dbg_flags &= ~DBGF_RESET;     // RESET
+            return _dbg_flags;  
+        }, 
+        [this](Byte data)
+        {
+            _dbg_flags = data;
+            (_dbg_flags & DBGF_DEBUG_ENABLE) ? s_bIsDebugActive = true : s_bIsDebugActive = false;
+            (_dbg_flags & DBGF_SINGLE_STEP_ENABLE) ? s_bSingleStep = true : s_bSingleStep = false;
+            if (_dbg_flags & DBGF_CLEAR_ALL_BRKPT)  cbClearBreaks();
+            (_dbg_flags & DBGF_UPDATE_BRKPT) ? mapBreakpoints[_dbg_brk_addr] = true : mapBreakpoints[_dbg_brk_addr] = false;
+            if (_dbg_flags & DBGF_FIRQ)   cbFIRQ();
+            if (_dbg_flags & DBGF_IRQ)   cbIRQ();
+            if (_dbg_flags & DBGF_NMI)   cbNMI();
+            if (_dbg_flags & DBGF_RESET)   cbReset();
+            // activate or deactivate the debugger
+            if (s_bIsDebugActive)   // activate the debugger
+            {
+                SDL_ShowWindow( Bus::GetGPU()->GetWindow() );
+                SDL_RaiseWindow( _dbg_window );
+            }
+            else                    // deactivate the debugger     
+            {      
+                SDL_HideWindow(_dbg_window);
+                SDL_RaiseWindow(Bus::GetGPU()->GetWindow());
+            }    
+        },  
+        {  
+            "(Byte) Debug Specific Hardware Flags:",
+            "- bit 7: Debug Enable",
+            "- bit 6: Single Step Enable",
+            "- bit 5: Clear All Breakpoints",
+            "- bit 4: Update Breakpoint at DEBUG_BRK_ADDR",
+            "- bit 3: FIRQ  (on low {0} to high {1} edge)",
+            "- bit 2: IRQ   (on low {0} to high {1} edge)",
+            "- bit 1: NMI   (on low {0} to high {1} edge)",
+            "- bit 0: RESET (on low {0} to high {1} edge)",
+            "" 
+        }
+    }); // nextAddr+=1;
+
+    mapped_register.push_back({ "SYS_END", nextAddr, nullptr, nullptr,  { "End of System Registers"}}); 
+    nextAddr++;
+    mapped_register.push_back({ "SYS_TOP", nextAddr, nullptr, nullptr,  { "Top of System Registers", ""}}); 
+    // nextAddr++;
 
     std::cout << clr::indent() << clr::LT_BLUE << "Debug::OnAttach() Exit" << clr::RETURN;    
-    _size = nextAddr - old_address;
-    return _size; 
+    return nextAddr - old_address;
 }
 
 
