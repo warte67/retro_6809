@@ -133,7 +133,7 @@ enum MEMMAP
                                       //               0: Disabled
                                       //               1: Enabled
                                       // 
-    GPU_MODE              = 0xFE0C,   // (Byte) Bitflag Enables
+    GPU_MODE              = 0xFE0C,   // (Byte) Standard Display Mode
                                       // - bit 7    = Standard Bitmap:
                                       //               0: Text Display
                                       //               1: Bitmap Display
@@ -150,12 +150,15 @@ enum MEMMAP
                                       //        accessible memory location
                                       //        of the currently active
                                       //        standard video mode.
-    GPU_HRES              = 0xFE0F,   // (Word) Horizontal Resolution (Read Only)
+                                      // 
+    GPU_HRES              = 0xFE0F,   // (Word) Horizontal Pixel Resolution (Read Only)
                                       //   Note: This will reflect the number of
                                       //        pixel columns for bitmap modes.
-    GPU_VRES              = 0xFE11,   // (Word) Vertical Resolution (Read Only)
+                                      // 
+    GPU_VRES              = 0xFE11,   // (Word) Vertical Pixel Resolution (Read Only)
                                       //   Note: This will reflect the number of
                                       //        pixel rows for bitmap modes.
+                                      // 
     GPU_TCOLS             = 0xFE13,   // (Byte) Text Horizontal Columns (Read Only)
                                       //   Note: This will reflect the number of
                                       //        glyph columns for text modes.
@@ -164,12 +167,26 @@ enum MEMMAP
                                       //   Note: This will reflect the number of
                                       //        glyph rows for text modes.
                                       // 
-    GPU_END               = 0xFE16,   // End of GPU Register Space
-    GPU_TOP               = 0xFE17,   // Top of GPU Register Space
+    GPU_PAL_INDEX         = 0xFE17,   // (Byte) Color Palette Index
+                                      //   Note: Use this register to set the
+                                      //        index into the Color Palette.
+                                      //        Set this value prior referencing
+                                      //        the color data (GPU_PAL_COLOR).
+                                      // 
+    GPU_PAL_COLOR         = 0xFE18,   // (Word) Color Palette Data (A4R4G4B4 format)
+                                      //   Note: This is the color data for an
+                                      //        individual palette entry. Write to 
+                                      //        DSP_PAL_IDX with the index within the
+                                      //        color palette prior to reading or
+                                      //        writing the color data in the
+                                      //        GFX_PAL_CLR register.
+                                      // 
+    GPU_END               = 0xFE19,   // End of GPU Register Space
+    GPU_TOP               = 0xFE1A,   // GPU_TOP
 // _______________________________________________________________________
 
     HDW_RESERVED_DEVICE   = 0x0000,   // START: Reserved Register Space
-    HDW_REG_END           = 0xFFEF,   // 472 bytes reserved for future use.
+    HDW_REG_END           = 0xFFEF,   // 469 bytes reserved for future use.
 // _______________________________________________________________________
 
     ROM_VECTS_DEVICE      = 0x0000,   // START: Hardware Interrupt Vectors

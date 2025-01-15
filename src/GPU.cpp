@@ -126,12 +126,12 @@ int  GPU::OnAttach(int nextAddr)
     SetBaseAddress(nextAddr);
     Word old_address=nextAddr;
     this->heading = "GPU Device Hardware Registers";
-    
-//     // if (offset == MAP(GPU_OPTIONS)) { 
-//     //     data = _verify_gpu_mode_change(data, offset);  
-//     //     _gpu_options = data;
-//     // }
 
+
+    ////////////////////////////////////////////////
+    // (Byte) GPU_OPTIONS
+    //       Bitflag Enables and Extended Display Options
+    /////
     mapped_register.push_back( { "GPU_OPTIONS", nextAddr, 
         [this](Word nextAddr) { (void)nextAddr; return _gpu_options; }, 
         [this](Word nextAddr, Byte data) { _verify_gpu_mode_change(data, nextAddr);  _gpu_options = data; },           
@@ -163,16 +163,16 @@ int  GPU::OnAttach(int nextAddr)
         }
     }); nextAddr+=1;
 
-//     // else if (offset == MAP(GPU_MODE)) { 
-//     //     data = _verify_gpu_mode_change(data, offset);  
-//     //     _gpu_mode = data;
-//     // }
 
+    ////////////////////////////////////////////////
+    // (Byte) GPU_MODE
+    //       Standard Display Mode
+    /////
     mapped_register.push_back( { "GPU_MODE", nextAddr, 
         [this](Word nextAddr) { (void)nextAddr; return _gpu_mode; }, 
         [this](Word nextAddr, Byte data) { _verify_gpu_mode_change(data, nextAddr);  _gpu_mode = data; }, 
         {   
-            "(Byte) Bitflag Enables",
+            "(Byte) Standard Display Mode",
             "- bit 7    = Standard Bitmap:",
             "              0: Text Display",
             "              1: Bitmap Display",
@@ -186,7 +186,10 @@ int  GPU::OnAttach(int nextAddr)
     }); nextAddr+=1;
 
 
-
+    ////////////////////////////////////////////////
+    // (Word) GPU_VIDEO_MAX
+    //       Video Buffer Maximum (Read Only)
+    /////
     mapped_register.push_back( { "GPU_VIDEO_MAX", nextAddr,
         [this](Word nextAddr) { (void)nextAddr; return _gpu_video_max >> 8; }, 
         nullptr, {   
@@ -195,67 +198,141 @@ int  GPU::OnAttach(int nextAddr)
             "       the size of the last cpu",
             "       accessible memory location",
             "       of the currently active",
-            "       standard video mode."
+            "       standard video mode.",""
         }}); nextAddr+=1;
     mapped_register.push_back( { "", nextAddr,
         [this](Word nextAddr) { (void)nextAddr; return _gpu_video_max & 0xFF; }, 
         nullptr, {""}}); nextAddr+=1;
 
 
-
+    ////////////////////////////////////////////////
+    // (Word) GPU_HRES
+    //      Horizontal Pixel Resolution (Read Only)
+    /////
     mapped_register.push_back({ "GPU_HRES", nextAddr, 
         [this](Word nextAddr) { (void)nextAddr; return _gpu_hres >> 8; }, 
         nullptr,  {
-            "(Word) Horizontal Resolution (Read Only)",
+            "(Word) Horizontal Pixel Resolution (Read Only)",
             "  Note: This will reflect the number of",
-            "       pixel columns for bitmap modes.", 
+            "       pixel columns for bitmap modes.",""
         }}); nextAddr+=1;        
      mapped_register.push_back( { "", nextAddr,
         [this](Word nextAddr) { (void)nextAddr; return _gpu_hres & 0xFF; }, 
         nullptr, {""}}); nextAddr+=1;
-   
-    
+
+
+    ////////////////////////////////////////////////
+    // (Word) GPU_VRES
+    //      Vertical Pixel Resolution (Read Only)
+    /////
     mapped_register.push_back({ "GPU_VRES", nextAddr, 
         [this](Word nextAddr) { (void)nextAddr; return _gpu_vres >> 8; }, 
         nullptr,  {
-            "(Word) Vertical Resolution (Read Only)",
+            "(Word) Vertical Pixel Resolution (Read Only)",
             "  Note: This will reflect the number of",
-            "       pixel rows for bitmap modes.", 
+            "       pixel rows for bitmap modes.",""
         }}); nextAddr+=1;        
      mapped_register.push_back( { "", nextAddr,
         [this](Word nextAddr) { (void)nextAddr; return _gpu_vres & 0xFF; }, 
         nullptr, {""}}); nextAddr+=1;
 
 
+    ////////////////////////////////////////////////
+    // (Byte) GPU_TCOLS
+    //      Text Horizontal Columns (Read Only)
+    /////
     mapped_register.push_back({ "GPU_TCOLS", nextAddr,  
         [this](Word nextAddr) { (void)nextAddr; return _gpu_tcols >> 8; }, 
         nullptr,  {
             "(Byte) Text Horizontal Columns (Read Only)",
             "  Note: This will reflect the number of",
-            "       glyph columns for text modes.",
+            "       glyph columns for text modes.",""
             ""}}); nextAddr+=1;
     mapped_register.push_back( { "", nextAddr,
         [this](Word nextAddr) { (void)nextAddr; return _gpu_tcols & 0xFF; }, 
         nullptr, {""}}); nextAddr+=1;
-    
+ 
 
+    ////////////////////////////////////////////////
+    // (Byte) GPU_TROWS
+    //      Text Vertical Rows (Read Only)
+    /////
     mapped_register.push_back({ "GPU_TROWS", nextAddr,  
         [this](Word nextAddr) { (void)nextAddr; return _gpu_trows >> 8; }, 
         nullptr,  {
             "(Byte) Text Vertical Rows (Read Only)",
             "  Note: This will reflect the number of",
-            "       glyph rows for text modes.",
+            "       glyph rows for text modes.",""
             ""}}); nextAddr+=1;
     mapped_register.push_back( { "", nextAddr,
         [this](Word nextAddr) { (void)nextAddr; return _gpu_trows & 0xFF; }, 
         nullptr, {""}}); nextAddr+=1;
+ 
 
+    ////////////////////////////////////////////////
+    // (Byte) GPU_PAL_INDEX
+    //      Color Palette Index
+    /////
+    mapped_register.push_back({ "GPU_PAL_INDEX", nextAddr,  
+        [this](Word nextAddr) { (void)nextAddr; return _gpu_pal_index; }, 
+        [this](Word nextAddr, Byte data) { (void)nextAddr; _gpu_pal_index = data; }, 
+        {
+            "(Byte) Color Palette Index",
+            "  Note: Use this register to set the",
+            "       index into the Color Palette.",
+            "       Set this value prior referencing",
+            "       the color data (GPU_PAL_COLOR).",""
+            ""
+        }
+    }); nextAddr+=1;
+ 
+
+    ////////////////////////////////////////////////
+    // (Word) GPU_PAL_COLOR
+    //      Indexed Color Palette Data (A4R4G4B4 format)
+    /////
+    mapped_register.push_back({ "GPU_PAL_COLOR", nextAddr,  
+        [this](Word nextAddr) { (void)nextAddr; return (_palette[_gpu_pal_index].color >> 8) & 0xFF; }, 
+        [this](Word nextAddr, Byte data) { 
+            (void)nextAddr; 
+            Word c = _palette[_gpu_pal_index].color & 0x00ff;
+			_palette[_gpu_pal_index].color = c | ((Word)data << 8);
+        }, {
+            "(Word) Color Palette Data (A4R4G4B4 format)",
+            "  Note: This is the color data for an",
+            "       individual palette entry. Write to ",
+            "       DSP_PAL_IDX with the index within the",
+            "       color palette prior to reading or",
+            "       writing the color data in the",
+            "       GFX_PAL_CLR register.",
+            ""
+        }}); nextAddr+=1;
+    mapped_register.push_back( { "", nextAddr,
+        [this](Word nextAddr) { (void)nextAddr; return _palette[_gpu_pal_index].color & 0xFF; }, 
+        [this](Word nextAddr, Byte data) { 
+            (void)nextAddr; 
+			Word c = _palette[_gpu_pal_index].color & 0xff00;
+			_palette[_gpu_pal_index].color = c | data;
+        }, {""}}); nextAddr+=1;      
+
+
+    ////////////////////////////////////////////////
+    // (Constant) GPU_END
+    //      End of GPU Register Space
+    /////
     nextAddr--;
     mapped_register.push_back({ "GPU_END", nextAddr, 
         nullptr, nullptr,  { "End of GPU Register Space"} });
     nextAddr++;
+
+
+    ////////////////////////////////////////////////
+    // (Constant) GPU_TOP
+    //      Top of GPU Register Space
+    //      (start of the next device)
+    /////
     mapped_register.push_back({ "GPU_TOP", nextAddr, 
-    nullptr, nullptr,  { "Top of GPU Register Space", "---"}});
+    nullptr, nullptr,  { "GPU_TOP", "---"}});
     
 
     std::cout << clr::indent() << clr::CYAN << "GPU::OnAttach() Exit" << clr::RETURN;

@@ -130,7 +130,7 @@ GPU_OPTIONS           equ    $FE0B    ; (Byte) Bitflag Enables
                                       ;               0: Disabled
                                       ;               1: Enabled
                                       ; 
-GPU_MODE              equ    $FE0C    ; (Byte) Bitflag Enables
+GPU_MODE              equ    $FE0C    ; (Byte) Standard Display Mode
                                       ; - bit 7    = Standard Bitmap:
                                       ;               0: Text Display
                                       ;               1: Bitmap Display
@@ -147,12 +147,15 @@ GPU_VIDEO_MAX         equ    $FE0D    ; (Word) Video Buffer Maximum (Read Only)
                                       ;        accessible memory location
                                       ;        of the currently active
                                       ;        standard video mode.
-GPU_HRES              equ    $FE0F    ; (Word) Horizontal Resolution (Read Only)
+                                      ; 
+GPU_HRES              equ    $FE0F    ; (Word) Horizontal Pixel Resolution (Read Only)
                                       ;   Note: This will reflect the number of
                                       ;        pixel columns for bitmap modes.
-GPU_VRES              equ    $FE11    ; (Word) Vertical Resolution (Read Only)
+                                      ; 
+GPU_VRES              equ    $FE11    ; (Word) Vertical Pixel Resolution (Read Only)
                                       ;   Note: This will reflect the number of
                                       ;        pixel rows for bitmap modes.
+                                      ; 
 GPU_TCOLS             equ    $FE13    ; (Byte) Text Horizontal Columns (Read Only)
                                       ;   Note: This will reflect the number of
                                       ;        glyph columns for text modes.
@@ -161,12 +164,26 @@ GPU_TROWS             equ    $FE15    ; (Byte) Text Vertical Rows (Read Only)
                                       ;   Note: This will reflect the number of
                                       ;        glyph rows for text modes.
                                       ; 
-GPU_END               equ    $FE16    ; End of GPU Register Space
-GPU_TOP               equ    $FE17    ; Top of GPU Register Space
+GPU_PAL_INDEX         equ    $FE17    ; (Byte) Color Palette Index
+                                      ;   Note: Use this register to set the
+                                      ;        index into the Color Palette.
+                                      ;        Set this value prior referencing
+                                      ;        the color data (GPU_PAL_COLOR).
+                                      ; 
+GPU_PAL_COLOR         equ    $FE18    ; (Word) Color Palette Data (A4R4G4B4 format)
+                                      ;   Note: This is the color data for an
+                                      ;        individual palette entry. Write to 
+                                      ;        DSP_PAL_IDX with the index within the
+                                      ;        color palette prior to reading or
+                                      ;        writing the color data in the
+                                      ;        GFX_PAL_CLR register.
+                                      ; 
+GPU_END               equ    $FE19    ; End of GPU Register Space
+GPU_TOP               equ    $FE1A    ; GPU_TOP
 ; _______________________________________________________________________
 
 HDW_RESERVED_DEVICE   equ    $0000    ; START: Reserved Register Space
-HDW_REG_END           equ    $FFEF    ; 472 bytes reserved for future use.
+HDW_REG_END           equ    $FFEF    ; 469 bytes reserved for future use.
 ; _______________________________________________________________________
 
 ROM_VECTS_DEVICE      equ    $0000    ; START: Hardware Interrupt Vectors
