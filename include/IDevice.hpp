@@ -188,25 +188,18 @@ class SOFT_VECTORS : public IDevice
 
             mapped_register.push_back({ "SOFT_EXEC", nextAddr, nullptr, nullptr,
                 { "Exec Software Interrupt Vector"}}); nextAddr+=2;           
-            
             mapped_register.push_back({ "SOFT_SWI3", nextAddr, nullptr, nullptr,  
                 { "SWI3 Software Interrupt Vector"}}); nextAddr+=2;
-
             mapped_register.push_back({ "SOFT_SWI2", nextAddr,  nullptr, nullptr, 
                 { "SWI2 Software Interrupt Vector"}}); nextAddr+=2;
-
             mapped_register.push_back({ "SOFT_FIRQ", nextAddr, nullptr, nullptr,  
                 { "FIRQ Software Interrupt Vector"}}); nextAddr+=2;
-
             mapped_register.push_back({ "SOFT_IRQ", nextAddr,  nullptr, nullptr,  
                 { "IRQ Software Interrupt Vector"}}); nextAddr+=2;
-
             mapped_register.push_back({ "SOFT_SWI", nextAddr, nullptr, nullptr,   
                 { "SWI / SYS Software Interrupt Vector"}}); nextAddr+=2;
-
             mapped_register.push_back({ "SOFT_NMI", nextAddr, nullptr, nullptr,   
                 { "NMI Software Interrupt Vector"}}); nextAddr+=2;
-
             mapped_register.push_back({ "SOFT_RESET", nextAddr, nullptr, nullptr, 
                 { "RESET Software Interrupt Vector", "---"}}); nextAddr+=2;
 
@@ -255,16 +248,12 @@ class SYSTEM_MEMORY : public IDevice
             
             mapped_register.push_back({ "ZERO_PAGE", nextAddr, nullptr, nullptr,   
                 { "Zero Page System and User Variables"}}); nextAddr=0x100;   
-
             mapped_register.push_back({ "FIO_BUFFER", nextAddr, nullptr, nullptr,    
                 { "START: File Input/Output Buffer"}}); nextAddr+=0xFF;  
-
             mapped_register.push_back({ "FIO_BFR_END", nextAddr,  nullptr, nullptr,  
                 { "END: File Input/Output Buffer"}}); nextAddr+=1; 
-
             mapped_register.push_back({ "SYSTEM_STACK", nextAddr, nullptr, nullptr,  
                 { "Bottom of the system stack spcace"}}); nextAddr=0x400;     
-
             mapped_register.push_back({ "SSTACK_TOP", nextAddr, nullptr, nullptr,   
                 { "Top of the system statck space", "---"}});
             
