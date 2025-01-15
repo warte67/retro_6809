@@ -11,90 +11,14 @@
  * This is the base class for the primary graphics devices. It provides the
  * basic methods for reading and writing to the device's memory.
  * 
+ * Released under the GPL v3.0 License.
+ * Original Author: Jay Faries (warte67)
+ * 
  ************************************/
 
 #include "Bus.hpp"
 #include "GPU.hpp"
 #include "Memory.hpp"
-
-/****************
- * Read / Write *
- ***************/ 
-
-
-// Byte GPU::OnRead(Word offset) 
-// { 
-//     Byte data = IDevice::memory(offset);
-//     // std::cout << clr::indent() << clr::CYAN << "GPU::OnRead($"<< clr::hex(offset,4) << ") = $" << clr::hex(data,2) << "\n" << clr::RESET;
-
-//     // if (offset == MAP(GPU_OPTIONS))             { data = _gpu_options;  }
-//     // else if (offset == MAP(GPU_MODE))           { data = _gpu_mode;     }
-
-//     // // GPU_VIDEO_MAX
-//     // else if (offset == MAP(GPU_VIDEO_MAX) + 0 ) 
-//     // {
-//     //     data = _gpu_video_max >> 8;
-//     // } 
-//     // else if (offset == MAP(GPU_VIDEO_MAX) + 1 )
-//     // {
-//     //     data = _gpu_video_max & 0xFF; 
-//     // } 
-    
-//     // // GPU_HRES (Read Only)
-//     // else if (offset == MAP(GPU_HRES) + 0 ) 
-//     // {
-//     //     data = _gpu_hres >> 8;
-//     // } 
-//     // else if (offset == MAP(GPU_HRES) + 1 )
-//     // {
-//     //     data = _gpu_hres & 0xFF; 
-//     // } 
-    
-//     // // GPU_VRES (Read Only)
-//     // else if (offset == MAP(GPU_VRES) + 0 ) 
-//     // {
-//     //     data = _gpu_vres >> 8;
-//     // } 
-//     // else if (offset == MAP(GPU_VRES) + 1 )
-//     // {
-//     //     data = _gpu_vres & 0xFF; 
-//     // } 
-    
-//     // // GPU_TCOLS (Read Only)
-//     // else if (offset == MAP(GPU_TCOLS) ) 
-//     // {
-//     //     data = _gpu_tcols;
-//     // } 
-    
-//     // // GPU_TROWS (Read Only)
-//     // else if (offset == MAP(GPU_TROWS) ) 
-//     // {
-//     //     data = _gpu_trows;
-//     // }     
-
-
-//     return data;
-// } // END: GPU::OnRead()
-
-// void GPU::OnWrite(Word offset, Byte data) 
-// { 
-//     // std::cout << clr::indent() << clr::CYAN << "GPU::OnWrite($" << clr::hex(offset,4) << ", $" << clr::hex(data,2) << ")\n" << clr::RESET;
-
-//     // if (offset == MAP(GPU_OPTIONS)) { 
-//     //     data = _verify_gpu_mode_change(data, offset);  
-//     //     _gpu_options = data;
-//     // }
-//     // else if (offset == MAP(GPU_MODE)) { 
-//     //     data = _verify_gpu_mode_change(data, offset);  
-//     //     _gpu_mode = data;
-//     // }
-
-
-//     IDevice::memory( offset, data);
-// } // END: GPU::OnWrite()
-
-
-
 
 
 /***************************

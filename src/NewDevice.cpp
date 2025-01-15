@@ -9,7 +9,10 @@
  *                                                                                     |_|     |_|    
  * This file serves meerly as a template as a
  * starting point for new devices.
- * 
+ *
+ * Released under the GPL v3.0 License.
+ * Original Author: Jay Faries (warte67)
+ *
  ************************************/
 
 #include "NewDevice.hpp"

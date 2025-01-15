@@ -1,8 +1,20 @@
-// font8x8_system.h
-#pragma once
+/*** font8x8_system.hpp *******************
+ *       __            _   ___        ___  
+ *      / _|          | | / _ \      / _ \ 
+ *     | |_ ___  _ __ | || (_) |_  _| (_) |
+ *     |  _/ _ \| '_ \| __> _ <\ \/ /> _ < 
+ *     | || (_) | | | | || (_) |>  <| (_) |
+ *     |_| \___/|_| |_|\__\___//_/\_\\___/ 
+ *
+ * 8x8 Pixel Character Glyph Font Map Data
+ * for the Default System Font.
+ * 
+ * Released under the GPL v3.0 License.
+ * Original Author: Jay Faries (warte67)
+ * 
+ ************************************/
 
-// Constant: font8x8_system
-// Contains an 8x8 font map for system default font
+#pragma once
 
 constexpr unsigned char font8x8_system[][8] = {
     { 0x38, 0x64, 0xF2, 0xBA, 0x9E, 0x4C, 0x38, 0x00 },    // 00

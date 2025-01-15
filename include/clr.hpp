@@ -21,7 +21,10 @@
  *          /usr/bin/resize -s row col
  * 
  * 	https://stackoverflow.com/questions/4842424/list-of-ansi-color-escape-sequences
- * 
+ *
+ * Released under the GPL v3.0 License.
+ * Original Author: Jay Faries (warte67)
+ *
  ******************/
 #pragma once
 

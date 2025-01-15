@@ -12,7 +12,10 @@
  *  CPU addressable memory map, reading, and writing. It
  *  acts as a static singleton  container object for all 
  *  of the attached mememory devices. 
- * 
+ *
+ * Released under the GPL v3.0 License.
+ * Original Author: Jay Faries (warte67)
+ *
  ******************/
 
 #include <algorithm>
@@ -273,7 +276,25 @@ void Memory::Generate_Memory_Map()
         std::ofstream fout(MEMORY_MAP_OUTPUT_FILE_HPP);
         if (fout.is_open())
         {
-            fout << "\n\n// memory_map.hpp\n";
+            // fout << "\n\n// memory_map.hpp\n";
+
+            fout << "/*** Memory_Map.hpp *************************************************\n";
+            fout << "*      __  __                                     __  __              _                 \n";
+            fout << "*     |  \\/  |                                   |  \\/  |            | |                \n";
+            fout << "*     | \\  / | ___ _ __ ___   ___  _ __ _   _    | \\  / | __ _ _ __  | |__  _ __  _ __  \n";
+            fout << "*     | |\\/| |/ _ \\ '_ ` _ \\ / _ \\| '__| | | |   | |\\/| |/ _` | '_ \\ | '_ \\| '_ \\| '_ \\ \n";
+            fout << "*     | |  | |  __/ | | | | | (_) | |  | |_| |   | |  | | (_| | |_) || | | | |_) | |_) |\n";
+            fout << "*     |_|  |_|\\___|_| |_| |_|\\___/|_|   \\__, |   |_|  |_|\\__,_| .__(_)_| |_| .__/| .__/ \n";
+            fout << "*                                        __/ |_____           | |          | |   | |    \n";
+            fout << "*                                       |___/______|          |_|          |_|   |_|    \n";
+            fout << "*\n";
+            fout << "* C++ Memory Map Definition File\n";
+            fout << "* \n";
+            fout << "* Released under the GPL v3.0 License.\n";
+            fout << "* Original Author: Jay Faries (warte67)\n";
+            fout << "* \n";
+            fout << "************************************/\n\n";
+
             fout << "#ifndef __MEMORY_MAP_HPP__\n";
             fout << "#define __MEMORY_MAP_HPP__\n";
             fout << std::endl;
@@ -337,7 +358,25 @@ void Memory::Generate_Memory_Map()
         std::ofstream fout(MEMORY_MAP_OUTPUT_FILE_ASM);
         if (fout.is_open())
         {
-            fout << "\n\n;    memory_map.asm\n;\n";
+            // fout << "\n\n;    memory_map.asm\n;\n";
+
+            fout << ";*** Memory_Map.asm *************************************************\n";
+            fout << ";*    __  __                                     __  __                                 \n";
+            fout << ";*   |  \\/  |                                   |  \\/  |                                \n";
+            fout << ";*   | \\  / | ___ _ __ ___   ___  _ __ _   _    | \\  / | __ _ _ __   __ _ ___ _ __ ___  \n";
+            fout << ";*   | |\\/| |/ _ \\ '_ ` _ \\ / _ \\| '__| | | |   | |\\/| |/ _` | '_ \\ / _` / __| '_ ` _ \\ \n";
+            fout << ";*   | |  | |  __/ | | | | | (_) | |  | |_| |   | |  | | (_| | |_) | (_| \\__ \\ | | | | |\n";
+            fout << ";*   |_|  |_|\\___|_| |_| |_|\\___/|_|   \\__, |   |_|  |_|\\__,_| .__(_)__,_|___/_| |_| |_|\n";
+            fout << ";*                                      __/ |_____           | |                        \n";
+            fout << ";*                                     |___/______|          |_|                        \n";
+            fout << ";*\n";
+            fout << ";* 6809 Assembly Memory Map Definition File\n";
+            fout << ";*\n";
+            fout << ";* Released under the GPL v3.0 License.\n";
+            fout << ";* Original Author: Jay Faries (warte67)\n";
+            fout << ";*\n";
+            fout << ";************************************\n\n\n\n";
+
             fout << clr::pad("",FIRST_TAB) << ";   **********************************************\n";
             fout << clr::pad("",FIRST_TAB) << ";   * Allocated 64k Memory Mapped System Symbols *\n";
             fout << clr::pad("",FIRST_TAB) << ";   **********************************************\n;\n";

@@ -7,7 +7,10 @@
  *     |_____/ \___|_.__/ \__,_|\__, (_)___| .__/| .__/ 
  *                               __/ |     | |   | |    
  *                              |___/      |_|   |_| 
- *  
+ *
+ * Released under the GPL v3.0 License.
+ * Original Author: Jay Faries (warte67)
+ * 
  ************************************/
 
 #include <deque>

@@ -7,7 +7,11 @@
  *     |_____| |_____/   \___|   \_/   |_|  \___|  \___| (_)  \___| | .__/  | .__/ 
  *                                                                  | |     | |    
  *                                                                  |_|     |_|    
- ******************/
+ * 
+ * Released under the GPL v3.0 License.
+ * Original Author: Jay Faries (warte67)
+ * 
+******************/
 
 #include "IDevice.hpp"
 #include "Memory.hpp"

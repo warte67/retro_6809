@@ -10,7 +10,10 @@
  *
  *      Interface for the emulated hardware devices 
  *      as they are mapped into cpu readable memory.
- * 
+ *
+ * Released under the GPL v3.0 License.
+ * Original Author: Jay Faries (warte67)
+ *
  *************************/
 #pragma once
 

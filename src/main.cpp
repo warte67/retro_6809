@@ -7,7 +7,10 @@
  *     |_| |_| |_|  \__,_| |_| |_| |_| (_)  \___| | .__/  | .__/ 
  *                                                | |     | |    
  *                                                |_|     |_|   
- *    
+ *
+ * Released under the GPL v3.0 License.
+ * Original Author: Jay Faries (warte67)
+ *
  *---------------------------------------------------------------
  *
  *      Build Options:

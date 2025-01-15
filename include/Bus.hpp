@@ -21,7 +21,10 @@
  *      While the Bus object is fundamentally the first created IDevice object, it houses the 
  *      Memory Management object which in turn controls all of the other attached memory based
  *      IDevice objects. 
- * 
+ *
+ * Released under the GPL v3.0 License.
+ * Original Author: Jay Faries (warte67)
+ *
  ******************/
 #pragma once
 

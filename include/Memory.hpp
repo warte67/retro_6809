@@ -12,7 +12,10 @@
  *  CPU addressable memory map, reading, and writing. It
  *  acts as a static singleton  container object for all 
  *  of the attached mememory devices. 
- * 
+ *
+ * Released under the GPL v3.0 License.
+ * Original Author: Jay Faries (warte67)
+ *
  ******************/
 #pragma once
 

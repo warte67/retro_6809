@@ -9,8 +9,9 @@
  *                                              |_|   |_|    
  *
  * MC6809 Central Processing Unit Emulation object
- * 
- * Under GPL v3.0 License
+ *
+ * Released under the GPL v3.0 License.
+ * Original Author: Jay Faries (warte67)
  *
  **************************************/
 

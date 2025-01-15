@@ -7,7 +7,10 @@
  *      \__|  \__, | | .__/   \___| |___/ (_) |_| |_| | .__/  | .__/ 
  *             __/ | | |                              | |     | |    
  *            |___/  |_|                              |_|     |_|    
- * 
+ *
+ * Released under the GPL v3.0 License.
+ * Original Author: Jay Faries (warte67)
+ *
  ***************************************/ 
 
 #pragma once    // (Easy Mode Header Guard)
