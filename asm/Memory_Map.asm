@@ -7,53 +7,53 @@
 ;   **********************************************
 ;
 
-SOFT_VECTORS_DEVICE   equ   0x0000    ; START: Software Interrupt Vectors
-SOFT_EXEC             equ   0x0000    ; Exec Software Interrupt Vector
-SOFT_SWI3             equ   0x0002    ; SWI3 Software Interrupt Vector
-SOFT_SWI2             equ   0x0004    ; SWI2 Software Interrupt Vector
-SOFT_FIRQ             equ   0x0006    ; FIRQ Software Interrupt Vector
-SOFT_IRQ              equ   0x0008    ; IRQ Software Interrupt Vector
-SOFT_SWI              equ   0x000A    ; SWI / SYS Software Interrupt Vector
-SOFT_NMI              equ   0x000C    ; NMI Software Interrupt Vector
-SOFT_RESET            equ   0x000E    ; RESET Software Interrupt Vector
+SOFT_VECTORS_DEVICE   equ    $0000    ; START: Software Interrupt Vectors
+SOFT_EXEC             equ    $0000    ; Exec Software Interrupt Vector
+SOFT_SWI3             equ    $0002    ; SWI3 Software Interrupt Vector
+SOFT_SWI2             equ    $0004    ; SWI2 Software Interrupt Vector
+SOFT_FIRQ             equ    $0006    ; FIRQ Software Interrupt Vector
+SOFT_IRQ              equ    $0008    ; IRQ Software Interrupt Vector
+SOFT_SWI              equ    $000A    ; SWI / SYS Software Interrupt Vector
+SOFT_NMI              equ    $000C    ; NMI Software Interrupt Vector
+SOFT_RESET            equ    $000E    ; RESET Software Interrupt Vector
 ; _______________________________________________________________________
 
-SYSTEM_MEMORY_DEVICE  equ   0x0000    ; START: System Memory
-ZERO_PAGE             equ   0x0010    ; Zero Page System and User Variables
-FIO_BUFFER            equ   0x0100    ; START: File Input/Output Buffer
-FIO_BFR_END           equ   0x01FF    ; END: File Input/Output Buffer
-SYSTEM_STACK          equ   0x0200    ; Bottom of the system stack spcace
-SSTACK_TOP            equ   0x0400    ; Top of the system statck space
+SYSTEM_MEMORY_DEVICE  equ    $0000    ; START: System Memory
+ZERO_PAGE             equ    $0010    ; Zero Page System and User Variables
+FIO_BUFFER            equ    $0100    ; START: File Input/Output Buffer
+FIO_BFR_END           equ    $01FF    ; END: File Input/Output Buffer
+SYSTEM_STACK          equ    $0200    ; Bottom of the system stack spcace
+SSTACK_TOP            equ    $0400    ; Top of the system statck space
 ; _______________________________________________________________________
 
-VIDEO_BUFFER_DEVICE   equ   0x0000    ; START: Video Buffer (8K)
-VIDEO_START           equ   0x0400    ; Start of standard video buffer
-VIDEO_END             equ   0x23FF    ; End of standard video buffer
-VIDEO_TOP             equ   0x2400    ; Top of standard video buffer
+VIDEO_BUFFER_DEVICE   equ    $0000    ; START: Video Buffer (8K)
+VIDEO_START           equ    $0400    ; Start of standard video buffer
+VIDEO_END             equ    $23FF    ; End of standard video buffer
+VIDEO_TOP             equ    $2400    ; Top of standard video buffer
 ; _______________________________________________________________________
 
-USER_MEMORY_DEVICE    equ   0x0000    ; START: User Memory (34K)
-USER_RAM              equ   0x2400    ; User Accessable RAM
-USER_RAM_END          equ   0xAFFF    ; End User Accessable RAM
-USER_RAM_TOP          equ   0xB000    ; Top User Accessable RAM
+USER_MEMORY_DEVICE    equ    $0000    ; START: User Memory (34K)
+USER_RAM              equ    $2400    ; User Accessable RAM
+USER_RAM_END          equ    $AFFF    ; End User Accessable RAM
+USER_RAM_TOP          equ    $B000    ; Top User Accessable RAM
 ; _______________________________________________________________________
 
-MEMBANK_DEVICE        equ   0x0000    ; START: Banked Memory Region (16K)
-MEMBANK_ONE           equ   0xB000    ; Banked Memory Page One (8K)
-MEMBANK_TWO           equ   0xD000    ; Banked Memory Page Two (8K)
-MEMBANK_END           equ   0xEFFF    ; End of Banked Memory Region
-MEMBANK_TOP           equ   0xF000    ; TOP of Banked Memory Region
+MEMBANK_DEVICE        equ    $0000    ; START: Banked Memory Region (16K)
+MEMBANK_ONE           equ    $B000    ; Banked Memory Page One (8K)
+MEMBANK_TWO           equ    $D000    ; Banked Memory Page Two (8K)
+MEMBANK_END           equ    $EFFF    ; End of Banked Memory Region
+MEMBANK_TOP           equ    $F000    ; TOP of Banked Memory Region
 ; _______________________________________________________________________
 
-KERNEL_ROM_DEVICE     equ   0x0000    ; START: Kernel Rom (3.5K)
-KERNEL_START          equ   0xF000    ; Start of Kernel Rom Space
-KERNEL_END            equ   0xFDFF    ; End of Kernel Rom Space
-KERNEL_TOP            equ   0xFE00    ; Top of Kernel Rom Space
+KERNEL_ROM_DEVICE     equ    $0000    ; START: Kernel Rom (3.5K)
+KERNEL_START          equ    $F000    ; Start of Kernel Rom Space
+KERNEL_END            equ    $FDFF    ; End of Kernel Rom Space
+KERNEL_TOP            equ    $FE00    ; Top of Kernel Rom Space
 ; _______________________________________________________________________
 
-SYS_DEVICE            equ   0xFE00    ; START: System and Debug Hardware Registers:
-SYS_BEGIN             equ   0xFE00    ; Start of System Registers
-SYS_STATE             equ   0xFE00    ; (Byte) System State Register
+SYS_DEVICE            equ    $FE00    ; START: System and Debug Hardware Registers:
+SYS_BEGIN             equ    $FE00    ; Start of System Registers
+SYS_STATE             equ    $FE00    ; (Byte) System State Register
                                       ; SYS_STATE: ABCD.SSSS                          
                                       ; - bit  7   = Error: Standard Buffer Overflow  
                                       ; - bit  6   = Error: Extended Buffer Overflow  
@@ -77,8 +77,8 @@ SYS_STATE             equ   0xFE00    ; (Byte) System State Register
                                       ;   14 ($E)  = CPU Clock 4000 khz 
                                       ;   15 ($F)  = CPU Clock ~10.0 mhz. (unmetered) 
                                       ; 
-SYS_SPEED             equ   0xFE01    ; (Word) Average CPU Clock Speed (Read Only)
-SYS_CLOCK_DIV         equ   0xFE03    ; (Byte) 60 hz Clock Divider Register (Read Only)
+SYS_SPEED             equ    $FE01    ; (Word) Average CPU Clock Speed (Read Only)
+SYS_CLOCK_DIV         equ    $FE03    ; (Byte) 60 hz Clock Divider Register (Read Only)
                                       ; - bit 7: 0.546875 hz
                                       ; - bit 6: 1.09375 hz
                                       ; - bit 5: 2.1875 hz
@@ -88,9 +88,9 @@ SYS_CLOCK_DIV         equ   0xFE03    ; (Byte) 60 hz Clock Divider Register (Rea
                                       ; - bit 1: 35.0 hz
                                       ; - bit 0: 70.0 hz
                                       ; 
-SYS_UPDATE_COUNT      equ   0xFE04    ; (Byte) Update Count (Read Only)
-SYS_DBG_BRK_ADDR      equ   0xFE08    ; (Word) Address of current debug breakpoint
-SYS_DBG_FLAGS         equ   0xFE0A    ; (Byte) Debug Specific Hardware Flags:
+SYS_UPDATE_COUNT      equ    $FE04    ; (DWord) Update Count (Read Only)
+SYS_DBG_BRK_ADDR      equ    $FE08    ; (Word) Address of current debug breakpoint
+SYS_DBG_FLAGS         equ    $FE0A    ; (Byte) Debug Specific Hardware Flags:
                                       ; - bit 7: Debug Enable
                                       ; - bit 6: Single Step Enable
                                       ; - bit 5: Clear All Breakpoints
@@ -100,12 +100,12 @@ SYS_DBG_FLAGS         equ   0xFE0A    ; (Byte) Debug Specific Hardware Flags:
                                       ; - bit 1: NMI   (on low {0} to high {1} edge)
                                       ; - bit 0: RESET (on low {0} to high {1} edge)
                                       ; 
-SYS_END               equ   0xFE0A    ; End of System Registers
-SYS_TOP               equ   0xFE0B    ; Top of System Registers
+SYS_END               equ    $FE0A    ; End of System Registers
+SYS_TOP               equ    $FE0B    ; Top of System Registers
 ; _______________________________________________________________________
 
-GPU_DEVICE            equ   0xFE0B    ; START: GPU Device Hardware Registers
-GPU_OPTIONS           equ   0xFE0B    ; (Byte) Bitflag Enables
+GPU_DEVICE            equ    $FE0B    ; START: GPU Device Hardware Registers
+GPU_OPTIONS           equ    $FE0B    ; (Byte) Bitflag Enables
                                       ; - bit 7    = Extended Bitmap:
                                       ;               0: Tilemap Display
                                       ;               1: Bitmap Display
@@ -130,7 +130,7 @@ GPU_OPTIONS           equ   0xFE0B    ; (Byte) Bitflag Enables
                                       ;               0: Disabled
                                       ;               1: Enabled
                                       ; 
-GPU_MODE              equ   0xFE0C    ; (Byte) Bitflag Enables
+GPU_MODE              equ    $FE0C    ; (Byte) Bitflag Enables
                                       ; - bit 7    = Standard Bitmap:
                                       ;               0: Text Display
                                       ;               1: Bitmap Display
@@ -141,43 +141,43 @@ GPU_MODE              equ   0xFE0C    ; (Byte) Bitflag Enables
                                       ;               11: 256-Colors
                                       ; - bits 0-4 = Display Mode (0-31)
                                       ; 
-GPU_VIDEO_MAX         equ   0xFE0D    ; (Word) Video Buffer Maximum (Read Only)
+GPU_VIDEO_MAX         equ    $FE0D    ; (Word) Video Buffer Maximum (Read Only)
                                       ;  Note: This will change to reflect
                                       ;        the size of the last cpu
                                       ;        accessible memory location
                                       ;        of the currently active
                                       ;        standard video mode.
-GPU_HRES              equ   0xFE0F    ; (Word) Horizontal Resolution (Read Only)
+GPU_HRES              equ    $FE0F    ; (Word) Horizontal Resolution (Read Only)
                                       ;   Note: This will reflect the number of
                                       ;        pixel columns for bitmap modes.
-GPU_VRES              equ   0xFE11    ; (Word) Vertical Resolution (Read Only)
+GPU_VRES              equ    $FE11    ; (Word) Vertical Resolution (Read Only)
                                       ;   Note: This will reflect the number of
                                       ;        pixel rows for bitmap modes.
-GPU_TCOLS             equ   0xFE13    ; (Byte) Text Horizontal Columns (Read Only)
+GPU_TCOLS             equ    $FE13    ; (Byte) Text Horizontal Columns (Read Only)
                                       ;   Note: This will reflect the number of
                                       ;        glyph columns for text modes.
                                       ; 
-GPU_TROWS             equ   0xFE15    ; (Byte) Text Vertical Rows (Read Only)
+GPU_TROWS             equ    $FE15    ; (Byte) Text Vertical Rows (Read Only)
                                       ;   Note: This will reflect the number of
                                       ;        glyph rows for text modes.
                                       ; 
-GPU_END               equ   0xFE16    ; End of GPU Register Space
-GPU_TOP               equ   0xFE17    ; Top of GPU Register Space
+GPU_END               equ    $FE16    ; End of GPU Register Space
+GPU_TOP               equ    $FE17    ; Top of GPU Register Space
 ; _______________________________________________________________________
 
-HDW_RESERVED_DEVICE   equ   0x0000    ; START: Reserved Register Space
-HDW_REG_END           equ   0xFFEF    ; 472 bytes reserved for future use.
+HDW_RESERVED_DEVICE   equ    $0000    ; START: Reserved Register Space
+HDW_REG_END           equ    $FFEF    ; 472 bytes reserved for future use.
 ; _______________________________________________________________________
 
-ROM_VECTS_DEVICE      equ   0x0000    ; START: Hardware Interrupt Vectors
-HARD_EXEC             equ   0xFFF0    ; EXEC Hardware Interrupt Vector
-HARD_SWI3             equ   0xFFF2    ; SWI3 Hardware Interrupt Vector
-HARD_SWI2             equ   0xFFF4    ; SWI2 Hardware Interrupt Vector
-HARD_FIRQ             equ   0xFFF6    ; FIRQ Hardware Interrupt Vector
-HARD_IRQ              equ   0xFFF8    ; IRQ Hardware Interrupt Vector
-HARD_SWI              equ   0xFFFA    ; SWI / SYS Hardware Interrupt Vector
-HARD_NMI              equ   0xFFFC    ; NMI Hardware Interrupt Vector
-HARD_RESET            equ   0xFFFE    ; RESET Hardware Interrupt Vector
+ROM_VECTS_DEVICE      equ    $0000    ; START: Hardware Interrupt Vectors
+HARD_EXEC             equ    $FFF0    ; EXEC Hardware Interrupt Vector
+HARD_SWI3             equ    $FFF2    ; SWI3 Hardware Interrupt Vector
+HARD_SWI2             equ    $FFF4    ; SWI2 Hardware Interrupt Vector
+HARD_FIRQ             equ    $FFF6    ; FIRQ Hardware Interrupt Vector
+HARD_IRQ              equ    $FFF8    ; IRQ Hardware Interrupt Vector
+HARD_SWI              equ    $FFFA    ; SWI / SYS Hardware Interrupt Vector
+HARD_NMI              equ    $FFFC    ; NMI Hardware Interrupt Vector
+HARD_RESET            equ    $FFFE    ; RESET Hardware Interrupt Vector
 
 
 ; END of memory_map.asm definitions

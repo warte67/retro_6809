@@ -91,7 +91,7 @@ enum MEMMAP
                                       // - bit 1: 35.0 hz
                                       // - bit 0: 70.0 hz
                                       // 
-    SYS_UPDATE_COUNT      = 0xFE04,   // (Byte) Update Count (Read Only)
+    SYS_UPDATE_COUNT      = 0xFE04,   // (DWord) Update Count (Read Only)
     SYS_DBG_BRK_ADDR      = 0xFE08,   // (Word) Address of current debug breakpoint
     SYS_DBG_FLAGS         = 0xFE0A,   // (Byte) Debug Specific Hardware Flags:
                                       // - bit 7: Debug Enable

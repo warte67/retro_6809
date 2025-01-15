@@ -344,11 +344,11 @@ void Memory::Generate_Memory_Map()
             for (auto &node : Memory::_memory_nodes) 
             {
                 fout << std::endl;
-                fout << clr::pad(clr::pad("",FIRST_TAB) + clr::pad(node->name(), VAR_LEN) + "equ   0x" + clr::hex(node->GetBaseAddress(),4), COMMENT_START) << "; START: " << node->heading << std::endl;
+                fout << clr::pad(clr::pad("",FIRST_TAB) + clr::pad(node->name(), VAR_LEN) + "equ    $" + clr::hex(node->GetBaseAddress(),4), COMMENT_START) << "; START: " << node->heading << std::endl;
                 for (auto &r : node->mapped_register)
                 {
                     if (r.name == "") continue;
-                    std::string _out = clr::pad(clr::pad(r.name, VAR_LEN) + "equ   0x" + clr::hex(r.address, 4), COMMENT_START);
+                    std::string _out = clr::pad(clr::pad(r.name, VAR_LEN) + "equ    $" + clr::hex(r.address, 4), COMMENT_START);
                     // comments
                     for (auto &c : r.comment)
                     {
