@@ -203,14 +203,14 @@ void Bus::_onInit()
     Memory::Attach<SYSTEM_MEMORY>();    // 0x0010 - 0x03FF
     Memory::Attach<VIDEO_BUFFER>();     // 0x0400 - 0x23FF      (8k video buffer)
     Memory::Attach<USER_MEMORY>();      // 0x2400 - 0xAFFF      (42k user RAM)    
-    // Memory::Attach<MEMBANK>();          // 0xB000 - 0xEFFF      (16k banked memory)
-    // Memory::Attach<KERNEL_ROM>(); 
+    Memory::Attach<MEMBANK>();          // 0xB000 - 0xEFFF      (16k banked memory)
+    Memory::Attach<KERNEL_ROM>(); 
 
     _pDebug = Memory::Attach<Debug>();
     _pGPU = Memory::Attach<GPU>();
 
-    // Memory::Attach<HDW_RESERVED>();     // reserved space for future use
-    // Memory::Attach<ROM_VECTS>();        // 0xFFF0 - 0xFFFF      (System ROM Vectors)
+    Memory::Attach<HDW_RESERVED>();     // reserved space for future use
+    Memory::Attach<ROM_VECTS>();        // 0xFFF0 - 0xFFFF      (System ROM Vectors)
 
     // Error Checking
     if (Memory::NextAddress() > 0x10000) {

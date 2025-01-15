@@ -41,9 +41,22 @@ enum MEMMAP
     USER_RAM_TOP          = 0xB000,   // Top User Accessable RAM
 // _______________________________________________________________________
 
-    SYS_DEVICE            = 0xB000,   // START: System and Debug Hardware Registers:
-    SYS_BEGIN             = 0xB000,   // Start of System Registers
-    SYS_STATE             = 0xB000,   // (Byte) System State Register
+    MEMBANK_DEVICE        = 0x0000,   // START: Banked Memory Region (16K)
+    MEMBANK_ONE           = 0xB000,   // Banked Memory Page One (8K)
+    MEMBANK_TWO           = 0xD000,   // Banked Memory Page Two (8K)
+    MEMBANK_END           = 0xEFFF,   // End of Banked Memory Region
+    MEMBANK_TOP           = 0xF000,   // TOP of Banked Memory Region
+// _______________________________________________________________________
+
+    KERNEL_ROM_DEVICE     = 0x0000,   // START: Kernel Rom (3.5K)
+    KERNEL_START          = 0xF000,   // Start of Kernel Rom Space
+    KERNEL_END            = 0xFDFF,   // End of Kernel Rom Space
+    KERNEL_TOP            = 0xFE00,   // Top of Kernel Rom Space
+// _______________________________________________________________________
+
+    SYS_DEVICE            = 0xFE00,   // START: System and Debug Hardware Registers:
+    SYS_BEGIN             = 0xFE00,   // Start of System Registers
+    SYS_STATE             = 0xFE00,   // (Byte) System State Register
                                       // SYS_STATE: ABCD.SSSS                          
                                       // - bit  7   = Error: Standard Buffer Overflow  
                                       // - bit  6   = Error: Extended Buffer Overflow  
@@ -67,9 +80,9 @@ enum MEMMAP
                                       //   14 ($E)  = CPU Clock 4000 khz 
                                       //   15 ($F)  = CPU Clock ~10.0 mhz. (unmetered) 
                                       // 
-    SYS_SPEED             = 0xB001,   // (Word) Average CPU Clock Speed (Read Only)
-                          = 0xB002,   // 
-    SYS_CLOCK_DIV         = 0xB003,   // (Byte) 60 hz Clock Divider Register (Read Only)
+    SYS_SPEED             = 0xFE01,   // (Word) Average CPU Clock Speed (Read Only)
+                          = 0xFE02,   // 
+    SYS_CLOCK_DIV         = 0xFE03,   // (Byte) 60 hz Clock Divider Register (Read Only)
                                       // - bit 7: 0.546875 hz
                                       // - bit 6: 1.09375 hz
                                       // - bit 5: 2.1875 hz
@@ -79,13 +92,13 @@ enum MEMMAP
                                       // - bit 1: 35.0 hz
                                       // - bit 0: 70.0 hz
                                       // 
-    SYS_UPDATE_COUNT      = 0xB004,   // (Byte) Update Count (Read Only)
-                          = 0xB005,   // 
-                          = 0xB006,   // 
-                          = 0xB007,   // 
-    SYS_DBG_BRK_ADDR      = 0xB008,   // (Word) Address of current debug breakpoint
-                          = 0xB009,   // 
-    SYS_DBG_FLAGS         = 0xB00A,   // (Byte) Debug Specific Hardware Flags:
+    SYS_UPDATE_COUNT      = 0xFE04,   // (Byte) Update Count (Read Only)
+                          = 0xFE05,   // 
+                          = 0xFE06,   // 
+                          = 0xFE07,   // 
+    SYS_DBG_BRK_ADDR      = 0xFE08,   // (Word) Address of current debug breakpoint
+                          = 0xFE09,   // 
+    SYS_DBG_FLAGS         = 0xFE0A,   // (Byte) Debug Specific Hardware Flags:
                                       // - bit 7: Debug Enable
                                       // - bit 6: Single Step Enable
                                       // - bit 5: Clear All Breakpoints
@@ -95,12 +108,12 @@ enum MEMMAP
                                       // - bit 1: NMI   (on low {0} to high {1} edge)
                                       // - bit 0: RESET (on low {0} to high {1} edge)
                                       // 
-    SYS_END               = 0xB00A,   // End of System Registers
-    SYS_TOP               = 0xB00B,   // Top of System Registers
-                                      // 
+    SYS_END               = 0xFE0A,   // End of System Registers
+    SYS_TOP               = 0xFE0B,   // Top of System Registers
+// _______________________________________________________________________
 
-    GPU_DEVICE            = 0xB00B,   // START: GPU Device Hardware Registers
-    GPU_OPTIONS           = 0xB00B,   // (Byte) Bitflag Enables
+    GPU_DEVICE            = 0xFE0B,   // START: GPU Device Hardware Registers
+    GPU_OPTIONS           = 0xFE0B,   // (Byte) Bitflag Enables
                                       // - bit 7    = Extended Bitmap:
                                       //               0: Tilemap Display
                                       //               1: Bitmap Display
@@ -125,7 +138,7 @@ enum MEMMAP
                                       //               0: Disabled
                                       //               1: Enabled
                                       // 
-    GPU_MODE              = 0xB00C,   // (Byte) Bitflag Enables
+    GPU_MODE              = 0xFE0C,   // (Byte) Bitflag Enables
                                       // - bit 7    = Standard Bitmap:
                                       //               0: Text Display
                                       //               1: Bitmap Display
@@ -136,34 +149,48 @@ enum MEMMAP
                                       //               11: 256-Colors
                                       // - bits 0-4 = Display Mode (0-31)
                                       // 
-    GPU_VIDEO_MAX         = 0xB00D,   // (Word) Video Buffer Maximum (Read Only)
+    GPU_VIDEO_MAX         = 0xFE0D,   // (Word) Video Buffer Maximum (Read Only)
                                       //  Note: This will change to reflect
                                       //        the size of the last cpu
                                       //        accessible memory location
                                       //        of the currently active
                                       //        standard video mode.
-                          = 0xB00E,   // 
-    GPU_HRES              = 0xB00F,   // (Word) Horizontal Resolution (Read Only)
+                          = 0xFE0E,   // 
+    GPU_HRES              = 0xFE0F,   // (Word) Horizontal Resolution (Read Only)
                                       //   Note: This will reflect the number of
                                       //        pixel columns for bitmap modes.
-                          = 0xB010,   // 
-    GPU_VRES              = 0xB011,   // (Word) Vertical Resolution (Read Only)
+                          = 0xFE10,   // 
+    GPU_VRES              = 0xFE11,   // (Word) Vertical Resolution (Read Only)
                                       //   Note: This will reflect the number of
                                       //        pixel rows for bitmap modes.
-                          = 0xB012,   // 
-    GPU_TCOLS             = 0xB013,   // (Byte) Text Horizontal Columns (Read Only)
+                          = 0xFE12,   // 
+    GPU_TCOLS             = 0xFE13,   // (Byte) Text Horizontal Columns (Read Only)
                                       //   Note: This will reflect the number of
                                       //        glyph columns for text modes.
                                       // 
-                          = 0xB014,   // 
-    GPU_TROWS             = 0xB015,   // (Byte) Text Vertical Rows (Read Only)
+                          = 0xFE14,   // 
+    GPU_TROWS             = 0xFE15,   // (Byte) Text Vertical Rows (Read Only)
                                       //   Note: This will reflect the number of
                                       //        glyph rows for text modes.
                                       // 
-                          = 0xB016,   // 
-    GPU_END               = 0xB016,   // End of GPU Register Space
-    GPU_TOP               = 0xB017,   // Top of GPU Register Space
+                          = 0xFE16,   // 
+    GPU_END               = 0xFE16,   // End of GPU Register Space
+    GPU_TOP               = 0xFE17,   // Top of GPU Register Space
 // _______________________________________________________________________
+
+    HDW_RESERVED_DEVICE   = 0x0000,   // START: Reserved Register Space
+    HDW_REG_END           = 0xFFEF,   // 472 bytes reserved for future use.
+// _______________________________________________________________________
+
+    ROM_VECTS_DEVICE      = 0x0000,   // START: Hardware Interrupt Vectors
+    HARD_EXEC             = 0xFFF0,   // EXEC Hardware Interrupt Vector
+    HARD_SWI3             = 0xFFF2,   // SWI3 Hardware Interrupt Vector
+    HARD_SWI2             = 0xFFF4,   // SWI2 Hardware Interrupt Vector
+    HARD_FIRQ             = 0xFFF6,   // FIRQ Hardware Interrupt Vector
+    HARD_IRQ              = 0xFFF8,   // IRQ Hardware Interrupt Vector
+    HARD_SWI              = 0xFFFA,   // SWI / SYS Hardware Interrupt Vector
+    HARD_NMI              = 0xFFFC,   // NMI Hardware Interrupt Vector
+    HARD_RESET            = 0xFFFE,   // RESET Hardware Interrupt Vector
     MEMMAP_END
 }; // END: enum MEMMAP
 

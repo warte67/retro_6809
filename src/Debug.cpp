@@ -329,7 +329,7 @@ int  Debug::OnAttach(int nextAddr)
 
     mapped_register.push_back({ "SYS_END", nextAddr, nullptr, nullptr,  { "End of System Registers"}}); 
     nextAddr++;
-    mapped_register.push_back({ "SYS_TOP", nextAddr, nullptr, nullptr,  { "Top of System Registers", ""}}); 
+    mapped_register.push_back({ "SYS_TOP", nextAddr, nullptr, nullptr,  { "Top of System Registers", "---"}}); 
     // nextAddr++;
 
     std::cout << clr::indent() << clr::LT_BLUE << "Debug::OnAttach() Exit" << clr::RETURN;    

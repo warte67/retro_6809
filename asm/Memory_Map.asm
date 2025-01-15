@@ -38,9 +38,22 @@ USER_RAM_END          equ   0xAFFF    ; End User Accessable RAM
 USER_RAM_TOP          equ   0xB000    ; Top User Accessable RAM
 ; _______________________________________________________________________
 
-SYS_DEVICE            equ   0xB000    ; START: System and Debug Hardware Registers:
-SYS_BEGIN             equ   0xB000    ; Start of System Registers
-SYS_STATE             equ   0xB000    ; (Byte) System State Register
+MEMBANK_DEVICE        equ   0x0000    ; START: Banked Memory Region (16K)
+MEMBANK_ONE           equ   0xB000    ; Banked Memory Page One (8K)
+MEMBANK_TWO           equ   0xD000    ; Banked Memory Page Two (8K)
+MEMBANK_END           equ   0xEFFF    ; End of Banked Memory Region
+MEMBANK_TOP           equ   0xF000    ; TOP of Banked Memory Region
+; _______________________________________________________________________
+
+KERNEL_ROM_DEVICE     equ   0x0000    ; START: Kernel Rom (3.5K)
+KERNEL_START          equ   0xF000    ; Start of Kernel Rom Space
+KERNEL_END            equ   0xFDFF    ; End of Kernel Rom Space
+KERNEL_TOP            equ   0xFE00    ; Top of Kernel Rom Space
+; _______________________________________________________________________
+
+SYS_DEVICE            equ   0xFE00    ; START: System and Debug Hardware Registers:
+SYS_BEGIN             equ   0xFE00    ; Start of System Registers
+SYS_STATE             equ   0xFE00    ; (Byte) System State Register
                                       ; SYS_STATE: ABCD.SSSS                          
                                       ; - bit  7   = Error: Standard Buffer Overflow  
                                       ; - bit  6   = Error: Extended Buffer Overflow  
@@ -64,9 +77,9 @@ SYS_STATE             equ   0xB000    ; (Byte) System State Register
                                       ;   14 ($E)  = CPU Clock 4000 khz 
                                       ;   15 ($F)  = CPU Clock ~10.0 mhz. (unmetered) 
                                       ; 
-SYS_SPEED             equ   0xB001    ; (Word) Average CPU Clock Speed (Read Only)
-                      equ   0xB002    ; 
-SYS_CLOCK_DIV         equ   0xB003    ; (Byte) 60 hz Clock Divider Register (Read Only)
+SYS_SPEED             equ   0xFE01    ; (Word) Average CPU Clock Speed (Read Only)
+                      equ   0xFE02    ; 
+SYS_CLOCK_DIV         equ   0xFE03    ; (Byte) 60 hz Clock Divider Register (Read Only)
                                       ; - bit 7: 0.546875 hz
                                       ; - bit 6: 1.09375 hz
                                       ; - bit 5: 2.1875 hz
@@ -76,13 +89,13 @@ SYS_CLOCK_DIV         equ   0xB003    ; (Byte) 60 hz Clock Divider Register (Rea
                                       ; - bit 1: 35.0 hz
                                       ; - bit 0: 70.0 hz
                                       ; 
-SYS_UPDATE_COUNT      equ   0xB004    ; (Byte) Update Count (Read Only)
-                      equ   0xB005    ; 
-                      equ   0xB006    ; 
-                      equ   0xB007    ; 
-SYS_DBG_BRK_ADDR      equ   0xB008    ; (Word) Address of current debug breakpoint
-                      equ   0xB009    ; 
-SYS_DBG_FLAGS         equ   0xB00A    ; (Byte) Debug Specific Hardware Flags:
+SYS_UPDATE_COUNT      equ   0xFE04    ; (Byte) Update Count (Read Only)
+                      equ   0xFE05    ; 
+                      equ   0xFE06    ; 
+                      equ   0xFE07    ; 
+SYS_DBG_BRK_ADDR      equ   0xFE08    ; (Word) Address of current debug breakpoint
+                      equ   0xFE09    ; 
+SYS_DBG_FLAGS         equ   0xFE0A    ; (Byte) Debug Specific Hardware Flags:
                                       ; - bit 7: Debug Enable
                                       ; - bit 6: Single Step Enable
                                       ; - bit 5: Clear All Breakpoints
@@ -92,12 +105,12 @@ SYS_DBG_FLAGS         equ   0xB00A    ; (Byte) Debug Specific Hardware Flags:
                                       ; - bit 1: NMI   (on low {0} to high {1} edge)
                                       ; - bit 0: RESET (on low {0} to high {1} edge)
                                       ; 
-SYS_END               equ   0xB00A    ; End of System Registers
-SYS_TOP               equ   0xB00B    ; Top of System Registers
-                                      ; 
+SYS_END               equ   0xFE0A    ; End of System Registers
+SYS_TOP               equ   0xFE0B    ; Top of System Registers
+; _______________________________________________________________________
 
-GPU_DEVICE            equ   0xB00B    ; START: GPU Device Hardware Registers
-GPU_OPTIONS           equ   0xB00B    ; (Byte) Bitflag Enables
+GPU_DEVICE            equ   0xFE0B    ; START: GPU Device Hardware Registers
+GPU_OPTIONS           equ   0xFE0B    ; (Byte) Bitflag Enables
                                       ; - bit 7    = Extended Bitmap:
                                       ;               0: Tilemap Display
                                       ;               1: Bitmap Display
@@ -122,7 +135,7 @@ GPU_OPTIONS           equ   0xB00B    ; (Byte) Bitflag Enables
                                       ;               0: Disabled
                                       ;               1: Enabled
                                       ; 
-GPU_MODE              equ   0xB00C    ; (Byte) Bitflag Enables
+GPU_MODE              equ   0xFE0C    ; (Byte) Bitflag Enables
                                       ; - bit 7    = Standard Bitmap:
                                       ;               0: Text Display
                                       ;               1: Bitmap Display
@@ -133,34 +146,48 @@ GPU_MODE              equ   0xB00C    ; (Byte) Bitflag Enables
                                       ;               11: 256-Colors
                                       ; - bits 0-4 = Display Mode (0-31)
                                       ; 
-GPU_VIDEO_MAX         equ   0xB00D    ; (Word) Video Buffer Maximum (Read Only)
+GPU_VIDEO_MAX         equ   0xFE0D    ; (Word) Video Buffer Maximum (Read Only)
                                       ;  Note: This will change to reflect
                                       ;        the size of the last cpu
                                       ;        accessible memory location
                                       ;        of the currently active
                                       ;        standard video mode.
-                      equ   0xB00E    ; 
-GPU_HRES              equ   0xB00F    ; (Word) Horizontal Resolution (Read Only)
+                      equ   0xFE0E    ; 
+GPU_HRES              equ   0xFE0F    ; (Word) Horizontal Resolution (Read Only)
                                       ;   Note: This will reflect the number of
                                       ;        pixel columns for bitmap modes.
-                      equ   0xB010    ; 
-GPU_VRES              equ   0xB011    ; (Word) Vertical Resolution (Read Only)
+                      equ   0xFE10    ; 
+GPU_VRES              equ   0xFE11    ; (Word) Vertical Resolution (Read Only)
                                       ;   Note: This will reflect the number of
                                       ;        pixel rows for bitmap modes.
-                      equ   0xB012    ; 
-GPU_TCOLS             equ   0xB013    ; (Byte) Text Horizontal Columns (Read Only)
+                      equ   0xFE12    ; 
+GPU_TCOLS             equ   0xFE13    ; (Byte) Text Horizontal Columns (Read Only)
                                       ;   Note: This will reflect the number of
                                       ;        glyph columns for text modes.
                                       ; 
-                      equ   0xB014    ; 
-GPU_TROWS             equ   0xB015    ; (Byte) Text Vertical Rows (Read Only)
+                      equ   0xFE14    ; 
+GPU_TROWS             equ   0xFE15    ; (Byte) Text Vertical Rows (Read Only)
                                       ;   Note: This will reflect the number of
                                       ;        glyph rows for text modes.
                                       ; 
-                      equ   0xB016    ; 
-GPU_END               equ   0xB016    ; End of GPU Register Space
-GPU_TOP               equ   0xB017    ; Top of GPU Register Space
+                      equ   0xFE16    ; 
+GPU_END               equ   0xFE16    ; End of GPU Register Space
+GPU_TOP               equ   0xFE17    ; Top of GPU Register Space
 ; _______________________________________________________________________
+
+HDW_RESERVED_DEVICE   equ   0x0000    ; START: Reserved Register Space
+HDW_REG_END           equ   0xFFEF    ; 472 bytes reserved for future use.
+; _______________________________________________________________________
+
+ROM_VECTS_DEVICE      equ   0x0000    ; START: Hardware Interrupt Vectors
+HARD_EXEC             equ   0xFFF0    ; EXEC Hardware Interrupt Vector
+HARD_SWI3             equ   0xFFF2    ; SWI3 Hardware Interrupt Vector
+HARD_SWI2             equ   0xFFF4    ; SWI2 Hardware Interrupt Vector
+HARD_FIRQ             equ   0xFFF6    ; FIRQ Hardware Interrupt Vector
+HARD_IRQ              equ   0xFFF8    ; IRQ Hardware Interrupt Vector
+HARD_SWI              equ   0xFFFA    ; SWI / SYS Hardware Interrupt Vector
+HARD_NMI              equ   0xFFFC    ; NMI Hardware Interrupt Vector
+HARD_RESET            equ   0xFFFE    ; RESET Hardware Interrupt Vector
 
 
 ; END of memory_map.asm definitions
