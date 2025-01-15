@@ -317,6 +317,71 @@ int  GPU::OnAttach(int nextAddr)
 
 
     ////////////////////////////////////////////////
+    // (Byte) GPU_GLYPH_IDX
+    //     Text Glyph Index (0-255)
+    /////
+    mapped_register.push_back({ "GPU_GLYPH_IDX", nextAddr,  
+        [this](Word nextAddr) { (void)nextAddr; return _gpu_glyph_idx; }, 
+        [this](Word nextAddr, Byte data) { (void)nextAddr; _gpu_glyph_idx = data; }, 
+        {
+            "(Byte) Text Glyph Index",
+            "  Note: Use this register to set the",
+            "       index of a specific text glyph.",
+            "       Set this value prior to updating",
+            "       the glyph data (GPU_GLYPH_DATA).",
+            ""
+        }
+    }); nextAddr+=1;
+
+
+    ////////////////////////////////////////////////
+    // (8-Bytes) GPU_GLYPH_DATA 
+    //      Text Glyph Pixel Data Array
+    /////
+    mapped_register.push_back({ "GPU_GLYPH_DATA", nextAddr,  
+        [this](Word nextAddr) { (void)nextAddr; return _gpu_glyph_data[_gpu_glyph_idx][0];  }, 
+        [this](Word nextAddr, Byte data) { (void)nextAddr; _gpu_glyph_data[_gpu_glyph_idx][0] = data; }, 
+        {
+            "(8-Bytes) 8 rows of binary encoded glyph pixel data",
+            "  Note: This is the pixel data for a", 
+            "       specific text glyph. Each 8x8",
+            "       text glyph is composed of 8 bytes.",            
+            "       The first byte in this array",
+            "       represents the top line of 8 pixels.",            
+            "       Each array entry represents a row of 8 pixels.",
+            ""
+        }}); nextAddr+=1;
+    mapped_register.push_back( { "", nextAddr,
+        [this](Word nextAddr) { (void)nextAddr; return _gpu_glyph_data[_gpu_glyph_idx][1]; }, 
+        [this](Word nextAddr, Byte data) { (void)nextAddr; _gpu_glyph_data[_gpu_glyph_idx][1] = data; }, 
+        {""}}); nextAddr+=1;      
+    mapped_register.push_back( { "", nextAddr,
+        [this](Word nextAddr) { (void)nextAddr; return _gpu_glyph_data[_gpu_glyph_idx][2]; }, 
+        [this](Word nextAddr, Byte data) { (void)nextAddr; _gpu_glyph_data[_gpu_glyph_idx][2] = data; }, 
+        {""}}); nextAddr+=1;      
+    mapped_register.push_back( { "", nextAddr,
+        [this](Word nextAddr) { (void)nextAddr; return _gpu_glyph_data[_gpu_glyph_idx][3]; }, 
+        [this](Word nextAddr, Byte data) { (void)nextAddr; _gpu_glyph_data[_gpu_glyph_idx][3] = data; }, 
+        {""}}); nextAddr+=1;      
+    mapped_register.push_back( { "", nextAddr,
+        [this](Word nextAddr) { (void)nextAddr; return _gpu_glyph_data[_gpu_glyph_idx][4]; }, 
+        [this](Word nextAddr, Byte data) { (void)nextAddr; _gpu_glyph_data[_gpu_glyph_idx][4] = data; }, 
+        {""}}); nextAddr+=1;      
+    mapped_register.push_back( { "", nextAddr,
+        [this](Word nextAddr) { (void)nextAddr; return _gpu_glyph_data[_gpu_glyph_idx][5]; }, 
+        [this](Word nextAddr, Byte data) { (void)nextAddr; _gpu_glyph_data[_gpu_glyph_idx][5] = data; }, 
+        {""}}); nextAddr+=1;      
+    mapped_register.push_back( { "", nextAddr,
+        [this](Word nextAddr) { (void)nextAddr; return _gpu_glyph_data[_gpu_glyph_idx][6]; }, 
+        [this](Word nextAddr, Byte data) { (void)nextAddr; _gpu_glyph_data[_gpu_glyph_idx][6] = data; }, 
+        {""}}); nextAddr+=1;      
+    mapped_register.push_back( { "", nextAddr,
+        [this](Word nextAddr) { (void)nextAddr; return _gpu_glyph_data[_gpu_glyph_idx][7]; }, 
+        [this](Word nextAddr, Byte data) { (void)nextAddr; _gpu_glyph_data[_gpu_glyph_idx][7] = data; }, 
+        {""}}); nextAddr+=1;      
+
+
+    ////////////////////////////////////////////////
     // (Constant) GPU_END
     //      End of GPU Register Space
     /////
@@ -332,7 +397,7 @@ int  GPU::OnAttach(int nextAddr)
     //      (start of the next device)
     /////
     mapped_register.push_back({ "GPU_TOP", nextAddr, 
-    nullptr, nullptr,  { "GPU_TOP", "---"}});
+    nullptr, nullptr,  { "Top of GPU Register Space", "---"}});
     
 
     std::cout << clr::indent() << clr::CYAN << "GPU::OnAttach() Exit" << clr::RETURN;
@@ -395,7 +460,7 @@ void GPU::OnInit()
     // initialize the font glyph buffer
     for (int i=0; i<256; i++)
         for (int r=0; r<8; r++)
-            _gfx_glyph_data[i][r] = font8x8_system[i][r];    
+            _gpu_glyph_data[i][r] = font8x8_system[i][r];    
 
     // // initialize the initial default display mode   
     Memory::Write(MAP(GPU_OPTIONS), _gpu_options);

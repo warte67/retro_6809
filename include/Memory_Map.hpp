@@ -181,12 +181,26 @@ enum MEMMAP
                                       //        writing the color data in the
                                       //        GFX_PAL_CLR register.
                                       // 
-    GPU_END               = 0xFE19,   // End of GPU Register Space
-    GPU_TOP               = 0xFE1A,   // GPU_TOP
+    GPU_GLYPH_IDX         = 0xFE1A,   // (Byte) Text Glyph Index
+                                      //   Note: Use this register to set the
+                                      //        index of a specific text glyph.
+                                      //        Set this value prior to updating
+                                      //        the glyph data (GPU_GLYPH_DATA).
+                                      // 
+    GPU_GLYPH_DATA        = 0xFE1B,   // (8-Bytes) 8 rows of binary encoded glyph pixel data
+                                      //   Note: This is the pixel data for a
+                                      //        specific text glyph. Each 8x8
+                                      //        text glyph is composed of 8 bytes.
+                                      //        The first byte in this array
+                                      //        represents the top line of 8 pixels.
+                                      //        Each array entry represents a row of 8 pixels.
+                                      // 
+    GPU_END               = 0xFE22,   // End of GPU Register Space
+    GPU_TOP               = 0xFE23,   // Top of GPU Register Space
 // _______________________________________________________________________
 
     HDW_RESERVED_DEVICE   = 0x0000,   // START: Reserved Register Space
-    HDW_REG_END           = 0xFFEF,   // 469 bytes reserved for future use.
+    HDW_REG_END           = 0xFFEF,   // 460 bytes reserved for future use.
 // _______________________________________________________________________
 
     ROM_VECTS_DEVICE      = 0x0000,   // START: Hardware Interrupt Vectors

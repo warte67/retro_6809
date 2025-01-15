@@ -178,12 +178,26 @@ GPU_PAL_COLOR         equ    $FE18    ; (Word) Color Palette Data (A4R4G4B4 form
                                       ;        writing the color data in the
                                       ;        GFX_PAL_CLR register.
                                       ; 
-GPU_END               equ    $FE19    ; End of GPU Register Space
-GPU_TOP               equ    $FE1A    ; GPU_TOP
+GPU_GLYPH_IDX         equ    $FE1A    ; (Byte) Text Glyph Index
+                                      ;   Note: Use this register to set the
+                                      ;        index of a specific text glyph.
+                                      ;        Set this value prior to updating
+                                      ;        the glyph data (GPU_GLYPH_DATA).
+                                      ; 
+GPU_GLYPH_DATA        equ    $FE1B    ; (8-Bytes) 8 rows of binary encoded glyph pixel data
+                                      ;   Note: This is the pixel data for a
+                                      ;        specific text glyph. Each 8x8
+                                      ;        text glyph is composed of 8 bytes.
+                                      ;        The first byte in this array
+                                      ;        represents the top line of 8 pixels.
+                                      ;        Each array entry represents a row of 8 pixels.
+                                      ; 
+GPU_END               equ    $FE22    ; End of GPU Register Space
+GPU_TOP               equ    $FE23    ; Top of GPU Register Space
 ; _______________________________________________________________________
 
 HDW_RESERVED_DEVICE   equ    $0000    ; START: Reserved Register Space
-HDW_REG_END           equ    $FFEF    ; 469 bytes reserved for future use.
+HDW_REG_END           equ    $FFEF    ; 460 bytes reserved for future use.
 ; _______________________________________________________________________
 
 ROM_VECTS_DEVICE      equ    $0000    ; START: Hardware Interrupt Vectors

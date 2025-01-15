@@ -45,7 +45,7 @@ public: // PUBLIC ACCESSORS
     SDL_Window* GetWindow() { return pWindow; }         // get the SDL window
     SDL_Renderer* GetRenderer() { return pRenderer; }   // get the SDL renderer
 
-    static Byte GetGlyphData(Byte index, Byte row) { return _gfx_glyph_data[index][row]; }
+    static Byte GetGlyphData(Byte index, Byte row) { return _gpu_glyph_data[index][row]; }
 
     // palette stuff
     union PALETTE {
@@ -170,12 +170,10 @@ private: // PRIVATE MEMBERS
 
     // Glyph and Palette Data
     std::vector<Byte> _ext_video_buffer;    // 64k extended video buffer
-    std::vector<PALETTE> _palette;          // color palette
-    
+    std::vector<PALETTE> _palette;          // color palette    
     Byte _gpu_pal_index = 0x00;             // GPU_PAL_INDEX
-
-    Byte _gfx_glyph_idx = 0x00;             // GFX_GLYPH_IDX
-    inline static Byte _gfx_glyph_data[256][8]{0};        // GFX_GLYPH_DATA (Customizeable)
+    Byte _gpu_glyph_idx = 0x00;             // GFX_GLYPH_IDX
+    inline static Byte _gpu_glyph_data[256][8]{0};        // GFX_GLYPH_DATA (Customizeable)
 };
 
 /*** NOTES: ****************************************
