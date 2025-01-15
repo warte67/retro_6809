@@ -48,7 +48,6 @@ void Memory::OnInit()
     for (auto &d : Memory::_memory_nodes) {
         d->OnInit();
     }    
-    // _build_map();
     std::cout << clr::indent_pop() << clr::CYAN << "Memory::OnInit() Exit" << clr::RETURN;                
 }
 

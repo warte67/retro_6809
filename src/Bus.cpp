@@ -229,67 +229,67 @@ void Bus::_onInit()
         // ...
     }
 
-    // Engage Basic Memory Tests
-    if (false)
-    {
-        int upper_bounds = 0xB000;  // Memory::NextAddress();  
-        std::cout << clr::indent_push() << clr::YELLOW << "Testing Addresses $0000-$" << clr::hex(upper_bounds-1,4) << " ... ";
-        Byte b = 0;
-        bool failed = false;
-        for (int a = 0; a< upper_bounds; a++) 
-        {
-            Memory::Write((Word)a,b);
-            if (Memory::Read((Word)a) != b) {
-                Bus::Error("Memory Test Failure!", __FILE__, __LINE__);     
-                failed = true;    
-                std::cout << clr::RED << "FAILED" << clr::RETURN;      
-                break;         
-            }
-            b++;
-        }
-        if (!failed) std::cout << clr::YELLOW << "GOOD" << clr::RETURN;
+    // // Engage Basic Memory Tests
+    // if (false)
+    // {
+    //     int upper_bounds = 0xB000;  // Memory::NextAddress();  
+    //     std::cout << clr::indent_push() << clr::YELLOW << "Testing Addresses $0000-$" << clr::hex(upper_bounds-1,4) << " ... ";
+    //     Byte b = 0;
+    //     bool failed = false;
+    //     for (int a = 0; a< upper_bounds; a++) 
+    //     {
+    //         Memory::Write((Word)a,b);
+    //         if (Memory::Read((Word)a) != b) {
+    //             Bus::Error("Memory Test Failure!", __FILE__, __LINE__);     
+    //             failed = true;    
+    //             std::cout << clr::RED << "FAILED" << clr::RETURN;      
+    //             break;         
+    //         }
+    //         b++;
+    //     }
+    //     if (!failed) std::cout << clr::YELLOW << "GOOD" << clr::RETURN;
 
-        // check 8k RAM banking area
-        int next_address = upper_bounds;
-        upper_bounds = 0xF000;
-        std::cout << clr::indent() << clr::YELLOW << "Testing Banked Memory $B000-$" << clr::hex(upper_bounds-1,4) << " ... ";
-        b=0;
-        failed = false;
-        for (int a = next_address; a< upper_bounds; a++) 
-        {
-            Memory::Write((Word)a,b);
-            if (Memory::Read((Word)a) != b) {
-                Bus::Error("Memory Test Failure!", __FILE__, __LINE__);                        
-                failed = true;                   
-                std::cout << clr::RED << "FAILED" << clr::RETURN;               
-                break;
-            }
-            b++;
-        }
-        if (!failed) std::cout << clr::YELLOW << "GOOD" << clr::RETURN;
+    //     // check 8k RAM banking area
+    //     int next_address = upper_bounds;
+    //     upper_bounds = 0xF000;
+    //     std::cout << clr::indent() << clr::YELLOW << "Testing Banked Memory $B000-$" << clr::hex(upper_bounds-1,4) << " ... ";
+    //     b=0;
+    //     failed = false;
+    //     for (int a = next_address; a< upper_bounds; a++) 
+    //     {
+    //         Memory::Write((Word)a,b);
+    //         if (Memory::Read((Word)a) != b) {
+    //             Bus::Error("Memory Test Failure!", __FILE__, __LINE__);                        
+    //             failed = true;                   
+    //             std::cout << clr::RED << "FAILED" << clr::RETURN;               
+    //             break;
+    //         }
+    //         b++;
+    //     }
+    //     if (!failed) std::cout << clr::YELLOW << "GOOD" << clr::RETURN;
         
-        // check ROM area $F000-$FDFF
-        next_address = upper_bounds;
-        upper_bounds = 0xFE00;
-        std::cout << clr::indent() << clr::YELLOW << "Testing ROM $F000-$" << clr::hex(upper_bounds-1,4) << " ... ";
-        b=255;
-        failed = false;
-        for (int a = next_address; a< upper_bounds; a++) 
-        {
-            Memory::Write((Word)a,b);
-            if (Memory::Read((Word)a) == b) {
-                Bus::Error("Memory Test Failure!", __FILE__, __LINE__);                        
-                failed = true;                   
-                std::cout << clr::RED << "FAILED" << clr::RETURN;               
-                break;
-            }
-            // b++;
-        }
-        if (!failed) std::cout << clr::YELLOW << "GOOD" << clr::RETURN;
-    }
+    //     // check ROM area $F000-$FDFF
+    //     next_address = upper_bounds;
+    //     upper_bounds = 0xFE00;
+    //     std::cout << clr::indent() << clr::YELLOW << "Testing ROM $F000-$" << clr::hex(upper_bounds-1,4) << " ... ";
+    //     b=255;
+    //     failed = false;
+    //     for (int a = next_address; a< upper_bounds; a++) 
+    //     {
+    //         Memory::Write((Word)a,b);
+    //         if (Memory::Read((Word)a) == b) {
+    //             Bus::Error("Memory Test Failure!", __FILE__, __LINE__);                        
+    //             failed = true;                   
+    //             std::cout << clr::RED << "FAILED" << clr::RETURN;               
+    //             break;
+    //         }
+    //         // b++;
+    //     }
+    //     if (!failed) std::cout << clr::YELLOW << "GOOD" << clr::RETURN;
+    // }
 
-    std::cout << clr::indent_pop() << clr::YELLOW << "... Memory Tests Passed!\n" << clr::RESET;
-    // END: Memory Tests
+    // std::cout << clr::indent_pop() << clr::YELLOW << "... Memory Tests Passed!\n" << clr::RESET;
+    // // END: Memory Tests
     
 
     // Dump the memory map
