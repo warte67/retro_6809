@@ -251,7 +251,7 @@ int  Debug::OnAttach(int nextAddr)
     mapped_register.push_back({ "SYS_UPDATE_COUNT", nextAddr,    
         [this](Word nextAddr) { (void)nextAddr; return Bus::GetUpdateCount() >> 24; }, 
         [this](Word nextAddr, Byte data) { (void)nextAddr; Bus::SetUpdateCount( (data << 24) | (Bus::GetUpdateCount() & 0x00FFFFFF) ); },  
-        { "(Byte) Update Count (Read Only)" }}); nextAddr+=1;    
+        { "(DWord) Update Count (Read Only)" }}); nextAddr+=1;    
     mapped_register.push_back(
         { "", nextAddr,    
         [this](Word nextAddr) { (void)nextAddr; return Bus::GetUpdateCount() >> 16; }, 
