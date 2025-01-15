@@ -133,7 +133,7 @@ int  GPU::OnAttach(int nextAddr)
 //     // }
 
     mapped_register.push_back( { "GPU_OPTIONS", nextAddr, 
-        [this](Word nextAddr) { return _gpu_options; }, 
+        [this](Word nextAddr) { (void)nextAddr; return _gpu_options; }, 
         [this](Word nextAddr, Byte data) { _verify_gpu_mode_change(data, nextAddr);  _gpu_options = data; },           
         {   
             "(Byte) Bitflag Enables",
@@ -169,7 +169,7 @@ int  GPU::OnAttach(int nextAddr)
 //     // }
 
     mapped_register.push_back( { "GPU_MODE", nextAddr, 
-        [this](Word nextAddr) { return _gpu_mode; }, 
+        [this](Word nextAddr) { (void)nextAddr; return _gpu_mode; }, 
         [this](Word nextAddr, Byte data) { _verify_gpu_mode_change(data, nextAddr);  _gpu_mode = data; }, 
         {   
             "(Byte) Bitflag Enables",
@@ -188,7 +188,7 @@ int  GPU::OnAttach(int nextAddr)
 
 
     mapped_register.push_back( { "GPU_VIDEO_MAX", nextAddr,
-        [this](Word nextAddr) { return _gpu_video_max >> 8; }, 
+        [this](Word nextAddr) { (void)nextAddr; return _gpu_video_max >> 8; }, 
         nullptr, {   
             "(Word) Video Buffer Maximum (Read Only)",
             " Note: This will change to reflect",
@@ -198,56 +198,56 @@ int  GPU::OnAttach(int nextAddr)
             "       standard video mode."
         }}); nextAddr+=1;
     mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { return _gpu_video_max & 0xFF; }, 
+        [this](Word nextAddr) { (void)nextAddr; return _gpu_video_max & 0xFF; }, 
         nullptr, {""}}); nextAddr+=1;
 
 
 
     mapped_register.push_back({ "GPU_HRES", nextAddr, 
-        [this](Word nextAddr) { return _gpu_hres >> 8; }, 
+        [this](Word nextAddr) { (void)nextAddr; return _gpu_hres >> 8; }, 
         nullptr,  {
             "(Word) Horizontal Resolution (Read Only)",
             "  Note: This will reflect the number of",
             "       pixel columns for bitmap modes.", 
         }}); nextAddr+=1;        
      mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { return _gpu_hres & 0xFF; }, 
+        [this](Word nextAddr) { (void)nextAddr; return _gpu_hres & 0xFF; }, 
         nullptr, {""}}); nextAddr+=1;
    
     
     mapped_register.push_back({ "GPU_VRES", nextAddr, 
-        [this](Word nextAddr) { return _gpu_vres >> 8; }, 
+        [this](Word nextAddr) { (void)nextAddr; return _gpu_vres >> 8; }, 
         nullptr,  {
             "(Word) Vertical Resolution (Read Only)",
             "  Note: This will reflect the number of",
             "       pixel rows for bitmap modes.", 
         }}); nextAddr+=1;        
      mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { return _gpu_vres & 0xFF; }, 
+        [this](Word nextAddr) { (void)nextAddr; return _gpu_vres & 0xFF; }, 
         nullptr, {""}}); nextAddr+=1;
 
 
     mapped_register.push_back({ "GPU_TCOLS", nextAddr,  
-        [this](Word nextAddr) { return _gpu_tcols >> 8; }, 
+        [this](Word nextAddr) { (void)nextAddr; return _gpu_tcols >> 8; }, 
         nullptr,  {
             "(Byte) Text Horizontal Columns (Read Only)",
             "  Note: This will reflect the number of",
             "       glyph columns for text modes.",
             ""}}); nextAddr+=1;
     mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { return _gpu_tcols & 0xFF; }, 
+        [this](Word nextAddr) { (void)nextAddr; return _gpu_tcols & 0xFF; }, 
         nullptr, {""}}); nextAddr+=1;
     
 
     mapped_register.push_back({ "GPU_TROWS", nextAddr,  
-        [this](Word nextAddr) { return _gpu_trows >> 8; }, 
+        [this](Word nextAddr) { (void)nextAddr; return _gpu_trows >> 8; }, 
         nullptr,  {
             "(Byte) Text Vertical Rows (Read Only)",
             "  Note: This will reflect the number of",
             "       glyph rows for text modes.",
             ""}}); nextAddr+=1;
     mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { return _gpu_trows & 0xFF; }, 
+        [this](Word nextAddr) { (void)nextAddr; return _gpu_trows & 0xFF; }, 
         nullptr, {""}}); nextAddr+=1;
 
     nextAddr--;

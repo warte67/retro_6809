@@ -255,8 +255,8 @@ void Memory::Generate_Device_Map()
         for (auto &reg : node->mapped_register) {
             if (reg.read != nullptr) {
                 _device_map[reg.address] = reg;
-if (reg.name != "")
-    std::cout << clr::RED << reg.name << " @ $" << clr::hex(reg.address,4) << clr::RESET << clr::RETURN;
+// if (reg.name != "")
+//     std::cout << clr::RED << reg.name << " @ $" << clr::hex(reg.address,4) << clr::RESET << clr::RETURN;
             }
         }
     }
