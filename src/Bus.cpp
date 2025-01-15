@@ -200,9 +200,9 @@ void Bus::_onInit()
 
     // Attach the core system devices
     Memory::Attach<SOFT_VECTORS>();     // 0x0000 - 0x000F
-    // Memory::Attach<SYSTEM_MEMORY>();    // 0x0010 - 0x03FF
-    // Memory::Attach<VIDEO_BUFFER>();     // 0x0400 - 0x23FF      (8k video buffer)
-    // Memory::Attach<USER_MEMORY>();      // 0x2400 - 0xAFFF      (42k user RAM)    
+    Memory::Attach<SYSTEM_MEMORY>();    // 0x0010 - 0x03FF
+    Memory::Attach<VIDEO_BUFFER>();     // 0x0400 - 0x23FF      (8k video buffer)
+    Memory::Attach<USER_MEMORY>();      // 0x2400 - 0xAFFF      (42k user RAM)    
     // Memory::Attach<MEMBANK>();          // 0xB000 - 0xEFFF      (16k banked memory)
     // Memory::Attach<KERNEL_ROM>(); 
 

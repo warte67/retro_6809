@@ -148,3 +148,223 @@ class ROM : public IDevice
 		// helper to set initial ROM values
         void write_to_rom(Word address, Byte data);
 };
+
+
+
+/*** class SOFT_VECTORS *******************************************************
+ * 
+ * ███████╗ ██████╗ ███████╗████████╗    ██╗   ██╗███████╗ ██████╗████████╗ ██████╗ ██████╗ ███████╗
+ * ██╔════╝██╔═══██╗██╔════╝╚══██╔══╝    ██║   ██║██╔════╝██╔════╝╚══██╔══╝██╔═══██╗██╔══██╗██╔════╝
+ * ███████╗██║   ██║█████╗     ██║       ██║   ██║█████╗  ██║        ██║   ██║   ██║██████╔╝███████╗
+ * ╚════██║██║   ██║██╔══╝     ██║       ╚██╗ ██╔╝██╔══╝  ██║        ██║   ██║   ██║██╔══██╗╚════██║
+ * ███████║╚██████╔╝██║        ██║███████╗╚████╔╝ ███████╗╚██████╗   ██║   ╚██████╔╝██║  ██║███████║
+ * ╚══════╝ ╚═════╝ ╚═╝        ╚═╝╚══════╝ ╚═══╝  ╚══════╝ ╚═════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝╚══════╝
+ * 
+ * (This may be moved to its own files)
+ ****************************************************************/
+class SOFT_VECTORS : public IDevice
+{
+    public:
+        SOFT_VECTORS() {
+            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
+            // _size = size;
+            _device_name = "SOFT_VECTORS_DEVICE";
+        }
+        virtual ~SOFT_VECTORS() {
+            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
+        }    
+
+		void OnInit() override 						{}
+		void OnQuit() override 						{}
+		void OnActivate() override 					{}
+		void OnDeactivate() override 				{}		
+		void OnEvent(SDL_Event* evnt) override 		{ if (evnt==nullptr) {;} }
+		void OnUpdate(float fElapsedTime) override 	{ if (fElapsedTime==0) {;} }
+		void OnRender() override 					{}
+
+		int OnAttach(int nextAddr) override       { 
+            Word old_address=nextAddr;
+            this->heading = "Software Interrupt Vectors";
+
+            mapped_register.push_back({ "SOFT_EXEC", nextAddr, nullptr, nullptr,
+                { "Exec Software Interrupt Vector"}}); nextAddr+=2;           
+            
+            mapped_register.push_back({ "SOFT_SWI3", nextAddr, nullptr, nullptr,  
+                { "SWI3 Software Interrupt Vector"}}); nextAddr+=2;
+
+            mapped_register.push_back({ "SOFT_SWI2", nextAddr,  nullptr, nullptr, 
+                { "SWI2 Software Interrupt Vector"}}); nextAddr+=2;
+
+            mapped_register.push_back({ "SOFT_FIRQ", nextAddr, nullptr, nullptr,  
+                { "FIRQ Software Interrupt Vector"}}); nextAddr+=2;
+
+            mapped_register.push_back({ "SOFT_IRQ", nextAddr,  nullptr, nullptr,  
+                { "IRQ Software Interrupt Vector"}}); nextAddr+=2;
+
+            mapped_register.push_back({ "SOFT_SWI", nextAddr, nullptr, nullptr,   
+                { "SWI / SYS Software Interrupt Vector"}}); nextAddr+=2;
+
+            mapped_register.push_back({ "SOFT_NMI", nextAddr, nullptr, nullptr,   
+                { "NMI Software Interrupt Vector"}}); nextAddr+=2;
+
+            mapped_register.push_back({ "SOFT_RESET", nextAddr, nullptr, nullptr, 
+                { "RESET Software Interrupt Vector", "---"}}); nextAddr+=2;
+
+            return nextAddr - old_address;
+        }  
+};
+
+
+
+
+
+
+/*** class SYSTEM_MEMORY *******************************************************
+ * 
+ * ███████╗██╗   ██╗███████╗████████╗███████╗███╗   ███╗        ███╗   ███╗███████╗███╗   ███╗ ██████╗ ██████╗ ██╗   ██╗
+ * ██╔════╝╚██╗ ██╔╝██╔════╝╚══██╔══╝██╔════╝████╗ ████║        ████╗ ████║██╔════╝████╗ ████║██╔═══██╗██╔══██╗╚██╗ ██╔╝
+ * ███████╗ ╚████╔╝ ███████╗   ██║   █████╗  ██╔████╔██║        ██╔████╔██║█████╗  ██╔████╔██║██║   ██║██████╔╝ ╚████╔╝ 
+ * ╚════██║  ╚██╔╝  ╚════██║   ██║   ██╔══╝  ██║╚██╔╝██║        ██║╚██╔╝██║██╔══╝  ██║╚██╔╝██║██║   ██║██╔══██╗  ╚██╔╝  
+ * ███████║   ██║   ███████║   ██║   ███████╗██║ ╚═╝ ██║███████╗██║ ╚═╝ ██║███████╗██║ ╚═╝ ██║╚██████╔╝██║  ██║   ██║   
+ * ╚══════╝   ╚═╝   ╚══════╝   ╚═╝   ╚══════╝╚═╝     ╚═╝╚══════╝╚═╝     ╚═╝╚══════╝╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝   
+ *                                                                                                                      
+ * (This may be moved to its own files)
+ ****************************************************************/
+class SYSTEM_MEMORY : public IDevice
+{
+    public:
+        SYSTEM_MEMORY() {
+            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
+            _device_name = "SYSTEM_MEMORY_DEVICE";
+        }
+        virtual ~SYSTEM_MEMORY() {
+            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
+        }    
+
+		void OnInit() override 						{}
+		void OnQuit() override 						{}
+		void OnActivate() override 					{}
+		void OnDeactivate() override 				{}		
+		void OnEvent(SDL_Event* evnt) override 		{ if (evnt==nullptr) {;} }
+		void OnUpdate(float fElapsedTime) override 	{ if (fElapsedTime==0) {;} }
+		void OnRender() override 					{}
+
+		int OnAttach(int nextAddr) override       { 
+            Word old_address=nextAddr;
+            this->heading = "System Memory";
+            
+            mapped_register.push_back({ "ZERO_PAGE", nextAddr, nullptr, nullptr,   
+                { "Zero Page System and User Variables"}}); nextAddr=0x100;   
+
+            mapped_register.push_back({ "FIO_BUFFER", nextAddr, nullptr, nullptr,    
+                { "START: File Input/Output Buffer"}}); nextAddr+=0xFF;  
+
+            mapped_register.push_back({ "FIO_BFR_END", nextAddr,  nullptr, nullptr,  
+                { "END: File Input/Output Buffer"}}); nextAddr+=1; 
+
+            mapped_register.push_back({ "SYSTEM_STACK", nextAddr, nullptr, nullptr,  
+                { "Bottom of the system stack spcace"}}); nextAddr=0x400;     
+
+            mapped_register.push_back({ "SSTACK_TOP", nextAddr, nullptr, nullptr,   
+                { "Top of the system statck space", "---"}});
+            
+            return nextAddr - old_address;
+        }  
+};
+
+
+
+/*** class VIDEO_BUFFER *******************************************************
+ * 
+ * ██╗   ██╗██╗██████╗ ███████╗ ██████╗         ██████╗ ██╗   ██╗███████╗███████╗███████╗██████╗ 
+ * ██║   ██║██║██╔══██╗██╔════╝██╔═══██╗        ██╔══██╗██║   ██║██╔════╝██╔════╝██╔════╝██╔══██╗
+ * ██║   ██║██║██║  ██║█████╗  ██║   ██║        ██████╔╝██║   ██║█████╗  █████╗  █████╗  ██████╔╝
+ * ╚██╗ ██╔╝██║██║  ██║██╔══╝  ██║   ██║        ██╔══██╗██║   ██║██╔══╝  ██╔══╝  ██╔══╝  ██╔══██╗
+ *  ╚████╔╝ ██║██████╔╝███████╗╚██████╔╝███████╗██████╔╝╚██████╔╝██║     ██║     ███████╗██║  ██║
+ *   ╚═══╝  ╚═╝╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚═════╝  ╚═════╝ ╚═╝     ╚═╝     ╚══════╝╚═╝  ╚═╝
+ * 
+ * (This may be moved to its own files)
+ ****************************************************************/
+class VIDEO_BUFFER : public IDevice
+{
+    public:
+        VIDEO_BUFFER() {
+            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
+            _device_name = "VIDEO_BUFFER_DEVICE";
+        }
+        virtual ~VIDEO_BUFFER() {
+            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
+        }    
+
+		void OnInit() override 						{}
+		void OnQuit() override 						{}
+		void OnActivate() override 					{}
+		void OnDeactivate() override 				{}		
+		void OnEvent(SDL_Event* evnt) override 		{ if (evnt==nullptr) {;} }
+		void OnUpdate(float fElapsedTime) override 	{ if (fElapsedTime==0) {;} }
+		void OnRender() override 					{}
+
+		int OnAttach(int nextAddr) override       { 
+            constexpr int vbfr_size = 8*1024;
+            Word old_address=nextAddr;
+            this->heading = "Video Buffer (" + std::to_string(vbfr_size/1024) + "K)";
+            
+            
+            mapped_register.push_back({ "VIDEO_START", nextAddr, nullptr, nullptr, 
+                { "Start of standard video buffer"}}); nextAddr+=vbfr_size-1;            
+            mapped_register.push_back({ "VIDEO_END", nextAddr, nullptr, nullptr,     
+                { "End of standard video buffer"}}); nextAddr+=1;
+            mapped_register.push_back({ "VIDEO_TOP", nextAddr, nullptr, nullptr,     
+                { "Top of standard video buffer", "---"}});             
+            
+            return nextAddr - old_address;; 
+        }  
+};
+
+
+
+/*** class USER_MEMORY *******************************************************
+ * 
+* ██╗   ██╗███████╗███████╗██████╗         ███╗   ███╗███████╗███╗   ███╗ ██████╗ ██████╗ ██╗   ██╗
+* ██║   ██║██╔════╝██╔════╝██╔══██╗        ████╗ ████║██╔════╝████╗ ████║██╔═══██╗██╔══██╗╚██╗ ██╔╝
+* ██║   ██║███████╗█████╗  ██████╔╝        ██╔████╔██║█████╗  ██╔████╔██║██║   ██║██████╔╝ ╚████╔╝ 
+* ██║   ██║╚════██║██╔══╝  ██╔══██╗        ██║╚██╔╝██║██╔══╝  ██║╚██╔╝██║██║   ██║██╔══██╗  ╚██╔╝  
+* ╚██████╔╝███████║███████╗██║  ██║███████╗██║ ╚═╝ ██║███████╗██║ ╚═╝ ██║╚██████╔╝██║  ██║   ██║   
+*  ╚═════╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝╚══════╝╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝   
+ * 
+ * (This may be moved to its own files)
+ ****************************************************************/
+class USER_MEMORY : public IDevice
+{
+    public:
+        USER_MEMORY() {
+            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
+            _device_name = "USER_MEMORY_DEVICE";
+        }
+        virtual ~USER_MEMORY() {
+            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
+        }    
+
+		void OnInit() override 						{}
+		void OnQuit() override 						{}
+		void OnActivate() override 					{}
+		void OnDeactivate() override 				{}
+		void OnEvent(SDL_Event* evnt) override 		{ if (evnt==nullptr) {;} }
+		void OnUpdate(float fElapsedTime) override 	{ if (fElapsedTime==0) {;} }       
+		void OnRender() override 					{}
+
+		int OnAttach(int nextAddr) override       { 
+            int ram_size = 0xAFFF-nextAddr;
+            Word old_address=nextAddr;
+            this->heading = "User Memory (" + std::to_string(ram_size/1024) + "K)";            
+            
+            mapped_register.push_back({ "USER_RAM", nextAddr,      nullptr, nullptr,
+                { "User Accessable RAM"}}); nextAddr+=ram_size;
+            mapped_register.push_back({ "USER_RAM_END", nextAddr,  nullptr, nullptr,
+                { "End User Accessable RAM"}}); nextAddr+=1;
+            mapped_register.push_back({ "USER_RAM_TOP", nextAddr,  nullptr, nullptr,
+                { "Top User Accessable RAM", "---"}});             
+
+            return nextAddr - old_address;
+        }  
+};
