@@ -515,17 +515,6 @@ void GPU::OnUpdate(float fElapsedTime)
         runningTime = fElapsedTime;
         SDL_SetWindowTitle(pWindow, Bus::GetTitle().c_str());
         // std::cout << "FPS: " << Bus::FPS() << std::endl;
-
-        // if (Memory::Read(MAP(TESTS_ONE)) & Tests::TestFlags::TEST_ENABLE )
-        // {
-        //     if (Memory::Read(MAP(TESTS_ONE)) & Tests::TestFlags::TEST_ANIM_BG )
-        //     { // animate some background pixels
-        //         int bfr_size = 64*1024;
-        //         static Byte c = 0;
-        //         for (int i=0; i<bfr_size; i++) { _ext_video_buffer[i] = c++; } 
-        //         c++;
-        //     }      
-        // }
     }
     runningTime += fElapsedTime;   
 

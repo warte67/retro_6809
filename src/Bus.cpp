@@ -136,7 +136,7 @@ bool Bus::Run()
                 Bus::IsDirty(false);           
             }
             // update all of the attached devices
-            //_onUpdate();
+            _onUpdate();
             
             // dispatch SDL events to the devices
             _onEvent();
@@ -227,27 +227,27 @@ void Bus::_onInit()
     // initialize the devices
     _memory.OnInit();
 
-    // // load initial applications (Kernel should be loaded with the KERNEL_ROM device)
-    // load_hex(INITIAL_ASM_APPLICATION);
+    // load initial applications (Kernel should be loaded with the KERNEL_ROM device)
+    load_hex(INITIAL_ASM_APPLICATION);
 
-    // // start the CPU thread
-    // s_c6809 = new C6809(this);
-	// try 
-	// {
-	// 	s_cpuThread = std::thread(&C6809::ThreadProc);
-    //     // Wait until the CPU thread is ready
-    //     C6809* cpu = Bus::GetC6809();
-    //     std::unique_lock<std::mutex> lock(cpu->mtx);
-    //     cpu->cv.wait(lock, [cpu]{ return cpu->isCpuThreadReady; });
-	// } 
-	// catch (const std::exception& e)
-	// {
-	// 	if (s_cpuThread.joinable())
-	// 		s_cpuThread.join();		
-	// 	Bus::Error("Unable to start the CPU thread");
-	// 	Bus::IsRunning(false);
-	// 	std::cout << e.what() << std::endl;
-	// }
+    // start the CPU thread
+    s_c6809 = new C6809(this);
+	try 
+	{
+		s_cpuThread = std::thread(&C6809::ThreadProc);
+        // Wait until the CPU thread is ready
+        C6809* cpu = Bus::GetC6809();
+        std::unique_lock<std::mutex> lock(cpu->mtx);
+        cpu->cv.wait(lock, [cpu]{ return cpu->isCpuThreadReady; });
+	} 
+	catch (const std::exception& e)
+	{
+		if (s_cpuThread.joinable())
+			s_cpuThread.join();		
+		Bus::Error("Unable to start the CPU thread");
+		Bus::IsRunning(false);
+		std::cout << e.what() << std::endl;
+	}
 
     // cleanup and return
     std::cout << clr::indent_pop() << clr::CYAN << "Bus::_onInit() Exit" << clr::RETURN;

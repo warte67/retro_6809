@@ -130,9 +130,17 @@ Byte Memory::Read(Word address, bool debug)
     if (debug) { return memory(address); }
 
     // find the device that is responsible for this address
-    // ... 
+    auto itr = _device_map.find(address);
+    // device was found?
+    if (itr != _device_map.end()) 
+    {
+        if (itr->second.read != nullptr)
+        {
+            return itr->second.read();
+        }
+    }
 
-    return 0xCC;    
+    return memory(address);  
 }
 
 
@@ -143,7 +151,22 @@ void Memory::Write(Word address, Byte data, bool debug)
     if (debug) { memory(address, data); return; }
 
     // find the device that is responsible for this address
-    // ... 
+    auto itr = _device_map.find(address);
+    // device was found?
+    if (itr != _device_map.end()) 
+    {
+        if (itr->second.read != nullptr)
+        {
+            if (itr->second.write != nullptr)
+            {
+                itr->second.write(data);
+                return;
+            }        
+        }
+    }
+    // write to the fallback memory (for debug)
+    memory(address, data);
+    return;
 }
 
 
@@ -265,6 +288,7 @@ void Memory::Generate_Memory_Map()
                 fout << clr::pad(clr::pad(" ",FIRST_TAB) + clr::pad(node->name(), VAR_LEN) + "= 0x" + clr::hex(node->GetBaseAddress(),4)+",", COMMENT_START+4) << "// START: " << node->heading << std::endl;
                 for (auto &r : node->mapped_register)
                 {
+                    if (r.name == "") continue;
                     std::string _out = clr::pad(clr::pad(r.name, VAR_LEN) + "= 0x" + clr::hex(r.address, 4) +",", COMMENT_START);
                     // comments
                     for (auto &c : r.comment)
@@ -323,6 +347,7 @@ void Memory::Generate_Memory_Map()
                 fout << clr::pad(clr::pad("",FIRST_TAB) + clr::pad(node->name(), VAR_LEN) + "equ   0x" + clr::hex(node->GetBaseAddress(),4), COMMENT_START) << "; START: " << node->heading << std::endl;
                 for (auto &r : node->mapped_register)
                 {
+                    if (r.name == "") continue;
                     std::string _out = clr::pad(clr::pad(r.name, VAR_LEN) + "equ   0x" + clr::hex(r.address, 4), COMMENT_START);
                     // comments
                     for (auto &c : r.comment)

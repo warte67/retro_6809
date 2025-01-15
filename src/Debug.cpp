@@ -559,6 +559,7 @@ void Debug::OnEvent(SDL_Event* evnt)
 
 void Debug::OnUpdate(float fElapsedTime)
 {
+
     // if the debugger is not active, just return
     if (!( _dbg_flags & DBGF_DEBUG_ENABLE))   { return; }   
 

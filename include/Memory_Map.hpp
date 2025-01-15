@@ -81,7 +81,6 @@ enum MEMMAP
                                       //   15 ($F)  = CPU Clock ~10.0 mhz. (unmetered) 
                                       // 
     SYS_SPEED             = 0xFE01,   // (Word) Average CPU Clock Speed (Read Only)
-                          = 0xFE02,   // 
     SYS_CLOCK_DIV         = 0xFE03,   // (Byte) 60 hz Clock Divider Register (Read Only)
                                       // - bit 7: 0.546875 hz
                                       // - bit 6: 1.09375 hz
@@ -93,11 +92,7 @@ enum MEMMAP
                                       // - bit 0: 70.0 hz
                                       // 
     SYS_UPDATE_COUNT      = 0xFE04,   // (Byte) Update Count (Read Only)
-                          = 0xFE05,   // 
-                          = 0xFE06,   // 
-                          = 0xFE07,   // 
     SYS_DBG_BRK_ADDR      = 0xFE08,   // (Word) Address of current debug breakpoint
-                          = 0xFE09,   // 
     SYS_DBG_FLAGS         = 0xFE0A,   // (Byte) Debug Specific Hardware Flags:
                                       // - bit 7: Debug Enable
                                       // - bit 6: Single Step Enable
@@ -155,25 +150,20 @@ enum MEMMAP
                                       //        accessible memory location
                                       //        of the currently active
                                       //        standard video mode.
-                          = 0xFE0E,   // 
     GPU_HRES              = 0xFE0F,   // (Word) Horizontal Resolution (Read Only)
                                       //   Note: This will reflect the number of
                                       //        pixel columns for bitmap modes.
-                          = 0xFE10,   // 
     GPU_VRES              = 0xFE11,   // (Word) Vertical Resolution (Read Only)
                                       //   Note: This will reflect the number of
                                       //        pixel rows for bitmap modes.
-                          = 0xFE12,   // 
     GPU_TCOLS             = 0xFE13,   // (Byte) Text Horizontal Columns (Read Only)
                                       //   Note: This will reflect the number of
                                       //        glyph columns for text modes.
                                       // 
-                          = 0xFE14,   // 
     GPU_TROWS             = 0xFE15,   // (Byte) Text Vertical Rows (Read Only)
                                       //   Note: This will reflect the number of
                                       //        glyph rows for text modes.
                                       // 
-                          = 0xFE16,   // 
     GPU_END               = 0xFE16,   // End of GPU Register Space
     GPU_TOP               = 0xFE17,   // Top of GPU Register Space
 // _______________________________________________________________________
