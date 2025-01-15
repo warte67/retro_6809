@@ -97,25 +97,25 @@ public:
 	void reset();
 
 	// getters
-	// inline Word getPC()    { std::lock_guard<std::mutex> lock(_mutex_PC); return PC; }
-	// inline Word getU()     { std::lock_guard<std::mutex> lock(_mutex_U); return U; }
-	// inline Word getS()     { std::lock_guard<std::mutex> lock(_mutex_S); return S; }
-	// inline Word getX()     { std::lock_guard<std::mutex> lock(_mutex_X); return X; }
-	// inline Word getY()     { std::lock_guard<std::mutex> lock(_mutex_Y); return Y; }
-	// inline Byte getDP()    { std::lock_guard<std::mutex> lock(_mutex_DP); return DP; }
-	// inline Byte getA()     { std::lock_guard<std::mutex> lock(_mutex_D); return A; }
-	// inline Byte getB()     { std::lock_guard<std::mutex> lock(_mutex_D); return B; }
-	// inline Word getD()     { std::lock_guard<std::mutex> lock(_mutex_D); return D; }
-	// inline Byte getCC()    { std::lock_guard<std::mutex> lock(_mutex_CC); return CC.all; }
-	// inline bool getCC_E()  { std::lock_guard<std::mutex> lock(_mutex_CC); return CC.bit.E != 0; }
-	// inline bool getCC_F()  { std::lock_guard<std::mutex> lock(_mutex_CC); return CC.bit.F != 0; }
-	// inline bool getCC_H()  { std::lock_guard<std::mutex> lock(_mutex_CC); return CC.bit.H != 0; }
-	// inline bool getCC_I()  { std::lock_guard<std::mutex> lock(_mutex_CC); return CC.bit.I != 0; }
-	// inline bool getCC_N()  { std::lock_guard<std::mutex> lock(_mutex_CC); return CC.bit.N != 0; }
-	// inline bool getCC_Z()  { std::lock_guard<std::mutex> lock(_mutex_CC); return CC.bit.Z != 0; }
-	// inline bool getCC_V()  { std::lock_guard<std::mutex> lock(_mutex_CC); return CC.bit.V != 0; }
-	// inline bool getCC_C()  { std::lock_guard<std::mutex> lock(_mutex_CC); return CC.bit.C != 0; }
-	// inline Byte getCycles(){ std::lock_guard<std::mutex> lock(_register_mutex); return cycles; }
+	// inline Word getPC()      const { std::lock_guard<std::mutex> lock(_mutex_PC); return PC; }
+	// inline Word getU()       const { std::lock_guard<std::mutex> lock(_mutex_U); return U; }
+	// inline Word getS()       const { std::lock_guard<std::mutex> lock(_mutex_S); return S; }
+	// inline Word getX()       const { std::lock_guard<std::mutex> lock(_mutex_X); return X; }
+	// inline Word getY()       const { std::lock_guard<std::mutex> lock(_mutex_Y); return Y; }
+	// inline Byte getDP()      const { std::lock_guard<std::mutex> lock(_mutex_DP); return DP; }
+	// inline Byte getA()       const { std::lock_guard<std::mutex> lock(_mutex_D); return A; }
+	// inline Byte getB()       const { std::lock_guard<std::mutex> lock(_mutex_D); return B; }
+	// inline Word getD()       const { std::lock_guard<std::mutex> lock(_mutex_D); return D; }
+	// inline Byte getCC()      const { std::lock_guard<std::mutex> lock(_mutex_CC); return CC.all; }
+	// inline bool getCC_E()    const { std::lock_guard<std::mutex> lock(_mutex_CC); return CC.bit.E != 0; }
+	// inline bool getCC_F()    const { std::lock_guard<std::mutex> lock(_mutex_CC); return CC.bit.F != 0; }
+	// inline bool getCC_H()    const { std::lock_guard<std::mutex> lock(_mutex_CC); return CC.bit.H != 0; }
+	// inline bool getCC_I()    const { std::lock_guard<std::mutex> lock(_mutex_CC); return CC.bit.I != 0; }
+	// inline bool getCC_N()    const { std::lock_guard<std::mutex> lock(_mutex_CC); return CC.bit.N != 0; }
+	// inline bool getCC_Z()    const { std::lock_guard<std::mutex> lock(_mutex_CC); return CC.bit.Z != 0; }
+	// inline bool getCC_V()    const { std::lock_guard<std::mutex> lock(_mutex_CC); return CC.bit.V != 0; }
+	// inline bool getCC_C()    const { std::lock_guard<std::mutex> lock(_mutex_CC); return CC.bit.C != 0; }
+	// inline Byte getCycles()  const { std::lock_guard<std::mutex> lock(_register_mutex); return cycles; }
     // // setters
 	// inline void setPC(Word pPc)    { std::lock_guard<std::mutex> lock(_mutex_PC); PC = pPc; }
 	// inline void setU(Word pU)      { std::lock_guard<std::mutex> lock(_mutex_U); U = pU; }
@@ -135,25 +135,26 @@ public:
 	// inline void setCC_V(bool bSet) { std::lock_guard<std::mutex> lock(_mutex_CC); CC.bit.V = bSet; }
 	// inline void setCC_C(bool bSet) { std::lock_guard<std::mutex> lock(_mutex_CC); CC.bit.C = bSet; }
 	// inline void setDP(Byte pDP)    { std::lock_guard<std::mutex> lock(_mutex_DP); DP = pDP; }
-	inline Word getPC()    { return PC; }
-	inline Word getU()     { return U; }
-	inline Word getS()     { return S; }
-	inline Word getX()     { return X; }
-	inline Word getY()     { return Y; }
-	inline Byte getDP()    { return DP; }
-	inline Byte getA()     { return A; }
-	inline Byte getB()     { return B; }
-	inline Word getD()     { return D; }
-	inline Byte getCC()    { return CC.all; }
-	inline bool getCC_E()  { return CC.bit.E != 0; }
-	inline bool getCC_F()  { return CC.bit.F != 0; }
-	inline bool getCC_H()  { return CC.bit.H != 0; }
-	inline bool getCC_I()  { return CC.bit.I != 0; }
-	inline bool getCC_N()  { return CC.bit.N != 0; }
-	inline bool getCC_Z()  { return CC.bit.Z != 0; }
-	inline bool getCC_V()  { return CC.bit.V != 0; }
-	inline bool getCC_C()  { return CC.bit.C != 0; }
-	inline Byte getCycles(){ return cycles; }
+    
+	inline Word getPC()      const { return PC; }
+	inline Word getU()       const { return U; }
+	inline Word getS()       const { return S; }
+	inline Word getX()       const { return X; }
+	inline Word getY()       const { return Y; }
+	inline Byte getDP()      const { return DP; }
+	inline Byte getA()       const { return A; }
+	inline Byte getB()       const { return B; }
+	inline Word getD()       const { return D; }
+	inline Byte getCC()      const { return CC.all; }
+	inline bool getCC_E()    const { return CC.bit.E != 0; }
+	inline bool getCC_F()    const { return CC.bit.F != 0; }
+	inline bool getCC_H()    const { return CC.bit.H != 0; }
+	inline bool getCC_I()    const { return CC.bit.I != 0; }
+	inline bool getCC_N()    const { return CC.bit.N != 0; }
+	inline bool getCC_Z()    const { return CC.bit.Z != 0; }
+	inline bool getCC_V()    const { return CC.bit.V != 0; }
+	inline bool getCC_C()    const { return CC.bit.C != 0; }
+	inline Byte getCycles()  const { return cycles; }
     // setters
 	inline void setPC(Word pPc)    { PC = pPc; }
 	inline void setU(Word pU)      { U = pU; }
