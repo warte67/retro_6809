@@ -15,28 +15,6 @@
 #include "NewDevice.hpp"
 
 
-/****************
- * Read / Write *
- ***************/ 
-
-Byte NewDevice::OnRead(Word offset) 
-{ 
-    Byte data = IDevice::memory(offset);
-    // ...
-
-    // std::cout << "MAP(GFX_MODE) = $" << clr::hex(MAP(GFX_MODE),4) << "\n";
-    // std::cout << "MAP(GFX_EMU) = $" << clr::hex(MAP(GFX_EMU),4) << "\n";
-
-    // ...
-    return data; 
-} // END: NewDevice::OnRead()
-
-void NewDevice::OnWrite(Word offset, Byte data) 
-{ 
-    IDevice::memory( offset, data);
-} // END: NewDevice::OnWrite()
-
-
 
 /***************************
 * Constructor / Destructor *
@@ -76,8 +54,8 @@ int  NewDevice::OnAttach(int nextAddr)
 
     // std::cout << clr::indent() << clr::LT_BLUE << "NewDevice::OnAttach() Exit" << clr::RETURN;
     
-    // _size = nextAddr - old_address;
-    // return _size; 
+
+    // return nextAddr - old_address;
 
     return 0;
 }

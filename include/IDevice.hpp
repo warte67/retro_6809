@@ -65,8 +65,8 @@ protected: // PROTECTED ACCESSORS
     struct REGISTER_NODE {
         std::string name;                   // register label
         int address;                        // register starting address
-        std::function<Byte()> read;         // Read handler (lambda or function pointer)
-        std::function<void(Byte)> write;    // Write handler (lambda or function pointer)    
+        std::function<Byte(Word)> read;         // Read handler (lambda or function pointer)
+        std::function<void(Word, Byte)> write;    // Write handler (lambda or function pointer)    
         std::vector<std::string> comment;   // register comments (can be multiple lines)
     };
     std::vector<REGISTER_NODE> mapped_register;

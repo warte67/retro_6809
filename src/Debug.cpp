@@ -189,8 +189,8 @@ int  Debug::OnAttach(int nextAddr)
 
 
     mapped_register.push_back({ "SYS_STATE", nextAddr, 
-        [this]() { return C6809::s_sys_state; }, 
-        [this](Byte data) { C6809::s_sys_state = data; },  
+        [this](Word nextAddr) { (void)nextAddr; return C6809::s_sys_state; }, 
+        [this](Word nextAddr, Byte data) { (void)nextAddr; C6809::s_sys_state = data; },  
         { 
             "(Byte) System State Register",
             "SYS_STATE: ABCD.SSSS                          ",
@@ -221,15 +221,15 @@ int  Debug::OnAttach(int nextAddr)
         
 
     mapped_register.push_back({ "SYS_SPEED", nextAddr, 
-        [this]() { return Bus::GetCpuSpeed() >> 8; }, nullptr,  
+        [this](Word nextAddr) { (void)nextAddr; return Bus::GetCpuSpeed() >> 8; }, nullptr,  
         { "(Word) Average CPU Clock Speed (Read Only)"}}); nextAddr+=1;
     mapped_register.push_back({ "", nextAddr, 
-        [this]() { return Bus::GetCpuSpeed() & 0xFF; }, nullptr,  
+        [this](Word nextAddr) { (void)nextAddr; return Bus::GetCpuSpeed() & 0xFF; }, nullptr,  
         { ""}}); nextAddr+=1;
 
 
     mapped_register.push_back({ "SYS_CLOCK_DIV", nextAddr,
-        [this]() { return Bus::GetClockDiv(); }, 
+        [this](Word nextAddr) { (void)nextAddr; return Bus::GetClockDiv(); }, 
         nullptr,  
         { "(Byte) 60 hz Clock Divider Register (Read Only)",
             "- bit 7: 0.546875 hz",
@@ -245,41 +245,45 @@ int  Debug::OnAttach(int nextAddr)
     }); nextAddr+=1;
 
 
+
+
+
     mapped_register.push_back({ "SYS_UPDATE_COUNT", nextAddr,    
-        [this]() { return Bus::GetUpdateCount() >> 24; }, 
-        [this](Byte data) { Bus::SetUpdateCount(data << 24); },  
+        [this](Word nextAddr) { (void)nextAddr; return Bus::GetUpdateCount() >> 24; }, 
+        [this](Word nextAddr, Byte data) { (void)nextAddr; Bus::SetUpdateCount( (data << 24) | (Bus::GetUpdateCount() & 0x00FFFFFF) ); },  
         { "(Byte) Update Count (Read Only)" }}); nextAddr+=1;    
     mapped_register.push_back(
         { "", nextAddr,    
-        [this]() { return Bus::GetUpdateCount() >> 16; }, 
-        [this](Byte data) { Bus::SetUpdateCount(data << 16); },  
+        [this](Word nextAddr) { (void)nextAddr; return Bus::GetUpdateCount() >> 16; }, 
+        [this](Word nextAddr, Byte data) { (void)nextAddr; Bus::SetUpdateCount( (data << 16) | (Bus::GetUpdateCount() & 0xFF00FFFF) ); },  
         { "" }}); nextAddr+=1;    
     mapped_register.push_back(
         { "", nextAddr,    
-        [this]() { return Bus::GetUpdateCount() >> 8; }, 
-        [this](Byte data) { Bus::SetUpdateCount(data << 8); },  
+        [this](Word nextAddr) { (void)nextAddr; return Bus::GetUpdateCount() >> 8; }, 
+        [this](Word nextAddr, Byte data) { (void)nextAddr; Bus::SetUpdateCount( (data << 8) | (Bus::GetUpdateCount() & 0xFFFF00FF) ); },  
         { "" }}); nextAddr+=1;   
     mapped_register.push_back(
         { "", nextAddr,    
-        [this]() { return Bus::GetUpdateCount() & 0xFF; }, 
-        [this](Byte data) { Bus::SetUpdateCount(data & 0xFF); },  
+        [this](Word nextAddr) { (void)nextAddr; return Bus::GetUpdateCount() & 0xFF; }, 
+        [this](Word nextAddr, Byte data) { (void)nextAddr; Bus::SetUpdateCount( (data << 0) | (Bus::GetUpdateCount() & 0xFFFFFF00) );  },  
         { "" }}); nextAddr+=1;    
 
 
     mapped_register.push_back({ "SYS_DBG_BRK_ADDR", nextAddr, 
-        [this]() { return _dbg_brk_addr >> 8; }, 
-        [this](Byte data) { _dbg_brk_addr = (data << 8); },  
+        [this](Word nextAddr) { (void)nextAddr; return _dbg_brk_addr >> 8; }, 
+        [this](Word nextAddr, Byte data) { (void)nextAddr; _dbg_brk_addr = ((data << 8) | (_dbg_brk_addr & 0xFF)); },  
         { "(Word) Address of current debug breakpoint"} }); nextAddr+=1;
     mapped_register.push_back({ "", nextAddr, 
-        [this]() { return _dbg_brk_addr & 0xFF; }, 
-        [this](Byte data) { _dbg_brk_addr = (data & 0xFF8); },  
+        [this](Word nextAddr) { (void)nextAddr; return _dbg_brk_addr & 0xFF; }, 
+        [this](Word nextAddr, Byte data) { (void)nextAddr; _dbg_brk_addr = (data & 0xFF) | (_dbg_brk_addr & 0xFF00); },  
         { "" }}); nextAddr+=1;
 
 
 
     mapped_register.push_back({ "SYS_DBG_FLAGS", nextAddr, 
-        [this]() 
+        [this](Word nextAddr) 
         {
+            (void)nextAddr; 
             (s_bIsDebugActive) ? _dbg_flags |= DBGF_DEBUG_ENABLE : _dbg_flags &= ~DBGF_DEBUG_ENABLE; // Enable
             (s_bSingleStep)     ? _dbg_flags |= DBGF_SINGLE_STEP_ENABLE : _dbg_flags &= ~DBGF_SINGLE_STEP_ENABLE; // Single-Step
             _dbg_flags &= ~DBGF_CLEAR_ALL_BRKPT;     // zero for Clear all Breakpoints
@@ -290,8 +294,9 @@ int  Debug::OnAttach(int nextAddr)
             _dbg_flags &= ~DBGF_RESET;     // RESET
             return _dbg_flags;  
         }, 
-        [this](Byte data)
+        [this](Word nextAddr, Byte data)
         {
+            (void)nextAddr; 
             _dbg_flags = data;
             (_dbg_flags & DBGF_DEBUG_ENABLE) ? s_bIsDebugActive = true : s_bIsDebugActive = false;
             (_dbg_flags & DBGF_SINGLE_STEP_ENABLE) ? s_bSingleStep = true : s_bSingleStep = false;

@@ -136,7 +136,7 @@ Byte Memory::Read(Word address, bool debug)
     {
         if (itr->second.read != nullptr)
         {
-            return itr->second.read();
+            return itr->second.read(address);
         }
     }
 
@@ -159,7 +159,7 @@ void Memory::Write(Word address, Byte data, bool debug)
         {
             if (itr->second.write != nullptr)
             {
-                itr->second.write(data);
+                itr->second.write(address, data);
                 return;
             }        
         }
