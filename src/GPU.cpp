@@ -79,7 +79,7 @@ int  GPU::OnAttach(int nextAddr)
             "              0: Disabled",
             "              1: Enabled",
             "- bit  1   = Presentation",
-            "              0: Overscan",
+            "              0: Overscan / Stretch",
             "              1: Letterbox",
             "- bit  0   = Standard Display Enable",
             "              0: Disabled",
