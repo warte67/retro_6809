@@ -138,9 +138,9 @@ GPU_OPTIONS           equ    $FE0B    ; (Byte) Bitflag Enables
                                       ; - bits 2   = VSync Enable
                                       ;               0: Disabled
                                       ;               1: Enabled
-                                      ; - bits 1   = Sprite Enable
-                                      ;               0: Disabled
-                                      ;               1: Enabled
+                                      ; - bit  1   = Presentation
+                                      ;               0: Overscan
+                                      ;               1: Letterbox
                                       ; - bit  0   = Standard Display Enable
                                       ;               0: Disabled
                                       ;               1: Enabled

@@ -78,9 +78,9 @@ int  GPU::OnAttach(int nextAddr)
             "- bits 2   = VSync Enable",
             "              0: Disabled",
             "              1: Enabled",
-            "- bits 1   = Sprite Enable",
-            "              0: Disabled",
-            "              1: Enabled",
+            "- bit  1   = Presentation",
+            "              0: Overscan",
+            "              1: Letterbox",
             "- bit  0   = Standard Display Enable",
             "              0: Disabled",
             "              1: Enabled", ""
@@ -1265,8 +1265,12 @@ Byte GPU::_verify_gpu_mode_change(Byte data, Word map_register)
     if (_gpu_video_max < MAP(VIDEO_START))  { _gpu_video_max = MAP(VIDEO_START); }
     if (_gpu_video_max > MAP(VIDEO_END))    { _gpu_video_max = MAP(VIDEO_END); }
 
-    // adjust the renderer size
-    SDL_SetRenderLogicalPresentation(pRenderer, (int)_ext_width, (int)_ext_height, SDL_LOGICAL_PRESENTATION_LETTERBOX);    
+    // adjust the renderer logical presentation to either stretch or letterbox
+    if (_gpu_mode & 0b0000'0010) {
+        SDL_SetRenderLogicalPresentation(pRenderer, (int)_ext_width, (int)_ext_height, SDL_LOGICAL_PRESENTATION_STRETCH);
+    } else {
+        SDL_SetRenderLogicalPresentation(pRenderer, (int)_ext_width, (int)_ext_height, SDL_LOGICAL_PRESENTATION_LETTERBOX);
+    }
 
     return data;
 }

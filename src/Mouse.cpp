@@ -299,8 +299,8 @@ void Mouse::OnEvent(SDL_Event* evnt)
                 SDL_ConvertEventToRenderCoordinates(gpu->GetRenderer(), evnt);      
                 mouse_x = evnt->motion.x;  
                 mouse_y = evnt->motion.y; 
-// std::cout << "Size: " << gpu->Get_Width() << ", " << gpu->Get_Height() << std::endl;
-// std::cout << "Mouse: " << mouse_x << ", " << mouse_y << std::endl;
+std::cout << "Size: " << gpu->Get_Width() << ", " << gpu->Get_Height() << " --- ";   
+std::cout << "Mouse: " << mouse_x << ", " << mouse_y << std::endl;
 
                 // leaving the letterbox
                 if (mouse_x < -16 || mouse_x >= gpu->Get_Width() || mouse_y < -16 || mouse_y >= gpu->Get_Height()) { _show_SDL_cursor(false); }
