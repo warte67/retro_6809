@@ -565,6 +565,7 @@ void Debug::DrawMemoryFrame(int col, int row)
     // 0xb3 = top left
     // 0xb5 = horizontal (both top and bottom)
     // 0xb6 = top right
+    // 0xb7 = horizontal and right vertical
     // 0xb9 = bottom left
     // 0xba = vertical (both left and right)
     // 0xbb = left side and right horizontal
@@ -601,7 +602,25 @@ void Debug::DrawMemoryFrame(int col, int row)
     // ...
 
     // RED Breakpoint Display Frame
-    // ...
+    col = 39;
+    row = 38;
+    clr = 0x30;
+    s = (char)0xb3; s += std::string(17, (char)0xb5); s += (char)0xb7;
+    s += std::string(7, (char)0xb5); s += (char)0xb7;
+    s += std::string(7, (char)0xb5); s += (char)0xb6;    
+    OutText(col, row++, s, clr);
+    // 
+    s = (char)0xba; s += std::string(17, (char)0x20); s += (char)0xba;
+    s += std::string(7, (char)0x20); s += (char)0xba;
+    s += std::string(7, (char)0x20); s += (char)0xba; 
+    for (int t = 0; t < 6; t++)
+        OutText(col, row++, s, clr);
+    //
+    s = (char)0xb9; s += std::string(17, (char)0xb5); s += (char)0xbd;
+    s += std::string(7, (char)0xb5); s += (char)0xbd;
+    s += std::string(7, (char)0xb5); s += (char)0xbc; 
+    OutText(col, row++, s, clr);
+
 
     // BUTTONS:  
     // 0xA1 = top left

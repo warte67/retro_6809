@@ -282,8 +282,6 @@ private: // PRIVATE MEMBERS
                                       // - bit 0: RESET (on low {0} to high {1} edge)
                                       // 
 
-
-
     inline static bool s_bIsDebugActive = DEBUG_STARTS_ACTIVE;
     inline static bool s_bSingleStep = DEBUG_SINGLE_STEP;
     inline static bool s_bIsStepPaused = true;        
