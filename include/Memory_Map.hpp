@@ -225,7 +225,7 @@ enum MEMMAP
                                       //    bits 5-6: number of clicks
                                       //    bits 7:   cursor enable
                                       // 
-    CSR_YOFS              = 0xFE2B,   // (Byte) Mouse Cursor Bitmap Pixel Offset
+    CSR_BMP_INDX          = 0xFE2B,   // (Byte) Mouse Cursor Bitmap Pixel Offset
     CSR_BMP_DATA          = 0xFE2C,   // (Byte) Mouse Cursor Bitmap Pixel Color Data ($0-$F)
     CSR_PAL_INDX          = 0xFE2D,   // (Byte) Mouse Cursor Color Palette Index (0-15)
     CSR_PAL_DATA          = 0xFE2E,   // (Word) Mouse Cursor Color Palette Data A4R4G4B4

@@ -45,8 +45,10 @@ public: // PUBLIC ACCESSORS
     SDL_Window* GetWindow() { return pWindow; }         // get the SDL window
     SDL_Renderer* GetRenderer() { return pRenderer; }   // get the SDL renderer
     inline Uint32 GetWindowID() { return SDL_GetWindowID(pWindow); }
-    inline SDL_Window* GetSDLWindow() { return pWindow; }    
-    SDL_Texture* GetTexture() { return pStd_Texture; }  // fetch an SDL texture to render foreground
+    inline SDL_Window* GetSDLWindow() { return pWindow; }   
+
+
+    SDL_Texture* GetTexture() { return pForeground_Texture; }  // fetch an SDL texture to render foreground
 
     static Byte GetGlyphData(Byte index, Byte row) { return _gpu_glyph_data[index][row]; }
 
@@ -88,16 +90,7 @@ public: // PUBLIC ACCESSORS
 
 
 private: // PRIVATE MEMBERS
-    // internal hardware register states:
-
-    float _screen_width = 640.0f;       // display mode timing 640x400 @ 70hz
-    float _screen_height = 400.0f;      // display mode timing 640x400 @ 70hz
-    float _ext_width = 0.0f;            // ToDo: remove this (redundant) 
-    float _ext_height = 0.0f;           // ToDo: remove this (redundant)
-    float _std_width = 0.0f;            // ToDo: remove this (redundant)
-    float _std_height = 0.0f;           // ToDo: remove this (redundant)
-
-    // GPU Registers
+     // GPU Registers
 
     // GPU_OPTIONS
     Byte _gpu_options = 0b1111'0001;    // (Byte) Bitflag Enables
@@ -202,7 +195,17 @@ private: // PRIVATE MEMBERS
     Byte _verify_gpu_mode_change(Byte data, Word map_register);
     void _setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_index, bool bIgnoreAlpha);
     void _build_palette();
-    void _clear_texture(SDL_Texture* texture, Byte red, Byte grn, Byte blu, Byte alpha);
+    void _clear_texture(SDL_Texture* texture, Byte alpha, Byte red, Byte grn, Byte blu);
+
+    // internal hardware register states:
+
+    float _screen_width = 640.0f;       // display mode timing 640x400 @ 70hz
+    float _screen_height = 400.0f;      // display mode timing 640x400 @ 70hz
+    float _ext_width = 0.0f;            // ToDo: remove this (redundant) 
+    float _ext_height = 0.0f;           // ToDo: remove this (redundant)
+    float _std_width = 0.0f;            // ToDo: remove this (redundant)
+    float _std_height = 0.0f;           // ToDo: remove this (redundant)
+
 
 	// SDL stuff
     int initial_width = 640*2.125;
@@ -211,7 +214,7 @@ private: // PRIVATE MEMBERS
 	SDL_Renderer* pRenderer = nullptr;
     SDL_Texture* pExt_Texture = nullptr;
     SDL_Texture* pStd_Texture = nullptr;
-    SDL_Texture* pMain_Texture = nullptr;
+    SDL_Texture* pForeground_Texture = nullptr;
 	Uint32 window_flags = SDL_WINDOW_RESIZABLE;
     Uint32 renderer_flags = SDL_RENDERER_VSYNC_DISABLED;
 

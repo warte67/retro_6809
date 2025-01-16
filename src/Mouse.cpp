@@ -136,7 +136,7 @@ int  Mouse::OnAttach(int nextAddr)
     // (Byte) CSR_BMP_INDX
     //       Vertical mouse cursor offset
     /////
-    mapped_register.push_back( { "CSR_YOFS", nextAddr,
+    mapped_register.push_back( { "CSR_BMP_INDX", nextAddr,
         [this](Word nextAddr) { (void)nextAddr; return bmp_offset; }, 
         [this](Word nextAddr, Byte data) { (void)nextAddr; bmp_offset = data; }, 
         { "(Byte) Mouse Cursor Bitmap Pixel Offset" }}); nextAddr+=1;
@@ -359,6 +359,9 @@ void Mouse::OnUpdate(float fElapsedTime)
     (void)fElapsedTime;     // stop the compiler from complaining about unused parameters
 
 
+    // GPU *gpu = Bus::GetGPU();
+    // gpu->ClearMainTexture();
+
     _display_SDL_cursor();
 
 
@@ -402,18 +405,19 @@ void Mouse::_display_SDL_cursor()
     }
     else
     {
-        static bool b_wasCleared = false;
-        if (b_wasCleared == false)
-        {
-            // start with a clear texture (pixel streaming version)
-            // for (int ty=0; ty < Memory::Read_Word(MAP(GPU_VRES)); ty++)
-            //     for (int tx=0; tx < Memory::Read_Word(MAP(GPU_HRES)); tx++)
-            //         _setPixel_cursor(pixels, pitch, tx, ty, 255);    
-            b_wasCleared = true;
-        }
+        // static bool b_wasCleared = false;
+        // if (b_wasCleared == false)
+        // {
+        //     start with a clear texture (pixel streaming version)
+        //     for (int ty=0; ty < Memory::Read_Word(MAP(GPU_VRES)); ty++)
+        //         for (int tx=0; tx < Memory::Read_Word(MAP(GPU_HRES)); tx++)
+        //             _setPixel_cursor(pixels, pitch, tx, ty, 255);    
+        //     b_wasCleared = true;
+        // }
         if (button_flags & 0x80)
         {
-            b_wasCleared = false;
+            // b_wasCleared = false;
+            
             // render the cursor
             int x = mouse_x + mouse_x_offset;
             int y = mouse_y + mouse_y_offset;   

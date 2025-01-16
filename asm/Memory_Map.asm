@@ -223,7 +223,7 @@ CSR_FLAGS             equ    $FE2A    ; (Byte) Mouse Device State Flags
                                       ;    bits 5-6: number of clicks
                                       ;    bits 7:   cursor enable
                                       ; 
-CSR_YOFS              equ    $FE2B    ; (Byte) Mouse Cursor Bitmap Pixel Offset
+CSR_BMP_INDX          equ    $FE2B    ; (Byte) Mouse Cursor Bitmap Pixel Offset
 CSR_BMP_DATA          equ    $FE2C    ; (Byte) Mouse Cursor Bitmap Pixel Color Data ($0-$F)
 CSR_PAL_INDX          equ    $FE2D    ; (Byte) Mouse Cursor Color Palette Index (0-15)
 CSR_PAL_DATA          equ    $FE2E    ; (Word) Mouse Cursor Color Palette Data A4R4G4B4
