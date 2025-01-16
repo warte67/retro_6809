@@ -591,8 +591,13 @@ void GPU::OnUpdate(float fElapsedTime)
     runningTime += fElapsedTime;   
 
     // GPU device runs before all other devices. 
-    // Clear the foreground texture 
-    _clear_texture(pForeground_Texture, 0x0, 0x0, 0x0, 0x0);
+    if (true) // Mouse Cursor and/or Foreground Sprites
+    {
+        // Clear the foreground texture 
+        _clear_texture(pForeground_Texture, 0x0, 0x0, 0x0, 0x0);
+    }
+
+
 
 
     // // TESTING ...
@@ -605,6 +610,9 @@ void GPU::OnUpdate(float fElapsedTime)
     //             SDL_SetRenderLogicalPresentation(pRenderer, (int)_ext_width, (int)_ext_height, SDL_LOGICAL_PRESENTATION_LETTERBOX);
     //         }
     // // ... TESTING
+
+
+
 
     // is extended graphics enabled?
     if (_gpu_options & 0b0001'0000)
@@ -629,32 +637,23 @@ void GPU::OnRender()
     //std::cout << clr::indent() << clr::CYAN << "GPU::OnRender() Entry" << clr::RETURN;
     SDL_FRect r{0.0f, 0.0f, _ext_width, _ext_height};
 
-    // clear the primary texture
-    // SDL_SetRenderTarget(pRenderer, pMain_Texture);
-    // SDL_SetRenderDrawColor(pRenderer, 0x00, 0x00, 0x00, 0xFF);
-    // SDL_RenderClear(pRenderer);
-
     // render Extended Graphics
     if (Memory::Read(MAP(GPU_OPTIONS)) & 0b0001'0000)
     {
         SDL_RenderTexture(pRenderer, pExt_Texture, &r, NULL);
     }
 
-    // render Standard Graphics
+    // render Standard Graphics 
     if (Memory::Read(MAP(GPU_OPTIONS)) & 0b0000'0001)
     {
         SDL_RenderTexture(pRenderer, pStd_Texture, &r, NULL);
     }
 
-    // render Foreground Graphics
-    if (true)
+    // render Foreground Graphics 
+    if (true) // Mouse Cursor and/or Foreground Sprites
     {
         SDL_RenderTexture(pRenderer, pForeground_Texture, &r, NULL);
     }
-
-    // // Set the render target to the window
-    // SDL_SetRenderTarget(pRenderer, NULL);
-    // SDL_RenderTexture(pRenderer, pMain_Texture, NULL, NULL);
 
     //std::cout << clr::indent() << clr::CYAN << "GPU::OnRender() Exit" << clr::RETURN;
 } // END: GPU::OnRender()
