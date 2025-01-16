@@ -22,137 +22,6 @@
 
 
 
-/****************
- * Read / Write *
- ***************/ 
-
-// Byte Debug::OnRead(Word offset) 
-// { 
-//     Byte data = IDevice::memory(offset);
-
-//     // system registers
-//     if (offset == MAP(SYS_STATE)) 
-//     {
-//         Byte err = C6809::s_sys_state & 0xF0;
-//         C6809::s_sys_state &= 0x0F;
-//         data = C6809::s_sys_state | err; 
-//     } 
-//     else if (offset == MAP(SYS_SPEED) + 0) 
-//     {
-//         data = Bus::GetCpuSpeed() >> 8;
-//     } 
-//     else if (offset == MAP(SYS_SPEED) + 1) 
-//     {
-//         data = Bus::GetCpuSpeed() & 0xFF;
-//     } 
-//     else if (offset == MAP(SYS_CLOCK_DIV)) 
-//     {
-//         data = Bus::GetClockDiv();
-//     } 
-//     // program update cycles count since last reset
-//     else if (offset == MAP( SYS_UPDATE_COUNT) + 0) 
-//     {
-//         data = (Byte)((Bus::GetUpdateCount() & 0xFF000000) >> 24);
-//     } 
-//     else if (offset == MAP(SYS_UPDATE_COUNT) + 1) 
-//     {
-//         data = (Byte)((Bus::GetUpdateCount() & 0x00FF0000) >> 16);
-//     } 
-//     else if (offset == MAP( SYS_UPDATE_COUNT) + 2) 
-//     {
-//         //data = (Byte)(Bus::GetUpdateCount() >> 8);
-//         data = (Byte)((Bus::GetUpdateCount() & 0x0000FF00) >> 16);
-//     } 
-//     else if (offset == MAP(SYS_UPDATE_COUNT) + 3) 
-//     {
-//         data = (Byte)((Bus::GetUpdateCount() & 0x000000FF) >> 0);
-//     } 
-//     // debug breakpoint address
-//     else if (offset == MAP(SYS_DBG_BRK_ADDR)) 
-//     { 
-//         data = _dbg_brk_addr; 
-//     } 
-//     // debug flags
-//     else if (offset == MAP(SYS_DBG_FLAGS) ) 
-//     {
-//         (s_bIsDebugActive) ? _dbg_flags |= DBGF_DEBUG_ENABLE : _dbg_flags &= ~DBGF_DEBUG_ENABLE; // Enable
-//         (s_bSingleStep)     ? _dbg_flags |= DBGF_SINGLE_STEP_ENABLE : _dbg_flags &= ~DBGF_SINGLE_STEP_ENABLE; // Single-Step
-//         _dbg_flags &= ~DBGF_CLEAR_ALL_BRKPT;     // zero for Clear all Breakpoints
-//         (mapBreakpoints[_dbg_brk_addr]) ? _dbg_flags |= DBGF_UPDATE_BRKPT : _dbg_flags &= ~DBGF_UPDATE_BRKPT;
-//         _dbg_flags &= ~DBGF_FIRQ;     // FIRQ
-//         _dbg_flags &= ~DBGF_IRQ;     // IRQ
-//         _dbg_flags &= ~DBGF_NMI;     // NMI
-//         _dbg_flags &= ~DBGF_RESET;     // RESET
-//         data = _dbg_flags;              
-//     }
-
-//     return data; 
-// } // END: Debug::OnRead()
-
-// void Debug::OnWrite(Word offset, Byte data) 
-// { 
-//     if ( offset == MAP(SYS_STATE) ) 
-//     {  
-//         C6809::s_sys_state = data;
-//     } 
-//     // program update cycles count since last reset
-//     else if ( offset == MAP(SYS_UPDATE_COUNT) + 0 ) 
-//     {
-//         Bus::SetUpdateCount( (data << 24) );
-//     } 
-//     else if ( offset == MAP(SYS_UPDATE_COUNT) + 1 ) 
-//     {
-//         Bus::SetUpdateCount( (data << 16) );
-//     } 
-//     else if ( offset == MAP(SYS_UPDATE_COUNT) + 2 ) 
-//     {
-//         Bus::SetUpdateCount( (data << 8) );
-//     } 
-//     else if ( offset == MAP(SYS_UPDATE_COUNT) + 3 ) 
-//     {
-//         Bus::SetUpdateCount( (data << 0) );
-//     } 
-//     // debug break address
-//     else if ( offset == MAP(SYS_DBG_BRK_ADDR) + 0 ) 
-//     {
-//         _dbg_brk_addr = (_dbg_brk_addr & 0x00ff) | (data << 8);
-//     } 
-//     else if ( offset == MAP(SYS_DBG_BRK_ADDR) + 1 ) 
-//     {
-//         _dbg_brk_addr = (_dbg_brk_addr & 0xff00) | (data << 0);
-//     }
-//     // debug flags
-//     else if ( offset == MAP(SYS_DBG_FLAGS) )
-//     {
-//         _dbg_flags = data;
-//         (_dbg_flags & DBGF_DEBUG_ENABLE) ? s_bIsDebugActive = true : s_bIsDebugActive = false;
-//         (_dbg_flags & DBGF_SINGLE_STEP_ENABLE) ? s_bSingleStep = true : s_bSingleStep = false;
-//         if (_dbg_flags & DBGF_CLEAR_ALL_BRKPT)  cbClearBreaks();
-//         (_dbg_flags & DBGF_UPDATE_BRKPT) ? mapBreakpoints[_dbg_brk_addr] = true : mapBreakpoints[_dbg_brk_addr] = false;
-//         if (_dbg_flags & DBGF_FIRQ)   cbFIRQ();
-//         if (_dbg_flags & DBGF_IRQ)   cbIRQ();
-//         if (_dbg_flags & DBGF_NMI)   cbNMI();
-//         if (_dbg_flags & DBGF_RESET)   cbReset();
-//         // activate or deactivate the debugger
-//         if (s_bIsDebugActive)   // activate the debugger
-//         {
-//             SDL_ShowWindow( Bus::GetGPU()->GetWindow() );
-//             // reset the visited memory 
-//             // C6809* cpu = Bus::GetC6809();
-//             // cpu->ClearVisited_Memory();
-//             SDL_RaiseWindow( _dbg_window );
-//         }
-//         else                    // deactivate the debugger     
-//         {      
-//             SDL_HideWindow(_dbg_window);
-//             SDL_RaiseWindow(Bus::GetGPU()->GetWindow());
-//         }        
-//     }
-
-//     IDevice::memory( offset, data);
-// } // END: Debug::OnWrite()
-
-
 
 /***************************
 * Constructor / Destructor *
@@ -302,7 +171,9 @@ int  Debug::OnAttach(int nextAddr)
         {
             (void)nextAddr; 
             _dbg_flags = data;
-            (_dbg_flags & DBGF_DEBUG_ENABLE) ? s_bIsDebugActive = true : s_bIsDebugActive = false;
+
+            if (_dbg_flags & DBGF_DEBUG_ENABLE) { s_bIsDebugActive = true; SDL_ShowWindow(_dbg_window); }
+            else { s_bIsDebugActive = false; SDL_HideWindow(_dbg_window); }
             (_dbg_flags & DBGF_SINGLE_STEP_ENABLE) ? s_bSingleStep = true : s_bSingleStep = false;
             if (_dbg_flags & DBGF_CLEAR_ALL_BRKPT)  cbClearBreaks();
             (_dbg_flags & DBGF_UPDATE_BRKPT) ? mapBreakpoints[_dbg_brk_addr] = true : mapBreakpoints[_dbg_brk_addr] = false;
@@ -451,7 +322,7 @@ void Debug::OnDeactivate()
 
 void Debug::OnEvent(SDL_Event* evnt)
 {
-    // if (SDL_GetWindowFromEvent(evnt) != _dbg_window) { return; }
+    // if the debugger is not active, just return without doing anything
     if (s_bIsDebugActive == false) { return; }
 
     switch (evnt->type) 
@@ -501,9 +372,22 @@ void Debug::OnEvent(SDL_Event* evnt)
                         bIsCursorVisible = false;
                 }    
             }
+            // if the debugger has focus ...
+            if (SDL_GetMouseFocus() == _dbg_window)
+            {
+                if (evnt->key.key == SDLK_SPACE)
+                {
+                    s_bSingleStep = true;
+                    s_bIsStepPaused = false;
+                }
+                if (evnt->key.key == SDLK_R)
+                {
+                    cbRunStop();
+                }
+            }
+            
             break;
         }
-
 
         case SDL_EVENT_MOUSE_WHEEL:
         {
@@ -612,13 +496,10 @@ void Debug::OnUpdate(float fElapsedTime)
             DrawCursor(fElapsedTime);
 
         // instruction text
-        OutText(1, 51, "[SPACE]    Step", 0x80);
-        OutText(1, 52, "[ALT-X]    Quit", 0x80);
-        OutText(1, 53, "[ALT-D] ~ Debug", 0x80);
-        OutText(1, 54, "[ALT-R] RunStop", 0x80);
-        OutText(1, 55, "[ALT-ENTER] Toggles between Fullscreen and Windowed", 0x80);
-
-
+        OutText(1, 51, "[SPACE] - SingleStep", 0x80);
+        OutText(1, 52, "[ALT-X] - Quit", 0x80);
+        OutText(1, 53, "[ALT-D] - Toggle Debug", 0x80);
+        OutText(1, 54, "[ALT-R] - Run / Stop", 0x80);
 
         // TESTING ...
             int mx, my;
@@ -1386,28 +1267,24 @@ void Debug::DrawButtons()
     // change the run/stop according to the single step state
     if (s_bSingleStep)
     {
-        vButton[5].text = " RUN!";
-        vButton[5].x_min = 02;
-        vButton[5].clr_index = 0xB;
+        vButton[RUN_STOP_ID].text = " RUN!";
+        vButton[RUN_STOP_ID].clr_index = 0xB;
     }
     else {
-        vButton[5].text = " STOP";
-        vButton[5].x_min = 02;
-        vButton[5].clr_index = 0xA;
+        vButton[RUN_STOP_ID].text = " STOP";
+        vButton[RUN_STOP_ID].clr_index = 0xA;
     }
     if (bEditingBreakpoint)
     {
-        vButton[9].text = "[$";
-        vButton[9].text += _hex(new_breakpoint, 4);
-        vButton[9].text += "]";
-        vButton[9].x_min = 46;
-        vButton[9].clr_index = 0x5;
+        vButton[ADD_BREAK_ID].text = "[$";
+        vButton[ADD_BREAK_ID].text += _hex(new_breakpoint, 4);
+        vButton[ADD_BREAK_ID].text += "]";
+        vButton[ADD_BREAK_ID].clr_index = 0x5;
     }
     else
     {
-        vButton[9].text = "Add Breakpoint ";
-        vButton[9].x_min = 46;
-        vButton[9].clr_index = 0x5;
+        vButton[ADD_BREAK_ID].text = " Add Breakpoint";
+        vButton[ADD_BREAK_ID].clr_index = 0x5;
     }
     // draw the buttons
     for (auto& a : vButton)
@@ -1804,7 +1681,12 @@ void Debug::cbHide()
     nRegisterBeingEdited.reg = Debug::EDIT_REGISTER::EDIT_NONE;	// cancel any register edits
 
     s_bIsDebugActive = false;
-    SDL_MinimizeWindow(_dbg_window);
+    // SDL_MinimizeWindow(_dbg_window);
+    SDL_HideWindow(_dbg_window);
+}void Debug::cbExit()
+{
+    nRegisterBeingEdited.reg = Debug::EDIT_REGISTER::EDIT_NONE;	// cancel any register edits
+    Bus::IsRunning(false);
 }
 void Debug::cbStepIn()  //F11
 {
@@ -1825,6 +1707,8 @@ void Debug::cbAddBrk()
     // printf("Add Breakpoint\n");
     bEditingBreakpoint = true;
     nRegisterBeingEdited.reg = Debug::EDIT_REGISTER::EDIT_BREAK;
+    csr_x = register_info[EDIT_BREAK].x_min;
+    csr_y = register_info[EDIT_BREAK].y_pos;
 }
 
 

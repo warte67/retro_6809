@@ -80,10 +80,24 @@ public: // PUBLIC ACCESSORS
     };
 
     bool SingleStep();
-    void ContinueSingleStep();
+    void ContinueSingleStep();\
+    bool IsDebugActive() { return s_bIsDebugActive; }
+    void SetDebugActive(bool value) { s_bIsDebugActive = value; }
+
 
     SDL_WindowID GetWindowID() { return SDL_GetWindowID( _dbg_window ); }
 
+    // hardware registers
+    enum _DBG_FLAGS : Byte {
+        DBGF_DEBUG_ENABLE       = 0x80, // - bit 7: Debug Enable
+        DBGF_SINGLE_STEP_ENABLE = 0x40, // - bit 6: Single Step Enable
+        DBGF_CLEAR_ALL_BRKPT    = 0x20, // - bit 5: Clear All Breakpoints
+        DBGF_UPDATE_BRKPT       = 0x10, // - bit 4: Update Breakpoint at DEBUG_BRK_ADDR
+        DBGF_FIRQ               = 0x08, // - bit 3: FIRQ  (on low to high edge)
+        DBGF_IRQ                = 0x04, // - bit 2: IRQ   (on low to high edge)
+        DBGF_NMI                = 0x02, // - bit 1: NMI   (on low to high edge)
+        DBGF_RESET              = 0x01  // - bit 0: RESET (on low to high edge)       
+    };
 
 private: // PRIVATE MEMBERS
 
@@ -122,18 +136,6 @@ private: // PRIVATE MEMBERS
     void DrawCursor(float fElapsedTime);
 
 
-    // hardware registers
-    enum _DBG_FLAGS : Byte {
-        DBGF_DEBUG_ENABLE       = 0x80, // - bit 7: Debug Enable
-        DBGF_SINGLE_STEP_ENABLE = 0x40, // - bit 6: Single Step Enable
-        DBGF_CLEAR_ALL_BRKPT    = 0x20, // - bit 5: Clear All Breakpoints
-        DBGF_UPDATE_BRKPT       = 0x10, // - bit 4: Update Breakpoint at DEBUG_BRK_ADDR
-        DBGF_FIRQ               = 0x08, // - bit 3: FIRQ  (on low to high edge)
-        DBGF_IRQ                = 0x04, // - bit 2: IRQ   (on low to high edge)
-        DBGF_NMI                = 0x02, // - bit 1: NMI   (on low to high edge)
-        DBGF_RESET              = 0x01  // - bit 0: RESET (on low to high edge)       
-    };
-
     // debug display
     int _dbg_width = DEBUG_WIDTH;
     int _dbg_height = DEBUG_HEIGHT;
@@ -156,6 +158,7 @@ private: // PRIVATE MEMBERS
     void cbFIRQ();
     void cbRunStop();
     void cbHide();
+    void cbExit();
     void cbStepIn();
     void cbStepOver();
     void cbAddBrk();
@@ -190,7 +193,7 @@ private: // PRIVATE MEMBERS
         { EDIT_REGISTER::EDIT_PC,    0,    4,     44,    47     },
         { EDIT_REGISTER::EDIT_S,     0,    4,     52,    55     },
         { EDIT_REGISTER::EDIT_DP,    0,    4,     61,    62     },
-        { EDIT_REGISTER::EDIT_BREAK, 0,   43,     50,    53     },
+        { EDIT_REGISTER::EDIT_BREAK, 0,   42,     53,    56     },
     };
     REGISTER_NODE nRegisterBeingEdited = { EDIT_NONE,0,0,0,0 };
 
@@ -204,17 +207,32 @@ private: // PRIVATE MEMBERS
         Byte clr_index;			// color index
         void (Debug::* cbFunction)();	// button callback
     };
-    std::vector<BUTTON_NODE> vButton = {   //   X1  X2  Y1  Y2  CLR  CB
-        {"Clear Breaks",    SDL_SCANCODE_C,		46, 62, 38, 40, 0x5, &Debug::cbClearBreaks},
-        {"Reset",			SDL_SCANCODE_R,		02, 10, 41, 43, 0xD, &Debug::cbReset },         // Reset
-        {" NMI",			SDL_SCANCODE_N,		28, 36, 41, 43, 0xD, &Debug::cbNMI },
-        {"IRQ",             SDL_SCANCODE_I,		20, 27, 41, 43, 0xD, &Debug::cbIRQ },
-        {"FIRQ",			SDL_SCANCODE_F,		11, 19, 41, 43, 0xD, &Debug::cbFIRQ },
-        {"RUN",			    SDL_SCANCODE_D,		02, 10, 38, 40, 0xB, &Debug::cbRunStop },       // Run / Stop
-        {" EXIT",			SDL_SCANCODE_H,		71, 78, 01, 03, 0x1, &Debug::cbHide },          // Exit / Hide
-        {"STEP_INTO",		SDL_SCANCODE_SPACE,	11, 23, 38, 40, 0x9, &Debug::cbStepIn },
-        {"STEP_OVER",		SDL_SCANCODE_O,		24, 36, 38, 40, 0x9, &Debug::cbStepOver },
-        {"Add Breakpoint ",	SDL_SCANCODE_B,		46, 62, 41, 43, 0x5, &Debug::cbAddBrk },
+    std::vector<BUTTON_NODE> vButton = {       //   X1  X2  Y1  Y2  CLR  CB
+        {" Clear Breaks",       SDL_SCANCODE_C,		46, 62, 38, 40, 0x5, &Debug::cbClearBreaks},
+        {"Reset",			    SDL_SCANCODE_R,		02, 10, 41, 43, 0xD, &Debug::cbReset },         // Reset
+        {" NMI",			    SDL_SCANCODE_N,		28, 36, 41, 43, 0xD, &Debug::cbNMI },
+        {"IRQ",                 SDL_SCANCODE_I,		20, 27, 41, 43, 0xD, &Debug::cbIRQ },
+        {"FIRQ",			    SDL_SCANCODE_F,		11, 19, 41, 43, 0xD, &Debug::cbFIRQ },
+        {"RUN",			        SDL_SCANCODE_D,		02, 10, 38, 40, 0xB, &Debug::cbRunStop },       // Run / Stop
+        {" EXIT",			    SDL_SCANCODE_X,		71, 78, 01, 03, 0x1, &Debug::cbExit },
+        {"STEP_INTO",		    SDL_SCANCODE_SPACE,	11, 23, 38, 40, 0x9, &Debug::cbStepIn },
+        {"STEP_OVER",		    SDL_SCANCODE_O,		24, 36, 38, 40, 0x9, &Debug::cbStepOver },
+        {" Add Breakpoint",	    SDL_SCANCODE_B,		46, 62, 41, 43, 0x5, &Debug::cbAddBrk },
+        {" HIDE",			    SDL_SCANCODE_H,		71, 78, 04, 06, 0x1, &Debug::cbHide },          
+    };
+    enum BTN_ID { 
+        CLEAR_BREAKS_ID = 0, 
+        RESET_ID, 
+        NMI_ID, 
+        IRQ_ID, 
+        FIRQ_ID, 
+        RUN_STOP_ID, 
+        EXIT_ID, 
+        STEP_INTO_ID, 
+        STEP_OVER_ID, 
+        ADD_BREAK_ID, 
+        HIDE_ID,
+        LAST_ID 
     };
 
     // std::vector<Word> mem_bank = { static_cast<Word>(MAP(SSTACK_TOP) - 0x0048), MAP(VIDEO_START), 0xFE00, 0x0000 };

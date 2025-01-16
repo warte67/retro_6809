@@ -339,6 +339,21 @@ void Bus::_onEvent()
                     if (evnt.key.key == SDLK_X)
                         Bus::IsRunning(false);
                 }
+                // Debugger Toggle ALT-D
+                if (evnt.key.key == SDLK_D)
+                {
+                    Byte flags = Memory::Read(MAP(SYS_DBG_FLAGS));
+                    if (flags & Debug::_DBG_FLAGS::DBGF_DEBUG_ENABLE)
+                    {
+                        flags &= ~Debug::_DBG_FLAGS::DBGF_DEBUG_ENABLE;
+                        Memory::Write(MAP(SYS_DBG_FLAGS), flags);
+                     }
+                    else
+                    {
+                        flags |= Debug::_DBG_FLAGS::DBGF_DEBUG_ENABLE;
+                        Memory::Write(MAP(SYS_DBG_FLAGS), flags);
+                   }
+                }
                 break;                
             }
         }
