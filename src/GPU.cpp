@@ -73,6 +73,7 @@ int  GPU::OnAttach(int nextAddr)
             "              0: Disabled",
             "              1: Enabled",
             "- bits 3   = Emulation Screen Mode",
+            "              (temporary)",
             "              0: Windowed",
             "              1: Fullscreen",
             "- bits 2   = VSync Enable",
@@ -1266,7 +1267,7 @@ Byte GPU::_verify_gpu_mode_change(Byte data, Word map_register)
     if (_gpu_video_max > MAP(VIDEO_END))    { _gpu_video_max = MAP(VIDEO_END); }
 
     // adjust the renderer logical presentation to either stretch or letterbox
-    if (_gpu_mode & 0b0000'0010) {
+    if (_gpu_options & 0b0000'0010) {
         SDL_SetRenderLogicalPresentation(pRenderer, (int)_ext_width, (int)_ext_height, SDL_LOGICAL_PRESENTATION_STRETCH);
     } else {
         SDL_SetRenderLogicalPresentation(pRenderer, (int)_ext_width, (int)_ext_height, SDL_LOGICAL_PRESENTATION_LETTERBOX);

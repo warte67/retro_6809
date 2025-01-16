@@ -16,6 +16,7 @@
 #include <deque>
 #include "Debug.hpp"
 #include "Bus.hpp"
+#include "GPU.hpp"
 #include "Memory.hpp"
 #include "C6809.hpp"
 
@@ -632,6 +633,20 @@ void Debug::OnUpdate(float fElapsedTime)
 
             std::string r = "s_bSingleStep: " + std::to_string(s_bSingleStep);
             OutText(1, row++, r, 0x80);
+
+            row = 45;
+            std::string p = "Width: " + std::to_string(Memory::Read_Word(MAP(GPU_HRES))) + " Height: " + std::to_string(Memory::Read_Word(MAP(GPU_VRES)));
+            OutText(40, row++, p, 0x80);
+            std::string t = "MX: " + std::to_string(Memory::Read_Word(MAP(CSR_XPOS))) + " MY: " + std::to_string(Memory::Read_Word(MAP(CSR_YPOS)));
+            OutText(40, row++, t, 0x80);
+
+            std::string opt = "GPU_OPTIONS: ";
+            if (Memory::Read(MAP(GPU_OPTIONS)) & 0x02)
+                opt += "Letterbox";
+            else
+                opt += "Stretch / Overscan";
+            OutText(40, row++, opt, 0x80);
+
 
         // END: ... TESTING
 

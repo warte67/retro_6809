@@ -166,7 +166,7 @@ int  Mouse::OnAttach(int nextAddr)
     // (Word) CSR_PAL_DATA
     //       Mouse Cursor Color Palette Data A4R4G4B4
     /////
-    mapped_register.push_back( { "CSR_YPOS", nextAddr,
+    mapped_register.push_back( { "CSR_PAL_DATA", nextAddr,
         [this](Word nextAddr) { (void)nextAddr; return (_csr_palette[m_palette_index].color) >> 8; }, 
         [this](Word nextAddr, Byte data) { 
             (void)nextAddr; 
@@ -299,12 +299,14 @@ void Mouse::OnEvent(SDL_Event* evnt)
                 SDL_ConvertEventToRenderCoordinates(gpu->GetRenderer(), evnt);      
                 mouse_x = evnt->motion.x;  
                 mouse_y = evnt->motion.y; 
-std::cout << "Size: " << gpu->Get_Width() << ", " << gpu->Get_Height() << " --- ";   
-std::cout << "Mouse: " << mouse_x << ", " << mouse_y << std::endl;
+// std::cout << "Size: " << gpu->Get_Width() << ", " << gpu->Get_Height() << " --- ";   
+// std::cout << "Mouse: " << mouse_x << ", " << mouse_y << std::endl;
 
                 // leaving the letterbox
-                if (mouse_x < -16 || mouse_x >= gpu->Get_Width() || mouse_y < -16 || mouse_y >= gpu->Get_Height()) { _show_SDL_cursor(false); }
-                else { _show_SDL_cursor(true); }
+                if (mouse_x < 0 || mouse_x >= gpu->Get_Width() || mouse_y < 0 || mouse_y >= gpu->Get_Height()) 
+                    { _show_SDL_cursor(false); }
+                else 
+                    { _show_SDL_cursor(true); }
             }
             break;
         } // END case SDL_MOUSEMOTION

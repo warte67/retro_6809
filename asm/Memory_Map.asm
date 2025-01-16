@@ -133,13 +133,14 @@ GPU_OPTIONS           equ    $FE0B    ; (Byte) Bitflag Enables
                                       ;               0: Disabled
                                       ;               1: Enabled
                                       ; - bits 3   = Emulation Screen Mode
+                                      ;               (temporary)
                                       ;               0: Windowed
                                       ;               1: Fullscreen
                                       ; - bits 2   = VSync Enable
                                       ;               0: Disabled
                                       ;               1: Enabled
                                       ; - bit  1   = Presentation
-                                      ;               0: Overscan
+                                      ;               0: Overscan / Stretch
                                       ;               1: Letterbox
                                       ; - bit  0   = Standard Display Enable
                                       ;               0: Disabled
@@ -225,7 +226,7 @@ CSR_FLAGS             equ    $FE2A    ; (Byte) Mouse Device State Flags
 CSR_YOFS              equ    $FE2B    ; (Byte) Mouse Cursor Bitmap Pixel Offset
 CSR_BMP_DATA          equ    $FE2C    ; (Byte) Mouse Cursor Bitmap Pixel Color Data ($0-$F)
 CSR_PAL_INDX          equ    $FE2D    ; (Byte) Mouse Cursor Color Palette Index (0-15)
-CSR_YPOS              equ    $FE2E    ; (Word) Mouse Cursor Color Palette Data A4R4G4B4
+CSR_PAL_DATA          equ    $FE2E    ; (Word) Mouse Cursor Color Palette Data A4R4G4B4
 CSR_END               equ    $FE2F    ; End of Mouse Device Register Space
 CSR_TOP               equ    $FE30    ; Top of CSR Register Space
 ; _______________________________________________________________________

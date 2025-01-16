@@ -135,13 +135,14 @@ enum MEMMAP
                                       //               0: Disabled
                                       //               1: Enabled
                                       // - bits 3   = Emulation Screen Mode
+                                      //               (temporary)
                                       //               0: Windowed
                                       //               1: Fullscreen
                                       // - bits 2   = VSync Enable
                                       //               0: Disabled
                                       //               1: Enabled
                                       // - bit  1   = Presentation
-                                      //               0: Overscan
+                                      //               0: Overscan / Stretch
                                       //               1: Letterbox
                                       // - bit  0   = Standard Display Enable
                                       //               0: Disabled
@@ -227,7 +228,7 @@ enum MEMMAP
     CSR_YOFS              = 0xFE2B,   // (Byte) Mouse Cursor Bitmap Pixel Offset
     CSR_BMP_DATA          = 0xFE2C,   // (Byte) Mouse Cursor Bitmap Pixel Color Data ($0-$F)
     CSR_PAL_INDX          = 0xFE2D,   // (Byte) Mouse Cursor Color Palette Index (0-15)
-    CSR_YPOS              = 0xFE2E,   // (Word) Mouse Cursor Color Palette Data A4R4G4B4
+    CSR_PAL_DATA          = 0xFE2E,   // (Word) Mouse Cursor Color Palette Data A4R4G4B4
     CSR_END               = 0xFE2F,   // End of Mouse Device Register Space
     CSR_TOP               = 0xFE30,   // Top of CSR Register Space
 // _______________________________________________________________________
