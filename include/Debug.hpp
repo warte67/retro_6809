@@ -193,7 +193,7 @@ private: // PRIVATE MEMBERS
         { EDIT_REGISTER::EDIT_PC,    0,    4,     44,    47     },
         { EDIT_REGISTER::EDIT_S,     0,    4,     52,    55     },
         { EDIT_REGISTER::EDIT_DP,    0,    4,     61,    62     },
-        { EDIT_REGISTER::EDIT_BREAK, 0,   42,     53,    56     },
+        { EDIT_REGISTER::EDIT_BREAK, 0,   43,     47,    50     },
     };
     REGISTER_NODE nRegisterBeingEdited = { EDIT_NONE,0,0,0,0 };
 
@@ -207,19 +207,7 @@ private: // PRIVATE MEMBERS
         Byte clr_index;			// color index
         void (Debug::* cbFunction)();	// button callback
     };
-    std::vector<BUTTON_NODE> vButton = {       //   X1  X2  Y1  Y2  CLR  CB
-        {" Clear Breaks",       SDL_SCANCODE_C,		46, 62, 38, 40, 0x5, &Debug::cbClearBreaks},
-        {"Reset",			    SDL_SCANCODE_R,		02, 10, 41, 43, 0xD, &Debug::cbReset },         // Reset
-        {" NMI",			    SDL_SCANCODE_N,		28, 36, 41, 43, 0xD, &Debug::cbNMI },
-        {"IRQ",                 SDL_SCANCODE_I,		20, 27, 41, 43, 0xD, &Debug::cbIRQ },
-        {"FIRQ",			    SDL_SCANCODE_F,		11, 19, 41, 43, 0xD, &Debug::cbFIRQ },
-        {"RUN",			        SDL_SCANCODE_D,		02, 10, 38, 40, 0xB, &Debug::cbRunStop },       // Run / Stop
-        {" EXIT",			    SDL_SCANCODE_X,		71, 78, 01, 03, 0x1, &Debug::cbExit },
-        {"STEP_INTO",		    SDL_SCANCODE_SPACE,	11, 23, 38, 40, 0x9, &Debug::cbStepIn },
-        {"STEP_OVER",		    SDL_SCANCODE_O,		24, 36, 38, 40, 0x9, &Debug::cbStepOver },
-        {" Add Breakpoint",	    SDL_SCANCODE_B,		46, 62, 41, 43, 0x5, &Debug::cbAddBrk },
-        {" HIDE",			    SDL_SCANCODE_H,		71, 78, 04, 06, 0x1, &Debug::cbHide },          
-    };
+
     enum BTN_ID { 
         CLEAR_BREAKS_ID = 0, 
         RESET_ID, 
@@ -234,7 +222,28 @@ private: // PRIVATE MEMBERS
         HIDE_ID,
         LAST_ID 
     };
+    std::vector<BUTTON_NODE> vButton = {       //   X1  X2  Y1  Y2  CLR  CB
+        {" Clear Breaks",       SDL_SCANCODE_C,		40, 56, 39, 41, 0x5, &Debug::cbClearBreaks},
+        {"Reset",			    SDL_SCANCODE_R,		02, 10, 42, 44, 0xD, &Debug::cbReset },         // Reset
+        {" NMI",			    SDL_SCANCODE_N,		28, 36, 42, 44, 0xD, &Debug::cbNMI },
+        {"IRQ",                 SDL_SCANCODE_I,		20, 27, 42, 44, 0xD, &Debug::cbIRQ },
+        {"FIRQ",			    SDL_SCANCODE_F,		11, 19, 42, 44, 0xD, &Debug::cbFIRQ },
+        {"RUN",			        SDL_SCANCODE_D,		02, 10, 39, 41, 0xB, &Debug::cbRunStop },       // Run / Stop
+        {" EXIT",			    SDL_SCANCODE_X,		71, 78, 01, 03, 0x1, &Debug::cbExit },
+        {"STEP_INTO",		    SDL_SCANCODE_SPACE,	11, 23, 39, 41, 0x9, &Debug::cbStepIn },
+        {"STEP_OVER",		    SDL_SCANCODE_O,		24, 36, 39, 41, 0x9, &Debug::cbStepOver },
+        {" Add Breakpoint",	    SDL_SCANCODE_B,		40, 56, 42, 44, 0x5, &Debug::cbAddBrk },
+        {" HIDE",			    SDL_SCANCODE_H,		71, 78, 04, 06, 0x1, &Debug::cbHide },          
+    };
 
+    // breakpoint window stuff
+    int _bkp_window_len = 6;
+    int _bkp_window_width = 7;
+    int _bkp_window_xmin = 58;  //71;
+    int _bkp_window_ymin = 39;  //41;
+    int _bkp_window_xmax = _bkp_window_xmin +_bkp_window_width;
+    int _bkp_window_ymax = _bkp_window_ymin + _bkp_window_len;
+    
     // std::vector<Word> mem_bank = { static_cast<Word>(MAP(SSTACK_TOP) - 0x0048), MAP(VIDEO_START), 0xFE00, 0x0000 };
     std::vector<Word> mem_bank = { 0x0000, 0x0400, 0x2400, 0xFE00 };
 

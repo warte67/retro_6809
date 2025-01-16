@@ -503,7 +503,7 @@ void Debug::OnUpdate(float fElapsedTime)
 
         // TESTING ...
             int mx, my;
-            int row = 45;
+            int row = 47;
             _correct_mouse_coords(mx, my);
 
             std::string s = "Mouse          - X: " + std::to_string(mx) + " Y: " + std::to_string(my);
@@ -515,7 +515,7 @@ void Debug::OnUpdate(float fElapsedTime)
             std::string r = "s_bSingleStep: " + std::to_string(s_bSingleStep);
             OutText(1, row++, r, 0x80);
 
-            row = 45;
+            row = 47;
             std::string p = "Width: " + std::to_string(Memory::Read_Word(MAP(GPU_HRES))) + " Height: " + std::to_string(Memory::Read_Word(MAP(GPU_VRES)));
             OutText(40, row++, p, 0x80);
             std::string t = "MX: " + std::to_string(Memory::Read_Word(MAP(CSR_XPOS))) + " MY: " + std::to_string(Memory::Read_Word(MAP(CSR_YPOS)));
@@ -863,7 +863,10 @@ void Debug::MouseStuff()
 
 
         // scroll the break point display window (bottom right corner)
-        if (mx >= 71 && my >= 41 && mx < 100 && my < 48)
+
+        // if (mx >= 71 && my >= 41 && mx < 100 && my < 48)
+        if (mx >= _bkp_window_xmin && my >= _bkp_window_ymin && 
+            mx < _bkp_window_xmax && my < _bkp_window_ymax)        
         {
             mw_brk_offset -= mouse_wheel;
         }
@@ -1352,7 +1355,7 @@ void Debug::DrawBreakpoints()
 {
     // C6809* cpu = Bus::GetC6809();
 
-    int x = 71, y = 41;		// y <= 38
+    int x = _bkp_window_xmin, y = _bkp_window_ymin;		// y <= 38
     // Uint8 ci = 0x0C;
 
     // build a vector of active breakpoints
@@ -1361,7 +1364,7 @@ void Debug::DrawBreakpoints()
         if (bp.second)
             breakpoints.push_back(bp.first);
     // standard display
-    if (breakpoints.size() < 8)
+    if (breakpoints.size() <= (size_t)_bkp_window_len)
     {
         for (Word t = 0; t < breakpoints.size(); t++)
         {
@@ -1377,17 +1380,17 @@ void Debug::DrawBreakpoints()
     {
         if (mw_brk_offset < 0)							
             mw_brk_offset = 0;
-        if ((unsigned)mw_brk_offset + 7 > breakpoints.size())		
-            mw_brk_offset = breakpoints.size() - 7;
+        if ((unsigned)mw_brk_offset + _bkp_window_len > breakpoints.size())		
+            mw_brk_offset = breakpoints.size() - _bkp_window_len;
 
         int index = mw_brk_offset;
-        for (int t = 0; t < 7; t++)
+        for (int t = 0; t < _bkp_window_len; t++)
         {
             std::string strBkpt;
 
             if (t == 0 && mw_brk_offset > 0)
                 strBkpt = "[ ... ]";
-            else if (t == 6 && (unsigned)index != breakpoints.size() - 1)
+            else if (t == _bkp_window_len-1 && (unsigned)index != breakpoints.size() - 1)
                 strBkpt = "[ ... ]";
             else
             {
@@ -1497,14 +1500,14 @@ bool Debug::EditRegister(float fElapsedTime)
         if (csr_x < nRegisterBeingEdited.x_max)
             csr_x++;
     }
-    SDL_Keycode ex[] = { SDL_SCANCODE_LEFT , SDL_SCANCODE_RIGHT , SDL_SCANCODE_RETURN , SDL_SCANCODE_ESCAPE };
-    static bool bEx[] = { 0, 0, 0, 0 };
-    for (int t = 0; t < 4; t++)
+    SDL_Keycode ex[] = { SDL_SCANCODE_LEFT , SDL_SCANCODE_RIGHT , SDL_SCANCODE_RETURN , SDL_SCANCODE_ESCAPE, SDL_SCANCODE_BACKSPACE };
+    static bool bEx[] = { 0, 0, 0, 0, 0 };
+    for (int t = 0; t < 5; t++)
     {
         if (bEx[t] == 0 && keybfr[ex[t]])
         {
             // left
-            if (ex[t] == SDL_SCANCODE_LEFT)
+            if (ex[t] == SDL_SCANCODE_LEFT || ex[t] == SDL_SCANCODE_BACKSPACE)
                 if (csr_x > nRegisterBeingEdited.x_min)
                     csr_x--;
             // right
@@ -1709,6 +1712,8 @@ void Debug::cbAddBrk()
     nRegisterBeingEdited.reg = Debug::EDIT_REGISTER::EDIT_BREAK;
     csr_x = register_info[EDIT_BREAK].x_min;
     csr_y = register_info[EDIT_BREAK].y_pos;
+    new_breakpoint = 0;
+    // register_info[EDIT_BREAK].value = 0;
 }
 
 
