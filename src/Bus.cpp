@@ -22,6 +22,7 @@
 #include "GPU.hpp"
 #include "Debug.hpp"
 #include "C6809.hpp"
+#include "Mouse.hpp"
 
 
 class BusException : public std::exception
@@ -212,6 +213,7 @@ void Bus::_onInit()
 
     _pDebug = Memory::Attach<Debug>();
     _pGPU = Memory::Attach<GPU>();
+    Memory::Attach<Mouse>();
 
     Memory::Attach<HDW_RESERVED>();     // reserved space for future use
     Memory::Attach<ROM_VECTS>();        // 0xFFF0 - 0xFFFF      (System ROM Vectors)

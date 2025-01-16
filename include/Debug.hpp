@@ -82,6 +82,8 @@ public: // PUBLIC ACCESSORS
     bool SingleStep();
     void ContinueSingleStep();
 
+    SDL_WindowID GetWindowID() { return SDL_GetWindowID( _dbg_window ); }
+
 
 private: // PRIVATE MEMBERS
 

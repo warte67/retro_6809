@@ -72,7 +72,7 @@ int  GPU::OnAttach(int nextAddr)
             "- bits 4   = Extended Display Enable",
             "              0: Disabled",
             "              1: Enabled",
-            "- bits 3   = Application Screen Mode",
+            "- bits 3   = Emulation Screen Mode",
             "              0: Windowed",
             "              1: Fullscreen",
             "- bits 2   = VSync Enable",
@@ -349,9 +349,7 @@ void GPU::OnInit()
         // create the renderer
         pRenderer = SDL_CreateRenderer(pWindow, NULL);
 
-        // the extended video mode should determine the overall renderer logical presentation area
         SDL_SetRenderLogicalPresentation(pRenderer, (int)_screen_width, (int)_screen_height, SDL_LOGICAL_PRESENTATION_LETTERBOX);
-
 
         // build the textures
         pExt_Texture = SDL_CreateTexture(pRenderer, 
@@ -592,6 +590,16 @@ void GPU::OnUpdate(float fElapsedTime)
     runningTime += fElapsedTime;   
 
 
+    // // TESTING ...
+    //         static float s_width = _ext_width;
+    //         static float s_height = _ext_height;
+    //         if (s_width != _ext_width || s_height != _ext_height) {
+    //             s_width = _ext_width;
+    //             s_height = _ext_height;
+    //             std::cout << "_ext_width: " << _ext_width << " _ext_height: " << _ext_height << std::endl;
+    //             SDL_SetRenderLogicalPresentation(pRenderer, (int)_ext_width, (int)_ext_height, SDL_LOGICAL_PRESENTATION_LETTERBOX);
+    //         }
+    // // ... TESTING
 
     // is extended graphics enabled?
     if (_gpu_options & 0b0001'0000)
@@ -1047,7 +1055,7 @@ void GPU::_build_palette()
     {
         // BASIC COLORS (0-15) CUSTOM DEFAULT COLORS
         std::vector<PALETTE> ref = {    
-			{ 0x0000 },		// 0: black             // 0xF000
+			{ 0xF000 },		// 0: black             // 0xF000
 			{ 0xF555 },		// 1: dk gray
 			{ 0xF007 },		// 2: dk blue
 			{ 0xF600 },		// 3: dk red
@@ -1256,6 +1264,9 @@ Byte GPU::_verify_gpu_mode_change(Byte data, Word map_register)
     // bounds checking Standard Buffer is between 0x0400 and 0x23FF
     if (_gpu_video_max < MAP(VIDEO_START))  { _gpu_video_max = MAP(VIDEO_START); }
     if (_gpu_video_max > MAP(VIDEO_END))    { _gpu_video_max = MAP(VIDEO_END); }
+
+    // adjust the renderer size
+    SDL_SetRenderLogicalPresentation(pRenderer, (int)_ext_width, (int)_ext_height, SDL_LOGICAL_PRESENTATION_LETTERBOX);    
 
     return data;
 }

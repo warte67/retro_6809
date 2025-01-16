@@ -132,7 +132,7 @@ GPU_OPTIONS           equ    $FE0B    ; (Byte) Bitflag Enables
                                       ; - bits 4   = Extended Display Enable
                                       ;               0: Disabled
                                       ;               1: Enabled
-                                      ; - bits 3   = Application Screen Mode
+                                      ; - bits 3   = Emulation Screen Mode
                                       ;               0: Windowed
                                       ;               1: Fullscreen
                                       ; - bits 2   = VSync Enable
@@ -211,8 +211,27 @@ GPU_END               equ    $FE22    ; End of GPU Register Space
 GPU_TOP               equ    $FE23    ; Top of GPU Register Space
 ; _______________________________________________________________________
 
+CSR_DEVICE            equ    $FE23    ; START: Mouse Device Hardware Registers
+CSR_XPOS              equ    $FE23    ; (Word) Horizontal Mouse Cursor Coordinate
+CSR_YPOS              equ    $FE25    ; (Word) Vertical Mouse Cursor Coordinate
+CSR_XOFS              equ    $FE27    ; (Byte) Horizontal Mouse Cursor Offset
+CSR_YOFS              equ    $FE28    ; (Byte) Vertical Mouse Cursor Offset
+CSR_SCROLL            equ    $FE29    ; (char) MouseWheel Scroll: -1, 0, 1
+CSR_FLAGS             equ    $FE2A    ; (Byte) Mouse Device State Flags
+                                      ;    bits 0-4: button states
+                                      ;    bits 5-6: number of clicks
+                                      ;    bits 7:   cursor enable
+                                      ; 
+CSR_YOFS              equ    $FE2B    ; (Byte) Mouse Cursor Bitmap Pixel Offset
+CSR_BMP_DATA          equ    $FE2C    ; (Byte) Mouse Cursor Bitmap Pixel Color Data ($0-$F)
+CSR_PAL_INDX          equ    $FE2D    ; (Byte) Mouse Cursor Color Palette Index (0-15)
+CSR_YPOS              equ    $FE2E    ; (Word) Mouse Cursor Color Palette Data A4R4G4B4
+CSR_END               equ    $FE2F    ; End of Mouse Device Register Space
+CSR_TOP               equ    $FE30    ; Top of CSR Register Space
+; _______________________________________________________________________
+
 HDW_RESERVED_DEVICE   equ    $0000    ; START: Reserved Register Space
-HDW_REG_END           equ    $FFEF    ; 460 bytes reserved for future use.
+HDW_REG_END           equ    $FFEF    ; 447 bytes reserved for future use.
 ; _______________________________________________________________________
 
 ROM_VECTS_DEVICE      equ    $0000    ; START: Hardware Interrupt Vectors

@@ -44,8 +44,31 @@ public: // PUBLIC ACCESSORS
     }
     SDL_Window* GetWindow() { return pWindow; }         // get the SDL window
     SDL_Renderer* GetRenderer() { return pRenderer; }   // get the SDL renderer
+    inline Uint32 GetWindowID() { return SDL_GetWindowID(pWindow); }
+    inline SDL_Window* GetSDLWindow() { return pWindow; }    
+    SDL_Texture* GetTexture() { return pStd_Texture; }  // fetch an SDL texture to render foreground
 
     static Byte GetGlyphData(Byte index, Byte row) { return _gpu_glyph_data[index][row]; }
+
+
+    // // testing ...
+    //         float Get_Texture_Width() 
+    //         { 
+    //             float w, h;
+    //             SDL_GetTextureSize(pExt_Texture, &w, &h);
+    //             return w; 
+    //         }
+    //         float Get_Texture_Height() 
+    //         { 
+    //             float w, h;
+    //             SDL_GetTextureSize(pExt_Texture, &w, &h);
+    //             return h; 
+    //         }
+
+            float Get_Width() { return _gpu_hres; }
+            float Get_Height() { return _gpu_vres; }
+    // ... testing
+
 
     // palette stuff
     union PALETTE {
@@ -61,6 +84,8 @@ public: // PUBLIC ACCESSORS
     Uint8 grn(Uint8 index) { Uint8 c = _palette[index].g;  return c; }
     Uint8 blu(Uint8 index) { Uint8 c = _palette[index].b;  return c; }
     Uint8 alf(Uint8 index) { Uint8 c = _palette[index].a;  return c; }      
+
+
 
 private: // PRIVATE MEMBERS
     // internal hardware register states:

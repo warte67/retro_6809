@@ -46,20 +46,64 @@ int  NewDevice::OnAttach(int nextAddr)
 {
     SetBaseAddress(nextAddr);
     
-    // std::cout << clr::indent() << clr::LT_BLUE << "NewDevice::OnAttach() Entry" << clr::RETURN;
-    // if (nextAddr == 0) { ; } // stop the compiler from complaining
+    // std::cout << clr::indent() << clr::LT_BLUE << "NewDevice::OnAttach() Entry" << clr::RETURN;    
+
+
+    // *** EXAMPLE: ************************************************************************
+    // 
+    // // std::cout << clr::indent() << clr::CYAN << "GPU::OnAttach() Entry" << clr::RETURN;
+    // 
+    // // SetBaseAddress(nextAddr);
+    // // Word old_address=nextAddr;
+    // // this->heading = "GPU Device Hardware Registers";
+    // 
+    // ...
+    //
+    // ////////////////////////////////////////////////
+    // // (Word) GPU_VIDEO_MAX
+    // //       Video Buffer Maximum (Read Only)
+    // /////
+    // mapped_register.push_back( { "GPU_VIDEO_MAX", nextAddr,
+    //     [this](Word nextAddr) { (void)nextAddr; return _gpu_video_max >> 8; }, 
+    //     nullptr, {   
+    //         "(Word) Video Buffer Maximum (Read Only)",
+    //         " Note: This will change to reflect",
+    //         "       the size of the last cpu",
+    //         "       accessible memory location",
+    //         "       of the currently active",
+    //         "       standard video mode.",""
+    //     }}); nextAddr+=1;
+    // mapped_register.push_back( { "", nextAddr,
+    //     [this](Word nextAddr) { (void)nextAddr; return _gpu_video_max & 0xFF; }, 
+    //     nullptr, {""}}); nextAddr+=1;
+    //
+    // ...
+    //
+    // ////////////////////////////////////////////////
+    // // (Constant) GPU_END
+    // //      End of GPU Register Space
+    // /////
+    // nextAddr--;
+    // mapped_register.push_back({ "GPU_END", nextAddr, 
+    //     nullptr, nullptr,  { "End of GPU Register Space"} });
+    // nextAddr++;
+    //
+    //
+    // ////////////////////////////////////////////////
+    // // (Constant) GPU_TOP
+    // //      Top of GPU Register Space
+    // //      (start of the next device)
+    // /////
+    // mapped_register.push_back({ "GPU_TOP", nextAddr, 
+    // nullptr, nullptr,  { "Top of GPU Register Space", "---"}});
+    // 
+    // // std::cout << clr::indent() << clr::CYAN << "GPU::OnAttach() Exit" << clr::RETURN;
+    // return nextAddr - old_address;
+    //
+    // *** END EXAMPLE ************************************************************************
     
-    // Word old_address=nextAddr;
-    // this->heading = "Default New Device";
-    // register_node new_node;
-    // new_node = { "NEW_DEVICE", nextAddr,  { "Default New Device"} }; nextAddr+=2;
-    // mapped_register.push_back(new_node);
 
     // std::cout << clr::indent() << clr::LT_BLUE << "NewDevice::OnAttach() Exit" << clr::RETURN;
-    
-
-    // return nextAddr - old_address;
-
     return 0;
 }
 
@@ -103,7 +147,7 @@ void NewDevice::OnDeactivate()
 void NewDevice::OnEvent(SDL_Event* evnt)
 {
     //std::cout << clr::indent() << clr::LT_BLUE << "NewDevice::OnEvent() Entry" << clr::RETURN;
-    if (evnt) { ; } // stop the compiler from complaining
+    (void)evnt;     // stop the compiler from complaining about unused parameters
     // ...
     //std::cout << clr::indent() << clr::LT_BLUE << "NewDevice::OnEvent() Exit" << clr::RETURN;
 }
@@ -112,7 +156,7 @@ void NewDevice::OnEvent(SDL_Event* evnt)
 void NewDevice::OnUpdate(float fElapsedTime)
 {
     //std::cout << clr::indent() << clr::LT_BLUE << "NewDevice::OnUpdate() Entry" << clr::RETURN;
-    if (fElapsedTime==0.0f) { ; } // stop the compiler from complaining
+    (void)fElapsedTime;     // stop the compiler from complaining about unused parameters
     // ...
     //std::cout << clr::indent() << clr::LT_BLUE << "NewDevice::OnUpdate() Exit" << clr::RETURN;
 }
