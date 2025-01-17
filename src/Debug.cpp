@@ -486,7 +486,7 @@ void Debug::OnUpdate(float fElapsedTime)
         DumpMemory(1, 28, mem_bank[3]);
 
         DrawCpu(40, 1);     // was (39,1)
-        DrawCode(40, 6);    // was (39,6)
+        DrawCode(40, 7);    // was (39,6)
 
         DrawButtons();    
         HandleButtons();
@@ -880,10 +880,7 @@ void Debug::MouseStuff()
                 mousewheel_offset -= mouse_wheel * 3;		// fast scroll
         }
 
-
         // scroll the break point display window (bottom right corner)
-
-        // if (mx >= 71 && my >= 41 && mx < 100 && my < 48)
         if (mx >= _bkp_window_xmin && my >= _bkp_window_ymin && 
             mx < _bkp_window_xmax && my < _bkp_window_ymax)        
         {
@@ -899,17 +896,21 @@ void Debug::MouseStuff()
     if ((btns & 1) && !last_LMB)
     {
         // left-clicked on breakpoint
-        if (mx >= 71 && my >= 41)
+        if (mx >= _bkp_window_xmin && my >= _bkp_window_ymin &&
+            mx <= _bkp_window_xmax && my <= _bkp_window_ymax)
         {
-            // int index = (my - 41) + mw_brk_offset;
+            int index = (my - _bkp_window_ymin) + mw_brk_offset;
             // build a vector of active breakpoints
             std::vector<Word> breakpoints;
             for (auto& bp : mapBreakpoints)
                 if (bp.second)
                     breakpoints.push_back(bp.first);
-            // if ((unsigned)index < breakpoints.size())
-            //     printf("LEFT CLICK: $%04X\n", breakpoints[index]);
-            //mapBreakpoints[breakpoints[index]] = false;
+            if (breakpoints.size() <= (size_t)_bkp_window_len ) { mw_brk_offset=0; }
+            if ((unsigned)index < breakpoints.size())
+            {
+                // printf("LEFT CLICK: $%04X\n", breakpoints[index]);
+                mapBreakpoints[breakpoints[index]] = false;
+            }
         }
         // click to select
         if (btns & 1)
@@ -957,11 +958,11 @@ void Debug::MouseStuff()
             nRegisterBeingEdited.reg = EDIT_NONE;
 
         // left-click on code line toggles breakpoint
-        if (mx > 39 && mx < 80 && my > 5 && my < 36 && s_bSingleStep)
+        if (mx > 39 && mx < 73 && my > 6 && my < 36 && s_bSingleStep)
         {
-            if (sDisplayedAsm[my - 6] >= 0)
+            if (sDisplayedAsm[my - 7] >= 0)
             {
-                Word offset = sDisplayedAsm[my - 6];
+                Word offset = sDisplayedAsm[my - 7];
                 (mapBreakpoints[offset]) ?
                     mapBreakpoints[offset] = false :
                     mapBreakpoints[offset] = true;
@@ -997,11 +998,11 @@ void Debug::MouseStuff()
                 nRegisterBeingEdited.reg = Debug::EDIT_REGISTER::EDIT_NONE;	// cancel any register edits
         }
         // right-click on code line toggles breakpoint and resumes execution
-        if (mx > 39 && mx < 80 && my > 5 && my < 36 && s_bSingleStep)
+        if (mx > 39 && mx < 73 && my > 6 && my < 36 && s_bSingleStep)
         {            
-            if (sDisplayedAsm[my - 6] >= 0)
+            if (sDisplayedAsm[my - 7] >= 0)
             {
-                Word offset = sDisplayedAsm[my - 6];
+                Word offset = sDisplayedAsm[my - 7];
                 (mapBreakpoints[offset]) ?
                     mapBreakpoints[offset] = false :
                     mapBreakpoints[offset] = true;
@@ -1114,8 +1115,8 @@ void Debug::DrawCode(int col, int row) {
 
 void Debug::_display_previous_instructions(int col, int& row) 
 {
-    C6809* cpu = Bus::GetC6809();
-    
+    C6809* cpu = Bus::GetC6809();    
+    int ofs = 7;
     int threshold = 100;
     int count = 14;
     int start_addr = (cpu->getPC()-1);              // + mousewheel_offset;
@@ -1127,7 +1128,7 @@ void Debug::_display_previous_instructions(int col, int& row)
             if (mapBreakpoints[i])	atBreak = true;
             Word throw_away;
             std::string code = cpu->disasm(i, throw_away);
-            sDisplayedAsm[row-6] = i;
+            sDisplayedAsm[row-ofs] = i;
             OutText(col, row--, code, atBreak ? 0x50 : 0x80);
             count--;
             if (count == 0) break;
@@ -1140,23 +1141,24 @@ void Debug::_display_previous_instructions(int col, int& row)
 void Debug::_display_single_instruction(int col, int& row, Word &nextAddress) 
 {
     C6809* cpu = Bus::GetC6809();
+    int ofs = 7;
     // current address
     Word currentAddress = nextAddress;
 
     // display the current instruction
     bool atBreak = mapBreakpoints[currentAddress];    
     std::string code = cpu->disasm(currentAddress, nextAddress);   // this updates nextAddress 
-    sDisplayedAsm[row-6] = currentAddress;
+    sDisplayedAsm[row-ofs] = currentAddress;
     OutText(col, row++, code, atBreak ? 0xA0 : 0xF0);
 }
 
 void Debug::_display_next_instructions(int col, int& row, Word& nextAddress) 
 {
     C6809* cpu = Bus::GetC6809();
-
+    int ofs = 7;
     // Display the next several instructions
     int count = 0;
-    while (count < 15) {
+    while (count < 14) {
         bool atBreak = mapBreakpoints[nextAddress];
 
         // Disassemble the current instruction and update nextAddress to the next instruction
@@ -1165,7 +1167,7 @@ void Debug::_display_next_instructions(int col, int& row, Word& nextAddress)
 
         // Output the disassembled instruction
         //if (cpu->WasVisited_Memory(currentAddress)) {
-            sDisplayedAsm[row-6] = currentAddress;
+            sDisplayedAsm[row-ofs] = currentAddress;
             OutText(col, row++, code, atBreak ? 0x30 : 0x10);
         //}
 
@@ -1188,7 +1190,7 @@ void Debug::Old_DrawCode(int col, int row)
     {
         Word cpu_PC = cpu->getPC();
         Word offset = cpu_PC + mousewheel_offset;
-        int max_lines = 30;
+        int max_lines = 29;
         while (line < max_lines)
         {
             if (offset < cpu_PC)
@@ -1289,11 +1291,11 @@ void Debug::DrawButtons()
     // change the run/stop according to the single step state
     if (s_bSingleStep)
     {
-        vButton[RUN_STOP_ID].text = " RUN!";
+        vButton[RUN_STOP_ID].text = "RUN! ";
         vButton[RUN_STOP_ID].clr_index = 0xB;
     }
     else {
-        vButton[RUN_STOP_ID].text = " STOP";
+        vButton[RUN_STOP_ID].text = "STOP ";
         vButton[RUN_STOP_ID].clr_index = 0xA;
     }
     if (bEditingBreakpoint)
@@ -1305,7 +1307,7 @@ void Debug::DrawButtons()
     }
     else
     {
-        vButton[ADD_BREAK_ID].text = " Add Breakpoint";
+        vButton[ADD_BREAK_ID].text = "Add Breakpoint";
         vButton[ADD_BREAK_ID].clr_index = 0x5;
     }
     // draw the buttons
@@ -1345,7 +1347,7 @@ void Debug::DrawButtons()
 
         // foreground
         int sX = x1 + ((x2 - x1) / 2) - (int)a.text.size() / 2;
-        OutText(sX, y1+1, a.text, a.clr_index % 16);
+        OutText(sX+1, y1+1, a.text, a.clr_index % 16);
     }
 }
 
@@ -1374,7 +1376,8 @@ void Debug::DrawBreakpoints()
 {
     // C6809* cpu = Bus::GetC6809();
 
-    int x = _bkp_window_xmin, y = _bkp_window_ymin;		// y <= 38
+    int x = _bkp_window_xmin;
+    int y = _bkp_window_ymin;		// y <= 38
     // Uint8 ci = 0x0C;
 
     // build a vector of active breakpoints
@@ -1382,16 +1385,19 @@ void Debug::DrawBreakpoints()
     for (auto& bp : mapBreakpoints)
         if (bp.second)
             breakpoints.push_back(bp.first);
+
     // standard display
-    if (breakpoints.size() <= (size_t)_bkp_window_len)
+    int length = _bkp_window_len;    // number of breakpoints to display
+    if (breakpoints.size() <= (size_t)length)
     {
-        for (Word t = 0; t < breakpoints.size(); t++)
+        for (Word idx = 0; idx < breakpoints.size(); idx++)
         {
             std::string strBkpt = "[$";
-            strBkpt += _hex(breakpoints[t], 4);
+            strBkpt += _hex(breakpoints[idx], 4);
             strBkpt += "]";
-            OutText(x, y, strBkpt, 0xA0);
-            y++;
+            OutText(x+((idx%2)*8), y, strBkpt, 0xA0);
+            if ( (idx % 2) == 1)
+                y++;
         }
     }
     // oversized, mousewheel scrollable, display
@@ -1399,17 +1405,16 @@ void Debug::DrawBreakpoints()
     {
         if (mw_brk_offset < 0)							
             mw_brk_offset = 0;
-        if ((unsigned)mw_brk_offset + _bkp_window_len > breakpoints.size())		
-            mw_brk_offset = breakpoints.size() - _bkp_window_len;
-
+        if ((unsigned)mw_brk_offset + length > breakpoints.size())		
+            mw_brk_offset = breakpoints.size() - length;
         int index = mw_brk_offset;
-        for (int t = 0; t < _bkp_window_len; t++)
+        for (int t = 0; t < length; t++)
         {
             std::string strBkpt;
-
             if (t == 0 && mw_brk_offset > 0)
                 strBkpt = "[ ... ]";
-            else if (t == _bkp_window_len-1 && (unsigned)index != breakpoints.size() - 1)
+            // else if (t == _bkp_window_len-1 && (unsigned)index != breakpoints.size() - 1)
+            else if (t == length-1 && (unsigned)index != breakpoints.size() - 1)
                 strBkpt = "[ ... ]";
             else
             {
@@ -1417,11 +1422,52 @@ void Debug::DrawBreakpoints()
                 strBkpt += _hex(breakpoints[index], 4);
                 strBkpt += "]";
             }
-            OutText(x, y, strBkpt, 0xA0);
-            y++;
+            OutText(x+((t%2)*8), y, strBkpt, 0xA0);
+            if ( (t % 2) == 1)
+                y++;
             index++;
         }
     }
+
+
+    // // standard display
+    // if (breakpoints.size() <= (size_t)_bkp_window_len)
+    // {
+    //     for (Word t = 0; t < breakpoints.size(); t++)
+    //     {
+    //         std::string strBkpt = "[$";
+    //         strBkpt += _hex(breakpoints[t], 4);
+    //         strBkpt += "]";
+    //         OutText(x, y, strBkpt, 0xA0);
+    //         y++;
+    //     }
+    // }
+    // // oversized, mousewheel scrollable, display
+    // else
+    // {
+    //     if (mw_brk_offset < 0)							
+    //         mw_brk_offset = 0;
+    //     if ((unsigned)mw_brk_offset + _bkp_window_len > breakpoints.size())		
+    //         mw_brk_offset = breakpoints.size() - _bkp_window_len;
+    //     int index = mw_brk_offset;
+    //     for (int t = 0; t < _bkp_window_len; t++)
+    //     {
+    //         std::string strBkpt;
+    //         if (t == 0 && mw_brk_offset > 0)
+    //             strBkpt = "[ ... ]";
+    //         else if (t == _bkp_window_len-1 && (unsigned)index != breakpoints.size() - 1)
+    //             strBkpt = "[ ... ]";
+    //         else
+    //         {
+    //             strBkpt = "[$";
+    //             strBkpt += _hex(breakpoints[index], 4);
+    //             strBkpt += "]";
+    //         }
+    //         OutText(x, y, strBkpt, 0xA0);
+    //         y++;
+    //         index++;
+    //     }
+    // }
 }
 
 bool Debug::EditRegister(float fElapsedTime)
