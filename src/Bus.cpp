@@ -24,6 +24,7 @@
 #include "C6809.hpp"
 #include "Mouse.hpp"
 #include "Keyboard.hpp"
+#include "Joystick.hpp"
 
 
 class BusException : public std::exception
@@ -216,6 +217,7 @@ void Bus::_onInit()
     _pGPU = Memory::Attach<GPU>();
     Memory::Attach<Mouse>();
     Memory::Attach<Keyboard>();
+    Memory::Attach<Joystick>();
 
     Memory::Attach<HDW_RESERVED>();     // reserved space for future use
     Memory::Attach<ROM_VECTS>();        // 0xFFF0 - 0xFFFF      (System ROM Vectors)

@@ -249,8 +249,29 @@ enum MEMMAP
     KEYBOARD_TOP          = 0xFE46,   // Top of Keyboard Register Space
 // _______________________________________________________________________
 
+    JOYSTICK_DEVICE       = 0xFE46,   // START: Joystick/Gamepad Controller Device Hardware Registers
+    JOYS_1_BTN            = 0xFE46,   // (Word) Button Bits: Room For up to 16 Buttons  (realtime)
+    JOYS_1_DBND           = 0xFE48,   // (Byte) PAD 1 analog deadband; default is 5   (read/write)
+    JOYS_1_LTX            = 0xFE4A,   // (char) PAD 1 LThumb-X position (-128 _ +127)   (realtime)
+    JOYS_1_LTY            = 0xFE4C,   // (char) PAD 1 LThumb-Y position (-128 _ +127)   (realtime)
+    JOYS_1_RTX            = 0xFE4E,   // (char) PAD 1 RThumb-X position (-128 _ +127)   (realtime)
+    JOYS_1_RTY            = 0xFE50,   // (char) PAD 1 RThumb-Y position (-128 _ +127)   (realtime)
+    JOYS_1_Z1             = 0xFE52,   // (char) PAD 1 left analog trigger (0 - 127)     (realtime)
+    JOYS_1_Z2             = 0xFE54,   // (char) PAD 1 left analog trigger (0 - 127)     (realtime)
+    JOYS_2_BTN            = 0xFE56,   // (Word) Button Bits: Room For up to 16 Buttons  (realtime)
+    JOYS_2_DBND           = 0xFE58,   // (Byte) PAD 2 analog deadband; default is 5   (read/write)
+    JOYS_2_LTX            = 0xFE5A,   // (char) PAD 2 LThumb-X position (-128 _ +127)   (realtime)
+    JOYS_2_LTY            = 0xFE5C,   // (char) PAD 2 LThumb-Y position (-128 _ +127)   (realtime)
+    JOYS_2_RTX            = 0xFE5E,   // (char) PAD 2 RThumb-X position (-128 _ +127)   (realtime)
+    JOYS_2_RTY            = 0xFE60,   // (char) PAD 2 RThumb-Y position (-128 _ +127)   (realtime)
+    JOYS_2_Z1             = 0xFE62,   // (char) PAD 2 left analog trigger (0 - 127)     (realtime)
+    JOYS_2_Z2             = 0xFE64,   // (char) PAD 2 left analog trigger (0 - 127)     (realtime)
+    JOYS_END              = 0xFE65,   // End of Joystick/Gamepad Device Register Space
+    JOYS_TOP              = 0xFE66,   // Top of Joystick/Gamepad Device Register Space
+// _______________________________________________________________________
+
     HDW_RESERVED_DEVICE   = 0x0000,   // START: Reserved Register Space
-    HDW_REG_END           = 0xFFEF,   // 425 bytes reserved for future use.
+    HDW_REG_END           = 0xFFEF,   // 393 bytes reserved for future use.
 // _______________________________________________________________________
 
     ROM_VECTS_DEVICE      = 0x0000,   // START: Hardware Interrupt Vectors

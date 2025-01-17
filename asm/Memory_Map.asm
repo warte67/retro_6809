@@ -247,8 +247,29 @@ KEYBOARD_END          equ    $FE45    ; End of Keyboard Register Space
 KEYBOARD_TOP          equ    $FE46    ; Top of Keyboard Register Space
 ; _______________________________________________________________________
 
+JOYSTICK_DEVICE       equ    $FE46    ; START: Joystick/Gamepad Controller Device Hardware Registers
+JOYS_1_BTN            equ    $FE46    ; (Word) Button Bits: Room For up to 16 Buttons  (realtime)
+JOYS_1_DBND           equ    $FE48    ; (Byte) PAD 1 analog deadband; default is 5   (read/write)
+JOYS_1_LTX            equ    $FE4A    ; (char) PAD 1 LThumb-X position (-128 _ +127)   (realtime)
+JOYS_1_LTY            equ    $FE4C    ; (char) PAD 1 LThumb-Y position (-128 _ +127)   (realtime)
+JOYS_1_RTX            equ    $FE4E    ; (char) PAD 1 RThumb-X position (-128 _ +127)   (realtime)
+JOYS_1_RTY            equ    $FE50    ; (char) PAD 1 RThumb-Y position (-128 _ +127)   (realtime)
+JOYS_1_Z1             equ    $FE52    ; (char) PAD 1 left analog trigger (0 - 127)     (realtime)
+JOYS_1_Z2             equ    $FE54    ; (char) PAD 1 left analog trigger (0 - 127)     (realtime)
+JOYS_2_BTN            equ    $FE56    ; (Word) Button Bits: Room For up to 16 Buttons  (realtime)
+JOYS_2_DBND           equ    $FE58    ; (Byte) PAD 2 analog deadband; default is 5   (read/write)
+JOYS_2_LTX            equ    $FE5A    ; (char) PAD 2 LThumb-X position (-128 _ +127)   (realtime)
+JOYS_2_LTY            equ    $FE5C    ; (char) PAD 2 LThumb-Y position (-128 _ +127)   (realtime)
+JOYS_2_RTX            equ    $FE5E    ; (char) PAD 2 RThumb-X position (-128 _ +127)   (realtime)
+JOYS_2_RTY            equ    $FE60    ; (char) PAD 2 RThumb-Y position (-128 _ +127)   (realtime)
+JOYS_2_Z1             equ    $FE62    ; (char) PAD 2 left analog trigger (0 - 127)     (realtime)
+JOYS_2_Z2             equ    $FE64    ; (char) PAD 2 left analog trigger (0 - 127)     (realtime)
+JOYS_END              equ    $FE65    ; End of Joystick/Gamepad Device Register Space
+JOYS_TOP              equ    $FE66    ; Top of Joystick/Gamepad Device Register Space
+; _______________________________________________________________________
+
 HDW_RESERVED_DEVICE   equ    $0000    ; START: Reserved Register Space
-HDW_REG_END           equ    $FFEF    ; 425 bytes reserved for future use.
+HDW_REG_END           equ    $FFEF    ; 393 bytes reserved for future use.
 ; _______________________________________________________________________
 
 ROM_VECTS_DEVICE      equ    $0000    ; START: Hardware Interrupt Vectors
