@@ -251,14 +251,27 @@ class SYSTEM_MEMORY : public IDevice
             
             mapped_register.push_back({ "ZERO_PAGE", nextAddr, nullptr, nullptr,   
                 { "Zero Page System and User Variables"}}); nextAddr=0x100;   
-            mapped_register.push_back({ "FIO_BUFFER", nextAddr, nullptr, nullptr,    
-                { "START: File Input/Output Buffer"}}); nextAddr+=0xFF;  
-            mapped_register.push_back({ "FIO_BFR_END", nextAddr,  nullptr, nullptr,  
-                { "END: File Input/Output Buffer"}}); nextAddr+=1; 
+            nextAddr--;
+            mapped_register.push_back({ "ZERO_PAGE_END", nextAddr, nullptr, nullptr,   
+                { "Zero Page System and User Variables"}}); nextAddr=0x100;   
+
+            mapped_register.push_back({ "FIO_FILE_BUFFER", nextAddr, nullptr, nullptr,    
+                { "START: File Input/Output Buffer"}}); nextAddr+=0x007F;  
+            mapped_register.push_back({ "FIO_FILE_BFR_END", nextAddr,  nullptr, nullptr,  
+                { "END: File Input/Output Buffers"}}); nextAddr+=1; 
+
+            mapped_register.push_back({ "FIO_LN_EDT_BUFFER", nextAddr, nullptr, nullptr,    
+                { "START: Line Edit Character Buffer"}}); nextAddr+=0x007F;  
+            mapped_register.push_back({ "FIO_LN_EDT_END", nextAddr,  nullptr, nullptr,  
+                { "END: Line Edit Character Buffer"}}); nextAddr+=1; 
+
             mapped_register.push_back({ "SYSTEM_STACK", nextAddr, nullptr, nullptr,  
-                { "Bottom of the system stack spcace"}}); nextAddr=0x400;     
+                { "Bottom of System Stack Spcace"}}); nextAddr=0x400;  
+            nextAddr--;   
+            mapped_register.push_back({ "SSTACK_END", nextAddr, nullptr, nullptr,   
+                { "END: System Stack Space"}});  nextAddr+=1; 
             mapped_register.push_back({ "SSTACK_TOP", nextAddr, nullptr, nullptr,   
-                { "Top of the system statck space", "---"}});
+                { "TOP: System Stack Space", "---"}});
             
             return nextAddr - old_address;
         }  

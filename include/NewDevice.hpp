@@ -35,7 +35,7 @@ public: // VIRTUAL METHODS
     virtual void OnEvent(SDL_Event* evnt);          // handle events
     virtual void OnUpdate(float fElapsedTime);      // update
     virtual void OnRender();                        // render
-
+ 
 public: // PUBLIC ACCESSORS
     // ... 
 

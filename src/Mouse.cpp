@@ -271,7 +271,7 @@ void Mouse::OnEvent(SDL_Event* evnt)
                 s_bCsr = (button_flags & 0x80);
                 _show_SDL_cursor(false);
             }
-            else if (evnt->window.windowID == dbg->GetWindowID())
+            else if (evnt->window.windowID == dbg->Get_Window_ID())
             {   // leaving the debug window
                 Memory::Write(MAP(CSR_FLAGS), Memory::Read(MAP(CSR_FLAGS)));  // restore prior cursor visibility state
             }
@@ -285,7 +285,7 @@ void Mouse::OnEvent(SDL_Event* evnt)
                 // printf("EVENT: entering the main window\n");
                 _show_SDL_cursor(s_bCsr);
             }
-            else if (evnt->window.windowID == dbg->GetWindowID())
+            else if (evnt->window.windowID == dbg->Get_Window_ID())
             {   // entering the debug window
                 SDL_ShowCursor();
             }

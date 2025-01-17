@@ -457,6 +457,7 @@ void GPU::OnEvent(SDL_Event* evnt)
     // if not a main window event, just return now
     if (SDL_GetWindowFromEvent(evnt) != pWindow) { return; }
 
+    SDL_Keymod km = SDL_GetModState();
 
     switch (evnt->type) 
     {
@@ -501,55 +502,57 @@ void GPU::OnEvent(SDL_Event* evnt)
                 Memory::Write(MAP(GPU_MODE), data);
             }
 
-            // [E] Extended Display Enable Toggle
-            if (evnt->key.key == SDLK_E)
+            if (km & SDL_KMOD_CTRL)
             {
-                SDL_Keymod mod = SDL_GetModState();
-                if (mod & SDL_KMOD_SHIFT)
-                { // [SHIFT] + [E]  // toggle between extended tilemap and bitmap mode
-                    Byte data = Memory::Read( MAP(GPU_OPTIONS) );
-                    if (data &  0b1000'0000) {
-                        data &= 0b0111'1111;
-                    } else {
-                        data |= 0b1000'0000;
+                // [E] Extended Display Enable Toggle
+                if (evnt->key.key == SDLK_E)
+                {
+                    SDL_Keymod mod = SDL_GetModState();
+                    if (mod & SDL_KMOD_SHIFT)
+                    { // [SHIFT] + [E]  // toggle between extended tilemap and bitmap mode
+                        Byte data = Memory::Read( MAP(GPU_OPTIONS) );
+                        if (data &  0b1000'0000) {
+                            data &= 0b0111'1111;
+                        } else {
+                            data |= 0b1000'0000;
+                        }
+                        Memory::Write(MAP(GPU_OPTIONS), data);
+                    } else { // [E] Extended Display Enable
+                        Byte data = Memory::Read( MAP(GPU_OPTIONS) );
+                        if (data &  0b0001'0000) {
+                            data &= 0b1110'1111;
+                        } else {
+                            data |= 0b0001'0000;
+                        }
+                        Memory::Write(MAP(GPU_OPTIONS), data);
                     }
-                    Memory::Write(MAP(GPU_OPTIONS), data);
-                } else { // [E] Extended Display Enable
-                    Byte data = Memory::Read( MAP(GPU_OPTIONS) );
-                    if (data &  0b0001'0000) {
-                        data &= 0b1110'1111;
-                    } else {
-                        data |= 0b0001'0000;
+                }
+                // [S] Standard Display Enable Toggle
+                if (evnt->key.key == SDLK_S)
+                {
+                    SDL_Keymod mod = SDL_GetModState();
+                    if (mod & SDL_KMOD_SHIFT)
+                    { // [SHIFT] + [S]  // toggle between text and graphics mode
+                        Byte data = Memory::Read( MAP(GPU_MODE) );
+                        if (data &  0b1000'0000) {
+                            data &= 0b0111'1111;
+                        } else {
+                            data |= 0b1000'0000;
+                        }
+                        // Memory::Write(MAP(GPU_OPTIONS), Memory::Read( MAP(GPU_OPTIONS) ));
+                        Memory::Write(MAP(GPU_MODE), data);
+                    } else { // [S] Standard Display Enable
+                        Byte data = Memory::Read( MAP(GPU_OPTIONS) );
+                        if (data &  0b0000'0001) {
+                            data &= 0b1111'1110;
+                        } else {
+                            data |= 0b0000'0001;
+                        }
+                        Memory::Write(MAP(GPU_OPTIONS), data);
+                        // Memory::Write(MAP(GPU_MODE), Memory::Read( MAP(GPU_MODE) ));
                     }
-                    Memory::Write(MAP(GPU_OPTIONS), data);
                 }
             }
-            // [S] Standard Display Enable Toggle
-            if (evnt->key.key == SDLK_S)
-            {
-                SDL_Keymod mod = SDL_GetModState();
-                if (mod & SDL_KMOD_SHIFT)
-                { // [SHIFT] + [S]  // toggle between text and graphics mode
-                    Byte data = Memory::Read( MAP(GPU_MODE) );
-                    if (data &  0b1000'0000) {
-                        data &= 0b0111'1111;
-                    } else {
-                        data |= 0b1000'0000;
-                    }
-                    // Memory::Write(MAP(GPU_OPTIONS), Memory::Read( MAP(GPU_OPTIONS) ));
-                    Memory::Write(MAP(GPU_MODE), data);
-                } else { // [S] Standard Display Enable
-                    Byte data = Memory::Read( MAP(GPU_OPTIONS) );
-                    if (data &  0b0000'0001) {
-                        data &= 0b1111'1110;
-                    } else {
-                        data |= 0b0000'0001;
-                    }
-                    Memory::Write(MAP(GPU_OPTIONS), data);
-                    // Memory::Write(MAP(GPU_MODE), Memory::Read( MAP(GPU_MODE) ));
-                }
-            }
-
             break;       
         } // END: case SDL_EVENT_KEY_DOWN
 

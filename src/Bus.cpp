@@ -23,6 +23,7 @@
 #include "Debug.hpp"
 #include "C6809.hpp"
 #include "Mouse.hpp"
+#include "Keyboard.hpp"
 
 
 class BusException : public std::exception
@@ -214,6 +215,7 @@ void Bus::_onInit()
     _pDebug = Memory::Attach<Debug>();
     _pGPU = Memory::Attach<GPU>();
     Memory::Attach<Mouse>();
+    Memory::Attach<Keyboard>();
 
     Memory::Attach<HDW_RESERVED>();     // reserved space for future use
     Memory::Attach<ROM_VECTS>();        // 0xFFF0 - 0xFFFF      (System ROM Vectors)
@@ -338,21 +340,21 @@ void Bus::_onEvent()
                 {
                     if (evnt.key.key == SDLK_X)
                         Bus::IsRunning(false);
-                }
-                // Debugger Toggle ALT-D
-                if (evnt.key.key == SDLK_D)
-                {
-                    Byte flags = Memory::Read(MAP(SYS_DBG_FLAGS));
-                    if (flags & Debug::_DBG_FLAGS::DBGF_DEBUG_ENABLE)
+                    // Debugger Toggle ALT-D
+                    if (evnt.key.key == SDLK_D)
                     {
-                        flags &= ~Debug::_DBG_FLAGS::DBGF_DEBUG_ENABLE;
-                        Memory::Write(MAP(SYS_DBG_FLAGS), flags);
-                     }
-                    else
-                    {
-                        flags |= Debug::_DBG_FLAGS::DBGF_DEBUG_ENABLE;
-                        Memory::Write(MAP(SYS_DBG_FLAGS), flags);
-                   }
+                        Byte flags = Memory::Read(MAP(SYS_DBG_FLAGS));
+                        if (flags & Debug::_DBG_FLAGS::DBGF_DEBUG_ENABLE)
+                        {
+                            flags &= ~Debug::_DBG_FLAGS::DBGF_DEBUG_ENABLE;
+                            Memory::Write(MAP(SYS_DBG_FLAGS), flags);
+                        }
+                        else
+                        {
+                            flags |= Debug::_DBG_FLAGS::DBGF_DEBUG_ENABLE;
+                            Memory::Write(MAP(SYS_DBG_FLAGS), flags);
+                        }
+                    }
                 }
                 break;                
             }

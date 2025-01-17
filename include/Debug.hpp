@@ -81,11 +81,13 @@ public: // PUBLIC ACCESSORS
 
     bool SingleStep();
     void ContinueSingleStep();\
-    bool IsDebugActive() { return s_bIsDebugActive; }
-    void SetDebugActive(bool value) { s_bIsDebugActive = value; }
+    inline bool IsDebugActive() { return s_bIsDebugActive; }
+    inline bool IsCursorVisible() { return bIsCursorVisible; }
+    inline void SetDebugActive(bool value) { s_bIsDebugActive = value; }
 
 
-    SDL_WindowID GetWindowID() { return SDL_GetWindowID( _dbg_window ); }
+    SDL_WindowID Get_Window_ID() { return SDL_GetWindowID( _dbg_window ); }
+    SDL_Window* Get_SDL_Window() { return _dbg_window; }
 
     // hardware registers
     enum _DBG_FLAGS : Byte {

@@ -74,6 +74,9 @@
         #define MAP(key) static_cast<Word>(key)
     #endif  // END: GENERATE_MEMORY_MAP
 
+    // Keyboard Constants:
+    constexpr size_t EDIT_BUFFER_SIZE = 128; // FIO_LN_EDT_BUFFER through FIO_LN_EDT_END
+
 
 
 

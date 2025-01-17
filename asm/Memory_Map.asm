@@ -35,10 +35,14 @@ SOFT_RESET            equ    $000E    ; RESET Software Interrupt Vector
 
 SYSTEM_MEMORY_DEVICE  equ    $0000    ; START: System Memory
 ZERO_PAGE             equ    $0010    ; Zero Page System and User Variables
-FIO_BUFFER            equ    $0100    ; START: File Input/Output Buffer
-FIO_BFR_END           equ    $01FF    ; END: File Input/Output Buffer
-SYSTEM_STACK          equ    $0200    ; Bottom of the system stack spcace
-SSTACK_TOP            equ    $0400    ; Top of the system statck space
+ZERO_PAGE_END         equ    $00FF    ; Zero Page System and User Variables
+FIO_FILE_BUFFER       equ    $0100    ; START: File Input/Output Buffer
+FIO_FILE_BFR_END      equ    $017F    ; END: File Input/Output Buffers
+FIO_LN_EDT_BUFFER     equ    $0180    ; START: Line Edit Character Buffer
+FIO_LN_EDT_END        equ    $01FF    ; END: Line Edit Character Buffer
+SYSTEM_STACK          equ    $0200    ; Bottom of System Stack Spcace
+SSTACK_END            equ    $03FF    ; END: System Stack Space
+SSTACK_TOP            equ    $0400    ; TOP: System Stack Space
 ; _______________________________________________________________________
 
 VIDEO_BUFFER_DEVICE   equ    $0000    ; START: Video Buffer (8K)
@@ -231,8 +235,20 @@ CSR_END               equ    $FE2F    ; End of Mouse Device Register Space
 CSR_TOP               equ    $FE30    ; Top of CSR Register Space
 ; _______________________________________________________________________
 
+KEYBOARD_DEVICE       equ    $FE30    ; START: Keyboard Device Hardware Registers
+CHAR_Q_LEN            equ    $FE30    ; (Byte) Number of Characters Waiting in Queue   (Read Only)
+CHAR_SCAN             equ    $FE31    ; (Byte) Read Next Character in Queue (Not Popped When Read)
+CHAR_POP              equ    $FE32    ; (Byte) Read Next Character in Queue     (Popped When Read)
+XKEY_BUFFER           equ    $FE33    ; (16 Bytes) 128 bits for XK_KEY data buffer     (Read Only)
+EDT_BFR_CSR           equ    $FE43    ; (Byte) Cursor Position Within Edit Buffer     (Read/Write)
+EDT_ENABLE            equ    $FE44    ; (Byte) Line Editor Enable Flag                (Read/Write)
+EDT_BFR_LEN           equ    $FE45    ; (Byte) Limit the Line Editor to This Length   (Read/Write)
+KEYBOARD_END          equ    $FE45    ; End of Keyboard Register Space
+KEYBOARD_TOP          equ    $FE46    ; Top of Keyboard Register Space
+; _______________________________________________________________________
+
 HDW_RESERVED_DEVICE   equ    $0000    ; START: Reserved Register Space
-HDW_REG_END           equ    $FFEF    ; 447 bytes reserved for future use.
+HDW_REG_END           equ    $FFEF    ; 425 bytes reserved for future use.
 ; _______________________________________________________________________
 
 ROM_VECTS_DEVICE      equ    $0000    ; START: Hardware Interrupt Vectors
