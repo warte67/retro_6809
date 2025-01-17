@@ -52,7 +52,7 @@ private: // PRIVATE MEMBERS
     void EncodeAxesRegister(int id);
 
     struct STATE {
-        SDL_Joystick* controller = nullptr;
+        SDL_Gamepad* controller = nullptr;
         SDL_Joystick* joystick = nullptr;
         bool bIsActive = false;
         bool bIsJoystick = false;
@@ -100,5 +100,19 @@ private: // PRIVATE MEMBERS
     std::unordered_map<Word, Byte> gpadBtnMap; 
 
 };
+
+/**********************
+
+CategoryJoystick: https://wiki.libsdl.org/SDL3/CategoryJoystick
+
+CategoryGamepad: https://wiki.libsdl.org/SDL3/CategoryGamepad
+
+
+
+
+
+ ********************/
+
+
 
 // END: Joystick.hpp

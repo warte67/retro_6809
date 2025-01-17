@@ -77,6 +77,9 @@
     // Keyboard Constants:
     constexpr size_t EDIT_BUFFER_SIZE = 128; // FIO_LN_EDT_BUFFER through FIO_LN_EDT_END
 
+    // Joystick/Gamepad Constants:
+    #define SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS "SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS"
+
 
 
 
