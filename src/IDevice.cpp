@@ -45,7 +45,12 @@ void ROM::write_to_rom(Word address, Byte data)
     (void)address;
     (void)data;
 
+    // ToDo:  Implement This Function and
+    //        verify that it works while
+    //        writing the Kernel ROM.
+    // ...
     
+    // THIS NO LONGER WORKS!
     // if (offset - base() < size())
     //     memory(offset - base(), data);
 }

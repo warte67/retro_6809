@@ -1,15 +1,15 @@
 /*** NewDevice.cpp *******************************************
- *      _   _                     _____                   _                     _                     
- *     | \ | |                   |  __ \                 (_)                   | |                    
- *     |  \| |   ___  __      __ | |  | |   ___  __   __  _    ___    ___      | |__    _ __    _ __  
- *     | . ` |  / _ \ \ \ /\ / / | |  | |  / _ \ \ \ / / | |  / __|  / _ \     | '_ \  | '_ \  | '_ \ 
- *     | |\  | |  __/  \ V  V /  | |__| | |  __/  \ V /  | | | (__  |  __/  _  | | | | | |_) | | |_) |
- *     |_| \_|  \___|   \_/\_/   |_____/   \___|   \_/   |_|  \___|  \___| (_) |_| |_| | .__/  | .__/ 
- *                                                                                     | |     | |    
- *                                                                                     |_|     |_|    
- * This file serves meerly as a template as a
- * starting point for new devices.
- *
+ *       _____                                      _                        
+ *      / ____|                                    | |                       
+ *     | |  __  __ _ _ __ ___   ___ _ __   __ _  __| |       ___ _ __  _ __  
+ *     | | |_ |/ _` | '_ ` _ \ / _ \ '_ \ / _` |/ _` |      / __| '_ \| '_ \ 
+ *     | |__| | (_| | | | | | |  __/ |_) | (_| | (_| |  _  | (__| |_) | |_) |
+ *      \_____|\__,_|_| |_| |_|\___| .__/ \__,_|\__,_| (_)  \___| .__/| .__/ 
+ *                                 | |                          | |   | |    
+ *                                 |_|                          |_|   |_|   
+ *     
+ *      Supports Gamepad Controller input as well as most Joystick Controllers.
+ * 
  * Released under the GPL v3.0 License.
  * Original Author: Jay Faries (warte67)
  *
@@ -65,7 +65,7 @@ int  NewDevice::OnAttach(int nextAddr)
     // /////
     // mapped_register.push_back( { "GPU_VIDEO_MAX", nextAddr,
     //     [this](Word nextAddr) { (void)nextAddr; return _gpu_video_max >> 8; }, 
-    //     [this](Word nextAddr, data) { (void)nextAddr; (void)data; /* do something or leave as nullptr for read only */}, {   
+    //     nullptr, {   
     //         "(Word) Video Buffer Maximum (Read Only)",
     //         " Note: This will change to reflect",
     //         "       the size of the last cpu",
