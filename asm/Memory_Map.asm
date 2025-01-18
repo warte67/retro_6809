@@ -249,27 +249,65 @@ KEYBOARD_TOP          equ    $FE46    ; Top of Keyboard Register Space
 
 JOYSTICK_DEVICE       equ    $FE46    ; START: Joystick/Gamepad Controller Device Hardware Registers
 JOYS_1_BTN            equ    $FE46    ; (Word) Button Bits: Room For up to 16 Buttons  (realtime)
+                                      ;        Gamepad Controller Button Bits:
+                                      ;            0000'0000'0000'0000 = Nothing Pressed
+                                      ;            0000'0000'0000'0001 = A
+                                      ;            0000'0000'0000'0010 = B
+                                      ;            0000'0000'0000'0100 = X
+                                      ;            0000'0000'0000'1000 = Y
+                                      ;            0000'0000'0001'0000 = L.Shoulder
+                                      ;            0000'0000'0010'0000 = R.Shoulder
+                                      ;            0000'0000'0100'0000 = Back
+                                      ;            0000'0000'1000'0000 = Start
+                                      ;            0000'0001'0000'0000 = Misc 1
+                                      ;            0000'0010'0000'0000 = Misc 2
+                                      ;            0000'0100'0000'0000 = Misc 3
+                                      ;            0000'1000'0000'0000 = Guide
+                                      ;            0001'0000'0000'0000 = DPad Up   
+                                      ;            0010'0000'0000'0000 = DPad Down 
+                                      ;            0100'0000'0000'0000 = DPad Left 
+                                      ;            1000'0000'0000'0000 = DPad Right
+                                      ;            1111'1111'1111'1111 = Not Connected
 JOYS_1_DBND           equ    $FE48    ; (Byte) PAD 1 analog deadband; default is 5   (read/write)
-JOYS_1_LTX            equ    $FE4A    ; (char) PAD 1 LThumb-X position (-128 _ +127)   (realtime)
-JOYS_1_LTY            equ    $FE4C    ; (char) PAD 1 LThumb-Y position (-128 _ +127)   (realtime)
-JOYS_1_RTX            equ    $FE4E    ; (char) PAD 1 RThumb-X position (-128 _ +127)   (realtime)
-JOYS_1_RTY            equ    $FE50    ; (char) PAD 1 RThumb-Y position (-128 _ +127)   (realtime)
-JOYS_1_Z1             equ    $FE52    ; (char) PAD 1 left analog trigger (0 - 127)     (realtime)
-JOYS_1_Z2             equ    $FE54    ; (char) PAD 1 left analog trigger (0 - 127)     (realtime)
-JOYS_2_BTN            equ    $FE56    ; (Word) Button Bits: Room For up to 16 Buttons  (realtime)
-JOYS_2_DBND           equ    $FE58    ; (Byte) PAD 2 analog deadband; default is 5   (read/write)
-JOYS_2_LTX            equ    $FE5A    ; (char) PAD 2 LThumb-X position (-128 _ +127)   (realtime)
-JOYS_2_LTY            equ    $FE5C    ; (char) PAD 2 LThumb-Y position (-128 _ +127)   (realtime)
-JOYS_2_RTX            equ    $FE5E    ; (char) PAD 2 RThumb-X position (-128 _ +127)   (realtime)
-JOYS_2_RTY            equ    $FE60    ; (char) PAD 2 RThumb-Y position (-128 _ +127)   (realtime)
-JOYS_2_Z1             equ    $FE62    ; (char) PAD 2 left analog trigger (0 - 127)     (realtime)
-JOYS_2_Z2             equ    $FE64    ; (char) PAD 2 left analog trigger (0 - 127)     (realtime)
-JOYS_END              equ    $FE65    ; End of Joystick/Gamepad Device Register Space
-JOYS_TOP              equ    $FE66    ; Top of Joystick/Gamepad Device Register Space
+JOYS_1_LTX            equ    $FE49    ; (char) PAD 1 LThumb-X position (-128 _ +127)   (realtime)
+JOYS_1_LTY            equ    $FE4A    ; (char) PAD 1 LThumb-Y position (-128 _ +127)   (realtime)
+JOYS_1_RTX            equ    $FE4B    ; (char) PAD 1 RThumb-X position (-128 _ +127)   (realtime)
+JOYS_1_RTY            equ    $FE4C    ; (char) PAD 1 RThumb-Y position (-128 _ +127)   (realtime)
+JOYS_1_Z1             equ    $FE4D    ; (char) PAD 1 left analog trigger (0 - 127)     (realtime)
+JOYS_1_Z2             equ    $FE4E    ; (char) PAD 1 left analog trigger (0 - 127)     (realtime)
+JOYS_2_BTN            equ    $FE4F    ; (Word) Button Bits: Room For up to 16 Buttons  (realtime)
+                                      ;        Joystick Button Bits:
+                                      ;            0000'0000'0000'0000 = Nothing Pressed
+                                      ;            0000'0000'0000'0001 = Button 1 
+                                      ;            0000'0000'0000'0010 = Button 2 
+                                      ;            0000'0000'0000'0100 = Button 3 
+                                      ;            0000'0000'0000'1000 = Button 4 
+                                      ;            0000'0000'0001'0000 = Button 5 
+                                      ;            0000'0000'0010'0000 = Button 6 
+                                      ;            0000'0000'0100'0000 = Button 7 
+                                      ;            0000'0000'1000'0000 = Button 8 
+                                      ;            0000'0001'0000'0000 = Button 9 
+                                      ;            0000'0010'0000'0000 = Button 10
+                                      ;            0000'0100'0000'0000 = Button 11
+                                      ;            0000'1000'0000'0000 = Button 12
+                                      ;            0001'0000'0000'0000 = Hat Up   
+                                      ;            0010'0000'0000'0000 = Hat Down 
+                                      ;            0100'0000'0000'0000 = Hat Left 
+                                      ;            1000'0000'0000'0000 = Hat Right
+                                      ;            1111'1111'1111'1111 = Not Connected
+JOYS_2_DBND           equ    $FE51    ; (Byte) PAD 2 analog deadband; default is 5   (read/write)
+JOYS_2_LTX            equ    $FE52    ; (char) PAD 2 LThumb-X position (-128 _ +127)   (realtime)
+JOYS_2_LTY            equ    $FE53    ; (char) PAD 2 LThumb-Y position (-128 _ +127)   (realtime)
+JOYS_2_RTX            equ    $FE54    ; (char) PAD 2 RThumb-X position (-128 _ +127)   (realtime)
+JOYS_2_RTY            equ    $FE55    ; (char) PAD 2 RThumb-Y position (-128 _ +127)   (realtime)
+JOYS_2_Z1             equ    $FE56    ; (char) PAD 2 left analog trigger (0 - 127)     (realtime)
+JOYS_2_Z2             equ    $FE57    ; (char) PAD 2 left analog trigger (0 - 127)     (realtime)
+JOYS_END              equ    $FE57    ; End of Joystick/Gamepad Device Register Space
+JOYS_TOP              equ    $FE58    ; Top of Joystick/Gamepad Device Register Space
 ; _______________________________________________________________________
 
 HDW_RESERVED_DEVICE   equ    $0000    ; START: Reserved Register Space
-HDW_REG_END           equ    $FFEF    ; 393 bytes reserved for future use.
+HDW_REG_END           equ    $FFEF    ; 407 bytes reserved for future use.
 ; _______________________________________________________________________
 
 ROM_VECTS_DEVICE      equ    $0000    ; START: Hardware Interrupt Vectors

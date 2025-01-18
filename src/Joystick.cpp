@@ -44,13 +44,20 @@ Joystick::~Joystick()
 
 
 
+/**
+ * OnAttach
+ * 
+ * Called by the Bus when this device is attached to the bus.
+ * 
+ * @param nextAddr The base address of the device in the bus.
+ * 
+ * @return The size of the device in address space.
+ */
 int  Joystick::OnAttach(int nextAddr)
 {
-    // std::cout << clr::indent() << clr::LT_BLUE << "Joystick::OnAttach() Entry" << clr::RETURN;    
     SetBaseAddress(nextAddr);
     Word old_address=nextAddr;
     this->heading = "Joystick/Gamepad Controller Device Hardware Registers"; 
-
 
 
     ////////////////////////////////////////////////
@@ -59,7 +66,27 @@ int  Joystick::OnAttach(int nextAddr)
     mapped_register.push_back( { "JOYS_1_BTN", nextAddr,
         [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
         [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
-        {   "(Word) Button Bits: Room For up to 16 Buttons  (realtime)" }}); nextAddr+=1;   
+        {   "(Word) Button Bits: Room For up to 16 Buttons  (realtime)",
+            "       Gamepad Controller Button Bits:",
+            "           0000'0000'0000'0000 = Nothing Pressed",
+            "           0000'0000'0000'0001 = A",  
+            "           0000'0000'0000'0010 = B",  
+            "           0000'0000'0000'0100 = X",   
+            "           0000'0000'0000'1000 = Y",   
+            "           0000'0000'0001'0000 = L.Shoulder",   
+            "           0000'0000'0010'0000 = R.Shoulder",
+            "           0000'0000'0100'0000 = Back",   
+            "           0000'0000'1000'0000 = Start",
+            "           0000'0001'0000'0000 = Misc 1",   
+            "           0000'0010'0000'0000 = Misc 2",  
+            "           0000'0100'0000'0000 = Misc 3",   
+            "           0000'1000'0000'0000 = Guide",  
+            "           0001'0000'0000'0000 = DPad Up   ",   
+            "           0010'0000'0000'0000 = DPad Down ",
+            "           0100'0000'0000'0000 = DPad Left ",   
+            "           1000'0000'0000'0000 = DPad Right",     
+            "           1111'1111'1111'1111 = Not Connected"   
+        }}); nextAddr+=1;   
     mapped_register.push_back( { "", nextAddr,
         [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
         [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
@@ -73,10 +100,6 @@ int  Joystick::OnAttach(int nextAddr)
         [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
         [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
         {   "(Byte) PAD 1 analog deadband; default is 5   (read/write)" }}); nextAddr+=1;   
-    mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
-        {"" }}); nextAddr+=1;   
 
 
     ////////////////////////////////////////////////
@@ -86,10 +109,6 @@ int  Joystick::OnAttach(int nextAddr)
         [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
         [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
         {   "(char) PAD 1 LThumb-X position (-128 _ +127)   (realtime)" }}); nextAddr+=1;   
-    mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
-        {"" }}); nextAddr+=1;   
 
 
     ////////////////////////////////////////////////
@@ -99,10 +118,6 @@ int  Joystick::OnAttach(int nextAddr)
         [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
         [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
         {   "(char) PAD 1 LThumb-Y position (-128 _ +127)   (realtime)" }}); nextAddr+=1;   
-    mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
-        {"" }}); nextAddr+=1;   
 
 
     ////////////////////////////////////////////////
@@ -112,10 +127,6 @@ int  Joystick::OnAttach(int nextAddr)
         [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
         [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
         {   "(char) PAD 1 RThumb-X position (-128 _ +127)   (realtime)" }}); nextAddr+=1;   
-    mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
-        {"" }}); nextAddr+=1;   
 
 
     ////////////////////////////////////////////////
@@ -125,10 +136,6 @@ int  Joystick::OnAttach(int nextAddr)
         [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
         [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
         {   "(char) PAD 1 RThumb-Y position (-128 _ +127)   (realtime)" }}); nextAddr+=1;   
-    mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
-        {"" }}); nextAddr+=1;   
 
 
     ////////////////////////////////////////////////
@@ -138,10 +145,6 @@ int  Joystick::OnAttach(int nextAddr)
         [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
         [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
         {   "(char) PAD 1 left analog trigger (0 - 127)     (realtime)" }}); nextAddr+=1;   
-    mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
-        {"" }}); nextAddr+=1;   
 
 
     ////////////////////////////////////////////////
@@ -151,10 +154,6 @@ int  Joystick::OnAttach(int nextAddr)
         [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
         [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
         {   "(char) PAD 1 left analog trigger (0 - 127)     (realtime)" }}); nextAddr+=1;   
-    mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
-        {"" }}); nextAddr+=1;   
 
 
     ////////////////////////////////////////////////
@@ -163,7 +162,27 @@ int  Joystick::OnAttach(int nextAddr)
     mapped_register.push_back( { "JOYS_2_BTN", nextAddr,
         [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
         [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
-        {   "(Word) Button Bits: Room For up to 16 Buttons  (realtime)" }}); nextAddr+=1;   
+         {   "(Word) Button Bits: Room For up to 16 Buttons  (realtime)",
+            "       Joystick Button Bits:",
+            "           0000'0000'0000'0000 = Nothing Pressed",
+            "           0000'0000'0000'0001 = Button 1 ",  
+            "           0000'0000'0000'0010 = Button 2 ",  
+            "           0000'0000'0000'0100 = Button 3 ",   
+            "           0000'0000'0000'1000 = Button 4 ",   
+            "           0000'0000'0001'0000 = Button 5 ",   
+            "           0000'0000'0010'0000 = Button 6 ",
+            "           0000'0000'0100'0000 = Button 7 ",   
+            "           0000'0000'1000'0000 = Button 8 ",
+            "           0000'0001'0000'0000 = Button 9 ",   
+            "           0000'0010'0000'0000 = Button 10",  
+            "           0000'0100'0000'0000 = Button 11",   
+            "           0000'1000'0000'0000 = Button 12",  
+            "           0001'0000'0000'0000 = Hat Up   ",   
+            "           0010'0000'0000'0000 = Hat Down ",
+            "           0100'0000'0000'0000 = Hat Left ",   
+            "           1000'0000'0000'0000 = Hat Right",   
+            "           1111'1111'1111'1111 = Not Connected"   
+        }}); nextAddr+=1;  
     mapped_register.push_back( { "", nextAddr,
         [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
         [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
@@ -177,10 +196,6 @@ int  Joystick::OnAttach(int nextAddr)
         [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
         [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
         {   "(Byte) PAD 2 analog deadband; default is 5   (read/write)" }}); nextAddr+=1;   
-    mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
-        {"" }}); nextAddr+=1;   
 
 
     ////////////////////////////////////////////////
@@ -190,10 +205,6 @@ int  Joystick::OnAttach(int nextAddr)
         [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
         [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
         {   "(char) PAD 2 LThumb-X position (-128 _ +127)   (realtime)" }}); nextAddr+=1;   
-    mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
-        {"" }}); nextAddr+=1;   
 
 
     ////////////////////////////////////////////////
@@ -203,10 +214,6 @@ int  Joystick::OnAttach(int nextAddr)
         [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
         [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
         {   "(char) PAD 2 LThumb-Y position (-128 _ +127)   (realtime)" }}); nextAddr+=1;   
-    mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
-        {"" }}); nextAddr+=1;   
 
 
     ////////////////////////////////////////////////
@@ -216,10 +223,6 @@ int  Joystick::OnAttach(int nextAddr)
         [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
         [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
         {   "(char) PAD 2 RThumb-X position (-128 _ +127)   (realtime)" }}); nextAddr+=1;   
-    mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
-        {"" }}); nextAddr+=1;   
 
 
     ////////////////////////////////////////////////
@@ -229,10 +232,6 @@ int  Joystick::OnAttach(int nextAddr)
         [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
         [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
         {   "(char) PAD 2 RThumb-Y position (-128 _ +127)   (realtime)" }}); nextAddr+=1;   
-    mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
-        {"" }}); nextAddr+=1;   
 
 
     ////////////////////////////////////////////////
@@ -242,10 +241,6 @@ int  Joystick::OnAttach(int nextAddr)
         [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
         [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
         {   "(char) PAD 2 left analog trigger (0 - 127)     (realtime)" }}); nextAddr+=1;   
-    mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
-        {"" }}); nextAddr+=1;   
 
 
     ////////////////////////////////////////////////
@@ -255,10 +250,6 @@ int  Joystick::OnAttach(int nextAddr)
         [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
         [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
         {   "(char) PAD 2 left analog trigger (0 - 127)     (realtime)" }}); nextAddr+=1;   
-    mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
-        {"" }}); nextAddr+=1;   
 
 
     ////////////////////////////////////////////////
@@ -279,20 +270,22 @@ int  Joystick::OnAttach(int nextAddr)
     mapped_register.push_back({ "JOYS_TOP", nextAddr, 
     nullptr, nullptr,  { "Top of Joystick/Gamepad Device Register Space", "---"}});
     
-    // std::cout << clr::indent() << clr::CYAN << "GPU::OnAttach() Exit" << clr::RETURN;
-    return nextAddr - old_address;
-   
-
-    // std::cout << clr::indent() << clr::LT_BLUE << "Joystick::OnAttach() Exit" << clr::RETURN;
+    // return with the size of the new device
     return nextAddr - old_address;
 }
 
 
-
+/// \brief OnInit - Initialize the Joystick/Gamepad Device
+///
+/// This function will initialize the Joystick/Gamepad Device. It will set the default
+/// dead band (dead zone) for the analog sticks and initialize the SDL joystick/gamepad
+/// subsystem. If the subsystem is not already initialized, it will open all gamepads
+/// and joysticks it can find and set their internal state to active.
+///
+/// \return void
 void Joystick::OnInit()
 {
-    std::cout << clr::indent() << clr::LT_BLUE << "Joystick::OnInit() Entry" << clr::RETURN;
-    
+    std::cout << clr::indent() << clr::LT_BLUE << "Joystick::OnInit() Entry" << clr::RETURN;    
     InitButtonStates(); 
 	if (!bJoystickWasInit)
 	{
@@ -310,51 +303,40 @@ void Joystick::OnInit()
 		OpenControllers();
 		bJoystickWasInit = true;
 	}   
-
     std::cout << clr::indent() << clr::LT_BLUE << "Joystick::OnInit() Exit" << clr::RETURN;
 }
 
 
 
+/// \brief OnQuit - Shutdown the Joystick/Gamepad Device
+///
+/// This function will shutdown the Joystick/Gamepad Device. It will close all
+/// open controllers and shutdown the SDL joystick/gamepad subsystem.
+///
+/// \return void
 void Joystick::OnQuit()
 {
     std::cout << clr::indent() << clr::LT_BLUE << "Joystick::OnQuit() Entry" << clr::RETURN;
-
 	if (bJoystickWasInit)
 	{
 		CloseControllers();
 		SDL_QuitSubSystem(SDL_INIT_JOYSTICK | SDL_INIT_GAMEPAD);
 		bJoystickWasInit = false;
 	}   
-
     std::cout << clr::indent() << clr::LT_BLUE << "Joystick::OnQuit() Exit" << clr::RETURN;
 }
 
 
-
-void Joystick::OnActivate()
-{
-    std::cout << clr::indent() << clr::LT_BLUE << "Joystick::OnActivate() Entry" << clr::RETURN;
-    // ...
-    std::cout << clr::indent() << clr::LT_BLUE << "Joystick::OnActivate() Exit" << clr::RETURN;
-}
-
-
-
-void Joystick::OnDeactivate()
-{
-    std::cout << clr::indent() << clr::LT_BLUE << "Joystick::OnDeactivate() Entry" << clr::RETURN;
-
-	// ...
-
-    std::cout << clr::indent() << clr::LT_BLUE << "Joystick::OnDeactivate() Exit" << clr::RETURN;
-}
-
+/// \brief Handle SDL events related to gamepad and joystick connections.
+///
+/// This function processes SDL events that indicate the addition, removal, or remapping
+/// of gamepads and joysticks. When such events are detected, it closes all currently open
+/// controllers and reopens them to update their states.
+///
+/// \param evnt The SDL event containing information about the gamepad or joystick event.
 
 void Joystick::OnEvent(SDL_Event* evnt)
 {
-    //std::cout << clr::indent() << clr::LT_BLUE << "Joystick::OnEvent() Entry" << clr::RETURN;
-
     switch (evnt->type)
     {
         case SDL_EVENT_GAMEPAD_ADDED:
@@ -366,16 +348,16 @@ void Joystick::OnEvent(SDL_Event* evnt)
             OpenControllers();
             break;
     }    
-
-    //std::cout << clr::indent() << clr::LT_BLUE << "Joystick::OnEvent() Exit" << clr::RETURN;
 }
 
 
+/// \brief Update the button and axis registers.
+///
+/// This function is called once per frame and updates the button and axis registers
+/// based on the current state of the joysticks and gamepads.
 void Joystick::OnUpdate(float fElapsedTime)
 {
-    //std::cout << clr::indent() << clr::LT_BLUE << "Joystick::OnUpdate() Entry" << clr::RETURN;
     (void)fElapsedTime;     // stop the compiler from complaining about unused parameters
-
     // update button registers
 	if (state[0].bIsActive)
 		Memory::Write_Word(MAP(JOYS_1_BTN), EncodeButtonRegister(0), true);
@@ -387,12 +369,17 @@ void Joystick::OnUpdate(float fElapsedTime)
 		Memory::Write_Word(MAP(JOYS_2_BTN), 0xffff, true);
 	EncodeAxesRegister(0);
 	EncodeAxesRegister(1);
-
-    //std::cout << clr::indent() << clr::LT_BLUE << "Joystick::OnUpdate() Exit" << clr::RETURN;
 }
 
 
 
+/// \brief Initialize the button mapping tables for gamepads and joysticks.
+///
+/// This function initializes the button mapping tables that are used to translate
+/// SDL gamepad and joystick button presses into the 16-bit button register format
+/// used by the emulator. The mapping tables are used by the EncodeButtonRegister
+/// function to translate the button presses into the correct bits in the button
+/// register.
 void Joystick::InitButtonStates()
 {
 	gpadBtnMap.clear();
@@ -404,18 +391,21 @@ void Joystick::InitButtonStates()
 	gpadBtnMap[SDL_GAMEPAD_BUTTON_EAST] = btn++;			// GPAD_BTN::BTN_B
 	gpadBtnMap[SDL_GAMEPAD_BUTTON_WEST] = btn++;			// GPAD_BTN::BTN_X
 	gpadBtnMap[SDL_GAMEPAD_BUTTON_NORTH] = btn++;			// GPAD_BTN::BTN_Y
-	gpadBtnMap[SDL_GAMEPAD_BUTTON_BACK] = btn++;			// GPAD_BTN::BTN_BACK
-	gpadBtnMap[SDL_GAMEPAD_BUTTON_GUIDE] = btn++;		    // GPAD_BTN::BTN_GUIDE
-	gpadBtnMap[SDL_GAMEPAD_BUTTON_START] = btn++;		    // GPAD_BTN::BTN_START
+
 	gpadBtnMap[SDL_GAMEPAD_BUTTON_LEFT_SHOULDER] = btn++;	// GPAD_BTN::BTN_LS
 	gpadBtnMap[SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER] = btn++;	// GPAD_BTN::BTN_RS
+	gpadBtnMap[SDL_GAMEPAD_BUTTON_BACK] = btn++;			// GPAD_BTN::BTN_BACK
+	gpadBtnMap[SDL_GAMEPAD_BUTTON_START] = btn++;		    // GPAD_BTN::BTN_START
+
+	gpadBtnMap[SDL_GAMEPAD_BUTTON_MISC1] = btn++;	        // GPAD_BTN::BTN_MISC1
+	gpadBtnMap[SDL_GAMEPAD_BUTTON_MISC2] = btn++;	        // GPAD_BTN::BTN_MISC2
+	gpadBtnMap[SDL_GAMEPAD_BUTTON_MISC3] = btn++;	        // GPAD_BTN::BTN_MISC3
+	gpadBtnMap[SDL_GAMEPAD_BUTTON_GUIDE] = btn++;		    // GPAD_BTN::BTN_GUIDE
+
 	gpadBtnMap[SDL_GAMEPAD_BUTTON_DPAD_UP] = btn++;		    // GPAD_BTN::BTN_DPAD_UP
 	gpadBtnMap[SDL_GAMEPAD_BUTTON_DPAD_DOWN] = btn++;	    // GPAD_BTN::BTN_DPAD_DOWN
 	gpadBtnMap[SDL_GAMEPAD_BUTTON_DPAD_LEFT] = btn++;	    // GPAD_BTN::BTN_DPAD_LEFT
 	gpadBtnMap[SDL_GAMEPAD_BUTTON_DPAD_RIGHT] = btn++;	    // GPAD_BTN::BTN_DPAD_RIGHT
-	gpadBtnMap[SDL_GAMEPAD_BUTTON_MISC1] = btn++;	        // GPAD_BTN::BTN_MISC1
-	gpadBtnMap[SDL_GAMEPAD_BUTTON_MISC2] = btn++;	        // GPAD_BTN::BTN_MISC2
-	gpadBtnMap[SDL_GAMEPAD_BUTTON_MISC3] = btn++;	        // GPAD_BTN::BTN_MISC3
 
     // 16 buttons including a single hat on a joystick
 	btn = 0;
@@ -423,37 +413,43 @@ void Joystick::InitButtonStates()
 	joysBtnMap[JOYS_BTN::BTN_2] = btn++;
 	joysBtnMap[JOYS_BTN::BTN_3] = btn++;
 	joysBtnMap[JOYS_BTN::BTN_4] = btn++;
+
 	joysBtnMap[JOYS_BTN::BTN_5] = btn++;
 	joysBtnMap[JOYS_BTN::BTN_6] = btn++;
 	joysBtnMap[JOYS_BTN::BTN_7] = btn++;
 	joysBtnMap[JOYS_BTN::BTN_8] = btn++;
-	joysBtnMap[JOYS_BTN::BTN_HAT_UP] = btn++;
-	joysBtnMap[JOYS_BTN::BTN_HAT_DOWN] = btn++;
-	joysBtnMap[JOYS_BTN::BTN_HAT_LEFT] = btn++;
-	joysBtnMap[JOYS_BTN::BTN_HAT_RIGHT] = btn++;
+
 	joysBtnMap[JOYS_BTN::BTN_9] = btn++;
 	joysBtnMap[JOYS_BTN::BTN_10] = btn++;
 	joysBtnMap[JOYS_BTN::BTN_11] = btn++;
 	joysBtnMap[JOYS_BTN::BTN_12] = btn++;
+
+	joysBtnMap[JOYS_BTN::BTN_HAT_UP] = btn++;
+	joysBtnMap[JOYS_BTN::BTN_HAT_DOWN] = btn++;
+	joysBtnMap[JOYS_BTN::BTN_HAT_LEFT] = btn++;
+	joysBtnMap[JOYS_BTN::BTN_HAT_RIGHT] = btn++;
+
 }
 
 
+/// \brief Open the first two gamepads or joysticks found.
+///
+/// This function is called during OnInit() and OnEvent() when the system detects
+/// a change in the availability of gamepads or joysticks. It will open the first
+/// two gamepads or joysticks it finds and set their internal state to active.
+///
+/// \return void
 void Joystick::OpenControllers()
 {
     int num_joysticks;
     SDL_JoystickID* jstk_id = SDL_GetJoysticks(&num_joysticks);
     if (num_joysticks > 2)  num_joysticks = 2;
 
-    std::cout << "Joystick::OpenControllers(): " << num_joysticks << " joysticks" << std::endl;
-
 	for (int num = 0; num < num_joysticks; num++)
 	{
         SDL_JoystickID index = jstk_id[num];
-        std::cout << "Joystick::OpenControllers() -- index: " << index << std::endl;
-		if (SDL_IsGamepad(index)) // is a Gamepad
+		if (SDL_IsGamepad(index)) // It's a Gamepad?
 		{
-            std::cout << "Joystick::OpenControllers(): " << index << " is a Gamepad" << std::endl;
-            //state[num].num_buttons = SDL_GAMEPAD_BUTTON_COUNT;
 			state[num].bIsJoystick = false;
 			state[num].name = SDL_GetGamepadNameForID(index);
 			state[num].controller = SDL_OpenGamepad(index);
@@ -466,12 +462,10 @@ void Joystick::OpenControllers()
 			}
 			state[num].bIsActive = true;
 		}
-		else // presume it is a joystick
+		else // It's a Joystick
 		{
-            std::cout << "Joystick::OpenControllers(): " << index << " is a Joystick" << std::endl;
 			state[num].bIsJoystick = true;
 			state[num].joystick = SDL_OpenJoystick(index);
-            //state[num].num_buttons = SDL_GetNumJoystickButtons(state[num].joystick);
 			if (state[num].joystick == nullptr)
 			{
 				std::string msg = "SDL could not open a joystick! SDL_Error: ";
@@ -479,22 +473,52 @@ void Joystick::OpenControllers()
 				Bus::Error(msg.c_str(), __FILE__, __LINE__);
 				return;
 			}
-			// state[index].name = SDL_JoystickName(state[index].joystick);
 			state[num].name = SDL_GetJoystickNameForID(index);
 			state[num].bIsActive = true;
 		}
 	}
 }
 
+/// \brief CloseControllers - Deactivate and close all gamepad or joystick controllers.
+///
+/// This function deactivates and closes the first two gamepad or joystick controllers
+/// that are currently open. It updates the state to inactive, writes default button 
+/// values to memory, and releases resources associated with each controller.
 void Joystick::CloseControllers()
 {
+    // Close Controller 0
 	state[0].bIsActive = false;
-	Memory::Write_Word(MAP(JOYS_1_BTN), 0xffff, true);	// bus->debug_write_word(JOYS_1_BTN, 0xffff);
+	Memory::Write_Word(MAP(JOYS_1_BTN), 0xffff, true);
+    if (state[0].controller) {
+        SDL_CloseGamepad(state[0].controller);
+        state[0].controller = nullptr;
+    }
+    if (state[0].joystick) {
+        SDL_CloseJoystick(state[0].joystick);
+        state[0].controller = nullptr;
+    }
+    // Close Controller 1
 	state[1].bIsActive = false;
-	Memory::Write_Word(MAP(JOYS_2_BTN), 0xffff, true);	// bus->debug_write_word(JOYS_2_BTN, 0xffff);
+	Memory::Write_Word(MAP(JOYS_2_BTN), 0xffff, true);
+    if (state[1].controller) {
+        SDL_CloseGamepad(state[1].controller);
+        state[1].controller = nullptr;
+    }
+    if (state[1].joystick) {
+        SDL_CloseJoystick(state[1].joystick);
+        state[1].controller = nullptr;
+    }
 }
 
 
+/// \brief EncodeButtonRegister - Encode gamepad or joystick buttons into a 16-bit register
+///
+/// This function encodes the state of the first 16 buttons of a gamepad or joystick
+/// into a 16-bit register. The register is returned as a Word value.
+///
+/// \param id - The ID of the gamepad or joystick (0 or 1).
+///
+/// \return The encoded button register as a Word value.
 Word Joystick::EncodeButtonRegister(int id)
 {
 	id %= 2;
@@ -518,13 +542,13 @@ Word Joystick::EncodeButtonRegister(int id)
 				// encode hat
 				Byte hat = SDL_GetJoystickHat(state[id].joystick, 0);
 				if (hat == SDL_HAT_UP || hat == SDL_HAT_RIGHTUP || hat == SDL_HAT_LEFTUP)
-					ret |= 0x0100;
+					ret |= 0x1000;
 				if (hat == SDL_HAT_DOWN || hat == SDL_HAT_RIGHTDOWN || hat == SDL_HAT_LEFTDOWN)
-					ret |= 0x0200;
+					ret |= 0x2000;
 				if (hat == SDL_HAT_LEFT || hat == SDL_HAT_LEFTUP || hat == SDL_HAT_LEFTDOWN)
-					ret |= 0x0400;
+					ret |= 0x4000;
 				if (hat == SDL_HAT_RIGHT || hat == SDL_HAT_RIGHTUP || hat == SDL_HAT_RIGHTDOWN)
-					ret |= 0x0800;
+					ret |= 0x8000;
 			}
 		}
 	}
@@ -532,6 +556,12 @@ Word Joystick::EncodeButtonRegister(int id)
 }
 
 
+/// \brief Encode the axes registers for gamepads and joysticks.
+///
+/// This function is called once per frame and updates the axes registers based on
+/// the current state of the joysticks and gamepads.
+///
+/// \param id - The ID of the gamepad or joystick (0 or 1).
 void Joystick::EncodeAxesRegister(int id)
 {
 	id %= 2;

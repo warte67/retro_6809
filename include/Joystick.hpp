@@ -31,14 +31,13 @@ public: // VIRTUAL METHODS
     virtual int  OnAttach(int nextAddr) override;            // attach to the memory map
     virtual void OnInit() override;                          // initialize
     virtual void OnQuit() override;                          // shutdown
-    virtual void OnActivate() override;                      // activate
-    virtual void OnDeactivate() override;                    // deactivate
     virtual void OnEvent(SDL_Event* evnt) override;          // handle events
     virtual void OnUpdate(float fElapsedTime) override;      // update
 
     // not used
+    void OnActivate() override {};
+    void OnDeactivate() override {};
     void OnRender() override {};    
-
  
 public: // PUBLIC ACCESSORS
     // ... 
@@ -66,18 +65,18 @@ private: // PRIVATE MEMBERS
         BTN_B,          // 1
         BTN_X,          // 2
         BTN_Y,          // 3
-        BTN_BACK,       // 4
-        BTN_GUIDE,      // 5
-        BTN_START,      // 6
-        BTN_LS,         // 7
-        BTN_RS,         // 8
-        BTN_DPAD_UP,    // 9
-        BTN_DPAD_DOWN,  // A
-        BTN_DPAD_LEFT,  // B
-        BTN_DPAD_RIGHT, // C
-        BTN_MISC1,      // D
-        BTN_MISC2,      // E
-        BTN_MISC3,      // F
+        BTN_LS,         // 4
+        BTN_RS,         // 5
+        BTN_BACK,       // 6
+        BTN_START,      // 7
+        BTN_MISC1,      // 8
+        BTN_MISC2,      // 9
+        BTN_MISC3,      // A
+        BTN_GUIDE,      // B
+        BTN_DPAD_UP,    // C
+        BTN_DPAD_DOWN,  // D
+        BTN_DPAD_LEFT,  // E
+        BTN_DPAD_RIGHT, // F
     };
 
     // Joystick Buttons Bits (16-max allowed)

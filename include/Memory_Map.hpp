@@ -251,27 +251,65 @@ enum MEMMAP
 
     JOYSTICK_DEVICE       = 0xFE46,   // START: Joystick/Gamepad Controller Device Hardware Registers
     JOYS_1_BTN            = 0xFE46,   // (Word) Button Bits: Room For up to 16 Buttons  (realtime)
+                                      //        Gamepad Controller Button Bits:
+                                      //            0000'0000'0000'0000 = Nothing Pressed
+                                      //            0000'0000'0000'0001 = A
+                                      //            0000'0000'0000'0010 = B
+                                      //            0000'0000'0000'0100 = X
+                                      //            0000'0000'0000'1000 = Y
+                                      //            0000'0000'0001'0000 = L.Shoulder
+                                      //            0000'0000'0010'0000 = R.Shoulder
+                                      //            0000'0000'0100'0000 = Back
+                                      //            0000'0000'1000'0000 = Start
+                                      //            0000'0001'0000'0000 = Misc 1
+                                      //            0000'0010'0000'0000 = Misc 2
+                                      //            0000'0100'0000'0000 = Misc 3
+                                      //            0000'1000'0000'0000 = Guide
+                                      //            0001'0000'0000'0000 = DPad Up   
+                                      //            0010'0000'0000'0000 = DPad Down 
+                                      //            0100'0000'0000'0000 = DPad Left 
+                                      //            1000'0000'0000'0000 = DPad Right
+                                      //            1111'1111'1111'1111 = Not Connected
     JOYS_1_DBND           = 0xFE48,   // (Byte) PAD 1 analog deadband; default is 5   (read/write)
-    JOYS_1_LTX            = 0xFE4A,   // (char) PAD 1 LThumb-X position (-128 _ +127)   (realtime)
-    JOYS_1_LTY            = 0xFE4C,   // (char) PAD 1 LThumb-Y position (-128 _ +127)   (realtime)
-    JOYS_1_RTX            = 0xFE4E,   // (char) PAD 1 RThumb-X position (-128 _ +127)   (realtime)
-    JOYS_1_RTY            = 0xFE50,   // (char) PAD 1 RThumb-Y position (-128 _ +127)   (realtime)
-    JOYS_1_Z1             = 0xFE52,   // (char) PAD 1 left analog trigger (0 - 127)     (realtime)
-    JOYS_1_Z2             = 0xFE54,   // (char) PAD 1 left analog trigger (0 - 127)     (realtime)
-    JOYS_2_BTN            = 0xFE56,   // (Word) Button Bits: Room For up to 16 Buttons  (realtime)
-    JOYS_2_DBND           = 0xFE58,   // (Byte) PAD 2 analog deadband; default is 5   (read/write)
-    JOYS_2_LTX            = 0xFE5A,   // (char) PAD 2 LThumb-X position (-128 _ +127)   (realtime)
-    JOYS_2_LTY            = 0xFE5C,   // (char) PAD 2 LThumb-Y position (-128 _ +127)   (realtime)
-    JOYS_2_RTX            = 0xFE5E,   // (char) PAD 2 RThumb-X position (-128 _ +127)   (realtime)
-    JOYS_2_RTY            = 0xFE60,   // (char) PAD 2 RThumb-Y position (-128 _ +127)   (realtime)
-    JOYS_2_Z1             = 0xFE62,   // (char) PAD 2 left analog trigger (0 - 127)     (realtime)
-    JOYS_2_Z2             = 0xFE64,   // (char) PAD 2 left analog trigger (0 - 127)     (realtime)
-    JOYS_END              = 0xFE65,   // End of Joystick/Gamepad Device Register Space
-    JOYS_TOP              = 0xFE66,   // Top of Joystick/Gamepad Device Register Space
+    JOYS_1_LTX            = 0xFE49,   // (char) PAD 1 LThumb-X position (-128 _ +127)   (realtime)
+    JOYS_1_LTY            = 0xFE4A,   // (char) PAD 1 LThumb-Y position (-128 _ +127)   (realtime)
+    JOYS_1_RTX            = 0xFE4B,   // (char) PAD 1 RThumb-X position (-128 _ +127)   (realtime)
+    JOYS_1_RTY            = 0xFE4C,   // (char) PAD 1 RThumb-Y position (-128 _ +127)   (realtime)
+    JOYS_1_Z1             = 0xFE4D,   // (char) PAD 1 left analog trigger (0 - 127)     (realtime)
+    JOYS_1_Z2             = 0xFE4E,   // (char) PAD 1 left analog trigger (0 - 127)     (realtime)
+    JOYS_2_BTN            = 0xFE4F,   // (Word) Button Bits: Room For up to 16 Buttons  (realtime)
+                                      //        Joystick Button Bits:
+                                      //            0000'0000'0000'0000 = Nothing Pressed
+                                      //            0000'0000'0000'0001 = Button 1 
+                                      //            0000'0000'0000'0010 = Button 2 
+                                      //            0000'0000'0000'0100 = Button 3 
+                                      //            0000'0000'0000'1000 = Button 4 
+                                      //            0000'0000'0001'0000 = Button 5 
+                                      //            0000'0000'0010'0000 = Button 6 
+                                      //            0000'0000'0100'0000 = Button 7 
+                                      //            0000'0000'1000'0000 = Button 8 
+                                      //            0000'0001'0000'0000 = Button 9 
+                                      //            0000'0010'0000'0000 = Button 10
+                                      //            0000'0100'0000'0000 = Button 11
+                                      //            0000'1000'0000'0000 = Button 12
+                                      //            0001'0000'0000'0000 = Hat Up   
+                                      //            0010'0000'0000'0000 = Hat Down 
+                                      //            0100'0000'0000'0000 = Hat Left 
+                                      //            1000'0000'0000'0000 = Hat Right
+                                      //            1111'1111'1111'1111 = Not Connected
+    JOYS_2_DBND           = 0xFE51,   // (Byte) PAD 2 analog deadband; default is 5   (read/write)
+    JOYS_2_LTX            = 0xFE52,   // (char) PAD 2 LThumb-X position (-128 _ +127)   (realtime)
+    JOYS_2_LTY            = 0xFE53,   // (char) PAD 2 LThumb-Y position (-128 _ +127)   (realtime)
+    JOYS_2_RTX            = 0xFE54,   // (char) PAD 2 RThumb-X position (-128 _ +127)   (realtime)
+    JOYS_2_RTY            = 0xFE55,   // (char) PAD 2 RThumb-Y position (-128 _ +127)   (realtime)
+    JOYS_2_Z1             = 0xFE56,   // (char) PAD 2 left analog trigger (0 - 127)     (realtime)
+    JOYS_2_Z2             = 0xFE57,   // (char) PAD 2 left analog trigger (0 - 127)     (realtime)
+    JOYS_END              = 0xFE57,   // End of Joystick/Gamepad Device Register Space
+    JOYS_TOP              = 0xFE58,   // Top of Joystick/Gamepad Device Register Space
 // _______________________________________________________________________
 
     HDW_RESERVED_DEVICE   = 0x0000,   // START: Reserved Register Space
-    HDW_REG_END           = 0xFFEF,   // 393 bytes reserved for future use.
+    HDW_REG_END           = 0xFFEF,   // 407 bytes reserved for future use.
 // _______________________________________________________________________
 
     ROM_VECTS_DEVICE      = 0x0000,   // START: Hardware Interrupt Vectors
