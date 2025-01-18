@@ -80,7 +80,8 @@
     // Joystick/Gamepad Constants:
     #define SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS "SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS"
 
-
+    // FileIO Device Constants:
+    constexpr Word FILEHANDLESMAX = 256;
 
 
 //#endif  // __TYPES_HPP__

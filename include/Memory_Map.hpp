@@ -421,23 +421,28 @@ enum MEMMAP
     FIO_HANDLE            = 0xFE5C,   // (Byte) Current File Stream HANDLE (0=NONE)
     FIO_SEEKPOS           = 0xFE5D,   // (DWord) File Seek Position
     FIO_IODATA            = 0xFE61,   // (Byte) Input / Output Data
-    FIO_PATH_LEN          = 0xFE62,   // (Byte) Length of the Filepath
-    FIO_PATH_POS          = 0xFE63,   // (Byte) Character Position Within the Filepath
-    FIO_PATH_DATA         = 0xFE64,   // (Byte) Data at the Character Position of the Path
                                       // 
-    FIO_DIR_DATA          = 0xFE65,   // (Byte) A Series of Null-Terminated Filenames
+    FIO_PATH_LEN          = 0xFE62,   // (Byte) Length of the Primary Filepath
+    FIO_PATH_POS          = 0xFE63,   // (Byte) Character Position Within the Primary Filepath
+    FIO_PATH_DATA         = 0xFE64,   // (Byte) Data at the Character Position of the Primary Path
+                                      // 
+    FIO_ALT_PATH_LEN      = 0xFE65,   // (Byte) Length of the Alternate Filepath
+    FIO_ALT_PATH_POS      = 0xFE66,   // (Byte) Character Position Within the Alternate Filepath
+    FIO_ALT_PATH_DATA     = 0xFE67,   // (Byte) Data at the Character Position of the Alternate Path
+                                      // 
+    FIO_DIR_DATA          = 0xFE68,   // (Byte) A Series of Null-Terminated Filenames
                                       //   NOTE: Current read-position is reset to the beginning
                                       //     following a List Directory command. The read-position
                                       //     is automatically advanced on read from this register.
                                       //     Each filename is $0A-terminated. The list itself is
                                       //     null-terminated.
                                       // 
-    FIO_END               = 0xFE65,   // End of FIO Device Register Space
-    FIO_TOP               = 0xFE66,   // Top of FIO Device Register Space
+    FIO_END               = 0xFE68,   // End of FIO Device Register Space
+    FIO_TOP               = 0xFE69,   // Top of FIO Device Register Space
 // _______________________________________________________________________
 
     HDW_RESERVED_DEVICE   = 0x0000,   // START: Reserved Register Space
-    HDW_REG_END           = 0xFFEF,   // 393 bytes reserved for future use.
+    HDW_REG_END           = 0xFFEF,   // 390 bytes reserved for future use.
 // _______________________________________________________________________
 
     ROM_VECTS_DEVICE      = 0x0000,   // START: Hardware Interrupt Vectors

@@ -419,23 +419,28 @@ FC_LAST               equ    $0018    ;   End FIO_COMMAND enumeration
 FIO_HANDLE            equ    $FE5C    ; (Byte) Current File Stream HANDLE (0=NONE)
 FIO_SEEKPOS           equ    $FE5D    ; (DWord) File Seek Position
 FIO_IODATA            equ    $FE61    ; (Byte) Input / Output Data
-FIO_PATH_LEN          equ    $FE62    ; (Byte) Length of the Filepath
-FIO_PATH_POS          equ    $FE63    ; (Byte) Character Position Within the Filepath
-FIO_PATH_DATA         equ    $FE64    ; (Byte) Data at the Character Position of the Path
                                       ; 
-FIO_DIR_DATA          equ    $FE65    ; (Byte) A Series of Null-Terminated Filenames
+FIO_PATH_LEN          equ    $FE62    ; (Byte) Length of the Primary Filepath
+FIO_PATH_POS          equ    $FE63    ; (Byte) Character Position Within the Primary Filepath
+FIO_PATH_DATA         equ    $FE64    ; (Byte) Data at the Character Position of the Primary Path
+                                      ; 
+FIO_ALT_PATH_LEN      equ    $FE65    ; (Byte) Length of the Alternate Filepath
+FIO_ALT_PATH_POS      equ    $FE66    ; (Byte) Character Position Within the Alternate Filepath
+FIO_ALT_PATH_DATA     equ    $FE67    ; (Byte) Data at the Character Position of the Alternate Path
+                                      ; 
+FIO_DIR_DATA          equ    $FE68    ; (Byte) A Series of Null-Terminated Filenames
                                       ;   NOTE: Current read-position is reset to the beginning
                                       ;     following a List Directory command. The read-position
                                       ;     is automatically advanced on read from this register.
                                       ;     Each filename is $0A-terminated. The list itself is
                                       ;     null-terminated.
                                       ; 
-FIO_END               equ    $FE65    ; End of FIO Device Register Space
-FIO_TOP               equ    $FE66    ; Top of FIO Device Register Space
+FIO_END               equ    $FE68    ; End of FIO Device Register Space
+FIO_TOP               equ    $FE69    ; Top of FIO Device Register Space
 ; _______________________________________________________________________
 
 HDW_RESERVED_DEVICE   equ    $0000    ; START: Reserved Register Space
-HDW_REG_END           equ    $FFEF    ; 393 bytes reserved for future use.
+HDW_REG_END           equ    $FFEF    ; 390 bytes reserved for future use.
 ; _______________________________________________________________________
 
 ROM_VECTS_DEVICE      equ    $0000    ; START: Hardware Interrupt Vectors
