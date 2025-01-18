@@ -15,7 +15,7 @@
  *
  ************************************/
 
-#include "NewDevice.hpp"
+#include "Gamepad.hpp"
 
 
 
