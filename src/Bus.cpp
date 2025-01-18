@@ -25,6 +25,7 @@
 #include "Mouse.hpp"
 #include "Keyboard.hpp"
 #include "Joystick.hpp"
+#include "FileIO.hpp"
 
 
 class BusException : public std::exception
@@ -206,18 +207,20 @@ void Bus::_onInit()
     ////////////////////////////////////////
 
     // Attach the core system devices
-    Memory::Attach<SOFT_VECTORS>();     // 0x0000 - 0x000F
-    Memory::Attach<SYSTEM_MEMORY>();    // 0x0010 - 0x03FF
-    Memory::Attach<VIDEO_BUFFER>();     // 0x0400 - 0x23FF      (8k video buffer)
-    Memory::Attach<USER_MEMORY>();      // 0x2400 - 0xAFFF      (42k user RAM)    
-    Memory::Attach<MEMBANK>();          // 0xB000 - 0xEFFF      (16k banked memory)
-    Memory::Attach<KERNEL_ROM>(); 
+    Memory::Attach<SOFT_VECTORS>(); 
+    Memory::Attach<SYSTEM_MEMORY>();
+    Memory::Attach<VIDEO_BUFFER>(); 
+    Memory::Attach<USER_MEMORY>();  
+    Memory::Attach<MEMBANK>();      
+    Memory::Attach<KERNEL_ROM>();       // Add a new constructor to include the kernal filename.
 
-    _pDebug = Memory::Attach<Debug>();
-    _pGPU = Memory::Attach<GPU>();
+    _pDebug = Memory::Attach<Debug>();  // This could be a singleton due to its static nature.
+    _pGPU   = Memory::Attach<GPU>();    // This could be a singleton due to its static nature.
+
     Memory::Attach<Mouse>();
     Memory::Attach<Keyboard>();
     Memory::Attach<Joystick>();
+    Memory::Attach<FileIO>();
 
     Memory::Attach<HDW_RESERVED>();     // reserved space for future use
     Memory::Attach<ROM_VECTS>();        // 0xFFF0 - 0xFFFF      (System ROM Vectors)

@@ -374,8 +374,70 @@ enum MEMMAP
     JOYS_TOP              = 0xFE5A,   // Top of Joystick/Gamepad Device Register Space
 // _______________________________________________________________________
 
+    FIO_DEVICE            = 0xFE5A,   // START: File I/O Device Hardware Registers
+    FIO_ERROR             = 0xFE5A,   // (Byte) FILE_ERROR enumeration result (FE_<error>)
+                                      // 
+    FE_BEGIN              = 0x0000,   //   Begin FILE_ERROR enumeration 
+    FE_NOERROR            = 0x0000,   //      no error, condition normal
+    FE_NOTFOUND           = 0x0001,   //      file or folder not found  
+    FE_NOTOPEN            = 0x0002,   //      file not open             
+    FE_EOF                = 0x0003,   //      end of file               
+    FE_OVERRUN            = 0x0004,   //      buffer overrun            
+    FE_WRONGTYPE          = 0x0005,   //      wrong file type           
+    FE_BAD_CMD            = 0x0006,   //      invalid command           
+    FE_BADSTREAM          = 0x0007,   //      invalid file stream       
+    FE_LAST               = 0x0007,   //   End of FILE_ERROR enumeration
+                                      // 
+    FIO_COMMAND           = 0xFE5B,   // (Byte) Execute a File Command (FC_<cmd>)
+                                      // 
+    FC_BEGIN              = 0x0000,   //   Begin FIO_COMMAND enumeration           
+    FC_RESET              = 0x0000,   //     Reset                                 
+    FC_SHUTDOWN           = 0x0001,   //     SYSTEM: Shutdown                      
+    FC_COMPDATE           = 0x0002,   //     SYSTEM: Load Compilation Date         
+    FC_FILEEXISTS         = 0x0003,   //     Does File Exist (return in FIO_IODATA)
+    FC_OPENREAD           = 0x0004,   //     Open Binary File For Reading          
+    FC_OPENWRITE          = 0x0005,   //     Open Binary File For Writing          
+    FC_OPENAPPEND         = 0x0006,   //     Open Binary File For Appending        
+    FC_CLOSEFILE          = 0x0007,   //     Close File                            
+    FC_READBYTE           = 0x0008,   //     Read Byte (into FIO_IOBYTE)           
+    FC_WRITEBYTE          = 0x0009,   //     Write Byte (from FIO_IOBYTE)          
+    FC_LOADHEX            = 0x000A,   //     Load Hex Format File                  
+    FC_GETLENGTH          = 0x000B,   //     Get File Length (into FIO_IOWORD)     
+    FC_LISTDIR            = 0x000C,   //     List Directory                        
+    FC_MAKEDIR            = 0x000D,   //     Make Directory                        
+    FC_CHANGEDIR          = 0x000E,   //     Change Directory                      
+    FC_GETPATH            = 0x000F,   //     Fetch Current Path                    
+    FC_REN_DIR            = 0x0010,   //     Rename Directory                      
+    FC_DEL_DIR            = 0x0011,   //     Delete Directory                      
+    FC_DEL_FILE           = 0x0012,   //     Delete File                           
+    FC_REN_FILE           = 0x0013,   //     Rename File                           
+    FC_COPY_FILE          = 0x0014,   //     Copy File                             
+    FC_SEEK_START         = 0x0015,   //     Seek Start                            
+    FC_SEEK_END           = 0x0016,   //     Seek End                              
+    FC_SET_SEEK           = 0x0017,   //     Set Seek Position (from FIO_IOWORD)   
+    FC_GET_SEEK           = 0x0018,   //     Get Seek Position (into FIO_IOWORD)   
+    FC_LAST               = 0x0018,   //   End FIO_COMMAND enumeration             
+                                      // 
+    FIO_HANDLE            = 0xFE5C,   // (Byte) Current File Stream HANDLE (0=NONE)
+    FIO_SEEKPOS           = 0xFE5D,   // (DWord) File Seek Position
+    FIO_IODATA            = 0xFE61,   // (Byte) Input / Output Data
+    FIO_PATH_LEN          = 0xFE62,   // (Byte) Length of the Filepath
+    FIO_PATH_POS          = 0xFE63,   // (Byte) Character Position Within the Filepath
+    FIO_PATH_DATA         = 0xFE64,   // (Byte) Data at the Character Position of the Path
+                                      // 
+    FIO_DIR_DATA          = 0xFE65,   // (Byte) A Series of Null-Terminated Filenames
+                                      //   NOTE: Current read-position is reset to the beginning
+                                      //     following a List Directory command. The read-position
+                                      //     is automatically advanced on read from this register.
+                                      //     Each filename is $0A-terminated. The list itself is
+                                      //     null-terminated.
+                                      // 
+    FIO_END               = 0xFE65,   // End of FIO Device Register Space
+    FIO_TOP               = 0xFE66,   // Top of FIO Device Register Space
+// _______________________________________________________________________
+
     HDW_RESERVED_DEVICE   = 0x0000,   // START: Reserved Register Space
-    HDW_REG_END           = 0xFFEF,   // 405 bytes reserved for future use.
+    HDW_REG_END           = 0xFFEF,   // 393 bytes reserved for future use.
 // _______________________________________________________________________
 
     ROM_VECTS_DEVICE      = 0x0000,   // START: Hardware Interrupt Vectors

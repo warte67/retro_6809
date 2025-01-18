@@ -387,6 +387,7 @@ void Memory::Generate_Memory_Map()
                 for (auto &r : node->mapped_register)
                 {
                     if (r.name == "") continue;
+                    //if (r.comment.size()==1)  continue;
                     std::string _out = clr::pad(clr::pad(r.name, VAR_LEN) + "equ    $" + clr::hex(r.address, 4), COMMENT_START);
                     // comments
                     for (auto &c : r.comment)

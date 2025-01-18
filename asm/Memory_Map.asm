@@ -372,8 +372,70 @@ JOYS_END              equ    $FE59    ; End of Joystick/Gamepad Device Register 
 JOYS_TOP              equ    $FE5A    ; Top of Joystick/Gamepad Device Register Space
 ; _______________________________________________________________________
 
+FIO_DEVICE            equ    $FE5A    ; START: File I/O Device Hardware Registers
+FIO_ERROR             equ    $FE5A    ; (Byte) FILE_ERROR enumeration result (FE_<error>)
+                                      ; 
+FE_BEGIN              equ    $0000    ;   Begin FILE_ERROR enumeration 
+FE_NOERROR            equ    $0000    ;      no error, condition normal
+FE_NOTFOUND           equ    $0001    ;      file or folder not found  
+FE_NOTOPEN            equ    $0002    ;      file not open             
+FE_EOF                equ    $0003    ;      end of file               
+FE_OVERRUN            equ    $0004    ;      buffer overrun            
+FE_WRONGTYPE          equ    $0005    ;      wrong file type           
+FE_BAD_CMD            equ    $0006    ;      invalid command           
+FE_BADSTREAM          equ    $0007    ;      invalid file stream       
+FE_LAST               equ    $0007    ;   End of FILE_ERROR enumeration
+                                      ; 
+FIO_COMMAND           equ    $FE5B    ; (Byte) Execute a File Command (FC_<cmd>)
+                                      ; 
+FC_BEGIN              equ    $0000    ;   Begin FIO_COMMAND enumeration           
+FC_RESET              equ    $0000    ;     Reset                                 
+FC_SHUTDOWN           equ    $0001    ;     SYSTEM: Shutdown                      
+FC_COMPDATE           equ    $0002    ;     SYSTEM: Load Compilation Date         
+FC_FILEEXISTS         equ    $0003    ;     Does File Exist (return in FIO_IODATA)
+FC_OPENREAD           equ    $0004    ;     Open Binary File For Reading          
+FC_OPENWRITE          equ    $0005    ;     Open Binary File For Writing          
+FC_OPENAPPEND         equ    $0006    ;     Open Binary File For Appending        
+FC_CLOSEFILE          equ    $0007    ;     Close File                            
+FC_READBYTE           equ    $0008    ;     Read Byte (into FIO_IOBYTE)           
+FC_WRITEBYTE          equ    $0009    ;     Write Byte (from FIO_IOBYTE)          
+FC_LOADHEX            equ    $000A    ;     Load Hex Format File                  
+FC_GETLENGTH          equ    $000B    ;     Get File Length (into FIO_IOWORD)     
+FC_LISTDIR            equ    $000C    ;     List Directory                        
+FC_MAKEDIR            equ    $000D    ;     Make Directory                        
+FC_CHANGEDIR          equ    $000E    ;     Change Directory                      
+FC_GETPATH            equ    $000F    ;     Fetch Current Path                    
+FC_REN_DIR            equ    $0010    ;     Rename Directory                      
+FC_DEL_DIR            equ    $0011    ;     Delete Directory                      
+FC_DEL_FILE           equ    $0012    ;     Delete File                           
+FC_REN_FILE           equ    $0013    ;     Rename File                           
+FC_COPY_FILE          equ    $0014    ;     Copy File                             
+FC_SEEK_START         equ    $0015    ;     Seek Start                            
+FC_SEEK_END           equ    $0016    ;     Seek End                              
+FC_SET_SEEK           equ    $0017    ;     Set Seek Position (from FIO_IOWORD)   
+FC_GET_SEEK           equ    $0018    ;     Get Seek Position (into FIO_IOWORD)   
+FC_LAST               equ    $0018    ;   End FIO_COMMAND enumeration             
+                                      ; 
+FIO_HANDLE            equ    $FE5C    ; (Byte) Current File Stream HANDLE (0=NONE)
+FIO_SEEKPOS           equ    $FE5D    ; (DWord) File Seek Position
+FIO_IODATA            equ    $FE61    ; (Byte) Input / Output Data
+FIO_PATH_LEN          equ    $FE62    ; (Byte) Length of the Filepath
+FIO_PATH_POS          equ    $FE63    ; (Byte) Character Position Within the Filepath
+FIO_PATH_DATA         equ    $FE64    ; (Byte) Data at the Character Position of the Path
+                                      ; 
+FIO_DIR_DATA          equ    $FE65    ; (Byte) A Series of Null-Terminated Filenames
+                                      ;   NOTE: Current read-position is reset to the beginning
+                                      ;     following a List Directory command. The read-position
+                                      ;     is automatically advanced on read from this register.
+                                      ;     Each filename is $0A-terminated. The list itself is
+                                      ;     null-terminated.
+                                      ; 
+FIO_END               equ    $FE65    ; End of FIO Device Register Space
+FIO_TOP               equ    $FE66    ; Top of FIO Device Register Space
+; _______________________________________________________________________
+
 HDW_RESERVED_DEVICE   equ    $0000    ; START: Reserved Register Space
-HDW_REG_END           equ    $FFEF    ; 405 bytes reserved for future use.
+HDW_REG_END           equ    $FFEF    ; 393 bytes reserved for future use.
 ; _______________________________________________________________________
 
 ROM_VECTS_DEVICE      equ    $0000    ; START: Hardware Interrupt Vectors
