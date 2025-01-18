@@ -386,17 +386,17 @@ void Joystick::OnUpdate(float fElapsedTime)
     //std::cout << clr::indent() << clr::LT_BLUE << "Joystick::OnUpdate() Entry" << clr::RETURN;
     (void)fElapsedTime;     // stop the compiler from complaining about unused parameters
 
-    // // update button registers
-	// if (state[0].bIsActive)
-	// 	Bus::Write_Word(JOYS_1_BTN, EncodeButtonRegister(0), true);
-	// else
-	// 	Bus::Write_Word(JOYS_1_BTN, 0xffff, true);
-	// if (state[1].bIsActive)
-	// 	Bus::Write_Word(JOYS_2_BTN, EncodeButtonRegister(1), true);
-	// else
-	// 	Bus::Write_Word(JOYS_2_BTN, 0xffff, true);
-	// EncodeAxesRegister(0);
-	// EncodeAxesRegister(1);
+    // update button registers
+	if (state[0].bIsActive)
+		Memory::Write_Word(MAP(JOYS_1_BTN), EncodeButtonRegister(0), true);
+	else
+		Memory::Write_Word(MAP(JOYS_1_BTN), 0xffff, true);
+	if (state[1].bIsActive)
+		Memory::Write_Word(MAP(JOYS_2_BTN), EncodeButtonRegister(1), true);
+	else
+		Memory::Write_Word(MAP(JOYS_2_BTN), 0xffff, true);
+	EncodeAxesRegister(0);
+	EncodeAxesRegister(1);
 
     //std::cout << clr::indent() << clr::LT_BLUE << "Joystick::OnUpdate() Exit" << clr::RETURN;
 }
@@ -508,13 +508,13 @@ Word Joystick::EncodeButtonRegister(int id)
 		// encode only the first 16 buttons
 		for (int btn = 0; btn < 16; btn++)
 		{
-			// Joystick?
-			if (state[id].bIsJoystick)
+			// Gamepad?
+			if (!state[id].bIsJoystick)
 			{
 				if (SDL_GetGamepadButton(state[id].controller, (SDL_GamepadButton)btn))
 					ret |= (1 << gpadBtnMap[btn]);
 			}
-			else // joystick
+			else // Joystick
 			{
 				if (SDL_GetJoystickButton(state[id].joystick, btn))
 					ret |= (1 << joysBtnMap[btn]);
@@ -544,7 +544,7 @@ void Joystick::EncodeAxesRegister(int id)
 		if (id == 1)
 			deadband = Memory::Read(MAP(JOYS_2_DBND));
 
-		if (state[id].bIsJoystick)	// is Joystick
+		if (!state[id].bIsJoystick)	// is Gamepad
 		{
 			Sint8 LTX = (SDL_GetGamepadAxis(state[id].controller, SDL_GAMEPAD_AXIS_LEFTX) & 0xff00) >> 8;
 			if (LTX < 0 && LTX > -deadband)	LTX = 0;
@@ -580,7 +580,7 @@ void Joystick::EncodeAxesRegister(int id)
 				Memory::Write(MAP(JOYS_2_Z2 ),  Z2, true);	
 			}
 		}
-		else  // is joystick
+		else  // is Joystick
 		{
 			Sint8 LTX = (SDL_GetJoystickAxis(state[id].joystick, 0) & 0xff00) >> 8;
 			if (LTX < 0 && LTX > -deadband)	LTX = 0;
