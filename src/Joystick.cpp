@@ -61,13 +61,54 @@ int  Joystick::OnAttach(int nextAddr)
 
 
     ////////////////////////////////////////////////
+    // (Byte) JOYS_1_FLAGS
+    //       PAD 1 Condition Flags   (read/write)
+    mapped_register.push_back( { "JOYS_1_FLAGS", nextAddr,
+        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
+        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
+        {   
+            "(Byte) Gamepad/Joystick #1 Condition Flags:     (Read Only)",
+            "           0000'0000: Not Connected",      
+            "           0000'1111: Controller Type",
+            "           0001'0000: (reserved)",
+            "           0010'0000: (reserved)",
+            "           0100'0000: Is a Gamepad",
+            "           1000'0000: Is a Joystick",
+            "",
+            "       Gamepad Controller Type (bits 0-3):",
+            "           0:  Unknown",
+            "           1:  Standard",
+            "           2:  Xbox360",
+            "           3:  XboxOne",
+            "           4:  PS3",
+            "           5:  PS4",
+            "           6:  PS5",
+            "           7:  Nintendo Switch Pro",
+            "           8:  Nintendo Switch Joycon Left",
+            "           9:  Nintendo Switch Joycon Right",
+            "",
+            "       Joystick Controller Type (bits 0-3):",
+            "           0:  Unknown",
+            "           1:  Gamepad",
+            "           2:  Wheel",
+            "           3:  Arcade Stick",
+            "           4:  Flight Stick",
+            "           5:  Dance Pad",
+            "           6:  Guitar",
+            "           7:  Drum Kit",
+            "           8:  Arcade Pad",
+            "           9:  Throttle",
+            ""
+        }}); nextAddr+=1;   
+
+
+    ////////////////////////////////////////////////
     // (Word) JOYS_1_BTN
     //       Button Bits: Room For up to 16 Buttons  (realtime)
     mapped_register.push_back( { "JOYS_1_BTN", nextAddr,
         [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
         [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
-        {   "(Word) Button Bits: Room For up to 16 Buttons  (realtime)",
-            "       Gamepad Controller Button Bits:",
+        {   "(Word) Gamepad Controller Button Bits:         (Read Only)",
             "           0000'0000'0000'0000 = Nothing Pressed",
             "           0000'0000'0000'0001 = A",  
             "           0000'0000'0000'0010 = B",  
@@ -85,8 +126,7 @@ int  Joystick::OnAttach(int nextAddr)
             "           0010'0000'0000'0000 = DPad Down ",
             "           0100'0000'0000'0000 = DPad Left ",   
             "           1000'0000'0000'0000 = DPad Right",     
-            "           1111'1111'1111'1111 = Not Connected"   
-        }}); nextAddr+=1;   
+            "           1111'1111'1111'1111 = Not Connected",""}}); nextAddr+=1;   
     mapped_register.push_back( { "", nextAddr,
         [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
         [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
@@ -153,7 +193,49 @@ int  Joystick::OnAttach(int nextAddr)
     mapped_register.push_back( { "JOYS_1_Z2", nextAddr,
         [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
         [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
-        {   "(char) PAD 1 left analog trigger (0 - 127)     (realtime)" }}); nextAddr+=1;   
+        {   "(char) PAD 1 left analog trigger (0 - 127)     (realtime)","" }}); nextAddr+=1;   
+
+
+    ////////////////////////////////////////////////
+    // (Byte) JOYS_2_FLAGS
+    //       PAD 2 Condition Flags   (read/write)
+    mapped_register.push_back( { "JOYS_2_FLAGS", nextAddr,
+        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
+        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
+        {   
+            "(Byte) Gamepad/Joystick #2 Condition Flags:     (Read Only)",
+            "           0000'0000: Not Connected",      
+            "           0000'1111: Controller Type",
+            "           0001'0000: (reserved)",
+            "           0010'0000: (reserved)",
+            "           0100'0000: Is a Gamepad",
+            "           1000'0000: Is a Joystick",
+            "",
+            "       Gamepad Controller Type (bits 0-3):",
+            "           0:  Unknown",
+            "           1:  Standard",
+            "           2:  Xbox360",
+            "           3:  XboxOne",
+            "           4:  PS3",
+            "           5:  PS4",
+            "           6:  PS5",
+            "           7:  Nintendo Switch Pro",
+            "           8:  Nintendo Switch Joycon Left",
+            "           9:  Nintendo Switch Joycon Right",
+            "",
+            "       Joystick Controller Type (bits 0-3):",
+            "           0:  Unknown",
+            "           1:  Gamepad",
+            "           2:  Wheel",
+            "           3:  Arcade Stick",
+            "           4:  Flight Stick",
+            "           5:  Dance Pad",
+            "           6:  Guitar",
+            "           7:  Drum Kit",
+            "           8:  Arcade Pad",
+            "           9:  Throttle",
+            ""
+        }}); nextAddr+=1;   
 
 
     ////////////////////////////////////////////////
@@ -181,8 +263,7 @@ int  Joystick::OnAttach(int nextAddr)
             "           0010'0000'0000'0000 = Hat Down ",
             "           0100'0000'0000'0000 = Hat Left ",   
             "           1000'0000'0000'0000 = Hat Right",   
-            "           1111'1111'1111'1111 = Not Connected"   
-        }}); nextAddr+=1;  
+            "           1111'1111'1111'1111 = Not Connected",""}}); nextAddr+=1;  
     mapped_register.push_back( { "", nextAddr,
         [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
         [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
@@ -369,6 +450,9 @@ void Joystick::OnUpdate(float fElapsedTime)
 		Memory::Write_Word(MAP(JOYS_2_BTN), 0xffff, true);
 	EncodeAxesRegister(0);
 	EncodeAxesRegister(1);
+
+    EncodeConditionFlags(0);
+    EncodeConditionFlags(1);
 }
 
 
@@ -452,8 +536,8 @@ void Joystick::OpenControllers()
 		{
 			state[num].bIsJoystick = false;
 			state[num].name = SDL_GetGamepadNameForID(index);
-			state[num].controller = SDL_OpenGamepad(index);
-			if (state[num].controller == nullptr)
+			state[num].gamepad = SDL_OpenGamepad(index);
+			if (state[num].gamepad == nullptr)
 			{
 				std::string msg = "SDL could not open a Gamepad! SDL_Error: ";
 				msg += SDL_GetError();
@@ -489,24 +573,26 @@ void Joystick::CloseControllers()
     // Close Controller 0
 	state[0].bIsActive = false;
 	Memory::Write_Word(MAP(JOYS_1_BTN), 0xffff, true);
-    if (state[0].controller) {
-        SDL_CloseGamepad(state[0].controller);
-        state[0].controller = nullptr;
+	Memory::Write(MAP(JOYS_1_FLAGS), 0, true);
+    if (state[0].gamepad) {
+        SDL_CloseGamepad(state[0].gamepad);
+        state[0].gamepad = nullptr;
     }
     if (state[0].joystick) {
         SDL_CloseJoystick(state[0].joystick);
-        state[0].controller = nullptr;
+        state[0].joystick = nullptr;
     }
     // Close Controller 1
 	state[1].bIsActive = false;
 	Memory::Write_Word(MAP(JOYS_2_BTN), 0xffff, true);
-    if (state[1].controller) {
-        SDL_CloseGamepad(state[1].controller);
-        state[1].controller = nullptr;
+	Memory::Write(MAP(JOYS_2_FLAGS), 0, true);
+    if (state[1].gamepad) {
+        SDL_CloseGamepad(state[1].gamepad);
+        state[1].gamepad = nullptr;
     }
     if (state[1].joystick) {
         SDL_CloseJoystick(state[1].joystick);
-        state[1].controller = nullptr;
+        state[1].joystick = nullptr;
     }
 }
 
@@ -532,7 +618,7 @@ Word Joystick::EncodeButtonRegister(int id)
 			// Gamepad?
 			if (!state[id].bIsJoystick)
 			{
-				if (SDL_GetGamepadButton(state[id].controller, (SDL_GamepadButton)btn))
+				if (SDL_GetGamepadButton(state[id].gamepad, (SDL_GamepadButton)btn))
 					ret |= (1 << gpadBtnMap[btn]);
 			}
 			else // Joystick
@@ -573,20 +659,20 @@ void Joystick::EncodeAxesRegister(int id)
 
 		if (!state[id].bIsJoystick)	// is Gamepad
 		{
-			Sint8 LTX = (SDL_GetGamepadAxis(state[id].controller, SDL_GAMEPAD_AXIS_LEFTX) & 0xff00) >> 8;
+			Sint8 LTX = (SDL_GetGamepadAxis(state[id].gamepad, SDL_GAMEPAD_AXIS_LEFTX) & 0xff00) >> 8;
 			if (LTX < 0 && LTX > -deadband)	LTX = 0;
 			if (LTX > 0 && LTX < deadband)	LTX = 0;
-			Sint8 LTY = (SDL_GetGamepadAxis(state[id].controller, SDL_GAMEPAD_AXIS_LEFTY) & 0xff00) >> 8;
+			Sint8 LTY = (SDL_GetGamepadAxis(state[id].gamepad, SDL_GAMEPAD_AXIS_LEFTY) & 0xff00) >> 8;
 			if (LTY < 0 && LTY > -deadband)	LTY = 0;
 			if (LTY > 0 && LTY < deadband)	LTY = 0;
-			Sint8 RTX = (SDL_GetGamepadAxis(state[id].controller, SDL_GAMEPAD_AXIS_RIGHTX) & 0xff00) >> 8;
+			Sint8 RTX = (SDL_GetGamepadAxis(state[id].gamepad, SDL_GAMEPAD_AXIS_RIGHTX) & 0xff00) >> 8;
 			if (RTX < 0 && RTX > -deadband)	RTX = 0;
 			if (RTX > 0 && RTX < deadband)	RTX = 0;
-			Sint8 RTY = (SDL_GetGamepadAxis(state[id].controller, SDL_GAMEPAD_AXIS_RIGHTY) & 0xff00) >> 8;
+			Sint8 RTY = (SDL_GetGamepadAxis(state[id].gamepad, SDL_GAMEPAD_AXIS_RIGHTY) & 0xff00) >> 8;
 			if (RTY < 0 && RTY > -deadband)	RTY = 0;
 			if (RTY > 0 && RTY < deadband)	RTY = 0;
-			Sint8 Z1 = SDL_GetGamepadAxis(state[id].controller, SDL_GAMEPAD_AXIS_LEFT_TRIGGER) >> 8;
-			Sint8 Z2 = SDL_GetGamepadAxis(state[id].controller, SDL_GAMEPAD_AXIS_RIGHT_TRIGGER) >> 8;
+			Sint8 Z1 = SDL_GetGamepadAxis(state[id].gamepad, SDL_GAMEPAD_AXIS_LEFT_TRIGGER) >> 8;
+			Sint8 Z2 = SDL_GetGamepadAxis(state[id].gamepad, SDL_GAMEPAD_AXIS_RIGHT_TRIGGER) >> 8;
 
 			if (id == 0)
 			{
@@ -656,6 +742,32 @@ void Joystick::EncodeAxesRegister(int id)
 			}
 		}
 	}
+}
+
+void Joystick::EncodeConditionFlags(int id)
+{
+	id %= 2;
+    Word joys_flags = 0;
+    if (id == 0)
+        joys_flags = MAP(JOYS_1_FLAGS);
+    else
+        joys_flags = MAP(JOYS_2_FLAGS);
+
+    // clear the bits (nothing connected)
+    Byte data = 0; 
+    SDL_GamepadType type = (SDL_GamepadType)SDL_GetGamepadType(state[id].gamepad);
+
+    // Gamepad or Joystick
+	if (state[id].gamepad != nullptr) {
+        data |= 0x40;   // is gamepad
+        data |= (type & 0x0f);
+    } 
+    if (state[id].joystick != nullptr) {
+        data |= 0x80;   // is joystick
+        data |= (type & 0x0f);
+    }
+    // update the flags
+    Memory::Write(joys_flags, data, true);
 }
 
 // END: Joystick.cpp
