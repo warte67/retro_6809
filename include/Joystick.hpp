@@ -56,42 +56,48 @@ private: // PRIVATE MEMBERS
         SDL_Joystick* joystick = nullptr;
         bool bIsActive = false;
         bool bIsJoystick = false;
+        // int  num_buttons = 0;
         std::string name = "";
     };
 
+    // Gamepad Buttons Bits (16-max allowed)
     enum GPAD_BTN {
-        BTN_A,
-        BTN_B,
-        BTN_X,
-        BTN_Y,
-        BTN_BACK,
-        BTN_START,
-        BTN_LS,
-        BTN_RS,
-        BTN_DPAD_UP,
-        BTN_DPAD_DOWN,
-        BTN_DPAD_LEFT,
-        BTN_DPAD_RIGHT,
-        BTN_GUIDE,
+        BTN_A,          // 0
+        BTN_B,          // 1
+        BTN_X,          // 2
+        BTN_Y,          // 3
+        BTN_BACK,       // 4
+        BTN_GUIDE,      // 5
+        BTN_START,      // 6
+        BTN_LS,         // 7
+        BTN_RS,         // 8
+        BTN_DPAD_UP,    // 9
+        BTN_DPAD_DOWN,  // A
+        BTN_DPAD_LEFT,  // B
+        BTN_DPAD_RIGHT, // C
+        BTN_MISC1,      // D
+        BTN_MISC2,      // E
+        BTN_MISC3,      // F
     };
 
+    // Joystick Buttons Bits (16-max allowed)
     enum JOYS_BTN {
-        BTN_1,
-        BTN_2,
-        BTN_3,
-        BTN_4,
-        BTN_5,
-        BTN_6,
-        BTN_7,
-        BTN_8,
-        BTN_9,
-        BTN_10,
-        BTN_11,
-        BTN_12,
-        BTN_HAT_UP,
-        BTN_HAT_DOWN,
-        BTN_HAT_LEFT,
-        BTN_HAT_RIGHT,
+        BTN_1,          // 0    
+        BTN_2,          // 1
+        BTN_3,          // 2
+        BTN_4,          // 3
+        BTN_5,          // 4
+        BTN_6,          // 5
+        BTN_7,          // 6
+        BTN_8,          // 7
+        BTN_9,          // 8
+        BTN_10,         // 9
+        BTN_11,         // A
+        BTN_12,         // B
+        BTN_HAT_UP,     // C    
+        BTN_HAT_DOWN,   // D        
+        BTN_HAT_LEFT,   // E    
+        BTN_HAT_RIGHT,  // F    
     };
 
     bool bJoystickWasInit = false;

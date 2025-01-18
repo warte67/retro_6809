@@ -358,20 +358,10 @@ void Joystick::OnEvent(SDL_Event* evnt)
     switch (evnt->type)
     {
         case SDL_EVENT_GAMEPAD_ADDED:
-            // std::cout << clr::indent() << clr::LT_BLUE << "Joystick::OnEvent() SDL_EVENT_GAMEPAD_ADDED:" << evnt->gdevice.which << clr::RETURN;
-            // break;
         case SDL_EVENT_GAMEPAD_REMOVED:
-            // std::cout << clr::indent() << clr::LT_BLUE << "Joystick::OnEvent() SDL_EVENT_GAMEPAD_REMOVED:" << evnt->gdevice.which << clr::RETURN;
-            // break;
         case SDL_EVENT_GAMEPAD_REMAPPED:
-            // std::cout << clr::indent() << clr::LT_BLUE << "Joystick::OnEvent() SDL_EVENT_GAMEPAD_REMAPPED:" << evnt->gdevice.which << clr::RETURN;
-            // break;
         case SDL_EVENT_JOYSTICK_ADDED:
-            // std::cout << clr::indent() << clr::LT_BLUE << "Joystick::OnEvent() SDL_EVENT_JOYSTICK_ADDED:" << evnt->jdevice.which << clr::RETURN;
-            // break;
         case SDL_EVENT_JOYSTICK_REMOVED:
-            // std::cout << clr::indent() << clr::LT_BLUE << "Joystick::OnEvent() SDL_EVENT_JOYSTICK_REMOVED:" << evnt->jdevice.which << clr::RETURN; 
-            // break;
             CloseControllers();
             OpenControllers();
             break;
@@ -405,15 +395,17 @@ void Joystick::OnUpdate(float fElapsedTime)
 
 void Joystick::InitButtonStates()
 {
-	Byte btn = 0;
 	gpadBtnMap.clear();
 	joysBtnMap.clear();
 
+    // 16 buttons including a single hat on a Gamepad
+    Byte btn = 0;
 	gpadBtnMap[SDL_GAMEPAD_BUTTON_SOUTH] = btn++;			// GPAD_BTN::BTN_A
 	gpadBtnMap[SDL_GAMEPAD_BUTTON_EAST] = btn++;			// GPAD_BTN::BTN_B
 	gpadBtnMap[SDL_GAMEPAD_BUTTON_WEST] = btn++;			// GPAD_BTN::BTN_X
 	gpadBtnMap[SDL_GAMEPAD_BUTTON_NORTH] = btn++;			// GPAD_BTN::BTN_Y
 	gpadBtnMap[SDL_GAMEPAD_BUTTON_BACK] = btn++;			// GPAD_BTN::BTN_BACK
+	gpadBtnMap[SDL_GAMEPAD_BUTTON_GUIDE] = btn++;		    // GPAD_BTN::BTN_GUIDE
 	gpadBtnMap[SDL_GAMEPAD_BUTTON_START] = btn++;		    // GPAD_BTN::BTN_START
 	gpadBtnMap[SDL_GAMEPAD_BUTTON_LEFT_SHOULDER] = btn++;	// GPAD_BTN::BTN_LS
 	gpadBtnMap[SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER] = btn++;	// GPAD_BTN::BTN_RS
@@ -421,8 +413,11 @@ void Joystick::InitButtonStates()
 	gpadBtnMap[SDL_GAMEPAD_BUTTON_DPAD_DOWN] = btn++;	    // GPAD_BTN::BTN_DPAD_DOWN
 	gpadBtnMap[SDL_GAMEPAD_BUTTON_DPAD_LEFT] = btn++;	    // GPAD_BTN::BTN_DPAD_LEFT
 	gpadBtnMap[SDL_GAMEPAD_BUTTON_DPAD_RIGHT] = btn++;	    // GPAD_BTN::BTN_DPAD_RIGHT
-	gpadBtnMap[SDL_GAMEPAD_BUTTON_GUIDE] = btn++;		    // GPAD_BTN::BTN_GUIDE
+	gpadBtnMap[SDL_GAMEPAD_BUTTON_MISC1] = btn++;	        // GPAD_BTN::BTN_MISC1
+	gpadBtnMap[SDL_GAMEPAD_BUTTON_MISC2] = btn++;	        // GPAD_BTN::BTN_MISC2
+	gpadBtnMap[SDL_GAMEPAD_BUTTON_MISC3] = btn++;	        // GPAD_BTN::BTN_MISC3
 
+    // 16 buttons including a single hat on a joystick
 	btn = 0;
 	joysBtnMap[JOYS_BTN::BTN_1] = btn++;
 	joysBtnMap[JOYS_BTN::BTN_2] = btn++;
@@ -458,6 +453,7 @@ void Joystick::OpenControllers()
 		if (SDL_IsGamepad(index)) // is a Gamepad
 		{
             std::cout << "Joystick::OpenControllers(): " << index << " is a Gamepad" << std::endl;
+            //state[num].num_buttons = SDL_GAMEPAD_BUTTON_COUNT;
 			state[num].bIsJoystick = false;
 			state[num].name = SDL_GetGamepadNameForID(index);
 			state[num].controller = SDL_OpenGamepad(index);
@@ -475,6 +471,7 @@ void Joystick::OpenControllers()
             std::cout << "Joystick::OpenControllers(): " << index << " is a Joystick" << std::endl;
 			state[num].bIsJoystick = true;
 			state[num].joystick = SDL_OpenJoystick(index);
+            //state[num].num_buttons = SDL_GetNumJoystickButtons(state[num].joystick);
 			if (state[num].joystick == nullptr)
 			{
 				std::string msg = "SDL could not open a joystick! SDL_Error: ";
