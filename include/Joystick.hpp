@@ -49,9 +49,10 @@ private: // PRIVATE MEMBERS
     void InitButtonStates();
     Word EncodeButtonRegister(int id);
     void EncodeAxesRegister(int id);
+    void EncodeConditionFlags(int id);
 
     struct STATE {
-        SDL_Gamepad* controller = nullptr;
+        SDL_Gamepad* gamepad = nullptr;
         SDL_Joystick* joystick = nullptr;
         bool bIsActive = false;
         bool bIsJoystick = false;
@@ -113,7 +114,60 @@ CategoryJoystick: https://wiki.libsdl.org/SDL3/CategoryJoystick
 CategoryGamepad: https://wiki.libsdl.org/SDL3/CategoryGamepad
 
 
+To Do:
 
+    Add a condition flag byte for each of the two controllers based
+    on whether they are a gamepad or a joystick and other related
+    SDL3 based information.
+
+    Flags:
+        0000'0000: Not Connected
+        0000'1111: Controller Type
+        0001'0000: (reserved)
+        0010'0000: (reserved)
+        0100'0000: Is a Gamepad
+        1000'0000: Is a Joystick
+
+SDL_GamepadType SDL_GetRealGamepadType(SDL_Gamepad *gamepad);
+typedef enum SDL_GamepadType
+{
+    SDL_GAMEPAD_TYPE_UNKNOWN = 0,                   // 0
+    SDL_GAMEPAD_TYPE_STANDARD,                      // 1
+    SDL_GAMEPAD_TYPE_XBOX360,                       // 2
+    SDL_GAMEPAD_TYPE_XBOXONE,                       // 2
+    SDL_GAMEPAD_TYPE_PS3,                           // 3
+    SDL_GAMEPAD_TYPE_PS4,                           // 4
+    SDL_GAMEPAD_TYPE_PS5,                           // 5
+    SDL_GAMEPAD_TYPE_NINTENDO_SWITCH_PRO,           // 6
+    SDL_GAMEPAD_TYPE_NINTENDO_SWITCH_JOYCON_LEFT,   // 7
+    SDL_GAMEPAD_TYPE_NINTENDO_SWITCH_JOYCON_RIGHT,  // 8
+    SDL_GAMEPAD_TYPE_NINTENDO_SWITCH_JOYCON_PAIR,   // 9       
+    SDL_GAMEPAD_TYPE_COUNT
+} SDL_GamepadType;
+
+
+
+SDL_JoystickType SDL_GetJoystickType(SDL_Joystick *joystick);
+typedef enum SDL_JoystickType
+{
+    SDL_JOYSTICK_TYPE_UNKNOWN,          // 0
+    SDL_JOYSTICK_TYPE_GAMEPAD,          // 1
+    SDL_JOYSTICK_TYPE_WHEEL,            // 2
+    SDL_JOYSTICK_TYPE_ARCADE_STICK,     // 3
+    SDL_JOYSTICK_TYPE_FLIGHT_STICK,     // 4
+    SDL_JOYSTICK_TYPE_DANCE_PAD,        // 5
+    SDL_JOYSTICK_TYPE_GUITAR,           // 6
+    SDL_JOYSTICK_TYPE_DRUM_KIT,         // 7
+    SDL_JOYSTICK_TYPE_ARCADE_PAD,       // 8
+    SDL_JOYSTICK_TYPE_THROTTLE,         // 9
+    SDL_JOYSTICK_TYPE_COUNT             // 10
+} SDL_JoystickType;
+
+
+
+
+const char * SDL_GetGamepadName(SDL_Gamepad *gamepad);
+const char * SDL_GetJoystickName(SDL_Joystick *joystick);
 
 
  ********************/

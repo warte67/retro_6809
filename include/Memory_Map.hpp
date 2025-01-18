@@ -250,8 +250,39 @@ enum MEMMAP
 // _______________________________________________________________________
 
     JOYSTICK_DEVICE       = 0xFE46,   // START: Joystick/Gamepad Controller Device Hardware Registers
-    JOYS_1_BTN            = 0xFE46,   // (Word) Button Bits: Room For up to 16 Buttons  (realtime)
-                                      //        Gamepad Controller Button Bits:
+    JOYS_1_FLAGS          = 0xFE46,   // (Byte) Gamepad/Joystick #1 Condition Flags:     (Read Only)
+                                      //            0000'0000: Not Connected
+                                      //            0000'1111: Controller Type
+                                      //            0001'0000: (reserved)
+                                      //            0010'0000: (reserved)
+                                      //            0100'0000: Is a Gamepad
+                                      //            1000'0000: Is a Joystick
+                                      // 
+                                      //        Gamepad Controller Type (bits 0-3):
+                                      //            0:  Unknown
+                                      //            1:  Standard
+                                      //            2:  Xbox360
+                                      //            3:  XboxOne
+                                      //            4:  PS3
+                                      //            5:  PS4
+                                      //            6:  PS5
+                                      //            7:  Nintendo Switch Pro
+                                      //            8:  Nintendo Switch Joycon Left
+                                      //            9:  Nintendo Switch Joycon Right
+                                      // 
+                                      //        Joystick Controller Type (bits 0-3):
+                                      //            0:  Unknown
+                                      //            1:  Gamepad
+                                      //            2:  Wheel
+                                      //            3:  Arcade Stick
+                                      //            4:  Flight Stick
+                                      //            5:  Dance Pad
+                                      //            6:  Guitar
+                                      //            7:  Drum Kit
+                                      //            8:  Arcade Pad
+                                      //            9:  Throttle
+                                      // 
+    JOYS_1_BTN            = 0xFE47,   // (Word) Gamepad Controller Button Bits:         (Read Only)
                                       //            0000'0000'0000'0000 = Nothing Pressed
                                       //            0000'0000'0000'0001 = A
                                       //            0000'0000'0000'0010 = B
@@ -270,14 +301,48 @@ enum MEMMAP
                                       //            0100'0000'0000'0000 = DPad Left 
                                       //            1000'0000'0000'0000 = DPad Right
                                       //            1111'1111'1111'1111 = Not Connected
-    JOYS_1_DBND           = 0xFE48,   // (Byte) PAD 1 analog deadband; default is 5   (read/write)
-    JOYS_1_LTX            = 0xFE49,   // (char) PAD 1 LThumb-X position (-128 _ +127)   (realtime)
-    JOYS_1_LTY            = 0xFE4A,   // (char) PAD 1 LThumb-Y position (-128 _ +127)   (realtime)
-    JOYS_1_RTX            = 0xFE4B,   // (char) PAD 1 RThumb-X position (-128 _ +127)   (realtime)
-    JOYS_1_RTY            = 0xFE4C,   // (char) PAD 1 RThumb-Y position (-128 _ +127)   (realtime)
-    JOYS_1_Z1             = 0xFE4D,   // (char) PAD 1 left analog trigger (0 - 127)     (realtime)
-    JOYS_1_Z2             = 0xFE4E,   // (char) PAD 1 left analog trigger (0 - 127)     (realtime)
-    JOYS_2_BTN            = 0xFE4F,   // (Word) Button Bits: Room For up to 16 Buttons  (realtime)
+                                      // 
+    JOYS_1_DBND           = 0xFE49,   // (Byte) PAD 1 analog deadband; default is 5   (read/write)
+    JOYS_1_LTX            = 0xFE4A,   // (char) PAD 1 LThumb-X position (-128 _ +127)   (realtime)
+    JOYS_1_LTY            = 0xFE4B,   // (char) PAD 1 LThumb-Y position (-128 _ +127)   (realtime)
+    JOYS_1_RTX            = 0xFE4C,   // (char) PAD 1 RThumb-X position (-128 _ +127)   (realtime)
+    JOYS_1_RTY            = 0xFE4D,   // (char) PAD 1 RThumb-Y position (-128 _ +127)   (realtime)
+    JOYS_1_Z1             = 0xFE4E,   // (char) PAD 1 left analog trigger (0 - 127)     (realtime)
+    JOYS_1_Z2             = 0xFE4F,   // (char) PAD 1 left analog trigger (0 - 127)     (realtime)
+                                      // 
+    JOYS_2_FLAGS          = 0xFE50,   // (Byte) Gamepad/Joystick #2 Condition Flags:     (Read Only)
+                                      //            0000'0000: Not Connected
+                                      //            0000'1111: Controller Type
+                                      //            0001'0000: (reserved)
+                                      //            0010'0000: (reserved)
+                                      //            0100'0000: Is a Gamepad
+                                      //            1000'0000: Is a Joystick
+                                      // 
+                                      //        Gamepad Controller Type (bits 0-3):
+                                      //            0:  Unknown
+                                      //            1:  Standard
+                                      //            2:  Xbox360
+                                      //            3:  XboxOne
+                                      //            4:  PS3
+                                      //            5:  PS4
+                                      //            6:  PS5
+                                      //            7:  Nintendo Switch Pro
+                                      //            8:  Nintendo Switch Joycon Left
+                                      //            9:  Nintendo Switch Joycon Right
+                                      // 
+                                      //        Joystick Controller Type (bits 0-3):
+                                      //            0:  Unknown
+                                      //            1:  Gamepad
+                                      //            2:  Wheel
+                                      //            3:  Arcade Stick
+                                      //            4:  Flight Stick
+                                      //            5:  Dance Pad
+                                      //            6:  Guitar
+                                      //            7:  Drum Kit
+                                      //            8:  Arcade Pad
+                                      //            9:  Throttle
+                                      // 
+    JOYS_2_BTN            = 0xFE51,   // (Word) Button Bits: Room For up to 16 Buttons  (realtime)
                                       //        Joystick Button Bits:
                                       //            0000'0000'0000'0000 = Nothing Pressed
                                       //            0000'0000'0000'0001 = Button 1 
@@ -297,19 +362,20 @@ enum MEMMAP
                                       //            0100'0000'0000'0000 = Hat Left 
                                       //            1000'0000'0000'0000 = Hat Right
                                       //            1111'1111'1111'1111 = Not Connected
-    JOYS_2_DBND           = 0xFE51,   // (Byte) PAD 2 analog deadband; default is 5   (read/write)
-    JOYS_2_LTX            = 0xFE52,   // (char) PAD 2 LThumb-X position (-128 _ +127)   (realtime)
-    JOYS_2_LTY            = 0xFE53,   // (char) PAD 2 LThumb-Y position (-128 _ +127)   (realtime)
-    JOYS_2_RTX            = 0xFE54,   // (char) PAD 2 RThumb-X position (-128 _ +127)   (realtime)
-    JOYS_2_RTY            = 0xFE55,   // (char) PAD 2 RThumb-Y position (-128 _ +127)   (realtime)
-    JOYS_2_Z1             = 0xFE56,   // (char) PAD 2 left analog trigger (0 - 127)     (realtime)
-    JOYS_2_Z2             = 0xFE57,   // (char) PAD 2 left analog trigger (0 - 127)     (realtime)
-    JOYS_END              = 0xFE57,   // End of Joystick/Gamepad Device Register Space
-    JOYS_TOP              = 0xFE58,   // Top of Joystick/Gamepad Device Register Space
+                                      // 
+    JOYS_2_DBND           = 0xFE53,   // (Byte) PAD 2 analog deadband; default is 5   (read/write)
+    JOYS_2_LTX            = 0xFE54,   // (char) PAD 2 LThumb-X position (-128 _ +127)   (realtime)
+    JOYS_2_LTY            = 0xFE55,   // (char) PAD 2 LThumb-Y position (-128 _ +127)   (realtime)
+    JOYS_2_RTX            = 0xFE56,   // (char) PAD 2 RThumb-X position (-128 _ +127)   (realtime)
+    JOYS_2_RTY            = 0xFE57,   // (char) PAD 2 RThumb-Y position (-128 _ +127)   (realtime)
+    JOYS_2_Z1             = 0xFE58,   // (char) PAD 2 left analog trigger (0 - 127)     (realtime)
+    JOYS_2_Z2             = 0xFE59,   // (char) PAD 2 left analog trigger (0 - 127)     (realtime)
+    JOYS_END              = 0xFE59,   // End of Joystick/Gamepad Device Register Space
+    JOYS_TOP              = 0xFE5A,   // Top of Joystick/Gamepad Device Register Space
 // _______________________________________________________________________
 
     HDW_RESERVED_DEVICE   = 0x0000,   // START: Reserved Register Space
-    HDW_REG_END           = 0xFFEF,   // 407 bytes reserved for future use.
+    HDW_REG_END           = 0xFFEF,   // 405 bytes reserved for future use.
 // _______________________________________________________________________
 
     ROM_VECTS_DEVICE      = 0x0000,   // START: Hardware Interrupt Vectors
