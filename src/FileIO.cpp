@@ -32,12 +32,19 @@
 * Constructor / Destructor *
 ***************************/
 
+/**
+ * Default constructor for the FileIO class. Sets the device name to "FIO_DEVICE".
+ */
 FileIO::FileIO() 
 { 
     std::cout << clr::indent_push() << clr::LT_BLUE << "FileIO Device Created" << clr::RETURN;
     _device_name = "FIO_DEVICE"; 
 } // END: FileIO()
 
+/**
+ * Destructor for the FileIO class. Outputs a message indicating that
+ * the FileIO device has been destroyed, and performs any necessary cleanup.
+ */
 FileIO::~FileIO() 
 { 
     std::cout << clr::indent_pop() << clr::LT_BLUE << "FileIO Device Destroyed" << clr::RETURN; 
@@ -51,6 +58,13 @@ FileIO::~FileIO()
 
 
 
+/**
+ * Attaches the FileIO device to the system bus and allocates the hardware
+ * registers.
+ *
+ * @param nextAddr The starting address of the device.
+ * @return The number of bytes allocated by the device.
+ */
 int  FileIO::OnAttach(int nextAddr)
 {
     // std::cout << clr::indent() << clr::LT_BLUE << "FileIO::OnAttach() Entry" << clr::RETURN;    
@@ -78,18 +92,19 @@ int  FileIO::OnAttach(int nextAddr)
         { "(Byte) FILE_ERROR enumeration result (FE_<error>)",""} });
     nextAddr++;
     Byte enumID = 0;
-    mapped_register.push_back({ "FE_BEGIN"      , enumID  , nullptr, nullptr,  { "  Begin FILE_ERROR enumeration "} });
-    mapped_register.push_back({ "FE_NOERROR"    , enumID++, nullptr, nullptr,  { "     no error, condition normal"} });
-    mapped_register.push_back({ "FE_NOTFOUND"   , enumID++, nullptr, nullptr,  { "     file or folder not found  "} });
-    mapped_register.push_back({ "FE_NOTOPEN"    , enumID++, nullptr, nullptr,  { "     file not open             "} });
-    mapped_register.push_back({ "FE_EOF"        , enumID++, nullptr, nullptr,  { "     end of file               "} });
-    mapped_register.push_back({ "FE_OVERRUN"    , enumID++, nullptr, nullptr,  { "     buffer overrun            "} });
-    mapped_register.push_back({ "FE_WRONGTYPE"  , enumID++, nullptr, nullptr,  { "     wrong file type           "} });
-    mapped_register.push_back({ "FE_BAD_CMD"    , enumID++, nullptr, nullptr,  { "     invalid command           "} });
-    mapped_register.push_back({ "FE_BADSTREAM"  , enumID  , nullptr, nullptr,  { "     invalid file stream       "} });
-    mapped_register.push_back({ "FE_NOT_EMPTY"  , enumID  , nullptr, nullptr,  { "     directory not empty       "} });
-    mapped_register.push_back({ "FE_FILE_EXISTS", enumID  , nullptr, nullptr,  { "     file already exists       "} });
-    mapped_register.push_back({ "FE_LAST"       , enumID  , nullptr, nullptr,  { "  End of FILE_ERROR enumeration",""} });
+    mapped_register.push_back({ "FE_BEGIN"       , enumID  , nullptr, nullptr,  { "  Begin FILE_ERROR enumeration "} });
+    mapped_register.push_back({ "FE_NOERROR"     , enumID++, nullptr, nullptr,  { "     no error, condition normal"} });
+    mapped_register.push_back({ "FE_NOTFOUND"    , enumID++, nullptr, nullptr,  { "     file or folder not found  "} });
+    mapped_register.push_back({ "FE_NOTOPEN"     , enumID++, nullptr, nullptr,  { "     file not open             "} });
+    mapped_register.push_back({ "FE_EOF"         , enumID++, nullptr, nullptr,  { "     end of file               "} });
+    mapped_register.push_back({ "FE_OVERRUN"     , enumID++, nullptr, nullptr,  { "     buffer overrun            "} });
+    mapped_register.push_back({ "FE_WRONGTYPE"   , enumID++, nullptr, nullptr,  { "     wrong file type           "} });
+    mapped_register.push_back({ "FE_BAD_CMD"     , enumID++, nullptr, nullptr,  { "     invalid command           "} });
+    mapped_register.push_back({ "FE_BADSTREAM"   , enumID  , nullptr, nullptr,  { "     invalid file stream       "} });
+    mapped_register.push_back({ "FE_NOT_EMPTY"   , enumID  , nullptr, nullptr,  { "     directory not empty       "} });
+    mapped_register.push_back({ "FE_FILE_EXISTS" , enumID  , nullptr, nullptr,  { "     file already exists       "} });
+    mapped_register.push_back({ "FE_INVALID_NAME", enumID  , nullptr, nullptr,  { "     invalid file name         "} });
+    mapped_register.push_back({ "FE_LAST"        , enumID  , nullptr, nullptr,  { "  End of FILE_ERROR enumeration",""} });
 
 
     ////////////////////////////////////////////////
@@ -412,7 +427,12 @@ int  FileIO::OnAttach(int nextAddr)
 }
 
 
-
+/**
+ * OnInit() is called when the device is initialized.
+ * It creates a vector of FILE* to represent the file streams
+ * that are available for use by the system. There are
+ * FILEHANDLESMAX of them.
+ */
 void FileIO::OnInit()
 {
     std::cout << clr::indent() << clr::LT_BLUE << "FileIO::OnInit() Entry" << clr::RETURN;
@@ -427,6 +447,12 @@ void FileIO::OnInit()
     std::cout << clr::indent() << clr::LT_BLUE << "FileIO::OnInit() Exit" << clr::RETURN;
 }
 
+
+/**
+ * OnQuit() is called when the device is being shutdown.
+ * It iterates through the vector of file streams and
+ * closes and sets to nullptr any non-null file streams.
+ */
 void FileIO::OnQuit()
 {
     std::cout << clr::indent() << clr::LT_BLUE << "FileIO::OnQuit() Entry" << clr::RETURN;
@@ -444,6 +470,12 @@ void FileIO::OnQuit()
     std::cout << clr::indent() << clr::LT_BLUE << "FileIO::OnQuit() Exit" << clr::RETURN;
 }
 
+
+/**
+ * _cmd_reset() is called when the FIO_COMMAND for a reset
+ * (FC_RESET) is received. It sends a reset command to the
+ * C6809.
+ */
 void FileIO::_cmd_reset()
 {
     // printf("FileIO: RESET Command Received\n");
@@ -451,17 +483,34 @@ void FileIO::_cmd_reset()
         Bus::GetC6809()->reset();
 }
 
+
+/**
+ * _cmd_system_shutdown() is called to shut down the system.
+ * It sets the running state of the Bus to false, effectively
+ * stopping the system operations.
+ */
 void FileIO::_cmd_system_shutdown()
 {
     Bus::IsRunning(false);
 }
 
+
+/**
+ * _cmd_system_load_comilation_date() is called to load the compilation date of
+ * the system into the FIO_PATH. It sets the FIO_PATH to the current date string
+ * and sets the FIO_PATH_CHARPOS to 0.
+ */
 void FileIO::_cmd_system_load_comilation_date()
 {
     filePath = __DATE__;
     path_char_pos = 0;
 }
 
+
+/**
+ * _bFileExists() returns true if the file exists, false otherwise.
+ * If the file does not exist, it sets the FIO_ERROR to FE_NOTFOUND.
+ */
 bool FileIO::_bFileExists(const char* file)
 {
     if (file)
@@ -478,10 +527,19 @@ bool FileIO::_bFileExists(const char* file)
     return false;
 }
 
+
+/**
+ * _openFile() opens a file for reading or writing with the given mode
+ * and places the file pointer in the first free slot in the vector of
+ * file streams. If the file cannot be opened, it sets the FIO_ERROR to
+ * FE_NOTOPEN.
+ *
+ * @param[in] mode Mode string for fopen() (e.g., "rb", "wb", "r+b", etc.)
+ */
 void FileIO::_openFile(const char* mode)
 {
     // if (!_bFileExists(filePath.c_str())) { return; }
-	_fileHandle = _FindOpenFileSlot();
+	_fileHandle = _find_free_file_slot();
     _vecFileStreams[_fileHandle] = fopen(filePath.c_str(), mode);
     if (!_vecFileStreams[_fileHandle])
     {
@@ -490,23 +548,45 @@ void FileIO::_openFile(const char* mode)
     } 
 }
 
+
+/**
+ * Opens the file for reading, effectively calling fopen() with "rb".
+ * If the file cannot be opened, it sets the FIO_ERROR to FE_NOTOPEN.
+ */
 void FileIO::_cmd_open_read()
 {
     // printf("%s::_cmd_open_read()\n", Name().c_str());
     _openFile("rb");
 }
 
+
+/**
+ * Opens the file for writing, effectively calling fopen() with "wb".
+ * If the file cannot be opened, it sets the FIO_ERROR to FE_NOTOPEN.
+ */
 void FileIO::_cmd_open_write()
 {
     // printf("%s::_cmd_open_write()\n", Name().c_str());
     _openFile("wb");
 }
+
+
+/**
+ * Opens the file for appending, effectively calling fopen() with "ab".
+ * If the file cannot be opened, it sets the FIO_ERROR to FE_NOTOPEN.
+ */
 void FileIO::_cmd_open_append()
 {
     // printf("%s::_cmd_open_append()\n", Name().c_str());
     _openFile("ab");
 }
 
+
+/**
+ * _cmd_close_file() closes the file stream associated with the FIO_HANDLE
+ * and sets its corresponding entry in the vector of file streams to nullptr.
+ * If the file is not open, it sets the FIO_ERROR to FE_NOTOPEN.
+ */
 void FileIO::_cmd_close_file()
 {
     // printf("%s::_cmd_close_file()\n", Name().c_str());
@@ -520,6 +600,13 @@ void FileIO::_cmd_close_file()
     _vecFileStreams[handle] = nullptr;
 }
 
+
+/**
+ * Reads a single byte from the file stream associated with the FIO_HANDLE
+ * and stores the read value in FIO_IODATA.
+ * If the file is not open, it sets the FIO_ERROR to FE_NOTOPEN.
+ * If the end of file is reached, it sets the FIO_ERROR to FE_OVERRUN.
+ */
 void FileIO::_cmd_read_byte()
 {
     // printf("%s::_cmd_read_byte()\n", Name().c_str());
@@ -539,6 +626,11 @@ void FileIO::_cmd_read_byte()
     Memory::Write(MAP(FIO_IODATA), data);    
 }
 
+
+/**
+ * Writes the byte stored in FIO_IODATA to the file stream associated with the FIO_HANDLE.
+ * If the file is not open, it sets the FIO_ERROR to FE_NOTOPEN.
+ */
 void FileIO::_cmd_write_byte()
 {
     // printf("%s::_cmd_write_byte()\n", Name().c_str());
@@ -552,6 +644,16 @@ void FileIO::_cmd_write_byte()
     Memory::Write(MAP(FIO_IODATA), data);
 }
 
+
+/**
+ * Checks if a file exists.
+ *
+ * Reads the file path from FIO_PATH_DATA and checks if the file exists.
+ * Writes the result to FIO_IODATA (true if the file exists, false otherwise).
+ * If the file does not exist, sets the FIO_ERROR to FE_NOTFOUND.
+ *
+ * @return true if the file exists, false otherwise.
+ */
 bool FileIO::_cmd_does_file_exist()
 {
     bool exists = _bFileExists(filePath.c_str());
@@ -565,7 +667,13 @@ bool FileIO::_cmd_does_file_exist()
 }
 
 
-// load_hex helpers
+/**
+ * Reads two characters from the file stream and interprets them as a hexadecimal
+ * representation of a byte.
+ *
+ * @param ifs the file stream to read from
+ * @return the byte value read from the file stream
+ */
 Byte FileIO::_fread_hex_byte(std::ifstream& ifs)
 {
     char str[3];
@@ -576,6 +684,15 @@ Byte FileIO::_fread_hex_byte(std::ifstream& ifs)
     l = strtol(str, NULL, 16);
     return (Byte)(l & 0xff);
 }
+
+
+/**
+ * Reads four characters from the file stream and interprets them as a hexadecimal
+ * representation of a 16-bit word.
+ *
+ * @param ifs the file stream to read from
+ * @return the word value read from the file stream
+ */
 Word FileIO::_fread_hex_word(std::ifstream& ifs)
 {
     Word ret;
@@ -585,17 +702,31 @@ Word FileIO::_fread_hex_word(std::ifstream& ifs)
     return ret;
 }
 
+/**
+ * Loads a hexadecimal format file into memory.
+ *
+ * This function attempts to load a file specified by `filePath` in the Intel
+ * HEX format. It performs several checks to ensure the file is valid and
+ * accessible:
+ * - Verifies that `filePath` is not empty.
+ * - Strips leading and trailing quotes from `filePath` if present.
+ * - Checks if the file exists and has a `.hex` extension.
+ * - Attempts to open the file and reads each line, interpreting it as a
+ *   sequence of hexadecimal bytes.
+ * 
+ * For each line:
+ * - Skips the leading colon (`:`).
+ * - Reads the byte count, starting address, and record type.
+ * - If the record type is 0x00 (data), reads the specified number of bytes
+ *   and writes them into memory starting at the given address.
+ * - If the record type is 0x01 (end of file), terminates the reading process.
+ * - Discards the checksum byte and skips any trailing line endings.
+ *
+ * If any file operation or validation fails, the function sets an appropriate
+ * error code in `FIO_ERROR` and returns without modifying memory.
+ */
 void FileIO::_cmd_load_hex_file()
 {
-    // // lambda to convert integer to hex string
-    // auto hex = [](uint32_t n, uint8_t digits)
-    // {
-    // 	std::string s(digits, '0');
-    // 	for (int i = digits - 1; i >= 0; i--, n >>= 4)
-    // 		s[i] = "0123456789ABCDEF"[n & 0xF];
-    // 	return s;
-    // };
-
     // sanity check (insanity perhaps?)
     if (filePath.size() == 0)   return;
 
@@ -604,7 +735,6 @@ void FileIO::_cmd_load_hex_file()
 
     // printf("'%s' size: %d\n",filePath.c_str(), (int)filePath.size());   
     path_char_pos=0;
-
 
     std::ifstream ifs(filePath);
     std::filesystem::path f{ filePath.c_str()};
@@ -672,6 +802,13 @@ void FileIO::_cmd_load_hex_file()
     ifs.close();
 }
 
+/**
+ * _cmd_get_file_length() retrieves the size of a file specified by `filePath`.
+ * 
+ * If the file exists, it writes the file size to MATH_ACR_INT. If the file
+ * does not exist, it sets the FIO_ERROR to FE_NOTFOUND and writes 0 to 
+ * MATH_ACR_INT.
+ */
 void FileIO::_cmd_get_file_length()
 {
     // printf("%s::_cmd_get_file_length()\n", Name().c_str());
@@ -686,6 +823,21 @@ void FileIO::_cmd_get_file_length()
     Memory::Write_DWord(MAP(MATH_ACR_INT), file_size);
 }
 
+
+/**
+ * Lists the contents of a directory or files matching a specified pattern.
+ *
+ * This function retrieves the directory contents or files that match the specified
+ * pattern in `filePath`. If `filePath` is empty, it defaults to the current working
+ * directory. The results are stored in the FIO_BUFFER, with directories enclosed
+ * in square brackets and files listed with their names. Wildcards can be used to
+ * match files based on their stems or extensions. If a specified directory does not
+ * exist, an error message is stored in `dir_data`.
+ *
+ * The function performs initial error checking on `current_path` and `filePath` and
+ * handles both directory and file listing scenarios. In case of any exceptions, it
+ * sets `dir_data` to indicate an error.
+ */
 
 void FileIO::_cmd_list_directory()
 {
@@ -798,6 +950,12 @@ void FileIO::_cmd_list_directory()
     dir_data_pos = 0;      
 }
 
+
+/**
+ * Change the current working directory to the path given by filePath.
+ * filePath must be a valid path. If the path does not exist, an error
+ * code of FE_NOTFOUND is written to the FIO_ERROR memory location.
+ */
 void FileIO::_cmd_change_directory()
 {
     // printf("Change Directory To: %s\n", filePath.c_str());
@@ -810,6 +968,11 @@ void FileIO::_cmd_change_directory()
         Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
 }
 
+
+/**
+ * _cmd_get_current_path() retrieves the current working directory into the
+ * filePath memory location.
+ */
 void FileIO::_cmd_get_current_path()
 {
     // printf("FileIO::_cmd_get_current_path()\n");
@@ -818,13 +981,47 @@ void FileIO::_cmd_get_current_path()
     // printf("%s\n", filePath.c_str());
 }
 
-void FileIO::_cmd_make_directory()
-{
+
+/**
+ * Creates a new directory specified by `filePath`.
+ *
+ * This function attempts to create a directory at the location specified
+ * by `filePath`. If the directory does not exist, it will be created. 
+ * If the directory already exists, the function sets the error code 
+ * `FIO_ERROR` to `FE_FILE_EXISTS`. If the directory cannot be created due 
+ * to an invalid name or other filesystem error, it sets the error code 
+ * `FIO_ERROR` to `FE_INVALID_NAME`.
+ */
+void FileIO::_cmd_make_directory() {
     std::string current_path = std::filesystem::current_path().generic_string();
-    std::filesystem::path arg1 = filePath;    
-    std::filesystem::create_directory(arg1);    
+    std::filesystem::path arg1(filePath);
+
+    if (!std::filesystem::exists(arg1)) {
+        try {
+            std::filesystem::create_directory(arg1);
+        } catch (const std::filesystem::filesystem_error& e) {
+            fio_error_code = FILE_ERROR::FE_INVALID_NAME;
+            return;
+        }
+    }
+    // If the directory already exists, set FIO_ERROR to FE_FILE_EXISTS
+    if (std::filesystem::exists(arg1) && std::filesystem::is_directory(arg1)) {
+        fio_error_code = FILE_ERROR::FE_FILE_EXISTS;
+    }
 }
 
+
+/**
+ * Renames the directory specified by `filePath` to the new name specified by `altFilePath`.
+ *
+ * This function attempts to rename the directory at the location specified
+ * by `filePath` to the new name specified by `altFilePath`. If the directory
+ * does not exist, it sets the error code `FIO_ERROR` to `FE_NOTFOUND`. 
+ * If the directory already exists with the new name, it sets the error code 
+ * `FIO_ERROR` to `FE_FILE_EXISTS`. If the directory cannot be renamed due 
+ * to an invalid name or other filesystem error, it sets the error code 
+ * `FIO_ERROR` to `FE_INVALID_NAME`.
+ */
 void FileIO::_cmd_rename_directory()
 {
     std::cout << "FileIO::_cmd_rename_directory()\n";
@@ -860,99 +1057,135 @@ void FileIO::_cmd_rename_directory()
     // see: std::filesystem::rename() for both rename_directory and rename_file
     // https://en.cppreference.com/w/cpp/filesystem/rename
 }
+
+
+/**
+ * Removes the directory specified by `filePath` if it is empty.
+ *
+ * This function attempts to remove the directory at the location specified
+ * by `filePath`. If the directory does not exist, it sets the error code
+ * `FIO_ERROR` to `FE_NOTFOUND`. If the directory is not empty, it sets the
+ * error code `FIO_ERROR` to `FE_NOT_EMPTY`. If the directory cannot be
+ * removed due to an invalid name or other filesystem error, it sets the
+ * error code `FIO_ERROR` to `FE_INVALID_NAME`.
+ */
 void FileIO::_cmd_remove_directory()
 {
     std::cout << "FileIO::_cmd_remove_directory()\n";
 
-
-    // VERIFY ...
-        const std::filesystem::path dirPath = filePath;
-        // Check if the directory exists and is a directory
-        if (!std::filesystem::exists(dirPath) || !std::filesystem::is_directory(dirPath)) {
-            Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
-            return;
-        }
-        // Check if the directory is empty
-        if (!std::filesystem::is_empty(dirPath)) {
-            Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOT_EMPTY);
-            return;
-        }
-        try {
-            std::filesystem::remove(dirPath);
-            filePath = "";  // Reset filePath since the directory has been removed
-        } catch (const std::filesystem::filesystem_error& e) {
-            Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_BAD_CMD);
-        }  
-    // ... VERIFY
-
+    const std::filesystem::path dirPath = filePath;
+    // Check if the directory exists and is a directory
+    if (!std::filesystem::exists(dirPath) || !std::filesystem::is_directory(dirPath)) {
+        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
+        return;
+    }
+    // Check if the directory is empty
+    if (!std::filesystem::is_empty(dirPath)) {
+        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOT_EMPTY);
+        return;
+    }
+    try {
+        std::filesystem::remove(dirPath);
+        filePath = "";  // Reset filePath since the directory has been removed
+    } catch (const std::filesystem::filesystem_error& e) {
+        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_BAD_CMD);
+    }  
 
     // see: std::filesystem::remove() for both remove_directory and delete_file
     // https://en.cppreference.com/w/cpp/filesystem/remove
 }
 
+
+/**
+ * Deletes the file specified by `filePath`.
+ *
+ * This function checks if the file at the given `filePath` exists and is a regular file.
+ * If the file does not exist, it sets the error code `FIO_ERROR` to `FE_NOTFOUND`.
+ * If the path is not a regular file, it sets the error code `FIO_ERROR` to `FE_WRONGTYPE`.
+ * On successful deletion, the file is removed from the filesystem.
+ * If the file cannot be deleted due to a filesystem error, it sets the error code 
+ * `FIO_ERROR` to `FE_BAD_CMD`.
+ */
 void FileIO::_cmd_delete_file()
 {
     std::cout << "FileIO::_cmd_delete_file()\n";
 
-    // VERIFY AI CODE ...
-        std::filesystem::path path = filePath;
-        if (!std::filesystem::exists(path)) {
-            Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
-            return;
-        }
-        if (!std::filesystem::is_regular_file(path)) {
-            Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_WRONGTYPE);
-            return;
-        }
-        try {
-            std::filesystem::remove(path);
-        } catch (const std::filesystem::filesystem_error& e) {
-            Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_BAD_CMD);
-        }
-    // ... VERIFY AI CODE
+    std::filesystem::path path = filePath;
+    if (!std::filesystem::exists(path)) {
+        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
+        return;
+    }
+    if (!std::filesystem::is_regular_file(path)) {
+        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_WRONGTYPE);
+        return;
+    }
+    try {
+        std::filesystem::remove(path);
+    } catch (const std::filesystem::filesystem_error& e) {
+        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_BAD_CMD);
+    }
 
     // see: std::filesystem::remove() for both remove_directory and delete_file
     // https://en.cppreference.com/w/cpp/filesystem/remove
 }
 
 
+/**
+ * Renames the file specified by `filePath` to the name specified by `altFilePath`.
+ *
+ * This function checks if the `filePath` points to an existing regular file
+ * and if the `altFilePath` does not already exist. If any of these conditions
+ * are not met, it sets the appropriate error code in `FIO_ERROR` and returns.
+ * If the renaming operation is successful, it updates `filePath` to reflect
+ * the new file name. In case of a filesystem error during the renaming process,
+ * it sets the error code in `FIO_ERROR` to `FE_BAD_CMD`.
+ */
 void FileIO::_cmd_rename_file()
 {
     std::cout << "FileIO::_cmd_rename_file()\n";
 
-    // VERIFY AI CODE ...
-        std::filesystem::path oldPath = filePath;
-        std::filesystem::path newName = altFilePath;
-        // Check if the old path is a valid directory or a file 
-        // (which should be a directory in this case)
-        if (!std::filesystem::exists(oldPath)) {
-            Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
-            return;
-        }
-        // Ensure that oldPath is a valid file
-        if (!std::filesystem::is_regular_file(oldPath)) {
-            Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_WRONGTYPE);
-            return;
-        }
-        // Check if the new path already exists 
-        std::filesystem::path newPath = oldPath.parent_path() / newName;
-        if (std::filesystem::exists(newPath)) {
-            Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_WRONGTYPE);
-            return;
-        }
-        // Attempt to rename the directory
-        try {
-            std::filesystem::rename(oldPath, newPath);
-            filePath = newName.string();  // Update the filePath to reflect the new directory name
-        } catch (const std::filesystem::filesystem_error& e) {
-            Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_BAD_CMD);
-        }
-    // ... VERIFY AI CODE
+    std::filesystem::path oldPath = filePath;
+    std::filesystem::path newName = altFilePath;
+    // Check if the old path is a valid directory or a file 
+    // (which should be a directory in this case)
+    if (!std::filesystem::exists(oldPath)) {
+        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
+        return;
+    }
+    // Ensure that oldPath is a valid file
+    if (!std::filesystem::is_regular_file(oldPath)) {
+        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_WRONGTYPE);
+        return;
+    }
+    // Check if the new path already exists 
+    std::filesystem::path newPath = oldPath.parent_path() / newName;
+    if (std::filesystem::exists(newPath)) {
+        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_WRONGTYPE);
+        return;
+    }
+    // Attempt to rename the directory
+    try {
+        std::filesystem::rename(oldPath, newPath);
+        filePath = newName.string();  // Update the filePath to reflect the new directory name
+    } catch (const std::filesystem::filesystem_error& e) {
+        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_BAD_CMD);
+    }
 
     // see: std::filesystem::rename() for both rename_directory and rename_file
     // https://en.cppreference.com/w/cpp/filesystem/rename
 }
 
+
+/**
+ * Copies the file specified by `filePath` to the location specified by `altFilePath`.
+ *
+ * This function checks if the `filePath` points to an existing regular file
+ * and if the `altFilePath` does not already exist as a file. If any of these
+ * conditions are not met, it sets the appropriate error code in `FIO_ERROR`
+ * and returns. If the copying operation is successful, it updates `filePath`
+ * to reflect the new file name. In case of a filesystem error during the
+ * copying process, it sets the error code in `FIO_ERROR` to `FE_BAD_CMD`.
+ */
 void FileIO::_cmd_copy_file()
 {
     std::cout << "FileIO::_cmd_copy_file()\n";
@@ -984,6 +1217,13 @@ void FileIO::_cmd_copy_file()
     // https://en.cppreference.com/w/cpp/filesystem/copy
 }
 
+
+/**
+ * Moves the file pointer to the beginning of the file and stores its current position.
+ *
+ * If no file is currently open for reading/writing using the provided handle index,
+ * it sets the error code `FIO_ERROR` to `FE_NOTFOUND`.
+ */
 void FileIO::_cmd_seek_start()
 {
     std::cout << "FileIO::_cmd_seek_start()\n";
@@ -1000,6 +1240,16 @@ void FileIO::_cmd_seek_start()
     // https://en.cppreference.com/w/cpp/io/c/fseek
 }
 
+
+/**
+ * Moves the file pointer to the end of the file and updates the current
+ * seek position.
+ *
+ * If no file is currently open for reading/writing using the provided handle index,
+ * it sets the error code `FIO_ERROR` to `FE_NOTFOUND`.
+ * If the end of the file is reached unexpectedly, it sets the error code
+ * `FIO_ERROR` to `FE_BADSTREAM`.
+ */
 void FileIO::_cmd_seek_end()
 {
     std::cout << "FileIO::_cmd_seek_end()\n";
@@ -1022,6 +1272,16 @@ void FileIO::_cmd_seek_end()
     // https://en.cppreference.com/w/cpp/io/c/fseek
 }
 
+
+/**
+ * Moves the file pointer to the position stored in `_seek_pos` and
+ * updates the current seek position.
+ *
+ * If no file is currently open for reading/writing using the provided
+ * handle index, it sets the error code `FIO_ERROR` to `FE_NOTFOUND`.
+ * If seeking to the end was past the end of the file, it sets the error
+ * code `FIO_ERROR` to `FE_BADSTREAM`.
+ */
 void FileIO::_cmd_set_seek_position()
 {
     std::cout << "FileIO::_cmd_set_seek_position()\n";
@@ -1044,6 +1304,15 @@ void FileIO::_cmd_set_seek_position()
     // https://en.cppreference.com/w/cpp/io/c/fsetpos
 }
 
+
+/**
+ * Retrieves the current position of the file pointer and updates the internal seek position.
+ * 
+ * If no file is currently open for reading/writing using the provided handle index,
+ * it sets the error code `FIO_ERROR` to `FE_NOTFOUND`.
+ * If retrieving the current position fails, it sets the error code `FIO_ERROR` 
+ * to `FE_BADSTREAM`.
+ */
 void FileIO::_cmd_get_seek_position()
 {
     std::cout << "FileIO::_cmd_get_seek_position()\n";
@@ -1064,8 +1333,16 @@ void FileIO::_cmd_get_seek_position()
 }
 
 
-// helper: return a handle to an open file stream slot
-int FileIO::_FindOpenFileSlot()
+/**
+ * Finds an empty slot in the file stream vector and returns its index.
+ *
+ * Iterates from 1 to FILEHANDLESMAX, and returns the first empty slot it finds.
+ * If no empty slot is found, it sets the error code `FIO_ERROR` to `FE_BADSTREAM`
+ * and returns 0.
+ *
+ * @return The index of the empty slot, or 0 if no empty slot is found.
+ */
+int FileIO::_find_free_file_slot()
 {
 	// find an empty slot
 	int found = 0;

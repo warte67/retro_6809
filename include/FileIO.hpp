@@ -53,7 +53,8 @@ public:
         FE_BAD_CMD,     //  $06: invalid command
         FE_BADSTREAM,   //  $07: invalid file stream
         FE_NOT_EMPTY,   //  $08: directory not empty
-        FE_FILE_EXISTS  //  $09: file already exists
+        FE_FILE_EXISTS, //  $09: file already exists
+        FE_INVALID_NAME //  $0A: invalid file name
     };
 
 private: // PRIVATE MEMBERS
@@ -87,7 +88,7 @@ private: // PRIVATE MEMBERS
     Byte _fread_hex_byte(std::ifstream& ifs);                           
     Word _fread_hex_word(std::ifstream& ifs);                           
 
-    int _FindOpenFileSlot();                    // return a handle to an open file stream slot
+    int _find_free_file_slot();                    // return a handle to an open file stream slot
     bool _bFileExists(const char* file);        // checks to see if a file exists
     void _openFile(const char* mode);           // file open helper
 
