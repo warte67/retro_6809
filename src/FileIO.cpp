@@ -817,7 +817,7 @@ void FileIO::_cmd_rename_directory()
     std::cout << "FileIO::_cmd_rename_directory()\n";
 
     std::filesystem::path oldPath = filePath;
-    std::filesystem::path newName(altFilePath);
+    std::filesystem::path newName = altFilePath;
 
     // Check if the old path is a valid directory or a file 
     // (which should be a directory in this case)
@@ -854,7 +854,6 @@ void FileIO::_cmd_remove_directory()
 
     // VERIFY ...
         const std::filesystem::path dirPath = filePath;
-
         // Check if the directory exists and is a directory
         if (!std::filesystem::exists(dirPath) || !std::filesystem::is_directory(dirPath)) {
             Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
@@ -883,22 +882,20 @@ void FileIO::_cmd_delete_file()
     std::cout << "FileIO::_cmd_delete_file()\n";
 
     // VERIFY AI CODE ...
-
-        // std::filesystem::path path = filePath;
-        // if (!std::filesystem::exists(path)) {
-        //     Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
-        //     return;
-        // }
-        // if (!std::filesystem::is_regular_file(path)) {
-        //     Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_WRONGTYPE);
-        //     return;
-        // }
-        // try {
-        //     std::filesystem::remove(path);
-        // } catch (const std::filesystem::filesystem_error& e) {
-        //     Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_BAD_CMD);
-        // }
-
+        std::filesystem::path path = filePath;
+        if (!std::filesystem::exists(path)) {
+            Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
+            return;
+        }
+        if (!std::filesystem::is_regular_file(path)) {
+            Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_WRONGTYPE);
+            return;
+        }
+        try {
+            std::filesystem::remove(path);
+        } catch (const std::filesystem::filesystem_error& e) {
+            Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_BAD_CMD);
+        }
     // ... VERIFY AI CODE
 
     // see: std::filesystem::remove() for both remove_directory and delete_file
@@ -911,23 +908,32 @@ void FileIO::_cmd_rename_file()
     std::cout << "FileIO::_cmd_rename_file()\n";
 
     // VERIFY AI CODE ...
-
-        // std::filesystem::path oldPath = filePath;
-        // std::filesystem::path newPath = filePath.substr(0, filePath.find_last_of('/')) + "/" + Memory::Read(MAP(FIO_IODATA));
-        // if (!std::filesystem::exists(oldPath)) {
-        //     Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
-        //     return;
-        // }
-        // if (std::filesystem::exists(newPath)) {
-        //     Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_WRONGTYPE);
-        //     return;
-        // }
-        // try {
-        //     std::filesystem::rename(oldPath, newPath);
-        // } catch (const std::filesystem::filesystem_error& e) {
-        //     Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_BAD_CMD);
-        // }
-
+        std::filesystem::path oldPath = filePath;
+        std::filesystem::path newName = altFilePath;
+        // Check if the old path is a valid directory or a file 
+        // (which should be a directory in this case)
+        if (!std::filesystem::exists(oldPath)) {
+            Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
+            return;
+        }
+        // Ensure that oldPath is a valid file
+        if (!std::filesystem::is_regular_file(oldPath)) {
+            Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_WRONGTYPE);
+            return;
+        }
+        // Check if the new path already exists 
+        std::filesystem::path newPath = oldPath.parent_path() / newName;
+        if (std::filesystem::exists(newPath)) {
+            Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_WRONGTYPE);
+            return;
+        }
+        // Attempt to rename the directory
+        try {
+            std::filesystem::rename(oldPath, newPath);
+            filePath = newName.string();  // Update the filePath to reflect the new directory name
+        } catch (const std::filesystem::filesystem_error& e) {
+            Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_BAD_CMD);
+        }
     // ... VERIFY AI CODE
 
     // see: std::filesystem::rename() for both rename_directory and rename_file
@@ -938,25 +944,6 @@ void FileIO::_cmd_copy_file()
 {
     std::cout << "FileIO::_cmd_copy_file()\n";
 
-    // VERIFY AI CODE ...
-
-        // std::filesystem::path source = filePath;
-        // std::filesystem::path destination = filePath.substr(0, filePath.find_last_of('/')) + "/" + Memory::Read(MAP(FIO_IODATA));
-        // if (!std::filesystem::exists(source)) {
-        //     Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
-        //     return;
-        // }
-        // if (std::filesystem::exists(destination)) {
-        //     Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_WRONGTYPE);
-        //     return;
-        // }
-        // try {
-        //     std::filesystem::copy(source, destination);
-        // } catch (const std::filesystem::filesystem_error& e) {
-        //     Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_BAD_CMD);
-        // }
-
-    // ... VERIFY AI CODE
 
     // see: std::filesystem::copy() to copy files, folders, and symlinks
     // https://en.cppreference.com/w/cpp/filesystem/copy
