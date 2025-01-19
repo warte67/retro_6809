@@ -422,11 +422,11 @@ enum MEMMAP
     FIO_SEEKPOS           = 0xFE5D,   // (DWord) File Seek Position
     FIO_IODATA            = 0xFE61,   // (Byte) Input / Output Data
                                       // 
-    FIO_PATH_LEN          = 0xFE62,   // (Byte) Length of the Primary Filepath
+    FIO_PATH_LEN          = 0xFE62,   // (Byte) Length of the Primary Filepath        (Read Only)
     FIO_PATH_POS          = 0xFE63,   // (Byte) Character Position Within the Primary Filepath
     FIO_PATH_DATA         = 0xFE64,   // (Byte) Data at the Character Position of the Primary Path
                                       // 
-    FIO_ALT_PATH_LEN      = 0xFE65,   // (Byte) Length of the Alternate Filepath
+    FIO_PATH_LEN          = 0xFE65,   // (Byte) Length of the Primary Filepath        (Read Only)
     FIO_ALT_PATH_POS      = 0xFE66,   // (Byte) Character Position Within the Alternate Filepath
     FIO_ALT_PATH_DATA     = 0xFE67,   // (Byte) Data at the Character Position of the Alternate Path
                                       // 

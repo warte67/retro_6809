@@ -420,11 +420,11 @@ FIO_HANDLE            equ    $FE5C    ; (Byte) Current File Stream HANDLE (0=NON
 FIO_SEEKPOS           equ    $FE5D    ; (DWord) File Seek Position
 FIO_IODATA            equ    $FE61    ; (Byte) Input / Output Data
                                       ; 
-FIO_PATH_LEN          equ    $FE62    ; (Byte) Length of the Primary Filepath
+FIO_PATH_LEN          equ    $FE62    ; (Byte) Length of the Primary Filepath        (Read Only)
 FIO_PATH_POS          equ    $FE63    ; (Byte) Character Position Within the Primary Filepath
 FIO_PATH_DATA         equ    $FE64    ; (Byte) Data at the Character Position of the Primary Path
                                       ; 
-FIO_ALT_PATH_LEN      equ    $FE65    ; (Byte) Length of the Alternate Filepath
+FIO_PATH_LEN          equ    $FE65    ; (Byte) Length of the Primary Filepath        (Read Only)
 FIO_ALT_PATH_POS      equ    $FE66    ; (Byte) Character Position Within the Alternate Filepath
 FIO_ALT_PATH_DATA     equ    $FE67    ; (Byte) Data at the Character Position of the Alternate Path
                                       ; 

@@ -87,6 +87,7 @@ int  FileIO::OnAttach(int nextAddr)
     mapped_register.push_back({ "FE_WRONGTYPE", enumID++, nullptr, nullptr,  { "     wrong file type           "} });
     mapped_register.push_back({ "FE_BAD_CMD"  , enumID++, nullptr, nullptr,  { "     invalid command           "} });
     mapped_register.push_back({ "FE_BADSTREAM", enumID  , nullptr, nullptr,  { "     invalid file stream       "} });
+    mapped_register.push_back({ "FE_NOT_EMPTY", enumID  , nullptr, nullptr,  { "     directory not empty       "} });
     mapped_register.push_back({ "FE_LAST"     , enumID  , nullptr, nullptr,  { "  End of FILE_ERROR enumeration",""} });
 
     
@@ -98,35 +99,35 @@ int  FileIO::OnAttach(int nextAddr)
         [this](Word addr) { (void)addr; return Memory::Read(addr, true); }, 
         [this](Word addr, Byte data) {
             (void)addr;
-
-             if ( data == MAP(FC_RESET     ) )  { _cmd_reset();                      }
-        else if ( data == MAP(FC_SHUTDOWN  ) )  { _cmd_system_shutdown();            }
-        else if ( data == MAP(FC_COMPDATE  ) )  { _cmd_system_load_comilation_date();}
-        else if ( data == MAP(FC_FILEEXISTS) )  { _cmd_does_file_exist();            }
-        else if ( data == MAP(FC_OPENREAD  ) )  { _cmd_open_read();                  }
-        else if ( data == MAP(FC_OPENWRITE ) )  { _cmd_open_write();                 }
-        else if ( data == MAP(FC_OPENAPPEND) )  { _cmd_open_append();                }
-        else if ( data == MAP(FC_CLOSEFILE ) )  { _cmd_close_file();                 }
-        else if ( data == MAP(FC_READBYTE  ) )  { _cmd_read_byte();                  }
-        else if ( data == MAP(FC_WRITEBYTE ) )  { _cmd_write_byte();                 }
-        else if ( data == MAP(FC_LOADHEX   ) )  { _cmd_load_hex_file();              }
-        else if ( data == MAP(FC_GETLENGTH ) )  { _cmd_get_file_length();            }
-        else if ( data == MAP(FC_LISTDIR   ) )  { _cmd_list_directory();             }
-        else if ( data == MAP(FC_MAKEDIR   ) )  { _cmd_make_directory();             }
-        else if ( data == MAP(FC_CHANGEDIR ) )  { _cmd_change_directory();           }
-        else if ( data == MAP(FC_GETPATH   ) )  { _cmd_get_current_path();           }
-        else if ( data == MAP(FC_REN_DIR   ) )  { _cmd_rename_directory();           }
-        else if ( data == MAP(FC_DEL_DIR   ) )  { _cmd_remove_directory();           }
-        else if ( data == MAP(FC_DEL_FILE  ) )  { _cmd_delete_file();                }
-        else if ( data == MAP(FC_REN_FILE  ) )  { _cmd_rename_file();                }
-        else if ( data == MAP(FC_COPY_FILE ) )  { _cmd_copy_file();                  }
-        else if ( data == MAP(FC_SEEK_START) )  { _cmd_seek_start();                 }
-        else if ( data == MAP(FC_SEEK_END  ) )  { _cmd_seek_end();                   }
-        else if ( data == MAP(FC_SET_SEEK  ) )  { _cmd_set_seek_position();          }
-        else if ( data == MAP(FC_GET_SEEK  ) )  { _cmd_get_seek_position();          }
+                 if ( data == MAP(FC_RESET     ) )  { _cmd_reset();                      }
+            else if ( data == MAP(FC_SHUTDOWN  ) )  { _cmd_system_shutdown();            }
+            else if ( data == MAP(FC_COMPDATE  ) )  { _cmd_system_load_comilation_date();}
+            else if ( data == MAP(FC_FILEEXISTS) )  { _cmd_does_file_exist();            }
+            else if ( data == MAP(FC_OPENREAD  ) )  { _cmd_open_read();                  }
+            else if ( data == MAP(FC_OPENWRITE ) )  { _cmd_open_write();                 }
+            else if ( data == MAP(FC_OPENAPPEND) )  { _cmd_open_append();                }
+            else if ( data == MAP(FC_CLOSEFILE ) )  { _cmd_close_file();                 }
+            else if ( data == MAP(FC_READBYTE  ) )  { _cmd_read_byte();                  }
+            else if ( data == MAP(FC_WRITEBYTE ) )  { _cmd_write_byte();                 }
+            else if ( data == MAP(FC_LOADHEX   ) )  { _cmd_load_hex_file();              }
+            else if ( data == MAP(FC_GETLENGTH ) )  { _cmd_get_file_length();            }
+            else if ( data == MAP(FC_LISTDIR   ) )  { _cmd_list_directory();             }
+            else if ( data == MAP(FC_MAKEDIR   ) )  { _cmd_make_directory();             }
+            else if ( data == MAP(FC_CHANGEDIR ) )  { _cmd_change_directory();           }
+            else if ( data == MAP(FC_GETPATH   ) )  { _cmd_get_current_path();           }
+            else if ( data == MAP(FC_REN_DIR   ) )  { _cmd_rename_directory();           }
+            else if ( data == MAP(FC_DEL_DIR   ) )  { _cmd_remove_directory();           }
+            else if ( data == MAP(FC_DEL_FILE  ) )  { _cmd_delete_file();                }
+            else if ( data == MAP(FC_REN_FILE  ) )  { _cmd_rename_file();                }
+            else if ( data == MAP(FC_COPY_FILE ) )  { _cmd_copy_file();                  }
+            else if ( data == MAP(FC_SEEK_START) )  { _cmd_seek_start();                 }
+            else if ( data == MAP(FC_SEEK_END  ) )  { _cmd_seek_end();                   }
+            else if ( data == MAP(FC_SET_SEEK  ) )  { _cmd_set_seek_position();          }
+            else if ( data == MAP(FC_GET_SEEK  ) )  { _cmd_get_seek_position();          }
         },   
         { "(Byte) Execute a File Command (FC_<cmd>)",""} });
     nextAddr++;
+
     enumID = 0;
     mapped_register.push_back({ "FC_BEGIN"     , enumID  , nullptr, nullptr,  { "  Begin FIO_COMMAND enumeration           "} });
     mapped_register.push_back({ "FC_RESET"     , enumID++, nullptr, nullptr,  { "    Reset                                 "} });
@@ -162,8 +163,8 @@ int  FileIO::OnAttach(int nextAddr)
     //      Current File Stream HANDLE (0=NONE)
     /////
     mapped_register.push_back({ "FIO_HANDLE", nextAddr, 
-        nullptr,
-        nullptr,  
+        [this](Word addr) { (void)addr; return _fileHandle; }, 
+        [this](Word addr, Byte data) { (void)addr; _fileHandle = data; },  
         { "(Byte) Current File Stream HANDLE (0=NONE)"} });
     nextAddr++;
 
@@ -173,23 +174,31 @@ int  FileIO::OnAttach(int nextAddr)
     //      File Seek Position
     /////
     mapped_register.push_back({ "FIO_SEEKPOS", nextAddr, 
-        nullptr, 
-        nullptr,  
+        [this](Word addr) { (void)addr; return (_seek_pos>>24) & 0xFF; }, 
+        [this](Word addr, Byte data) { 
+            (void)addr; _seek_pos = (_seek_pos & 0xFFFFFF00) | ((data & 0xFF) << 24); 
+        },   
         { "(DWord) File Seek Position"} });
     nextAddr++;
     mapped_register.push_back({ "", nextAddr, 
-        nullptr, 
-        nullptr,  
+        [this](Word addr) { (void)addr; return (_seek_pos>>16) & 0xFF; }, 
+        [this](Word addr, Byte data) { 
+            (void)addr; _seek_pos = (_seek_pos & 0xFFFF00FF) | ((data & 0xFF) << 16);
+        },   
         {""} });
     nextAddr++;
     mapped_register.push_back({ "", nextAddr, 
-        nullptr, 
-        nullptr,  
+        [this](Word addr) { (void)addr; return (_seek_pos>> 8) & 0xFF; }, 
+        [this](Word addr, Byte data) { 
+            (void)addr; _seek_pos = (_seek_pos & 0xFF00FFFF) | ((data & 0xFF) << 8);
+        },   
         {""} });
     nextAddr++;
     mapped_register.push_back({ "", nextAddr, 
-        nullptr, 
-        nullptr,  
+        [this](Word addr) { (void)addr; return (_seek_pos>> 0) & 0xFF;  }, 
+        [this](Word addr, Byte data) { 
+            (void)addr; _seek_pos = (_seek_pos & 0x00FFFFFF) | ((data & 0xFF) << 0);
+        },   
         {""} });
     nextAddr++;
 
@@ -199,20 +208,20 @@ int  FileIO::OnAttach(int nextAddr)
     //      Input / Output Data
     /////
     mapped_register.push_back({ "FIO_IODATA", nextAddr, 
-        nullptr, 
-        nullptr,  
+        [this](Word addr) { (void)addr; return _io_data; }, 
+        [this](Word addr, Byte data) { (void)addr; _io_data = data; },  
         { "(Byte) Input / Output Data",""} });
     nextAddr++;
 
 
     ////////////////////////////////////////////////
     // (Byte) FIO_PATH_LEN
-    //      Length of the Filepath
+    //      Length of the Filepath (Read Only)
     /////
     mapped_register.push_back({ "FIO_PATH_LEN", nextAddr, 
-        nullptr, 
-        nullptr,  
-        { "(Byte) Length of the Primary Filepath"} });
+        [this](Word addr) { (void)addr; return filePath.size(); }, 
+        nullptr, // Read Only 
+        { "(Byte) Length of the Primary Filepath        (Read Only)"} });
     nextAddr++;
 
 
@@ -221,8 +230,21 @@ int  FileIO::OnAttach(int nextAddr)
     //      Character Position Within the Filepath
     /////
     mapped_register.push_back({ "FIO_PATH_POS", nextAddr, 
-        nullptr, 
-        nullptr,  
+        [this](Word addr) { 
+            (void)addr; 
+            Byte data = path_char_pos;
+            if (data >= filePath.size())
+                data = filePath.size() - 1;
+            if (filePath.size() == 0)
+                data = 0;
+            return data; 
+        }, 
+        [this](Word addr, Byte data) { 
+            (void)addr; 
+            if (data > filePath.size())
+                data = filePath.size() - 1;
+            path_char_pos = data;
+        },  
         { "(Byte) Character Position Within the Primary Filepath"} });
     nextAddr++;
 
@@ -232,20 +254,53 @@ int  FileIO::OnAttach(int nextAddr)
     //      Data at the Character Position of the Primary Path
     /////
     mapped_register.push_back({ "FIO_PATH_DATA", nextAddr, 
-        nullptr, 
-        nullptr,  
+        [this](Word addr) { 
+            (void)addr;
+            Byte data = 0;
+            if (filePath.size() > 0)
+            {
+                if (path_char_pos < filePath.size())
+                {
+                    data = (Byte)filePath.substr(path_char_pos, 1).at(0);
+                    if (path_char_pos <= filePath.size())
+                        path_char_pos++;
+                }
+                else
+                {
+                    filePath = "";
+                    data = 0;
+                }
+            }
+            return data; 
+        }, 
+        [this](Word addr, Byte data) { 
+            (void)addr; 
+            if (path_char_pos == 0)
+            {
+                filePath = "";
+                path_char_pos = 0;
+                filePath += data;
+                path_char_pos++;
+            }
+            else
+            {
+                filePath = filePath.substr(0, path_char_pos);
+                filePath += data;
+                path_char_pos++;
+            }
+        },  
         { "(Byte) Data at the Character Position of the Primary Path",""} });
     nextAddr++;
 
 
     ////////////////////////////////////////////////
     // (Byte) FIO_ALT_PATH_LEN
-    //      Length of the Alternate Filepath
+    //      Length of the Alternate Filepath (Read Only)
     /////
-    mapped_register.push_back({ "FIO_ALT_PATH_LEN", nextAddr, 
-        nullptr, 
-        nullptr,  
-        { "(Byte) Length of the Alternate Filepath"} });
+    mapped_register.push_back({ "FIO_PATH_LEN", nextAddr, 
+        [this](Word addr) { (void)addr; return altFilePath.size(); }, 
+        nullptr, // Read Only 
+        { "(Byte) Length of the Primary Filepath        (Read Only)"} });
     nextAddr++;
 
 
@@ -254,8 +309,21 @@ int  FileIO::OnAttach(int nextAddr)
     //      Character Position Within the Alternate Filepath
     /////
     mapped_register.push_back({ "FIO_ALT_PATH_POS", nextAddr, 
-        nullptr, 
-        nullptr,  
+        [this](Word addr) { 
+            (void)addr; 
+            Byte data = path_alt_char_pos;
+            if (data >= altFilePath.size())
+                data = altFilePath.size() - 1;
+            if (altFilePath.size() == 0)
+                data = 0;
+            return data; 
+        }, 
+        [this](Word addr, Byte data) { 
+            (void)addr; 
+            if (data > altFilePath.size())
+                data = altFilePath.size() - 1;
+            path_alt_char_pos = data;
+        },  
         { "(Byte) Character Position Within the Alternate Filepath"} });
     nextAddr++;
 
@@ -265,8 +333,41 @@ int  FileIO::OnAttach(int nextAddr)
     //      Data at the Character Position of the Alternate Path
     /////
     mapped_register.push_back({ "FIO_ALT_PATH_DATA", nextAddr, 
-        nullptr, 
-        nullptr,  
+        [this](Word addr) { 
+            (void)addr;
+            Byte data = 0;
+            if (altFilePath.size() > 0)
+            {
+                if (path_alt_char_pos < altFilePath.size())
+                {
+                    data = (Byte)filePath.substr(path_alt_char_pos, 1).at(0);
+                    if (path_alt_char_pos <= altFilePath.size())
+                        path_alt_char_pos++;
+                }
+                else
+                {
+                    altFilePath = "";
+                    data = 0;
+                }
+            }
+            return data; 
+        }, 
+        [this](Word addr, Byte data) { 
+            (void)addr; 
+            if (path_char_pos == 0)
+            {
+                altFilePath = "";
+                path_alt_char_pos = 0;
+                altFilePath += data;
+                path_alt_char_pos++;
+            }
+            else
+            {
+                altFilePath = altFilePath.substr(0, path_alt_char_pos);
+                altFilePath += data;
+                path_alt_char_pos++;
+            }
+        },  
         { "(Byte) Data at the Character Position of the Alternate Path",""} });
     nextAddr++;
 
@@ -715,25 +816,33 @@ void FileIO::_cmd_rename_directory()
 {
     std::cout << "FileIO::_cmd_rename_directory()\n";
 
-    // VERIFY AI CODE ...
+    std::filesystem::path oldPath = filePath;
+    std::filesystem::path newName(altFilePath);
 
-        // std::filesystem::path oldPath = filePath;
-        // std::filesystem::path newPath = filePath.substr(0, filePath.find_last_of('/')) + "/" + Memory::Read(MAP(FIO_IODATA));
-        // if (!std::filesystem::exists(oldPath)) {
-        //     Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
-        //     return;
-        // }
-        // if (std::filesystem::exists(newPath)) {
-        //     Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_WRONGTYPE);
-        //     return;
-        // }
-        // try {
-        //     std::filesystem::rename(oldPath, newPath);
-        // } catch (const std::filesystem::filesystem_error& e) {
-        //     Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_BAD_CMD);
-        // }
-
-    // ... VERIFY AI CODE
+    // Check if the old path is a valid directory or a file 
+    // (which should be a directory in this case)
+    if (!std::filesystem::exists(oldPath)) {
+        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
+        return;
+    }
+    // Ensure that oldPath is a valid directory
+    if (!std::filesystem::is_directory(oldPath)) {
+        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_WRONGTYPE);
+        return;
+    }
+    // Check if the new path already exists 
+    std::filesystem::path newPath = oldPath.parent_path() / newName;
+    if (std::filesystem::exists(newPath)) {
+        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_WRONGTYPE);
+        return;
+    }
+    // Attempt to rename the directory
+    try {
+        std::filesystem::rename(oldPath, newPath);
+        filePath = newName.string();  // Update the filePath to reflect the new directory name
+    } catch (const std::filesystem::filesystem_error& e) {
+        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_BAD_CMD);
+    }
 
     // see: std::filesystem::rename() for both rename_directory and rename_file
     // https://en.cppreference.com/w/cpp/filesystem/rename
@@ -742,24 +851,28 @@ void FileIO::_cmd_remove_directory()
 {
     std::cout << "FileIO::_cmd_remove_directory()\n";
 
-    // VERIFY AI CODE ...
-        
-        // std::filesystem::path path = filePath;
-        // if (!std::filesystem::exists(path)) {
-        //     Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
-        //     return;
-        // }
-        // if (!std::filesystem::is_directory(path)) {
-        //     Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_WRONGTYPE);
-        //     return;
-        // }
-        // try {
-        //     std::filesystem::remove_all(path);
-        // } catch (const std::filesystem::filesystem_error& e) {
-        //     Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_BAD_CMD);
-        // }
 
-    // ... VERIFY AI CODE
+    // VERIFY ...
+        const std::filesystem::path dirPath = filePath;
+
+        // Check if the directory exists and is a directory
+        if (!std::filesystem::exists(dirPath) || !std::filesystem::is_directory(dirPath)) {
+            Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
+            return;
+        }
+        // Check if the directory is empty
+        if (!std::filesystem::is_empty(dirPath)) {
+            Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOT_EMPTY);
+            return;
+        }
+        try {
+            std::filesystem::remove(dirPath);
+            filePath = "";  // Reset filePath since the directory has been removed
+        } catch (const std::filesystem::filesystem_error& e) {
+            Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_BAD_CMD);
+        }  
+    // ... VERIFY
+
 
     // see: std::filesystem::remove() for both remove_directory and delete_file
     // https://en.cppreference.com/w/cpp/filesystem/remove

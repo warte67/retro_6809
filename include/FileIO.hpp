@@ -51,7 +51,8 @@ public:
         FE_OVERRUN,     //  $04: buffer overrun
         FE_WRONGTYPE,   //  $05: wrong file type
         FE_BAD_CMD,     //  $06: invalid command
-        FE_BADSTREAM    //  $07: invalid file stream
+        FE_BADSTREAM,   //  $07: invalid file stream
+        FE_NOT_EMPTY,   //  $08: directory not empty
     };
 
 private: // PRIVATE MEMBERS
