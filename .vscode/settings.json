@@ -105,7 +105,8 @@
         "hash_map": "cpp",
         "csignal": "cpp",
         "expected": "cpp",
-        "queue": "cpp"
+        "queue": "cpp",
+        "filesystem": "cpp"
     }, // IntelliSense setting, no fallback
   }
   
