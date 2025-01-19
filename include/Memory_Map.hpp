@@ -387,6 +387,7 @@ enum MEMMAP
     FE_BAD_CMD            = 0x0006,   //      invalid command           
     FE_BADSTREAM          = 0x0007,   //      invalid file stream       
     FE_NOT_EMPTY          = 0x0007,   //      directory not empty       
+    FE_FILE_EXISTS        = 0x0007,   //      file already exists       
     FE_LAST               = 0x0007,   //   End of FILE_ERROR enumeration
                                       // 
     FIO_COMMAND           = 0xFE5B,   // (Byte) Execute a File Command (FC_<cmd>)

@@ -78,19 +78,20 @@ int  FileIO::OnAttach(int nextAddr)
         { "(Byte) FILE_ERROR enumeration result (FE_<error>)",""} });
     nextAddr++;
     Byte enumID = 0;
-    mapped_register.push_back({ "FE_BEGIN"    , enumID  , nullptr, nullptr,  { "  Begin FILE_ERROR enumeration "} });
-    mapped_register.push_back({ "FE_NOERROR"  , enumID++, nullptr, nullptr,  { "     no error, condition normal"} });
-    mapped_register.push_back({ "FE_NOTFOUND" , enumID++, nullptr, nullptr,  { "     file or folder not found  "} });
-    mapped_register.push_back({ "FE_NOTOPEN"  , enumID++, nullptr, nullptr,  { "     file not open             "} });
-    mapped_register.push_back({ "FE_EOF"      , enumID++, nullptr, nullptr,  { "     end of file               "} });
-    mapped_register.push_back({ "FE_OVERRUN"  , enumID++, nullptr, nullptr,  { "     buffer overrun            "} });
-    mapped_register.push_back({ "FE_WRONGTYPE", enumID++, nullptr, nullptr,  { "     wrong file type           "} });
-    mapped_register.push_back({ "FE_BAD_CMD"  , enumID++, nullptr, nullptr,  { "     invalid command           "} });
-    mapped_register.push_back({ "FE_BADSTREAM", enumID  , nullptr, nullptr,  { "     invalid file stream       "} });
-    mapped_register.push_back({ "FE_NOT_EMPTY", enumID  , nullptr, nullptr,  { "     directory not empty       "} });
-    mapped_register.push_back({ "FE_LAST"     , enumID  , nullptr, nullptr,  { "  End of FILE_ERROR enumeration",""} });
+    mapped_register.push_back({ "FE_BEGIN"      , enumID  , nullptr, nullptr,  { "  Begin FILE_ERROR enumeration "} });
+    mapped_register.push_back({ "FE_NOERROR"    , enumID++, nullptr, nullptr,  { "     no error, condition normal"} });
+    mapped_register.push_back({ "FE_NOTFOUND"   , enumID++, nullptr, nullptr,  { "     file or folder not found  "} });
+    mapped_register.push_back({ "FE_NOTOPEN"    , enumID++, nullptr, nullptr,  { "     file not open             "} });
+    mapped_register.push_back({ "FE_EOF"        , enumID++, nullptr, nullptr,  { "     end of file               "} });
+    mapped_register.push_back({ "FE_OVERRUN"    , enumID++, nullptr, nullptr,  { "     buffer overrun            "} });
+    mapped_register.push_back({ "FE_WRONGTYPE"  , enumID++, nullptr, nullptr,  { "     wrong file type           "} });
+    mapped_register.push_back({ "FE_BAD_CMD"    , enumID++, nullptr, nullptr,  { "     invalid command           "} });
+    mapped_register.push_back({ "FE_BADSTREAM"  , enumID  , nullptr, nullptr,  { "     invalid file stream       "} });
+    mapped_register.push_back({ "FE_NOT_EMPTY"  , enumID  , nullptr, nullptr,  { "     directory not empty       "} });
+    mapped_register.push_back({ "FE_FILE_EXISTS", enumID  , nullptr, nullptr,  { "     file already exists       "} });
+    mapped_register.push_back({ "FE_LAST"       , enumID  , nullptr, nullptr,  { "  End of FILE_ERROR enumeration",""} });
 
-    
+
     ////////////////////////////////////////////////
     // (Byte) FIO_COMMAND
     //      End of GPU Register Space
@@ -415,21 +416,33 @@ int  FileIO::OnAttach(int nextAddr)
 void FileIO::OnInit()
 {
     std::cout << clr::indent() << clr::LT_BLUE << "FileIO::OnInit() Entry" << clr::RETURN;
-    // ...
+
+    // create a block of null file stream devices
+    for (int i = 0; i < FILEHANDLESMAX; i++)
+    {
+        FILE* ifs = nullptr;
+        _vecFileStreams.push_back(ifs);
+    }
+
     std::cout << clr::indent() << clr::LT_BLUE << "FileIO::OnInit() Exit" << clr::RETURN;
 }
-
-
 
 void FileIO::OnQuit()
 {
     std::cout << clr::indent() << clr::LT_BLUE << "FileIO::OnQuit() Entry" << clr::RETURN;
-    // ...
+
+    // close and and all open file streams
+    for (auto* fs : _vecFileStreams)
+    {
+        if (fs != nullptr)
+        {
+            fclose(fs);
+            fs = nullptr;
+        }
+    }
+
     std::cout << clr::indent() << clr::LT_BLUE << "FileIO::OnQuit() Exit" << clr::RETURN;
 }
-
-
-
 
 void FileIO::_cmd_reset()
 {
@@ -944,7 +957,29 @@ void FileIO::_cmd_copy_file()
 {
     std::cout << "FileIO::_cmd_copy_file()\n";
 
-
+    const std::filesystem::path srcPath = filePath;
+    const std::filesystem::path destPath = altFilePath;
+    // Check if the source file exists and is a regular file
+    if (!std::filesystem::exists(srcPath)) {
+        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
+        return;
+    }
+    // Ensure that srcPath is a valid file
+    if (!std::filesystem::is_regular_file(srcPath)) {
+        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_WRONGTYPE);
+        return;
+    }
+    // Check if the destination path already exists (which would be a file in this case)
+    if (std::filesystem::exists(destPath)) {
+        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_FILE_EXISTS);
+        return;
+    }
+    try {
+        std::filesystem::copy(srcPath, destPath);
+        filePath = destPath.filename().string();  // Update the filePath to reflect the new destination filename
+    } catch (const std::filesystem::filesystem_error& e) {
+        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_BAD_CMD);
+    }
     // see: std::filesystem::copy() to copy files, folders, and symlinks
     // https://en.cppreference.com/w/cpp/filesystem/copy
 }
@@ -953,20 +988,15 @@ void FileIO::_cmd_seek_start()
 {
     std::cout << "FileIO::_cmd_seek_start()\n";
 
-    // VERIFY AI CODE ...
-
-        // std::ifstream file(filePath, std::ios::binary);
-        // if (!file.is_open()) {
-        //     Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
-        //     return;
-        // }
-        // file.seekg(0);
-        // if (!file.good()) {
-        //     Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_BADSTREAM);
-        // }
-
-    // ... VERIFY AI CODE
-
+    // Check if a file is currently open for reading/writing using the provided handle index
+    if (_fileHandle == 0 || _vecFileStreams[_fileHandle] == nullptr) {
+        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
+        return;
+    }
+    // Move the file pointer to the end of the file and get its current position using tellg()
+    fseek(_vecFileStreams[_fileHandle], 0, SEEK_SET);
+    // Set the seek position
+    _seek_pos = ftell(_vecFileStreams[_fileHandle]);
     // https://en.cppreference.com/w/cpp/io/c/fseek
 }
 
@@ -974,19 +1004,20 @@ void FileIO::_cmd_seek_end()
 {
     std::cout << "FileIO::_cmd_seek_end()\n";
 
-    // VERIFY AI CODE ...
-
-        // std::ifstream file(filePath, std::ios::binary);
-        // if (!file.is_open()) {
-        //     Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
-        //     return;
-        // }
-        // file.seekg(0, std::ios::end);
-        // if (!file.good()) {
-        //     Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_BADSTREAM);
-        // }
-
-    // ... VERIFY AI CODE
+    // Check if a file is currently open for reading/writing using the provided handle index
+    if (_fileHandle == 0 || _vecFileStreams[_fileHandle] == nullptr) {
+        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
+        return;
+    }
+    // Move the file pointer to the end of the file and get its current position using tellg()
+    fseek(_vecFileStreams[_fileHandle], 0, SEEK_END);
+    // Check if seeking to the end was successful
+    if (feof(_vecFileStreams[_fileHandle])) {
+        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_BADSTREAM);
+        return;
+    }
+    // Set the seek position
+    _seek_pos = ftell(_vecFileStreams[_fileHandle]);
 
     // https://en.cppreference.com/w/cpp/io/c/fseek
 }
@@ -995,20 +1026,20 @@ void FileIO::_cmd_set_seek_position()
 {
     std::cout << "FileIO::_cmd_set_seek_position()\n";
 
-    // VERIFY AI CODE ...
-
-        // std::ifstream file(filePath, std::ios::binary);
-        // if (!file.is_open()) {
-        //     Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
-        //     return;
-        // }
-        // Word position = Memory::Read(MAP(FIO_IOWORD));
-        // file.seekg(position);
-        // if (!file.good()) {
-        //     Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_BADSTREAM);
-        // }
-
-    // ... VERIFY AI CODE
+    // Check if a file is currently open for reading/writing using the provided handle index
+    if (_fileHandle == 0 || _vecFileStreams[_fileHandle] == nullptr) {
+        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
+        return;
+    }
+    // Move the file pointer to the end of the file and get its current position using tellg()
+    fseek(_vecFileStreams[_fileHandle], _seek_pos, SEEK_SET);
+    // Check if seeking was past the end.
+    if (feof(_vecFileStreams[_fileHandle])) {
+        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_BADSTREAM);
+        return;
+    }
+    // Set the seek position
+    _seek_pos = ftell(_vecFileStreams[_fileHandle]);
 
     // https://en.cppreference.com/w/cpp/io/c/fsetpos
 }
@@ -1017,21 +1048,17 @@ void FileIO::_cmd_get_seek_position()
 {
     std::cout << "FileIO::_cmd_get_seek_position()\n";
 
-    // VERIFY AI CODE ...
-
-        // std::ifstream file(filePath, std::ios::binary);
-        // if (!file.is_open()) {
-        //     Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
-        //     return;
-        // }
-        // Word position = file.tellg();
-        // if (position == -1) {
-        //     Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_BADSTREAM);
-        //     return;
-        // }
-        // Memory::Write(MAP(FIO_IOWORD), position);    
-
-    // ... VERIFY AI CODE
+    // Check if a file is currently open for reading/writing using the provided handle index
+    if (_fileHandle == 0 || _vecFileStreams[_fileHandle] == nullptr) {
+        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
+        return;
+    }
+    // Get the current position of the file pointer using ftell()
+    if (ftell(_vecFileStreams[_fileHandle]) != -1) {
+        _seek_pos = ftell(_vecFileStreams[_fileHandle]);
+    } else {
+        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_BADSTREAM);
+    }
 
     // https://en.cppreference.com/w/cpp/io/c/fgetpos
 }

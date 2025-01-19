@@ -37,8 +37,8 @@ public: // VIRTUAL METHODS
     // unused pure virtuals
     virtual void OnActivate() {};                   // activate
     virtual void OnDeactivate() {};                 // deactivate
-    virtual void OnEvent(SDL_Event* evnt) {};       // handle events
-    virtual void OnUpdate(float fElapsedTime) {};   // update
+    virtual void OnEvent(SDL_Event* evnt) {(void)evnt;};       // handle events
+    virtual void OnUpdate(float fElapsedTime) {(void)fElapsedTime;};   // update
     virtual void OnRender() {};                     // render
  
 public: 
@@ -53,6 +53,7 @@ public:
         FE_BAD_CMD,     //  $06: invalid command
         FE_BADSTREAM,   //  $07: invalid file stream
         FE_NOT_EMPTY,   //  $08: directory not empty
+        FE_FILE_EXISTS  //  $09: file already exists
     };
 
 private: // PRIVATE MEMBERS

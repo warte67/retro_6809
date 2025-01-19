@@ -385,6 +385,7 @@ FE_WRONGTYPE          equ    $0005    ;      wrong file type
 FE_BAD_CMD            equ    $0006    ;      invalid command           
 FE_BADSTREAM          equ    $0007    ;      invalid file stream       
 FE_NOT_EMPTY          equ    $0007    ;      directory not empty       
+FE_FILE_EXISTS        equ    $0007    ;      file already exists       
 FE_LAST               equ    $0007    ;   End of FILE_ERROR enumeration
                                       ; 
 FIO_COMMAND           equ    $FE5B    ; (Byte) Execute a File Command (FC_<cmd>)
