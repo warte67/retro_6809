@@ -46,7 +46,7 @@ void UnitTest::Quit()
         Log("Test Log Closed");
         testLog.close();
     }
-    print_log_to_console();
+    // print_log_to_console();
 }
 
 
@@ -54,6 +54,8 @@ void UnitTest::Log(const std::string& message)
 {
     if (testLog.is_open()) {
         testLog << GetCurrentTime() << " - " << message << std::endl;
+
+        std::cout << clr::indent() << clr::DARK << GetCurrentTime() << " - " << message << std::endl;
     }
 }
 
@@ -62,7 +64,7 @@ void UnitTest::Assert(bool condition, const std::string& message, const char* fi
 {
     if (!condition) {
         std::ostringstream ss;
-        ss << "ASSERT FAILED: " << message; // << " (" << file << ":" << line << ")";
+        ss << clr::RED << "ASSERT FAILED: " << message << clr::RESET; // << " (" << file << ":" << line << ")";
         Log(ss.str());
         Bus::Error(ss.str(), file, line);
         // std::cerr << ss.str() << std::endl;
@@ -111,7 +113,7 @@ bool UnitTest::RangeTest_RW(std::string name, Word start, Word end)
                 if (Memory::Read(addr) != pattern) {
                     result = false;
                     testFailed = true;
-                    UnitTest::Log("Read/Write failed at address $" + clr::hex(addr, 4));
+                    UnitTest::Log(clr::RED + "Read/Write failed at address $" + clr::hex(addr, 4) + clr::RESET );
                     break;
                 }
             }
@@ -121,9 +123,9 @@ bool UnitTest::RangeTest_RW(std::string name, Word start, Word end)
         if (testFailed) { break; }
     }
     if (result)
-        UnitTest::Log(name + " Read/Write Test PASSED");
+        UnitTest::Log(clr::GREEN + name + " Read/Write Test PASSED" + clr::RESET);
     else
-        UnitTest::Log(name + " Read/Write Test FAILED");
+        UnitTest::Log(clr::RED + name + " Read/Write Test FAILED" + clr::RESET);
     return result;
 }
 
@@ -147,7 +149,7 @@ bool UnitTest::RangeTest_RO(std::string name, Word start, Word end)
                 if (Memory::Read(addr) == pattern) {
                     result = false;
                     testFailed = true;
-                    UnitTest::Log("Write allowed to read-only memory at address $" + clr::hex(addr, 4) + " with pattern " + clr::hex(pattern, 2));
+                    UnitTest::Log(clr::RED + "Write allowed to read-only memory at address $" + clr::hex(addr, 4) + " with pattern " + clr::hex(pattern, 2) + clr::RESET);
                     break;
                 }
             }
@@ -155,8 +157,8 @@ bool UnitTest::RangeTest_RO(std::string name, Word start, Word end)
         if (testFailed) { break; }
     }
     if (result)
-        UnitTest::Log(name + " Read-Only Test PASSED");
+        UnitTest::Log(clr::GREEN +name + " Read-Only Test PASSED" + clr::RESET);
     else
-        UnitTest::Log(name + " Read-Only Test FAILED");
+        UnitTest::Log(clr::RED + name + " Read-Only Test FAILED" + clr::RESET);
     return result;
 }
