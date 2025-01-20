@@ -9,7 +9,7 @@
                       ;* Original Author: Jay Faries (warte67)                                           
                       ;*****************************
                       
-0000                                  INCLUDE "Memory_Map.asm"
+0000                                          INCLUDE "Memory_Map.asm"
                       ;*** Memory_Map.asm *************************************************
                       ;*    __  __                                     __  __                                 
                       ;*   |  \/  |                                   |  \/  |                                
@@ -551,38 +551,67 @@ FFFE                  HARD_RESET            equ    $FFFE    ; RESET Hardware Int
                       
                       
                       
-FFFE                                  org     $FFFE
-FFFE  F000                            fdb     start
+0000                                          org     SOFT_VECTORS_DEVICE
+                      
+0000  0000                                    fdb     #0      ; SOFT_EXEC                                     
+0002  0000                                    fdb     #0      ; SOFT_SWI3             
+0004  0000                                    fdb     #0      ; SOFT_SWI2             
+0006  0000                                    fdb     #0      ; SOFT_FIRQ             
+0008  0000                                    fdb     #0      ; SOFT_IRQ              
+000A  0000                                    fdb     #0      ; SOFT_SWI              
+000C  0000                                    fdb     #0      ; SOFT_NMI              
+000E  0000                                    fdb     #0      ; SOFT_RESET            
+                      
+FFFE                                          org     HARD_RESET
+FFFE  F000                                    fdb     start
+                      
+                      ; ---------------------------------------------------------------------
                       
                       
-F000                                  org     KERNEL_START
+F000                                          org     KERNEL_START
                       
-F000  2017            start           bra     begin
+F000  2017            start                   bra     begin
                       
-F002  4B65726E656C2056657273696F6E3A2000 vers_label      fcn     "Kernel Version: "
-F013  302E302E3100    vers_number     fcn     "0.0.1"
+F002  4B65726E656C2056657273696F6E3A2000 vers_label              fcn     "Kernel Version: "
+F013  302E302E3100    vers_number             fcn     "0.0.1"
                       
-F019  12              begin           nop
-                                      ; clear out system memory
-F01A  8E0000                          ldx     #SOFT_VECTORS_DEVICE
-F01D  CC0000                          ldd     #$0000
-F020  ED81            1               std     ,x++
-F022  8C2400                          cmpx    #VIDEO_TOP
-F025  26F9                            bne     1b
-                                      ;
+F019                  begin                   ; warm reset?
+F019  FC000E                                  ldd     SOFT_RESET
+                                              ; cmpd  #0
+F01C  2704                                    beq     krnl_cold_reset
+F01E  6E9F000E                                jmp     [SOFT_RESET]
+                                              
+F022                  krnl_cold_reset         ; cold reset
+F022  CCF03A                                  ldd     #krnl_warm_reset
+F025  FD000E                                  std     SOFT_RESET
+                                              ; ...
+                                              ; clear out system memory
+F028  8E0010          krnl_clear_mem          ldx     #SYSTEM_MEMORY_DEVICE
+F02B  CE0400                                  ldu     #VIDEO_START
+F02E  CC0000                                  ldd     #$0000
+F031  AFC4            1                       stx     ,u                      ; cycle first character to show progress
+F033  ED81                                    std     ,x++
+F035  8CF000                                  cmpx    #KERNEL_ROM_DEVICE
+F038  26F7                                    bne     1b
+                                              ; ...
+F03A                  krnl_warm_reset         ; common start up code
+                                              ;
+                                              ; for now simply set the SP
+F03A  10CE0400                                lds     #SSTACK_TOP
+                                              ; ...
                       
                       
                       
-                      
-                                      
-F027  CC0100                          ldd     #$0100
-F02A  8E0400          lp2             ldx     #VIDEO_START            
-F02D  C30001                          addd    #1
-F030  ED81            lp1             std     ,x++
-F032  C30001                          addd    #1
-F035  BCFE0D                          cmpx    GPU_VIDEO_MAX
-F038  2DF6                            blt     lp1
-F03A  20EE                            bra     lp2
+                      ; ----------------------  MAIN LOOP  --------------------------------------
+                                              ; cycle video memory
+F03E  CC0100                                  ldd     #$0100
+F041  8E0400          1                       ldx     #VIDEO_START            
+F044  C30001                                  addd    #1
+F047  ED81            2                       std     ,x++
+F049  C30001                                  addd    #1
+F04C  BCFE0D                                  cmpx    GPU_VIDEO_MAX
+F04F  2DF6                                    blt     2b
+F051  20EE                                    bra     1b
                       
                       
                       

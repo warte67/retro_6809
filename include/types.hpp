@@ -64,7 +64,7 @@
     const int DEBUG_WINDOW_HEIGHT = DEBUG_HEIGHT * DEBUG_WINDOW_SCALE;
     const size_t DEBUG_BUFFER_SIZE = (DEBUG_WIDTH/8)*(DEBUG_HEIGHT/8);
     constexpr bool DEBUG_STARTS_ACTIVE = true;
-    constexpr bool DEBUG_SINGLE_STEP = false;
+    constexpr bool DEBUG_SINGLE_STEP = true;
     constexpr int DEBUG_HISTORY_SIZE = 16;
 
     #define DEBUG_THROW_ERROR_ON_WRITE_TO_READ_ONLY_MEMORY false
