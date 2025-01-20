@@ -452,14 +452,14 @@ void Keyboard::OnEvent(SDL_Event* evnt)
 			// find the register that should contain the bit
 			Word reg = xkey / 8;
 			Byte bit = Memory::Read(MAP(XKEY_BUFFER) + reg) | (1 << (xkey % 8));
-			Memory::Write(MAP(XKEY_BUFFER) + reg, bit);
+			Memory::Write(MAP(XKEY_BUFFER) + reg, bit, true);
 			// handle the ALT keys
 			if (xkey == XKey::L_ALT || xkey == XKey::R_ALT)
 			{
 				xkey = XKey::ALT;
 				reg = xkey / 8;
 				bit = Memory::Read(MAP(XKEY_BUFFER) + reg) | (1 << (xkey % 8));
-				Memory::Write(MAP(XKEY_BUFFER) + reg, bit);
+				Memory::Write(MAP(XKEY_BUFFER) + reg, bit, true);
 			}
 			// handle the SHIFT keys
 			if (xkey == XKey::L_SHIFT || xkey == XKey::R_SHIFT)
@@ -467,7 +467,7 @@ void Keyboard::OnEvent(SDL_Event* evnt)
 				xkey = XKey::SHIFT;
 				reg = xkey / 8;
 				bit = Memory::Read(MAP(XKEY_BUFFER) + reg) | (1 << (xkey % 8));
-				Memory::Write(MAP(XKEY_BUFFER) + reg, bit);
+				Memory::Write(MAP(XKEY_BUFFER) + reg, bit, true);
 			}
 			// handle the CONTROL keys
 			if (xkey == XKey::L_CONTROL || xkey == XKey::R_CONTROL)
@@ -475,7 +475,7 @@ void Keyboard::OnEvent(SDL_Event* evnt)
 				xkey = XKey::CONTROL;
 				reg = xkey / 8;
 				bit = Memory::Read(MAP(XKEY_BUFFER) + reg) | (1 << (xkey % 8));
-				Memory::Write(MAP(XKEY_BUFFER) + reg, bit);
+				Memory::Write(MAP(XKEY_BUFFER) + reg, bit, true);
 			}
 			// don't queue key presses while in the debugger screen
 			if ((km & SDL_KMOD_ALT) || (km & SDL_KMOD_CTRL) || Bus::GetDebug()->IsCursorVisible())
@@ -497,14 +497,14 @@ void Keyboard::OnEvent(SDL_Event* evnt)
 			// find the register that should contain the bit
 			Word reg = xkey / 8;
 			Byte bit = Memory::Read(MAP(XKEY_BUFFER) + reg) & ~(1 << (xkey % 8));
-			Memory::Write(MAP(XKEY_BUFFER) + reg, bit);
+			Memory::Write(MAP(XKEY_BUFFER) + reg, bit, true);
 			// handle release of the ALT keys
 			if (xkey == XKey::L_ALT || xkey == XKey::R_ALT)
 			{
 				xkey = XKey::ALT;
 				reg = xkey / 8;
 				bit = Memory::Read(MAP(XKEY_BUFFER) + reg) & ~(1 << (xkey % 8));
-				Memory::Write(MAP(XKEY_BUFFER) + reg, bit);
+				Memory::Write(MAP(XKEY_BUFFER) + reg, bit, true);
 			}
 			// handle release of the SHIFT keys
 			if (xkey == XKey::L_SHIFT || xkey == XKey::R_SHIFT)
@@ -512,7 +512,7 @@ void Keyboard::OnEvent(SDL_Event* evnt)
 				xkey = XKey::SHIFT;
 				reg = xkey / 8;
 				bit = Memory::Read(MAP(XKEY_BUFFER) + reg) & ~(1 << (xkey % 8));
-				Memory::Write(MAP(XKEY_BUFFER) + reg, bit);
+				Memory::Write(MAP(XKEY_BUFFER) + reg, bit, true);
 			}
 			// handle release of the CONTROL keys
 			if (xkey == XKey::L_CONTROL || xkey == XKey::R_CONTROL)
@@ -520,7 +520,7 @@ void Keyboard::OnEvent(SDL_Event* evnt)
 				xkey = XKey::CONTROL;
 				reg = xkey / 8;
 				bit = Memory::Read(MAP(XKEY_BUFFER) + reg) & ~(1 << (xkey % 8));
-				Memory::Write(MAP(XKEY_BUFFER) + reg, bit);
+				Memory::Write(MAP(XKEY_BUFFER) + reg, bit, true);
 			}
 			break;
 		}
@@ -617,16 +617,16 @@ void Keyboard::_doEditBuffer(char xkey)
 	}
 
 	editBuffer.at(0) = 0;
-    Memory::Write(MAP(FIO_LN_EDT_BUFFER),0);
+    Memory::Write(MAP(FIO_LN_EDT_BUFFER),0, true);
 
 	Word i = 0;
 	for (auto& a : _str_edt_buffer)
     {
-        Memory::Write(MAP(FIO_LN_EDT_BUFFER)+i,a);
+        Memory::Write(MAP(FIO_LN_EDT_BUFFER)+i,a, true);
 		editBuffer.at(i++) = a;
     }
 	editBuffer.at(i) = 0;
-    Memory::Write(MAP(FIO_LN_EDT_BUFFER)+i,0);
+    Memory::Write(MAP(FIO_LN_EDT_BUFFER)+i,0, true);
 }
 
 
@@ -642,7 +642,7 @@ Byte Keyboard::charPopQueue() {
 
 	Byte ret = charQueue.front();
 	charQueue.pop();
-	Memory::Write(MAP(CHAR_Q_LEN), charQueue.size());
+	Memory::Write(MAP(CHAR_Q_LEN), charQueue.size(), true);
 	return ret;
 }
 

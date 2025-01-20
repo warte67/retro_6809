@@ -106,7 +106,8 @@
         "csignal": "cpp",
         "expected": "cpp",
         "queue": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "strstream": "cpp"
     }, // IntelliSense setting, no fallback
   }
   

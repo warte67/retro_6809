@@ -35,6 +35,9 @@
     #define MEMORY_MAP_OUTPUT_FILE_ASM  "./asm/Memory_Map.asm"
     #define INITIAL_ASM_APPLICATION     "./asm/test.hex"
 
+    constexpr bool MEMORY_MAP_DISPLAY_OUTPUT_FILE_HPP = false;
+    constexpr bool MEMORY_MAP_DISPLAY_OUTPUT_FILE_ASM = false;
+
     // simple types for 8-bit archetecture 
     #ifndef Byte
         #define Byte Uint8
@@ -59,6 +62,8 @@
     constexpr bool DEBUG_STARTS_ACTIVE = true;
     constexpr bool DEBUG_SINGLE_STEP = false;
     constexpr int DEBUG_HISTORY_SIZE = 16;
+
+    #define DEBUG_THROW_ERROR_ON_WRITE_TO_READ_ONLY_MEMORY true
 
 
     // Define the MAP() macro based on the value of GENERATE_MEMORY_MAP

@@ -26,6 +26,7 @@
 #include "Keyboard.hpp"
 #include "Joystick.hpp"
 #include "FileIO.hpp"
+#include "Math.hpp"
 
 
 class BusException : public std::exception
@@ -221,6 +222,7 @@ void Bus::_onInit()
     Memory::Attach<Keyboard>();
     Memory::Attach<Joystick>();
     Memory::Attach<FileIO>();
+    Memory::Attach<Math>();
 
     Memory::Attach<HDW_RESERVED>();     // reserved space for future use
     Memory::Attach<ROM_VECTS>();        // 0xFFF0 - 0xFFFF      (System ROM Vectors)

@@ -164,7 +164,16 @@ void Memory::Write(Word address, Byte data, bool debug)
             {
                 itr->second.write(address, data);
                 return;
-            }        
+            }  
+            #if DEBUG_THROW_ERROR_ON_WRITE_TO_READ_ONLY_MEMORY == true                  
+                else
+                {
+                    // Handle Read-Only Register
+                    std::string err = "Error: Attempt to write to read-only register at address $" + clr::hex(address,4);
+                    Bus::Error(err, __FILE__, __LINE__);
+                    return;  // Just do nothing, silently return or log error.
+                }
+            #endif // DEBUG_THROW_ERROR_ON_WRITE_TO_READ_ONLY_MEMORY == true 
         }
     }
     // write to the fallback memory (for debug)
@@ -337,17 +346,20 @@ void Memory::Generate_Memory_Map()
             Bus::Error("Unable to open mem_test.hpp", __FILE__, __LINE__);
         }
         // output that text file
-        std::ifstream fin(MEMORY_MAP_OUTPUT_FILE_HPP);
-        if (fin.is_open())
+        if (MEMORY_MAP_DISPLAY_OUTPUT_FILE_HPP)
         {
-            std::string line;
-            while (std::getline(fin, line))
+            std::ifstream fin(MEMORY_MAP_OUTPUT_FILE_HPP);
+            if (fin.is_open())
             {
-                std::cout << line << std::endl;
+                std::string line;
+                while (std::getline(fin, line))
+                {
+                    std::cout << line << std::endl;
+                }
+                fin.close();
+            } else {
+                Bus::Error("Unable to open mem_test.hpp", __FILE__, __LINE__);
             }
-            fin.close();
-        } else {
-            Bus::Error("Unable to open mem_test.hpp", __FILE__, __LINE__);
         }
     } // END: Generate C++ Memory_Map.hpp    
     
@@ -411,17 +423,20 @@ void Memory::Generate_Memory_Map()
             fout.close();
         }
         // output that text file
-        std::ifstream fin(MEMORY_MAP_OUTPUT_FILE_ASM);
-        if (fin.is_open())
+        if (MEMORY_MAP_DISPLAY_OUTPUT_FILE_ASM)
         {
-            std::string line;
-            while (std::getline(fin, line))
+            std::ifstream fin(MEMORY_MAP_OUTPUT_FILE_ASM);
+            if (fin.is_open())
             {
-                std::cout << line << std::endl;
+                std::string line;
+                while (std::getline(fin, line))
+                {
+                    std::cout << line << std::endl;
+                }
+                fin.close();
+            } else {
+                Bus::Error("Unable to open mem_test.hpp", __FILE__, __LINE__);
             }
-            fin.close();
-        } else {
-            Bus::Error("Unable to open mem_test.hpp", __FILE__, __LINE__);
         }
     } // END: Generate Assembly Memory_Map.asm
 }
