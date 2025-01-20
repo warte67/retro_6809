@@ -220,7 +220,7 @@ void Bus::_onInit()
     Memory::Attach<SYSTEM_MEMORY>();
     Memory::Attach<VIDEO_BUFFER>(); 
     Memory::Attach<USER_MEMORY>();  
-    Memory::Attach<MEMBANK>();      
+    Memory::Attach<BANKED_MEM>();      
     Memory::Attach<KERNEL_ROM>();       // Add a new constructor to include the kernal filename.
 
     _pDebug = Memory::Attach<Debug>();  // This could be a singleton due to its static nature.

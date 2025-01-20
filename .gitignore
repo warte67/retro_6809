@@ -16,6 +16,10 @@
 *.dylib
 *.dll
 
+# Log Files
+*.log
+test.log
+
 # Fortran module files
 *.mod
 *.smod
@@ -40,4 +44,3 @@ build/
 
 vgcore.*
 
-test.log

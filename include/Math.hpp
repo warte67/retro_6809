@@ -30,8 +30,9 @@ public: // PUBLIC CONSTRUCTOR / DESTRUCTOR
 
 public: // VIRTUAL METHODS
 
-    virtual int  OnAttach(int nextAddr) override;               // attach to the memory map
-    virtual void OnInit() override;                             // initialize
+    virtual int  OnAttach(int nextAddr) override;   // attach to the memory map
+    virtual bool OnTest() override;                 // return true for successful unit tests
+    virtual void OnInit() override;                 // initialize    
 
     // not used
     virtual void OnQuit() override {};
@@ -41,8 +42,9 @@ public: // VIRTUAL METHODS
     virtual void OnUpdate(float fElapsedTime) override { (void)fElapsedTime;};
     virtual void OnRender() override {};
  
-public: // PUBLIC ACCESSORS
-    // ... 
+private: // PRIVATE UNIT TESTs
+    bool _test_accumilators();
+    bool _test_math_operations();
 
 private: // PRIVATE MEMBERS
 

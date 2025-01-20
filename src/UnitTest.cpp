@@ -46,7 +46,7 @@ void UnitTest::Quit()
         Log("Test Log Closed");
         testLog.close();
     }
-    print_log_to_console();
+    // print_log_to_console();
 }
 
 
@@ -54,6 +54,8 @@ void UnitTest::Log(const std::string& message)
 {
     if (testLog.is_open()) {
         testLog << GetCurrentTime() << " - " << message << std::endl;
+
+        std::cout << clr::indent() << clr::DARK << GetCurrentTime() << " - " << message << std::endl;
     }
 }
 
@@ -62,7 +64,7 @@ void UnitTest::Assert(bool condition, const std::string& message, const char* fi
 {
     if (!condition) {
         std::ostringstream ss;
-        ss << "ASSERT FAILED: " << message; // << " (" << file << ":" << line << ")";
+        ss << clr::RED << "ASSERT FAILED: " << message << clr::RESET; // << " (" << file << ":" << line << ")";
         Log(ss.str());
         Bus::Error(ss.str(), file, line);
         // std::cerr << ss.str() << std::endl;
@@ -96,23 +98,67 @@ std::string UnitTest::GetCurrentTime()
 bool UnitTest::RangeTest_RW(std::string name, Word start, Word end)
 {
     bool result = true;
-    // Test the entire memory range
+    std::vector<Byte> testValues = {
+        0b00000000, 0b00000001, 0b00000010, 0b00000100, 0b00001000, 
+        0b00010000, 0b00100000, 0b01000000, 0b10000000, 0b10101010, 
+        0b01010101, 0b11001100, 0b00110011, 0b11110000, 0b00001111, 
+        0b11111111
+    };
     for (Word addr = start; addr < end; ++addr) {
-        Byte origValue = Memory::Read(addr);
-        Byte data = 1;  
-        while (data != 0)
-        {
-            Memory::Write(addr, data);
-            if (Memory::Read(addr) != data)
-            {
-                UnitTest::Log("Memory read/write failed for " + name + " at address $" + clr::hex(addr, 4));
-                result = false;
+        Byte originalValue = Memory::Read(addr);  // Read the current value
+        bool testFailed = false;
+        for (Byte pattern : testValues) {
+            if (originalValue != pattern) {  // Only write if the value is different
+                Memory::Write(addr, pattern);
+                if (Memory::Read(addr) != pattern) {
+                    result = false;
+                    testFailed = true;
+                    UnitTest::Log(clr::RED + "Read/Write failed at address $" + clr::hex(addr, 4) + clr::RESET );
+                    break;
+                }
             }
-            data++;
         }
-        Memory::Write(addr, origValue);
+        // Restore original value
+        Memory::Write(addr, originalValue);
+        if (testFailed) { break; }
     }
+    if (result)
+        UnitTest::Log(clr::WHITE + name + clr::GREEN + " Read/Write Test PASSED" + clr::RESET);
+    else
+        UnitTest::Log(clr::WHITE + name + clr::RED + " Read/Write Test FAILED" + clr::RESET);
+    return result;
+}
 
-    UnitTest::Log(name+" Unit Tests PASSED");
-    return result;    
+
+bool UnitTest::RangeTest_RO(std::string name, Word start, Word end)
+{
+    bool result = true;
+    std::vector<Byte> testValues = {
+        0b00000000, 0b00000001, 0b00000010, 0b00000100, 0b00001000, 
+        0b00010000, 0b00100000, 0b01000000, 0b10000000, 0b10101010, 
+        0b01010101, 0b11001100, 0b00110011, 0b11110000, 0b00001111, 
+        0b11111111
+    };
+    for (Word addr = start; addr < end; ++addr) {
+        Byte originalValue = Memory::Read(addr);  // Read the current value before writing
+        bool testFailed = false;
+        for (Byte pattern : testValues) {
+            if (originalValue != pattern) {  // Only attempt to write if the value is different
+                Memory::Write(addr, pattern);  // Try writing to the read-only memory
+                // Check if write was allowed (shouldn't be for read-only)
+                if (Memory::Read(addr) == pattern) {
+                    result = false;
+                    testFailed = true;
+                    UnitTest::Log(clr::RED + "Write allowed to read-only memory at address $" + clr::hex(addr, 4) + " with pattern " + clr::hex(pattern, 2) + clr::RESET);
+                    break;
+                }
+            }
+        }
+        if (testFailed) { break; }
+    }
+    if (result)
+        UnitTest::Log(clr::WHITE + name + clr::GREEN + " Read-Only Test PASSED" + clr::RESET);
+    else
+        UnitTest::Log(clr::WHITE + name + clr::RED + " Read-Only Test FAILED" + clr::RESET);
+    return result;
 }

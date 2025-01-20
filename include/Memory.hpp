@@ -84,9 +84,9 @@ public:     // PUBLIC ACCESSORS
     static int NextAddress() { return _next_address; }
     static void Generate_Device_Map();
     static void Generate_Memory_Map();
-    // static void add_ROM_entry_to_device_map(Word addr);
+    static void add_entry_to_device_map(Word addr, std::function<Byte(Word)> read, std::function<void(Word, Byte)> write);
 
-    
+
     // Map a constants name to its address
     static Word Map(std::string name, std::string file, int line);
 
@@ -95,11 +95,8 @@ protected:
 
 private:
     static int _attach(IDevice* device);
-
     inline static int _next_address = 0;    // next available address    
-
     inline static std::unordered_map<Word, REGISTER_NODE> _device_map;   // addressable hardware registers
-
     inline static std::vector<IDevice*> _memory_nodes;  // all of the attached devices	
     inline static std::unordered_map<std::string, Word> _map;   // constants
     bool bWasInit = false;

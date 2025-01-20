@@ -35,38 +35,36 @@ enum MEMMAP
     SOFT_RESET            = 0x000E,   // RESET Software Interrupt Vector
 // _______________________________________________________________________
 
-    SYSTEM_MEMORY_DEVICE  = 0x0000,   // START: System Memory
+    SYSTEM_MEMORY_DEVICE  = 0x0010,   // START: System Memory
     ZERO_PAGE             = 0x0010,   // Zero Page System and User Variables
     ZERO_PAGE_END         = 0x00FF,   // Zero Page System and User Variables
-    FIO_FILE_BUFFER       = 0x0100,   // START: File Input/Output Buffer
-    FIO_FILE_BFR_END      = 0x017F,   // END: File Input/Output Buffers
-    FIO_LN_EDT_BUFFER     = 0x0180,   // START: Line Edit Character Buffer
+    FIO_LN_EDT_BUFFER     = 0x0100,   // START: Line Edit Character Buffer
     FIO_LN_EDT_END        = 0x01FF,   // END: Line Edit Character Buffer
     SYSTEM_STACK          = 0x0200,   // Bottom of System Stack Spcace
     SSTACK_END            = 0x03FF,   // END: System Stack Space
     SSTACK_TOP            = 0x0400,   // TOP: System Stack Space
 // _______________________________________________________________________
 
-    VIDEO_BUFFER_DEVICE   = 0x0000,   // START: Video Buffer (8K)
+    VIDEO_BUFFER_DEVICE   = 0x0400,   // START: Video Buffer (8K)
     VIDEO_START           = 0x0400,   // Start of standard video buffer
     VIDEO_END             = 0x23FF,   // End of standard video buffer
     VIDEO_TOP             = 0x2400,   // Top of standard video buffer
 // _______________________________________________________________________
 
-    USER_MEMORY_DEVICE    = 0x0000,   // START: User Memory (34K)
+    USER_MEMORY_DEVICE    = 0x2400,   // START: User Memory (34K)
     USER_RAM              = 0x2400,   // User Accessable RAM
     USER_RAM_END          = 0xAFFF,   // End User Accessable RAM
     USER_RAM_TOP          = 0xB000,   // Top User Accessable RAM
 // _______________________________________________________________________
 
-    MEMBANK_DEVICE        = 0x0000,   // START: Banked Memory Region (16K)
-    MEMBANK_ONE           = 0xB000,   // Banked Memory Page One (8K)
-    MEMBANK_TWO           = 0xD000,   // Banked Memory Page Two (8K)
-    MEMBANK_END           = 0xEFFF,   // End of Banked Memory Region
-    MEMBANK_TOP           = 0xF000,   // TOP of Banked Memory Region
+    BANKED_MEMORY_REGION  = 0xB000,   // START: Banked Memory Region (16K)
+    BANKMEM_ONE           = 0xB000,   // Banked Memory Page One (8K)
+    BANKMEM_TWO           = 0xD000,   // Banked Memory Page Two (8K)
+    BANKMEM_END           = 0xEFFF,   // End of Banked Memory Region
+    BANKMEM_TOP           = 0xF000,   // TOP of Banked Memory Region
 // _______________________________________________________________________
 
-    KERNEL_ROM_DEVICE     = 0x0000,   // START: Kernel Rom (3.5K)
+    KERNEL_ROM_DEVICE     = 0xF000,   // START: Kernel Rom (3.5K)
     KERNEL_START          = 0xF000,   // Start of Kernel Rom Space
     KERNEL_END            = 0xFDFF,   // End of Kernel Rom Space
     KERNEL_TOP            = 0xFE00,   // Top of Kernel Rom Space
@@ -451,94 +449,92 @@ enum MEMMAP
     MATH_ACA_INT          = 0xFE6F,   // (4-Bytes) ACA Integer Data
                                       // 
     MATH_ACB_POS          = 0xFE73,   // (Byte) Character Position Within the ACB Float String
-                                      // 
     MATH_ACB_DATA         = 0xFE74,   // (Byte) ACB Float String Character Port
     MATH_ACB_RAW          = 0xFE75,   // (4-Bytes) ACB Raw Float Data
     MATH_ACB_INT          = 0xFE79,   // (4-Bytes) ACB Integer Data
                                       // 
     MATH_ACR_POS          = 0xFE7D,   // (Byte) Character Position Within the ACR Float String
-                                      // 
     MATH_ACR_DATA         = 0xFE7E,   // (Byte) ACR Float String Character Port
     MATH_ACR_RAW          = 0xFE7F,   // (4-Bytes) ACR Raw Float Data
     MATH_ACR_INT          = 0xFE83,   // (4-Bytes) ACR Integer Data
                                       // 
     MATH_OPERATION        = 0xFE87,   // (Byte) ACA Float String Character Port   (On Write)
     MOP_BEGIN             = 0x0000,   //   BEGIN Math Operation Enumeration:
-    MOP_RANDOM            = 0x0001,   //     ACA, ACB, and ACR are set to randomized values
-    MOP_RND_SEED          = 0x0002,   //     MATH_ACA_INT seeds the pseudo-random number generator
-    MOP_IS_EQUAL          = 0x0003,   //     (bool)ACR = (ACA == ACB)
-    MOP_IS_NOT_EQUAL      = 0x0004,   //     (bool)ACR = (ACA != ACB)
-    MOP_IS_LESS           = 0x0005,   //     (bool)ACR = std::isless(ACA, ACB)
-    MOP_IS_GREATER        = 0x0006,   //     (bool)ACR = std::isgreater(ACA, ACB)
-    MOP_IS_LTE            = 0x0007,   //     (bool)ACR = std::islessequal(ACA, ACB)
-    MOP_IS_GTE            = 0x0008,   //     (bool)ACR = std::islessgreater(ACA, ACB)
-    MOP_IS_FINITE         = 0x0009,   //     (bool)ACR = std::isfinite(ACA)
-    MOP_IS_INF            = 0x000A,   //     (bool)ACR = std::isinf(ACA)
-    MOP_IS_NAN            = 0x000B,   //     (bool)ACR = std::isnan(ACA)
-    MOP_IS_NORMAL         = 0x000C,   //     (bool)ACR = std::isnormal(ACA)
-    MOP_SIGNBIT           = 0x000D,   //     (bool)ACR = std::signbit(ACA)
-    MOP_SUBTRACT          = 0x000E,   //     ACR = ACA - ACB
-    MOP_ADD               = 0x000F,   //     ACR = ACA + ACB
-    MOP_MULTIPLY          = 0x0010,   //     ACR = ACA * ACB
-    MOP_DIVIDE            = 0x0011,   //     ACR = ACA / ACB
-    MOP_FMOD              = 0x0012,   //     ACR = std::fmod(ACA, ACB)
-    MOP_REMAINDER         = 0x0013,   //     ACR = std::remainder(ACA, ACB)
-    MOP_FMAX              = 0x0014,   //     ACR = std::fmax(ACA, ACB)
-    MOP_FMIN              = 0x0015,   //     ACR = std::fmin(ACA, ACB)
-    MOP_FDIM              = 0x0016,   //     ACR = std::fdim(ACA, ACB)
-    MOP_EXP               = 0x0017,   //     ACR = std::exp(ACA)
-    MOP_EXP2              = 0x0018,   //     ACR = std::exp2(ACA)
-    MOP_EXPM1             = 0x0019,   //     ACR = std::expm1(ACA)
-    MOP_LOG               = 0x001A,   //     ACR = std::log(ACA)
-    MOP_LOG10             = 0x001B,   //     ACR = std::log10(ACA)
-    MOP_LOG2              = 0x001C,   //     ACR = std::log2(ACA)
-    MOP_LOG1P             = 0x001D,   //     ACR = std::log1p(ACA)
-    MOP_SQRT              = 0x001E,   //     ACR = std::sqrt(ACA)
-    MOP_CBRT              = 0x001F,   //     ACR = std::cbrt(ACA)
-    MOP_HYPOT             = 0x0020,   //     ACR = std::hypot(ACA, ACB)
-    MOP_POW               = 0x0021,   //     ACR = std::pow(ACA, ACB)
-    MOP_SIN               = 0x0022,   //     ACR = std::sin(ACA)
-    MOP_COS               = 0x0023,   //     ACR = std::cos(ACA)
-    MOP_TAN               = 0x0024,   //     ACR = std::tan(ACA)
-    MOP_ASIN              = 0x0025,   //     ACR = std::asin(ACA)
-    MOP_ACOS              = 0x0026,   //     ACR = std::acos(ACA)
-    MOP_ATAN              = 0x0027,   //     ACR = std::atan(ACA)
-    MOP_ATAN2             = 0x0028,   //     ACR = std::atan2(ACA, ACB)
-    MOP_SINH              = 0x0029,   //     ACR = std::sinh(ACA)
-    MOP_COSH              = 0x002A,   //     ACR = std::acosh(ACA)
-    MOP_ATANH             = 0x002B,   //     ACR = std::atanh(ACA)
-    MOP_ERF               = 0x002C,   //     ACR = std::erf(ACA)
-    MOP_ERFC              = 0x002D,   //     ACR = std::erfc(ACA)
-    MOP_LGAMMA            = 0x002E,   //     ACR = std::lgamma(ACA)
-    MOP_TGAMMA            = 0x002F,   //     ACR = std::tgamma(ACA)
-    MOP_CEIL              = 0x0030,   //     ACR = std::ceil(ACA)
-    MOP_FLOOR             = 0x0031,   //     ACR = std::floor(ACA)
-    MOP_TRUNC             = 0x0032,   //     ACR = std::trunc(ACA)
-    MOP_ROUND             = 0x0033,   //     ACR = std::round(ACA)
-    MOP_LROUND            = 0x0034,   //     ACR = std::lround(ACA)
-    MOP_NEARBYINT         = 0x0035,   //     ACR = std::nearbyint(ACA)
-    MOP_ILOGB             = 0x0036,   //     ACR = std::ilogb(ACA)
-    MOP_LOGB              = 0x0037,   //     ACR = std::logb(ACA)
-    MOP_NEXTAFTER         = 0x0038,   //     ACR = std::nextafter(ACA, ACB)
-    MOP_COPYSIGN          = 0x0039,   //     ACR = std::copysign(ACA, ACB)
-    MOP_LASTOP            = 0x003A,   //   END Math Operation Enumeration
+    MOP_RANDOM            = 0x0000,   //     ACA, ACB, and ACR are set to randomized values
+    MOP_RND_SEED          = 0x0001,   //     MATH_ACA_INT seeds the pseudo-random number generator
+    MOP_IS_EQUAL          = 0x0002,   //     (bool)ACR = (ACA == ACB)
+    MOP_IS_NOT_EQUAL      = 0x0003,   //     (bool)ACR = (ACA != ACB)
+    MOP_IS_LESS           = 0x0004,   //     (bool)ACR = std::isless(ACA, ACB)
+    MOP_IS_GREATER        = 0x0005,   //     (bool)ACR = std::isgreater(ACA, ACB)
+    MOP_IS_LTE            = 0x0006,   //     (bool)ACR = std::islessequal(ACA, ACB)
+    MOP_IS_GTE            = 0x0007,   //     (bool)ACR = std::islessgreater(ACA, ACB)
+    MOP_IS_FINITE         = 0x0008,   //     (bool)ACR = std::isfinite(ACA)
+    MOP_IS_INF            = 0x0009,   //     (bool)ACR = std::isinf(ACA)
+    MOP_IS_NAN            = 0x000A,   //     (bool)ACR = std::isnan(ACA)
+    MOP_IS_NORMAL         = 0x000B,   //     (bool)ACR = std::isnormal(ACA)
+    MOP_SIGNBIT           = 0x000C,   //     (bool)ACR = std::signbit(ACA)
+    MOP_SUBTRACT          = 0x000D,   //     ACR = ACA - ACB
+    MOP_ADD               = 0x000E,   //     ACR = ACA + ACB
+    MOP_MULTIPLY          = 0x000F,   //     ACR = ACA * ACB
+    MOP_DIVIDE            = 0x0010,   //     ACR = ACA / ACB
+    MOP_FMOD              = 0x0011,   //     ACR = std::fmod(ACA, ACB)
+    MOP_REMAINDER         = 0x0012,   //     ACR = std::remainder(ACA, ACB)
+    MOP_FMAX              = 0x0013,   //     ACR = std::fmax(ACA, ACB)
+    MOP_FMIN              = 0x0014,   //     ACR = std::fmin(ACA, ACB)
+    MOP_FDIM              = 0x0015,   //     ACR = std::fdim(ACA, ACB)
+    MOP_EXP               = 0x0016,   //     ACR = std::exp(ACA)
+    MOP_EXP2              = 0x0017,   //     ACR = std::exp2(ACA)
+    MOP_EXPM1             = 0x0018,   //     ACR = std::expm1(ACA)
+    MOP_LOG               = 0x0019,   //     ACR = std::log(ACA)
+    MOP_LOG10             = 0x001A,   //     ACR = std::log10(ACA)
+    MOP_LOG2              = 0x001B,   //     ACR = std::log2(ACA)
+    MOP_LOG1P             = 0x001C,   //     ACR = std::log1p(ACA)
+    MOP_SQRT              = 0x001D,   //     ACR = std::sqrt(ACA)
+    MOP_CBRT              = 0x001E,   //     ACR = std::cbrt(ACA)
+    MOP_HYPOT             = 0x001F,   //     ACR = std::hypot(ACA, ACB)
+    MOP_POW               = 0x0020,   //     ACR = std::pow(ACA, ACB)
+    MOP_SIN               = 0x0021,   //     ACR = std::sin(ACA)
+    MOP_COS               = 0x0022,   //     ACR = std::cos(ACA)
+    MOP_TAN               = 0x0023,   //     ACR = std::tan(ACA)
+    MOP_ASIN              = 0x0024,   //     ACR = std::asin(ACA)
+    MOP_ACOS              = 0x0025,   //     ACR = std::acos(ACA)
+    MOP_ATAN              = 0x0026,   //     ACR = std::atan(ACA)
+    MOP_ATAN2             = 0x0027,   //     ACR = std::atan2(ACA, ACB)
+    MOP_SINH              = 0x0028,   //     ACR = std::sinh(ACA)
+    MOP_COSH              = 0x0029,   //     ACR = std::acosh(ACA)
+    MOP_ATANH             = 0x002A,   //     ACR = std::atanh(ACA)
+    MOP_ERF               = 0x002B,   //     ACR = std::erf(ACA)
+    MOP_ERFC              = 0x002C,   //     ACR = std::erfc(ACA)
+    MOP_LGAMMA            = 0x002D,   //     ACR = std::lgamma(ACA)
+    MOP_TGAMMA            = 0x002E,   //     ACR = std::tgamma(ACA)
+    MOP_CEIL              = 0x002F,   //     ACR = std::ceil(ACA)
+    MOP_FLOOR             = 0x0030,   //     ACR = std::floor(ACA)
+    MOP_TRUNC             = 0x0031,   //     ACR = std::trunc(ACA)
+    MOP_ROUND             = 0x0032,   //     ACR = std::round(ACA)
+    MOP_LROUND            = 0x0033,   //     ACR = std::lround(ACA)
+    MOP_NEARBYINT         = 0x0034,   //     ACR = std::nearbyint(ACA)
+    MOP_ILOGB             = 0x0035,   //     ACR = std::ilogb(ACA)
+    MOP_LOGB              = 0x0036,   //     ACR = std::logb(ACA)
+    MOP_NEXTAFTER         = 0x0037,   //     ACR = std::nextafter(ACA, ACB)
+    MOP_COPYSIGN          = 0x0038,   //     ACR = std::copysign(ACA, ACB)
+    MOP_LASTOP            = 0x0039,   //   END Math Operation Enumeration
     MATH_END              = 0xFE87,   // End of Math Co-Processor Register Space
     MATH_TOP              = 0xFE88,   // Top of Math Co-Processor Register Space
 // _______________________________________________________________________
 
-    HDW_RESERVED_DEVICE   = 0x0000,   // START: Reserved Register Space
+    HDW_RESERVED_DEVICE   = 0xFE88,   // START: Reserved Register Space
     HDW_REG_END           = 0xFFEF,   // 359 bytes reserved for future use.
 // _______________________________________________________________________
 
-    ROM_VECTS_DEVICE      = 0x0000,   // START: Hardware Interrupt Vectors
-    HARD_EXEC             = 0xFFF0,   // EXEC Hardware Interrupt Vector
-    HARD_SWI3             = 0xFFF2,   // SWI3 Hardware Interrupt Vector
-    HARD_SWI2             = 0xFFF4,   // SWI2 Hardware Interrupt Vector
-    HARD_FIRQ             = 0xFFF6,   // FIRQ Hardware Interrupt Vector
-    HARD_IRQ              = 0xFFF8,   // IRQ Hardware Interrupt Vector
-    HARD_SWI              = 0xFFFA,   // SWI / SYS Hardware Interrupt Vector
-    HARD_NMI              = 0xFFFC,   // NMI Hardware Interrupt Vector
-    HARD_RESET            = 0xFFFE,   // RESET Hardware Interrupt Vector
+    ROM_VECTS_DEVICE      = 0xFFEF,   // START: Hardware Interrupt Vectors
+    HARD_EXEC             = 0xFFEF,   // EXEC Hardware Interrupt Vector
+    HARD_SWI3             = 0xFFF1,   // SWI3 Hardware Interrupt Vector
+    HARD_SWI2             = 0xFFF3,   // SWI2 Hardware Interrupt Vector
+    HARD_FIRQ             = 0xFFF5,   // FIRQ Hardware Interrupt Vector
+    HARD_IRQ              = 0xFFF7,   // IRQ Hardware Interrupt Vector
+    HARD_SWI              = 0xFFF9,   // SWI / SYS Hardware Interrupt Vector
+    HARD_NMI              = 0xFFFB,   // NMI Hardware Interrupt Vector
+    HARD_RESET            = 0xFFFD,   // RESET Hardware Interrupt Vector
     MEMMAP_END
 }; // END: enum MEMMAP
 

@@ -33,38 +33,36 @@ SOFT_NMI              equ    $000C    ; NMI Software Interrupt Vector
 SOFT_RESET            equ    $000E    ; RESET Software Interrupt Vector
 ; _______________________________________________________________________
 
-SYSTEM_MEMORY_DEVICE  equ    $0000    ; START: System Memory
+SYSTEM_MEMORY_DEVICE  equ    $0010    ; START: System Memory
 ZERO_PAGE             equ    $0010    ; Zero Page System and User Variables
 ZERO_PAGE_END         equ    $00FF    ; Zero Page System and User Variables
-FIO_FILE_BUFFER       equ    $0100    ; START: File Input/Output Buffer
-FIO_FILE_BFR_END      equ    $017F    ; END: File Input/Output Buffers
-FIO_LN_EDT_BUFFER     equ    $0180    ; START: Line Edit Character Buffer
+FIO_LN_EDT_BUFFER     equ    $0100    ; START: Line Edit Character Buffer
 FIO_LN_EDT_END        equ    $01FF    ; END: Line Edit Character Buffer
 SYSTEM_STACK          equ    $0200    ; Bottom of System Stack Spcace
 SSTACK_END            equ    $03FF    ; END: System Stack Space
 SSTACK_TOP            equ    $0400    ; TOP: System Stack Space
 ; _______________________________________________________________________
 
-VIDEO_BUFFER_DEVICE   equ    $0000    ; START: Video Buffer (8K)
+VIDEO_BUFFER_DEVICE   equ    $0400    ; START: Video Buffer (8K)
 VIDEO_START           equ    $0400    ; Start of standard video buffer
 VIDEO_END             equ    $23FF    ; End of standard video buffer
 VIDEO_TOP             equ    $2400    ; Top of standard video buffer
 ; _______________________________________________________________________
 
-USER_MEMORY_DEVICE    equ    $0000    ; START: User Memory (34K)
+USER_MEMORY_DEVICE    equ    $2400    ; START: User Memory (34K)
 USER_RAM              equ    $2400    ; User Accessable RAM
 USER_RAM_END          equ    $AFFF    ; End User Accessable RAM
 USER_RAM_TOP          equ    $B000    ; Top User Accessable RAM
 ; _______________________________________________________________________
 
-MEMBANK_DEVICE        equ    $0000    ; START: Banked Memory Region (16K)
-MEMBANK_ONE           equ    $B000    ; Banked Memory Page One (8K)
-MEMBANK_TWO           equ    $D000    ; Banked Memory Page Two (8K)
-MEMBANK_END           equ    $EFFF    ; End of Banked Memory Region
-MEMBANK_TOP           equ    $F000    ; TOP of Banked Memory Region
+BANKED_MEMORY_REGION  equ    $B000    ; START: Banked Memory Region (16K)
+BANKMEM_ONE           equ    $B000    ; Banked Memory Page One (8K)
+BANKMEM_TWO           equ    $D000    ; Banked Memory Page Two (8K)
+BANKMEM_END           equ    $EFFF    ; End of Banked Memory Region
+BANKMEM_TOP           equ    $F000    ; TOP of Banked Memory Region
 ; _______________________________________________________________________
 
-KERNEL_ROM_DEVICE     equ    $0000    ; START: Kernel Rom (3.5K)
+KERNEL_ROM_DEVICE     equ    $F000    ; START: Kernel Rom (3.5K)
 KERNEL_START          equ    $F000    ; Start of Kernel Rom Space
 KERNEL_END            equ    $FDFF    ; End of Kernel Rom Space
 KERNEL_TOP            equ    $FE00    ; Top of Kernel Rom Space
@@ -449,94 +447,92 @@ MATH_ACA_RAW          equ    $FE6B    ; (4-Bytes) ACA Raw Float Data
 MATH_ACA_INT          equ    $FE6F    ; (4-Bytes) ACA Integer Data
                                       ; 
 MATH_ACB_POS          equ    $FE73    ; (Byte) Character Position Within the ACB Float String
-                                      ; 
 MATH_ACB_DATA         equ    $FE74    ; (Byte) ACB Float String Character Port
 MATH_ACB_RAW          equ    $FE75    ; (4-Bytes) ACB Raw Float Data
 MATH_ACB_INT          equ    $FE79    ; (4-Bytes) ACB Integer Data
                                       ; 
 MATH_ACR_POS          equ    $FE7D    ; (Byte) Character Position Within the ACR Float String
-                                      ; 
 MATH_ACR_DATA         equ    $FE7E    ; (Byte) ACR Float String Character Port
 MATH_ACR_RAW          equ    $FE7F    ; (4-Bytes) ACR Raw Float Data
 MATH_ACR_INT          equ    $FE83    ; (4-Bytes) ACR Integer Data
                                       ; 
 MATH_OPERATION        equ    $FE87    ; (Byte) ACA Float String Character Port   (On Write)
 MOP_BEGIN             equ    $0000    ;   BEGIN Math Operation Enumeration:
-MOP_RANDOM            equ    $0001    ;     ACA, ACB, and ACR are set to randomized values
-MOP_RND_SEED          equ    $0002    ;     MATH_ACA_INT seeds the pseudo-random number generator
-MOP_IS_EQUAL          equ    $0003    ;     (bool)ACR = (ACA == ACB)
-MOP_IS_NOT_EQUAL      equ    $0004    ;     (bool)ACR = (ACA != ACB)
-MOP_IS_LESS           equ    $0005    ;     (bool)ACR = std::isless(ACA, ACB)
-MOP_IS_GREATER        equ    $0006    ;     (bool)ACR = std::isgreater(ACA, ACB)
-MOP_IS_LTE            equ    $0007    ;     (bool)ACR = std::islessequal(ACA, ACB)
-MOP_IS_GTE            equ    $0008    ;     (bool)ACR = std::islessgreater(ACA, ACB)
-MOP_IS_FINITE         equ    $0009    ;     (bool)ACR = std::isfinite(ACA)
-MOP_IS_INF            equ    $000A    ;     (bool)ACR = std::isinf(ACA)
-MOP_IS_NAN            equ    $000B    ;     (bool)ACR = std::isnan(ACA)
-MOP_IS_NORMAL         equ    $000C    ;     (bool)ACR = std::isnormal(ACA)
-MOP_SIGNBIT           equ    $000D    ;     (bool)ACR = std::signbit(ACA)
-MOP_SUBTRACT          equ    $000E    ;     ACR = ACA - ACB
-MOP_ADD               equ    $000F    ;     ACR = ACA + ACB
-MOP_MULTIPLY          equ    $0010    ;     ACR = ACA * ACB
-MOP_DIVIDE            equ    $0011    ;     ACR = ACA / ACB
-MOP_FMOD              equ    $0012    ;     ACR = std::fmod(ACA, ACB)
-MOP_REMAINDER         equ    $0013    ;     ACR = std::remainder(ACA, ACB)
-MOP_FMAX              equ    $0014    ;     ACR = std::fmax(ACA, ACB)
-MOP_FMIN              equ    $0015    ;     ACR = std::fmin(ACA, ACB)
-MOP_FDIM              equ    $0016    ;     ACR = std::fdim(ACA, ACB)
-MOP_EXP               equ    $0017    ;     ACR = std::exp(ACA)
-MOP_EXP2              equ    $0018    ;     ACR = std::exp2(ACA)
-MOP_EXPM1             equ    $0019    ;     ACR = std::expm1(ACA)
-MOP_LOG               equ    $001A    ;     ACR = std::log(ACA)
-MOP_LOG10             equ    $001B    ;     ACR = std::log10(ACA)
-MOP_LOG2              equ    $001C    ;     ACR = std::log2(ACA)
-MOP_LOG1P             equ    $001D    ;     ACR = std::log1p(ACA)
-MOP_SQRT              equ    $001E    ;     ACR = std::sqrt(ACA)
-MOP_CBRT              equ    $001F    ;     ACR = std::cbrt(ACA)
-MOP_HYPOT             equ    $0020    ;     ACR = std::hypot(ACA, ACB)
-MOP_POW               equ    $0021    ;     ACR = std::pow(ACA, ACB)
-MOP_SIN               equ    $0022    ;     ACR = std::sin(ACA)
-MOP_COS               equ    $0023    ;     ACR = std::cos(ACA)
-MOP_TAN               equ    $0024    ;     ACR = std::tan(ACA)
-MOP_ASIN              equ    $0025    ;     ACR = std::asin(ACA)
-MOP_ACOS              equ    $0026    ;     ACR = std::acos(ACA)
-MOP_ATAN              equ    $0027    ;     ACR = std::atan(ACA)
-MOP_ATAN2             equ    $0028    ;     ACR = std::atan2(ACA, ACB)
-MOP_SINH              equ    $0029    ;     ACR = std::sinh(ACA)
-MOP_COSH              equ    $002A    ;     ACR = std::acosh(ACA)
-MOP_ATANH             equ    $002B    ;     ACR = std::atanh(ACA)
-MOP_ERF               equ    $002C    ;     ACR = std::erf(ACA)
-MOP_ERFC              equ    $002D    ;     ACR = std::erfc(ACA)
-MOP_LGAMMA            equ    $002E    ;     ACR = std::lgamma(ACA)
-MOP_TGAMMA            equ    $002F    ;     ACR = std::tgamma(ACA)
-MOP_CEIL              equ    $0030    ;     ACR = std::ceil(ACA)
-MOP_FLOOR             equ    $0031    ;     ACR = std::floor(ACA)
-MOP_TRUNC             equ    $0032    ;     ACR = std::trunc(ACA)
-MOP_ROUND             equ    $0033    ;     ACR = std::round(ACA)
-MOP_LROUND            equ    $0034    ;     ACR = std::lround(ACA)
-MOP_NEARBYINT         equ    $0035    ;     ACR = std::nearbyint(ACA)
-MOP_ILOGB             equ    $0036    ;     ACR = std::ilogb(ACA)
-MOP_LOGB              equ    $0037    ;     ACR = std::logb(ACA)
-MOP_NEXTAFTER         equ    $0038    ;     ACR = std::nextafter(ACA, ACB)
-MOP_COPYSIGN          equ    $0039    ;     ACR = std::copysign(ACA, ACB)
-MOP_LASTOP            equ    $003A    ;   END Math Operation Enumeration
+MOP_RANDOM            equ    $0000    ;     ACA, ACB, and ACR are set to randomized values
+MOP_RND_SEED          equ    $0001    ;     MATH_ACA_INT seeds the pseudo-random number generator
+MOP_IS_EQUAL          equ    $0002    ;     (bool)ACR = (ACA == ACB)
+MOP_IS_NOT_EQUAL      equ    $0003    ;     (bool)ACR = (ACA != ACB)
+MOP_IS_LESS           equ    $0004    ;     (bool)ACR = std::isless(ACA, ACB)
+MOP_IS_GREATER        equ    $0005    ;     (bool)ACR = std::isgreater(ACA, ACB)
+MOP_IS_LTE            equ    $0006    ;     (bool)ACR = std::islessequal(ACA, ACB)
+MOP_IS_GTE            equ    $0007    ;     (bool)ACR = std::islessgreater(ACA, ACB)
+MOP_IS_FINITE         equ    $0008    ;     (bool)ACR = std::isfinite(ACA)
+MOP_IS_INF            equ    $0009    ;     (bool)ACR = std::isinf(ACA)
+MOP_IS_NAN            equ    $000A    ;     (bool)ACR = std::isnan(ACA)
+MOP_IS_NORMAL         equ    $000B    ;     (bool)ACR = std::isnormal(ACA)
+MOP_SIGNBIT           equ    $000C    ;     (bool)ACR = std::signbit(ACA)
+MOP_SUBTRACT          equ    $000D    ;     ACR = ACA - ACB
+MOP_ADD               equ    $000E    ;     ACR = ACA + ACB
+MOP_MULTIPLY          equ    $000F    ;     ACR = ACA * ACB
+MOP_DIVIDE            equ    $0010    ;     ACR = ACA / ACB
+MOP_FMOD              equ    $0011    ;     ACR = std::fmod(ACA, ACB)
+MOP_REMAINDER         equ    $0012    ;     ACR = std::remainder(ACA, ACB)
+MOP_FMAX              equ    $0013    ;     ACR = std::fmax(ACA, ACB)
+MOP_FMIN              equ    $0014    ;     ACR = std::fmin(ACA, ACB)
+MOP_FDIM              equ    $0015    ;     ACR = std::fdim(ACA, ACB)
+MOP_EXP               equ    $0016    ;     ACR = std::exp(ACA)
+MOP_EXP2              equ    $0017    ;     ACR = std::exp2(ACA)
+MOP_EXPM1             equ    $0018    ;     ACR = std::expm1(ACA)
+MOP_LOG               equ    $0019    ;     ACR = std::log(ACA)
+MOP_LOG10             equ    $001A    ;     ACR = std::log10(ACA)
+MOP_LOG2              equ    $001B    ;     ACR = std::log2(ACA)
+MOP_LOG1P             equ    $001C    ;     ACR = std::log1p(ACA)
+MOP_SQRT              equ    $001D    ;     ACR = std::sqrt(ACA)
+MOP_CBRT              equ    $001E    ;     ACR = std::cbrt(ACA)
+MOP_HYPOT             equ    $001F    ;     ACR = std::hypot(ACA, ACB)
+MOP_POW               equ    $0020    ;     ACR = std::pow(ACA, ACB)
+MOP_SIN               equ    $0021    ;     ACR = std::sin(ACA)
+MOP_COS               equ    $0022    ;     ACR = std::cos(ACA)
+MOP_TAN               equ    $0023    ;     ACR = std::tan(ACA)
+MOP_ASIN              equ    $0024    ;     ACR = std::asin(ACA)
+MOP_ACOS              equ    $0025    ;     ACR = std::acos(ACA)
+MOP_ATAN              equ    $0026    ;     ACR = std::atan(ACA)
+MOP_ATAN2             equ    $0027    ;     ACR = std::atan2(ACA, ACB)
+MOP_SINH              equ    $0028    ;     ACR = std::sinh(ACA)
+MOP_COSH              equ    $0029    ;     ACR = std::acosh(ACA)
+MOP_ATANH             equ    $002A    ;     ACR = std::atanh(ACA)
+MOP_ERF               equ    $002B    ;     ACR = std::erf(ACA)
+MOP_ERFC              equ    $002C    ;     ACR = std::erfc(ACA)
+MOP_LGAMMA            equ    $002D    ;     ACR = std::lgamma(ACA)
+MOP_TGAMMA            equ    $002E    ;     ACR = std::tgamma(ACA)
+MOP_CEIL              equ    $002F    ;     ACR = std::ceil(ACA)
+MOP_FLOOR             equ    $0030    ;     ACR = std::floor(ACA)
+MOP_TRUNC             equ    $0031    ;     ACR = std::trunc(ACA)
+MOP_ROUND             equ    $0032    ;     ACR = std::round(ACA)
+MOP_LROUND            equ    $0033    ;     ACR = std::lround(ACA)
+MOP_NEARBYINT         equ    $0034    ;     ACR = std::nearbyint(ACA)
+MOP_ILOGB             equ    $0035    ;     ACR = std::ilogb(ACA)
+MOP_LOGB              equ    $0036    ;     ACR = std::logb(ACA)
+MOP_NEXTAFTER         equ    $0037    ;     ACR = std::nextafter(ACA, ACB)
+MOP_COPYSIGN          equ    $0038    ;     ACR = std::copysign(ACA, ACB)
+MOP_LASTOP            equ    $0039    ;   END Math Operation Enumeration
 MATH_END              equ    $FE87    ; End of Math Co-Processor Register Space
 MATH_TOP              equ    $FE88    ; Top of Math Co-Processor Register Space
 ; _______________________________________________________________________
 
-HDW_RESERVED_DEVICE   equ    $0000    ; START: Reserved Register Space
+HDW_RESERVED_DEVICE   equ    $FE88    ; START: Reserved Register Space
 HDW_REG_END           equ    $FFEF    ; 359 bytes reserved for future use.
 ; _______________________________________________________________________
 
-ROM_VECTS_DEVICE      equ    $0000    ; START: Hardware Interrupt Vectors
-HARD_EXEC             equ    $FFF0    ; EXEC Hardware Interrupt Vector
-HARD_SWI3             equ    $FFF2    ; SWI3 Hardware Interrupt Vector
-HARD_SWI2             equ    $FFF4    ; SWI2 Hardware Interrupt Vector
-HARD_FIRQ             equ    $FFF6    ; FIRQ Hardware Interrupt Vector
-HARD_IRQ              equ    $FFF8    ; IRQ Hardware Interrupt Vector
-HARD_SWI              equ    $FFFA    ; SWI / SYS Hardware Interrupt Vector
-HARD_NMI              equ    $FFFC    ; NMI Hardware Interrupt Vector
-HARD_RESET            equ    $FFFE    ; RESET Hardware Interrupt Vector
+ROM_VECTS_DEVICE      equ    $FFEF    ; START: Hardware Interrupt Vectors
+HARD_EXEC             equ    $FFEF    ; EXEC Hardware Interrupt Vector
+HARD_SWI3             equ    $FFF1    ; SWI3 Hardware Interrupt Vector
+HARD_SWI2             equ    $FFF3    ; SWI2 Hardware Interrupt Vector
+HARD_FIRQ             equ    $FFF5    ; FIRQ Hardware Interrupt Vector
+HARD_IRQ              equ    $FFF7    ; IRQ Hardware Interrupt Vector
+HARD_SWI              equ    $FFF9    ; SWI / SYS Hardware Interrupt Vector
+HARD_NMI              equ    $FFFB    ; NMI Hardware Interrupt Vector
+HARD_RESET            equ    $FFFD    ; RESET Hardware Interrupt Vector
 
 
 ; END of memory_map.asm definitions

@@ -21,11 +21,13 @@
 #include <cfloat>
 #include <cmath>
 #include <time.h>		// for srand()
+#include <string>
 #include <cstring>
 #include <sstream>
 
 #include "Bus.hpp"
 #include "Math.hpp"
+#include "UnitTest.hpp"
 
 
 
@@ -156,7 +158,7 @@ int  Math::OnAttach(int nextAddr)
     mapped_register.push_back({ "MATH_ACB_POS", nextAddr, 
         [this](Word nextAddr) { (void)nextAddr; return (acb_pos >> 0) & 0xff; }, 
         [this](Word nextAddr, DWord data) { (void)nextAddr; acb_pos = data & 0xff; }, 
-        { "(Byte) Character Position Within the ACB Float String",""} }); 
+        { "(Byte) Character Position Within the ACB Float String"} }); 
     nextAddr++;
 
 
@@ -244,7 +246,7 @@ int  Math::OnAttach(int nextAddr)
     mapped_register.push_back({ "MATH_ACR_POS", nextAddr, 
         [this](Word nextAddr) { (void)nextAddr; return (acr_pos >> 0) & 0xff; }, 
         [this](Word nextAddr, DWord data) { (void)nextAddr; acr_pos = data & 0xff; }, 
-        { "(Byte) Character Position Within the ACR Float String",""} }); 
+        { "(Byte) Character Position Within the ACR Float String"} }); 
     nextAddr++;
 
 
@@ -339,7 +341,7 @@ int  Math::OnAttach(int nextAddr)
     nextAddr++;
     // Define the MOP's
     int enum_value = 0;
-    mapped_register.push_back({ "MOP_BEGIN",        enum_value++, nullptr, nullptr, {"  BEGIN Math Operation Enumeration:"}});
+    mapped_register.push_back({ "MOP_BEGIN",        enum_value  , nullptr, nullptr, {"  BEGIN Math Operation Enumeration:"}});
     mapped_register.push_back({ "MOP_RANDOM",       enum_value++, nullptr, nullptr, {"    ACA, ACB, and ACR are set to randomized values"}});
     mapped_register.push_back({ "MOP_RND_SEED",     enum_value++, nullptr, nullptr, {"    MATH_ACA_INT seeds the pseudo-random number generator"}});
     mapped_register.push_back({ "MOP_IS_EQUAL",     enum_value++, nullptr, nullptr, {"    (bool)ACR = (ACA == ACB)"}});
@@ -420,6 +422,276 @@ int  Math::OnAttach(int nextAddr)
     _size = nextAddr - old_address;
     return _size;
 }
+
+
+bool Math::OnTest() 
+{ 
+    bool test_results = true;
+    // Check the number of mapped registers
+    size_t expectedRegisters = 92; // Number of interrupt vectors
+    std::string err = _device_name + ": Incorrect number of mapped registers. Was " + std::to_string(expectedRegisters) + 
+                                    " should be " + std::to_string(mapped_register.size()) + ".";
+    ASSERT(mapped_register.size() == expectedRegisters, err);
+
+    // Unit Tests
+    if (!_test_accumilators()) {
+        test_results = false;
+    }
+
+    if (!_test_math_operations()) {
+        test_results = false;
+    }
+
+    // display the result of the tests
+    if (test_results)
+        UnitTest::Log(clr::WHITE + _device_name + clr::GREEN + " Unit Tests PASSED" + clr::RESET);
+    else
+        UnitTest::Log(clr::WHITE + _device_name + clr::RED + " Unit Tests FAILED" + clr::RESET);
+    return test_results;
+}
+
+bool Math::_test_accumilators()
+{
+    // Vectors for the three sets of accumulators
+    std::vector<Word> math_acx_pos  = { MAP(MATH_ACA_POS), MAP(MATH_ACB_POS), MAP(MATH_ACR_POS) };
+    std::vector<Word> math_acx_data = { MAP(MATH_ACA_DATA), MAP(MATH_ACB_DATA), MAP(MATH_ACR_DATA) };
+    std::vector<Word> math_acx_raw  = { MAP(MATH_ACA_RAW), MAP(MATH_ACB_RAW), MAP(MATH_ACR_RAW) };
+    std::vector<Word> math_acx_int  = { MAP(MATH_ACA_INT), MAP(MATH_ACB_INT), MAP(MATH_ACR_INT) };
+    std::vector<char> reg_char = { 'A', 'B', 'R' };
+
+    // Test string to be written to MATH_ACx_DATA
+    std::string input_str = "123.45";  // Example string value
+
+    bool all_tests_passed = true;  // Flag to track if all tests pass
+
+    // Loop through each of the accumulators (ACA, ACB, ACR)
+    for (size_t i = 0; i < math_acx_pos.size(); ++i) {
+        Word math_aca_pos = math_acx_pos[i];
+        Word math_aca_data = math_acx_data[i];
+        Word math_aca_raw = math_acx_raw[i];
+        Word math_aca_int = math_acx_int[i];
+
+        // Step 1: Clear MATH_ACx_POS to reset position
+        Memory::Write(math_aca_pos, 0);
+
+        // Step 2: Write each character of the string to MATH_ACx_DATA
+        for (char c : input_str) {
+            Memory::Write(math_aca_data, static_cast<Byte>(c)); // Write character one by one
+        }
+
+        // Step 3: Write 0 after the last character to indicate null-terminator
+        Memory::Write(math_aca_data, 0);
+
+        // Step 4: Verify the output in MATH_ACx_RAW and MATH_ACx_INT
+        // The raw value (MATH_ACx_RAW) should represent the string "123.45" as a float in IEEE 754 format
+        float expected_raw_value = std::stof(input_str); // Convert string to float
+        DWord raw_result = Memory::Read_DWord(math_aca_raw); // Read raw float value from MATH_ACx_RAW register
+
+        // Correct conversion of float to DWord using memcpy
+        DWord expected_raw_value_dword;
+        memcpy(&expected_raw_value_dword, &expected_raw_value, sizeof(float)); // Convert float to raw DWord representation
+
+        // Log mismatch with expected vs actual value
+        if (!ASSERT_TRUE(raw_result == expected_raw_value_dword)) {
+            all_tests_passed = false;
+            UnitTest::Log(clr::RED + "MATH_AC" + reg_char[i] + "_RAW value mismatch: Expected $" +
+                clr::hex(expected_raw_value_dword,8) + ", Got $" + clr::hex(raw_result,8) + clr::RESET);
+        }
+
+        // The integer value (MATH_ACx_INT) should be the integer representation of the float (e.g., 123 from 123.45)
+        DWord expected_int_value = static_cast<DWord>(expected_raw_value); // Convert float to DWord (as integer part)
+        DWord int_result = Memory::Read_DWord(math_aca_int); // Read integer value from MATH_ACx_INT register
+
+        // Log mismatch with expected vs actual value
+        if (!ASSERT_TRUE(int_result == expected_int_value)) {
+            all_tests_passed = false;
+            UnitTest::Log(clr::RED + "MATH_AC" + reg_char[i] + "_INT value mismatch: Expected " +
+                clr::hex(expected_int_value,8) + ", Got $" + clr::hex(int_result,8) + clr::RESET);
+        }
+    }
+
+    return all_tests_passed;
+}
+
+bool Math::_test_math_operations()
+{
+    bool all_tests_passed = true;
+
+    struct mop_node
+    {
+        Word mop_value;
+        std::string name;   
+        std::function<bool(float, float)> func;
+    };
+
+    // Define the vector of MOP operations using mop_node structs with lambda functions
+    std::vector<mop_node> mop_operations = {
+        { MAP(MOP_RANDOM),       "MOP_RANDOM",      [](float, float) { return true; }},  // Placeholder for MOP_RANDOM (it does not need params)
+        { MAP(MOP_RND_SEED),     "MOP_RND_SEED",    [](float, float) { return true; }},  // Placeholder for MOP_RANDOM (it does not need params)
+        { MAP(MOP_IS_EQUAL),     "MOP_IS_EQUAL",    [](float aca, float acb)    { return aca == acb; }},
+        { MAP(MOP_IS_NOT_EQUAL), "MOP_IS_NOT_EQUAL",[](float aca, float acb)    { return aca != acb; }},
+        { MAP(MOP_IS_LESS),      "MOP_IS_LESS",     [](float aca, float acb)    { return aca < acb; }},
+        { MAP(MOP_IS_GREATER),   "MOP_IS_GREATER",  [](float aca, float acb)    { return aca > acb; }},
+        { MAP(MOP_IS_LTE),       "MOP_IS_LTE",      [](float aca, float acb)    { return aca <= acb; }},
+        { MAP(MOP_IS_GTE),       "MOP_IS_GTE",      [](float aca, float acb)    { return aca >= acb; }},
+        { MAP(MOP_IS_FINITE),    "MOP_IS_FINITE",   [](float aca, float)        { return std::isfinite(aca); }},
+        { MAP(MOP_IS_INF),       "MOP_IS_INF",      [](float aca, float)        { return std::isinf(aca); }},
+        { MAP(MOP_IS_NAN),       "MOP_IS_NAN",      [](float aca, float)        { return std::isnan(aca); }},
+        { MAP(MOP_IS_NORMAL),    "MOP_IS_NORMAL",   [](float aca, float)        { return std::isnormal(aca); }},
+        { MAP(MOP_SIGNBIT),      "MOP_SIGNBIT",     [](float aca, float)        { return std::signbit(aca); }},
+        { MAP(MOP_SUBTRACT),     "MOP_SUBTRACT",    [](float aca, float acb)    { return aca - acb; }},
+        { MAP(MOP_ADD),          "MOP_ADD",         [](float aca, float acb)    { return aca + acb; }},
+        { MAP(MOP_MULTIPLY),     "MOP_MULTIPLY",    [](float aca, float acb)    { return aca * acb; }},
+        { MAP(MOP_DIVIDE),       "MOP_DIVIDE",      [](float aca, float acb)    { return aca / acb; }},
+        { MAP(MOP_FMOD),         "MOP_FMOD",        [](float aca, float acb)    { return std::fmod(aca, acb); }},
+        { MAP(MOP_REMAINDER),    "MOP_REMAINDER",   [](float aca, float acb)    { return std::remainder(aca, acb); }},
+        { MAP(MOP_FMAX),         "MOP_FMAX",        [](float aca, float acb)    { return std::fmax(aca, acb); }},
+        { MAP(MOP_FMIN),         "MOP_FMIN",        [](float aca, float acb)    { return std::fmin(aca, acb); }},
+        { MAP(MOP_FDIM),         "MOP_FDIM",        [](float aca, float acb)    { return std::fdim(aca, acb); }},
+        { MAP(MOP_EXP),          "MOP_EXP",         [](float aca, float)        { return std::exp(aca); }},
+        { MAP(MOP_EXP2),         "MOP_EXP2",        [](float aca, float)        { return std::exp2(aca); }},
+        { MAP(MOP_EXPM1),        "MOP_EXPM1",       [](float aca, float)        { return std::expm1(aca); }},
+        { MAP(MOP_LOG),          "MOP_LOG",         [](float aca, float)        { return std::log(aca); }},
+        { MAP(MOP_LOG10),        "MOP_LOG10",       [](float aca, float)        { return std::log10(aca); }},
+        { MAP(MOP_LOG2),         "MOP_LOG2",        [](float aca, float)        { return std::log2(aca); }},
+        { MAP(MOP_LOG1P),        "MOP_LOG1P",       [](float aca, float)        { return std::log1p(aca); }},
+        { MAP(MOP_SQRT),         "MOP_SQRT",        [](float aca, float)        { return std::sqrt(aca); }},
+        { MAP(MOP_CBRT),         "MOP_CBRT",        [](float aca, float)        { return std::cbrt(aca); }},
+        { MAP(MOP_HYPOT),        "MOP_HYPOT",       [](float aca, float acb)    { return std::hypot(aca, acb); }},
+        { MAP(MOP_POW),          "MOP_POW",         [](float aca, float acb)    { return std::pow(aca, acb); }},
+        { MAP(MOP_SIN),          "MOP_SIN",         [](float aca, float)        { return std::sin(aca); }},
+        { MAP(MOP_COS),          "MOP_COS",         [](float aca, float)        { return std::cos(aca); }},
+        { MAP(MOP_TAN),          "MOP_TAN",         [](float aca, float)        { return std::tan(aca); }},
+        { MAP(MOP_ASIN),         "MOP_ASIN",        [](float aca, float)        { return std::asin(aca); }},
+        { MAP(MOP_ACOS),         "MOP_ACOS",        [](float aca, float)        { return std::acos(aca); }},
+        { MAP(MOP_ATAN),         "MOP_ATAN",        [](float aca, float)        { return std::atan(aca); }},
+        { MAP(MOP_ATAN2),        "MOP_ATAN2",       [](float aca, float acb)    { return std::atan2(aca, acb); }},
+        { MAP(MOP_SINH),         "MOP_SINH",        [](float aca, float)        { return std::sinh(aca); }},
+        { MAP(MOP_COSH),         "MOP_COSH",        [](float aca, float)        { return std::cosh(aca); }},
+        { MAP(MOP_ATANH),        "MOP_ATANH",       [](float aca, float)        { return std::atanh(aca); }},
+        { MAP(MOP_ERF),          "MOP_ERF",         [](float aca, float)        { return std::erf(aca); }},
+        { MAP(MOP_ERFC),         "MOP_ERFC",        [](float aca, float)        { return std::erfc(aca); }},
+        { MAP(MOP_LGAMMA),       "MOP_LGAMMA",      [](float aca, float)        { return std::lgamma(aca); }},
+        { MAP(MOP_TGAMMA),       "MOP_TGAMMA",      [](float aca, float)        { return std::tgamma(aca); }},
+        { MAP(MOP_CEIL),         "MOP_CEIL",        [](float aca, float)        { return std::ceil(aca); }},
+        { MAP(MOP_FLOOR),        "MOP_FLOOR",       [](float aca, float)        { return std::floor(aca); }},
+        { MAP(MOP_TRUNC),        "MOP_TRUNC",       [](float aca, float)        { return std::trunc(aca); }},
+        { MAP(MOP_ROUND),        "MOP_ROUND",       [](float aca, float)        { return std::round(aca); }},
+        { MAP(MOP_LROUND),       "MOP_LROUND",      [](float aca, float)        { return std::lround(aca); }},
+        { MAP(MOP_NEARBYINT),    "MOP_NEARBYINT",   [](float aca, float)        { return std::nearbyint(aca); }},
+        { MAP(MOP_ILOGB),        "MOP_ILOGB",       [](float aca, float)        { return std::ilogb(aca); }},
+        { MAP(MOP_LOGB),         "MOP_LOGB",        [](float aca, float)        { return std::logb(aca); }},
+        { MAP(MOP_NEXTAFTER),    "MOP_NEXTAFTER",   [](float aca, float acb)    { return std::nextafter(aca, acb); }},
+        { MAP(MOP_COPYSIGN),     "MOP_COPYSIGN",    [](float aca, float acb)    { return std::copysign(aca, acb); }},
+    };    
+
+    // Iterate through each MOP and perform the corresponding test
+    // for (DWord mop : mop_values) 
+    for (mop_node op : mop_operations) 
+    {
+        DWord mop = op.mop_value;
+
+        // Prepare input values based on the operation type
+        float aca_value = 0.0f, acb_value = 0.0f;
+
+        // Handle different MOP types based on the type of operation (unary vs binary)
+        if (mop == MAP(MOP_RANDOM)) 
+        {
+            int iterations = 10;
+            int fail_count = 0;
+            for (int i = 0; i < iterations; i++) 
+            {
+                Memory::Write(MAP(MATH_OPERATION), MAP(MOP_RANDOM)); // call the MOP_RANDOM operation
+                // all three accumilators should now contain random values
+                DWord rnd_aca_raw = Memory::Read_DWord(MAP(MATH_ACA_RAW));
+                DWord rnd_aca_int = Memory::Read_DWord(MAP(MATH_ACA_INT));
+                DWord rnd_acb_raw = Memory::Read_DWord(MAP(MATH_ACB_RAW));
+                DWord rnd_acb_int = Memory::Read_DWord(MAP(MATH_ACB_INT));
+                DWord rnd_acr_raw = Memory::Read_DWord(MAP(MATH_ACR_RAW));
+                DWord rnd_acr_int = Memory::Read_DWord(MAP(MATH_ACR_INT));
+
+                Memory::Write(MAP(MATH_OPERATION), MAP(MOP_RANDOM)); // call the MOP_RANDOM operation, again
+                // all three accumilators should now contain new random values
+                if (rnd_aca_raw == Memory::Read_DWord(MAP(MATH_ACA_RAW)) || 
+                    rnd_aca_int == Memory::Read_DWord(MAP(MATH_ACA_INT)) || 
+                    rnd_acb_raw == Memory::Read_DWord(MAP(MATH_ACB_RAW)) || 
+                    rnd_acb_int == Memory::Read_DWord(MAP(MATH_ACB_INT)) || 
+                    rnd_acr_raw == Memory::Read_DWord(MAP(MATH_ACR_RAW)) || 
+                    rnd_acr_int == Memory::Read_DWord(MAP(MATH_ACR_INT)))
+                {
+                    fail_count++;
+                }                
+            }
+            if (fail_count == iterations) 
+            {
+                all_tests_passed = false;
+                UnitTest::Log(clr::RED + "MOP_RANDOM test failed: " + std::to_string(fail_count) + clr::RESET);
+            }
+        } 
+        else if (mop == MAP(MOP_RND_SEED)) 
+        {
+            int iterations = 10;
+            int fail_count = 0;
+            for (int i = 0; i < iterations; i++) 
+            { 
+                // randomize the seed by calling the MOP_RANDOM operation
+                Memory::Write(MAP(MATH_OPERATION), MAP(MOP_RANDOM)); // call the MOP_RANDOM operation
+                DWord aca_int = Memory::Read_DWord(MAP(MATH_ACA_INT));
+                // MOP_RND_SEED is set to the value in the ACA register (randomized at this point)
+                Memory::Write(MAP(MATH_OPERATION), MAP(MOP_RND_SEED)); // call the MOP_RND_SEED operation
+                // the seed should now have been randomized
+                DWord acr_result = Memory::Read_DWord(MAP(MATH_ACR_INT));
+                if (aca_int == acr_result)
+                {
+                    fail_count++;
+                }
+                if (fail_count == iterations) 
+                {
+                    all_tests_passed = false;
+                    UnitTest::Log(clr::RED + "MOP_RND_SEED test failed. Expected: " + 
+                        std::to_string(aca_int) + ", Got: " + std::to_string(acr_result) + clr::RESET);
+                }            
+            }
+        } 
+        else 
+        {
+            // Arithmetic operations (binary)
+            aca_value = 5.0f;
+            acb_value = 3.0f;
+            // Write the operation to MATH_OPERATION
+            aca_float = aca_value; // directly assign the internal aca_float
+            acb_float = acb_value; // directly assign the internal acb_float
+            Memory::Write(MAP(MATH_OPERATION), mop);           
+            // Read the result from MATH_ACR_FLOAT as a boolean
+            bool expected_result = op.func(aca_value, acb_value);
+            bool actual_result = (bool)acr_float; //(bool)Memory::Read_DWord(MAP(MATH_ACR_INT));
+            if (mop == MAP(MOP_IS_EQUAL) || 
+                mop == MAP(MOP_IS_NOT_EQUAL) || 
+                mop == MAP(MOP_IS_LESS) || 
+                mop == MAP(MOP_IS_GREATER) || 
+                mop == MAP(MOP_IS_LTE) || 
+                mop == MAP(MOP_IS_GTE) ||
+                mop == MAP(MOP_IS_INF) || 
+                mop == MAP(MOP_IS_NAN) || 
+                mop == MAP(MOP_SIGNBIT) )
+            { // Read the result from MATH_ACR_INT as a boolean
+                actual_result = (bool)Memory::Read_DWord(MAP(MATH_ACR_INT));
+            }
+            // Compare the expected and actual results
+            if (actual_result != expected_result) {
+                all_tests_passed = false;
+                UnitTest::Log(clr::RED + op.name + " failed. Expected: " + 
+                    std::to_string(expected_result) + ", Got: " + std::to_string(actual_result) + clr::RESET);
+            }
+        }
+    }
+    return all_tests_passed;
+}
+
+
+
+
+
 
 
 
@@ -987,7 +1259,7 @@ void Math::_update_regs_from_float(float f_data, float& _float,
     
     // Convert to string with controlled precision
     std::ostringstream stream;
-    stream.precision(7);  // For example, to limit precision of the string output
+    stream.precision(5);  // (7) limit precision of the string output
     stream << std::fixed << _float;  // Fixed-point representation
     _string = stream.str();
 

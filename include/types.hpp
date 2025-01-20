@@ -65,7 +65,7 @@
     constexpr bool DEBUG_SINGLE_STEP = false;
     constexpr int DEBUG_HISTORY_SIZE = 16;
 
-    #define DEBUG_THROW_ERROR_ON_WRITE_TO_READ_ONLY_MEMORY true
+    #define DEBUG_THROW_ERROR_ON_WRITE_TO_READ_ONLY_MEMORY false
 
 
     // Define the MAP() macro based on the value of GENERATE_MEMORY_MAP
