@@ -123,9 +123,9 @@ bool UnitTest::RangeTest_RW(std::string name, Word start, Word end)
         if (testFailed) { break; }
     }
     if (result)
-        UnitTest::Log(clr::GREEN + name + " Read/Write Test PASSED" + clr::RESET);
+        UnitTest::Log(clr::WHITE + name + clr::GREEN + " Read/Write Test PASSED" + clr::RESET);
     else
-        UnitTest::Log(clr::RED + name + " Read/Write Test FAILED" + clr::RESET);
+        UnitTest::Log(clr::WHITE + name + clr::RED + " Read/Write Test FAILED" + clr::RESET);
     return result;
 }
 
@@ -157,8 +157,8 @@ bool UnitTest::RangeTest_RO(std::string name, Word start, Word end)
         if (testFailed) { break; }
     }
     if (result)
-        UnitTest::Log(clr::GREEN +name + " Read-Only Test PASSED" + clr::RESET);
+        UnitTest::Log(clr::WHITE + name + clr::GREEN + " Read-Only Test PASSED" + clr::RESET);
     else
-        UnitTest::Log(clr::RED + name + " Read-Only Test FAILED" + clr::RESET);
+        UnitTest::Log(clr::WHITE + name + clr::RED + " Read-Only Test FAILED" + clr::RESET);
     return result;
 }

@@ -217,7 +217,17 @@ int  Debug::OnAttach(int nextAddr)
     return _size;
 }
 
+bool Debug::OnTest() {
+    // Integrate these tests with specific KERNEL_ROM startup code.
+    bool result = true;
 
+    UnitTest::Log(clr::WHITE + _device_name + clr::ORANGE + " Kernel_Rom Not Yet Implemented" + clr::RESET);
+    // if (result)
+    //     UnitTest::Log(clr::WHITE + _device_name + clr::GREEN + " Read-Only Test PASSED" + clr::RESET);
+    // else
+    //     UnitTest::Log(clr::WHITE + _device_name + clr::RED + " Read-Only Test FAILED" + clr::RESET);
+    return result;    
+} 
 
 void Debug::OnInit()
 {

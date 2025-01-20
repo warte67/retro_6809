@@ -31,17 +31,16 @@ public: // PUBLIC CONSTRUCTOR / DESTRUCTOR
     virtual ~Debug();
 
 public: // VIRTUAL METHODS
-    // virtual Byte OnRead(Word offset);               // read
-    // virtual void OnWrite(Word offset, Byte data);   // write
-    // =============================================
-    virtual int  OnAttach(int nextAddr);            // attach to the memory map
-    virtual void OnInit();                          // initialize
-    virtual void OnQuit();                          // shutdown
-    virtual void OnActivate();                      // activate
-    virtual void OnDeactivate();                    // deactivate
-    virtual void OnEvent(SDL_Event* evnt);          // handle events
-    virtual void OnUpdate(float fElapsedTime);      // update
-    virtual void OnRender();                        // render
+
+    virtual int  OnAttach(int nextAddr) override;       // attach to the memory map
+    virtual void OnInit() override;                     // initialize
+    virtual void OnQuit() override;                     // shutdown
+    virtual void OnActivate() override;                 // activate
+    virtual void OnDeactivate() override;               // deactivate
+    virtual void OnEvent(SDL_Event* evnt) override;     // handle events
+    virtual void OnUpdate(float fElapsedTime) override; // update
+    virtual void OnRender() override;                   // render
+    virtual bool OnTest() override;                     // Unit Tests
 
 public: // PUBLIC ACCESSORS
 
