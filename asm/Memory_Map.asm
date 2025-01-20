@@ -55,11 +55,11 @@ USER_RAM_END          equ    $AFFF    ; End User Accessable RAM
 USER_RAM_TOP          equ    $B000    ; Top User Accessable RAM
 ; _______________________________________________________________________
 
-MEMBANK_DEVICE        equ    $B000    ; START: Banked Memory Region (16K)
-MEMBANK_ONE           equ    $B000    ; Banked Memory Page One (8K)
-MEMBANK_TWO           equ    $D000    ; Banked Memory Page Two (8K)
-MEMBANK_END           equ    $EFFF    ; End of Banked Memory Region
-MEMBANK_TOP           equ    $F000    ; TOP of Banked Memory Region
+BANKED_MEMORY_REGION  equ    $B000    ; START: Banked Memory Region (16K)
+BANKMEM_ONE           equ    $B000    ; Banked Memory Page One (8K)
+BANKMEM_TWO           equ    $D000    ; Banked Memory Page Two (8K)
+BANKMEM_END           equ    $EFFF    ; End of Banked Memory Region
+BANKMEM_TOP           equ    $F000    ; TOP of Banked Memory Region
 ; _______________________________________________________________________
 
 KERNEL_ROM_DEVICE     equ    $F000    ; START: Kernel Rom (3.5K)

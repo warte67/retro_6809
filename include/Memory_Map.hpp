@@ -57,11 +57,11 @@ enum MEMMAP
     USER_RAM_TOP          = 0xB000,   // Top User Accessable RAM
 // _______________________________________________________________________
 
-    MEMBANK_DEVICE        = 0xB000,   // START: Banked Memory Region (16K)
-    MEMBANK_ONE           = 0xB000,   // Banked Memory Page One (8K)
-    MEMBANK_TWO           = 0xD000,   // Banked Memory Page Two (8K)
-    MEMBANK_END           = 0xEFFF,   // End of Banked Memory Region
-    MEMBANK_TOP           = 0xF000,   // TOP of Banked Memory Region
+    BANKED_MEMORY_REGION  = 0xB000,   // START: Banked Memory Region (16K)
+    BANKMEM_ONE           = 0xB000,   // Banked Memory Page One (8K)
+    BANKMEM_TWO           = 0xD000,   // Banked Memory Page Two (8K)
+    BANKMEM_END           = 0xEFFF,   // End of Banked Memory Region
+    BANKMEM_TOP           = 0xF000,   // TOP of Banked Memory Region
 // _______________________________________________________________________
 
     KERNEL_ROM_DEVICE     = 0xF000,   // START: Kernel Rom (3.5K)

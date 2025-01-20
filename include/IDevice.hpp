@@ -410,25 +410,25 @@ public:
 
 
 
-/*** class MEMBANK *******************************************************
+/*** class BANKED_MEM *******************************************************
  * 
- * ███╗   ███╗███████╗███╗   ███╗██████╗  █████╗ ███╗   ██╗██╗  ██╗
- * ████╗ ████║██╔════╝████╗ ████║██╔══██╗██╔══██╗████╗  ██║██║ ██╔╝
- * ██╔████╔██║█████╗  ██╔████╔██║██████╔╝███████║██╔██╗ ██║█████╔╝ 
- * ██║╚██╔╝██║██╔══╝  ██║╚██╔╝██║██╔══██╗██╔══██║██║╚██╗██║██╔═██╗ 
- * ██║ ╚═╝ ██║███████╗██║ ╚═╝ ██║██████╔╝██║  ██║██║ ╚████║██║  ██╗
- * ╚═╝     ╚═╝╚══════╝╚═╝     ╚═╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝
+ *      ____    _    _   _ _  _______ ____            __  __ _____ __  __ 
+ *     | __ )  / \  | \ | | |/ / ____|  _ \          |  \/  | ____|  \/  |
+ *     |  _ \ / _ \ |  \| | ' /|  _| | | | |         | |\/| |  _| | |\/| |
+ *     | |_) / ___ \| |\  | . \| |___| |_| |         | |  | | |___| |  | |
+ *     |____/_/   \_\_| \_|_|\_\_____|____/   _____  |_|  |_|_____|_|  |_|
+ *                                           |_____|       
  * 
  * (This may be moved to its own files)
  ****************************************************************/
-class MEMBANK : public IDevice
+class BANKED_MEM : public IDevice
 {
 public:
-    MEMBANK() {
+    BANKED_MEM() {
         //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
-        _device_name = "MEMBANK_DEVICE";
+        _device_name = "BANKED_MEMORY_REGION";
     }
-    virtual ~MEMBANK() {
+    virtual ~BANKED_MEM() {
         //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
     }    
 
@@ -443,13 +443,13 @@ public:
         int bank_size = 8*1024;
         Word old_address=nextAddr;
         this->heading = "Banked Memory Region (" + std::to_string(bank_size/512) + "K)";
-        mapped_register.push_back({ "MEMBANK_ONE", nextAddr, nullptr, nullptr,
+        mapped_register.push_back({ "BANKMEM_ONE", nextAddr, nullptr, nullptr,
             { "Banked Memory Page One (8K)"}}); nextAddr+=bank_size;
-        mapped_register.push_back({ "MEMBANK_TWO", nextAddr, nullptr, nullptr,
+        mapped_register.push_back({ "BANKMEM_TWO", nextAddr, nullptr, nullptr,
             { "Banked Memory Page Two (8K)"}}); nextAddr+=(bank_size-1);
-        mapped_register.push_back({ "MEMBANK_END", nextAddr, nullptr, nullptr,
+        mapped_register.push_back({ "BANKMEM_END", nextAddr, nullptr, nullptr,
             { "End of Banked Memory Region"}}); nextAddr+=1;            
-        mapped_register.push_back({ "MEMBANK_TOP", nextAddr, nullptr, nullptr,
+        mapped_register.push_back({ "BANKMEM_TOP", nextAddr, nullptr, nullptr,
             { "TOP of Banked Memory Region", "---"}}); 
         _size = nextAddr - old_address;
         return _size;
