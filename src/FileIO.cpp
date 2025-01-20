@@ -313,10 +313,10 @@ int  FileIO::OnAttach(int nextAddr)
     // (Byte) FIO_ALT_PATH_LEN
     //      Length of the Alternate Filepath (Read Only)
     /////
-    mapped_register.push_back({ "FIO_PATH_LEN", nextAddr, 
+    mapped_register.push_back({ "FIO_ALT_PATH_LEN", nextAddr, 
         [this](Word addr) { (void)addr; return altFilePath.size(); }, 
         nullptr, // Read Only 
-        { "(Byte) Length of the Primary Filepath        (Read Only)"} });
+        { "(Byte) Length of the alternate Filepath        (Read Only)"} });
     nextAddr++;
 
 

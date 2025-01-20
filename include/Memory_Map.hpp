@@ -427,7 +427,7 @@ enum MEMMAP
     FIO_PATH_POS          = 0xFE63,   // (Byte) Character Position Within the Primary Filepath
     FIO_PATH_DATA         = 0xFE64,   // (Byte) Data at the Character Position of the Primary Path
                                       // 
-    FIO_PATH_LEN          = 0xFE65,   // (Byte) Length of the Primary Filepath        (Read Only)
+    FIO_ALT_PATH_LEN      = 0xFE65,   // (Byte) Length of the alternate Filepath        (Read Only)
     FIO_ALT_PATH_POS      = 0xFE66,   // (Byte) Character Position Within the Alternate Filepath
     FIO_ALT_PATH_DATA     = 0xFE67,   // (Byte) Data at the Character Position of the Alternate Path
                                       // 
@@ -523,18 +523,18 @@ enum MEMMAP
 // _______________________________________________________________________
 
     HDW_RESERVED_DEVICE   = 0xFE88,   // START: Reserved Register Space
-    HDW_REG_END           = 0xFFEF,   // 359 bytes reserved for future use.
+    HDW_REG_END           = 0xFFF0,   // 360 bytes reserved for future use.
 // _______________________________________________________________________
 
-    ROM_VECTS_DEVICE      = 0xFFEF,   // START: Hardware Interrupt Vectors
-    HARD_EXEC             = 0xFFEF,   // EXEC Hardware Interrupt Vector
-    HARD_SWI3             = 0xFFF1,   // SWI3 Hardware Interrupt Vector
-    HARD_SWI2             = 0xFFF3,   // SWI2 Hardware Interrupt Vector
-    HARD_FIRQ             = 0xFFF5,   // FIRQ Hardware Interrupt Vector
-    HARD_IRQ              = 0xFFF7,   // IRQ Hardware Interrupt Vector
-    HARD_SWI              = 0xFFF9,   // SWI / SYS Hardware Interrupt Vector
-    HARD_NMI              = 0xFFFB,   // NMI Hardware Interrupt Vector
-    HARD_RESET            = 0xFFFD,   // RESET Hardware Interrupt Vector
+    ROM_VECTS_DEVICE      = 0xFFF0,   // START: Hardware Interrupt Vectors
+    HARD_EXEC             = 0xFFF0,   // EXEC Hardware Interrupt Vector
+    HARD_SWI3             = 0xFFF2,   // SWI3 Hardware Interrupt Vector
+    HARD_SWI2             = 0xFFF4,   // SWI2 Hardware Interrupt Vector
+    HARD_FIRQ             = 0xFFF6,   // FIRQ Hardware Interrupt Vector
+    HARD_IRQ              = 0xFFF8,   // IRQ Hardware Interrupt Vector
+    HARD_SWI              = 0xFFFA,   // SWI / SYS Hardware Interrupt Vector
+    HARD_NMI              = 0xFFFC,   // NMI Hardware Interrupt Vector
+    HARD_RESET            = 0xFFFE,   // RESET Hardware Interrupt Vector
     MEMMAP_END
 }; // END: enum MEMMAP
 

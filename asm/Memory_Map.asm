@@ -425,7 +425,7 @@ FIO_PATH_LEN          equ    $FE62    ; (Byte) Length of the Primary Filepath   
 FIO_PATH_POS          equ    $FE63    ; (Byte) Character Position Within the Primary Filepath
 FIO_PATH_DATA         equ    $FE64    ; (Byte) Data at the Character Position of the Primary Path
                                       ; 
-FIO_PATH_LEN          equ    $FE65    ; (Byte) Length of the Primary Filepath        (Read Only)
+FIO_ALT_PATH_LEN      equ    $FE65    ; (Byte) Length of the alternate Filepath        (Read Only)
 FIO_ALT_PATH_POS      equ    $FE66    ; (Byte) Character Position Within the Alternate Filepath
 FIO_ALT_PATH_DATA     equ    $FE67    ; (Byte) Data at the Character Position of the Alternate Path
                                       ; 
@@ -521,18 +521,18 @@ MATH_TOP              equ    $FE88    ; Top of Math Co-Processor Register Space
 ; _______________________________________________________________________
 
 HDW_RESERVED_DEVICE   equ    $FE88    ; START: Reserved Register Space
-HDW_REG_END           equ    $FFEF    ; 359 bytes reserved for future use.
+HDW_REG_END           equ    $FFF0    ; 360 bytes reserved for future use.
 ; _______________________________________________________________________
 
-ROM_VECTS_DEVICE      equ    $FFEF    ; START: Hardware Interrupt Vectors
-HARD_EXEC             equ    $FFEF    ; EXEC Hardware Interrupt Vector
-HARD_SWI3             equ    $FFF1    ; SWI3 Hardware Interrupt Vector
-HARD_SWI2             equ    $FFF3    ; SWI2 Hardware Interrupt Vector
-HARD_FIRQ             equ    $FFF5    ; FIRQ Hardware Interrupt Vector
-HARD_IRQ              equ    $FFF7    ; IRQ Hardware Interrupt Vector
-HARD_SWI              equ    $FFF9    ; SWI / SYS Hardware Interrupt Vector
-HARD_NMI              equ    $FFFB    ; NMI Hardware Interrupt Vector
-HARD_RESET            equ    $FFFD    ; RESET Hardware Interrupt Vector
+ROM_VECTS_DEVICE      equ    $FFF0    ; START: Hardware Interrupt Vectors
+HARD_EXEC             equ    $FFF0    ; EXEC Hardware Interrupt Vector
+HARD_SWI3             equ    $FFF2    ; SWI3 Hardware Interrupt Vector
+HARD_SWI2             equ    $FFF4    ; SWI2 Hardware Interrupt Vector
+HARD_FIRQ             equ    $FFF6    ; FIRQ Hardware Interrupt Vector
+HARD_IRQ              equ    $FFF8    ; IRQ Hardware Interrupt Vector
+HARD_SWI              equ    $FFFA    ; SWI / SYS Hardware Interrupt Vector
+HARD_NMI              equ    $FFFC    ; NMI Hardware Interrupt Vector
+HARD_RESET            equ    $FFFE    ; RESET Hardware Interrupt Vector
 
 
 ; END of memory_map.asm definitions

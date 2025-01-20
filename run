@@ -2,6 +2,9 @@
 #
 # 'run' bash script
 
+./kernel.sh
+
+
 if [ "$1" == "clean" ]; then
     rm -r build
 fi

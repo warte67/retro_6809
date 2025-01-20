@@ -35,7 +35,9 @@
 
     #define MEMORY_MAP_OUTPUT_FILE_HPP  "./include/Memory_Map.hpp"
     #define MEMORY_MAP_OUTPUT_FILE_ASM  "./asm/Memory_Map.asm"
-    #define INITIAL_ASM_APPLICATION     "./asm/test.hex"
+    // #define INITIAL_ASM_APPLICATION     "./asm/test.hex"                    // remove this after we have a valid kernel
+
+    #define KERNEL_ROM_FILENAME         "./asm/kernel.hex"
 
     constexpr bool MEMORY_MAP_DISPLAY_OUTPUT_FILE_HPP = false;
     constexpr bool MEMORY_MAP_DISPLAY_OUTPUT_FILE_ASM = false;

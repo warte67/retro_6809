@@ -66,38 +66,6 @@ void ROM::write_to_rom(Word address, Byte data)
 }
 
 
-
-int KERNEL_ROM::OnAttach(int nextAddr) 
-{ 
-    int bank_size = 3.5f*1024;
-    Word old_address=nextAddr;
-    this->heading = "Kernel Rom (3.5K)";
-
-    mapped_register.push_back({ "KERNEL_START", nextAddr, nullptr, nullptr,
-            { "Start of Kernel Rom Space"     }}); nextAddr+=(bank_size-1);
-    mapped_register.push_back({ "KERNEL_END",   nextAddr, nullptr, nullptr,
-            { "End of Kernel Rom Space"       }}); nextAddr+=1;
-    mapped_register.push_back({ "KERNEL_TOP",   nextAddr, nullptr, nullptr,
-            { "Top of Kernel Rom Space", "---"}});
-
-    for (int addr = old_address; addr < nextAddr; addr++)   
-    {
-        Memory::add_entry_to_device_map(
-            addr, 
-            nullptr, 
-            [this](Word addr, Byte d) { 
-                (void)addr; 
-                (void)d;             
-            }        
-        );           
-    }
-
-    _size = nextAddr - old_address;
-    return _size;
-}  
-
-
-
 int ROM_VECTS::OnAttach(int nextAddr)
 { 
     Word old_address=nextAddr;
@@ -140,12 +108,12 @@ int HDW_RESERVED::OnAttach(int nextAddr)
     Word old_address=nextAddr;
     this->heading = "Reserved Register Space";
     // reserve space for future use
-    int bank_size = 0xFFEF-nextAddr;      
+    int bank_size = 0xFFF0-nextAddr;      
     std::string res = std::to_string(bank_size);
     res += " bytes reserved for future use.";
     nextAddr+=bank_size;
     mapped_register.push_back({ "HDW_REG_END", nextAddr, nullptr, nullptr,  
-        { res , "---"}}); // nextAddr+=1;
+        { res , "---"}}); 
 
     for (int addr = old_address; addr < nextAddr; addr++)   
     {

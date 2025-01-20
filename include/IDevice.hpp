@@ -466,59 +466,6 @@ public:
 
 
 
-/*** class KERNEL_ROM *******************************************************
- * 
- * ██╗  ██╗███████╗██████╗ ███╗   ██╗███████╗██╗             ██████╗  ██████╗ ███╗   ███╗
- * ██║ ██╔╝██╔════╝██╔══██╗████╗  ██║██╔════╝██║             ██╔══██╗██╔═══██╗████╗ ████║
- * █████╔╝ █████╗  ██████╔╝██╔██╗ ██║█████╗  ██║             ██████╔╝██║   ██║██╔████╔██║
- * ██╔═██╗ ██╔══╝  ██╔══██╗██║╚██╗██║██╔══╝  ██║             ██╔══██╗██║   ██║██║╚██╔╝██║
- * ██║  ██╗███████╗██║  ██║██║ ╚████║███████╗███████╗███████╗██║  ██║╚██████╔╝██║ ╚═╝ ██║
- * ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚══════╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝
- * 
- * (This will be moved to its own files)
- * Currently using a RAM model for testing.
- ****************************************************************/
-class KERNEL_ROM : public IDevice
-{
-public:
-    KERNEL_ROM() {
-        //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
-        _device_name = "KERNEL_ROM_DEVICE";
-    }
-    KERNEL_ROM(const char* hexfile) : hex_filename(hexfile) {
-        _device_name = "KERNEL_ROM_DEVICE";
-        // todo: load the kernel rom hex file
-        // ...
-    }        
-    virtual ~KERNEL_ROM() {
-        //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
-    }    
-
-    void OnInit() override 						    { }
-    void OnQuit() override 						    {}
-    void OnActivate() override 					    {}
-    void OnDeactivate() override 				    {}
-    void OnEvent(SDL_Event* evnt) override 		    { if (evnt==nullptr) {;} }
-    void OnUpdate(float fElapsedTime) override 	    { if (fElapsedTime==0) {;} }         
-    void OnRender() override 					    {}
-    
-    int OnAttach(int nextAddr) override; 
-
-    bool OnTest() 
-    { 
-        // Check the number of mapped registers
-        size_t expectedRegisters = 3; // Number of interrupt vectors
-        ASSERT(mapped_register.size() == expectedRegisters, _device_name + ": Incorrect number of mapped registers");
-        // Check the mapped registers
-        bool result = UnitTest::RangeTest_RO(_device_name, base_address, base_address+_size); 
-        return result;
-    }     
-
-private:
-    std::string hex_filename;
-};
-
-
 class HDW_RESERVED : public IDevice
 {
 public:

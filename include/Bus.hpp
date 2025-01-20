@@ -76,7 +76,7 @@ public: // PUBLIC METHODS
     // inline static float GetAvgCpuCycleTime() { return s_avg_cpu_cycle_time; }
     // inline static void SetAvgCpuCycleTime(float f) { s_avg_cpu_cycle_time = f; }
     
-    void load_hex(const char* filename);
+    static void load_hex(const char* filename);
 
     static void Error(std::string err_msg, std::string file=__FILE__, int line=__LINE__);
     #define ERROR(msg) Bus::Error(#msg, __FILE__, __LINE__)
@@ -124,7 +124,7 @@ private: // INTERNAL PRIVATES
     inline static std::string _s_title;
 
 
-    Byte _fread_hex_byte(std::ifstream& ifs);
-    Word _fread_hex_word(std::ifstream& ifs);
+    static Byte _fread_hex_byte(std::ifstream& ifs);
+    static Word _fread_hex_word(std::ifstream& ifs);
 
 };

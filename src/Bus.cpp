@@ -20,6 +20,7 @@
 #include "Bus.hpp"
 #include "clr.hpp"
 #include "UnitTest.hpp"
+#include "Kernel_Rom.hpp"
 #include "GPU.hpp"
 #include "Debug.hpp"
 #include "C6809.hpp"
@@ -221,7 +222,8 @@ void Bus::_onInit()
     Memory::Attach<VIDEO_BUFFER>(); 
     Memory::Attach<USER_MEMORY>();  
     Memory::Attach<BANKED_MEM>();      
-    Memory::Attach<KERNEL_ROM>();       // Add a new constructor to include the kernal filename.
+
+    Memory::Attach<KERNEL_ROM>(KERNEL_ROM_FILENAME);  
 
     _pDebug = Memory::Attach<Debug>();  // This could be a singleton due to its static nature.
     _pGPU   = Memory::Attach<GPU>();    // This could be a singleton due to its static nature.
@@ -251,7 +253,7 @@ void Bus::_onInit()
     _memory.OnInit();
 
     // load initial applications (Kernel should be loaded with the KERNEL_ROM device)
-    load_hex(INITIAL_ASM_APPLICATION);
+    // load_hex(INITIAL_ASM_APPLICATION);      // just something in ram to run
 
     // start the CPU thread
     s_c6809 = new C6809(this);
