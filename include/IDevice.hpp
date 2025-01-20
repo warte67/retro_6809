@@ -266,13 +266,13 @@ public:
         mapped_register.push_back({ "ZERO_PAGE_END", nextAddr, nullptr, nullptr,   
             { "Zero Page System and User Variables"}}); nextAddr=0x100;   
 
-        mapped_register.push_back({ "FIO_FILE_BUFFER", nextAddr, nullptr, nullptr,    
-            { "START: File Input/Output Buffer"}}); nextAddr+=0x007F;  
-        mapped_register.push_back({ "FIO_FILE_BFR_END", nextAddr,  nullptr, nullptr,  
-            { "END: File Input/Output Buffers"}}); nextAddr+=1; 
+        // mapped_register.push_back({ "FIO_FILE_BUFFER", nextAddr, nullptr, nullptr,    
+        //     { "START: File Input/Output Buffer"}}); nextAddr+=0x007F;  
+        // mapped_register.push_back({ "FIO_FILE_BFR_END", nextAddr,  nullptr, nullptr,  
+        //     { "END: File Input/Output Buffers"}}); nextAddr+=1; 
 
         mapped_register.push_back({ "FIO_LN_EDT_BUFFER", nextAddr, nullptr, nullptr,    
-            { "START: Line Edit Character Buffer"}}); nextAddr+=0x007F;  
+            { "START: Line Edit Character Buffer"}}); nextAddr+=0x00FF;  
         mapped_register.push_back({ "FIO_LN_EDT_END", nextAddr,  nullptr, nullptr,  
             { "END: Line Edit Character Buffer"}}); nextAddr+=1; 
 
@@ -290,7 +290,7 @@ public:
     bool OnTest() 
     { 
         // Check the number of mapped registers
-        size_t expectedRegisters = 9; // Number of interrupt vectors
+        size_t expectedRegisters = 7; // Number of interrupt vectors
         ASSERT(mapped_register.size() == expectedRegisters, _device_name + ": Incorrect number of mapped registers");
         // Check the mapped registers
         return UnitTest::RangeTest_RW(_device_name, base_address, base_address+_size);

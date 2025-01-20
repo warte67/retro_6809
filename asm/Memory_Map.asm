@@ -36,9 +36,7 @@ SOFT_RESET            equ    $000E    ; RESET Software Interrupt Vector
 SYSTEM_MEMORY_DEVICE  equ    $0010    ; START: System Memory
 ZERO_PAGE             equ    $0010    ; Zero Page System and User Variables
 ZERO_PAGE_END         equ    $00FF    ; Zero Page System and User Variables
-FIO_FILE_BUFFER       equ    $0100    ; START: File Input/Output Buffer
-FIO_FILE_BFR_END      equ    $017F    ; END: File Input/Output Buffers
-FIO_LN_EDT_BUFFER     equ    $0180    ; START: Line Edit Character Buffer
+FIO_LN_EDT_BUFFER     equ    $0100    ; START: Line Edit Character Buffer
 FIO_LN_EDT_END        equ    $01FF    ; END: Line Edit Character Buffer
 SYSTEM_STACK          equ    $0200    ; Bottom of System Stack Spcace
 SSTACK_END            equ    $03FF    ; END: System Stack Space
