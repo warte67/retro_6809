@@ -422,6 +422,14 @@ int  Math::OnAttach(int nextAddr)
 }
 
 
+bool Math::OnTest() 
+{ 
+    // Check the number of mapped registers
+    size_t expectedRegisters = 8; // Number of interrupt vectors
+    ASSERT(mapped_register.size() == expectedRegisters, _device_name + ": Incorrect number of mapped registers");
+    // Check the mapped registers
+    return UnitTest::RangeTest_RW(_device_name, base_address, base_address+_size);
+}
 
 void Math::OnInit()
 {
