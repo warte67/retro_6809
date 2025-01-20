@@ -33,7 +33,7 @@ SOFT_NMI              equ    $000C    ; NMI Software Interrupt Vector
 SOFT_RESET            equ    $000E    ; RESET Software Interrupt Vector
 ; _______________________________________________________________________
 
-SYSTEM_MEMORY_DEVICE  equ    $0000    ; START: System Memory
+SYSTEM_MEMORY_DEVICE  equ    $0010    ; START: System Memory
 ZERO_PAGE             equ    $0010    ; Zero Page System and User Variables
 ZERO_PAGE_END         equ    $00FF    ; Zero Page System and User Variables
 FIO_FILE_BUFFER       equ    $0100    ; START: File Input/Output Buffer
@@ -45,26 +45,26 @@ SSTACK_END            equ    $03FF    ; END: System Stack Space
 SSTACK_TOP            equ    $0400    ; TOP: System Stack Space
 ; _______________________________________________________________________
 
-VIDEO_BUFFER_DEVICE   equ    $0000    ; START: Video Buffer (8K)
+VIDEO_BUFFER_DEVICE   equ    $0400    ; START: Video Buffer (8K)
 VIDEO_START           equ    $0400    ; Start of standard video buffer
 VIDEO_END             equ    $23FF    ; End of standard video buffer
 VIDEO_TOP             equ    $2400    ; Top of standard video buffer
 ; _______________________________________________________________________
 
-USER_MEMORY_DEVICE    equ    $0000    ; START: User Memory (34K)
+USER_MEMORY_DEVICE    equ    $2400    ; START: User Memory (34K)
 USER_RAM              equ    $2400    ; User Accessable RAM
 USER_RAM_END          equ    $AFFF    ; End User Accessable RAM
 USER_RAM_TOP          equ    $B000    ; Top User Accessable RAM
 ; _______________________________________________________________________
 
-MEMBANK_DEVICE        equ    $0000    ; START: Banked Memory Region (16K)
+MEMBANK_DEVICE        equ    $B000    ; START: Banked Memory Region (16K)
 MEMBANK_ONE           equ    $B000    ; Banked Memory Page One (8K)
 MEMBANK_TWO           equ    $D000    ; Banked Memory Page Two (8K)
 MEMBANK_END           equ    $EFFF    ; End of Banked Memory Region
 MEMBANK_TOP           equ    $F000    ; TOP of Banked Memory Region
 ; _______________________________________________________________________
 
-KERNEL_ROM_DEVICE     equ    $0000    ; START: Kernel Rom (3.5K)
+KERNEL_ROM_DEVICE     equ    $F000    ; START: Kernel Rom (3.5K)
 KERNEL_START          equ    $F000    ; Start of Kernel Rom Space
 KERNEL_END            equ    $FDFF    ; End of Kernel Rom Space
 KERNEL_TOP            equ    $FE00    ; Top of Kernel Rom Space
@@ -524,11 +524,11 @@ MATH_END              equ    $FE87    ; End of Math Co-Processor Register Space
 MATH_TOP              equ    $FE88    ; Top of Math Co-Processor Register Space
 ; _______________________________________________________________________
 
-HDW_RESERVED_DEVICE   equ    $0000    ; START: Reserved Register Space
+HDW_RESERVED_DEVICE   equ    $FE88    ; START: Reserved Register Space
 HDW_REG_END           equ    $FFEF    ; 359 bytes reserved for future use.
 ; _______________________________________________________________________
 
-ROM_VECTS_DEVICE      equ    $0000    ; START: Hardware Interrupt Vectors
+ROM_VECTS_DEVICE      equ    $FFF0    ; START: Hardware Interrupt Vectors
 HARD_EXEC             equ    $FFF0    ; EXEC Hardware Interrupt Vector
 HARD_SWI3             equ    $FFF2    ; SWI3 Hardware Interrupt Vector
 HARD_SWI2             equ    $FFF4    ; SWI2 Hardware Interrupt Vector

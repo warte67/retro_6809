@@ -35,7 +35,7 @@ enum MEMMAP
     SOFT_RESET            = 0x000E,   // RESET Software Interrupt Vector
 // _______________________________________________________________________
 
-    SYSTEM_MEMORY_DEVICE  = 0x0000,   // START: System Memory
+    SYSTEM_MEMORY_DEVICE  = 0x0010,   // START: System Memory
     ZERO_PAGE             = 0x0010,   // Zero Page System and User Variables
     ZERO_PAGE_END         = 0x00FF,   // Zero Page System and User Variables
     FIO_FILE_BUFFER       = 0x0100,   // START: File Input/Output Buffer
@@ -47,26 +47,26 @@ enum MEMMAP
     SSTACK_TOP            = 0x0400,   // TOP: System Stack Space
 // _______________________________________________________________________
 
-    VIDEO_BUFFER_DEVICE   = 0x0000,   // START: Video Buffer (8K)
+    VIDEO_BUFFER_DEVICE   = 0x0400,   // START: Video Buffer (8K)
     VIDEO_START           = 0x0400,   // Start of standard video buffer
     VIDEO_END             = 0x23FF,   // End of standard video buffer
     VIDEO_TOP             = 0x2400,   // Top of standard video buffer
 // _______________________________________________________________________
 
-    USER_MEMORY_DEVICE    = 0x0000,   // START: User Memory (34K)
+    USER_MEMORY_DEVICE    = 0x2400,   // START: User Memory (34K)
     USER_RAM              = 0x2400,   // User Accessable RAM
     USER_RAM_END          = 0xAFFF,   // End User Accessable RAM
     USER_RAM_TOP          = 0xB000,   // Top User Accessable RAM
 // _______________________________________________________________________
 
-    MEMBANK_DEVICE        = 0x0000,   // START: Banked Memory Region (16K)
+    MEMBANK_DEVICE        = 0xB000,   // START: Banked Memory Region (16K)
     MEMBANK_ONE           = 0xB000,   // Banked Memory Page One (8K)
     MEMBANK_TWO           = 0xD000,   // Banked Memory Page Two (8K)
     MEMBANK_END           = 0xEFFF,   // End of Banked Memory Region
     MEMBANK_TOP           = 0xF000,   // TOP of Banked Memory Region
 // _______________________________________________________________________
 
-    KERNEL_ROM_DEVICE     = 0x0000,   // START: Kernel Rom (3.5K)
+    KERNEL_ROM_DEVICE     = 0xF000,   // START: Kernel Rom (3.5K)
     KERNEL_START          = 0xF000,   // Start of Kernel Rom Space
     KERNEL_END            = 0xFDFF,   // End of Kernel Rom Space
     KERNEL_TOP            = 0xFE00,   // Top of Kernel Rom Space
@@ -526,11 +526,11 @@ enum MEMMAP
     MATH_TOP              = 0xFE88,   // Top of Math Co-Processor Register Space
 // _______________________________________________________________________
 
-    HDW_RESERVED_DEVICE   = 0x0000,   // START: Reserved Register Space
+    HDW_RESERVED_DEVICE   = 0xFE88,   // START: Reserved Register Space
     HDW_REG_END           = 0xFFEF,   // 359 bytes reserved for future use.
 // _______________________________________________________________________
 
-    ROM_VECTS_DEVICE      = 0x0000,   // START: Hardware Interrupt Vectors
+    ROM_VECTS_DEVICE      = 0xFFF0,   // START: Hardware Interrupt Vectors
     HARD_EXEC             = 0xFFF0,   // EXEC Hardware Interrupt Vector
     HARD_SWI3             = 0xFFF2,   // SWI3 Hardware Interrupt Vector
     HARD_SWI2             = 0xFFF4,   // SWI2 Hardware Interrupt Vector

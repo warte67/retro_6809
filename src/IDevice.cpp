@@ -80,10 +80,18 @@ int KERNEL_ROM::OnAttach(int nextAddr)
     mapped_register.push_back({ "KERNEL_TOP",   nextAddr, nullptr, nullptr,
             { "Top of Kernel Rom Space", "---"}});
 
-    // // Register all addresses between KERNEL_START and KERNEL_END
-    // for (Word addr = old_address; addr < nextAddr; ++addr) {
-    //     Memory::add_ROM_entry_to_device_map(addr);
-    // }                
+    for (Word addr = old_address; addr < nextAddr; addr++)   
+    {
+        Memory::add_entry_to_device_map(
+            addr, 
+            nullptr, 
+            [this](Word addr, Byte d) { 
+                (void)addr; 
+                (void)d;             
+                // std::cout << "ROM: " << addr << " " << d << std::endl;            
+            }        
+        );           
+    }
 
     _size = nextAddr - old_address;
     return _size;

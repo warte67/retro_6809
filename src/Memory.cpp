@@ -171,26 +171,24 @@ void Memory::Write(Word address, Byte data, bool debug)
     // device was found?
     if (itr != _device_map.end()) 
     {
-        // if (itr->second.read != nullptr)
+        if (itr->second.write != nullptr)
         {
-            if (itr->second.write != nullptr)
-            {
-                itr->second.write(address, data);
-                return;
-            }  
-            #if DEBUG_THROW_ERROR_ON_WRITE_TO_READ_ONLY_MEMORY == true                  
-                else
-                {
-                    // Handle Read-Only Register
-                    std::string err = "Error: Attempt to write to read-only register at address $" + clr::hex(address,4);
-                    Bus::Error(err, __FILE__, __LINE__);
-                    return;  // Just do nothing, silently return or log error.
-                }
-            #endif // DEBUG_THROW_ERROR_ON_WRITE_TO_READ_ONLY_MEMORY == true 
+            itr->second.write(address, data);
             return;
-        }
+        }  
+        #if DEBUG_THROW_ERROR_ON_WRITE_TO_READ_ONLY_MEMORY == true                  
+            else
+            {
+                // Handle Read-Only Register
+                std::string err = "Error: Attempt to write to read-only register at address $" + clr::hex(address,4);
+                Bus::Error(err, __FILE__, __LINE__);
+                return;  // Just do nothing, silently return or log error.
+            }
+        #endif // DEBUG_THROW_ERROR_ON_WRITE_TO_READ_ONLY_MEMORY == true 
+        return;
     }
     // write to the fallback memory (for debug)
+// std::cout << "Write to address $" << clr::hex(address,4) << " with data $" << clr::hex(data,2) << std::endl;
     memory(address, data);
     return;
 }
@@ -247,8 +245,9 @@ int Memory::_attach(IDevice* device)
         size = device->OnAttach(_next_address);     
         if (size > 0)
         {
+            device->base_address = _next_address;
             _next_address += size;               
-            Memory::_memory_nodes.push_back(device);
+            Memory::_memory_nodes.push_back(device);            
 
             // update the memory map
             for (auto &n : device->mapped_register) {
@@ -286,18 +285,18 @@ void Memory::Generate_Device_Map()
     }
 }
 
-// void Memory::add_ROM_entry_to_device_map(Word addr)
-// {
-//     REGISTER_NODE rn = { "", addr, nullptr, nullptr, {""} };
+void Memory::add_entry_to_device_map(Word addr, std::function<Byte(Word)> read, std::function<void(Word, Byte)> write)
+{
+    REGISTER_NODE rn = { "", addr, read, write, {""} };
+    // Check if the address is already in the device map
+    auto itr = _device_map.find(addr);
+    if (itr == _device_map.end()) {
+        _device_map[addr] = rn;  // Add the entry
+    } else {
+        Bus::Error("Attempt to add duplicate address to device map at address $" + clr::hex(addr, 4), __FILE__, __LINE__);
+    }
+}
 
-//     // Check if the address is already in the device map
-//     auto itr = _device_map.find(addr);
-//     if (itr == _device_map.end()) {
-//         _device_map[addr] = rn;  // Add the entry
-//     } else {
-//         Bus::Error("Attempt to add duplicate address to device map at address $" + clr::hex(addr, 4), __FILE__, __LINE__);
-//     }
-// }
 
 
 

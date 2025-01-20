@@ -502,12 +502,6 @@ public:
     void OnUpdate(float fElapsedTime) override 	    { if (fElapsedTime==0) {;} }         
     void OnRender() override 					    {}
     
-    // WRITE
-    inline static void memory(Word address, Byte data) { 
-        (void)address; (void)data;  
-        std::cout << "Attempted to Write to ROM at $" << std::hex << address << std::endl;
-    }
-
     int OnAttach(int nextAddr) override; 
 
     bool OnTest() 
@@ -516,7 +510,8 @@ public:
         size_t expectedRegisters = 3; // Number of interrupt vectors
         ASSERT(mapped_register.size() == expectedRegisters, "Incorrect number of mapped registers");
         // Check the mapped registers
-        return UnitTest::RangeTest_RW(_device_name, base_address, base_address+_size);
+        bool result = UnitTest::RangeTest_RO(_device_name, base_address, base_address+_size); 
+        return result;
     }     
 
 private:

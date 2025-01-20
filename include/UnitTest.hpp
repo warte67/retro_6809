@@ -50,6 +50,7 @@ public: // PUBLIC SINGLETON STUFF
     static void print_log_to_console();
 
     static bool RangeTest_RW(std::string name, Uint16 start, Uint16 end);
+    static bool RangeTest_RO(std::string name, Uint16 start, Uint16 end);
 
 private:
 
