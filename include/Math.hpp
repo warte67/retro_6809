@@ -42,8 +42,9 @@ public: // VIRTUAL METHODS
     virtual void OnUpdate(float fElapsedTime) override { (void)fElapsedTime;};
     virtual void OnRender() override {};
  
-public: // PUBLIC ACCESSORS
-    // ... 
+private: // PRIVATE UNIT TESTs
+    bool _test_accumilators();
+    bool _test_math_operations();
 
 private: // PRIVATE MEMBERS
 

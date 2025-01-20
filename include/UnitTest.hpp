@@ -29,6 +29,11 @@
 #define ASSERT(condition, message) \
     UnitTest::Assert(condition, message, __FILE__, __LINE__)    
 
+#define ASSERT_TRUE(condition) \
+    (condition) ? true : false
+
+    
+
 class UnitTest {
 private:
     UnitTest();
