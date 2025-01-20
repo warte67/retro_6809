@@ -19,6 +19,7 @@
 
 #include "Bus.hpp"
 #include "clr.hpp"
+#include "UnitTest.hpp"
 #include "GPU.hpp"
 #include "Debug.hpp"
 #include "C6809.hpp"
@@ -117,6 +118,13 @@ bool Bus::Run()
     {   
         // initialize everything
         _onInit();
+
+        // run the unit tests
+        if (!_onTest())
+        {
+            Bus::Error("Unit Tests Failed", __FILE__, __LINE__);
+            Bus::IsRunning(false);
+        }
 
         // terminate the app when the 'bIsRunning' flag is no longer true
         while (Bus::IsRunning())
@@ -269,6 +277,9 @@ void Bus::_onInit()
 
     // Set the initialized flag
     _bWasInit = true;
+
+    // Initialize the UnitTest
+    UnitTest::Init();
 }
 
 
@@ -294,6 +305,8 @@ void Bus::_onQuit()
         _bWasInit = false;         
         // shutdown SDL
         SDL_Quit();
+        // shutdown the UnitTests
+        UnitTest::Quit();
     }    
     std::cout << clr::indent_pop() << clr::CYAN << "Bus::_onQuit() Exit" << clr::RETURN;
 }
@@ -516,6 +529,11 @@ void Bus::_onUpdate()
 void Bus::_onRender(void) 
 {
     _memory.OnRender();
+}
+
+bool Bus::_onTest()
+{
+    return _memory.OnTest();
 }
 
 

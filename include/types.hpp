@@ -25,6 +25,8 @@
     #include <vector>
     #include <iostream>
 
+    #include "UnitTest.hpp"
+
 
     // GENERATE_MEMORY_MAP: Generate a memory map definition file?
     //      true:  generate Memory_Map.hpp and use the local unordered map
@@ -87,6 +89,8 @@
 
     // FileIO Device Constants:
     constexpr Word FILEHANDLESMAX = 256;
+
+
 
 
 //#endif  // __TYPES_HPP__

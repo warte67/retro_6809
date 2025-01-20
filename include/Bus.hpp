@@ -61,7 +61,8 @@ private: // PRIVATE DISPATCHER METHODS
     void _onDeactivate(void);	
     void _onEvent(); 
     void _onUpdate();
-    void _onRender(void);
+    void _onRender();
+    bool _onTest();
 
     Byte clock_div(Byte& cl_div, int bit);
     void clockDivider();

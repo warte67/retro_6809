@@ -213,7 +213,8 @@ int  Debug::OnAttach(int nextAddr)
     // nextAddr++;
 
     std::cout << clr::indent() << clr::LT_BLUE << "Debug::OnAttach() Exit" << clr::RETURN;    
-    return nextAddr - old_address;
+    _size = nextAddr - old_address;
+    return _size;
 }
 
 

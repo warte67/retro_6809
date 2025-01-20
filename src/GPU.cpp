@@ -326,7 +326,8 @@ int  GPU::OnAttach(int nextAddr)
     
 
     std::cout << clr::indent() << clr::CYAN << "GPU::OnAttach() Exit" << clr::RETURN;
-    return nextAddr - old_address;  // return the size of the allocation
+    _size = nextAddr - old_address;
+    return _size;
 } // END: GPU::OnAttach()
 
 

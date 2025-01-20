@@ -54,6 +54,7 @@ public:		// PUBLIC VIRTUAL METHODS
     void OnEvent(SDL_Event* evnt) override;
     void OnUpdate(float fElapsedTime) override;
     void OnRender() override;
+    bool OnTest() override;         // returns true if tests pass
 
     int OnAttach(int nextAddr) override 		{ if (nextAddr) { return 0; } return 0; } // stop the argument not used warning
 
@@ -83,6 +84,8 @@ public:     // PUBLIC ACCESSORS
     static int NextAddress() { return _next_address; }
     static void Generate_Device_Map();
     static void Generate_Memory_Map();
+    // static void add_ROM_entry_to_device_map(Word addr);
+
     
     // Map a constants name to its address
     static Word Map(std::string name, std::string file, int line);

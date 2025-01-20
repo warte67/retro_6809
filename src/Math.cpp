@@ -417,8 +417,8 @@ int  Math::OnAttach(int nextAddr)
     /////
     mapped_register.push_back({ "MATH_TOP", nextAddr, 
     nullptr, nullptr,  { "Top of Math Co-Processor Register Space", "---"}});
-
-    return nextAddr - old_address;
+    _size = nextAddr - old_address;
+    return _size;
 }
 
 

@@ -352,7 +352,8 @@ int  Joystick::OnAttach(int nextAddr)
     nullptr, nullptr,  { "Top of Joystick/Gamepad Device Register Space", "---"}});
     
     // return with the size of the new device
-    return nextAddr - old_address;
+    _size = nextAddr - old_address;
+    return _size;
 }
 
 

@@ -45,6 +45,8 @@ NewDevice::~NewDevice()
 int  NewDevice::OnAttach(int nextAddr)
 {
     SetBaseAddress(nextAddr);
+    Word old_address=nextAddr;
+    this->heading = "NewDevice Device Hardware Registers";
     
     // std::cout << clr::indent() << clr::LT_BLUE << "NewDevice::OnAttach() Entry" << clr::RETURN;    
 
@@ -98,13 +100,15 @@ int  NewDevice::OnAttach(int nextAddr)
     // nullptr, nullptr,  { "Top of GPU Register Space", "---"}});
     // 
     // // std::cout << clr::indent() << clr::CYAN << "GPU::OnAttach() Exit" << clr::RETURN;
-    // return nextAddr - old_address;
+    // _size = nextAddr - old_address;
+    // return _size;
     //
     // *** END EXAMPLE ************************************************************************
     
 
     // std::cout << clr::indent() << clr::LT_BLUE << "NewDevice::OnAttach() Exit" << clr::RETURN;
-    return 0;
+    _size = nextAddr - old_address;
+    return _size;
 }
 
 

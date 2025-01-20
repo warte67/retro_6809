@@ -176,7 +176,8 @@ int  Keyboard::OnAttach(int nextAddr)
 
 
     // std::cout << clr::indent() << clr::LT_BLUE << "Keyboard::OnAttach() Exit" << clr::RETURN;
-    return nextAddr - old_address;
+    _size = nextAddr - old_address;
+    return _size;
 }
 
 

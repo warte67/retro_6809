@@ -119,6 +119,19 @@ void Memory::OnRender()
     }
 }
 
+bool Memory::OnTest()
+{
+    bool ret = true;
+	for (auto &d : Memory::_memory_nodes) 
+    {
+		if (!d->OnTest()) 
+        { 
+            ret = false; 
+        }
+    }
+    return ret;
+}
+
 
 //////////////////////
 // PUBLIC ACCESSORS //
@@ -158,7 +171,7 @@ void Memory::Write(Word address, Byte data, bool debug)
     // device was found?
     if (itr != _device_map.end()) 
     {
-        if (itr->second.read != nullptr)
+        // if (itr->second.read != nullptr)
         {
             if (itr->second.write != nullptr)
             {
@@ -174,6 +187,7 @@ void Memory::Write(Word address, Byte data, bool debug)
                     return;  // Just do nothing, silently return or log error.
                 }
             #endif // DEBUG_THROW_ERROR_ON_WRITE_TO_READ_ONLY_MEMORY == true 
+            return;
         }
     }
     // write to the fallback memory (for debug)
@@ -267,12 +281,24 @@ void Memory::Generate_Device_Map()
         for (auto &reg : node->mapped_register) {
             if (reg.read != nullptr) {
                 _device_map[reg.address] = reg;
-// if (reg.name != "")
-//     std::cout << clr::RED << reg.name << " @ $" << clr::hex(reg.address,4) << clr::RESET << clr::RETURN;
             }
         }
     }
 }
+
+// void Memory::add_ROM_entry_to_device_map(Word addr)
+// {
+//     REGISTER_NODE rn = { "", addr, nullptr, nullptr, {""} };
+
+//     // Check if the address is already in the device map
+//     auto itr = _device_map.find(addr);
+//     if (itr == _device_map.end()) {
+//         _device_map[addr] = rn;  // Add the entry
+//     } else {
+//         Bus::Error("Attempt to add duplicate address to device map at address $" + clr::hex(addr, 4), __FILE__, __LINE__);
+//     }
+// }
+
 
 
 void Memory::Generate_Memory_Map() 

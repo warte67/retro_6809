@@ -13,9 +13,18 @@
  * 
 ******************/
 
+#include "UnitTest.hpp"
 #include "IDevice.hpp"
 #include "Memory.hpp"
 
+
+
+bool IDevice::OnTest() 
+{
+    std::string msg = "No unit tests defined for " + _device_name + ".";
+    UnitTest::Log(msg);
+    return true; 
+}
 
 
 
@@ -32,6 +41,7 @@ Byte IDevice::memory(Word address) {
 void IDevice::memory(Word address, Byte data) { 
     Memory::_raw_cpu_memory[address] = data; 
 }
+
 
 
 /////////////////////////////
@@ -54,3 +64,27 @@ void ROM::write_to_rom(Word address, Byte data)
     // if (offset - base() < size())
     //     memory(offset - base(), data);
 }
+
+
+
+int KERNEL_ROM::OnAttach(int nextAddr) 
+{ 
+    int bank_size = 3.5f*1024;
+    Word old_address=nextAddr;
+    this->heading = "Kernel Rom (3.5K)";
+
+    mapped_register.push_back({ "KERNEL_START", nextAddr, nullptr, nullptr,
+            { "Start of Kernel Rom Space"     }}); nextAddr+=(bank_size-1);
+    mapped_register.push_back({ "KERNEL_END",   nextAddr, nullptr, nullptr,
+            { "End of Kernel Rom Space"       }}); nextAddr+=1;
+    mapped_register.push_back({ "KERNEL_TOP",   nextAddr, nullptr, nullptr,
+            { "Top of Kernel Rom Space", "---"}});
+
+    // // Register all addresses between KERNEL_START and KERNEL_END
+    // for (Word addr = old_address; addr < nextAddr; ++addr) {
+    //     Memory::add_ROM_entry_to_device_map(addr);
+    // }                
+
+    _size = nextAddr - old_address;
+    return _size;
+}  
