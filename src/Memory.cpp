@@ -188,7 +188,6 @@ void Memory::Write(Word address, Byte data, bool debug)
         return;
     }
     // write to the fallback memory (for debug)
-// std::cout << "Write to address $" << clr::hex(address,4) << " with data $" << clr::hex(data,2) << std::endl;
     memory(address, data);
     return;
 }

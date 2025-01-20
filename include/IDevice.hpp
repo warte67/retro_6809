@@ -215,7 +215,7 @@ public:
     { 
         // Check the number of mapped registers
         size_t expectedRegisters = 8; // Number of interrupt vectors
-        ASSERT(mapped_register.size() == expectedRegisters, "Incorrect number of mapped registers");
+        ASSERT(mapped_register.size() == expectedRegisters, _device_name + ": Incorrect number of mapped registers");
         // Check the mapped registers
         return UnitTest::RangeTest_RW(_device_name, base_address, base_address+_size);
     }
@@ -291,7 +291,7 @@ public:
     { 
         // Check the number of mapped registers
         size_t expectedRegisters = 9; // Number of interrupt vectors
-        ASSERT(mapped_register.size() == expectedRegisters, "Incorrect number of mapped registers");
+        ASSERT(mapped_register.size() == expectedRegisters, _device_name + ": Incorrect number of mapped registers");
         // Check the mapped registers
         return UnitTest::RangeTest_RW(_device_name, base_address, base_address+_size);
     }    
@@ -349,7 +349,7 @@ public:
     { 
         // Check the number of mapped registers
         size_t expectedRegisters = 3; // Number of interrupt vectors
-        ASSERT(mapped_register.size() == expectedRegisters, "Incorrect number of mapped registers");
+        ASSERT(mapped_register.size() == expectedRegisters, _device_name + ": Incorrect number of mapped registers");
         // Check the mapped registers
         return UnitTest::RangeTest_RW(_device_name, base_address, base_address+_size);
     }   
@@ -402,7 +402,7 @@ public:
     { 
         // Check the number of mapped registers
         size_t expectedRegisters = 3; // Number of interrupt vectors
-        ASSERT(mapped_register.size() == expectedRegisters, "Incorrect number of mapped registers");
+        ASSERT(mapped_register.size() == expectedRegisters, _device_name + ": Incorrect number of mapped registers");
         // Check the mapped registers
         return UnitTest::RangeTest_RW(_device_name, base_address, base_address+_size);
     }     
@@ -458,7 +458,7 @@ public:
     { 
         // Check the number of mapped registers
         size_t expectedRegisters = 4; // Number of interrupt vectors
-        ASSERT(mapped_register.size() == expectedRegisters, "Incorrect number of mapped registers");
+        ASSERT(mapped_register.size() == expectedRegisters, _device_name + ": Incorrect number of mapped registers");
         // Check the mapped registers
         return UnitTest::RangeTest_RW(_device_name, base_address, base_address+_size);
     }     
@@ -508,7 +508,7 @@ public:
     { 
         // Check the number of mapped registers
         size_t expectedRegisters = 3; // Number of interrupt vectors
-        ASSERT(mapped_register.size() == expectedRegisters, "Incorrect number of mapped registers");
+        ASSERT(mapped_register.size() == expectedRegisters, _device_name + ": Incorrect number of mapped registers");
         // Check the mapped registers
         bool result = UnitTest::RangeTest_RO(_device_name, base_address, base_address+_size); 
         return result;
@@ -538,20 +538,17 @@ public:
     void OnUpdate(float fElapsedTime) override 	{ (void) fElapsedTime; }
     void OnRender() override 					{}
 
-    int OnAttach(int nextAddr) override       {
-        Word old_address=nextAddr-1;
-        this->heading = "Reserved Register Space";
+    int OnAttach(int nextAddr) override;
 
-        // reserve space for future use
-        int bank_size = 0xFFEF-nextAddr;      
-        std::string res = std::to_string(bank_size);
-        res += " bytes reserved for future use.";
-        nextAddr+=bank_size;
-        mapped_register.push_back({ "HDW_REG_END", nextAddr, nullptr, nullptr,  
-            { res , "---"}}); // nextAddr+=1;
-
-        return  nextAddr - old_address; 
-    }
+    bool OnTest() 
+    { 
+        // Check the number of mapped registers
+        size_t expectedRegisters = 1; // Number of interrupt vectors
+        ASSERT(mapped_register.size() == expectedRegisters, _device_name + ": Incorrect number of mapped registers");
+        // Check the mapped registers
+        bool result = UnitTest::RangeTest_RW(_device_name, base_address, base_address+_size); 
+        return result;
+    }   
 };
 
 
@@ -567,44 +564,32 @@ public:
  ****************************************************************/
 class ROM_VECTS : public IDevice
 {
-    public:
-        ROM_VECTS() {
-            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
-            _device_name = "ROM_VECTS_DEVICE";
-        }
-        virtual ~ROM_VECTS() {
-            //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
-        }    
+public:
+    ROM_VECTS() {
+        //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
+        _device_name = "ROM_VECTS_DEVICE";
+    }
+    virtual ~ROM_VECTS() {
+        //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
+    }    
 
-		void OnInit() override 						{}
-		void OnQuit() override 						{}
-		void OnActivate() override 					{}
-		void OnDeactivate() override 				{}
-		void OnEvent(SDL_Event* evnt) override 		{ if (evnt==nullptr) {;} }
-		void OnUpdate(float fElapsedTime) override 	{ if (fElapsedTime==0) {;} }
-		void OnRender() override 					{}
+    void OnInit() override 						{}
+    void OnQuit() override 						{}
+    void OnActivate() override 					{}
+    void OnDeactivate() override 				{}
+    void OnEvent(SDL_Event* evnt) override 		{ (void)evnt; }
+    void OnUpdate(float fElapsedTime) override 	{ (void)fElapsedTime; }
+    void OnRender() override 					{}
 
-		int OnAttach(int nextAddr) override       { 
-            Word old_address=nextAddr;
-            this->heading = "Hardware Interrupt Vectors";
-            mapped_register.push_back({ "HARD_EXEC",  nextAddr, nullptr, nullptr, 
-                { "EXEC Hardware Interrupt Vector"      }}); nextAddr+=2;
-            mapped_register.push_back({ "HARD_SWI3",  nextAddr, nullptr, nullptr, 
-                { "SWI3 Hardware Interrupt Vector"      }}); nextAddr+=2;
-            mapped_register.push_back({ "HARD_SWI2",  nextAddr, nullptr, nullptr, 
-                { "SWI2 Hardware Interrupt Vector"      }}); nextAddr+=2;
-            mapped_register.push_back({ "HARD_FIRQ",  nextAddr, nullptr, nullptr, 
-                { "FIRQ Hardware Interrupt Vector"      }}); nextAddr+=2;
-            mapped_register.push_back({ "HARD_IRQ",   nextAddr, nullptr, nullptr, 
-                { "IRQ Hardware Interrupt Vector"       }}); nextAddr+=2;
-            mapped_register.push_back({ "HARD_SWI",   nextAddr, nullptr, nullptr, 
-                { "SWI / SYS Hardware Interrupt Vector" }}); nextAddr+=2;
-            mapped_register.push_back({ "HARD_NMI",   nextAddr, nullptr, nullptr, 
-                { "NMI Hardware Interrupt Vector"       }}); nextAddr+=2;
-            mapped_register.push_back({ "HARD_RESET", nextAddr, nullptr, nullptr, 
-                { "RESET Hardware Interrupt Vector"     }}); nextAddr+=2;
-            _size = nextAddr - old_address;
-            return _size;
-        }  
+    int OnAttach(int nextAddr) override; 
+    bool OnTest() 
+    { 
+        // Check the number of mapped registers
+        size_t expectedRegisters = 8; // Number of interrupt vectors
+        ASSERT(mapped_register.size() == expectedRegisters, _device_name + ": Incorrect number of mapped registers");
+        // Check the mapped registers
+        bool result = UnitTest::RangeTest_RO(_device_name, base_address, base_address+_size); 
+        return result;
+    }       
 };
 

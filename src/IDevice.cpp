@@ -80,7 +80,7 @@ int KERNEL_ROM::OnAttach(int nextAddr)
     mapped_register.push_back({ "KERNEL_TOP",   nextAddr, nullptr, nullptr,
             { "Top of Kernel Rom Space", "---"}});
 
-    for (Word addr = old_address; addr < nextAddr; addr++)   
+    for (int addr = old_address; addr < nextAddr; addr++)   
     {
         Memory::add_entry_to_device_map(
             addr, 
@@ -88,7 +88,6 @@ int KERNEL_ROM::OnAttach(int nextAddr)
             [this](Word addr, Byte d) { 
                 (void)addr; 
                 (void)d;             
-                // std::cout << "ROM: " << addr << " " << d << std::endl;            
             }        
         );           
     }
@@ -96,3 +95,67 @@ int KERNEL_ROM::OnAttach(int nextAddr)
     _size = nextAddr - old_address;
     return _size;
 }  
+
+
+
+int ROM_VECTS::OnAttach(int nextAddr)
+{ 
+    Word old_address=nextAddr;
+    this->heading = "Hardware Interrupt Vectors";
+    mapped_register.push_back({ "HARD_EXEC",  nextAddr, nullptr, nullptr, 
+        { "EXEC Hardware Interrupt Vector"      }}); nextAddr+=2;
+    mapped_register.push_back({ "HARD_SWI3",  nextAddr, nullptr, nullptr, 
+        { "SWI3 Hardware Interrupt Vector"      }}); nextAddr+=2;
+    mapped_register.push_back({ "HARD_SWI2",  nextAddr, nullptr, nullptr, 
+        { "SWI2 Hardware Interrupt Vector"      }}); nextAddr+=2;
+    mapped_register.push_back({ "HARD_FIRQ",  nextAddr, nullptr, nullptr, 
+        { "FIRQ Hardware Interrupt Vector"      }}); nextAddr+=2;
+    mapped_register.push_back({ "HARD_IRQ",   nextAddr, nullptr, nullptr, 
+        { "IRQ Hardware Interrupt Vector"       }}); nextAddr+=2;
+    mapped_register.push_back({ "HARD_SWI",   nextAddr, nullptr, nullptr, 
+        { "SWI / SYS Hardware Interrupt Vector" }}); nextAddr+=2;
+    mapped_register.push_back({ "HARD_NMI",   nextAddr, nullptr, nullptr, 
+        { "NMI Hardware Interrupt Vector"       }}); nextAddr+=2;
+    mapped_register.push_back({ "HARD_RESET", nextAddr, nullptr, nullptr, 
+        { "RESET Hardware Interrupt Vector"     }}); nextAddr+=2;
+
+    for (int addr = old_address; addr < nextAddr; addr++)   
+    {
+        Memory::add_entry_to_device_map(
+            addr, 
+            nullptr, 
+            [this](Word addr, Byte d) { 
+                (void)addr; 
+                (void)d;             
+            }        
+        );           
+    }
+
+    _size = nextAddr - old_address;
+    return _size;
+}  
+
+int HDW_RESERVED::OnAttach(int nextAddr)       
+{
+    Word old_address=nextAddr;
+    this->heading = "Reserved Register Space";
+    // reserve space for future use
+    int bank_size = 0xFFEF-nextAddr;      
+    std::string res = std::to_string(bank_size);
+    res += " bytes reserved for future use.";
+    nextAddr+=bank_size;
+    mapped_register.push_back({ "HDW_REG_END", nextAddr, nullptr, nullptr,  
+        { res , "---"}}); // nextAddr+=1;
+
+    for (int addr = old_address; addr < nextAddr; addr++)   
+    {
+        Memory::add_entry_to_device_map(
+            addr, 
+            [this](Word addr) { return memory(addr); },
+            [this](Word addr, Byte d) { memory(addr, d); }        
+        );           
+    }    
+
+    _size = nextAddr - old_address;
+    return  _size;
+}
