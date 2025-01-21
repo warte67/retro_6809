@@ -17,23 +17,7 @@
 		; INCLUDE "Memory_Map.asm"
 		INCLUDE "Kernel_Header.asm"
 
-		org	SOFT_VECTORS_DEVICE
-
-SVCT_EXEC	fdb	#0	; VECT_EXEC	       				
-SVCT_SWI3 	fdb	#0	; VECT_SWI3 	       	
-SVCT_SWI2 	fdb	#0	; VECT_SWI2 	       	
-SVCT_FIRQ 	fdb	#0	; VECT_FIRQ 	       	
-SVCT_IRQ  	fdb	#0	; VECT_IRQ  	       	
-SVCT_SWI  	fdb	#0	; VECT_SWI  	       	
-SVCT_NMI  	fdb	#0	; VECT_NMI  	       	
-SVCT_RESET	fdb	#0	; VECT_RESET	
-
-
-
-; ---------------------------------------------------------------------
-
 		org 	KERNEL_START
-
 KRNL_START	bra	KRNL_BEGIN
 
 krnl_vers_label		fcn	"Kernel Version: "
@@ -41,16 +25,16 @@ krnl_vers_number	fcn	"0.0.1"
 
 
 * ; *****************************************************************************
-* ; * KERNEL JUMP VECTORS                                                       *
+* ; * SOFTWARE JUMP VECTORS                                                     *
 * ; *****************************************************************************
-* KRNL_EXEC	jmp	[VEC_EXEC]	; The user EXEC vector
-* KRNL_SWI3 	jmp	[VEC_SWI3]	; SWI3 Software Interrupt Vector	
-* KRNL_SWI2 	jmp	[VEC_SWI2]	; SWI2 Software Interrupt Vector
-* KRNL_FIRQ 	jmp	[VEC_FIRQ]	; FIRQ Software Interrupt Vector
-* KRNL_IRQ  	jmp	[VEC_IRQ]	; IRQ Software Interrupt Vector
-* KRNL_SWI  	jmp	[VEC_SWI]	; SWI / SYS Software Interrupt Vector
-* KRNL_NMI  	jmp	[VEC_NMI]	; NMI Software Interrupt Vector
-* KRNL_RESET	jmp	[VEC_RESET]	; RESET Software Interrupt Vector	
+SVCT_EXEC	fdb	#0	; (VECT_EXEC) The user EXEC vector
+SVCT_SWI3 	fdb	#0	; (VECT_SWI3) SWI3 Software Interrupt Vector	
+SVCT_SWI2 	fdb	#0	; (VECT_SWI2) SWI2 Software Interrupt Vector
+SVCT_FIRQ 	fdb	#0	; (VECT_FIRQ) FIRQ Software Interrupt Vector
+SVCT_IRQ  	fdb	#0	; (VECT_IRQ)  IRQ Software Interrupt Vector
+SVCT_SWI  	fdb	#0	; (VECT_SWI)  SWI / SYS Software Interrupt Vector
+SVCT_NMI  	fdb	#0	; (VECT_NMI)  NMI Software Interrupt Vector
+SVCT_RESET	fdb	#0	; (VECT_RESET RESET Software Interrupt Vector	
 
 ; *****************************************************************************
 ; * DEFAULT VECTORS                                                           *
@@ -136,7 +120,7 @@ KRNL_COLD	; cold reset
 		cmpx	#KERNEL_ROM_DEVICE
 		bne	1b
 
-		; initialize the system	
+		; initialize the system	vectors
 		ldx	#SYSTEM_DATA_START
 		ldy	#$0010
 2		lda	,x+
@@ -145,55 +129,45 @@ KRNL_COLD	; cold reset
 		blt	2b			
 
 
-			; ...
-KRNL_WARM		; common start up code
-			;
-			; for now simply set the SP
-			lds	#SSTACK_TOP
-			; ...
+		; ...
+KRNL_WARM	; common start up code
+		;
+		; set the SP
+		lds	#SSTACK_TOP
+		; ...
 
-			lda	#$4B			; $4B = green on dk.green
-			sta	_ATTRIB
+		lda	#$4B	; $4B = green on dk.green
+		sta	_ATTRIB
 
-			; set default video
-			lda	#%11110001
-			ldb	#%01100000
-			std	GPU_OPTIONS
-			;cmpd	GPU_OPTIONS
+		; set default video
+		lda	#%11110001
+		ldb	#%01100000
+		std	GPU_OPTIONS
 
-			* ; display some text
-			* ldx 	#krnl_vers_label
-			* jsr	KRNL_LINEOUT
+		; make a system call
+		sys	#$00
 
-			; make a system call
-			sys	#$00
-
-			clr	_CURSOR_COL
-			clr	_CURSOR_ROW
-			ldx 	#krnl_vers_label
-			jsr	KRNL_LINEOUT
-			ldx 	#krnl_vers_number
-			jsr	KRNL_LINEOUT
+		clr	_CURSOR_COL
+		clr	_CURSOR_ROW
+		ldx 	#krnl_vers_label
+		jsr	KRNL_LINEOUT
+		ldx 	#krnl_vers_number
+		jsr	KRNL_LINEOUT
 
 krnl_warm_reset_inf	jmp 	krnl_warm_reset_inf			
 
 
 
-; ----------------------  MAIN STUFF  --------------------------------------
-
-
-
-
-			; cycle video memory
-krnl_swi2_random_garbage			
-			ldd	#$0100
-1			ldx	#VIDEO_START		
-			addd	#1
-2			std	,x++
-			addd	#1
-			cmpx	GPU_VIDEO_MAX
-			blt	2b
-			bra	1b
+	; cycle video memory
+KRNL_GARBAGE			
+	ldd	#$0100
+1	ldx	#VIDEO_START		
+	addd	#1
+2	std	,x++
+	addd	#1
+	cmpx	GPU_VIDEO_MAX
+	blt	2b
+	bra	1b
 
 
 
@@ -206,25 +180,35 @@ krnl_swi2_random_garbage
 ; *
 ; *
 ; *********************************************************************************
-krnl_swi2_call_vector	fdb	KRNL_CLS			; $00 clear screen
-			fdb	KRNL_CHROUT			; $01 CHROUT
-			fdb	KRNL_LINEOUT			; $02 LINEOUT
-			fdb	krnl_swi2_random_garbage	; $N random garbage
-krnl_swi2_call_end				
+KRNL_SYS_CALLS	fdb	KRNL_CLS	; $00 CLS 	(void)
+		fdb	KRNL_CHROUT	; $01 CHROUT	(void)
+		fdb	KRNL_LINEOUT	; $02 LINEOUT	(void) 
+		fdb	KRNL_GARBAGE	; $N random garbage
+KRNL_SYS_CALLS_END				
+		
+
+SYS_Handler	; increment the return address on the stack past the command byte
+		ldu	$000a,s
+		ldb	0,u
+		leau	1,u
+		stu	$000a,s
+		ldx	#KRNL_SYS_CALLS
+		lslb
+		leax	b,x
+		cmpx	#KRNL_SYS_CALLS_END
+		bge	SYS_HNDLR_DONE
+		jsr	[,x]
+SYS_HNDLR_DONE	rti
 
 
-SYS_Handler		; increment the return address on the stack past the command byte
-			ldu	$000a,s
-			ldb	0,u
-			leau	1,u
-			stu	$000a,s
-			ldx	#krnl_swi2_call_vector
-			lslb
-			leax	b,x
-			cmpx	#krnl_swi2_call_end
-			bge	SWI2_start_done
-			jsr	[,x]
-SWI2_start_done		rti
+; * TODO:
+; *  	-) Remove the SYSTEM_DATA_START/SYSTEM_DATA_END software vector block.
+; *	-) Remove the KERNAL ROUTINE SOFTWARE VECTORS from Kernel_Header.asm
+; *	-) Rename the KRNL_SYS_CALLS to SYS_CALL_ prefix
+; *		-> Remove the stack save and restore. Convert these to SYS calls with RTI.
+; *		-> Update the stack to reflect return values from each function.
+; *		-> Make a stack storage chart to assist in updating stacked values.
+
 
 
 ; *****************************************************************************
@@ -280,6 +264,22 @@ K_CHROUT_0	jsr	KRNL_CSRPOS	; position X at the cursor position
 		jsr	KRNL_NEWLINE	; perform a new line
 K_CHROUT_DONE	puls	d,x,cc,pc	; cleanup and return
 
+		cmpx	#KRNL_SYS_CALLS_END
+		bge	SYS_DONE
+		jsr	[,x]
+SYS_DONE	rti
+
+
+; * TODO:
+; *  	-) Remove the SYSTEM_DATA_START/SYSTEM_DATA_END software vector block.
+; *	-) Remove the KERNAL ROUTINE SOFTWARE VECTORS from Kernel_Header.asm
+; *	-) Rename the KRNL_SYS_CALLS to SYS_CALL_ prefix
+; *		-> Remove the stack save and restore. Convert these to SYS calls with RTI.
+; *		-> Update the stack to reflect return values from each function.
+; *		-> Make a stack storage chart to assist in updating stacked values.
+
+
+
 ; *****************************************************************************
 ; * KRNL_NEWLINE                                                              *
 ; * 	Perfoms a CR/LF ($0A) on the console. Advances the current            *
@@ -311,15 +311,15 @@ K_NEWLINE_DONE	puls	D,X,PC		; restore the saved registers and return
 ; * EXIT CONDITIONS:	All registers preserved.                              *
 ; *****************************************************************************
 KRNL_TAB  ; Tab ($09)
-		pshs	b			; save B
-		ldb     _CURSOR_COL		; Fetch the current cursor col
-		addb    #4                      ; Move cursor by 4 spaces
-		andb    #%11111100              ; Align to the next tab stop
-		stb     _CURSOR_COL		; update the cursor column
-		cmpb    GPU_TCOLS               ; Ensure column is within bounds
-		blt     K_TAB_DONE		; Within bounds, we're done
-		jsr     KRNL_NEWLINE   		; Handle line wrapping
-K_TAB_DONE	puls	B,PC			; cleanup and return
+		pshs	b		; save B
+		ldb     _CURSOR_COL	; Fetch the current cursor col
+		addb    #4              ; Move cursor by 4 spaces
+		andb    #%11111100      ; Align to the next tab stop
+		stb     _CURSOR_COL	; update the cursor column
+		cmpb    GPU_TCOLS       ; Ensure column is within bounds
+		blt     K_TAB_DONE	; Within bounds, we're done
+		jsr     KRNL_NEWLINE   	; Handle line wrapping
+K_TAB_DONE	puls	B,PC		; cleanup and return
 
 
 ; *****************************************************************************
@@ -340,7 +340,8 @@ K_LINEOUT_0	lda	,u+		; fetch the next character
 		jsr	KRNL_CHROUT	; send the character to the console
 		leax	1,x		; point to the next character
 		bra	K_LINEOUT_0	; continue looping until done
-K_LINEOUT_DONE	puls	D,U,X,pc	; restore the saved registers and return		
+K_LINEOUT_DONE	puls	D,U,X,pc	; restore the saved registers and return
+
 
 ; *****************************************************************************
 ; * KRNL_CSRPOS                                                              *
@@ -422,12 +423,12 @@ K_SCROLL_DONE	puls	d,x,u,pc	; restore the registers and return
 * ; *****************************************************************************
 	org	ROM_VECTS_DEVICE
 KRNL_HARD_VECT			
-	fdb	EXEC_start	; HARD_RSRVD       EXEC Interrupt Vector
-	fdb	SWI3_start	; HARD_SWI3        SWI3 Hardware Interrupt Vector
-	fdb	SYS_Handler	; HARD_SWI2        SWI2 Hardware Interrupt Vector
-	fdb	FIRQ_start	; HARD_FIRQ        FIRQ Hardware Interrupt Vector
-	fdb	IRQ_start	; HARD_IRQ         IRQ Hardware Interrupt Vector
-	fdb	SWI_start	; HARD_SWI         SWI / SYS Hardware Interrupt Vector
-	fdb	NMI_start	; HARD_NMI         NMI Hardware Interrupt Vector
-	fdb	KRNL_START	; HARD_RESET       RESET Hardware Interrupt Vector
+	fdb	EXEC_start	; (HARD_RSRVD) EXEC Interrupt Vector
+	fdb	SWI3_start	; (HARD_SWI3 ) SWI3 Hardware Interrupt Vector
+	fdb	SYS_Handler	; (HARD_SWI2 ) SWI2 Hardware Interrupt Vector
+	fdb	FIRQ_start	; (HARD_FIRQ ) FIRQ Hardware Interrupt Vector
+	fdb	IRQ_start	; (HARD_IRQ  ) IRQ Hardware Interrupt Vector
+	fdb	SWI_start	; (HARD_SWI  ) SWI / SYS Hardware Interrupt Vector
+	fdb	NMI_start	; (HARD_NMI  ) NMI Hardware Interrupt Vector
+	fdb	KRNL_START	; (HARD_RESET) RESET Hardware Interrupt Vector
 KRNL_HARD_VECT_END
