@@ -9,6 +9,14 @@
                       ;* Original Author: Jay Faries (warte67)                                           
                       ;*****************************
                       
+                      sys                     macro
+                                              swi2
+                                              fcb     \1
+                                              endm
+                      
+                      
+                      
+                      
 0000                                          INCLUDE "Memory_Map.asm"
                       ;*** Memory_Map.asm *************************************************
                       ;*    __  __                                     __  __                                 
@@ -560,58 +568,147 @@ FFFE                  HARD_RESET            equ    $FFFE    ; RESET Hardware Int
 0008  0000                                    fdb     #0      ; SOFT_IRQ              
 000A  0000                                    fdb     #0      ; SOFT_SWI              
 000C  0000                                    fdb     #0      ; SOFT_NMI              
-000E  0000                                    fdb     #0      ; SOFT_RESET            
+000E  0000                                    fdb     #0      ; SOFT_RESET   
                       
-FFFE                                          org     HARD_RESET
+0010  2A              krnl_color_attribute    fcb     #$2a    ; current color attribute
+                      
+                      
+FFF0                                          org     ROM_VECTS_DEVICE
+FFF0                  krnl_hard_vectors                       
+FFF0  F019                                    fdb     krnl_soft_exec_inf
+FFF2  F01C                                    fdb     krnl_soft_swi3_inf
+FFF4  F09D                                    fdb     krnl_swi2               ; krnl_soft_swi2_inf
+FFF6  F022                                    fdb     krnl_soft_firq_inf
+FFF8  F025                                    fdb     krnl_soft_irq_inf
+FFFA  F028                                    fdb     krnl_soft_swi_inf
+FFFC  F02B                                    fdb     krnl_soft_nmi_inf
 FFFE  F000                                    fdb     start
+0000                  krnl_hard_vector_end
                       
                       ; ---------------------------------------------------------------------
                       
-                      
 F000                                          org     KERNEL_START
                       
-F000  2017            start                   bra     begin
+F000  202F            start                   bra     begin
                       
-F002  4B65726E656C2056657273696F6E3A2000 vers_label              fcn     "Kernel Version: "
-F013  302E302E3100    vers_number             fcn     "0.0.1"
+F002  4B65726E656C2056657273696F6E3A2000 krnl_vers_label         fcn     "Kernel Version: "
+F013  302E302E3100    krnl_vers_number        fcn     "0.0.1"
                       
-F019                  begin                   ; warm reset?
-F019  FC000E                                  ldd     SOFT_RESET
-                                              ; cmpd  #0
-F01C  2704                                    beq     krnl_cold_reset
-F01E  6E9F000E                                jmp     [SOFT_RESET]
+                      
+                      
+                      ; default fake infinite loops... just to verify vector jumps
+F019  7EF019          krnl_soft_exec_inf      jmp     krnl_soft_exec_inf
+F01C  7EF01C          krnl_soft_swi3_inf      jmp     krnl_soft_swi3_inf
+F01F  7EF01F          krnl_soft_swi2_inf      jmp     krnl_soft_swi2_inf
+F022  7EF022          krnl_soft_firq_inf      jmp     krnl_soft_firq_inf
+F025  7EF025          krnl_soft_irq_inf       jmp     krnl_soft_irq_inf
+F028  7EF028          krnl_soft_swi_inf       jmp     krnl_soft_swi_inf
+F02B  7EF02B          krnl_soft_nmi_inf       jmp     krnl_soft_nmi_inf
+F02E  7EF02E          krnl_soft_reset_inf     jmp     krnl_soft_reset_inf
+                      
+                      
+                      ; ---------------------------------------------------------------------
+                      
+F031                  begin                   ; warm reset?
+F031  FC000E                                  ldd     SOFT_RESET
+F034  10830000                                cmpd    #0
+F038  2704                                    beq     krnl_cold_reset
+F03A  6E9F000E                                jmp     [SOFT_RESET]
                                               
-F022                  krnl_cold_reset         ; cold reset
-F022  CCF03A                                  ldd     #krnl_warm_reset
-F025  FD000E                                  std     SOFT_RESET
+F03E                  krnl_cold_reset         ; cold reset
+F03E  8EFFF0                                  ldx     #krnl_hard_vectors
+F041  CE0000                                  ldu     #SOFT_VECTORS_DEVICE
+F044  EC81            1                       ldd     ,x++
+F046  EDC1                                    std     ,u++
+F048  8C0000                                  cmpx    #krnl_hard_vector_end
+F04B  2DF7                                    blt     1b
+F04D  CCF065                                  ldd     #krnl_warm_reset
+F050  FD000E                                  std     SOFT_RESET
+                      
                                               ; ...
                                               ; clear out system memory
-F028  8E0010          krnl_clear_mem          ldx     #SYSTEM_MEMORY_DEVICE
-F02B  CE0400                                  ldu     #VIDEO_START
-F02E  CC0000                                  ldd     #$0000
-F031  AFC4            1                       stx     ,u                      ; cycle first character to show progress
-F033  ED81                                    std     ,x++
-F035  8CF000                                  cmpx    #KERNEL_ROM_DEVICE
-F038  26F7                                    bne     1b
+F053  8E0010          krnl_clear_mem          ldx     #SYSTEM_MEMORY_DEVICE
+F056  CE0400                                  ldu     #VIDEO_START
+F059  CC0000                                  ldd     #$0000
+F05C  AFC4            1                       stx     ,u                      ; cycle first character to show progress
+F05E  ED81                                    std     ,x++
+F060  8CF000                                  cmpx    #KERNEL_ROM_DEVICE
+F063  26F7                                    bne     1b
+                      
+                      
                                               ; ...
-F03A                  krnl_warm_reset         ; common start up code
+F065                  krnl_warm_reset         ; common start up code
                                               ;
                                               ; for now simply set the SP
-F03A  10CE0400                                lds     #SSTACK_TOP
+F065  10CE0400                                lds     #SSTACK_TOP
                                               ; ...
                       
+F069  864B                                    lda     #$4B                    ; $4B = green on dk.green
+F06B  B70010                                  sta     krnl_color_attribute
                       
                       
-                      ; ----------------------  MAIN LOOP  --------------------------------------
+                                              ; make a system call
+F06E                                          sys     #$00
+F06E  103F                                    swi2
+F070  00                                      fcb     \1
+                      
+F071  7EF071          krnl_warm_reset_inf     jmp     krnl_warm_reset_inf                     
+                      
+                      
+                      
+                      ; ----------------------  MAIN STUFF  --------------------------------------
+                      
+                      
+F074                  krnl_swi2_clear_screen
+F074  B60010                                  lda     krnl_color_attribute
+F077  C641                                    ldb     #'A'
+                      
+                                              ;ldd    #$23fe
+                      
+F079  8E0400                                  ldx     #VIDEO_START
+F07C  ED81            1                       std     ,x++
+F07E  BCFE0D                                  cmpx    GPU_VIDEO_MAX
+F081  2DF9                                    blt     1b
+                                              
+F083  39                                      rts
+                      
+                      
                                               ; cycle video memory
-F03E  CC0100                                  ldd     #$0100
-F041  8E0400          1                       ldx     #VIDEO_START            
-F044  C30001                                  addd    #1
-F047  ED81            2                       std     ,x++
-F049  C30001                                  addd    #1
-F04C  BCFE0D                                  cmpx    GPU_VIDEO_MAX
-F04F  2DF6                                    blt     2b
-F051  20EE                                    bra     1b
+F084                  krnl_swi2_random_garbage                        
+F084  CC0100                                  ldd     #$0100
+F087  8E0400          1                       ldx     #VIDEO_START            
+F08A  C30001                                  addd    #1
+F08D  ED81            2                       std     ,x++
+F08F  C30001                                  addd    #1
+F092  BCFE0D                                  cmpx    GPU_VIDEO_MAX
+F095  2DF6                                    blt     2b
+F097  20EE                                    bra     1b
                       
                       
                       
+                      
+                      *** krnl_swi2 *******************************************************************
+                      ** 
+                      ** System Call Handler: 
+                      **      References the byte immediately following the SWI2 instruction and
+                      **      dispatches to the appropriate system call based on that value.
+                      **
+                      **
+                      **********************************************************************************
+F099  F074            krnl_swi2_call_vector   fdb     krnl_swi2_clear_screen          ; $00 clear screen
+F09B  F084                                    fdb     krnl_swi2_random_garbage        ; $01 random garbage
+F09D                  krnl_swi2_call_end                              
+                      
+                      
+F09D                  krnl_swi2               ; increment the return address on the stack past the command byte
+F09D  EE6A                                    ldu     $000a,s
+F09F  E6C4                                    ldb     0,u
+F0A1  3341                                    leau    1,u
+F0A3  EF6A                                    stu     $000a,s
+F0A5  8EF099                                  ldx     #krnl_swi2_call_vector
+F0A8  58                                      lslb
+F0A9  3085                                    leax    b,x
+F0AB  8CF09D                                  cmpx    #krnl_swi2_call_end
+F0AE  2C02                                    bge     krnl_swi2_done
+F0B0  AD94                                    jsr     [,x]
+F0B2  3B              krnl_swi2_done          rti
