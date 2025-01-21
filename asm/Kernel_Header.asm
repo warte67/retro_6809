@@ -55,6 +55,8 @@ CALL_TAB        equ	$04     ; $04 TAB       (void)
 CALL_LINEOUT    equ	$05  	; $05 LINEOUT   Entry: X=string
 CALL_CSRPOS     equ	$06     ; $06 CSRPOS    Exit: Character Display Address in X
 CALL_SCROLL     equ	$07     ; $07 SCROLL    (void)      
+CALL_LINEEDIT	equ	$08	; $08 LINEEDIT	(void)
+CALL_GETKEY	equ	$09	; $09 GETKEY    Returns Key Press in A
 
 
 ; *****************************************************************************

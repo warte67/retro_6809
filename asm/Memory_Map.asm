@@ -36,8 +36,10 @@ SOFT_RESET            equ    $000E    ; RESET Software Interrupt Vector
 SYSTEM_MEMORY_DEVICE  equ    $0010    ; START: System Memory
 ZERO_PAGE             equ    $0010    ; Zero Page System and User Variables
 ZERO_PAGE_END         equ    $00FF    ; Zero Page System and User Variables
-FIO_LN_EDT_BUFFER     equ    $0100    ; START: Line Edit Character Buffer
-FIO_LN_EDT_END        equ    $01FF    ; END: Line Edit Character Buffer
+EDT_BUFFER            equ    $0100    ; START: Line Edit Character Buffer
+KEY_END               equ    $017F    ; END: Line Edit Character Buffer
+FIO_BUFFER            equ    $0180    ; START: Input/Output Buffer
+FIO_BFR_END           equ    $01FF    ; END: Input/Output Buffer
 SYSTEM_STACK          equ    $0200    ; Bottom of System Stack Spcace
 SSTACK_END            equ    $03FF    ; END: System Stack Space
 SSTACK_TOP            equ    $0400    ; TOP: System Stack Space
@@ -142,8 +144,8 @@ GPU_OPTIONS           equ    $FE0B    ; (Byte) Bitflag Enables
                                       ;               0: Disabled
                                       ;               1: Enabled
                                       ; - bit  1   = Presentation
-                                      ;               0: Overscan / Stretch
-                                      ;               1: Letterbox
+                                      ;               0: Letterbox
+                                      ;               1: Overscan / Stretch
                                       ; - bit  0   = Standard Display Enable
                                       ;               0: Disabled
                                       ;               1: Enabled

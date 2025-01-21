@@ -618,16 +618,16 @@ void Keyboard::_doEditBuffer(char xkey)
 	}
 
 	editBuffer.at(0) = 0;
-    Memory::Write(MAP(FIO_LN_EDT_BUFFER),0, true);
+    Memory::Write(MAP(EDT_BUFFER),0, true);
 
 	Word i = 0;
 	for (auto& a : _str_edt_buffer)
     {
-        Memory::Write(MAP(FIO_LN_EDT_BUFFER)+i,a, true);
+        Memory::Write(MAP(EDT_BUFFER)+i,a, true);
 		editBuffer.at(i++) = a;
     }
 	editBuffer.at(i) = 0;
-    Memory::Write(MAP(FIO_LN_EDT_BUFFER)+i,0, true);
+    Memory::Write(MAP(EDT_BUFFER)+i,0, true);
 }
 
 

@@ -938,9 +938,9 @@ void FileIO::_cmd_list_directory()
         dir_data_pos = 0; 
         return;
     }
-    // clear the FIO_BUFFER
-    for (int i = MAP(FIO_BUFFER); i <= MAP(FIO_BFR_END); i++)
-        Memory::Write(i, 0);
+    // // clear the FIO_BUFFER
+    // for (int i = MAP(FIO_BUFFER); i <= MAP(FIO_BFR_END); i++)
+    //     Memory::Write(i, 0);
 
     // build the result
     dir_data = seach_folder;

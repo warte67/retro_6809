@@ -80,8 +80,8 @@ int  GPU::OnAttach(int nextAddr)
             "              0: Disabled",
             "              1: Enabled",
             "- bit  1   = Presentation",
-            "              0: Overscan / Stretch",
-            "              1: Letterbox",
+            "              0: Letterbox",
+            "              1: Overscan / Stretch",
             "- bit  0   = Standard Display Enable",
             "              0: Disabled",
             "              1: Enabled", ""
@@ -484,19 +484,6 @@ void GPU::OnEvent(SDL_Event* evnt)
                 Memory::Write(MAP(GPU_OPTIONS), data);
             } // END: if (evnt->key.key == SDLK_F)
 
-            if (evnt->key.key == SDLK_RIGHT)
-            {
-                Byte data = Memory::Read( MAP(GPU_MODE) );
-                data++;
-                Memory::Write(MAP(GPU_MODE), data);
-            }
-            if (evnt->key.key == SDLK_LEFT)
-            {
-                Byte data = Memory::Read( MAP(GPU_MODE) );
-                data--;
-                Memory::Write(MAP(GPU_MODE), data);
-            }
-
             if (km & SDL_KMOD_CTRL)
             {
                 // [E] Extended Display Enable Toggle
@@ -546,6 +533,19 @@ void GPU::OnEvent(SDL_Event* evnt)
                         Memory::Write(MAP(GPU_OPTIONS), data);
                         // Memory::Write(MAP(GPU_MODE), Memory::Read( MAP(GPU_MODE) ));
                     }
+                }
+
+                if (evnt->key.key == SDLK_RIGHT)
+                {
+                    Byte data = Memory::Read( MAP(GPU_MODE) );
+                    data++;
+                    Memory::Write(MAP(GPU_MODE), data);
+                }
+                if (evnt->key.key == SDLK_LEFT)
+                {
+                    Byte data = Memory::Read( MAP(GPU_MODE) );
+                    data--;
+                    Memory::Write(MAP(GPU_MODE), data);
                 }
             }
             break;       

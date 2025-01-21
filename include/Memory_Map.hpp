@@ -38,8 +38,10 @@ enum MEMMAP
     SYSTEM_MEMORY_DEVICE  = 0x0010,   // START: System Memory
     ZERO_PAGE             = 0x0010,   // Zero Page System and User Variables
     ZERO_PAGE_END         = 0x00FF,   // Zero Page System and User Variables
-    FIO_LN_EDT_BUFFER     = 0x0100,   // START: Line Edit Character Buffer
-    FIO_LN_EDT_END        = 0x01FF,   // END: Line Edit Character Buffer
+    EDT_BUFFER            = 0x0100,   // START: Line Edit Character Buffer
+    KEY_END               = 0x017F,   // END: Line Edit Character Buffer
+    FIO_BUFFER            = 0x0180,   // START: Input/Output Buffer
+    FIO_BFR_END           = 0x01FF,   // END: Input/Output Buffer
     SYSTEM_STACK          = 0x0200,   // Bottom of System Stack Spcace
     SSTACK_END            = 0x03FF,   // END: System Stack Space
     SSTACK_TOP            = 0x0400,   // TOP: System Stack Space
@@ -144,8 +146,8 @@ enum MEMMAP
                                       //               0: Disabled
                                       //               1: Enabled
                                       // - bit  1   = Presentation
-                                      //               0: Overscan / Stretch
-                                      //               1: Letterbox
+                                      //               0: Letterbox
+                                      //               1: Overscan / Stretch
                                       // - bit  0   = Standard Display Enable
                                       //               0: Disabled
                                       //               1: Enabled

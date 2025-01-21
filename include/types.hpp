@@ -32,6 +32,8 @@
     //      true:  generate Memory_Map.hpp and use the local unordered map
     //      false: to use enums from Memory_Map.hpp
     #define GENERATE_MEMORY_MAP     true
+    constexpr bool MEMORY_MAP_DISPLAY_OUTPUT_FILE_HPP = false;
+    constexpr bool MEMORY_MAP_DISPLAY_OUTPUT_FILE_ASM = true;
 
     #define MEMORY_MAP_OUTPUT_FILE_HPP  "./include/Memory_Map.hpp"
     #define MEMORY_MAP_OUTPUT_FILE_ASM  "./asm/Memory_Map.asm"
@@ -39,8 +41,6 @@
 
     #define KERNEL_ROM_FILENAME         "./asm/Kernel.hex"
 
-    constexpr bool MEMORY_MAP_DISPLAY_OUTPUT_FILE_HPP = false;
-    constexpr bool MEMORY_MAP_DISPLAY_OUTPUT_FILE_ASM = false;
 
     // simple types for 8-bit archetecture 
     #ifndef Byte

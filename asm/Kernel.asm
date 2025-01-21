@@ -13,9 +13,18 @@
 		        INCLUDE "Kernel_Header.asm"
 
 		        org 	KERNEL_START
-KRNL_START	    bra	    KRNL_BEGIN
+KRNL_START	    jmp	    KRNL_BEGIN
 
-KRNL_VERS_FCN	fcn	    "Kernel Version: 0.0.1"
+; Notes: 
+;	fcc 	stores raw character string with no default termination
+;	fcs	character string with its terminators high bit set
+;	fcn	character string with null termination
+
+KRNL_PROMPT0	fcn	"Retro 6809 Kernel ROM V0.4\n"
+KRNL_PROMPT1	fcn	"Emulator compiled "
+KRNL_PROMPT2	fcn	"GNU General Public Liscense (GPL V3)\n"
+KRNL_PROMPT3	fcn	"Copyright (C) 2024-2025 By Jay Faries\n\n"  
+READY_PROMPT	fcn	"Ready\n"
 
 
 * ; *****************************************************************************
@@ -90,7 +99,7 @@ KRNL_WARM	    ; warm reboot
                                             ; (bit 4)   Extended Display Enabled, 
                                             ; (bit 3)   Emulation in Windowed Mode, 
                                             ; (bit 2)   Vsync Disabled, 
-                                            ; (bit 1)   Presentation (Overscan/Stretch)                                            
+                                            ; (bit 1)   Presentation (Letterbox)                                            
                                             ; (bit 0)   Standard Display Enabled
 		        ldb	    #%01100000          ; (bit 7)   Standard Text Display
                                             ; (bit 5-6) Color Mode (11=256-Color) 
@@ -99,18 +108,73 @@ KRNL_WARM	    ; warm reboot
                                             ; ... registers to set the video mode                
                 ; ...		
 		        ; set up the initial display
-		        sys	    #CALL_CLS           ; Clear the Text Screen
-                ldx     #KRNL_VERS_FCN      ; Point X to the Version Text
-                sys     #CALL_LINEOUT       ; Display the Text
+		        sys	    CALL_CLS           ; Clear the Text Screen
+                ldx     #KRNL_PROMPT0       ; Point X to the Kernel Version Text
+                sys     CALL_LINEOUT       ; Display the Text
+                ldx     #KRNL_PROMPT1       ; Point X to the Compilation Text
+                sys     CALL_LINEOUT       ; Display the Text
+                lda	    #FC_COMPDATE	    ; command to fetch the compilation date
+                sta	    FIO_COMMAND	        ; issue the command to the FileIO device
+1               lda	    FIO_PATH_DATA	    ; load a character from the response data
+                beq	    2f              	; if we've received a NULL, stop looping
+                sys     CALL_CHROUT        ; output the retrieved character to the console
+                bra     1b                  ; continue looping while there is still data
+2               lda     #$0a                ; line feed character
+                sys     CALL_CHROUT        ; send the line feed to the console                
+                ldx	    #KRNL_PROMPT2	    ; point to the third prompt line
+                sys	    CALL_LINEOUT	    ; output it to the console
+                ldx	    #KRNL_PROMPT3	    ; point to the fourth prompt line
+                sys	    CALL_LINEOUT	    ; output it to the console
                 ; ...		
                 ; enable the mouse cursor
                 lda     CSR_FLAGS           ; load the mouse cursor flags
-                ora     #%1000'0000          ; set the enable bit
+                ora     #%1000'0000         ; set the enable bit
                 sta     CSR_FLAGS           ; update the cursor flags
             
+; *****************************************************************************
+; * THE MAIN COMMAND LOOP                                                     *
+; *****************************************************************************
+; *                                                                           *
+; * 	1) Displays the "Ready" prompt                                        *
+; *     2) Runs the Command Input Line Editor                                 *
+; *     3) Dispatches the Operating System Commands                           *
+; *                                                                           *
+; *****************************************************************************
+KRNL_MAIN_LOOP	ldb	    _ATTRIB             ; fetch the current color attribute
+		        ldx	    #READY_PROMPT	    ; the ready prompt
+                sys     CALL_LINEOUT        ; output to the console
+
+                lda	    #$ff		        ; Initialize the line editor
+                sta	    EDT_BFR_LEN	        ; allow for the full sized buffer
+                clr	    EDT_BFR_CSR	        ; set the buffer cursor to the start
+                clr	    EDT_BUFFER	        	
+                ldx	    #EDT_BUFFER	        ; point to the edit buffer
+
+k_main_clr	    clr	    ,x+		            ; clear an entry and advance to next
+		        cmpx	#KEY_END	        ; are we at the end of the buffer?
+		        blt	    k_main_clr	        ;   not yet, continue looping
+k_main_0	    jsr	    KRNL_LINEEDIT	    ; run the command line editor
+* 		        jsr	    KRNL_CMD_PROC	    ;    decode the command; A = Table Index
+* 		        tst	    FIO_BUFFER	        ; test the buffer for a null
+* 		        beq	    k_main_cont	        ; skip, nothing was entered
+* 		        cmpa	#$FF		        ; ERROR: command not found 
+* 		        beq	    k_main_error	    ;    display the error
+* 		        lsla			            ; index two byte addresses
+* 		        leax	1,x
+* 		        ldy	    #KRNL_CMD_VECTS	    ; the start of the command vector table
+* 		        jsr	    [a,y]		        ; call the command subroutine
+* k_main_cont	    tst	    EDT_BUFFER	        ; nothing entered in the command line?
+* 		        beq	    k_main_0	        ;   nope, skip the ready prompt
+* 		        bra	    MAIN_LOOP	        ; back to the top of the main loop
+* k_main_error	ldx	    #KRNL_ERR_NFND	    ; ERROR: Command Not Found
+* 		        jsr	    KRNL_LINEOUT	    ; send it to the console
+* 		        bra	    k_main_cont	        ; continue within the main loop
+
 
                 ; ...
                 ; infinite loop (for now)
+
+                sys     CALL_GARBAGE
 KRNL_INF	    jmp 	KRNL_INF			
 
 
@@ -144,7 +208,10 @@ KRNL_SYS_CALLS	fdb	    SYS_GARBAGE	    ; $00 random garbage
                 fdb     SYS_TAB         ; $04 TAB       (void)
                 fdb     SYS_LINEOUT     ; $05 LINEOUT   Entry: X=string
                 fdb     SYS_CSRPOS      ; $06 CSRPOS    Exit: Character Display Address in X
-                fdb     SYS_SCROLL      ; $07 SCROLL    (void)                
+                fdb     SYS_SCROLL      ; $07 SCROLL    (void)       
+                fdb     SYS_LINEEDIT	; $08 LINEEDIT	(void)
+                fdb     SYS_GETKEY	    ; $09 GETKEY    Returns Key Press in A
+
 KRNL_SYS_CALLS_END				
 		
 
@@ -370,6 +437,102 @@ K_SCROLL_1	    sta	,x++		        ; and store it to where X points
 		        beq	K_SCROLL_DONE	    ; nope, just clean up and return
 		        dec	_ANCHOR_ROW	        ; yup, decrease the anchor row by one
 K_SCROLL_DONE	puls	d,x,u,pc	    ; restore the registers and return
+
+
+
+
+; *****************************************************************************
+; * KRNL_LINEEDIT                                                             *
+; * 	Engage the text line editor,                                          *
+; *                                                                           *
+; * ENTRY REQUIREMENTS: NONE                                                  *
+; *                                                                           *
+; * EXIT CONDITIONS:	All registers preserved.                              *
+; *****************************************************************************
+SYS_LINEEDIT    jsr     KRNL_LINEEDIT   ; call the text line edit kernel handler
+                rti                     ; return from the interrupt
+                ; ...
+KRNL_LINEEDIT	pshs	D,X,U,CC	    ; save the used registers onto the stack		
+		        ldd 	_CURSOR_COL	    ; load the current cursor position
+		        std	    _ANCHOR_COL	    ;   use it to update the anchor position
+		        lda	    #1		        ; load the enable condition
+		        sta	    EDT_ENABLE	    ; to enable the line editor
+KRNL_LEDIT_0	; display the line up to the cursor		
+		        ldd 	_ANCHOR_COL	    ; restore the line editor anchor
+		        std	    _CURSOR_COL 	; into the console cursor position
+		        ldu	    #EDT_BUFFER	    ; point to the start of the edit buffer
+		        ldb	    EDT_BFR_CSR	    ; the buffer csr position
+		        stb	    _LOCAL_0	    ; store the edit csr position locally
+KRNL_LEDIT_1	tst	    _LOCAL_0	    ; test the edit csr position
+		        beq	    KRNL_LEDIT_2	; if we're there, go display the cursor
+		        dec	    _LOCAL_0	    ; decrement the edit csr position
+		        lda	    ,u+		        ; load the next character from the buffer
+		        beq	    KRNL_LEDIT_2	; display csr if at the null terminator
+		        jsr	    KRNL_CHROUT	    ; output the character to the console
+		        bra	    KRNL_LEDIT_1	; loop until we're at the cursor
+KRNL_LEDIT_2	; display the cursor at the end of the line
+		        lda	    #' '		    ; load a blank SPACE character
+		        ldb	    SYS_CLOCK_DIV	; load clock timer data
+		        * lsrb			        ;	divide by 2
+		        * lsrb			        ;	divide by 2
+		        * lsrb			        ;	divide by 2
+		        * lsrb			        ;	divide by 2
+                lslb
+		        andb	#$F0		    ; B now holds color cycled attribute
+		        tst	    ,u		        ; test the next character in the buffer
+		        beq	    KRNL_LEDIT_3	; use the SPACE if we're at a null
+		        lda	    ,u+		        ; load the next character from buffer
+KRNL_LEDIT_3	; finish the line
+		        jsr	    KRNL_CSRPOS	    ; load X with the current cursor position 
+		        std	    ,x		        ; store the character where X points to
+		        inc	    _CURSOR_COL	    ; ipdate the cursor column number
+		        ; ldb	KRNL_ATTRIB	    ; load the default color attribute
+KRNL_LEDIT_4	lda	    ,u+		        ; fetch the next character from the buffer
+		        beq	    KRNL_DONE	    ; if it's null, we're done
+		        jsr	    KRNL_CHROUT	    ; output it to the console
+		        bra	    KRNL_LEDIT_4	; continue looping until we find the null
+KRNL_DONE	; space at the end	
+		        lda	    #' '		    ; load the SPACE character
+		        jsr	    KRNL_CSRPOS	    ; fetch the cursor position into X
+		        lda	    #' '		    ; load the SPACE character
+		        ldb	    _ATTRIB		    ; load the current color attribute
+		        std	    ,x		        ; update the console
+		        ; test for the user pressing ENTER / RETURN
+		        lda	    CHAR_POP	    ; Pop the top key from the queue
+		        beq	    KRNL_LEDIT_0	; loop to the top if no keys we're pressed
+		        cmpa	#$0d		    ; check for the RETURN / ENTER key press
+		        bne	    KRNL_LEDIT_0	; if not pressend, loop back to the top		
+		        clr	    EDT_ENABLE	    ; disable the line editor		
+		        jsr	    KRNL_CSRPOS	    ; load the cursor position into X
+		        lda	    #' '		    ; load a SPACE character
+		        std	    -2,x		    ; store the character, clean up artifacts
+		        ldd 	_ANCHOR_COL	    ; restore the line editor anchor
+		        std	    _CURSOR_COL 	; into the console cursor position
+		        ldx	    #EDT_BUFFER	    ; point to the edit buffer
+		        jsr	    KRNL_LINEOUT	; send the edit buffer to the console
+		        puls	D,X,U,CC,PC	    ; cleanup saved registers and return
+
+
+; *****************************************************************************
+; * KRNL_GETKEY                                                                *
+; * 	Input a character from the console. Waits for the keypress.           *
+; *                                                                           *
+; * ENTRY REQUIREMENTS: NONE                                                  *
+; *                                                                           *
+; * EXIT CONDITIONS:	A = key code of the key that was pressed              *
+; *                         All other registers preserved                     *
+; *****************************************************************************
+SYS_GETKEY      jsr     KRNL_GETKEY     ; call the kernel get key handler
+                rti                     ; return from interrupt
+                ; ...
+KRNL_GETKEY	    pshs	b,CC		    ; save the used registers onto the stack
+K_GETKEY_0	    ldb	    CHAR_POP	    ; pop the next key from the queue
+		        bne	    K_GETKEY_0	    ; continue until the queue is empty		
+K_GETKEY_1	    ldb	    CHAR_Q_LEN	    ; how many keys are in the queue
+		        beq	    K_GETKEY_1	    ; loop until a key is queued
+		        lda	    CHAR_POP	    ; pop the key into A to be returned
+		        puls	b,CC,PC	        ; cleanup saved registers and return
+
 
 
 

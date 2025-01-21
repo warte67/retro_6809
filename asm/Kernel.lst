@@ -10,12 +10,7 @@
                       ;*****************************
                       
                       
-                      
-                      
-                      
-                      
-                                      ; INCLUDE "Memory_Map.asm"
-0000                                  INCLUDE "Kernel_Header.asm"
+0000                                          INCLUDE "Kernel_Header.asm"
                       ; ***** kernel_header.asm ************************************************************************
                       ; *      _  __                    _     _   _                _                                 
                       ; *     | |/ /___ _ __ _ __   ___| |   | | | | ___  __ _  __| | ___ _ __    __ _ ___ _ __ ___  
@@ -65,8 +60,10 @@
 0010                  SYSTEM_MEMORY_DEVICE  equ    $0010    ; START: System Memory
 0010                  ZERO_PAGE             equ    $0010    ; Zero Page System and User Variables
 00FF                  ZERO_PAGE_END         equ    $00FF    ; Zero Page System and User Variables
-0100                  FIO_LN_EDT_BUFFER     equ    $0100    ; START: Line Edit Character Buffer
-01FF                  FIO_LN_EDT_END        equ    $01FF    ; END: Line Edit Character Buffer
+0100                  EDT_BUFFER            equ    $0100    ; START: Line Edit Character Buffer
+017F                  KEY_END               equ    $017F    ; END: Line Edit Character Buffer
+0180                  FIO_BUFFER            equ    $0180    ; START: Input/Output Buffer
+01FF                  FIO_BFR_END           equ    $01FF    ; END: Input/Output Buffer
 0200                  SYSTEM_STACK          equ    $0200    ; Bottom of System Stack Spcace
 03FF                  SSTACK_END            equ    $03FF    ; END: System Stack Space
 0400                  SSTACK_TOP            equ    $0400    ; TOP: System Stack Space
@@ -171,8 +168,8 @@ FE0B                  GPU_OPTIONS           equ    $FE0B    ; (Byte) Bitflag Ena
                                                             ;               0: Disabled
                                                             ;               1: Enabled
                                                             ; - bit  1   = Presentation
-                                                            ;               0: Overscan / Stretch
-                                                            ;               1: Letterbox
+                                                            ;               0: Letterbox
+                                                            ;               1: Overscan / Stretch
                                                             ; - bit  0   = Standard Display Enable
                                                             ;               0: Disabled
                                                             ;               1: Enabled
@@ -613,6 +610,8 @@ FFFE                  HARD_RESET            equ    $FFFE    ; RESET Hardware Int
 0005                  CALL_LINEOUT    equ     $05     ; $05 LINEOUT   Entry: X=string
 0006                  CALL_CSRPOS     equ     $06     ; $06 CSRPOS    Exit: Character Display Address in X
 0007                  CALL_SCROLL     equ     $07     ; $07 SCROLL    (void)      
+0008                  CALL_LINEEDIT   equ     $08     ; $08 LINEEDIT  (void)
+0009                  CALL_GETKEY     equ     $09     ; $09 GETKEY    Returns Key Press in A
                       
                       
                       ; *****************************************************************************
@@ -631,40 +630,45 @@ FFFE                  HARD_RESET            equ    $FFFE    ; RESET Hardware Int
 0019                  ZERO_PAGE_USER  equ     _LOCAL_3+1      ; start of user appropriate zero-page memory
                       
 F000                                          org     KERNEL_START
-F000  203E            KRNL_START          bra     KRNL_BEGIN
+F000  7EF0AF          KRNL_START          jmp     KRNL_BEGIN
                       
-F002  4B65726E656C2056657273696F6E3A20302E302E3100 KRNL_VERS_FCN   fcn         "Kernel Version: 0.0.1"
+                      ; Notes: 
+                      ;       fcc     stores raw character string with no default termination
+                      ;       fcs     character string with its terminators high bit set
+                      ;       fcn     character string with null termination
+                      
+F003  526574726F2036383039204B65726E656C20524F4D2056302E340A00 KRNL_PROMPT0    fcn     "Retro 6809 Kernel ROM V0.4\n"
+F01F  456D756C61746F7220636F6D70696C65642000 KRNL_PROMPT1    fcn     "Emulator compiled "
+F032  474E552047656E6572616C205075626C6963204C697363656E7365202847504C205633290A00 KRNL_PROMPT2    fcn     "GNU General Public Liscense (GPL V3)\n"
+F058  436F707972696768742028432920323032342D32303235204279204A6179204661726965730A0A00 KRNL_PROMPT3    fcn     "Copyright (C) 2024-2025 By Jay Faries\n\n"  
+F080  52656164790A00  READY_PROMPT    fcn     "Ready\n"
                       
                       
                       * ; *****************************************************************************
                       * ; * SOFTWARE JUMP VECTORS                                                     *
                       * ; *****************************************************************************
-F018  0000            SVCT_START          fdb #0      ; (VECT_EXEC) The user EXEC vector
-F01A  0000                                fdb #0      ; (VECT_SWI3) SWI3 Software Interrupt Vector    
-F01C  0000                                fdb #0      ; (VECT_SWI2) SWI2 Software Interrupt Vector
-F01E  0000                                fdb #0      ; (VECT_FIRQ) FIRQ Software Interrupt Vector
-F020  0000                                fdb #0      ; (VECT_IRQ)  IRQ Software Interrupt Vector
-F022  0000                                fdb #0      ; (VECT_SWI)  SWI / SYS Software Interrupt Vector
-F024  0000                                fdb #0      ; (VECT_NMI)  NMI Software Interrupt Vector
-F026  0000                                fdb #0      ; (VECT_RESET RESET Software Interrupt Vector   
-F028                  SVCT_END            
-                      ; ---------------------------------------------------------------------
-                      
-                      
+F087  0000            SVCT_START          fdb #0      ; (VECT_EXEC) The user EXEC vector
+F089  0000                                fdb #0      ; (VECT_SWI3) SWI3 Software Interrupt Vector    
+F08B  0000                                fdb #0      ; (VECT_SWI2) SWI2 Software Interrupt Vector
+F08D  0000                                fdb #0      ; (VECT_FIRQ) FIRQ Software Interrupt Vector
+F08F  0000                                fdb #0      ; (VECT_IRQ)  IRQ Software Interrupt Vector
+F091  0000                                fdb #0      ; (VECT_SWI)  SWI / SYS Software Interrupt Vector
+F093  0000                                fdb #0      ; (VECT_NMI)  NMI Software Interrupt Vector
+F095  0000                                fdb #0      ; (VECT_RESET RESET Software Interrupt Vector   
+F097                  SVCT_END            
                       
                       
                       ; *****************************************************************************
                       ; * DEFAULT VECTORS                                                           *
                       ; *****************************************************************************
-F028  7EF028          EXEC_start          jmp EXEC_start      ; EXEC program
-F02B  7EF02B          SWI3_start          jmp SWI3_start      ; SWI3 Implementation
-F02E  7EF02E          SWI2_start          jmp SWI2_start      ; SYS (SWI2) Implementation
-F031  7EF031          FIRQ_start          jmp FIRQ_start      ; FIRQ Implementation
-F034  7EF034          IRQ_start           jmp IRQ_start       ; IRQ Implementation
-F037  7EF037          SWI_start           jmp SWI_start       ; SWI / SYS Implementation
-F03A  7EF03A          NMI_start           jmp NMI_start       ; NMI Implementation
-F03D  7EF03D          RESET_start         jmp RESET_start     ; RESET Implementation
-                      ; ---------------------------------------------------------------------
+F097  7EF097          EXEC_start          jmp EXEC_start      ; EXEC program
+F09A  7EF09A          SWI3_start          jmp SWI3_start      ; SWI3 Implementation
+F09D  7EF09D          SWI2_start          jmp SWI2_start      ; SYS (SWI2) Implementation
+F0A0  7EF0A0          FIRQ_start          jmp FIRQ_start      ; FIRQ Implementation
+F0A3  7EF0A3          IRQ_start           jmp IRQ_start       ; IRQ Implementation
+F0A6  7EF0A6          SWI_start           jmp SWI_start       ; SWI / SYS Implementation
+F0A9  7EF0A9          NMI_start           jmp NMI_start       ; NMI Implementation
+F0AC  7EF0AC          RESET_start         jmp RESET_start     ; RESET Implementation
                       
                       
                       ; *******************************************************************************
@@ -677,61 +681,136 @@ F03D  7EF03D          RESET_start         jmp RESET_start     ; RESET Implementa
                       ; * EXIT CONDITIONS:    None                                                    *
                       ; *                                                                             *
                       ; *******************************************************************************
-F040                  KRNL_BEGIN          ; common start up code
-F040  FC000E                                  ldd         SOFT_RESET          ; load the soft reset vector
-F043  10830000                                cmpd    #0                  ; has it already been initialized?
-F047  2704                                    beq         KRNL_COLD           ; no? Well then, do a cold start
-F049  6E9F000E                                jmp         [SOFT_RESET]        ; yes? Follow the warm reset vector                     
-F04D                  KRNL_COLD           ; cold reset
-F04D  8EFFF0                                  ldx         #KRNL_HARD_VECT     ; start of the hardcoded CPU vectors
-F050  CE0000                                  ldu         #SOFT_VECTORS_DEVICE; start of the software vectors
-F053  EC81            1                       ldd         ,x++                ; copy from hardcoded CPU vectors
-F055  EDC1                                    std         ,u++                ; copy to the software vectors
-F057  8C0000                                  cmpx    #KRNL_HARD_VECT_END ; at the end yet?
-F05A  2DF7                                    blt         1b                  ; nope, keep going
-F05C  CCF072                                  ldd         #KRNL_WARM          ; fetch the warm reboot vector
-F05F  FD000E                                  std         SOFT_RESET          ; ... and store it appropriately
+F0AF                  KRNL_BEGIN          ; common start up code
+F0AF  FC000E                                  ldd         SOFT_RESET          ; load the soft reset vector
+F0B2  10830000                                cmpd    #0                  ; has it already been initialized?
+F0B6  2704                                    beq         KRNL_COLD           ; no? Well then, do a cold start
+F0B8  6E9F000E                                jmp         [SOFT_RESET]        ; yes? Follow the warm reset vector     
+                                      ; ...           
+F0BC                  KRNL_COLD           ; cold reset
+F0BC  8EFFF0                                  ldx         #KRNL_HARD_VECT     ; start of the hardcoded CPU vectors
+F0BF  CE0000                                  ldu         #SOFT_VECTORS_DEVICE; start of the software vectors
+F0C2  EC81            1                       ldd         ,x++                ; copy from hardcoded CPU vectors
+F0C4  EDC1                                    std         ,u++                ; copy to the software vectors
+F0C6  8C0000                                  cmpx    #KRNL_HARD_VECT_END ; at the end yet?
+F0C9  2DF7                                    blt         1b                  ; nope, keep going
+F0CB  CCF0E1                                  ldd         #KRNL_WARM          ; fetch the warm reboot vector
+F0CE  FD000E                                  std         SOFT_RESET          ; ... and store it appropriately
+                                      ; ...           
                                               ; clear out system memory
-F062  8E0010                                  ldx         #SYSTEM_MEMORY_DEVICE   ; start of system memory
-F065  CC0000                                  ldd         #$0000              ; clear out D
-F068  BF0400          1                       stx         VIDEO_START                 ; cycle first character to show progress
-F06B  ED81                                    std         ,x++                ; clear out the next word of system memory
-F06D  8CF000                                  cmpx    #KERNEL_ROM_DEVICE  ; at the end yet?
-F070  26F6                                    bne         1b                  ; nope, keep going
-F072                  KRNL_WARM           ; warm reboot
-F072  10CE0400                                lds         #SSTACK_TOP         ; give the stack a home
-F076  864B                                    lda         #$4B                    ; $4B = green on dk.green
-F078  B70012                                  sta         _ATTRIB             ; set the default text color attribute
+F0D1  8E0010                                  ldx         #SYSTEM_MEMORY_DEVICE   ; start of system memory
+F0D4  CC0000                                  ldd         #$0000              ; clear out D
+F0D7  BF0400          1                       stx         VIDEO_START                 ; cycle first character to show progress
+F0DA  ED81                                    std         ,x++                ; clear out the next word of system memory
+F0DC  8CF000                                  cmpx    #KERNEL_ROM_DEVICE  ; at the end yet?
+F0DF  26F6                                    bne         1b                  ; nope, keep going
+                                      ; ...           
+F0E1                  KRNL_WARM           ; warm reboot
+F0E1  10CE0400                                lds         #SSTACK_TOP         ; give the stack a home
+F0E5  864B                                    lda         #$4B                    ; $4B = green on dk.green
+F0E7  B70012                                  sta         _ATTRIB             ; set the default text color attribute
+                                      ; ...           
                                               ; set default video
-F07B  86F1                                    lda         #%11110001          ; (bit 7)   Extended Bitmap, 
+F0EA  86F1                                    lda         #%11110001          ; (bit 7)   Extended Bitmap, 
                                                                   ; (bit 5-6) 256-color, 
                                                                   ; (bit 4)   Extended Display Enabled, 
                                                                   ; (bit 3)   Emulation in Windowed Mode, 
                                                                   ; (bit 2)   Vsync Disabled, 
-                                                                  ; (bit 1)   Presentation (Overscan/Stretch)                                            
+                                                                  ; (bit 1)   Presentation (Letterbox)                                            
                                                                   ; (bit 0)   Standard Display Enabled
-F07D  C660                                    ldb         #%01100000          ; (bit 7)   Standard Text Display
+F0EC  C660                                    ldb         #%01100000          ; (bit 7)   Standard Text Display
                                                                   ; (bit 5-6) Color Mode (11=256-Color) 
                                                                   ; (bit 0-4) Video Mode 0 (40x25 / 320x200)
-F07F  FDFE0B                                  std         GPU_OPTIONS         ; write to the GPU_OPTIONS and GPU_MODE
+F0EE  FDFE0B                                  std         GPU_OPTIONS         ; write to the GPU_OPTIONS and GPU_MODE
                                                                   ; ... registers to set the video mode                
+                                      ; ...           
                                               ; set up the initial display
-F082                                          sys         #CALL_CLS           ; Clear the Text Screen
-F082  103F                            swi2
-F084  01                              fcb     \1
-F085  8EF002                          ldx     #KRNL_VERS_FCN      ; Point X to the Version Text
-F088                                  sys     #CALL_LINEOUT       ; Display the Text
-F088  103F                            swi2
-F08A  05                              fcb     \1
+F0F1                                          sys         CALL_CLS           ; Clear the Text Screen
+F0F1  103F                            swi2
+F0F3  01                              fcb     \1
+F0F4  8EF003                          ldx     #KRNL_PROMPT0       ; Point X to the Kernel Version Text
+F0F7                                  sys     CALL_LINEOUT       ; Display the Text
+F0F7  103F                            swi2
+F0F9  05                              fcb     \1
+F0FA  8EF01F                          ldx     #KRNL_PROMPT1       ; Point X to the Compilation Text
+F0FD                                  sys     CALL_LINEOUT       ; Display the Text
+F0FD  103F                            swi2
+F0FF  05                              fcb     \1
+F100  8602                            lda         #FC_COMPDATE            ; command to fetch the compilation date
+F102  B7FE59                          sta         FIO_COMMAND         ; issue the command to the FileIO device
+F105  B6FE62          1               lda         FIO_PATH_DATA           ; load a character from the response data
+F108  2705                            beq         2f                  ; if we've received a NULL, stop looping
+F10A                                  sys     CALL_CHROUT        ; output the retrieved character to the console
+F10A  103F                            swi2
+F10C  02                              fcb     \1
+F10D  20F6                            bra     1b                  ; continue looping while there is still data
+F10F  860A            2               lda     #$0a                ; line feed character
+F111                                  sys     CALL_CHROUT        ; send the line feed to the console                
+F111  103F                            swi2
+F113  02                              fcb     \1
+F114  8EF032                          ldx         #KRNL_PROMPT2           ; point to the third prompt line
+F117                                  sys         CALL_LINEOUT            ; output it to the console
+F117  103F                            swi2
+F119  05                              fcb     \1
+F11A  8EF058                          ldx         #KRNL_PROMPT3           ; point to the fourth prompt line
+F11D                                  sys         CALL_LINEOUT            ; output it to the console
+F11D  103F                            swi2
+F11F  05                              fcb     \1
+                                      ; ...           
                                       ; enable the mouse cursor
-F08B  B6FE28                          lda     CSR_FLAGS           ; load the mouse cursor flags
-F08E  8A08                            ora     #%1000'0000          ; set the enable bit
-F090  B7FE28                          sta     CSR_FLAGS           ; update the cursor flags
+F120  B6FE28                          lda     CSR_FLAGS           ; load the mouse cursor flags
+F123  8A08                            ora     #%1000'0000         ; set the enable bit
+F125  B7FE28                          sta     CSR_FLAGS           ; update the cursor flags
                                   
+                      ; *****************************************************************************
+                      ; * THE MAIN COMMAND LOOP                                                     *
+                      ; *****************************************************************************
+                      ; *                                                                           *
+                      ; *     1) Displays the "Ready" prompt                                        *
+                      ; *     2) Runs the Command Input Line Editor                                 *
+                      ; *     3) Dispatches the Operating System Commands                           *
+                      ; *                                                                           *
+                      ; *****************************************************************************
+F128  F60012          KRNL_MAIN_LOOP  ldb         _ATTRIB             ; fetch the current color attribute
+F12B  8EF080                                  ldx         #READY_PROMPT           ; the ready prompt
+F12E                                  sys     CALL_LINEOUT        ; output to the console
+F12E  103F                            swi2
+F130  05                              fcb     \1
                       
-                              ; ...
+F131  86FF                            lda         #$ff                        ; Initialize the line editor
+F133  B7FE43                          sta         EDT_BFR_LEN         ; allow for the full sized buffer
+F136  7FFE41                          clr         EDT_BFR_CSR         ; set the buffer cursor to the start
+F139  7F0100                          clr         EDT_BUFFER                  
+F13C  8E0100                          ldx         #EDT_BUFFER         ; point to the edit buffer
                       
-F093  7EF093          KRNL_INF            jmp         KRNL_INF                        
+F13F  6F80            k_main_clr          clr     ,x+                     ; clear an entry and advance to next
+F141  8C017F                                  cmpx    #KEY_END                ; are we at the end of the buffer?
+F144  2DF9                                    blt         k_main_clr          ;   not yet, continue looping
+F146  BDF289          k_main_0            jsr     KRNL_LINEEDIT           ; run the command line editor
+                      *                       jsr         KRNL_CMD_PROC           ;    decode the command; A = Table Index
+                      *                       tst         FIO_BUFFER          ; test the buffer for a null
+                      *                       beq         k_main_cont         ; skip, nothing was entered
+                      *                       cmpa    #$FF                    ; ERROR: command not found 
+                      *                       beq         k_main_error            ;    display the error
+                      *                       lsla                                ; index two byte addresses
+                      *                       leax    1,x
+                      *                       ldy         #KRNL_CMD_VECTS         ; the start of the command vector table
+                      *                       jsr         [a,y]                       ; call the command subroutine
+                      * k_main_cont       tst     EDT_BUFFER          ; nothing entered in the command line?
+                      *                       beq         k_main_0            ;   nope, skip the ready prompt
+                      *                       bra         MAIN_LOOP           ; back to the top of the main loop
+                      * k_main_error  ldx         #KRNL_ERR_NFND          ; ERROR: Command Not Found
+                      *                       jsr         KRNL_LINEOUT            ; send it to the console
+                      *                       bra         k_main_cont         ; continue within the main loop
+                      
+                      
+                                      ; ...
+                                      ; infinite loop (for now)
+                      
+F149                                  sys     CALL_GARBAGE
+F149  103F                            swi2
+F14B  00                              fcb     \1
+F14C  7EF14C          KRNL_INF            jmp         KRNL_INF                        
                       
                       
                       ; *******************************************************************************
@@ -757,48 +836,51 @@ F093  7EF093          KRNL_INF            jmp         KRNL_INF
                       ; *         PC  = 10,S                                                          *
                       ; *                                                                             *
                       ; *******************************************************************************
-F096  F0C0            KRNL_SYS_CALLS  fdb         SYS_GARBAGE     ; $00 random garbage
-F098  F0D9                            fdb         SYS_CLS         ; $01 CLS       (void)
-F09A  F0F6                            fdb         SYS_CHROUT      ; $02 CHROUT        (void)
-F09C  F12B                            fdb     SYS_NEWLINE     ; $03 NEWLINE   (void)
-F09E  F147                            fdb     SYS_TAB         ; $04 TAB       (void)
-F0A0  F161                            fdb     SYS_LINEOUT     ; $05 LINEOUT   Entry: X=string
-F0A2  F17B                            fdb     SYS_CSRPOS      ; $06 CSRPOS    Exit: Character Display Address in X
-F0A4  F199                            fdb     SYS_SCROLL      ; $07 SCROLL    (void)                
-F0A6                  KRNL_SYS_CALLS_END                              
+F14F  F17D            KRNL_SYS_CALLS  fdb         SYS_GARBAGE     ; $00 random garbage
+F151  F196                            fdb         SYS_CLS         ; $01 CLS       (void)
+F153  F1B3                            fdb         SYS_CHROUT      ; $02 CHROUT        (void)
+F155  F1E8                            fdb     SYS_NEWLINE     ; $03 NEWLINE   (void)
+F157  F204                            fdb     SYS_TAB         ; $04 TAB       (void)
+F159  F21E                            fdb     SYS_LINEOUT     ; $05 LINEOUT   Entry: X=string
+F15B  F238                            fdb     SYS_CSRPOS      ; $06 CSRPOS    Exit: Character Display Address in X
+F15D  F256                            fdb     SYS_SCROLL      ; $07 SCROLL    (void)       
+F15F  F285                            fdb     SYS_LINEEDIT    ; $08 LINEEDIT  (void)
+F161  F302                            fdb     SYS_GETKEY          ; $09 GETKEY    Returns Key Press in A
+                      
+F163                  KRNL_SYS_CALLS_END                              
                                       
                       
-F0A6                  SYS_Handler     ; increment the return address on the stack past the command byte
-F0A6  EE6A                                    ldu         $000a,S         ; fetch the command that follows the SWI2
-F0A8  E6C4                                    ldb         0,U             ; load the command into B
-F0AA  3341                                    leau    1,U             ; address just past the command byte
-F0AC  EF6A                                    stu         $000a,S         ; update the return address in the stack
-F0AE  CEF096                                  ldu         #KRNL_SYS_CALLS ; system call vector base address
-F0B1  58                                      lslb                    ; each address is two bytes long
-F0B2  33C5                                    leau    B,U             ; U = system call vector effective address
-F0B4  1183F0A6                                cmpu    #KRNL_SYS_CALLS_END ; Bounds check
-F0B8  2C02                                    bge         SYS_HNDLR_DONE  ; system call out of bounds; error
-F0BA  6ED4                                    jmp         [,U]            ; take the appropriate system call vector
-F0BC                  SYS_HNDLR_DONE  ; Error Condition -- System Call Out of Bounds
+F163                  SYS_Handler     ; increment the return address on the stack past the command byte
+F163  EE6A                                    ldu         $000a,S         ; fetch the command that follows the SWI2
+F165  E6C4                                    ldb         0,U             ; load the command into B
+F167  3341                                    leau    1,U             ; address just past the command byte
+F169  EF6A                                    stu         $000a,S         ; update the return address in the stack
+F16B  CEF14F                                  ldu         #KRNL_SYS_CALLS ; system call vector base address
+F16E  58                                      lslb                    ; each address is two bytes long
+F16F  33C5                                    leau    B,U             ; U = system call vector effective address
+F171  1183F163                                cmpu    #KRNL_SYS_CALLS_END ; Bounds check
+F175  2C02                                    bge         SYS_HNDLR_DONE  ; system call out of bounds; error
+F177  6ED4                                    jmp         [,U]            ; take the appropriate system call vector
+F179                  SYS_HNDLR_DONE  ; Error Condition -- System Call Out of Bounds
                                       ; ...  (ToDo)
-F0BC  7EF0C4                          jmp     KRNL_GARBAGE    ; temporary fatal error
+F179  7EF181                          jmp     KRNL_GARBAGE    ; temporary fatal error
                                       ; ...
-F0BF  3B                              rti ; Reminder: This Sub is an Interrupt
+F17C  3B                              rti ; Reminder: This Sub is an Interrupt
                       
                       
                       ; This is just a temporary place holder for a terminal system crash.
                       ; cycle video memory (infinite loop)
-F0C0  BDF0C4          SYS_GARBAGE     jsr     KRNL_GARBAGE    ; call the kernel error handler (temp)
-F0C3  3B                              rti                     ; return from the sys interrupt
-F0C4                  KRNL_GARBAGE                    
-F0C4  CC0100                              ldd     #$0100          ; initialize a starting attribute/character pair
-F0C7  8E0400          1                   ldx     #VIDEO_START    ; point to the start of the text display
-F0CA  C30001                              addd        #1              ; increment the attribute/character to display
-F0CD  ED81            2                   std     ,x++            ; store the colored character to the next cell
-F0CF  C30001                              addd        #1              ; increment the attribute/character to display
-F0D2  BCFE0D                              cmpx        GPU_VIDEO_MAX   ; at the end of displayed video memory?
-F0D5  2DF6                                blt     2b              ; nope, keep going with the next character
-F0D7  20EE                                bra     1b              ; yup, start over.
+F17D  BDF181          SYS_GARBAGE     jsr     KRNL_GARBAGE    ; call the kernel error handler (temp)
+F180  3B                              rti                     ; return from the sys interrupt
+F181                  KRNL_GARBAGE                    
+F181  CC0100                              ldd     #$0100          ; initialize a starting attribute/character pair
+F184  8E0400          1                   ldx     #VIDEO_START    ; point to the start of the text display
+F187  C30001                              addd        #1              ; increment the attribute/character to display
+F18A  ED81            2                   std     ,x++            ; store the colored character to the next cell
+F18C  C30001                              addd        #1              ; increment the attribute/character to display
+F18F  BCFE0D                              cmpx        GPU_VIDEO_MAX   ; at the end of displayed video memory?
+F192  2DF6                                blt     2b              ; nope, keep going with the next character
+F194  20EE                                bra     1b              ; yup, start over.
                       
                       
                       ; *****************************************************************************
@@ -810,19 +892,19 @@ F0D7  20EE                                bra     1b              ; yup, start o
                       ; *                                                                           *
                       ; * EXIT CONDITIONS:    All registers preserved                               *
                       ; *****************************************************************************
-F0D9  BDF0DD          SYS_CLS         jsr     KRNL_CLS        ; call the kernel Clear Screen handler
-F0DC  3B                              rti                     ; return from the sys interrupt
+F196  BDF19A          SYS_CLS         jsr     KRNL_CLS        ; call the kernel Clear Screen handler
+F199  3B                              rti                     ; return from the sys interrupt
                                       ; ...
-F0DD  3416            KRNL_CLS            pshs        d,x                     ; save the used registers onto the stack
-F0DF  F60012                                  ldb         _ATTRIB                 ; fetch the current color attribute
-F0E2  8620                                    lda         #' '                    ; the space character
-F0E4  8E0400                                  ldx         #VIDEO_START        ; index the start of the video buffer
-F0E7  ED81            1                       std         ,x++                    ; store a character to the buffer
-F0E9  BCFE0D                                  cmpx    GPU_VIDEO_MAX   ; are we at the end yet?
-F0EC  2DF9                                    blt         1b                  ; nope, keep storing characters
-F0EE  7F0010                          clr     _CURSOR_COL     ; clear the current cursor position ...
-F0F1  7F0011                          clr         _CURSOR_ROW     ; ... column and row the home (top/left)
-F0F4  3596                                    puls    d,x,pc              ; cleanup and return
+F19A  3416            KRNL_CLS            pshs        d,x                     ; save the used registers onto the stack
+F19C  F60012                                  ldb         _ATTRIB                 ; fetch the current color attribute
+F19F  8620                                    lda         #' '                    ; the space character
+F1A1  8E0400                                  ldx         #VIDEO_START        ; index the start of the video buffer
+F1A4  ED81            1                       std         ,x++                    ; store a character to the buffer
+F1A6  BCFE0D                                  cmpx    GPU_VIDEO_MAX   ; are we at the end yet?
+F1A9  2DF9                                    blt         1b                  ; nope, keep storing characters
+F1AB  7F0010                          clr     _CURSOR_COL     ; clear the current cursor position ...
+F1AE  7F0011                          clr         _CURSOR_ROW     ; ... column and row the home (top/left)
+F1B1  3596                                    puls    d,x,pc              ; cleanup and return
                       
                       
                       ; *****************************************************************************
@@ -835,30 +917,30 @@ F0F4  3596                                    puls    d,x,pc              ; clea
                       ; *                                                                           *
                       ; * EXIT CONDITIONS:    All registers preserved                               *
                       ; *****************************************************************************
-F0F6  A661            SYS_CHROUT      lda     1,S             ; fetch A from the stack
-F0F8  BDF0FC                          jsr     KRNL_CHROUT     ; call the character out kernel handler
-F0FB  3B                              rti                     ; return from the sys interrupt
+F1B3  A661            SYS_CHROUT      lda     1,S             ; fetch A from the stack
+F1B5  BDF1B9                          jsr     KRNL_CHROUT     ; call the character out kernel handler
+F1B8  3B                              rti                     ; return from the sys interrupt
                                       ; ...
-F0FC  3417            KRNL_CHROUT         pshs        d,x,cc              ; save the used registers onto the stack
-F0FE  F60012                                  ldb         _ATTRIB                 ; load the current color attribute
-F101  4D              K_CHROUT_1          tsta                                ; is A a null?
-F102  2725                                    beq         K_CHROUT_DONE       ;    A is null, just return and do nothing              
-F104  810A                                    cmpa    #$0A                ; is it a newline character?
-F106  2605                                    bne         K_CHROUT_2      ; nope, don't do a newline
-F108  BDF12F                                  jsr         KRNL_NEWLINE        ; advance the cursor 
-F10B  201C                                    bra         K_CHROUT_DONE       ; clean up and return
-F10D  8109            K_CHROUT_2          cmpa        #$09                ; is it a tab character?
-F10F  2605                                    bne         K_CHROUT_0      ; nope, don't do a tab
-F111  BDF14B                                  jsr         KRNL_TAB        ; tab the character position
-F114  2013                                    bra         K_CHROUT_DONE       ; clean up and return
-F116  BDF181          K_CHROUT_0          jsr     KRNL_CSRPOS     ; position X at the cursor position
-F119  ED84                                    std         ,x                  ; display the character/attribute combo
-F11B  7C0010                                  inc         _CURSOR_COL     ; increment current cursor column position
-F11E  B60010                                  lda         _CURSOR_COL     ; load current cursor column position                                       
-F121  B1FE13                                  cmpa    GPU_TCOLS           ; compare with the current screen columns
-F124  2D03                                    blt         K_CHROUT_DONE       ; if the csr column is okay, we're done
-F126  BDF12F                                  jsr         KRNL_NEWLINE        ; perform a new line
-F129  3597            K_CHROUT_DONE   puls    d,x,cc,pc           ; cleanup and return
+F1B9  3417            KRNL_CHROUT         pshs        d,x,cc              ; save the used registers onto the stack
+F1BB  F60012                                  ldb         _ATTRIB                 ; load the current color attribute
+F1BE  4D              K_CHROUT_1          tsta                                ; is A a null?
+F1BF  2725                                    beq         K_CHROUT_DONE       ;    A is null, just return and do nothing              
+F1C1  810A                                    cmpa    #$0A                ; is it a newline character?
+F1C3  2605                                    bne         K_CHROUT_2      ; nope, don't do a newline
+F1C5  BDF1EC                                  jsr         KRNL_NEWLINE        ; advance the cursor 
+F1C8  201C                                    bra         K_CHROUT_DONE       ; clean up and return
+F1CA  8109            K_CHROUT_2          cmpa        #$09                ; is it a tab character?
+F1CC  2605                                    bne         K_CHROUT_0      ; nope, don't do a tab
+F1CE  BDF208                                  jsr         KRNL_TAB        ; tab the character position
+F1D1  2013                                    bra         K_CHROUT_DONE       ; clean up and return
+F1D3  BDF23E          K_CHROUT_0          jsr     KRNL_CSRPOS     ; position X at the cursor position
+F1D6  ED84                                    std         ,x                  ; display the character/attribute combo
+F1D8  7C0010                                  inc         _CURSOR_COL     ; increment current cursor column position
+F1DB  B60010                                  lda         _CURSOR_COL     ; load current cursor column position                                       
+F1DE  B1FE13                                  cmpa    GPU_TCOLS           ; compare with the current screen columns
+F1E1  2D03                                    blt         K_CHROUT_DONE       ; if the csr column is okay, we're done
+F1E3  BDF1EC                                  jsr         KRNL_NEWLINE        ; perform a new line
+F1E6  3597            K_CHROUT_DONE   puls    d,x,cc,pc           ; cleanup and return
                       
                       
                       ; *****************************************************************************
@@ -870,18 +952,18 @@ F129  3597            K_CHROUT_DONE   puls    d,x,cc,pc           ; cleanup and 
                       ; *                                                                           *
                       ; * EXIT CONDITIONS:    All registers preserved.                              *
                       ; *****************************************************************************
-F12B  BDF12F          SYS_NEWLINE     jsr     KRNL_NEWLINE    ; call the newline kernel handler
-F12E  3B                              rti                     ; return from the sys interrupt
+F1E8  BDF1EC          SYS_NEWLINE     jsr     KRNL_NEWLINE    ; call the newline kernel handler
+F1EB  3B                              rti                     ; return from the sys interrupt
                                       ; ...
-F12F  3416            KRNL_NEWLINE    pshs    D,X                     ; save the used registers onto the stack
-F131  7F0010                                  clr         _CURSOR_COL     ; carrage return (move to left edge)
-F134  7C0011                                  inc         _CURSOR_ROW     ; increment the cursors row
-F137  B60011                                  lda         _CURSOR_ROW     ; load the current row
-F13A  B1FE14                                  cmpa    GPU_TROWS           ; compared to the current screen rows
-F13D  2D06                                    blt         K_NEWLINE_DONE      ; clean up and return if less than
-F13F  7A0011                                  dec         _CURSOR_ROW     ; move the cursor the the bottom row
-F142  BDF19D                                  jsr         KRNL_SCROLL     ; scroll the text screen up one line
-F145  3596            K_NEWLINE_DONE  puls    D,X,PC              ; restore the saved registers and return
+F1EC  3416            KRNL_NEWLINE    pshs    D,X                     ; save the used registers onto the stack
+F1EE  7F0010                                  clr         _CURSOR_COL     ; carrage return (move to left edge)
+F1F1  7C0011                                  inc         _CURSOR_ROW     ; increment the cursors row
+F1F4  B60011                                  lda         _CURSOR_ROW     ; load the current row
+F1F7  B1FE14                                  cmpa    GPU_TROWS           ; compared to the current screen rows
+F1FA  2D06                                    blt         K_NEWLINE_DONE      ; clean up and return if less than
+F1FC  7A0011                                  dec         _CURSOR_ROW     ; move the cursor the the bottom row
+F1FF  BDF25A                                  jsr         KRNL_SCROLL     ; scroll the text screen up one line
+F202  3596            K_NEWLINE_DONE  puls    D,X,PC              ; restore the saved registers and return
                       
                       
                       ; *****************************************************************************
@@ -893,18 +975,18 @@ F145  3596            K_NEWLINE_DONE  puls    D,X,PC              ; restore the 
                       ; *                                                                           *
                       ; * EXIT CONDITIONS:    All registers preserved.                              *
                       ; *****************************************************************************
-F147  BDF14B          SYS_TAB         jsr     KRNL_TAB        ; call the tab character kernel handler
-F14A  3B                              rti                     ; return from the sys interrupt
+F204  BDF208          SYS_TAB         jsr     KRNL_TAB        ; call the tab character kernel handler
+F207  3B                              rti                     ; return from the sys interrupt
                                       ; ...
-F14B  3404            KRNL_TAB        pshs    b                       ; save B
-F14D  F60010                          ldb     _CURSOR_COL         ; Fetch the current cursor col
-F150  CB04                            addb    #4              ; Move cursor by 4 spaces
-F152  C4FC                            andb    #%11111100      ; Align to the next tab stop
-F154  F70010                          stb     _CURSOR_COL         ; update the cursor column
-F157  F1FE13                          cmpb    GPU_TCOLS       ; Ensure column is within bounds
-F15A  2D03                            blt     K_TAB_DONE          ; Within bounds, we're done
-F15C  BDF12F                          jsr     KRNL_NEWLINE    ; Handle line wrapping
-F15F  3584            K_TAB_DONE          puls        B,PC                ; cleanup and return
+F208  3404            KRNL_TAB        pshs    b                       ; save B
+F20A  F60010                          ldb     _CURSOR_COL         ; Fetch the current cursor col
+F20D  CB04                            addb    #4              ; Move cursor by 4 spaces
+F20F  C4FC                            andb    #%11111100      ; Align to the next tab stop
+F211  F70010                          stb     _CURSOR_COL         ; update the cursor column
+F214  F1FE13                          cmpb    GPU_TCOLS       ; Ensure column is within bounds
+F217  2D03                            blt     K_TAB_DONE          ; Within bounds, we're done
+F219  BDF1EC                          jsr     KRNL_NEWLINE    ; Handle line wrapping
+F21C  3584            K_TAB_DONE          puls        B,PC                ; cleanup and return
                       
                       
                       ; *******************************************************************************
@@ -916,19 +998,19 @@ F15F  3584            K_TAB_DONE          puls        B,PC                ; clea
                       ; *                                                                             *
                       ; * EXIT CONDITIONS:    All registers preserved.                                *
                       ; *******************************************************************************
-F161  AE64            SYS_LINEOUT     ldx     4,S             ; fetch X from the stack
-F163  BDF167                          jsr     KRNL_LINEOUT    ; call the line out kernel handler
-F166  3B                              rti                     ; return from the sys interrupt
+F21E  AE64            SYS_LINEOUT     ldx     4,S             ; fetch X from the stack
+F220  BDF224                          jsr     KRNL_LINEOUT    ; call the line out kernel handler
+F223  3B                              rti                     ; return from the sys interrupt
                                       ; ...
-F167  3456            KRNL_LINEOUT    pshs    D,X,U               ; save the used registers onto the stack
-F169  1F13                                    tfr         X,U                 ; move X to U
-F16B  BDF181                                  jsr         KRNL_CSRPOS     ; set X to the cursor position 
-F16E  A6C0            K_LINEOUT_0         lda     ,U+                 ; fetch the next character
-F170  2707                                    beq         K_LINEOUT_DONE      ; cleanup and return if null-terminator         
-F172  BDF0FC                                  jsr         KRNL_CHROUT     ; send the character to the console
-F175  3001                                    leax    1,X                     ; point to the next character
-F177  20F5                                    bra         K_LINEOUT_0     ; continue looping until done
-F179  35D6            K_LINEOUT_DONE  puls    D,U,X,PC            ; restore the saved registers and return
+F224  3456            KRNL_LINEOUT    pshs    D,X,U               ; save the used registers onto the stack
+F226  1F13                                    tfr         X,U                 ; move X to U
+F228  BDF23E                                  jsr         KRNL_CSRPOS     ; set X to the cursor position 
+F22B  A6C0            K_LINEOUT_0         lda     ,U+                 ; fetch the next character
+F22D  2707                                    beq         K_LINEOUT_DONE      ; cleanup and return if null-terminator         
+F22F  BDF1B9                                  jsr         KRNL_CHROUT     ; send the character to the console
+F232  3001                                    leax    1,X                     ; point to the next character
+F234  20F5                                    bra         K_LINEOUT_0     ; continue looping until done
+F236  35D6            K_LINEOUT_DONE  puls    D,U,X,PC            ; restore the saved registers and return
                       
                       
                       ; *******************************************************************************
@@ -943,22 +1025,22 @@ F179  35D6            K_LINEOUT_DONE  puls    D,U,X,PC            ; restore the 
                       ; *                         where the cursor is positioned.                     *   
                       ; *                     All other registers preserved.                          *
                       ; *******************************************************************************
-F17B  BDF181          SYS_CSRPOS      jsr     KRNL_CSRPOS     ; call the CSRPOS kernel subroutine
-F17E  AF64                            stx     4,S             ; replace X in the stack so it has ...
-F180  3B                              rti                     ; ... valid info on return
+F238  BDF23E          SYS_CSRPOS      jsr     KRNL_CSRPOS     ; call the CSRPOS kernel subroutine
+F23B  AF64                            stx     4,S             ; replace X in the stack so it has ...
+F23D  3B                              rti                     ; ... valid info on return
                                       ; ...
-F181  3406            KRNL_CSRPOS         pshs        D                       ; save the used registers onto the stack
-F183  B60011                                  lda         _CURSOR_ROW     ; current cursor row
-F186  F6FE13                                  ldb         GPU_TCOLS       ; current text columns
-F189  58                                      lslb                            ; times two (account for the attribute)
-F18A  3D                                      mul                                 ; row * columns
-F18B  8E0400                                  ldx         #VIDEO_START        ; the buffer starting address
-F18E  308B                                    leax    D,X                     ; add the video base address
-F190  F60010                                  ldb         _CURSOR_COL     ; load the current cursor column
-F193  58                                      lslb                            ; times two (account for the attribute)
-F194  4F                                      clra                            ; don't let B become negative, use D
-F195  308B                                    leax    D,X                     ; add the column to the return address
-F197  3586                                    puls    D,PC                ; restore the saved registers and return
+F23E  3406            KRNL_CSRPOS         pshs        D                       ; save the used registers onto the stack
+F240  B60011                                  lda         _CURSOR_ROW     ; current cursor row
+F243  F6FE13                                  ldb         GPU_TCOLS       ; current text columns
+F246  58                                      lslb                            ; times two (account for the attribute)
+F247  3D                                      mul                                 ; row * columns
+F248  8E0400                                  ldx         #VIDEO_START        ; the buffer starting address
+F24B  308B                                    leax    D,X                     ; add the video base address
+F24D  F60010                                  ldb         _CURSOR_COL     ; load the current cursor column
+F250  58                                      lslb                            ; times two (account for the attribute)
+F251  4F                                      clra                            ; don't let B become negative, use D
+F252  308B                                    leax    D,X                     ; add the column to the return address
+F254  3586                                    puls    D,PC                ; restore the saved registers and return
                       
                       ; *****************************************************************************
                       ; * KRNL_SCROLL                                                               *
@@ -968,28 +1050,124 @@ F197  3586                                    puls    D,PC                ; rest
                       ; *                                                                           *
                       ; * EXIT CONDITIONS:    All registers preserved.                              *
                       ; *****************************************************************************
-F199  BDF19D          SYS_SCROLL      jsr     KRNL_SCROLL     ; call the text screen scroll handler
-F19C  3B                              rti                     ; return from the sys interrupt
+F256  BDF25A          SYS_SCROLL      jsr     KRNL_SCROLL     ; call the text screen scroll handler
+F259  3B                              rti                     ; return from the sys interrupt
                                       ; ...
-F19D  3456            KRNL_SCROLL         pshs        d,x,u               ; save the used registers onto the stack
-F19F  8E0400                                  ldx     #VIDEO_START        ; set X to the start of the video buffer
-F1A2  1F13                                    tfr     x,u                         ; copy X into U
-F1A4  F6FE13                                  ldb     GPU_TCOLS               ; B = Screen Columns
-F1A7  58                                      lslb                            ; account for the attribute byte
-F1A8  4F                                      clra                            ; MSB of D needs to not be negative
-F1A9  33CB                                    leau    d,u                     ; U is now one line below X
-F1AB  ECC1            K_SCROLL_0          ldd ,u++                    ; load a character from where U points
-F1AD  ED81                                    std     ,x++                    ; store it to where X points
-F1AF  11B3FE0D                                cmpu    GPU_VIDEO_MAX   ; has U exceeded the screen buffer
-F1B3  2DF6                                    blt     K_SCROLL_0              ; continue looping of not
-F1B5  8620                                    lda     #' '                    ; set SPACE as the current character
-F1B7  A781            K_SCROLL_1          sta ,x++                    ; and store it to where X points
-F1B9  BCFE0D                                  cmpx    GPU_VIDEO_MAX   ; continue looping until the bottom ...
-F1BC  2DF9                                    blt     K_SCROLL_1              ; ... line has been cleared
-F1BE  7DFE42                                  tst     EDT_ENABLE              ; are we using the line editor?
-F1C1  2703                                    beq     K_SCROLL_DONE       ; nope, just clean up and return
-F1C3  7A0014                                  dec     _ANCHOR_ROW             ; yup, decrease the anchor row by one
-F1C6  35D6            K_SCROLL_DONE   puls    d,x,u,pc            ; restore the registers and return
+F25A  3456            KRNL_SCROLL         pshs        d,x,u               ; save the used registers onto the stack
+F25C  8E0400                                  ldx     #VIDEO_START        ; set X to the start of the video buffer
+F25F  1F13                                    tfr     x,u                         ; copy X into U
+F261  F6FE13                                  ldb     GPU_TCOLS               ; B = Screen Columns
+F264  58                                      lslb                            ; account for the attribute byte
+F265  4F                                      clra                            ; MSB of D needs to not be negative
+F266  33CB                                    leau    d,u                     ; U is now one line below X
+F268  ECC1            K_SCROLL_0          ldd ,u++                    ; load a character from where U points
+F26A  ED81                                    std     ,x++                    ; store it to where X points
+F26C  11B3FE0D                                cmpu    GPU_VIDEO_MAX   ; has U exceeded the screen buffer
+F270  2DF6                                    blt     K_SCROLL_0              ; continue looping of not
+F272  8620                                    lda     #' '                    ; set SPACE as the current character
+F274  A781            K_SCROLL_1          sta ,x++                    ; and store it to where X points
+F276  BCFE0D                                  cmpx    GPU_VIDEO_MAX   ; continue looping until the bottom ...
+F279  2DF9                                    blt     K_SCROLL_1              ; ... line has been cleared
+F27B  7DFE42                                  tst     EDT_ENABLE              ; are we using the line editor?
+F27E  2703                                    beq     K_SCROLL_DONE       ; nope, just clean up and return
+F280  7A0014                                  dec     _ANCHOR_ROW             ; yup, decrease the anchor row by one
+F283  35D6            K_SCROLL_DONE   puls    d,x,u,pc            ; restore the registers and return
+                      
+                      
+                      
+                      
+                      ; *****************************************************************************
+                      ; * KRNL_LINEEDIT                                                             *
+                      ; *     Engage the text line editor,                                          *
+                      ; *                                                                           *
+                      ; * ENTRY REQUIREMENTS: NONE                                                  *
+                      ; *                                                                           *
+                      ; * EXIT CONDITIONS:    All registers preserved.                              *
+                      ; *****************************************************************************
+F285  BDF289          SYS_LINEEDIT    jsr     KRNL_LINEEDIT   ; call the text line edit kernel handler
+F288  3B                              rti                     ; return from the interrupt
+                                      ; ...
+F289  3457            KRNL_LINEEDIT   pshs    D,X,U,CC            ; save the used registers onto the stack            
+F28B  FC0010                                  ldd     _CURSOR_COL         ; load the current cursor position
+F28E  FD0013                                  std         _ANCHOR_COL     ;   use it to update the anchor position
+F291  8601                                    lda         #1                  ; load the enable condition
+F293  B7FE42                                  sta         EDT_ENABLE      ; to enable the line editor
+F296                  KRNL_LEDIT_0    ; display the line up to the cursor             
+F296  FC0013                                  ldd     _ANCHOR_COL         ; restore the line editor anchor
+F299  FD0010                                  std         _CURSOR_COL         ; into the console cursor position
+F29C  CE0100                                  ldu         #EDT_BUFFER     ; point to the start of the edit buffer
+F29F  F6FE41                                  ldb         EDT_BFR_CSR     ; the buffer csr position
+F2A2  F70015                                  stb         _LOCAL_0        ; store the edit csr position locally
+F2A5  7D0015          KRNL_LEDIT_1    tst         _LOCAL_0        ; test the edit csr position
+F2A8  270C                                    beq         KRNL_LEDIT_2        ; if we're there, go display the cursor
+F2AA  7A0015                                  dec         _LOCAL_0        ; decrement the edit csr position
+F2AD  A6C0                                    lda         ,u+                 ; load the next character from the buffer
+F2AF  2705                                    beq         KRNL_LEDIT_2        ; display csr if at the null terminator
+F2B1  BDF1B9                                  jsr         KRNL_CHROUT     ; output the character to the console
+F2B4  20EF                                    bra         KRNL_LEDIT_1        ; loop until we're at the cursor
+F2B6                  KRNL_LEDIT_2    ; display the cursor at the end of the line
+F2B6  8620                                    lda         #' '                    ; load a blank SPACE character
+F2B8  F6FE03                                  ldb         SYS_CLOCK_DIV       ; load clock timer data
+                                              * lsrb                          ;       divide by 2
+                                              * lsrb                          ;       divide by 2
+                                              * lsrb                          ;       divide by 2
+                                              * lsrb                          ;       divide by 2
+F2BB  58                              lslb
+F2BC  C4F0                                    andb    #$F0                ; B now holds color cycled attribute
+F2BE  6DC4                                    tst         ,u                  ; test the next character in the buffer
+F2C0  2702                                    beq         KRNL_LEDIT_3        ; use the SPACE if we're at a null
+F2C2  A6C0                                    lda         ,u+                 ; load the next character from buffer
+F2C4                  KRNL_LEDIT_3    ; finish the line
+F2C4  BDF23E                                  jsr         KRNL_CSRPOS     ; load X with the current cursor position 
+F2C7  ED84                                    std         ,x                  ; store the character where X points to
+F2C9  7C0010                                  inc         _CURSOR_COL     ; ipdate the cursor column number
+                                              ; ldb   KRNL_ATTRIB         ; load the default color attribute
+F2CC  A6C0            KRNL_LEDIT_4    lda         ,u+                 ; fetch the next character from the buffer
+F2CE  2705                                    beq         KRNL_DONE       ; if it's null, we're done
+F2D0  BDF1B9                                  jsr         KRNL_CHROUT     ; output it to the console
+F2D3  20F7                                    bra         KRNL_LEDIT_4        ; continue looping until we find the null
+F2D5                  KRNL_DONE       ; space at the end      
+F2D5  8620                                    lda         #' '                    ; load the SPACE character
+F2D7  BDF23E                                  jsr         KRNL_CSRPOS     ; fetch the cursor position into X
+F2DA  8620                                    lda         #' '                    ; load the SPACE character
+F2DC  F60012                                  ldb         _ATTRIB                 ; load the current color attribute
+F2DF  ED84                                    std         ,x                  ; update the console
+                                              ; test for the user pressing ENTER / RETURN
+F2E1  B6FE30                                  lda         CHAR_POP        ; Pop the top key from the queue
+F2E4  27B0                                    beq         KRNL_LEDIT_0        ; loop to the top if no keys we're pressed
+F2E6  810D                                    cmpa    #$0d                ; check for the RETURN / ENTER key press
+F2E8  26AC                                    bne         KRNL_LEDIT_0        ; if not pressend, loop back to the top         
+F2EA  7FFE42                                  clr         EDT_ENABLE      ; disable the line editor           
+F2ED  BDF23E                                  jsr         KRNL_CSRPOS     ; load the cursor position into X
+F2F0  8620                                    lda         #' '                    ; load a SPACE character
+F2F2  ED1E                                    std         -2,x                    ; store the character, clean up artifacts
+F2F4  FC0013                                  ldd     _ANCHOR_COL         ; restore the line editor anchor
+F2F7  FD0010                                  std         _CURSOR_COL         ; into the console cursor position
+F2FA  8E0100                                  ldx         #EDT_BUFFER     ; point to the edit buffer
+F2FD  BDF224                                  jsr         KRNL_LINEOUT        ; send the edit buffer to the console
+F300  35D7                                    puls    D,X,U,CC,PC         ; cleanup saved registers and return
+                      
+                      
+                      ; *****************************************************************************
+                      ; * KRNL_GETKEY                                                                *
+                      ; *     Input a character from the console. Waits for the keypress.           *
+                      ; *                                                                           *
+                      ; * ENTRY REQUIREMENTS: NONE                                                  *
+                      ; *                                                                           *
+                      ; * EXIT CONDITIONS:    A = key code of the key that was pressed              *
+                      ; *                         All other registers preserved                     *
+                      ; *****************************************************************************
+F302  BDF306          SYS_GETKEY      jsr     KRNL_GETKEY     ; call the kernel get key handler
+F305  3B                              rti                     ; return from interrupt
+                                      ; ...
+F306  3405            KRNL_GETKEY         pshs        b,CC                ; save the used registers onto the stack
+F308  F6FE30          K_GETKEY_0          ldb     CHAR_POP        ; pop the next key from the queue
+F30B  26FB                                    bne         K_GETKEY_0      ; continue until the queue is empty         
+F30D  F6FE2E          K_GETKEY_1          ldb     CHAR_Q_LEN      ; how many keys are in the queue
+F310  27FB                                    beq         K_GETKEY_1      ; loop until a key is queued
+F312  B6FE30                                  lda         CHAR_POP        ; pop the key into A to be returned
+F315  3585                                    puls    b,CC,PC         ; cleanup saved registers and return
+                      
                       
                       
                       
@@ -1015,12 +1193,12 @@ F1C6  35D6            K_SCROLL_DONE   puls    d,x,u,pc            ; restore the 
                       * ; *****************************************************************************
 FFF0                                      org ROM_VECTS_DEVICE
 FFF0                  KRNL_HARD_VECT                  
-FFF0  F028                                fdb EXEC_start      ; (HARD_RSRVD) EXEC Interrupt Vector
-FFF2  F02B                                fdb SWI3_start      ; (HARD_SWI3 ) SWI3 Hardware Interrupt Vector
-FFF4  F0A6                                fdb SYS_Handler     ; (HARD_SWI2 ) SWI2 Hardware Interrupt Vector
-FFF6  F031                                fdb FIRQ_start      ; (HARD_FIRQ ) FIRQ Hardware Interrupt Vector
-FFF8  F034                                fdb IRQ_start       ; (HARD_IRQ  ) IRQ Hardware Interrupt Vector
-FFFA  F037                                fdb SWI_start       ; (HARD_SWI  ) SWI / SYS Hardware Interrupt Vector
-FFFC  F03A                                fdb NMI_start       ; (HARD_NMI  ) NMI Hardware Interrupt Vector
+FFF0  F097                                fdb EXEC_start      ; (HARD_RSRVD) EXEC Interrupt Vector
+FFF2  F09A                                fdb SWI3_start      ; (HARD_SWI3 ) SWI3 Hardware Interrupt Vector
+FFF4  F163                                fdb SYS_Handler     ; (HARD_SWI2 ) SWI2 Hardware Interrupt Vector
+FFF6  F0A0                                fdb FIRQ_start      ; (HARD_FIRQ ) FIRQ Hardware Interrupt Vector
+FFF8  F0A3                                fdb IRQ_start       ; (HARD_IRQ  ) IRQ Hardware Interrupt Vector
+FFFA  F0A6                                fdb SWI_start       ; (HARD_SWI  ) SWI / SYS Hardware Interrupt Vector
+FFFC  F0A9                                fdb NMI_start       ; (HARD_NMI  ) NMI Hardware Interrupt Vector
 FFFE  F000                                fdb KRNL_START      ; (HARD_RESET) RESET Hardware Interrupt Vector
 0000                  KRNL_HARD_VECT_END
