@@ -167,15 +167,12 @@ int  GPU::OnAttach(int nextAddr)
     //      Text Horizontal Columns (Read Only)
     /////
     mapped_register.push_back({ "GPU_TCOLS", nextAddr,  
-        [this](Word nextAddr) { (void)nextAddr; return _gpu_tcols >> 8; }, 
+        [this](Word nextAddr) { (void)nextAddr; return _gpu_tcols & 0xFF; }, 
         nullptr,  {
             "(Byte) Text Horizontal Columns (Read Only)",
             "  Note: This will reflect the number of",
             "       glyph columns for text modes.",""
             ""}}); nextAddr+=1;
-    mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { (void)nextAddr; return _gpu_tcols & 0xFF; }, 
-        nullptr, {""}}); nextAddr+=1;
  
 
     ////////////////////////////////////////////////
@@ -183,15 +180,12 @@ int  GPU::OnAttach(int nextAddr)
     //      Text Vertical Rows (Read Only)
     /////
     mapped_register.push_back({ "GPU_TROWS", nextAddr,  
-        [this](Word nextAddr) { (void)nextAddr; return _gpu_trows >> 8; }, 
+        [this](Word nextAddr) { (void)nextAddr; return _gpu_trows & 0xFF; }, 
         nullptr,  {
             "(Byte) Text Vertical Rows (Read Only)",
             "  Note: This will reflect the number of",
             "       glyph rows for text modes.",""
             ""}}); nextAddr+=1;
-    mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { (void)nextAddr; return _gpu_trows & 0xFF; }, 
-        nullptr, {""}}); nextAddr+=1;
  
 
     ////////////////////////////////////////////////
@@ -902,8 +896,10 @@ void GPU::_update_text_buffer() {
 		Word addr = MAP(VIDEO_START);
 		for (; addr < end; addr += 2)
 		{
-			Byte at = Memory::Read(addr+0, true);
-			Byte ch = Memory::Read(addr+1, true);
+			// Byte at = Memory::Read(addr+0, true);
+			// Byte ch = Memory::Read(addr+1, true);
+			Byte ch = Memory::Read(addr+0, true);
+			Byte at = Memory::Read(addr+1, true);
 			Byte bg = at >> 4;
 			Byte fg = at & 0x0f;
 			Word index = addr - MAP(VIDEO_START);
