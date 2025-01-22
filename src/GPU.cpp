@@ -472,20 +472,20 @@ void GPU::OnEvent(SDL_Event* evnt)
                 }
                 Memory::Write(MAP(GPU_OPTIONS), data);
             }
-            
-            if (evnt->key.key == SDLK_F)
-            {   // [F] Toggle Fullscreen
-                Byte data = Memory::Read( MAP(GPU_OPTIONS) );
-                if (data &  0b0000'1000) {
-                    data &= 0b1111'0111;
-                } else {
-                    data |= 0b0000'1000;
-                }
-                Memory::Write(MAP(GPU_OPTIONS), data);
-            } // END: if (evnt->key.key == SDLK_F)
 
             if (km & SDL_KMOD_CTRL)
-            {
+            {            
+                if (evnt->key.key == SDLK_F)
+                {   // [F] Toggle Fullscreen
+                    Byte data = Memory::Read( MAP(GPU_OPTIONS) );
+                    if (data &  0b0000'1000) {
+                        data &= 0b1111'0111;
+                    } else {
+                        data |= 0b0000'1000;
+                    }
+                    Memory::Write(MAP(GPU_OPTIONS), data);
+                } // END: if (evnt->key.key == SDLK_F)
+
                 // [E] Extended Display Enable Toggle
                 if (evnt->key.key == SDLK_E)
                 {
