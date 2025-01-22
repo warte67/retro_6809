@@ -393,14 +393,46 @@ int  FileIO::OnAttach(int nextAddr)
     //      A Series of Null-Terminated Filenames
     /////
     mapped_register.push_back({ "FIO_DIR_DATA", nextAddr, 
-        nullptr, 
-        nullptr,  
-        { "(Byte) A Series of Null-Terminated Filenames",
-                             "  NOTE: Current read-position is reset to the beginning",
-                             "    following a List Directory command. The read-position",
-                             "    is automatically advanced on read from this register.",
-                             "    Each filename is $0A-terminated. The list itself is",
-                             "    null-terminated.",""} }); 
+        [this](Word addr) 
+        { 
+            (void)addr; 
+            Byte data = 0;
+            if (dir_data_pos < (int)dir_data.size())
+            {
+                data = (Byte)dir_data.substr(dir_data_pos, 1).at(0);
+                if (dir_data_pos <= (int)dir_data.size())
+                    dir_data_pos++;
+            }
+            else
+            {
+                dir_data = "";
+                data = 0;
+            }
+            return data; 
+        },
+        [this](Word addr, Byte data) 
+        {
+            (void)addr;
+             if (path_char_pos == 0)
+            {
+                filePath = "";
+                path_char_pos = 0;
+
+                filePath += data;
+                path_char_pos++;
+            }
+            else
+            {
+                filePath = filePath.substr(0, path_char_pos);
+                filePath += data;
+                path_char_pos++;
+            }                       
+        },{ "(Byte) A Series of Null-Terminated Filenames",
+            "  NOTE: Current read-position is reset to the beginning",
+            "    following a List Directory command. The read-position",
+            "    is automatically advanced on read from this register.",
+            "    Each filename is $0A-terminated. The list itself is",
+            "    null-terminated.",""} }); 
     nextAddr++;
 
 
@@ -842,7 +874,7 @@ void FileIO::_cmd_get_file_length()
 
 void FileIO::_cmd_list_directory()
 {
-    //printf("%s::_cmd_list_directory()\n", Name().c_str());
+    // std::cout << _device_name << "::_cmd_list_directory()" << std::endl;
 
     std::string current_path = std::filesystem::current_path().generic_string();
     std::vector<std::string> _files;
@@ -938,9 +970,9 @@ void FileIO::_cmd_list_directory()
         dir_data_pos = 0; 
         return;
     }
-    // // clear the FIO_BUFFER
-    // for (int i = MAP(FIO_BUFFER); i <= MAP(FIO_BFR_END); i++)
-    //     Memory::Write(i, 0);
+    // clear the FIO_BUFFER
+    for (int i = MAP(FIO_BUFFER); i <= MAP(FIO_BFR_END); i++)
+        Memory::Write(i, 0);
 
     // build the result
     dir_data = seach_folder;
@@ -949,6 +981,9 @@ void FileIO::_cmd_list_directory()
     for (auto& f : _files)
         dir_data += (f+"\n");
     dir_data_pos = 0;      
+
+    // std::cout << _device_name << "::_cmd_list_directory()" << std::endl;
+    // std::cout << dir_data << std::endl;
 }
 
 
@@ -960,6 +995,8 @@ void FileIO::_cmd_list_directory()
 void FileIO::_cmd_change_directory()
 {
     // printf("Change Directory To: %s\n", filePath.c_str());
+    std::cout << _device_name << "::_cmd_change_directory()" << std::endl;
+
     if (filePath.size() == 0)   return;
 
     std::string chdir = filePath;    

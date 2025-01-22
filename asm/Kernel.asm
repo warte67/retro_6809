@@ -153,7 +153,7 @@ SYSTEM_DATA_END
 ; *****************************************************************************
 ; * DEFAULT VECTORS                                                           *
 ; *****************************************************************************
-EXEC_start		jmp	EXEC_start	; EXEC program
+EXEC_start		rts				; EXEC program
 SWI3_start		jmp	SWI3_start	; SWI3 Implementation
 SWI2_start		jmp	SWI2_start	; SYS (SWI2) Implementation
 FIRQ_start		jmp	FIRQ_start	; FIRQ Implementation
@@ -399,6 +399,7 @@ do_dir_2		rts						; return from subroutine
 do_cd					; CD is an alias for CHDIR
 do_chdir		bsr		do_arg1_helper	; fetch path data from argument 1
 				lda		#FC_CHANGEDIR	; load the FIO command: CHANGEDIR
+				sta		FIO_COMMAND		; send it; change dir
 				jmp		do_pwd			; output the current working directory
 
 ; *****************************************************************************
