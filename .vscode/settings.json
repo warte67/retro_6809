@@ -108,6 +108,7 @@
         "queue": "cpp",
         "filesystem": "cpp",
         "strstream": "cpp"
-    }, // IntelliSense setting, no fallback
+    },
+    "terminal.integrated.tabStopWidth": 4, // IntelliSense setting, no fallback
   }
   
