@@ -1073,7 +1073,7 @@ void GPU::_build_palette()
 			{ 0xF140 },		// 4: dk green
 			{ 0xF840 },		// 5: brown
 			{ 0xF406 },		// 6: purple          
-			{ 0x0046 },		// 7: deep sea          // 0xF046  	
+			{ 0xF046 },		// 7: deep sea          // 0xF046  	
 			{ 0xF888 },		// 8: lt gray
 			{ 0xF22F },		// 9: blue
 			{ 0xFd00 },		// A: red
