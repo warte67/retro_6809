@@ -26,6 +26,25 @@ KRNL_PROMPT2	fcn	"GNU General Public Liscense (GPL V3)\n"
 KRNL_PROMPT3	fcn	"Copyright (C) 2024-2025 By Jay Faries\n\n"  
 READY_PROMPT	fcn	"Ready\n"
 
+
+; *****************************************************************************
+; * MAIN KERNEL COMMAND SUBROUTINES (Prototypes)                              *
+; *****************************************************************************
+;	do_cls		; #0		; Clear Screen (0-255) or ($00-$FF)
+;	do_color	; #1		; Change Color (0-255) or ($00-$FF)
+;	do_load		; #2		; Load an Intel Hex Formatted File
+;	do_exec		; #3		; Execute a Loaded Program
+;	do_reset	; #4		; Reset the System
+;	do_dir		; #5		; Display Files and Folders in a Folder
+;	do_cd		; #6		; Change the Current Directory
+; 	do_pwd		; #7		; Print Working Directory
+;	do_chdir	; #8		; Alias of CD
+;	do_exit		; #9		; Exit the Emulator
+;	do_quit		; #10		; Also Exits the Emulator
+;	do_mode		; #11		; Display Mode (0-31) or ($00-$1F)
+;	do_debug	; #12		; Enter or Exit the Debugger
+;	do_help		; #13		; Display usage help
+
 KRNL_CMD_TABLE	
 				fcn		"cls"		; #0
 				fcn		"color"		; #1
@@ -35,11 +54,12 @@ KRNL_CMD_TABLE
 				fcn		"dir"		; #5
 				fcn		"cd"		; #6
 				fcn		"chdir"		; #7
-				fcn		"exit"		; #8
-				fcn		"quit"		; #9
-				fcn		"mode"		; #10
-				fcn		"debug"		; #11
-				fcn		"help"		; #12
+				fcn		"pwd"		; #8
+				fcn		"exit"		; #9
+				fcn		"quit"		; #10
+				fcn		"mode"		; #11
+				fcn		"debug"		; #12
+				fcn		"help"		; #13
 				fcb		$FF		; $FF = end of list
 				; ...
 
@@ -52,20 +72,37 @@ KRNL_CMD_VECTS
 				fdb		do_dir		; #5
 				fdb		do_cd		; #6
 				fdb		do_chdir	; #7
-				fdb		do_exit		; #8
-				fdb		do_quit		; #9
-				fdb		do_mode		; #10
-				fdb		do_debug	; #11
-				fdb		do_help		; #12
+				fdb		do_pwd		; #8
+				fdb		do_exit		; #9
+				fdb		do_quit		; #10
+				fdb		do_mode		; #11
+				fdb		do_debug	; #12
+				fdb		do_help		; #13
 		; ...
 KRNL_ERR_NFND 	fcn		"ERROR: Command Not Found\n"
 krnl_help_str	fcc		" valid commands are:\n"
 				fcc		"  cls,   color, load,\n"
-				fcc		"  exec,  reset, dir, cd,\n"
-				fcc		"  chdir, exit,  quit,\n"
-				fcc		"  mode,  debug, exit,\n"
-				fcc		"  quit,  mode,  debug,\n"
-				fcn		"  and help\n"
+				fcc		"  exec,  reset, dir,\n"
+				fcc		"  cd,    chdir, pwd,\n"
+				fcc		"  exit,  quit,  mode\n"
+				fcn		"  debug, and help\n"
+
+* krnl_help_str	fcc		"cls:   Clear Screen (0-255) or ($00-$FF)\n"
+* 				fcc		"color: Change Color (0-255) or ($00-$FF)\n"
+* 				fcc		"load:  Load an Intel Hex Formatted File\n"
+* 				fcc		"exec:  Execute a Loaded Program\n"
+* 				fcc		"reset: Reset the System\n"
+* 				fcc		"dir:   Display Files and Folders in a Folder\n"
+* 				fcc		"cd:    Change the Current Directory\n"
+* 				fcc		"chdir: Alias of CD\n"
+* 				fcc		"pwd:   Print Working Directory\n"
+* 				fcc		"exit:  Exit the Emulator\n"
+* 				fcc		"quit:  Also Exits the Emulator\n"
+* 				fcc		"mode:  Display Mode (0-31) or ($00-$1F)\n"
+* 				fcc		"debug: Enter or Exit the Debugger\n"
+* 				fcn		"help"  Display usage help\n"
+
+
 
 
 
@@ -242,8 +279,7 @@ k_main_clr	    clr	    ,x+		            ; clear an entry and advance to next
 
 k_main_0	    jsr	    KRNL_LINEEDIT	    ; run the command line editor
  		        jsr	    KRNL_CMD_PROC	    ;    decode the command; A = Table Index
- 		        tst	    FIO_BUFFER	        ; test the buffer for a null
- 		        *tst	    EDT_BUFFER	        ; test the buffer for a null
+ 		        tst	    EDT_BUFFER	        ; test the buffer for a null
  		        beq	    k_main_cont	        ; skip, nothing was entered
  		        cmpa	#$FF		        ; ERROR: command not found 
  		        beq	    k_main_error	    ;    display the error
@@ -267,25 +303,9 @@ KRNL_INF	    jmp 	KRNL_INF
 
 
 
-; *****************************************************************************
-; * MAIN KERNEL COMMAND SUBROUTINES (Prototypes)                              *
-; *****************************************************************************
-;	do_cls		; #0		; Clear Screen (0-255) or ($00-$FF)
-;	do_color	; #1		; Change Color (0-255) or ($00-$FF)
-;	do_load		; #2		; Load an Intel Hex Formatted File
-;	do_exec		; #3		; Execute a Loaded Program
-;	do_reset	; #4		; Reset the System
-;	do_dir		; #5		; Display Files and Folders in a Folder
-;	do_cd		; #6		; Change the Current Directory
-;	do_chdir	; #7		; Alias of CD
-;	do_exit		; #8		; Exit the Emulator
-;	do_quit		; #9		; Also Exits the Emulator
-;	do_mode		; #10		; Display Mode (0-31) or ($00-$1F)
-;	do_debug	; #11		; Enter or Exit the Debugger
-
 
 ; *****************************************************************************
-; * Command: CLS "Clear Screen"			      ARG1 = Color Attribute  *
+; * Command: CLS "Clear Screen"			              ARG1 = Color Attribute  *
 ; *****************************************************************************
 do_cls			tst		,x				; test for an argument
 				beq		do_cls_0		; no argument, just go clear the screen
@@ -379,15 +399,19 @@ do_dir_2		rts						; return from subroutine
 do_cd					; CD is an alias for CHDIR
 do_chdir		bsr		do_arg1_helper	; fetch path data from argument 1
 				lda		#FC_CHANGEDIR	; load the FIO command: CHANGEDIR
-				sta		FIO_COMMAND		; send the command to the FIO Device
-				lda		#FC_GETPATH		; load the FIO command: GETPATH	
+				jmp		do_pwd			; output the current working directory
+
+; *****************************************************************************
+; * Command: PWD "Print Working Directory"  				     ARG1 = none  *
+; *****************************************************************************
+do_pwd			lda		#FC_GETPATH		; load the FIO command: GETPATH	
 				sta		FIO_COMMAND		; send it; fetch the current path
 				clr		FIO_PATH_POS	; reset the path cursor position
-do_cd_0			lda		FIO_PATH_DATA	; pull a character from the path data port
-				beq		do_cd_1			; if it's a null, we're done
+do_pwd_0		lda		FIO_PATH_DATA	; pull a character from the path data port
+				beq		do_pwd_1		; if it's a null, we're done
 				jsr		KRNL_CHROUT		; output the character to the console
-				bra		do_cd_0			; continue looping until done
-do_cd_1			rts						; return from subroutine
+				bra		do_pwd_0		; continue looping until done
+do_pwd_1		rts						; return from subroutine
 
 ; *****************************************************************************
 ; * Command: EXIT / QUIT "Terminate the Emulator Program"        ARG1 = none  *
@@ -403,7 +427,7 @@ do_quit			lda		#FC_SHUTDOWN	; load the FIO command: SHUTDOWN
 do_mode			tst		,x				; test for an argument
 				beq		do_mode_0		; just return if argument == zero
 				jsr 	KRNL_ARG_TO_A	; fetch the numeric argument into A 
-				anda	#%0001'1111		; mask out the mode bits
+				; anda	#%0001'1111		; mask out the mode bits
 				sta		GPU_MODE		; set the GMODE 
 				lda		#' '			; load a SPACE character
 				jsr		KRNL_CLS		; clear the screen
@@ -562,8 +586,8 @@ SYS_CLS         jsr     KRNL_CLS        ; call the kernel Clear Screen handler
                 ; ...
 KRNL_CLS	    jmp		[VEC_CLS]		; proceed through the software vector
 STUB_CLS		pshs	d,x		        ; save the used registers onto the stack
-		        ldb	    _ATTRIB		    ; fetch the current color attribute
-		        lda	    #' '		    ; the space character
+		        lda	    _ATTRIB		    ; fetch the current color attribute
+		        ldb	    #' '		    ; the space character
 		        ldx	    #VIDEO_START	; index the start of the video buffer
 1		        std	    ,x++		    ; store a character to the buffer
 		        cmpx	GPU_VIDEO_MAX	; are we at the end yet?
@@ -589,14 +613,15 @@ SYS_CHROUT      lda     1,S             ; fetch A from the stack
                 ; ...
 KRNL_CHROUT		jmp		[VEC_CHROUT]    ; proceed through the software vector
 STUB_CHROUT		pshs	d,x,cc		    ; save the used registers onto the stack
-		        ldb	    _ATTRIB		    ; load the current color attribute
-K_CHROUT_1	    tsta			        ; is A a null?
+				tfr		a,b
+		        lda	    _ATTRIB		    ; load the current color attribute
+K_CHROUT_1	    tstb			        ; is A a null?
 		        beq	    K_CHROUT_DONE	;    A is null, just return and do nothing		
-		        cmpa	#$0A		    ; is it a newline character?
+		        cmpb	#$0A		    ; is it a newline character?
 		        bne	    K_CHROUT_2	    ; nope, don't do a newline
 		        jsr	    KRNL_NEWLINE	; advance the cursor 
 		        bra	    K_CHROUT_DONE	; clean up and return
-K_CHROUT_2	    cmpa	#$09		    ; is it a tab character?
+K_CHROUT_2	    cmpb	#$09		    ; is it a tab character?
 		        bne	    K_CHROUT_0	    ; nope, don't do a tab
 		        jsr	    KRNL_TAB	    ; tab the character position
 		        bra	    K_CHROUT_DONE	; clean up and return
@@ -735,8 +760,9 @@ K_SCROLL_0	    ldd		,u++		    ; load a character from where U points
 		        std		,x++		    ; store it to where X points
 		        cmpu	GPU_VIDEO_MAX	; has U exceeded the screen buffer
 		        blt		K_SCROLL_0	    ; continue looping of not
-		        lda		#' '		    ; set SPACE as the current character
-K_SCROLL_1	    sta		,x++		    ; and store it to where X points
+				lda		_ATTRIB
+		        ldb		#' '		    ; set SPACE as the current character
+K_SCROLL_1	    std		,x++		    ; and store it to where X points
 		        cmpx	GPU_VIDEO_MAX	; continue looping until the bottom ...
 		        blt		K_SCROLL_1	    ; ... line has been cleared
 		        tst		EDT_ENABLE	    ; are we using the line editor?
@@ -777,17 +803,14 @@ KRNL_LEDIT_1	tst	    _LOCAL_0	    ; test the edit csr position
 KRNL_LEDIT_2	; display the cursor at the end of the line
 		        lda	    #' '		    ; load a blank SPACE character
 		        ldb	    SYS_CLOCK_DIV	; load clock timer data
-		        * lsrb			        ;	divide by 2
-		        * lsrb			        ;	divide by 2
-		        * lsrb			        ;	divide by 2
-		        * lsrb			        ;	divide by 2
-                lslb
+				lslb					; times two
 		        andb	#$F0		    ; B now holds color cycled attribute
 		        tst	    ,u		        ; test the next character in the buffer
 		        beq	    KRNL_LEDIT_3	; use the SPACE if we're at a null
 		        lda	    ,u+		        ; load the next character from buffer
 KRNL_LEDIT_3	; finish the line
 		        jsr	    KRNL_CSRPOS	    ; load X with the current cursor position 
+				exg		a,b
 		        std	    ,x		        ; store the character where X points to
 		        inc	    _CURSOR_COL	    ; ipdate the cursor column number
 		        ; ldb	KRNL_ATTRIB	    ; load the default color attribute
@@ -800,6 +823,7 @@ KRNL_DONE	; space at the end
 		        jsr	    KRNL_CSRPOS	    ; fetch the cursor position into X
 		        lda	    #' '		    ; load the SPACE character
 		        ldb	    _ATTRIB		    ; load the current color attribute
+				exg		a,b
 		        std	    ,x		        ; update the console
 		        ; test for the user pressing ENTER / RETURN
 		        lda	    CHAR_POP	    ; Pop the top key from the queue
@@ -808,7 +832,8 @@ KRNL_DONE	; space at the end
 		        bne	    KRNL_LEDIT_0	; if not pressend, loop back to the top		
 		        clr	    EDT_ENABLE	    ; disable the line editor		
 		        jsr	    KRNL_CSRPOS	    ; load the cursor position into X
-		        lda	    #' '		    ; load a SPACE character
+				lda		_ATTRIB
+		        ldb	    #' '		    ; load a SPACE character
 		        std	    -2,x		    ; store the character, clean up artifacts
 		        ldd 	_ANCHOR_COL	    ; restore the line editor anchor
 		        std	    _CURSOR_COL 	; into the console cursor position

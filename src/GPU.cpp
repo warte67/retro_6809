@@ -540,6 +540,12 @@ void GPU::OnEvent(SDL_Event* evnt)
                     Byte data = Memory::Read( MAP(GPU_MODE) );
                     data++;
                     Memory::Write(MAP(GPU_MODE), data);
+                    // home the cursor and clear the screen
+                    for (int t=MAP(VIDEO_START); t<_gpu_video_max; t+=2)     
+                    {
+                        Word atch = (Memory::Read(0x005C)<<8) | ' ';  // _ATTRIB
+                        Memory::Write_Word(t, atch);
+                    }               
                 }
                 if (evnt->key.key == SDLK_LEFT)
                 {
@@ -898,8 +904,8 @@ void GPU::_update_text_buffer() {
 		{
 			// Byte at = Memory::Read(addr+0, true);
 			// Byte ch = Memory::Read(addr+1, true);
-			Byte ch = Memory::Read(addr+0, true);
-			Byte at = Memory::Read(addr+1, true);
+			Byte at = Memory::Read(addr+0, true);
+			Byte ch = Memory::Read(addr+1, true);
 			Byte bg = at >> 4;
 			Byte fg = at & 0x0f;
 			Word index = addr - MAP(VIDEO_START);

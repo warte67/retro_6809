@@ -545,10 +545,16 @@ void Keyboard::_doEditBuffer(char xkey)
 	if ((km & SDL_KMOD_ALT) || (km & SDL_KMOD_CTRL))
 		return;
 
+    // if the edit buffer is null, then clear it
+    if (Memory::Read(MAP(EDT_BUFFER)) == 0) {
+        _str_edt_buffer.clear(); }
+
+    // get the current edit buffer cursor position
 	Byte c = xkey;
 	auto itr = _str_edt_buffer.begin() + edt_bfr_csr;
-	Byte Cols = Memory::Read_Word(MAP(GPU_TCOLS));
+	Byte Cols = Memory::Read(MAP(GPU_TCOLS));
 
+    // handle the key presses
 	if (c == XKeyToAscii(XKey::LEFT))
 	{
 		            // Bus::Read(CHAR_POP);
@@ -572,6 +578,8 @@ void Keyboard::_doEditBuffer(char xkey)
 		            // Bus::Read(CHAR_POP);
 		if (edt_bfr_csr + Cols < _str_edt_buffer.size())
 			edt_bfr_csr += Cols;
+        else
+            edt_bfr_csr = _str_edt_buffer.size();
 	}
 	else if (c == XKeyToAscii(XKey::BACKSPACE))
 	{
@@ -609,23 +617,24 @@ void Keyboard::_doEditBuffer(char xkey)
 		if (_str_edt_buffer.size() < editBuffer.size() - 2)     // include space for null-termination
 		{
 			        // Bus::Read(CHAR_POP);
-			if (_str_edt_buffer.size() < _line_editor_length)
+			if (_str_edt_buffer.size() < _line_editor_length && _str_edt_buffer.size() < EDIT_BUFFER_SIZE)
 			{
 				_str_edt_buffer.insert(itr, c);
 				edt_bfr_csr++;
 			}
 		}
 	}
-
+    // clear the edit buffer
 	editBuffer.at(0) = 0;
     Memory::Write(MAP(EDT_BUFFER),0, true);
-
+    // write the edit buffer to the memory
 	Word i = 0;
 	for (auto& a : _str_edt_buffer)
     {
         Memory::Write(MAP(EDT_BUFFER)+i,a, true);
 		editBuffer.at(i++) = a;
     }
+    // write the null-terminator
 	editBuffer.at(i) = 0;
     Memory::Write(MAP(EDT_BUFFER)+i,0, true);
 }
