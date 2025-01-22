@@ -540,18 +540,40 @@ void GPU::OnEvent(SDL_Event* evnt)
                     Byte data = Memory::Read( MAP(GPU_MODE) );
                     data++;
                     Memory::Write(MAP(GPU_MODE), data);
-                    // home the cursor and clear the screen
+                    // clear the screen
                     for (int t=MAP(VIDEO_START); t<_gpu_video_max; t+=2)     
                     {
                         Word atch = (Memory::Read(0x005C)<<8) | ' ';  // _ATTRIB
                         Memory::Write_Word(t, atch);
-                    }               
+                    }    
                 }
                 if (evnt->key.key == SDLK_LEFT)
                 {
                     Byte data = Memory::Read( MAP(GPU_MODE) );
                     data--;
                     Memory::Write(MAP(GPU_MODE), data);
+                    // clear the screen
+                    for (int t=MAP(VIDEO_START); t<_gpu_video_max; t+=2)     
+                    {
+                        Word atch = (Memory::Read(0x005C)<<8) | ' ';  // _ATTRIB
+                        Memory::Write_Word(t, atch);
+                    }    
+				}
+                if (evnt->key.key == SDLK_UP)
+                {
+                    // toggle VSYNC
+                    Byte bits = 0b0000'0100;
+                    Byte data = Memory::Read( MAP(GPU_OPTIONS) );
+                    data ^= bits;
+                    Memory::Write(MAP(GPU_OPTIONS), data);
+                }
+                if (evnt->key.key == SDLK_DOWN)
+                {
+                    // toggle between letterbox and overscan/stretch modes
+                    Byte bits = 0b0000'0010;
+                    Byte data = Memory::Read( MAP(GPU_OPTIONS) );
+                    data ^= bits;
+                    Memory::Write(MAP(GPU_OPTIONS), data);
                 }
             }
             break;       
@@ -600,23 +622,6 @@ void GPU::OnUpdate(float fElapsedTime)
         // Clear the foreground texture 
         _clear_texture(pForeground_Texture, 0x0, 0x0, 0x0, 0x0);
     }
-
-
-
-
-    // // TESTING ...
-    //         static float s_width = _ext_width;
-    //         static float s_height = _ext_height;
-    //         if (s_width != _ext_width || s_height != _ext_height) {
-    //             s_width = _ext_width;
-    //             s_height = _ext_height;
-    //             std::cout << "_ext_width: " << _ext_width << " _ext_height: " << _ext_height << std::endl;
-    //             SDL_SetRenderLogicalPresentation(pRenderer, (int)_ext_width, (int)_ext_height, SDL_LOGICAL_PRESENTATION_LETTERBOX);
-    //         }
-    // // ... TESTING
-
-
-
 
     // is extended graphics enabled?
     if (_gpu_options & 0b0001'0000)
@@ -1196,8 +1201,6 @@ void GPU::_display_mode_helper(Byte mode, int &width, int &height)
 
 Byte GPU::_verify_gpu_mode_change(Byte data, Word map_register)
 {
-    // Byte saved_options = _gpu_options;
-    // Byte saved_mode = _gpu_mode;
 
     int buffer_size = 99999;
 
@@ -1218,8 +1221,10 @@ Byte GPU::_verify_gpu_mode_change(Byte data, Word map_register)
         {
             if (data & 0b0000'0100) {
                 SDL_SetRenderVSync(pRenderer, 1);
+				//std::cout << clr::ORANGE << "GPU::_verify_gpu_mode_change()  --  VSYNC ON" << clr::RETURN;
             } else {
                 SDL_SetRenderVSync(pRenderer, 0);
+				//std::cout << clr::ORANGE << "GPU::_verify_gpu_mode_change()  --  VSYNC OFF" << clr::RETURN;
             } 
         }
         _gpu_options = data;   
@@ -1285,8 +1290,10 @@ Byte GPU::_verify_gpu_mode_change(Byte data, Word map_register)
     // adjust the renderer logical presentation to either stretch or letterbox
     if (_gpu_options & 0b0000'0010) {
         SDL_SetRenderLogicalPresentation(pRenderer, (int)_ext_width, (int)_ext_height, SDL_LOGICAL_PRESENTATION_STRETCH);
+		// std::cout << clr::ORANGE << "GPU::_verify_gpu_mode_change()  --  STRETCH" << clr::RETURN;
     } else {
         SDL_SetRenderLogicalPresentation(pRenderer, (int)_ext_width, (int)_ext_height, SDL_LOGICAL_PRESENTATION_LETTERBOX);
+		// std::cout << clr::ORANGE << "GPU::_verify_gpu_mode_change()  --  LETTERBOX" << clr::RETURN;
     }
 
     return data;
