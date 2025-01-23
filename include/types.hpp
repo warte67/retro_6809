@@ -33,7 +33,7 @@
     //      false: to use enums from Memory_Map.hpp
     #define GENERATE_MEMORY_MAP     true
     constexpr bool MEMORY_MAP_DISPLAY_OUTPUT_FILE_HPP = false;
-    constexpr bool MEMORY_MAP_DISPLAY_OUTPUT_FILE_ASM = true;
+    constexpr bool MEMORY_MAP_DISPLAY_OUTPUT_FILE_ASM = false;
 
     #define MEMORY_MAP_OUTPUT_FILE_HPP  "./include/Memory_Map.hpp"
     #define MEMORY_MAP_OUTPUT_FILE_ASM  "./asm/Memory_Map.asm"
