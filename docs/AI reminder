@@ -96,3 +96,14 @@ Other Key Reminders:
     The Emulator’s Focus: The key part of the emulator is to faithfully replicate the behavior of the Math Co-Processor, ensuring that all math operations are correct and that data conversions between float and integer representations happen seamlessly.
     Addressing and Flags: Be aware of the specific memory addresses assigned to each register, and ensure that the flags for the 6809 CPU and the emulator are properly configured to handle 16-bit and 8-bit data.
 
+
+
+    Discussed designing hardware for a retro computing project.
+    Talked about memory mapping, device allocation, and the challenges of fitting devices into a 64k memory space.
+    The memory map has already allocated space for the GPU, math co-processor, and a couple of others. The focus was on understanding the structure and potential future device additions like a Memory Management Unit (MMU), GPIO interface, and GPU extensions.
+    Key memory regions:
+        Banked memory: $B000-$CFFF (Bank 1) and $D000-$EFFF (Bank 2).
+        Hardware registers: Start at $FE00, and there are 324 bytes remaining for future devices.
+        Discussed memory node windowing, how the MMU works with a 32-byte window for direct memory access, and the need for more devices, with a focus on small sizes.
+    Ideas discussed about design optimization and how some devices, like the GPU and math co-processor, are nearing the limits of allocated space.
+    Expressed appreciation for feedback and assistance with refining the design.
