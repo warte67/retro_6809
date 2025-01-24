@@ -220,9 +220,9 @@ enum MEMMAP
 
     MMU_DEVICE            = 0xFE21,   // START: Memory Management Unit Hardware Registers
     MMU_1_SELECT          = 0xFE21,   // Page Select for 8K Memory Bank 1 (0-255)
-    MMU_2_SELECT          = 0xFE22,   // Page Select for 8K Memory Bank 2 (0-255)
-    MMU_1_TYPE            = 0xFE23,   // Memory Bank 1 Storage Type
-    MMU_2_TYPE            = 0xFE24,   // Memory Bank 2 Storage Type
+    MMU_1_FLAGS           = 0xFE22,   // Memory Bank 1 Condition Flags
+    MMU_2_SELECT          = 0xFE23,   // Page Select for 8K Memory Bank 2 (0-255)
+    MMU_2_FLAGS           = 0xFE24,   // Memory Bank 2 Condition Flags
     MMU_TYPE_RAM          = 0x0000,   //     Random Access Memory (RAM)
     MMU_TYPE_ROM          = 0x0001,   //     Read Only Memory (ROM)
     MMU_FAST_INDEX        = 0xFE25,   // (Word) Index into Array (32-byte Fast Memory)

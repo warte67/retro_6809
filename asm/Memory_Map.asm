@@ -218,9 +218,9 @@ GPU_TOP               equ    $FE21    ; Top of GPU Register Space
 
 MMU_DEVICE            equ    $FE21    ; START: Memory Management Unit Hardware Registers
 MMU_1_SELECT          equ    $FE21    ; Page Select for 8K Memory Bank 1 (0-255)
-MMU_2_SELECT          equ    $FE22    ; Page Select for 8K Memory Bank 2 (0-255)
-MMU_1_TYPE            equ    $FE23    ; Memory Bank 1 Storage Type
-MMU_2_TYPE            equ    $FE24    ; Memory Bank 2 Storage Type
+MMU_1_FLAGS           equ    $FE22    ; Memory Bank 1 Condition Flags
+MMU_2_SELECT          equ    $FE23    ; Page Select for 8K Memory Bank 2 (0-255)
+MMU_2_FLAGS           equ    $FE24    ; Memory Bank 2 Condition Flags
 MMU_TYPE_RAM          equ    $0000    ;     Random Access Memory (RAM)
 MMU_TYPE_ROM          equ    $0001    ;     Read Only Memory (ROM)
 MMU_FAST_INDEX        equ    $FE25    ; (Word) Index into Array (32-byte Fast Memory)

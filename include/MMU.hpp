@@ -17,7 +17,8 @@
  * The MMU handles paged memory with 8KB pages, enabling flexible memory 
  * allocation and protection. It ensures that the CPU and other devices 
  * access valid memory regions with appropriate read/write permissions, 
- * optimizing system performance.
+ * optimizing system performance. After "formatting" with METADATA there 
+ * will be 1'677'696 bytes of free space for dynamic allocation.
  * 
  * Released under the GPL v3.0 License.
  * Original Author: Jay Faries (warte67)
@@ -26,8 +27,13 @@
 
 #pragma once
 
-// #include <vector>
+#include <bitset>
 #include "IDevice.hpp"
+
+// constexpr size_t NUM_METADATA_NODES = 52'428;
+// constexpr size_t NODE_SIZE_BYTES = 32;
+// constexpr size_t METADATA_SIZE_BYTES = 8;
+// constexpr size_t PAGE_FLAG_BYTES = 32;
 
 class MMU : public IDevice {
 
@@ -50,41 +56,50 @@ public:
     virtual void OnEvent(SDL_Event*) override {}
     virtual void OnUpdate(float) override {}
     virtual void OnRender() override {}
- 
-public: 
-
-    // CUSTOM TYPES USED BY THIS DEVICE:
-    // ...
 
 private: 
-
 
     struct BANK_PAGE {        // 8K Memory Bank Page Node
         std::vector<Word> mem_node = std::vector<Word>(256);
     };
     std::vector<BANK_PAGE> _bank_pages; //vector of 8KB memory bank pages
 
-    struct MEMORY_NODE {
-        Byte block_count;   // how many 32-byte blocks are included in this allocation
+    struct METADATA_NODE {
+        Byte data_index;    // index within the _data_pool vector to 32-Byte data
         Byte status;        // status flags
-                            // bit  0	Allocated:  0 = Free,   1 = Allocated
-                            // bit  1   8k Paged?:  0 = No,     1 = Yes
-                            // bit  2	Type:       0 = RAM,    1 = ROM
-                            // bit  3   Fragmented? 0 = No,     1 = Yes
+                            // bit  0   Is Allocated:     0 = Free,   1 = Allocated
+                            // bit  1   8k Paged Memory:  0 = No,     1 = Yes
+                            // bit  2	Storage Type:     0 = RAM,    1 = ROM
+                            // bit  3   Is Fragmented?    0 = No,     1 = Yes
                             // bit  4   ...
                             // bit  5   ...
                             // bit  6   ...
-                            // bit  7   Error:      0 = No,     1 = Yes
+                            // bit  7   Error:            0 = No,     1 = Yes
         Word start_block;   // index of the first block in this allocation
-        Word parent_node;   // index of the parent node in the memory pool
-        Word next_node;     // index of the child node in the memory pool
-        Byte data[32]={0};  // 32-byte data block, preinitialized to zero
-    }; 
+        Word prev_node;     // index of the previous node in this allocation
+        Word next_node;     // index of the child node in this allocation        
+    };
+    // Allocate within the 2MB memory pool (Each METADATA_NODE represents 8-bytes)
+    // the metadata pool will be 52'428 * 8 = 419'424 bytes.
+    std::vector<METADATA_NODE> _metadata_pool = std::vector<METADATA_NODE>(52'428);
 
-    // allocate a 2MB memory pool (Each node represents 32-bytes)
-    std::vector<MEMORY_NODE> _memory_pool=std::vector<MEMORY_NODE>(65536);  
+    struct DATA_NODE {
+        std::array<Byte,32> data = {0};
+    };
+    // Allocate within the 2MB memory pool (Each DATA_NODE represents 32-bytes)
+    // the data pool will be 52'428 * 32 = 1'677'696 bytes
+    std::vector<DATA_NODE> _data_pool = std::vector<DATA_NODE>(52'428);
 
-    Word _dynamic_memory_top = 0xFFFF;      // top of dynamic memory
+    //          DATA pool = 1'677'696 bytes
+    //      METADATA pool =   419'424 bytes
+    //             equals = 2'097'120 bytes
+    //                2MB = 2'097'152 bytes
+    // the remaining 32 bytes left within the 2MB pool are reserved for flags
+    struct PageFlags {
+        std::bitset<256> flags; // 256 bits (32 bytes) to represent flags for each 32-byte block.
+    };
+
+    Word _dynamic_memory_top = 0xCCCC;      // top of dynamic memory $CCCC = 52'428
     Word _dynamic_memory_bottom = 0x0000;   // bottom of dynamemic memory, 
                                             //     preinitialized to zero for now
 };

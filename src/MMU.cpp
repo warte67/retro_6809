@@ -17,7 +17,8 @@
  * The MMU handles paged memory with 8KB pages, enabling flexible memory 
  * allocation and protection. It ensures that the CPU and other devices 
  * access valid memory regions with appropriate read/write permissions, 
- * optimizing system performance.
+ * optimizing system performance. After "formatting" with METADATA there 
+ * will be 1'677'696 bytes of free space for dynamic allocation.
  *
  * Released under the GPL v3.0 License.
  * Original Author: Jay Faries (warte67)
@@ -77,6 +78,17 @@ int  MMU::OnAttach(int nextAddr)
 
 
     ////////////////////////////////////////////////
+    // (Byte) MMU_1_FLAGS
+    //      Memory Bank 1 Condition Flags
+    /////
+    mapped_register.push_back({ "MMU_1_FLAGS", nextAddr, 
+        nullptr, 
+        nullptr,  
+        { "Memory Bank 1 Condition Flags"} });
+    nextAddr++;
+
+
+    ////////////////////////////////////////////////
     // (Byte) MMU_2_SELECT
     //      Page Select for 8K Memory Bank 2 (0-255)
     /////
@@ -87,26 +99,15 @@ int  MMU::OnAttach(int nextAddr)
     nextAddr++;
 
 
-    ////////////////////////////////////////////////
-    // (Byte) MMU_1_TYPE
-    //      Memory Bank 1 Storage Type
+     ////////////////////////////////////////////////
+    // (Byte) MMU_2_FLAGS
+    //      Memory Bank 2 Condition Flags
     /////
-    mapped_register.push_back({ "MMU_1_TYPE", nextAddr, 
+    mapped_register.push_back({ "MMU_2_FLAGS", nextAddr, 
         nullptr, 
         nullptr,  
-        { "Memory Bank 1 Storage Type"} });
+        { "Memory Bank 2 Condition Flags"} });
     nextAddr++;
-
-
-    ////////////////////////////////////////////////
-    // (Byte) MMU_2_TYPE
-    //      Memory Bank 2 Storage Type
-    /////
-    mapped_register.push_back({ "MMU_2_TYPE", nextAddr, 
-        nullptr, 
-        nullptr,  
-        { "Memory Bank 2 Storage Type"} });
-    nextAddr++;    
 
 
     ////////////////////////////////////////////////
@@ -122,6 +123,7 @@ int  MMU::OnAttach(int nextAddr)
     mapped_register.push_back({ "MMU_TYPE_ROM", _MMU_type, 
         nullptr, nullptr, { "    Read Only Memory (ROM)"} });
     _MMU_type++; // nextAddr++;    
+
 
     ////////////////////////////////////////////////
     // (Word) MMU_FAST_INDEX
