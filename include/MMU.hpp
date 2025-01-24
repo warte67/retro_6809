@@ -37,7 +37,7 @@ public: // PUBLIC CONSTRUCTOR / DESTRUCTOR
 
 public: 
 
-    // VIRTUAL METHODS
+    // VIRTUAL METHODS:
 
     virtual int  OnAttach(int nextAddr) override;   // attach to the memory map
     virtual void OnInit() override;                 // initialize
@@ -58,6 +58,12 @@ public:
 
 private: 
 
+
+    struct BANK_PAGE {        // 8K Memory Bank Page Node
+        std::vector<Word> mem_node = std::vector<Word>(256);
+    };
+    std::vector<BANK_PAGE> _bank_pages; //vector of 8KB memory bank pages
+
     struct MEMORY_NODE {
         Byte block_count;   // how many 32-byte blocks are included in this allocation
         Byte status;        // status flags
@@ -73,10 +79,14 @@ private:
         Word parent_node;   // index of the parent node in the memory pool
         Word next_node;     // index of the child node in the memory pool
         Byte data[32]={0};  // 32-byte data block, preinitialized to zero
-    };  
+    }; 
 
     // allocate a 2MB memory pool (Each node represents 32-bytes)
     std::vector<MEMORY_NODE> _memory_pool=std::vector<MEMORY_NODE>(65536);  
+
+    Word _dynamic_memory_top = 0xFFFF;      // top of dynamic memory
+    Word _dynamic_memory_bottom = 0x0000;   // bottom of dynamemic memory, 
+                                            //     preinitialized to zero for now
 };
 
 /**************************************
