@@ -533,7 +533,8 @@ void Debug::OnUpdate(float fElapsedTime)
             OutText(40, row++, t, 0x80);
 
             std::string opt = "GPU_OPTIONS: ";
-            if (Memory::Read(MAP(GPU_OPTIONS)) & 0x02)
+            // if (Memory::Read(MAP(GPU_OPTIONS)) & 0x02)
+            if (Memory::Read(MAP(GPU_MODE_MSB)) & 0x01)
                 opt += "Letterbox";
             else
                 opt += "Stretch / Overscan";

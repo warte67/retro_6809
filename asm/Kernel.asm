@@ -216,19 +216,19 @@ KRNL_WARM	    ; warm reboot
 		        lda	    #$4B	            ; $4B = green on dk.green
 		        sta	    _ATTRIB             ; set the default text color attribute
                 ; ...		
-		        ; set default video
-		        lda	    #%11110001          ; (bit 7)   Extended Bitmap, 
-                                            ; (bit 5-6) 256-color, 
-                                            ; (bit 4)   Extended Display Enabled, 
-                                            ; (bit 3)   Emulation in Windowed Mode, 
-                                            ; (bit 2)   Vsync Disabled, 
-                                            ; (bit 1)   Presentation (Letterbox)                                            
-                                            ; (bit 0)   Standard Display Enabled
-		        ldb	    #%01100000          ; (bit 7)   Standard Text Display
-                                            ; (bit 5-6) Color Mode (11=256-Color) 
-                                            ; (bit 0-4) Video Mode 0 (40x25 / 320x200)
-		        std	    GPU_OPTIONS         ; write to the GPU_OPTIONS and GPU_MODE
-                                            ; ... registers to set the video mode                
+		        * ; set default video
+		        * lda	    #%11110001          ; (bit 7)   Extended Bitmap, 
+                *                             ; (bit 5-6) 256-color, 
+                *                             ; (bit 4)   Extended Display Enabled, 
+                *                             ; (bit 3)   Emulation in Windowed Mode, 
+                *                             ; (bit 2)   Vsync Disabled, 
+                *                             ; (bit 1)   Presentation (Letterbox)                                            
+                *                             ; (bit 0)   Standard Display Enabled
+		        * ldb	    #%01100000          ; (bit 7)   Standard Text Display
+                *                             ; (bit 5-6) Color Mode (11=256-Color) 
+                *                             ; (bit 0-4) Video Mode 0 (40x25 / 320x200)
+		        * std	    GPU_OPTIONS         ; write to the GPU_OPTIONS and GPU_MODE
+                *                             ; ... registers to set the video mode                
                 ; ...		
 		        ; set up the initial display
 		        sys	    CALL_CLS           ; Clear the Text Screen
@@ -428,8 +428,12 @@ do_quit			lda		#FC_SHUTDOWN	; load the FIO command: SHUTDOWN
 do_mode			tst		,x				; test for an argument
 				beq		do_mode_0		; just return if argument == zero
 				jsr 	KRNL_ARG_TO_A	; fetch the numeric argument into A 
-				; anda	#%0001'1111		; mask out the mode bits
-				sta		GPU_MODE		; set the GMODE 
+				anda	#%00000111		; mask out the mode bits
+                sta     _LOCAL_3        ; store the mode bits
+                lda     GPU_MODE_LSB    ; fetch the current mode lsb
+                anda    #%11111000      ; mask out the mode bits
+                ora     _LOCAL_3        ; or them back in
+				sta		GPU_MODE_LSB	; set the GMODE 
 				lda		#' '			; load a SPACE character
 				jsr		KRNL_CLS		; clear the screen
 do_mode_0		rts						; return from subroutine

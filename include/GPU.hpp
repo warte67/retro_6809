@@ -92,44 +92,64 @@ public: // PUBLIC ACCESSORS
 private: // PRIVATE MEMBERS
      // GPU Registers
 
-    // GPU_OPTIONS
-    Byte _gpu_options = 0b1111'0001;    // (Byte) Bitflag Enables
-                                        //    - bit 7    = Extended Bitmap:
+    // GPU_MODE
+    Word _gpu_mode = 0b1011'1000'1011'0000; // (Word) Display Mode:
+    // GPU_MODE_MSB                     // (Byte) Display Mode Most Significant Byte
+
+                                        //    - bits 15 (7)  = Extended Display Enable
+                                        //                 0: Disabled
+                                        //                 1: Enabled
+
+                                        //    - bit 14 (6)  = (reserved)
+
+                                        //    - bits 12-13 (4-5) = Extended Color Depth:
+                                        //                  00: 2-Colors
+                                        //                  01: 4-Colors
+                                        //                  10: 16-Colors
+                                        //                  11: 256-Colors
+
+                                        //    - bit 11 (3)   = Extended Rendering Mode:
                                         //                  0: Tilemap Display
                                         //                  1: Bitmap Display
-                                        //    - bits 5-6 = Extended Color Mode:
-                                        //                  00: 2-Colors
-                                        //                  01: 4-Colors
-                                        //                  10: 16-Colors
-                                        //                  11: 256-Colors
-                                        //    - bits 4   = Extended Display Enable
-                                        //                 0: Disabled
-                                        //                 1: Enabled
-                                        //    - bits 3   = Application Screen Mode
+
+                                        //    - bits 10 (2)  = Emulation Screen Mode
                                         //                 0: Windowed
                                         //                 1: Fullscreen
-                                        //    - bits 2   = VSync Enable
+
+                                        //    - bit 9 (1)   = VSync Enable
                                         //                 0: Disabled
                                         //                 1: Enabled
-                                        //    - bit 1    = Presentation
+
+                                        //    - bit 8 (0)   = Presentation
                                         //                 0: Overscan (Stretch)
                                         //                 1: Letterbox
-                                        //    - bit  0   = Standard Display Enable
+
+                                        // -------------------------------------------------
+    // GPU_MODE_LSB                     // (Byte) Display Mode Least Significant Byte
+
+                                        //    - bit 7   = Standard Display Enable
                                         //                 0: Disabled
                                         //                 1: Enabled
-                                        // 
-    // GPU_MODE
-    Byte _gpu_mode = 0b0110'1001;       // (Byte) Bitflag Enables
-                                        //    - bit 7    = Standard Bitmap:
-                                        //                  0: Text Display
-                                        //                  1: Bitmap Display
-                                        //    - bits 5-6 = Standard Color Mode:
+
+                                        //    - bit 6    = (reserved)
+
+                                        //    - bits 4-5 = Standard Bitmap Color Depth:
                                         //                  00: 2-Colors
                                         //                  01: 4-Colors
                                         //                  10: 16-Colors
                                         //                  11: 256-Colors
-                                        //    - bits 0-4 = Display Mode (0-31)
-                                        // 
+
+                                        //    - bit 3    = Standard Bitmap:
+                                        //                  0: Text Display
+                                        //                  1: Bitmap Display
+
+                                        //    - bit 2    = 0: 320/256 width,  1: 160/128 width
+                                        //    - bit 1    = 0: 200/160 height, 1: 160/80 height
+                                        //    - bit 0    = Base Resolution: 0:320x200, 1:256x160
+
+
+
+
     // GPU_VIDEO_MAX
     Word _gpu_video_max = 0x23FF;       // (Word) Video Buffer Maximum (Read Only)
                                         //  Note: This will change to reflect
@@ -192,7 +212,8 @@ private: // PRIVATE MEMBERS
     void _update_text_buffer();
     void _update_tile_buffer();
     void _display_mode_helper(Byte mode, int &width, int &height);
-    Byte _verify_gpu_mode_change(Byte data, Word map_register);
+    // Byte _verify_gpu_mode_change(Byte data, Word map_register);
+    void _verify_gpu_mode_change(Word mode_data);
     void _setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_index, bool bIgnoreAlpha);
     void _build_palette();
     void _clear_texture(SDL_Texture* texture, Byte alpha, Byte red, Byte grn, Byte blu);
@@ -252,72 +273,6 @@ private: // PRIVATE MEMBERS
     // Tilemap Registers
     // 
 
-
-
-
-    GPU_OPTIONS & GPU_MODE changes:
-
-    // GPU_OPTIONS
-    Byte _gpu_options = 0b1111'0001;    // (Byte) Bitflag Enables
-
-
-
-
-
-    // GPU_MODE
-    Word _gpu_mode;                     // (Word) Display Mode:
-    // GPU_MODE_MSB                     // (Byte) Display Mode Most Significant Byte
-
-                                        //    - bits 15 (7)  = Extended Display Enable
-                                        //                 0: Disabled
-                                        //                 1: Enabled
-
-                                        //    - bit 14 (6)  = Extended Display Slow Update
-
-                                        //    - bits 12-13 (4-5) = Extended Color Depth:
-                                        //                  00: 2-Colors
-                                        //                  01: 4-Colors
-                                        //                  10: 16-Colors
-                                        //                  11: 256-Colors
-
-                                        //    - bit 11 (3)   = Extended Bitmap:
-                                        //                  0: Tilemap Display
-                                        //                  1: Bitmap Display
-
-                                        //    - bits 10 (2)  = Emulation Screen Mode
-                                        //                 0: Windowed
-                                        //                 1: Fullscreen
-
-                                        //    - bit 9 (1)   = VSync Enable
-                                        //                 0: Disabled
-                                        //                 1: Enabled
-
-                                        //    - bit 8 (0)   = Presentation
-                                        //                 0: Overscan (Stretch)
-                                        //                 1: Letterbox
-
-                                        // -------------------------------------------------
-    // GPU_MODE_LSB                     // (Byte) Display Mode Least Significant Byte
-
-                                        //    - bit 7   = Standard Display Enable
-                                        //                 0: Disabled
-                                        //                 1: Enabled
-
-                                        //    - bit 6    = Standard Display Slow Update
-
-                                        //    - bits 4-5 = Standard Bitmap Color Depth:
-                                        //                  00: 2-Colors
-                                        //                  01: 4-Colors
-                                        //                  10: 16-Colors
-                                        //                  11: 256-Colors
-
-                                        //    - bit 3    = Standard Bitmap:
-                                        //                  0: Text Display
-                                        //                  1: Bitmap Display
-
-                                        //    - bit 2    = 0: 320/256 width,  1: 160/128 width
-                                        //    - bit 1    = 0: 200/160 height, 1: 160/80 height
-                                        //    - bit 0    = Base Resolution: 0:320x200, 1:256x160
 
 ******************************************************/
 

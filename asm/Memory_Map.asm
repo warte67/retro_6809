@@ -124,42 +124,45 @@ SYS_TOP               equ    $FE0B    ; Top of System Registers
 ; _______________________________________________________________________
 
 GPU_DEVICE            equ    $FE0B    ; START: GPU Device Hardware Registers
-GPU_OPTIONS           equ    $FE0B    ; (Byte) Bitflag Enables
-                                      ; - bit 7    = Extended Bitmap:
+GPU_MODE              equ    $FE0B    ; 
+GPU_MODE_MSB          equ    $FE0B    ; (Byte) Graphics Display Mode
+                                      ; - bit  7   = Extended Display Enable:
+                                      ;               0: Disabled
+                                      ;               1: Enabled
+                                      ; - bit  6   = (reserved)
+                                      ; - bits 4-5 = Extended Color Depth:
+                                      ;               00: 2-Colors
+                                      ;               01: 4-Colors
+                                      ;               10: 16-Colors
+                                      ;               11: 256-Colors
+                                      ; - bit  3   = Extended Rendering Mode
                                       ;               0: Tilemap Display
                                       ;               1: Bitmap Display
-                                      ; - bits 5-6 = Extended Color Mode:
-                                      ;               00: 2-Colors
-                                      ;               01: 4-Colors
-                                      ;               10: 16-Colors
-                                      ;               11: 256-Colors
-                                      ; - bits 4   = Extended Display Enable
-                                      ;               0: Disabled
-                                      ;               1: Enabled
-                                      ; - bits 3   = Emulation Screen Mode
-                                      ;               (temporary)
+                                      ; - bit  2   = Emulation Screen Mode
                                       ;               0: Windowed
                                       ;               1: Fullscreen
-                                      ; - bits 2   = VSync Enable
+                                      ; - bit  1   = VSync Enable
                                       ;               0: Disabled
                                       ;               1: Enabled
-                                      ; - bit  1   = Presentation
+                                      ; - bit  0   = Presentation
                                       ;               0: Letterbox
                                       ;               1: Overscan / Stretch
-                                      ; - bit  0   = Standard Display Enable
-                                      ;               0: Disabled
-                                      ;               1: Enabled
                                       ; 
-GPU_MODE              equ    $FE0C    ; (Byte) Standard Display Mode
-                                      ; - bit 7    = Standard Bitmap:
-                                      ;               0: Text Display
-                                      ;               1: Bitmap Display
-                                      ; - bits 5-6 = Standard Color Mode:
+GPU_MODE_LSB          equ    $FE0C    ; - bit  7   = Standard Display Enable
+                                      ;              0: Disabled
+                                      ;              1: Enabled
+                                      ; - bit  6    = (reserved)
+                                      ; - bits 4-5 = Standard Bitmap Color Depth:
                                       ;               00: 2-Colors
                                       ;               01: 4-Colors
                                       ;               10: 16-Colors
                                       ;               11: 256-Colors
-                                      ; - bits 0-4 = Display Mode (0-31)
+                                      ; - bit  3    = Standard Bitmap:
+                                      ;               0: Text Display
+                                      ;               1: Bitmap Display
+                                      ; - bit  2    = 0: 320/256 width,  1: 160/128 width
+                                      ; - bit  1    = 0: 200/160 height, 1: 160/80 height
+                                      ; - bit  0    = Base Resolution: 0:320x200, 1:256x160            
                                       ; 
 GPU_VIDEO_MAX         equ    $FE0D    ; (Word) Video Buffer Maximum (Read Only)
                                       ;  Note: This will change to reflect
