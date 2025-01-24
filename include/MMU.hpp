@@ -1,17 +1,23 @@
-/*** BankedMem.hpp *******************************************
- *      ____              _            _ __  __                    _                 
- *     |  _ \            | |          | |  \/  |                  | |                
- *     | |_) | __ _ _ __ | | _____  __| | \  / | ___ _ __ ___     | |__  _ __  _ __  
- *     |  _ < / _` | '_ \| |/ / _ \/ _` | |\/| |/ _ \ '_ ` _ \    | '_ \| '_ \| '_ \ 
- *     | |_) | (_| | | | |   <  __/ (_| | |  | |  __/ | | | | |_  | | | | |_) | |_) |
- *     |____/ \__,_|_| |_|_|\_\___|\__,_|_|  |_|\___|_| |_| |_(_) |_| |_| .__/| .__/ 
- *                                                                      | |   | |    
- *                                                                      |_|   |_|
+/*** MMU.hpp *******************************************
+ *      __  __ __  __ _    _       _                 
+ *     |  \/  |  \/  | |  | |     | |                
+ *     | \  / | \  / | |  | |     | |__  _ __  _ __  
+ *     | |\/| | |\/| | |  | |     | '_ \| '_ \| '_ \ 
+ *     | |  | | |  | | |__| |  _  | | | | |_) | |_) |
+ *     |_|  |_|_|  |_|\____/  (_) |_| |_| .__/| .__/ 
+ *                                      | |   | |    
+ *                                      |_|   |_|  
+ * 
+ * Memory Management Unit (MMU) Device
  *
- * This device manages the pair of 8K memory banks defined in the 
- * BANKED_MEMORY_REGION of the memory map, where each block can be 
- * configured as RAM, ROM, or ersistent RAM, and is indexed by an 
- * 8-bit page address, enabling a total of 2MB of banked memory.
+ * The Memory Management Unit (MMU) controls memory access and mapping 
+ * within the system, managing a 2MB PSRAM memory pool. It organizes 
+ * memory nodes, defining regions such as RAM and ROM, and supports 
+ * 32-byte windowed direct memory access for efficient memory operations. 
+ * The MMU handles paged memory with 8KB pages, enabling flexible memory 
+ * allocation and protection. It ensures that the CPU and other devices 
+ * access valid memory regions with appropriate read/write permissions, 
+ * optimizing system performance.
  * 
  * Released under the GPL v3.0 License.
  * Original Author: Jay Faries (warte67)
@@ -22,11 +28,11 @@
 
 #include "IDevice.hpp"
 
-class BankedMem : public IDevice {
+class MMU : public IDevice {
 
 public: // PUBLIC CONSTRUCTOR / DESTRUCTOR
-    BankedMem();
-    virtual ~BankedMem();
+    MMU();
+    virtual ~MMU();
 
 public: 
 
@@ -355,4 +361,4 @@ Updated To-Do List: Memory System Implementation
  */
 
 
-// END: BankedMem.hpp
+// END: MMU.hpp

@@ -22,7 +22,7 @@
 #include "UnitTest.hpp"
 #include "Kernel_Rom.hpp"
 #include "GPU.hpp"
-#include "BankedMem.hpp"
+#include "MMU.hpp"
 #include "Debug.hpp"
 #include "C6809.hpp"
 #include "Mouse.hpp"
@@ -229,7 +229,7 @@ void Bus::_onInit()
     _pDebug = Memory::Attach<Debug>();  // This could be a singleton due to its static nature.
     _pGPU   = Memory::Attach<GPU>();    // This could be a singleton due to its static nature.
 
-    Memory::Attach<BankedMem>();
+    Memory::Attach<MMU>();
     Memory::Attach<Mouse>();
     Memory::Attach<Keyboard>();
     Memory::Attach<Joystick>();

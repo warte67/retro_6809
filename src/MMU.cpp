@@ -1,41 +1,46 @@
-/*** BankedMem.cpp *******************************************
- *      ____              _            _ __  __                                     
- *     |  _ \            | |          | |  \/  |                                    
- *     | |_) | __ _ _ __ | | _____  __| | \  / | ___ _ __ ___       ___ _ __  _ __  
- *     |  _ < / _` | '_ \| |/ / _ \/ _` | |\/| |/ _ \ '_ ` _ \     / __| '_ \| '_ \ 
- *     | |_) | (_| | | | |   <  __/ (_| | |  | |  __/ | | | | |_  | (__| |_) | |_) |
- *     |____/ \__,_|_| |_|_|\_\___|\__,_|_|  |_|\___|_| |_| |_(_)  \___| .__/| .__/ 
- *                                                                     | |   | |    
- *                                                                     |_|   |_| 
+/*** MMU.cpp *******************************************
+ *      __  __ __  __ _    _                        
+ *     |  \/  |  \/  | |  | |                       
+ *     | \  / | \  / | |  | |       ___ _ __  _ __  
+ *     | |\/| | |\/| | |  | |      / __| '_ \| '_ \ 
+ *     | |  | | |  | | |__| |  _  | (__| |_) | |_) |
+ *     |_|  |_|_|  |_|\____/  (_)  \___| .__/| .__/ 
+ *                                     | |   | |    
+ *                                     |_|   |_|  
  * 
- * This device manages the pair of 8K memory banks defined in the 
- * BANKED_MEMORY_REGION of the memory map, where each block can be 
- * configured as RAM, ROM, or ersistent RAM, and is indexed by an 
- * 8-bit page address, enabling a total of 2MB of banked memory.
+ * Memory Management Unit (MMU) Device
+ *
+ * The Memory Management Unit (MMU) controls memory access and mapping 
+ * within the system, managing a 2MB PSRAM memory pool. It organizes 
+ * memory nodes, defining regions such as RAM and ROM, and supports 
+ * 32-byte windowed direct memory access for efficient memory operations. 
+ * The MMU handles paged memory with 8KB pages, enabling flexible memory 
+ * allocation and protection. It ensures that the CPU and other devices 
+ * access valid memory regions with appropriate read/write permissions, 
+ * optimizing system performance.
  *
  * Released under the GPL v3.0 License.
  * Original Author: Jay Faries (warte67)
  *
  ************************************/
 
-#include "BankedMem.hpp"
-
+#include "MMU.hpp"
 
 
 /***************************
 * Constructor / Destructor *
 ***************************/
 
-BankedMem::BankedMem() 
+MMU::MMU() 
 { 
-    std::cout << clr::indent_push() << clr::LT_BLUE << "BankedMem Device Created" << clr::RETURN;
+    std::cout << clr::indent_push() << clr::LT_BLUE << "MMU Device Created" << clr::RETURN;
     _device_name = "BANKED_MEMORY_DEVICE"; 
-} // END: BankedMem()
+} // END: MMU()
 
-BankedMem::~BankedMem() 
+MMU::~MMU() 
 { 
-    std::cout << clr::indent_pop() << clr::LT_BLUE << "BankedMem Device Destroyed" << clr::RETURN; 
-} // END: ~BankedMem()
+    std::cout << clr::indent_pop() << clr::LT_BLUE << "MMU Device Destroyed" << clr::RETURN; 
+} // END: ~MMU()
 
 
 
@@ -45,13 +50,13 @@ BankedMem::~BankedMem()
 
 
 
-int  BankedMem::OnAttach(int nextAddr)
+int  MMU::OnAttach(int nextAddr)
 {
     SetBaseAddress(nextAddr);
     Word old_address=nextAddr;
-    this->heading = "BankedMem Device Hardware Registers";
+    this->heading = "MMU Device Hardware Registers";
     
-    std::cout << clr::indent() << clr::LT_BLUE << "BankedMem::OnAttach() Entry" << clr::RETURN;    
+    std::cout << clr::indent() << clr::LT_BLUE << "MMU::OnAttach() Entry" << clr::RETURN;    
 
     ////////////////////////////////////////////////
     // (Byte) BANK_1_SELECT
@@ -156,7 +161,7 @@ int  BankedMem::OnAttach(int nextAddr)
     /////
     mapped_register.push_back({ "BANK_TOP", nextAddr, 
     nullptr, nullptr,  { "Top of Banked Memory Register Space", "---"}});
-    std::cout << clr::indent() << clr::LT_BLUE << "BankedMem::OnAttach() Exit" << clr::RETURN;
+    std::cout << clr::indent() << clr::LT_BLUE << "MMU::OnAttach() Exit" << clr::RETURN;
 
 
     _size = nextAddr - old_address;
@@ -164,20 +169,20 @@ int  BankedMem::OnAttach(int nextAddr)
 }
 
 
-void BankedMem::OnInit()
+void MMU::OnInit()
 {
-    std::cout << clr::indent() << clr::LT_BLUE << "BankedMem::OnInit() Entry" << clr::RETURN;
+    std::cout << clr::indent() << clr::LT_BLUE << "MMU::OnInit() Entry" << clr::RETURN;
     // ...
-    std::cout << clr::indent() << clr::LT_BLUE << "BankedMem::OnInit() Exit" << clr::RETURN;
+    std::cout << clr::indent() << clr::LT_BLUE << "MMU::OnInit() Exit" << clr::RETURN;
 }
 
 
-void BankedMem::OnQuit()
+void MMU::OnQuit()
 {
-    std::cout << clr::indent() << clr::LT_BLUE << "BankedMem::OnQuit() Entry" << clr::RETURN;
+    std::cout << clr::indent() << clr::LT_BLUE << "MMU::OnQuit() Entry" << clr::RETURN;
     // ...
-    std::cout << clr::indent() << clr::LT_BLUE << "BankedMem::OnQuit() Exit" << clr::RETURN;
+    std::cout << clr::indent() << clr::LT_BLUE << "MMU::OnQuit() Exit" << clr::RETURN;
 }
 
 
-// END: BankedMem.cpp
+// END: MMU.cpp
