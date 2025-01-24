@@ -241,6 +241,116 @@ Optimize and Test the Memory Management Flow:
     or PSRAM). Verify that the "Fast RAM" block system behaves as expected for rapid memory 
     operations.
 
+    Four Bits for Error Codes and Four Bits for Commands:
+    bit 7:  0=Read/Write, 1=Read Only
+    bit 6:  0=allocated, 1=free
+    bit 5:  0=not currently mapped, 1=mapped to the 32-byte fast mem register
+    bit 4:  0=not currently mapped, 1=mapped into one of the slow 8k pages    
+    bits 0-3:  16 commands: On Read = etch last command), On Write Issue a New Command:
+        Command 0 = Memory Allocation Error (Read Only)
+        Command 1 = Allocate Memory
+        Command 2 = Deallocate Memory
+        Command 3 = Load a Block of memory into the 32-byte "window" register
+        Command 4 = Save a Block of memory from the 32-byte "window" register
+        Command 5 = Copy a block of memory from the 32-byte "Window" to another memory node
+        Command 6 = Copy a block of memory from one memory node to the 32-byte "Window"
+        Command 7 = Copy a block of memory from one memory node to another memory node
+        ... etc
+
+    Byte for Per Node Memory Status:
+        0	Allocated: 0 = Free, 1 = Allocated	Tracks whether the block is in use.
+        1	Read/Write or Read-Only: 0 = RW, 1 = RO	Distinguishes between writable and immutable memory.
+        2	Mapped to Fast Memory: 0 = No, 1 = Yes	Indicates if the block is mapped to the 32-byte fast memory register.
+        3	Mapped to Paged Memory: 0 = No, 1 = Yes	Indicates if the block is mapped to the 8k page.
+        4	Fragmentation Marker	Marks blocks that are fragmented or part of a split allocation for debugging or defragmentation purposes.
+        5	Temporary Allocation Flag	Marks blocks as temporarily allocated (e.g., for a short-term operation, scratch memory).
+        6	Cacheable Flag	Marks whether the block is cacheable (useful in performance tuning).
+        7	Error State: 0 = No Error, 1 = Error	Indicates if an error has occurred with this block.        
+
+
+    // (note:  Words have been defined as unsigned shorts or Uint16
+    //         Bytes have been defined as unsigned chars or Uint8)
+    struct MEMORY_NODE {
+        Byte block_count;   // how many 32-byte blocks are included in this allocation
+        Byte status;        // status flags
+        Word start_block;   // index of the first block in this allocation
+        Word parent_node;   // index of the parent node in the memory pool
+        Word next_node;     // index of the child node in the memory pool
+    };
+
+    Exactly 8-Bytes in size. This should fit well within the 64-bit nature of the
+    software emulation as well as either 16-bit or 32-bit nature of the 
+    Raspberry PI PICO boards.
+
+
+=================================================================================
+
+Updated To-Do List: Memory System Implementation
+1. Memory Architecture
+
+    Fixed Memory:
+        Reserve 34 KB fixed RAM below the paged memory region (for stack, text buffer, etc.).
+    Paged Memory:
+        Reserve 16 KB for two default 8 KB pages (Page 0 and Page 1).
+        Implement mechanism for allocating additional 8 KB pages as RAM or ROM.
+    Dynamic Memory:
+        Design a system for allocating 32-byte blocks from the remaining memory pool (~1,934 KB after reserved areas).
+
+2. Banked Memory Mechanisms
+
+    Page-Based Allocation:
+        Allow allocation of 8 KB pages as RAM or ROM.
+        Support loading ROM data during boot or runtime from external media.
+    Dynamic Allocation:
+        Implement a 32-byte block allocator using:
+            std::vector<MEMORY_NODE> to track allocated and free blocks.
+            MEMORY_NODE Structure (8 bytes each):
+                Byte block_count: Number of 32-byte blocks in the allocation.
+                Byte status: Allocation, read-only, or mapping status flags.
+                Word start_block: Start index of the allocation.
+                Word parent_node and Word next_node: Linked list pointers for tracking allocations.
+
+3. Register and Hardware Design
+
+    Memory Control Registers:
+        BANK_1_SELECT and BANK_2_SELECT: Select 8 KB pages for Page 1 and Page 2.
+        BANK_FAST_INDEX: 16-bit register for selecting blocks in the 32-byte "Window."
+        BANK_FAST_WINDOW: 32-byte register for direct memory access to dynamic blocks.
+    Simplified Status and Commands:
+        Use separate status and command/error registers to manage memory nodes.
+        Include flags for:
+            Read/Write, Read-Only, Mapped, Allocated, Dirty, or Internal Use.
+
+4. User Interface for Programmers
+
+    ROM Allocation:
+        Enable allocation of multiple 8 KB pages as ROM.
+        Provide functionality for loading ROM data at boot or runtime.
+    RAM Allocation:
+        Enable allocation of multiple 8 KB pages for large working data.
+        Support deallocation and reuse of these pages.
+    Dynamic Memory Allocation:
+        Use the 32-byte block allocator for fine-grained, temporary memory needs.
+        Ensure memory fragmentation is minimized using a linked list or heap structure.
+    Safety Features:
+        Prevent users from changing pages while dynamic memory is buffered in paged memory regions.
+
+5. Implementation Tasks
+
+    Page Mechanisms:
+        Write functions to allocate/deallocate 8 KB pages.
+        Track page allocations with bitmaps or lightweight data structures.
+    Dynamic Memory System:
+        Develop the 32-byte block allocator with linked list support.
+        Implement functions for allocating, deallocating, and mapping memory nodes.
+        Test and debug garbage collection (e.g., using the "dirty" bit and deferred deallocation).
+    Performance Optimization:
+        Optimize mapping to 32-byte fast memory for rapid access.
+        Implement safe access patterns for paged memory to avoid programmer pitfalls.
+
+
+
+
 
  */
 

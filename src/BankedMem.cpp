@@ -104,19 +104,39 @@ int  BankedMem::OnAttach(int nextAddr)
     //      BANK_TYPE 2 = ROM
     /////
     Word _bank_type = 0;
-    mapped_register.push_back({ "BANK_TYPE_ENUM", _bank_type, 
-        nullptr, nullptr, { "  START: Banked Memory Type Enumeration:"} });
     mapped_register.push_back({ "BANK_TYPE_RAM", _bank_type, 
         nullptr, nullptr, { "    Random Access Memory (RAM)"} });
-    _bank_type++; // nextAddr++;    
-    mapped_register.push_back({ "BANK_TYPE_PERSIST", _bank_type, 
-        nullptr, nullptr, { "    Persistent Random Access Memory (PRAM)"} });
     _bank_type++; // nextAddr++;    
     mapped_register.push_back({ "BANK_TYPE_ROM", _bank_type, 
         nullptr, nullptr, { "    Read Only Memory (ROM)"} });
     _bank_type++; // nextAddr++;    
-    mapped_register.push_back({ "BANK_TYPE_ENUM_END", _bank_type, 
-        nullptr, nullptr, { "  END: Banked Memory Type Enumeration:"} });
+
+    ////////////////////////////////////////////////
+    // (Word) BANK_FAST_INDEX
+    //      16-bit Index into Array of 32-byte Fast Memory Elements
+    /////
+    mapped_register.push_back({ "BANK_FAST_INDEX", nextAddr, 
+        nullptr, 
+        nullptr,  
+        { "(Word) Index into Array (32-byte Fast Memory)"} });
+    nextAddr++;    
+    mapped_register.push_back( { "", nextAddr, nullptr, nullptr, {""}}); nextAddr+=1;    
+
+
+    ////////////////////////////////////////////////
+    // (Word) BANK_FAST_WINDOW
+    //      32-byte Memory Window For Fast Memory Access
+    /////
+    mapped_register.push_back({ "BANK_FAST_WINDOW", nextAddr, 
+        nullptr, 
+        nullptr,  
+        { "(32-Bytes) 32-byte Memory Window For Fast Memory Access"} });
+    // nextAddr++;    
+    for (int index = 0; index < 32; index++) {
+        mapped_register.push_back( { "", nextAddr, nullptr, nullptr, {""}}); nextAddr+=1;    
+    }
+
+
 
 
     ////////////////////////////////////////////////

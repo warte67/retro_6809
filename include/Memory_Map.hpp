@@ -223,48 +223,47 @@ enum MEMMAP
     BANK_2_SELECT         = 0xFE22,   // Page Select for 8K Memory Bank 2 (0-255)
     BANK_1_TYPE           = 0xFE23,   // Memory Bank 1 Storage Type
     BANK_2_TYPE           = 0xFE24,   // Memory Bank 2 Storage Type
-    BANK_TYPE_ENUM        = 0x0000,   //   START: Banked Memory Type Enumeration:
     BANK_TYPE_RAM         = 0x0000,   //     Random Access Memory (RAM)
-    BANK_TYPE_PERSIST     = 0x0001,   //     Persistent Random Access Memory (PRAM)
-    BANK_TYPE_ROM         = 0x0002,   //     Read Only Memory (ROM)
-    BANK_TYPE_ENUM_END    = 0x0003,   //   END: Banked Memory Type Enumeration:
-    BANK_END              = 0xFE24,   // End of Banked Memory Register Space
-    BANK_TOP              = 0xFE25,   // Top of Banked Memory Register Space
+    BANK_TYPE_ROM         = 0x0001,   //     Read Only Memory (ROM)
+    BANK_FAST_INDEX       = 0xFE25,   // (Word) Index into Array (32-byte Fast Memory)
+    BANK_FAST_WINDOW      = 0xFE27,   // (32-Bytes) 32-byte Memory Window For Fast Memory Access
+    BANK_END              = 0xFE46,   // End of Banked Memory Register Space
+    BANK_TOP              = 0xFE47,   // Top of Banked Memory Register Space
 // _______________________________________________________________________
 
-    CSR_DEVICE            = 0xFE25,   // START: Mouse Device Hardware Registers
-    CSR_XPOS              = 0xFE25,   // (Word) Horizontal Mouse Cursor Coordinate
-    CSR_YPOS              = 0xFE27,   // (Word) Vertical Mouse Cursor Coordinate
-    CSR_XOFS              = 0xFE29,   // (Byte) Horizontal Mouse Cursor Offset
-    CSR_YOFS              = 0xFE2A,   // (Byte) Vertical Mouse Cursor Offset
-    CSR_SCROLL            = 0xFE2B,   // (char) MouseWheel Scroll: -1, 0, 1
-    CSR_FLAGS             = 0xFE2C,   // (Byte) Mouse Device State Flags
+    CSR_DEVICE            = 0xFE47,   // START: Mouse Device Hardware Registers
+    CSR_XPOS              = 0xFE47,   // (Word) Horizontal Mouse Cursor Coordinate
+    CSR_YPOS              = 0xFE49,   // (Word) Vertical Mouse Cursor Coordinate
+    CSR_XOFS              = 0xFE4B,   // (Byte) Horizontal Mouse Cursor Offset
+    CSR_YOFS              = 0xFE4C,   // (Byte) Vertical Mouse Cursor Offset
+    CSR_SCROLL            = 0xFE4D,   // (char) MouseWheel Scroll: -1, 0, 1
+    CSR_FLAGS             = 0xFE4E,   // (Byte) Mouse Device State Flags
                                       //    bits 0-4: button states
                                       //    bits 5-6: number of clicks
                                       //    bits 7:   cursor enable
                                       // 
-    CSR_BMP_INDX          = 0xFE2D,   // (Byte) Mouse Cursor Bitmap Pixel Offset
-    CSR_BMP_DATA          = 0xFE2E,   // (Byte) Mouse Cursor Bitmap Pixel Color Data ($0-$F)
-    CSR_PAL_INDX          = 0xFE2F,   // (Byte) Mouse Cursor Color Palette Index (0-15)
-    CSR_PAL_DATA          = 0xFE30,   // (Word) Mouse Cursor Color Palette Data A4R4G4B4
-    CSR_END               = 0xFE31,   // End of Mouse Device Register Space
-    CSR_TOP               = 0xFE32,   // Top of CSR Register Space
+    CSR_BMP_INDX          = 0xFE4F,   // (Byte) Mouse Cursor Bitmap Pixel Offset
+    CSR_BMP_DATA          = 0xFE50,   // (Byte) Mouse Cursor Bitmap Pixel Color Data ($0-$F)
+    CSR_PAL_INDX          = 0xFE51,   // (Byte) Mouse Cursor Color Palette Index (0-15)
+    CSR_PAL_DATA          = 0xFE52,   // (Word) Mouse Cursor Color Palette Data A4R4G4B4
+    CSR_END               = 0xFE53,   // End of Mouse Device Register Space
+    CSR_TOP               = 0xFE54,   // Top of CSR Register Space
 // _______________________________________________________________________
 
-    KEYBOARD_DEVICE       = 0xFE32,   // START: Keyboard Device Hardware Registers
-    CHAR_Q_LEN            = 0xFE32,   // (Byte) Number of Characters Waiting in Queue   (Read Only)
-    CHAR_SCAN             = 0xFE33,   // (Byte) Read Next Character in Queue (Not Popped When Read)
-    CHAR_POP              = 0xFE34,   // (Byte) Read Next Character in Queue     (Popped When Read)
-    XKEY_BUFFER           = 0xFE35,   // (16 Bytes) 128 bits for XK_KEY data buffer     (Read Only)
-    EDT_BFR_CSR           = 0xFE45,   // (Byte) Cursor Position Within Edit Buffer     (Read/Write)
-    EDT_ENABLE            = 0xFE46,   // (Byte) Line Editor Enable Flag                (Read/Write)
-    EDT_BFR_LEN           = 0xFE47,   // (Byte) Limit the Line Editor to This Length   (Read/Write)
-    KEYBOARD_END          = 0xFE47,   // End of Keyboard Register Space
-    KEYBOARD_TOP          = 0xFE48,   // Top of Keyboard Register Space
+    KEYBOARD_DEVICE       = 0xFE54,   // START: Keyboard Device Hardware Registers
+    CHAR_Q_LEN            = 0xFE54,   // (Byte) Number of Characters Waiting in Queue   (Read Only)
+    CHAR_SCAN             = 0xFE55,   // (Byte) Read Next Character in Queue (Not Popped When Read)
+    CHAR_POP              = 0xFE56,   // (Byte) Read Next Character in Queue     (Popped When Read)
+    XKEY_BUFFER           = 0xFE57,   // (16 Bytes) 128 bits for XK_KEY data buffer     (Read Only)
+    EDT_BFR_CSR           = 0xFE67,   // (Byte) Cursor Position Within Edit Buffer     (Read/Write)
+    EDT_ENABLE            = 0xFE68,   // (Byte) Line Editor Enable Flag                (Read/Write)
+    EDT_BFR_LEN           = 0xFE69,   // (Byte) Limit the Line Editor to This Length   (Read/Write)
+    KEYBOARD_END          = 0xFE69,   // End of Keyboard Register Space
+    KEYBOARD_TOP          = 0xFE6A,   // Top of Keyboard Register Space
 // _______________________________________________________________________
 
-    JOYSTICK_DEVICE       = 0xFE48,   // START: Joystick/Gamepad Controller Device Hardware Registers
-    JOYS_1_FLAGS          = 0xFE48,   // (Byte) Gamepad/Joystick #1 Condition Flags:     (Read Only)
+    JOYSTICK_DEVICE       = 0xFE6A,   // START: Joystick/Gamepad Controller Device Hardware Registers
+    JOYS_1_FLAGS          = 0xFE6A,   // (Byte) Gamepad/Joystick #1 Condition Flags:     (Read Only)
                                       //            0000'0000: Not Connected
                                       //            0000'1111: Controller Type
                                       //            0001'0000: (reserved)
@@ -296,7 +295,7 @@ enum MEMMAP
                                       //            8:  Arcade Pad
                                       //            9:  Throttle
                                       // 
-    JOYS_1_BTN            = 0xFE49,   // (Word) Gamepad Controller Button Bits:         (Read Only)
+    JOYS_1_BTN            = 0xFE6B,   // (Word) Gamepad Controller Button Bits:         (Read Only)
                                       //            0000'0000'0000'0000 = Nothing Pressed
                                       //            0000'0000'0000'0001 = A
                                       //            0000'0000'0000'0010 = B
@@ -316,15 +315,15 @@ enum MEMMAP
                                       //            1000'0000'0000'0000 = DPad Right
                                       //            1111'1111'1111'1111 = Not Connected
                                       // 
-    JOYS_1_DBND           = 0xFE4B,   // (Byte) PAD 1 analog deadband; default is 5   (read/write)
-    JOYS_1_LTX            = 0xFE4C,   // (char) PAD 1 LThumb-X position (-128 _ +127)   (realtime)
-    JOYS_1_LTY            = 0xFE4D,   // (char) PAD 1 LThumb-Y position (-128 _ +127)   (realtime)
-    JOYS_1_RTX            = 0xFE4E,   // (char) PAD 1 RThumb-X position (-128 _ +127)   (realtime)
-    JOYS_1_RTY            = 0xFE4F,   // (char) PAD 1 RThumb-Y position (-128 _ +127)   (realtime)
-    JOYS_1_Z1             = 0xFE50,   // (char) PAD 1 left analog trigger (0 - 127)     (realtime)
-    JOYS_1_Z2             = 0xFE51,   // (char) PAD 1 left analog trigger (0 - 127)     (realtime)
+    JOYS_1_DBND           = 0xFE6D,   // (Byte) PAD 1 analog deadband; default is 5   (read/write)
+    JOYS_1_LTX            = 0xFE6E,   // (char) PAD 1 LThumb-X position (-128 _ +127)   (realtime)
+    JOYS_1_LTY            = 0xFE6F,   // (char) PAD 1 LThumb-Y position (-128 _ +127)   (realtime)
+    JOYS_1_RTX            = 0xFE70,   // (char) PAD 1 RThumb-X position (-128 _ +127)   (realtime)
+    JOYS_1_RTY            = 0xFE71,   // (char) PAD 1 RThumb-Y position (-128 _ +127)   (realtime)
+    JOYS_1_Z1             = 0xFE72,   // (char) PAD 1 left analog trigger (0 - 127)     (realtime)
+    JOYS_1_Z2             = 0xFE73,   // (char) PAD 1 left analog trigger (0 - 127)     (realtime)
                                       // 
-    JOYS_2_FLAGS          = 0xFE52,   // (Byte) Gamepad/Joystick #2 Condition Flags:     (Read Only)
+    JOYS_2_FLAGS          = 0xFE74,   // (Byte) Gamepad/Joystick #2 Condition Flags:     (Read Only)
                                       //            0000'0000: Not Connected
                                       //            0000'1111: Controller Type
                                       //            0001'0000: (reserved)
@@ -356,7 +355,7 @@ enum MEMMAP
                                       //            8:  Arcade Pad
                                       //            9:  Throttle
                                       // 
-    JOYS_2_BTN            = 0xFE53,   // (Word) Button Bits: Room For up to 16 Buttons  (realtime)
+    JOYS_2_BTN            = 0xFE75,   // (Word) Button Bits: Room For up to 16 Buttons  (realtime)
                                       //        Joystick Button Bits:
                                       //            0000'0000'0000'0000 = Nothing Pressed
                                       //            0000'0000'0000'0001 = Button 1 
@@ -377,19 +376,19 @@ enum MEMMAP
                                       //            1000'0000'0000'0000 = Hat Right
                                       //            1111'1111'1111'1111 = Not Connected
                                       // 
-    JOYS_2_DBND           = 0xFE55,   // (Byte) PAD 2 analog deadband; default is 5   (read/write)
-    JOYS_2_LTX            = 0xFE56,   // (char) PAD 2 LThumb-X position (-128 _ +127)   (realtime)
-    JOYS_2_LTY            = 0xFE57,   // (char) PAD 2 LThumb-Y position (-128 _ +127)   (realtime)
-    JOYS_2_RTX            = 0xFE58,   // (char) PAD 2 RThumb-X position (-128 _ +127)   (realtime)
-    JOYS_2_RTY            = 0xFE59,   // (char) PAD 2 RThumb-Y position (-128 _ +127)   (realtime)
-    JOYS_2_Z1             = 0xFE5A,   // (char) PAD 2 left analog trigger (0 - 127)     (realtime)
-    JOYS_2_Z2             = 0xFE5B,   // (char) PAD 2 left analog trigger (0 - 127)     (realtime)
-    JOYS_END              = 0xFE5B,   // End of Joystick/Gamepad Device Register Space
-    JOYS_TOP              = 0xFE5C,   // Top of Joystick/Gamepad Device Register Space
+    JOYS_2_DBND           = 0xFE77,   // (Byte) PAD 2 analog deadband; default is 5   (read/write)
+    JOYS_2_LTX            = 0xFE78,   // (char) PAD 2 LThumb-X position (-128 _ +127)   (realtime)
+    JOYS_2_LTY            = 0xFE79,   // (char) PAD 2 LThumb-Y position (-128 _ +127)   (realtime)
+    JOYS_2_RTX            = 0xFE7A,   // (char) PAD 2 RThumb-X position (-128 _ +127)   (realtime)
+    JOYS_2_RTY            = 0xFE7B,   // (char) PAD 2 RThumb-Y position (-128 _ +127)   (realtime)
+    JOYS_2_Z1             = 0xFE7C,   // (char) PAD 2 left analog trigger (0 - 127)     (realtime)
+    JOYS_2_Z2             = 0xFE7D,   // (char) PAD 2 left analog trigger (0 - 127)     (realtime)
+    JOYS_END              = 0xFE7D,   // End of Joystick/Gamepad Device Register Space
+    JOYS_TOP              = 0xFE7E,   // Top of Joystick/Gamepad Device Register Space
 // _______________________________________________________________________
 
-    FIO_DEVICE            = 0xFE5C,   // START: File I/O Device Hardware Registers
-    FIO_ERROR             = 0xFE5C,   // (Byte) FILE_ERROR enumeration result (FE_<error>)
+    FIO_DEVICE            = 0xFE7E,   // START: File I/O Device Hardware Registers
+    FIO_ERROR             = 0xFE7E,   // (Byte) FILE_ERROR enumeration result (FE_<error>)
                                       // 
     FE_BEGIN              = 0x0000,   //   Begin FILE_ERROR enumeration 
     FE_NOERROR            = 0x0000,   //      no error, condition normal
@@ -405,7 +404,7 @@ enum MEMMAP
     FE_INVALID_NAME       = 0x0007,   //      invalid file name         
     FE_LAST               = 0x0007,   //   End of FILE_ERROR enumeration
                                       // 
-    FIO_COMMAND           = 0xFE5D,   // (Byte) Execute a File Command (FC_<cmd>)
+    FIO_COMMAND           = 0xFE7F,   // (Byte) Execute a File Command (FC_<cmd>)
                                       // 
     FC_BEGIN              = 0x0000,   //   Begin FIO_COMMAND enumeration           
     FC_RESET              = 0x0000,   //     Reset                                 
@@ -435,46 +434,46 @@ enum MEMMAP
     FC_GET_SEEK           = 0x0018,   //     Get Seek Position (into FIO_IOWORD)   
     FC_LAST               = 0x0018,   //   End FIO_COMMAND enumeration             
                                       // 
-    FIO_HANDLE            = 0xFE5E,   // (Byte) Current File Stream HANDLE (0=NONE)
-    FIO_SEEKPOS           = 0xFE5F,   // (DWord) File Seek Position
-    FIO_IODATA            = 0xFE63,   // (Byte) Input / Output Data
+    FIO_HANDLE            = 0xFE80,   // (Byte) Current File Stream HANDLE (0=NONE)
+    FIO_SEEKPOS           = 0xFE81,   // (DWord) File Seek Position
+    FIO_IODATA            = 0xFE85,   // (Byte) Input / Output Data
                                       // 
-    FIO_PATH_LEN          = 0xFE64,   // (Byte) Length of the Primary Filepath        (Read Only)
-    FIO_PATH_POS          = 0xFE65,   // (Byte) Character Position Within the Primary Filepath
-    FIO_PATH_DATA         = 0xFE66,   // (Byte) Data at the Character Position of the Primary Path
+    FIO_PATH_LEN          = 0xFE86,   // (Byte) Length of the Primary Filepath        (Read Only)
+    FIO_PATH_POS          = 0xFE87,   // (Byte) Character Position Within the Primary Filepath
+    FIO_PATH_DATA         = 0xFE88,   // (Byte) Data at the Character Position of the Primary Path
                                       // 
-    FIO_ALT_PATH_LEN      = 0xFE67,   // (Byte) Length of the alternate Filepath        (Read Only)
-    FIO_ALT_PATH_POS      = 0xFE68,   // (Byte) Character Position Within the Alternate Filepath
-    FIO_ALT_PATH_DATA     = 0xFE69,   // (Byte) Data at the Character Position of the Alternate Path
+    FIO_ALT_PATH_LEN      = 0xFE89,   // (Byte) Length of the alternate Filepath        (Read Only)
+    FIO_ALT_PATH_POS      = 0xFE8A,   // (Byte) Character Position Within the Alternate Filepath
+    FIO_ALT_PATH_DATA     = 0xFE8B,   // (Byte) Data at the Character Position of the Alternate Path
                                       // 
-    FIO_DIR_DATA          = 0xFE6A,   // (Byte) A Series of Null-Terminated Filenames
+    FIO_DIR_DATA          = 0xFE8C,   // (Byte) A Series of Null-Terminated Filenames
                                       //   NOTE: Current read-position is reset to the beginning
                                       //     following a List Directory command. The read-position
                                       //     is automatically advanced on read from this register.
                                       //     Each filename is $0A-terminated. The list itself is
                                       //     null-terminated.
                                       // 
-    FIO_END               = 0xFE6A,   // End of FIO Device Register Space
-    FIO_TOP               = 0xFE6B,   // Top of FIO Device Register Space
+    FIO_END               = 0xFE8C,   // End of FIO Device Register Space
+    FIO_TOP               = 0xFE8D,   // Top of FIO Device Register Space
 // _______________________________________________________________________
 
-    MATH_DEVICE           = 0xFE6B,   // START: Math Co-Processor Device Hardware Registers
-    MATH_ACA_POS          = 0xFE6B,   // (Byte) Character Position Within the ACA Float String
-    MATH_ACA_DATA         = 0xFE6C,   // (Byte) ACA Float String Character Port
-    MATH_ACA_RAW          = 0xFE6D,   // (4-Bytes) ACA Raw Float Data
-    MATH_ACA_INT          = 0xFE71,   // (4-Bytes) ACA Integer Data
+    MATH_DEVICE           = 0xFE8D,   // START: Math Co-Processor Device Hardware Registers
+    MATH_ACA_POS          = 0xFE8D,   // (Byte) Character Position Within the ACA Float String
+    MATH_ACA_DATA         = 0xFE8E,   // (Byte) ACA Float String Character Port
+    MATH_ACA_RAW          = 0xFE8F,   // (4-Bytes) ACA Raw Float Data
+    MATH_ACA_INT          = 0xFE93,   // (4-Bytes) ACA Integer Data
                                       // 
-    MATH_ACB_POS          = 0xFE75,   // (Byte) Character Position Within the ACB Float String
-    MATH_ACB_DATA         = 0xFE76,   // (Byte) ACB Float String Character Port
-    MATH_ACB_RAW          = 0xFE77,   // (4-Bytes) ACB Raw Float Data
-    MATH_ACB_INT          = 0xFE7B,   // (4-Bytes) ACB Integer Data
+    MATH_ACB_POS          = 0xFE97,   // (Byte) Character Position Within the ACB Float String
+    MATH_ACB_DATA         = 0xFE98,   // (Byte) ACB Float String Character Port
+    MATH_ACB_RAW          = 0xFE99,   // (4-Bytes) ACB Raw Float Data
+    MATH_ACB_INT          = 0xFE9D,   // (4-Bytes) ACB Integer Data
                                       // 
-    MATH_ACR_POS          = 0xFE7F,   // (Byte) Character Position Within the ACR Float String
-    MATH_ACR_DATA         = 0xFE80,   // (Byte) ACR Float String Character Port
-    MATH_ACR_RAW          = 0xFE81,   // (4-Bytes) ACR Raw Float Data
-    MATH_ACR_INT          = 0xFE85,   // (4-Bytes) ACR Integer Data
+    MATH_ACR_POS          = 0xFEA1,   // (Byte) Character Position Within the ACR Float String
+    MATH_ACR_DATA         = 0xFEA2,   // (Byte) ACR Float String Character Port
+    MATH_ACR_RAW          = 0xFEA3,   // (4-Bytes) ACR Raw Float Data
+    MATH_ACR_INT          = 0xFEA7,   // (4-Bytes) ACR Integer Data
                                       // 
-    MATH_OPERATION        = 0xFE89,   // (Byte) ACA Float String Character Port   (On Write)
+    MATH_OPERATION        = 0xFEAB,   // (Byte) ACA Float String Character Port   (On Write)
     MOP_BEGIN             = 0x0000,   //   BEGIN Math Operation Enumeration:
     MOP_RANDOM            = 0x0000,   //     ACA, ACB, and ACR are set to randomized values
     MOP_RND_SEED          = 0x0001,   //     MATH_ACA_INT seeds the pseudo-random number generator
@@ -534,12 +533,12 @@ enum MEMMAP
     MOP_NEXTAFTER         = 0x0037,   //     ACR = std::nextafter(ACA, ACB)
     MOP_COPYSIGN          = 0x0038,   //     ACR = std::copysign(ACA, ACB)
     MOP_LASTOP            = 0x0039,   //   END Math Operation Enumeration
-    MATH_END              = 0xFE89,   // End of Math Co-Processor Register Space
-    MATH_TOP              = 0xFE8A,   // Top of Math Co-Processor Register Space
+    MATH_END              = 0xFEAB,   // End of Math Co-Processor Register Space
+    MATH_TOP              = 0xFEAC,   // Top of Math Co-Processor Register Space
 // _______________________________________________________________________
 
-    HDW_RESERVED_DEVICE   = 0xFE8A,   // START: Reserved Register Space
-    HDW_REG_END           = 0xFFF0,   // 358 bytes reserved for future use.
+    HDW_RESERVED_DEVICE   = 0xFEAC,   // START: Reserved Register Space
+    HDW_REG_END           = 0xFFF0,   // 324 bytes reserved for future use.
 // _______________________________________________________________________
 
     ROM_VECTS_DEVICE      = 0xFFF0,   // START: Hardware Interrupt Vectors
