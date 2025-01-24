@@ -43,5 +43,3 @@ build/
 .code-workspace
 
 vgcore.*
-
-test.log
