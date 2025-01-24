@@ -216,17 +216,17 @@ GPU_END               equ    $FE20    ; End of GPU Register Space
 GPU_TOP               equ    $FE21    ; Top of GPU Register Space
 ; _______________________________________________________________________
 
-BANKED_MEMORY_DEVICE  equ    $FE21    ; START: BankedMem Device Hardware Registers
-BANK_1_SELECT         equ    $FE21    ; Page Select for 8K Memory Bank 1 (0-255)
-BANK_2_SELECT         equ    $FE22    ; Page Select for 8K Memory Bank 2 (0-255)
-BANK_1_TYPE           equ    $FE23    ; Memory Bank 1 Storage Type
-BANK_2_TYPE           equ    $FE24    ; Memory Bank 2 Storage Type
-BANK_TYPE_RAM         equ    $0000    ;     Random Access Memory (RAM)
-BANK_TYPE_ROM         equ    $0001    ;     Read Only Memory (ROM)
-BANK_FAST_INDEX       equ    $FE25    ; (Word) Index into Array (32-byte Fast Memory)
-BANK_FAST_WINDOW      equ    $FE27    ; (32-Bytes) 32-byte Memory Window For Fast Memory Access
-BANK_END              equ    $FE46    ; End of Banked Memory Register Space
-BANK_TOP              equ    $FE47    ; Top of Banked Memory Register Space
+MMU_DEVICE            equ    $FE21    ; START: Memory Management Unit Hardware Registers
+MMU_1_SELECT          equ    $FE21    ; Page Select for 8K Memory Bank 1 (0-255)
+MMU_2_SELECT          equ    $FE22    ; Page Select for 8K Memory Bank 2 (0-255)
+MMU_1_TYPE            equ    $FE23    ; Memory Bank 1 Storage Type
+MMU_2_TYPE            equ    $FE24    ; Memory Bank 2 Storage Type
+MMU_TYPE_RAM          equ    $0000    ;     Random Access Memory (RAM)
+MMU_TYPE_ROM          equ    $0001    ;     Read Only Memory (ROM)
+MMU_FAST_INDEX        equ    $FE25    ; (Word) Index into Array (32-byte Fast Memory)
+MMU_FAST_WINDOW       equ    $FE27    ; (32-Bytes) 32-byte Memory Window For Fast Memory Access
+MMU_END               equ    $FE46    ; End of Banked Memory Register Space
+MMU_TOP               equ    $FE47    ; Top of Banked Memory Register Space
 ; _______________________________________________________________________
 
 CSR_DEVICE            equ    $FE47    ; START: Mouse Device Hardware Registers

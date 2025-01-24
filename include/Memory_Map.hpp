@@ -218,17 +218,17 @@ enum MEMMAP
     GPU_TOP               = 0xFE21,   // Top of GPU Register Space
 // _______________________________________________________________________
 
-    BANKED_MEMORY_DEVICE  = 0xFE21,   // START: BankedMem Device Hardware Registers
-    BANK_1_SELECT         = 0xFE21,   // Page Select for 8K Memory Bank 1 (0-255)
-    BANK_2_SELECT         = 0xFE22,   // Page Select for 8K Memory Bank 2 (0-255)
-    BANK_1_TYPE           = 0xFE23,   // Memory Bank 1 Storage Type
-    BANK_2_TYPE           = 0xFE24,   // Memory Bank 2 Storage Type
-    BANK_TYPE_RAM         = 0x0000,   //     Random Access Memory (RAM)
-    BANK_TYPE_ROM         = 0x0001,   //     Read Only Memory (ROM)
-    BANK_FAST_INDEX       = 0xFE25,   // (Word) Index into Array (32-byte Fast Memory)
-    BANK_FAST_WINDOW      = 0xFE27,   // (32-Bytes) 32-byte Memory Window For Fast Memory Access
-    BANK_END              = 0xFE46,   // End of Banked Memory Register Space
-    BANK_TOP              = 0xFE47,   // Top of Banked Memory Register Space
+    MMU_DEVICE            = 0xFE21,   // START: Memory Management Unit Hardware Registers
+    MMU_1_SELECT          = 0xFE21,   // Page Select for 8K Memory Bank 1 (0-255)
+    MMU_2_SELECT          = 0xFE22,   // Page Select for 8K Memory Bank 2 (0-255)
+    MMU_1_TYPE            = 0xFE23,   // Memory Bank 1 Storage Type
+    MMU_2_TYPE            = 0xFE24,   // Memory Bank 2 Storage Type
+    MMU_TYPE_RAM          = 0x0000,   //     Random Access Memory (RAM)
+    MMU_TYPE_ROM          = 0x0001,   //     Read Only Memory (ROM)
+    MMU_FAST_INDEX        = 0xFE25,   // (Word) Index into Array (32-byte Fast Memory)
+    MMU_FAST_WINDOW       = 0xFE27,   // (32-Bytes) 32-byte Memory Window For Fast Memory Access
+    MMU_END               = 0xFE46,   // End of Banked Memory Register Space
+    MMU_TOP               = 0xFE47,   // Top of Banked Memory Register Space
 // _______________________________________________________________________
 
     CSR_DEVICE            = 0xFE47,   // START: Mouse Device Hardware Registers

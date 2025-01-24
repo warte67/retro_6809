@@ -24,6 +24,7 @@
  *
  ************************************/
 
+#include "Bus.hpp"
 #include "MMU.hpp"
 
 
@@ -33,13 +34,19 @@
 
 MMU::MMU() 
 { 
-    std::cout << clr::indent_push() << clr::LT_BLUE << "MMU Device Created" << clr::RETURN;
-    _device_name = "BANKED_MEMORY_DEVICE"; 
+    std::cout << clr::indent_push() << clr::LT_BLUE << "Memory Management Unit Device Created" << clr::RETURN;
+
+    static MMU* bWasInitialized = this;    
+    if (bWasInitialized != this) { 
+        Bus::Error("MMU already initialized!", __FILE__, __LINE__);
+    }
+
+    _device_name = "MMU_DEVICE"; 
 } // END: MMU()
 
 MMU::~MMU() 
 { 
-    std::cout << clr::indent_pop() << clr::LT_BLUE << "MMU Device Destroyed" << clr::RETURN; 
+    std::cout << clr::indent_pop() << clr::LT_BLUE << "Memory Management Unit Device Destroyed" << clr::RETURN; 
 } // END: ~MMU()
 
 
@@ -54,15 +61,15 @@ int  MMU::OnAttach(int nextAddr)
 {
     SetBaseAddress(nextAddr);
     Word old_address=nextAddr;
-    this->heading = "MMU Device Hardware Registers";
+    this->heading = "Memory Management Unit Hardware Registers";
     
     std::cout << clr::indent() << clr::LT_BLUE << "MMU::OnAttach() Entry" << clr::RETURN;    
 
     ////////////////////////////////////////////////
-    // (Byte) BANK_1_SELECT
+    // (Byte) MMU_1_SELECT
     //      Page Select for 8K Memory Bank 1 (0-255)
     /////
-    mapped_register.push_back({ "BANK_1_SELECT", nextAddr, 
+    mapped_register.push_back({ "MMU_1_SELECT", nextAddr, 
         nullptr, 
         nullptr,  
         { "Page Select for 8K Memory Bank 1 (0-255)"} });
@@ -70,10 +77,10 @@ int  MMU::OnAttach(int nextAddr)
 
 
     ////////////////////////////////////////////////
-    // (Byte) BANK_2_SELECT
+    // (Byte) MMU_2_SELECT
     //      Page Select for 8K Memory Bank 2 (0-255)
     /////
-    mapped_register.push_back({ "BANK_2_SELECT", nextAddr, 
+    mapped_register.push_back({ "MMU_2_SELECT", nextAddr, 
         nullptr, 
         nullptr,  
         { "Page Select for 8K Memory Bank 2 (0-255)"} });
@@ -81,10 +88,10 @@ int  MMU::OnAttach(int nextAddr)
 
 
     ////////////////////////////////////////////////
-    // (Byte) BANK_1_TYPE
+    // (Byte) MMU_1_TYPE
     //      Memory Bank 1 Storage Type
     /////
-    mapped_register.push_back({ "BANK_1_TYPE", nextAddr, 
+    mapped_register.push_back({ "MMU_1_TYPE", nextAddr, 
         nullptr, 
         nullptr,  
         { "Memory Bank 1 Storage Type"} });
@@ -92,10 +99,10 @@ int  MMU::OnAttach(int nextAddr)
 
 
     ////////////////////////////////////////////////
-    // (Byte) BANK_2_TYPE
+    // (Byte) MMU_2_TYPE
     //      Memory Bank 2 Storage Type
     /////
-    mapped_register.push_back({ "BANK_2_TYPE", nextAddr, 
+    mapped_register.push_back({ "MMU_2_TYPE", nextAddr, 
         nullptr, 
         nullptr,  
         { "Memory Bank 2 Storage Type"} });
@@ -103,24 +110,24 @@ int  MMU::OnAttach(int nextAddr)
 
 
     ////////////////////////////////////////////////
-    // BANK_TYPE enumeration
-    //      BANK_TYPE 0 = RAM
-    //      BANK_TYPE 1 = PERSISTENT RAM
-    //      BANK_TYPE 2 = ROM
+    // MMU_TYPE enumeration
+    //      MMU_TYPE 0 = RAM
+    //      MMU_TYPE 1 = PERSISTENT RAM
+    //      MMU_TYPE 2 = ROM
     /////
-    Word _bank_type = 0;
-    mapped_register.push_back({ "BANK_TYPE_RAM", _bank_type, 
+    Word _MMU_type = 0;
+    mapped_register.push_back({ "MMU_TYPE_RAM", _MMU_type, 
         nullptr, nullptr, { "    Random Access Memory (RAM)"} });
-    _bank_type++; // nextAddr++;    
-    mapped_register.push_back({ "BANK_TYPE_ROM", _bank_type, 
+    _MMU_type++; // nextAddr++;    
+    mapped_register.push_back({ "MMU_TYPE_ROM", _MMU_type, 
         nullptr, nullptr, { "    Read Only Memory (ROM)"} });
-    _bank_type++; // nextAddr++;    
+    _MMU_type++; // nextAddr++;    
 
     ////////////////////////////////////////////////
-    // (Word) BANK_FAST_INDEX
+    // (Word) MMU_FAST_INDEX
     //      16-bit Index into Array of 32-byte Fast Memory Elements
     /////
-    mapped_register.push_back({ "BANK_FAST_INDEX", nextAddr, 
+    mapped_register.push_back({ "MMU_FAST_INDEX", nextAddr, 
         nullptr, 
         nullptr,  
         { "(Word) Index into Array (32-byte Fast Memory)"} });
@@ -129,10 +136,10 @@ int  MMU::OnAttach(int nextAddr)
 
 
     ////////////////////////////////////////////////
-    // (Word) BANK_FAST_WINDOW
+    // (Word) MMU_FAST_WINDOW
     //      32-byte Memory Window For Fast Memory Access
     /////
-    mapped_register.push_back({ "BANK_FAST_WINDOW", nextAddr, 
+    mapped_register.push_back({ "MMU_FAST_WINDOW", nextAddr, 
         nullptr, 
         nullptr,  
         { "(32-Bytes) 32-byte Memory Window For Fast Memory Access"} });
@@ -145,21 +152,21 @@ int  MMU::OnAttach(int nextAddr)
 
 
     ////////////////////////////////////////////////
-    // (Constant) BANK_END
+    // (Constant) MMU_END
     //      End of Banked Memory Register Space
     /////
     nextAddr--;
-    mapped_register.push_back({ "BANK_END", nextAddr, 
+    mapped_register.push_back({ "MMU_END", nextAddr, 
         nullptr, nullptr,  { "End of Banked Memory Register Space"} });
     nextAddr++;
     
     
     ////////////////////////////////////////////////
-    // (Constant) BANK_TOP
+    // (Constant) MMU_TOP
     //      Top of Banked Register Space
     //      (start of the next device)
     /////
-    mapped_register.push_back({ "BANK_TOP", nextAddr, 
+    mapped_register.push_back({ "MMU_TOP", nextAddr, 
     nullptr, nullptr,  { "Top of Banked Memory Register Space", "---"}});
     std::cout << clr::indent() << clr::LT_BLUE << "MMU::OnAttach() Exit" << clr::RETURN;
 

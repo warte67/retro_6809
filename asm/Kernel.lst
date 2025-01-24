@@ -240,19 +240,17 @@ FE20                  GPU_END               equ    $FE20    ; End of GPU Registe
 FE21                  GPU_TOP               equ    $FE21    ; Top of GPU Register Space
                       ; _______________________________________________________________________
                       
-FE21                  BANKED_MEMORY_DEVICE  equ    $FE21    ; START: BankedMem Device Hardware Registers
-FE21                  BANKMEM_1_SELECT      equ    $FE21    ; Page Select for 8K Memory Bank 1 (0-255)
-FE22                  BANKMEM_2_SELECT      equ    $FE22    ; Page Select for 8K Memory Bank 2 (0-255)
-FE23                  BANKMEM_1_TYPE        equ    $FE23    ; Memory Bank 1 Storage Type
-FE24                  BANKMEM_2_TYPE        equ    $FE24    ; Memory Bank 2 Storage Type
-0000                  BANKMEM_TYPE_ENUM     equ    $0000    ;   START: Banked Memory Type Enumeration:
-0000                  BANKMEM_TYPE_RAM      equ    $0000    ;     Random Access Memory (RAM)
-0001                  BANKMEM_TYPE_ROM      equ    $0001    ;     Read Only Memory (ROM)
-0002                  BANKMEM_TYPE_END      equ    $0002    ;   END: Banked Memory Type Enumeration:
-FE25                  BANKMEM_FAST_INDEX    equ    $FE25    ; (Word) Index into Array (32-byte Fast Memory)
-FE27                  BANKMEM_FAST_WINDOW   equ    $FE27    ; (32-Bytes) 32-byte Memory Window For Fast Memory Access
-FE46                  BANK_END              equ    $FE46    ; End of Banked Memory Register Space
-FE47                  BANK_TOP              equ    $FE47    ; Top of Banked Memory Register Space
+FE21                  MMU_DEVICE            equ    $FE21    ; START: Memory Management Unit Hardware Registers
+FE21                  MMU_1_SELECT          equ    $FE21    ; Page Select for 8K Memory Bank 1 (0-255)
+FE22                  MMU_2_SELECT          equ    $FE22    ; Page Select for 8K Memory Bank 2 (0-255)
+FE23                  MMU_1_TYPE            equ    $FE23    ; Memory Bank 1 Storage Type
+FE24                  MMU_2_TYPE            equ    $FE24    ; Memory Bank 2 Storage Type
+0000                  MMU_TYPE_RAM          equ    $0000    ;     Random Access Memory (RAM)
+0001                  MMU_TYPE_ROM          equ    $0001    ;     Read Only Memory (ROM)
+FE25                  MMU_FAST_INDEX        equ    $FE25    ; (Word) Index into Array (32-byte Fast Memory)
+FE27                  MMU_FAST_WINDOW       equ    $FE27    ; (32-Bytes) 32-byte Memory Window For Fast Memory Access
+FE46                  MMU_END               equ    $FE46    ; End of Banked Memory Register Space
+FE47                  MMU_TOP               equ    $FE47    ; Top of Banked Memory Register Space
                       ; _______________________________________________________________________
                       
 FE47                  CSR_DEVICE            equ    $FE47    ; START: Mouse Device Hardware Registers
