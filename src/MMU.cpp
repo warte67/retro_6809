@@ -18,7 +18,7 @@
  * allocation and protection. It ensures that the CPU and other devices 
  * access valid memory regions with appropriate read/write permissions, 
  * optimizing system performance. After "formatting" with METADATA there 
- * will be 1'677'696 bytes of free space for dynamic allocation.
+ * will be 1'677'696 bytes of free space for dynamic memory allocation.
  *
  * Released under the GPL v3.0 License.
  * Original Author: Jay Faries (warte67)
