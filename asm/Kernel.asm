@@ -538,9 +538,6 @@ KRNL_SYS_CALLS	fdb	    SYS_GARBAGE	    ; $00 random garbage
 				fdb		SYS_WRITE_ACB	; $24 SYS_WRITE_ACB
 				fdb		SYS_WRITE_ACR	; $25 SYS_WRITE_ACR
 				fdb		SYS_ARG_TO_A	; $26 SYS_ARG_TO_A
-
-
-
 KRNL_SYS_CALLS_END				
 		
 

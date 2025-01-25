@@ -685,6 +685,18 @@ bool Math::_test_math_operations()
             }
         }
     }
+    // TEST: Division by zero
+    // ...
+
+    // Precision Handling for Floating-Point Comparisons:
+    //
+    // Floating-point operations (e.g., std::sqrt, std::pow) can result in precision errors. Instead of direct
+    // equality checks, consider using:
+    //      ASSERT_TRUE(std::fabs(actual_result - expected_result) < epsilon);
+    // Set epsilon to a small threshold like 1e-6.
+
+
+
     return all_tests_passed;
 }
 

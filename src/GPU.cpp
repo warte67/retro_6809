@@ -707,17 +707,14 @@ void GPU::_render_extended_graphics()
     _clear_texture(pExt_Texture, 0, red(0), grn(0), blu(0));
 
     // is the extended display enabled
-    // if ((_gpu_options & 0b0001'0000)==0)
     if ((_gpu_mode & 0b1000'0000'0000'0000)==0)
         return; // nope, just return
 
-    // if ( (_gpu_options & 0b1000'0000) == 0)
+    // IS Extended Display In Tiled Mode?
     if ( (_gpu_mode & 0b0000'1000'0000'0000) == 0)
-    {   // IS Extended Display In Tiled Mode?
-
+    { 
         // TODO: render tiled graphics
         //std::cout << "GPU::_render_extended_graphics() ---> Displaying extended tilemap buffer" << std::endl;
-
         _update_tile_buffer();
     } else {
         // extended bitmap mode

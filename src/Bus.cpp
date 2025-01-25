@@ -229,12 +229,12 @@ void Bus::_onInit()
     _pDebug = Memory::Attach<Debug>();  // This could be a singleton due to its static nature.
     _pGPU   = Memory::Attach<GPU>();    // This could be a singleton due to its static nature.
 
-    Memory::Attach<MMU>();
     Memory::Attach<Mouse>();
     Memory::Attach<Keyboard>();
     Memory::Attach<Joystick>();
     Memory::Attach<FileIO>();
     Memory::Attach<Math>();
+    Memory::Attach<MMU>();
 
     Memory::Attach<HDW_RESERVED>();     // reserved space for future use
     Memory::Attach<ROM_VECTS>();        // 0xFFF0 - 0xFFFF      (System ROM Vectors)
