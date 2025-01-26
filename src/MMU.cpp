@@ -800,7 +800,7 @@ Byte MMU::do_alloc()
     for (Word i = 0; i < allocation_size; ++i) 
     {
         // find a free node
-        Byte new_node = 0;
+        Word new_node = 0;
         for (new_node = 0; new_node < _metadata_pool.size(); ++new_node) 
         {
             if (!(_metadata_pool[new_node].status & 0b0000'0001)) { break; }            
@@ -810,7 +810,7 @@ Byte MMU::do_alloc()
             error(MAP(MMU_ERR_ALLOC));
             _metadata_pool[current_node].next_node = MMU_BAD_HANDLE;            
             return MAP(MMU_CMD_ALLOC);
-        }        
+        }    
         // Link the current node to the new node
         _metadata_pool[new_node].prev_node = current_node;
         _metadata_pool[new_node].root_node = handle;
