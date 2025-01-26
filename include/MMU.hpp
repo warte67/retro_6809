@@ -28,13 +28,11 @@
 #pragma once
 
 #include <bitset>
+#include <string>
+#include <map>
+#include <utility>
 #include "IDevice.hpp"
-
-//// considering these constants:
-// constexpr size_t NUM_METADATA_NODES = 52'428;
-// constexpr size_t NODE_SIZE_BYTES = 32;
-// constexpr size_t METADATA_SIZE_BYTES = 8;
-// constexpr size_t PAGE_FLAG_BYTES = 32;
+#include "UnitTest.hpp"
 
 class MMU : public IDevice {
 
@@ -49,6 +47,7 @@ public:
     virtual int  OnAttach(int nextAddr) override;   // attach to the memory map
     virtual void OnInit() override;                 // initialize
     virtual void OnQuit() override;                 // shutdown
+    virtual bool OnTest() override;                 // return true for successful unit tests
 
     // NOT USED:
 
@@ -60,102 +59,217 @@ public:
 
 private: 
 
-    struct MMU_PAGE {
-        Word metadata_root = 0xFFFF;    // index of the first metadata node in this allocation
-        Byte status = 0;                // status flags (same as METADATA_NODE)
-    };
-    std::vector<MMU_PAGE> _mmu_page;    // a vector that references a number of 8KB pages
+    void error(Byte error_code);
+    void do_command(Byte command);
+    Byte do_nop();
+    Byte do_pg_alloc();
+    Byte do_pg_free();
+    Byte do_alloc();
+    Byte do_free();
+    Byte do_load_root();
+    Byte do_load_next();
+    Byte do_load_prev();
+    Byte do_load_last();
+    Byte do_del_node();
+    Byte do_ins_before();
+    Byte do_ins_after();
+    Byte do_push_back();
+    Byte do_push_front();
+    Byte do_pop_back();
+    Byte do_pop_front();
+    Byte do_lock_node();
+    Byte do_unlock_node();
+    Byte do_defrag();
+    Byte do_reset();
+    Byte do_size();
 
-    Byte _mmu_1_select = 0xff;    
-    // MMU_1_SELECT                 ; (Byte) Page Select for 8K Memory Bank 1 (MMU_META_HANDLE)
-    Byte _mmu_2_select = 0xff;    
-    // MMU_2_SELECT                 ; (Byte) Page Select for 8K Memory Bank 2 (MMU_META_HANDLE)    
-    Word _mmu_blocks_free = 0xCCCC-1;
+    bool _test_nop();
+    bool _test_pg_alloc();  
+    bool _test_pg_free();   
+    bool _test_alloc();    
+    bool _test_free();      
+    bool _test_load_root(); 
+    bool _test_load_next(); 
+    bool _test_load_prev(); 
+    bool _test_load_last(); 
+    bool _test_del_node();  
+    bool _test_ins_before(); 
+    bool _test_ins_after(); 
+    bool _test_push_back(); 
+    bool _test_push_front(); 
+    bool _test_pop_back();  
+    bool _test_pop_front(); 
+    bool _test_lock_node(); 
+    bool _test_unlock_node(); 
+    bool _test_defrag();    
+    bool _test_reset();     
+    bool _test_size();
+
+    std::unordered_map<Byte, std::function<Byte()>> _mmu_commands;
+    inline void register_command(Byte command, std::function<Byte()> handler)
+    {
+        if (_mmu_commands.find(command) != _mmu_commands.end()) {
+            UnitTest::Log("Warning: Command already registered: " + command);
+            Bus::Error("Command already registered", __FILE__, __LINE__);
+            return;
+        }        
+        _mmu_commands[command] = handler;
+    }
+
+
+    // ****************** //
+    // HARDWARE REGISTERS //
+    // ****************** //
+
+
+    Word MMU_BAD_HANDLE = 0xFFFF;
+
+    Word _mmu_1_select = MMU_BAD_HANDLE;    
+    // MMU_1_SELECT                 ; (Word) Page Select for 8K Memory Bank 1
+
+    Word _mmu_2_select = MMU_BAD_HANDLE;    
+    // MMU_2_SELECT                 ; (Word) Page Select for 8K Memory Bank 2
+
+    Word _mmu_blocks_free = 0xCCCC;
     // MMU_BLOCKS_FREE              ; (Word) Number of 32-Byte Blocks Available for Allocation
+
     Word _mmu_blocks_allocated = 0;
     // MMU_BLOCKS_ALLOCATED         ; (Word) Number of 32-Byte Blocks Currently Allocated
+
     Word _mmu_blocks_fragged = 0;
     // MMU_BLOCKS_FRAGGED           ; (Word) Number of 32-Byte Blocks Currently Fragmented
+
     Word _mmu_arg_1 = 0;
     // MMU_ARG_1                    ; (Word)  Argument 1 for MMU Command
+
     Word _mmu_arg_2 = 0;
     // MMU_ARG_2                    ; (Word)  Argument 2 for MMU Command
-    Byte _mmu_command = 0;  
-    // MMU_COMMAND                  ; (Byte) Memory Management Unit Command
-    //                              ;    $00 = NO OPERATION / ERROR
-    //                              ;    $01 = ALLOCATE PAGE (Always 8192 Bytes)
-    //                              ;    $02 = DEALLOCATE PAGE (Always 8192 Bytes)
-    //                              ;    $03 = ALLOCATE CHAIN (MMU_ARG_1_LSB = # Blocks)
-    //                              ;             MMU_ARG_1_LSB: 0=NONE, 1-255= (32-8160 Bytes)
-    //                              ;    $04 = DEALLOCATE CHAIN (From MMU_META_ROOT)
-    //                              ;    $05 = Load Root Node
-    //                              ;    $06 = Load Next Node
-    //                              ;    $07 = Load Prev Node
-    //                              ;    $08 = Load Last Node
-    //                              ;    $09 = Remove Current Node (and Adjust Links)
-    //                              ;    $0A = Insert Node Before (and activate)
-    //                              ;    $0B = Insert Node After (and activate)
-    //                              ;    $0C = Push Back (and activate)
-    //                              ;    $0D = Push Front (and activate)
-    //                              ;    $0E = Pop Back (and activate)
-    //                              ;    $0F = Pop Front (adjust the handle and activate next)
-    //                              ;    $10 = Lock Node
-    //                              ;    $11 = Unlock Node
-    //                              ;    $12 = Defragment / Collect Garbage
-    //                              ;    ...
-    //                              ;    $FF = RESET; Clear All Allocation Chains
-    Byte _mmu_error = 0;
-    // MMU_ERROR                    ; (Byte) Memory Management Unit Error Code:
-    //                              ;    $00 = NO ERROR
-    //                              ;    $01 = OUT OF MEMORY
-    //                              ;    $02 = MEMORY ALLOCATION ERROR
-    //                              ;    $03 = MEMORY DEALLOCATION ERROR
-    //                              ;    $04 = MEMORY MAPPING ERROR
-    //                              ;    $05 = MEMORY UNMAPPING ERROR
-    //                              ;    $06 = INVALID COMMAND
-    //                              ;    $07 = INVALID ARGUMENT
-    //                              ;    $08 = INVALID HANDLE
-    //                              ;    $09 = INVALID NODE
-    //                              ;    $0A = INVALID PAGE
-    //                              ;    $0B = INVALID BANK
-    //                              ;    $0C = INVALID ADDRESS
-    //                              ;    $0D = INVALID OFFSET
-    //                              ;    $0E = INVALID LENGTH
-    //                              ;    $0F = INVALID INDEX
-    //                              ;    $FF = UNKNOWN ERROR
 
-    Word _mmu_handle = 0;
+    Byte _mmu_command = 0;  
+
+    struct CommandInfo {
+        std::string key;
+        std::string description;
+        std::function<Byte()> action;  // Function pointer for the command
+        std::function<bool()> test;    // Function pointer for the unit test
+    };
+
+std::vector<CommandInfo> _mmu_command_list = {
+//    CONSTANT             , DESCRIPTION                                , FUNCTION POINTER FOR THE COMMAND,             , FUNCTION POINTER FOR THE UNIT TEST
+    {"MMU_CMD_NOP"        , "No Operation / Error",                     [this]() -> Byte { return do_nop(); },          [this]() -> bool { return _test_nop(); }},
+    {"MMU_CMD_PG_ALLOC"   , "Page Allocate (8K Bytes)",                 [this]() -> Byte { return do_pg_alloc(); },     [this]() -> bool { return _test_pg_alloc(); }},
+    {"MMU_CMD_PG_FREE"    , "Page Deallocate (8K Bytes)",               [this]() -> Byte { return do_pg_free(); },      [this]() -> bool { return _test_pg_free(); }},
+    {"MMU_CMD_ALLOC"      , "Allocate Chain (< 8K Bytes)",              [this]() -> Byte { return do_alloc(); },        [this]() -> bool { return _test_alloc(); }},
+    {"MMU_CMD_FREE"       , "Deallocate Chain (< 8K Bytes)",            [this]() -> Byte { return do_free(); },         [this]() -> bool { return _test_free(); }},
+    {"MMU_CMD_LOAD_ROOT"  , "Load Root Node",                           [this]() -> Byte { return do_load_root(); },    [this]() -> bool { return _test_load_root(); }},
+    {"MMU_CMD_LOAD_NEXT"  , "Load Next Node",                           [this]() -> Byte { return do_load_next(); },    [this]() -> bool { return _test_load_next(); }},
+    {"MMU_CMD_LOAD_PREV"  , "Load Prev Node",                           [this]() -> Byte { return do_load_prev(); },    [this]() -> bool { return _test_load_prev(); }},
+    {"MMU_CMD_LOAD_LAST"  , "Load Last Node",                           [this]() -> Byte { return do_load_last(); },    [this]() -> bool { return _test_load_last(); }},
+    {"MMU_CMD_DEL_NODE"   , "Remove Current Node (and Adjust Links)",   [this]() -> Byte { return do_del_node(); },     [this]() -> bool { return _test_del_node(); }},
+    {"MMU_CMD_INS_BEFORE" , "Insert Node Before (and activate)",        [this]() -> Byte { return do_ins_before(); },   [this]() -> bool { return _test_ins_before(); }},
+    {"MMU_CMD_INS_AFTER"  , "Insert Node After (and activate)",         [this]() -> Byte { return do_ins_after(); },    [this]() -> bool { return _test_ins_after(); }},
+    {"MMU_CMD_PUSH_BACK"  , "Push Back (and activate)",                 [this]() -> Byte { return do_push_back(); },    [this]() -> bool { return _test_push_back(); }},
+    {"MMU_CMD_PUSH_FRONT" , "Push Front (and activate)",                [this]() -> Byte { return do_push_front(); },   [this]() -> bool { return _test_push_front(); }},
+    {"MMU_CMD_POP_BACK"   , "Pop Back (and activate)",                  [this]() -> Byte { return do_pop_back(); },     [this]() -> bool { return _test_pop_back(); }},
+    {"MMU_CMD_POP_FRONT"  , "Pop Front (and activate)",                 [this]() -> Byte { return do_pop_front(); },    [this]() -> bool { return _test_pop_front(); }},
+    {"MMU_CMD_LOCK_NODE"  , "Lock Node",                                [this]() -> Byte { return do_lock_node(); },    [this]() -> bool { return _test_lock_node(); }},
+    {"MMU_CMD_UNLOCK_NODE", "Unlock Node",                              [this]() -> Byte { return do_unlock_node(); },  [this]() -> bool { return _test_unlock_node(); }},
+    {"MMU_CMD_DEFRAG"     , "Defragment / Collect Garbage",             [this]() -> Byte { return do_defrag(); },       [this]() -> bool { return _test_defrag(); }},
+    {"MMU_CMD_RESET"      , "Reset Memory Management Unit",             [this]() -> Byte { return do_reset(); },        [this]() -> bool { return _test_reset(); }},
+    {"MMU_CMD_SIZE"       , "Total Number of MMU Commands",             [this]() -> Byte { return do_size(); },         [this]() -> bool { return _test_size(); }}
+};
+
+    Byte _mmu_error = 0;
+    std::vector<std::pair<std::string, std::string>> _mmu_error_list = {
+        { "MMU_ERR_NONE",       "No Error" },
+        { "MMU_ERR_OUTOFMEM",   "Out of Memory Error" },
+        { "MMU_ERR_ALLOC",      "Failed to Allocate Memory" },
+        { "MMU_ERR_FREE",       "Failed to Deallocate Memory" },
+        { "MMU_ERR_MAPPING",    "Memory Mapping Error" },
+        { "MMU_ERR_UNMAPPING",  "Error Unmapping Memory" },
+        { "MMU_ERR_INVALID",    "Invalid Command" },
+        { "MMU_ERR_ARGUMENT",   "Invalid Argument" },
+        { "MMU_ERR_HANDLE",     "Invalid Handle" },
+        { "MMU_ERR_NODE",       "Invalid Node" },
+        { "MMU_ERR_PAGE",       "Invalid Page" },
+        { "MMU_ERR_BANK",       "Invalid Bank" },
+        { "MMU_ERR_ADDRESS",    "Invalid Address" },
+        { "MMU_ERR_OFFSET",     "Invalid Offset" },
+        { "MMU_ERR_LENGTH",     "Invalid Length" },
+        { "MMU_ERR_INDEX",      "Invalid Index" },
+        { "MMU_ERR_UNKNOWN",    "Unknown Error" },
+        { "MMU_ERR_SIZE",       "Total Number of MMU Errors" }
+    };
+
+
+    // MMU_ERROR                    ; (Byte) Memory Management Unit Error Code:
+    // MMU_ERR_NONE                 ;    $00 = No Error
+    // MMU_ERR_OUTOFMEM             ;    $01 = Out of Memory Error
+    // MMU_ERR_ALLOC                ;    $02 = Failed to Allocate Memory
+    // MMU_ERR_FREE                 ;    $03 = Failed to Deallocate Memory
+    // MMU_ERR_MAPPING              ;    $04 = Memory Mapping Error
+    // MMU_ERR_UNMAPPING            ;    $05 = Error Unmapping Memory
+    // MMU_ERR_INVALID              ;    $06 = Invalid Command
+    // MMU_ERR_ARGUMENT             ;    $07 = Invalid Argument
+    // MMU_ERR_HANDLE               ;    $08 = Invalid Handle
+    // MMU_ERR_NODE                 ;    $09 = Invalid Node
+    // MMU_ERR_PAGE                 ;    $0A = Invalid Page
+    // MMU_ERR_BANK                 ;    $0B = Invalid Bank
+    // MMU_ERR_ADDRESS              ;    $0C = Invalid Address
+    // MMU_ERR_OFFSET               ;    $0D = Invalid Offset
+    // MMU_ERR_LENGTH               ;    $0E = Invalid Length
+    // MMU_ERR_INDEX                ;    $0F = Invalid Index
+    // MMU_ERR_UNKNOWN              ;    $10 = Unknown Error
+
+    Word _mmu_handle = MMU_BAD_HANDLE;
     // MMU_HANDLE                   ; (Word) Handle for the current allocation chain
+
     Byte _mmu_status = 0;
     // MMU_STATUS                   ; (Byte) Status flags:
-    //                              ;    bit  0 = Is Allocated:     0 = Free,   1 = Allocated
-    //                              ;    bit  1 = 8k Paged Memory:  0 = No,     1 = Yes
-    //                              ;    bit  2 = Storage Type:     0 = RAM,    1 = ROM
-    //                              ;    bit  3 = Is Fragmented?    0 = No,     1 = Yes
-    //                              ;    bit  4 = Is Locked?        0 = No,     1 = Yes
-    //                              ;    bit  5 = (reserved)
-    //                              ;    bit  6 = (reserved)
-    //                              ;    bit  7 = Error:            0 = No,     1 = Yes
-
+    // MMU_STFLG_ALLOC              ;    0000'0001: Is Allocated: 0 = Free, 1 = Allocated
+    // MMU_STFLG_PAGED              ;    0000'0010: Paged Memory: 0 = No,   1 = Yes
+    // MMU_STFLG_RW_RO              ;    0000'0100: Memory Type:  0 = RAM,  1 = ROM
+    // MMU_STFLG_FRAGD              ;    0000'1000: Fragmented:   0 = No,   1 = Yes
+    // MMU_STFLG_LOCKED             ;    0001'0000: Locked:       0 = No,   1 = Yes
+    // MMU_STFLG_RES_1              ;    0010'0000:   (reserved)
+    // MMU_STFLG_RES_2              ;    0100'0000:   (reserved)
+    // MMU_STFLG_ERROR              ;    1000'0000: Error:        0 = No,   1 = Yes
 
     std::array<Byte,32> _meta_data{0};
     // MMU_META_DATA                ; (32-Bytes) 32-Byte data for the current allocation chain
 
-
-
     Word _mmu_meta_root = 0;
     // MMU_META_ROOT                ; (Word) (Read Only) Root node of the current allocation chain
+
     Word _mmu_meta_prev = 0;
     // MMU_META_PREV                ; (Word) (Read Only) Previous node of the current allocation chain
+
     Word _mmu_meta_next = 0;
     // MMU_META_NEXT                ; (Word) (Read Only) Next node of the current allocation chain    
+
     Word _mmu_raw_index = 0;
     // MMU_RAW_INDEX                ; Raw Index of the current memory node (For Debugging)
 
 
+    // ************************* //
+    // DATA TYPES AND STRUCTURES //
+    // ************************* //
+
+    Word allocate_handle();
+    void deallocate_handle(Word handle);
+
+
+    std::vector<Word> _handles;  // Holds the allocated memory handles (root node indices)
+
+    // struct MMU_PAGE {
+    //     Word metadata_root = 0xFFFF;    // index of the first metadata node in this allocation
+    //     Byte status = 0;                // status flags (same as METADATA_NODE)
+    // };
+    // std::vector<MMU_PAGE> _mmu_page;    // a vector that references a number of 8KB pages
+    
 
     struct METADATA_NODE {
-        Byte data_index;            // index within the _data_pool vector to 32-Byte data
+        Byte reserved;              // padding to align to 8-bytes (reserved for future use)
         Byte status;                // status flags
                                     // bit  0   Is Allocated:     0 = Free,   1 = Allocated
                                     // bit  1   8k Paged Memory:  0 = No,     1 = Yes
@@ -165,20 +279,16 @@ private:
                                     // bit  5   (reserved)
                                     // bit  6   (reserved)
                                     // bit  7   Error:            0 = No,     1 = Yes
+        std::array<Byte,32> data = {0};                                    
         Word root_node;             // index of the first block in this allocation
         Word prev_node;             // index of the previous node in this allocation
         Word next_node;             // index of the child node in this allocation        
     };
     // Allocate within the 2MB memory pool (Each METADATA_NODE represents 8-bytes)
     // the metadata pool will be 52'428 * 8 = 419'424 bytes.
-    std::vector<METADATA_NODE> _metadata_pool = std::vector<METADATA_NODE>(52'428);
+    // MMU_MEMORY_SIZE = 52'428
+    std::vector<METADATA_NODE> _metadata_pool = std::vector<METADATA_NODE>(MMU_MEMORY_SIZE);
 
-    struct DATA_NODE {
-        std::array<Byte,32> data = {0};
-    };
-    // Allocate within the 2MB memory pool (Each DATA_NODE represents 32-bytes)
-    // the data pool will be 52'428 * 32 = 1'677'696 bytes
-    std::vector<DATA_NODE> _data_pool = std::vector<DATA_NODE>(52'428);
 
     //          DATA pool = 1'677'696 bytes
     //      METADATA pool =   419'424 bytes
@@ -189,10 +299,16 @@ private:
         std::bitset<256> flags; // 256 bits (32 bytes) to represent flags for each 32-byte block.
     };
 
-    Word _dynamic_memory_top = 0xCCCC;      // top of dynamic memory $CCCC = 52'428
-    Word _dynamic_memory_bottom = 0x0000;   // bottom of dynamemic memory, 
-                                            //     preinitialized to zero for now
+
+    Word _dynamic_memory_top = MMU_MEMORY_SIZE;     // top of dynamic memory $CCCC = 52'428
+    Word _dynamic_memory_bottom = 0x0000;           // bottom of dynamemic memory, 
+                                                    //     preinitialized to zero for now
 };
+
+
+
+
+
 
 /**************************************+
 
@@ -451,95 +567,7 @@ Updated To-Do List: Memory System Implementation
         Implement safe access patterns for paged memory to avoid programmer pitfalls.
 
 
-
-
-
-    MMU_DEVICE              (Constant)      ; START: Memory Management Unit Hardware Registers
-    MMU_1_SELECT            (Word)          ; Page Select for 8K Memory Bank 1 (MMU_META_HANDLE)
-    MMU_2_SELECT            (Word)          ; Page Select for 8K Memory Bank 2 (MMU_META_HANDLE)
-
-    MMU_BLOCKS_FREE         (Word)          ; Number of 32-Byte Blocks Available for Allocation
-    MMU_BLOCKS_ALLOCATED    (Word)          ; Number of 32-Byte Blocks Currently Allocated
-    MMU_BLOCKS_FRAGGED      (Word)          ; Number of 32-Byte Blocks Currently Fragmented
-
-    MMU_ARG_1_MSB           (Byte)          ; Argument 1 Most Significant Byte for MMU Command
-    MMU_ARG_1_LSB           (Byte)          ; Argument 1 Least Significant Byte for MMU Command
-    MMU_ARG_2_MSB           (Byte)          ; Argument 2 Most Significant Byte for MMU Command
-    MMU_ARG_2_LSB           (Byte)          ; Argument 2 Least Significant Byte for MMU Command
-
-    MMU_COMMAND             (Byte)          ; Memory Management Unit Command
-                                            ; $00 = NO OPERATION / ERROR
-                                            ; $01 = ALLOCATE PAGE (Always 8192 Bytes)
-                                            ; $02 = DEALLOCATE PAGE (Always 8192 Bytes)
-                                            ; $03 = ALLOCATE CHAIN (MMU_ARG_1_LSB = # Blocks)
-                                            ;       MMU_ARG_1_LSB: 0=NONE, 1-255= (32-8160 Bytes)
-                                            ; $04 = DEALLOCATE CHAIN (From MMU_META_ROOT)
-                                            ; $05 = Load Root Node
-                                            ; $06 = Load Next Node
-                                            ; $07 = Load Prev Node
-                                            ; $08 = Load Last Node
-                                            ; $09 = Remove Current Node (and Adjust Links)
-                                            ; $0A = Insert Node Before (and activate)
-                                            ; $0B = Insert Node After (and activate)
-                                            ; $0C = Push Back
-                                            ; $0D = Push Front
-                                            ; $0E = Pop Back (and activate previous)
-                                            ; $0F = Pop Front (adjust the handle and activate next)
-                                            ; $10 = Lock Node
-                                            ; $11 = Unlock Node
-                                            ; ...
-                                            ; $NN = Defragment / Collect Garbage
-                                            ; ...
-                                            ; $FF = RESET; Clear All Allocation Chains
-
-    MMU_ERROR               (Byte)          ; Memory Management Unit Error Code:
-                                            ; $00 = NO ERROR
-                                            ; $01 = OUT OF MEMORY
-                                            ; $02 = MEMORY ALLOCATION ERROR
-                                            ; $03 = MEMORY DEALLOCATION ERROR
-                                            ; $04 = MEMORY MAPPING ERROR
-                                            ; $05 = MEMORY UNMAPPING ERROR
-                                            ; $06 = INVALID COMMAND
-                                            ; $07 = INVALID ARGUMENT
-                                            ; $08 = INVALID HANDLE
-                                            ; $09 = INVALID NODE
-                                            ; $0A = INVALID PAGE
-                                            ; $0B = INVALID BANK
-                                            ; $0C = INVALID ADDRESS
-                                            ; $0D = INVALID OFFSET
-                                            ; $0E = INVALID LENGTH
-                                            ; $0F = INVALID INDEX
-                                            ; $FF = UNKNOWN ERROR
-
-    MMU_META_HANDLE         (Word)          ; Handle for the current allocation
-    MMU_META_STATUS         (Byte)          ; Status flags for the current allocation
-    MMU_META_DATA           (32-Bytes)      ; 32-Bytes of data for the current allocation
-    MMU_META_ROOT           (Word)          ; (Read Only) Root node of the current allocation
-    MMU_META_PREV           (Word)          ; (Read Only) Previous node of the current allocation
-    MMU_META_NEXT           (Word)          ; (Read Only) Next node of the current allocation    
-    MMU_RAW_INDEX           (Word)          ; Raw Index of the current memory node (For Debugging)
-
-    MMU_END                 (Constant)      ; END: of Banked Memory Register Space
-    MMU_TOP                 (Constant)      ; TOP: of Banked Memory Register Space
-
-
-    struct METADATA_NODE {
-        Byte data_index;    // index within the _data_pool vector to 32-Byte data
-        Byte status;        // status flags
-                            // bit  0   Is Allocated:     0 = Free,   1 = Allocated
-                            // bit  1   8k Paged Memory:  0 = No,     1 = Yes
-                            // bit  2	Storage Type:     0 = RAM,    1 = ROM
-                            // bit  3   Is Fragmented?    0 = No,     1 = Yes
-                            // bit  4   (reserved)
-                            // bit  5   (reserved)
-                            // bit  6   (reserved)
-                            // bit  7   Error:            0 = No,     1 = Yes
-        Word root_block;    // index of the first block in this allocation
-        Word prev_node;     // index of the previous node in this allocation
-        Word next_node;     // index of the child node in this allocation        
-    };
-
- */
+ ************/
 
 
 // END: MMU.hpp

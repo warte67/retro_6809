@@ -528,83 +528,85 @@ enum MEMMAP
 // _______________________________________________________________________
 
     MMU_DEVICE            = 0xFE86,   // START: Memory Management Unit Hardware Registers
-    MMU_1_SELECT          = 0xFE86,   // (Byte) Page Select for 8K Memory Bank 1
-    MMU_2_SELECT          = 0xFE87,   // (Byte) Page Select for 8K Memory Bank 2 (MMU_META_HANDLE)
-    MMU_BLOCKS_FREE       = 0xFE88,   // (Word) Number of 32-Byte Blocks Available for Allocation
-    MMU_BLOCKS_ALLOCATED  = 0xFE8A,   // (Word) Number of 32-Byte Blocks Currently Allocated
-    MMU_BLOCKS_FRAGGED    = 0xFE8C,   // (Word) Number of 32-Byte Blocks Currently Fragmented
-    MMU_ARG_1             = 0xFE8E,   // (Word)  Argument 1 for MMU Command
-    MMU_ARG_1_MSB         = 0xFE8E,   // (Byte)  Argument 1 Most Significant Byte for MMU Command
-    MMU_ARG_1_LSB         = 0xFE8F,   // (Byte)  Argument 1 Least Significant Byte for MMU Command
-    MMU_ARG_2             = 0xFE90,   // (Word)  Argument 2 for MMU Command
-    MMU_ARG_2_MSB         = 0xFE90,   // (Byte)  Argument 2 Most Significant Byte for MMU Command
-    MMU_ARG_2_LSB         = 0xFE91,   // (Byte)  Argument 2 Least Significant Byte for MMU Command
-    MMU_COMMAND           = 0xFE92,   // (Byte) Memory Management Unit Command:
-                                      //    $00 = NO OPERATION / ERROR
-                                      //    $01 = ALLOCATE PAGE (Always 8192 Bytes)
-                                      //    $02 = DEALLOCATE PAGE (Always 8192 Bytes)
-                                      //    $03 = ALLOCATE CHAIN (MMU_ARG_1_LSB = # Blocks)
-                                      //             MMU_ARG_1_LSB: 0=NONE, 1-255= (32-8160 Bytes)
-                                      //    $04 = DEALLOCATE CHAIN (From MMU_META_ROOT)
-                                      //    $05 = Load Root Node
-                                      //    $06 = Load Next Node
-                                      //    $07 = Load Prev Node
-                                      //    $08 = Load Last Node
-                                      //    $09 = Remove Current Node (and Adjust Links)
-                                      //    $0A = Insert Node Before (and activate)
-                                      //    $0B = Insert Node After (and activate)
-                                      //    $0C = Push Back (and activate)
-                                      //    $0D = Push Front (and activate)
-                                      //    $0E = Pop Back (and activate)
-                                      //    $0F = Pop Front (adjust the handle and activate next)
-                                      //    $10 = Lock Node
-                                      //    $11 = Unlock Node
-                                      //    $12 = Defragment / Collect Garbage
-                                      //    ...
-                                      //    $FF = RESET; Clear All Allocation Chains
+    MMU_1_SELECT          = 0xFE86,   // (Word) Page Select for 8K Memory Bank 1
+    MMU_2_SELECT          = 0xFE88,   // (Word) Page Select for 8K Memory Bank 2
+    MMU_BLOCKS_FREE       = 0xFE8A,   // (Word) Number of 32-Byte Blocks Available for Allocation (Read Only)
+    MMU_BLOCKS_ALLOCATED  = 0xFE8C,   // (Word) Number of 32-Byte Blocks Currently Allocated  (Read Only)
+    MMU_BLOCKS_FRAGGED    = 0xFE8E,   // (Word) Number of 32-Byte Blocks Currently Fragmented  (Read Only)
+    MMU_ARG_1             = 0xFE90,   // (Word) Argument 1 for MMU Command
+    MMU_ARG_1_MSB         = 0xFE90,   // (Byte) Argument 1 Most Significant Byte for MMU Command
+    MMU_ARG_1_LSB         = 0xFE91,   // (Byte) Argument 1 Least Significant Byte for MMU Command
+    MMU_ARG_2             = 0xFE92,   // (Word) Argument 2 for MMU Command
+    MMU_ARG_2_MSB         = 0xFE92,   // (Byte) Argument 2 Most Significant Byte for MMU Command
+    MMU_ARG_2_LSB         = 0xFE93,   // (Byte) Argument 2 Least Significant Byte for MMU Command
                                       // 
-    MMU_ERROR             = 0xFE93,   // (Byte) Memory Management Unit Error Code:
-                                      //    $00 = NO ERROR
-                                      //    $01 = OUT OF MEMORY
-                                      //    $02 = MEMORY ALLOCATION ERROR
-                                      //    $03 = MEMORY DEALLOCATION ERROR
-                                      //    $04 = MEMORY MAPPING ERROR
-                                      //    $05 = MEMORY UNMAPPING ERROR
-                                      //    $06 = INVALID COMMAND
-                                      //    $07 = INVALID ARGUMENT
-                                      //    $08 = INVALID HANDLE
-                                      //    $09 = INVALID NODE
-                                      //    $0A = INVALID PAGE
-                                      //    $0B = INVALID BANK
-                                      //    $0C = INVALID ADDRESS
-                                      //    $0D = INVALID OFFSET
-                                      //    $0E = INVALID LENGTH
-                                      //    $0F = INVALID INDEX
-                                      //    $FF = UNKNOWN ERROR
+    MMU_COMMAND           = 0xFE94,   // (Byte) Memory Management Unit Command:
+    MMU_CMD_NOP           = 0x0000,   //    $00 = No Operation / Error
+    MMU_CMD_PG_ALLOC      = 0x0001,   //    $01 = Page Allocate (8K Bytes)
+    MMU_CMD_PG_FREE       = 0x0002,   //    $02 = Page Deallocate (8K Bytes)
+    MMU_CMD_ALLOC         = 0x0003,   //    $03 = Allocate Chain (< 8K Bytes)
+    MMU_CMD_FREE          = 0x0004,   //    $04 = Deallocate Chain (< 8K Bytes)
+    MMU_CMD_LOAD_ROOT     = 0x0005,   //    $05 = Load Root Node
+    MMU_CMD_LOAD_NEXT     = 0x0006,   //    $06 = Load Next Node
+    MMU_CMD_LOAD_PREV     = 0x0007,   //    $07 = Load Prev Node
+    MMU_CMD_LOAD_LAST     = 0x0008,   //    $08 = Load Last Node
+    MMU_CMD_DEL_NODE      = 0x0009,   //    $09 = Remove Current Node (and Adjust Links)
+    MMU_CMD_INS_BEFORE    = 0x000A,   //    $0A = Insert Node Before (and activate)
+    MMU_CMD_INS_AFTER     = 0x000B,   //    $0B = Insert Node After (and activate)
+    MMU_CMD_PUSH_BACK     = 0x000C,   //    $0C = Push Back (and activate)
+    MMU_CMD_PUSH_FRONT    = 0x000D,   //    $0D = Push Front (and activate)
+    MMU_CMD_POP_BACK      = 0x000E,   //    $0E = Pop Back (and activate)
+    MMU_CMD_POP_FRONT     = 0x000F,   //    $0F = Pop Front (and activate)
+    MMU_CMD_LOCK_NODE     = 0x0010,   //    $10 = Lock Node
+    MMU_CMD_UNLOCK_NODE   = 0x0011,   //    $11 = Unlock Node
+    MMU_CMD_DEFRAG        = 0x0012,   //    $12 = Defragment / Collect Garbage
+    MMU_CMD_RESET         = 0x0013,   //    $13 = Reset Memory Management Unit
+    MMU_CMD_SIZE          = 0x0014,   //    $14 = Total Number of MMU Commands
                                       // 
-    MMU_META_HANDLE       = 0xFE94,   // (Word) Handle for the current allocation chain
-    MMU_META_STATUS       = 0xFE96,   // (Byte) Status Flags:
-                                      //    bit  0 = Is Allocated:     0 = Free,   1 = Allocated
-                                      //    bit  1 = 8k Paged Memory:  0 = No,     1 = Yes
-                                      //    bit  2 = Storage Type:     0 = RAM,    1 = ROM
-                                      //    bit  3 = Is Fragmented?    0 = No,     1 = Yes
-                                      //    bit  4 = Is Locked?        0 = No,     1 = Yes
-                                      //    bit  5 = (reserved)
-                                      //    bit  6 = (reserved)
-                                      //    bit  7 = Error:            0 = No,     1 = Yes
+    MMU_ERROR             = 0xFE95,   // (Byte) Memory Management Unit Error Code:     (Read Only)
+    MMU_ERR_NONE          = 0x0000,   //    $00 = No Error
+    MMU_ERR_OUTOFMEM      = 0x0001,   //    $01 = Out of Memory Error
+    MMU_ERR_ALLOC         = 0x0002,   //    $02 = Failed to Allocate Memory
+    MMU_ERR_FREE          = 0x0003,   //    $03 = Failed to Deallocate Memory
+    MMU_ERR_MAPPING       = 0x0004,   //    $04 = Memory Mapping Error
+    MMU_ERR_UNMAPPING     = 0x0005,   //    $05 = Error Unmapping Memory
+    MMU_ERR_INVALID       = 0x0006,   //    $06 = Invalid Command
+    MMU_ERR_ARGUMENT      = 0x0007,   //    $07 = Invalid Argument
+    MMU_ERR_HANDLE        = 0x0008,   //    $08 = Invalid Handle
+    MMU_ERR_NODE          = 0x0009,   //    $09 = Invalid Node
+    MMU_ERR_PAGE          = 0x000A,   //    $0A = Invalid Page
+    MMU_ERR_BANK          = 0x000B,   //    $0B = Invalid Bank
+    MMU_ERR_ADDRESS       = 0x000C,   //    $0C = Invalid Address
+    MMU_ERR_OFFSET        = 0x000D,   //    $0D = Invalid Offset
+    MMU_ERR_LENGTH        = 0x000E,   //    $0E = Invalid Length
+    MMU_ERR_INDEX         = 0x000F,   //    $0F = Invalid Index
+    MMU_ERR_UNKNOWN       = 0x0010,   //    $10 = Unknown Error
+    MMU_ERR_SIZE          = 0x0011,   //    $11 = Total Number of MMU Errors
                                       // 
-    MMU_META_DATA         = 0xFE97,   // (32-Bytes) Data Window for the Current Allocation
-    MMU_META_ROOT         = 0xFEB6,   // (Word) Root node of the current allocation       (Read Only)
-    MMU_META_PREV         = 0xFEB8,   // (Word) Previous node of the current allocation   (Read Only)
-    MMU_META_NEXT         = 0xFEBA,   // (Word) Next node of the current allocation       (Read Only)
-    MMU_RAW_INDEX         = 0xFEBC,   // (Word) Raw Index of the current memory node  (For Debugging)
+    MMU_META_HANDLE       = 0xFE96,   // (Word) Handle for the current allocation chain
                                       // 
-    MMU_END               = 0xFEBD,   // End of Banked Memory Register Space
-    MMU_TOP               = 0xFEBE,   // Top of Banked Memory Register Space
+    MMU_META_STATUS       = 0xFE98,   // (Byte) Status Flags:
+    MMU_STFLG_ALLOC       = 0x0001,   //    0000'0001: Is Allocated: 0 = Free, 1 = Allocated
+    MMU_STFLG_PAGED       = 0x0002,   //    0000'0010: Paged Memory: 0 = No,   1 = Yes
+    MMU_STFLG_RW_RO       = 0x0004,   //    0000'0100: Memory Type:  0 = RAM,  1 = ROM
+    MMU_STFLG_FRAGD       = 0x0008,   //    0000'1000: Fragmented:   0 = No,   1 = Yes
+    MMU_STFLG_LOCKED      = 0x0010,   //    0001'0000: Locked:       0 = No,   1 = Yes
+    MMU_STFLG_RES_1       = 0x0020,   //    0010'0000:   (reserved)
+    MMU_STFLG_RES_2       = 0x0040,   //    0100'0000:   (reserved)
+    MMU_STFLG_ERROR       = 0x0080,   //    1000'0000: Error:        0 = No,   1 = Yes
+                                      // 
+    MMU_META_DATA         = 0xFE99,   // (32-Bytes) Data Window for the Current Allocation
+    MMU_META_ROOT         = 0xFEB9,   // (Word) Root node of the current allocation       (Read Only)
+    MMU_META_PREV         = 0xFEBB,   // (Word) Previous node of the current allocation   (Read Only)
+    MMU_META_NEXT         = 0xFEBD,   // (Word) Next node of the current allocation       (Read Only)
+    MMU_RAW_INDEX         = 0xFEBF,   // (Word) Raw Index of the current memory node  (For Debugging)
+                                      // 
+    MMU_END               = 0xFEC0,   // End of Banked Memory Register Space
+    MMU_TOP               = 0xFEC1,   // Top of Banked Memory Register Space
 // _______________________________________________________________________
 
-    HDW_RESERVED_DEVICE   = 0xFEBE,   // START: Reserved Register Space
-    HDW_REG_END           = 0xFFF0,   // 306 bytes reserved for future use.
+    HDW_RESERVED_DEVICE   = 0xFEC1,   // START: Reserved Register Space
+    HDW_REG_END           = 0xFFF0,   // 303 bytes reserved for future use.
 // _______________________________________________________________________
 
     ROM_VECTS_DEVICE      = 0xFFF0,   // START: Hardware Interrupt Vectors
