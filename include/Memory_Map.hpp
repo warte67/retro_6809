@@ -588,7 +588,7 @@ enum MEMMAP
     MMU_META_STATUS       = 0xFE98,   // (Byte) Status Flags:
     MMU_STFLG_ALLOC       = 0x0001,   //    0000'0001: Is Allocated: 0 = Free, 1 = Allocated
     MMU_STFLG_PAGED       = 0x0002,   //    0000'0010: Paged Memory: 0 = No,   1 = Yes
-    MMU_STFLG_RW_RO       = 0x0004,   //    0000'0100: Memory Type:  0 = RAM,  1 = ROM
+    MMU_STFLG_READONLY    = 0x0004,   //    0000'0100: Memory Type:  0 = RAM,  1 = ROM
     MMU_STFLG_FRAGD       = 0x0008,   //    0000'1000: Fragmented:   0 = No,   1 = Yes
     MMU_STFLG_LOCKED      = 0x0010,   //    0001'0000: Locked:       0 = No,   1 = Yes
     MMU_STFLG_RES_1       = 0x0020,   //    0010'0000:   (reserved)

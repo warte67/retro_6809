@@ -280,14 +280,14 @@ int  MMU::OnAttach(int nextAddr)
         { "(Byte) Status Flags:" }}); nextAddr++;
     // ADD STATUS FLAGS ENUMERATION:
     Byte stat = 0;
-    mapped_register.push_back({ "MMU_STFLG_ALLOC" , (1<<stat++),nullptr,nullptr, { "   0000'0001: Is Allocated: 0 = Free, 1 = Allocated"}}); 
-    mapped_register.push_back({ "MMU_STFLG_PAGED" , (1<<stat++),nullptr,nullptr, { "   0000'0010: Paged Memory: 0 = No,   1 = Yes"}});
-    mapped_register.push_back({ "MMU_STFLG_RW_RO" , (1<<stat++),nullptr,nullptr, { "   0000'0100: Memory Type:  0 = RAM,  1 = ROM"}});
-    mapped_register.push_back({ "MMU_STFLG_FRAGD" , (1<<stat++),nullptr,nullptr, { "   0000'1000: Fragmented:   0 = No,   1 = Yes"}});
-    mapped_register.push_back({ "MMU_STFLG_LOCKED", (1<<stat++),nullptr,nullptr, { "   0001'0000: Locked:       0 = No,   1 = Yes"}});
-    mapped_register.push_back({ "MMU_STFLG_RES_1" , (1<<stat++),nullptr,nullptr, { "   0010'0000:   (reserved)"}});
-    mapped_register.push_back({ "MMU_STFLG_RES_2" , (1<<stat++),nullptr,nullptr, { "   0100'0000:   (reserved)"}});
-    mapped_register.push_back({ "MMU_STFLG_ERROR" , (1<<stat++),nullptr,nullptr, { "   1000'0000: Error:        0 = No,   1 = Yes",""}});
+    mapped_register.push_back({ "MMU_STFLG_ALLOC"   , (1<<stat++),nullptr,nullptr, { "   0000'0001: Is Allocated: 0 = Free, 1 = Allocated"}}); 
+    mapped_register.push_back({ "MMU_STFLG_PAGED"   , (1<<stat++),nullptr,nullptr, { "   0000'0010: Paged Memory: 0 = No,   1 = Yes"}});
+    mapped_register.push_back({ "MMU_STFLG_READONLY", (1<<stat++),nullptr,nullptr, { "   0000'0100: Memory Type:  0 = RAM,  1 = ROM"}});
+    mapped_register.push_back({ "MMU_STFLG_FRAGD"   , (1<<stat++),nullptr,nullptr, { "   0000'1000: Fragmented:   0 = No,   1 = Yes"}});
+    mapped_register.push_back({ "MMU_STFLG_LOCKED"  , (1<<stat++),nullptr,nullptr, { "   0001'0000: Locked:       0 = No,   1 = Yes"}});
+    mapped_register.push_back({ "MMU_STFLG_RES_1"   , (1<<stat++),nullptr,nullptr, { "   0010'0000:   (reserved)"}});
+    mapped_register.push_back({ "MMU_STFLG_RES_2"   , (1<<stat++),nullptr,nullptr, { "   0100'0000:   (reserved)"}});
+    mapped_register.push_back({ "MMU_STFLG_ERROR"   , (1<<stat++),nullptr,nullptr, { "   1000'0000: Error:        0 = No,   1 = Yes",""}});
     
 
     ////////////////////////////////////////////////
@@ -300,15 +300,34 @@ int  MMU::OnAttach(int nextAddr)
         {
             mapped_register.push_back({ "MMU_META_DATA", nextAddr, 
             [this,i](Word) { return _metadata_pool[_mmu_raw_index].data[i]; }, 
-            [this,i](Word, Byte data) { _metadata_pool[_mmu_raw_index].data[i] = data; },  
-            { "(32-Bytes) Data Window for the Current Allocation"} }); nextAddr++;
+            [this,i](Word, Byte data) 
+            { 
+                // Read Only if the root node or the current node is locked or Read Only
+                Word root_node = _metadata_pool[_mmu_raw_index].root_node;
+                if (!(_metadata_pool[root_node].status & 0x04) &&
+                    !(_metadata_pool[_mmu_raw_index].status & 0x04) &&
+                    !(_metadata_pool[root_node].status & 0x10) &&
+                    !(_metadata_pool[_mmu_raw_index].status & 0x10))
+                {
+                    _metadata_pool[_mmu_raw_index].data[i] = data; 
+                }
+            },{ "(32-Bytes) Data Window for the Current Allocation"} }); nextAddr++;
         }
         else
         {
             mapped_register.push_back( { "", nextAddr, 
             [this,i](Word) { return _metadata_pool[_mmu_raw_index].data[i]; },   
-            [this,i](Word, Byte data) { _metadata_pool[_mmu_raw_index].data[i] = data; },  
-            {""}}); nextAddr++;
+            [this,i](Word, Byte data) { 
+                // Read Only if the root node or the current node is locked or Read Only
+                Word root_node = _metadata_pool[_mmu_raw_index].root_node;
+                if (!(_metadata_pool[root_node].status & 0x04) &&
+                    !(_metadata_pool[_mmu_raw_index].status & 0x04) &&
+                    !(_metadata_pool[root_node].status & 0x10) &&
+                    !(_metadata_pool[_mmu_raw_index].status & 0x10))
+                {
+                    _metadata_pool[_mmu_raw_index].data[i] = data; 
+                }            
+            },{""}}); nextAddr++;
         }
     }
 
@@ -318,13 +337,13 @@ int  MMU::OnAttach(int nextAddr)
     //      Handle for the current allocation chain
     /////
     mapped_register.push_back({ "MMU_META_ROOT", nextAddr, 
-        [this](Word) { return (_mmu_meta_root>>8) & 0xFF; },  
-        [this](Word, Byte data) { _mmu_meta_root = (_mmu_meta_root & 0x00FF) | (data << 8); }, 
+        [this](Word) { return (_metadata_pool[_mmu_raw_index].root_node>>8) & 0xFF; },  
+        [this](Word, Byte data) { _metadata_pool[_mmu_raw_index].root_node = (_metadata_pool[_mmu_raw_index].root_node & 0x00FF) | (data << 8); }, 
         { "(Word) Root node of the current allocation       (Read Only)"} });
     nextAddr++;
     mapped_register.push_back( { "", nextAddr, 
-        [this](Word) { return _mmu_meta_root & 0xFF; },  
-        [this](Word, Byte data) { _mmu_meta_root = (_mmu_meta_root & 0xFF00) | data; },
+        [this](Word) { return _metadata_pool[_mmu_raw_index].root_node & 0xFF; },  
+        [this](Word, Byte data) { _metadata_pool[_mmu_raw_index].root_node = (_metadata_pool[_mmu_raw_index].root_node & 0xFF00) | data; },
     {""}}); nextAddr++;
 
 
@@ -333,13 +352,13 @@ int  MMU::OnAttach(int nextAddr)
     //      Handle for the current allocation chain
     /////
     mapped_register.push_back({ "MMU_META_PREV", nextAddr, 
-        [this](Word) { return (_mmu_meta_prev>>8) & 0xFF; },  
-        [this](Word, Byte data) { _mmu_meta_prev = (_mmu_meta_prev & 0x00FF) | (data << 8); },   
+        [this](Word) { return (_metadata_pool[_mmu_raw_index].prev_node>>8) & 0xFF; },  
+        [this](Word, Byte data) { _metadata_pool[_mmu_raw_index].prev_node = (_metadata_pool[_mmu_raw_index].prev_node & 0x00FF) | (data << 8); },   
         { "(Word) Previous node of the current allocation   (Read Only)"} });
     nextAddr++;
     mapped_register.push_back( { "", nextAddr, 
-        [this](Word) { return _mmu_meta_prev & 0xFF; },   
-        [this](Word, Byte data) { _mmu_meta_prev = (_mmu_meta_prev & 0xFF00) | data; },
+        [this](Word) { return _metadata_pool[_mmu_raw_index].prev_node & 0xFF; },   
+        [this](Word, Byte data) { _metadata_pool[_mmu_raw_index].prev_node = (_metadata_pool[_mmu_raw_index].prev_node & 0xFF00) | data; },
     {""}}); nextAddr++;
 
 
@@ -348,13 +367,13 @@ int  MMU::OnAttach(int nextAddr)
     //      Handle for the current allocation chain
     /////
     mapped_register.push_back({ "MMU_META_NEXT", nextAddr, 
-        [this](Word) { return (_mmu_meta_next>>8) & 0xFF; },
-        [this](Word, Byte data) { _mmu_meta_next = (_mmu_meta_next & 0x00FF) | (data << 8); }, 
+        [this](Word) { return (_metadata_pool[_mmu_raw_index].next_node>>8) & 0xFF; },
+        [this](Word, Byte data) { _metadata_pool[_mmu_raw_index].next_node = (_metadata_pool[_mmu_raw_index].next_node & 0x00FF) | (data << 8); }, 
         { "(Word) Next node of the current allocation       (Read Only)"} });
     nextAddr++;
     mapped_register.push_back( { "", nextAddr, 
-        [this](Word) { return _mmu_meta_next & 0xFF; }, 
-        [this](Word, Byte data) { _mmu_meta_next = (_mmu_meta_next & 0xFF00) | data; },
+        [this](Word) { return _metadata_pool[_mmu_raw_index].next_node & 0xFF; }, 
+        [this](Word, Byte data) { _metadata_pool[_mmu_raw_index].next_node = (_metadata_pool[_mmu_raw_index].next_node & 0xFF00) | data; },
     {""}}); nextAddr++;
 
 
@@ -421,7 +440,6 @@ void MMU::OnInit()
         node.next_node = MMU_BAD_HANDLE;       
         std::fill(node.data.begin(), node.data.end(), 0);  // Clear data block
     }    
-
     std::cout << clr::indent() << clr::LT_BLUE << "MMU::OnInit() Exit" << clr::RETURN;
 }
 
@@ -474,7 +492,7 @@ void MMU::error(Byte error_code)
  */
 void MMU::do_command(Byte command)
 {
-std::cout << clr::indent() << clr::PURPLE << "MMU::do_command() Entry" << clr::RETURN;
+    // std::cout << clr::indent() << clr::PURPLE << "MMU::do_command() Entry" << clr::RETURN;
     _mmu_command = command;
     // find the command and run it
     auto it = _mmu_commands.find(command);
@@ -483,7 +501,7 @@ std::cout << clr::indent() << clr::PURPLE << "MMU::do_command() Entry" << clr::R
     } else {
         error(MAP(MMU_ERR_INVALID));  // Handle invalid commands
     }    
-std::cout << clr::indent() << clr::PURPLE << "MMU::do_command() Exit" << clr::RETURN;
+    // std::cout << clr::indent() << clr::PURPLE << "MMU::do_command() Exit" << clr::RETURN;
 }
 
 /**
@@ -506,77 +524,9 @@ bool MMU::_test_nop()
 Byte MMU::do_pg_alloc()
 {
     // allocate 8k memory pages from the bottom of the pool towards the top
-    const size_t page_size = 8192;  // 8 KB (8192 bytes)
-    const size_t node_size = 32;    // Size of a single METADATA_NODE (32 bytes)
-    
-    const bool IS_RAM = true;        // Set this to true for RAM, false for ROM
-    const Byte STORAGE_TYPE_BIT = 0x04; // Bit 2 is for the storage type (RAM = 0, ROM = 1)
+    //const size_t page_size = 8192;  // 8 KB (8192 bytes)
 
-    size_t total_allocated = 0;
-    size_t num_nodes = 0;
-
-    // Create a new handle (this is the root node of the chain)
-    Word handle = allocate_handle();
-    if (handle == MMU_BAD_HANDLE) {
-        UnitTest::Log(clr::RED + "Error: Could not allocate memory handle!" + clr::RESET);
-        error(MAP(MMU_ERR_ALLOC));  // Report allocation failure
-        return MAP(MMU_CMD_PG_ALLOC);  // Return failure code
-    }
-
-    // Set the handle for the first node in the allocation chain
-    _mmu_handle = handle;  // Update the global MMU handle with the root node's handle
-
-std::cout << "handle: $" << clr::hex(handle, 4) << std::endl;
-
-    // Initialize the root node's root_node (set to itself)
-    _metadata_pool[handle].root_node = handle;  // The first node's root_node should point to itself
-
-    // Start creating the chain of metadata nodes
-    Word current_node_index = handle;
-    Word previous_node_index = MMU_BAD_HANDLE;  // There is no previous node for the first allocation
-    while (total_allocated < page_size) {
-        METADATA_NODE& node = _metadata_pool[current_node_index];
-
-        // Set the previous node for this one
-        node.prev_node = previous_node_index;
-
-        // Set the paged memory bit (bit 1 = 1, mask = 0x02)
-        node.status |= 0x02;  // Mark this node as part of a paged memory allocation
-
-        // Set the storage type bit (bit 2 = 0 for RAM, 1 for ROM)
-        if (IS_RAM) {
-            node.status &= ~STORAGE_TYPE_BIT;  // Ensure RAM status (bit 2 = 0)
-        } else {
-            node.status |= STORAGE_TYPE_BIT;   // Set ROM status (bit 2 = 1)
-        }
-
-        // Allocate one METADATA_NODE (32 bytes)
-        total_allocated += node_size;
-        num_nodes++;
-
-        // If there is more space to allocate, link to the next node
-        if (total_allocated < page_size) {
-            Word next_node_index = allocate_handle();
-            if (next_node_index != MMU_BAD_HANDLE) {
-                node.next_node = next_node_index;
-                previous_node_index = current_node_index;  // Update previous_node for the next iteration
-                current_node_index = next_node_index;
-            }
-            else {
-                // If there is no more space available, break out of the loop
-                UnitTest::Log(clr::RED + "Error: Not enough space in the metadata pool!" + clr::RESET);
-                error(MAP(MMU_ERR_ALLOC));  // Call error on allocation failure
-                return MAP(MMU_CMD_PG_ALLOC);  // Return failure code
-            }
-        }
-        else {
-            break;  // We've allocated enough blocks (8 KB)
-        }
-    }
-
-    // Log the allocation result (optional)
-    UnitTest::Log(clr::GREEN + "Allocated " + std::to_string(num_nodes) + " metadata nodes, " +
-                  std::to_string(total_allocated) + " bytes of 8KB." + clr::RESET);
+    // ...
 
     // Return the mapped command for page allocation
     return MAP(MMU_CMD_PG_ALLOC);
@@ -615,14 +565,271 @@ bool MMU::_test_pg_free()
     return test_results;
 }
 
+
+/**
+ * Allocate a chain of metadata nodes until (MMU_ARG_1_LSB)+1 amount is reached.
+ * 
+ * This function allocates a chain of metadata nodes until the total allocation
+ * size reaches the value of MMU_ARG_1_LSB+1. It returns the mapped command for
+ * page allocation (MMU_CMD_PG_ALLOC).
+ * 
+ * The function first creates a new handle for the root node of the allocation
+ * chain. It then sets the handle for the first node in the allocation chain
+ * and initializes the root node's root_node and prev_node to point to itself. 
+ * It also sets the nodes status flag to the value found within MMU_ARG_1_MSB.
+ * 
+ * In the case where bit 2 of the status flag stored within MMU_ARG_1_MSB is set
+ * to 1 the value of 255 will be stored into MMU_ARG_1_LSB regardless of the
+ * value currently stored in MMU_ARG_1_LSB. In this case a full sized 8k page
+ * should be allocated.
+ * 
+ * The function then starts creating the chain of metadata nodes. For each node,
+ * it sets the previous node of the new node to the current node index, sets the
+ * next node of the current node to the new nodes index, and updates the status 
+ * flag to the value in MMU_ARG_1_MSB. This process repeats until the number of 
+ * nodes in the chain is equal to the value stored in MMU_ARG_1_LSB+1 or 1-256.
+ * 
+ * If there is more space to allocate, the function will handle the allocation
+ * error by calling error(MMU_ERR_ALLOC) to indicate a memory allocation error.
+ * When this happens the next_node of the current node is set to MMU_BAD_HANDLE.
+ * The function then breaks out of the loop and returns normally.
+ * 
+ * If there is no more space available, the function breaks out of the loop and
+ * logs an error message. It then calls error on allocation failure and returns
+ * the failure code (MMU_CMD_PG_ALLOC).
+ * 
+ * Finally, the function logs the allocation result and returns the mapped
+ * command for page allocation (MMU_CMD_PG_ALLOC).     
+ * 
+ * @param (MMU_ARG_1_MSB) status flag template for allocation
+ *         relevant bits:
+ *              0000'0010: Paged Memory: 0 = No,   1 = Yes
+ *              0000'0100: Memory Type:  0 = RAM,  1 = ROM
+ *              0001'0000: Locked:       0 = No,   1 = Yes
+ *              0010'0000:   (reserved) or User Data
+ *              0100'0000:   (reserved) or User Data
+ * 
+ * @param (MMU_ARG_1_LSB)+1 or 1-256 The number of 32-byte nodes to allocate.
+ * 
+ * 
+ * @return The value in MMU_RAW_INDEX should be set to the handle of the root node.
+ */
 Byte MMU::do_alloc()
 {
-    // ...
+    // Read the status flag and allocation size
+    Byte status_flag = Memory::Read(MAP(MMU_ARG_1_MSB)) & 0b0111'1110;
+    Word allocation_size = Memory::Read(MAP(MMU_ARG_1_LSB)) + 1; // Nodes to allocate
+
+    // Check if full-page allocation is requested
+    if (status_flag & MAP(MMU_STFLG_PAGED)) {
+        Memory::Write(MAP(MMU_ARG_1_LSB), 255); // Update allocation size
+        allocation_size = 256;
+    }
+
+    // Create the root node handle
+    Word handle = create_handle();
+    if (handle == MMU_BAD_HANDLE) {
+        error(MAP(MMU_ERR_HANDLE));
+        return MAP(MMU_CMD_ALLOC);
+    }
+    _mmu_handle = handle;
+
+    // Set the root node
+    _mmu_raw_index = handle;
+    _metadata_pool[_mmu_raw_index].root_node = handle;
+    _metadata_pool[_mmu_raw_index].prev_node = handle;
+    _metadata_pool[_mmu_raw_index].next_node = MMU_BAD_HANDLE;
+    _metadata_pool[_mmu_raw_index].status = (status_flag | 0b0000'0001);  // Set status flag as allocated
+    Word current_node = handle;
+
+    // Allocate a Chain of Nodes
+    for (Word i = 1; i < allocation_size; ++i) 
+    {
+        // find a free node
+        Byte new_node = 0;
+        for (new_node = 0; new_node < _metadata_pool.size(); ++new_node) 
+        {
+            if (!(_metadata_pool[new_node].status & 0b0000'0001)) { break; }            
+        }   
+        if (new_node == _metadata_pool.size())
+        {
+            error(MAP(MMU_ERR_ALLOC));
+            _metadata_pool[current_node].next_node = MMU_BAD_HANDLE;            
+            return MAP(MMU_CMD_ALLOC);
+        }        
+
+        // Link the current node to the new node
+        _metadata_pool[new_node].prev_node = current_node;
+        _metadata_pool[new_node].root_node = handle;
+        _metadata_pool[current_node].next_node = new_node;
+        _metadata_pool[new_node].status = (status_flag | 0b0000'0001);  // Set status flag as allocated
+        current_node = new_node; // Move to the new node
+    }    
+
+    // Log success
+    UnitTest::Log("Allocation complete. Root handle: " + std::to_string(handle));
     return MAP(MMU_CMD_ALLOC);
 }
+
+
+
 bool MMU::_test_alloc()
 {
     bool test_results = true;
+
+    // test RAM allocation
+    // first allocate a single block and verify it
+    Memory::Write(MAP(MMU_ARG_1_MSB), 0);         // status flag
+    Memory::Write(MAP(MMU_ARG_1_LSB), 0x00);                // single 32-byte node
+    Memory::Write(MAP(MMU_COMMAND), MAP(MMU_CMD_ALLOC));    // execute the allocation command
+    _test_rw_handle = Memory::Read_Word(MAP(MMU_META_HANDLE));    // save the handle
+    // verify the handle after a single allocation
+    if (_test_rw_handle != 0x0000) {
+        UnitTest::Log(clr::RED + "(RAM) Memory Handle Allocation Failed!" + clr::RESET);
+        test_results = false;
+    }
+    // verify the remaining memory after a single allocation
+    if (Memory::Read_Word(MAP(MMU_BLOCKS_FREE)) != 0xCCCB) {
+        UnitTest::Log(clr::RED + "(RAM) [MMU_BLOCKS_FREE] Failed!" + clr::RESET);
+        test_results = false;
+    }
+    // verify the blocks allocated after a single allocation
+    if (Memory::Read_Word(MAP(MMU_BLOCKS_ALLOCATED)) != 1) {
+        UnitTest::Log(clr::RED + "(RAM) [MMU_BLOCKS_ALLOCATED] Failed!" + clr::RESET);
+        test_results = false;
+    }    
+    // verify the MMU_META_ROOT after a single allocation
+    if (Memory::Read_Word(MAP(MMU_META_ROOT)) != 0) {
+        UnitTest::Log(clr::RED + "(RAM) [MMU_META_ROOT] Failed!" + clr::RESET);
+        test_results = false;
+    }    
+    // verify the MMU_META_PREV after a single allocation
+    if (Memory::Read_Word(MAP(MMU_META_PREV)) != 0) {
+        UnitTest::Log(clr::RED + "(RAM) [MMU_META_PREV] Failed!" + clr::RESET);
+        test_results = false;
+    }    
+    // verify the MMU_META_NEXT after a single allocation
+    if (Memory::Read_Word(MAP(MMU_META_NEXT)) != MMU_BAD_HANDLE) {
+        UnitTest::Log(clr::RED + "(RAM) [MMU_META_NEXT] Failed!" + clr::RESET);
+        test_results = false;
+    }
+    // verify MMU_RAW_INDEX is same as the handle after a single allocation
+    if (Memory::Read_Word(MAP(MMU_RAW_INDEX)) != _test_rw_handle) {
+        UnitTest::Log(clr::RED + "(RAM) [MMU_RAW_INDEX] Failed!" + clr::RESET);
+        test_results = false;
+    }
+    Byte data = 0x01;   
+    for (Word addr = 0; addr < 32; ++addr) {
+        Memory::Write(MAP(MMU_META_DATA) + addr, data);
+        if (Memory::Read(MAP(MMU_META_DATA) + addr) != data) {
+            UnitTest::Log(clr::RED + "(RAM) [MMU_META_DATA + $" + clr::hex(addr, 2) + "] Failed Read/Write Test!" + clr::RESET);
+            test_results = false;            
+        }
+        data++;
+    }
+
+    // test ROM allocation
+    // first allocate a single block and verify it
+    Memory::Write(MAP(MMU_ARG_1_MSB), MAP(MMU_STFLG_READONLY));         // status flag
+    Memory::Write(MAP(MMU_ARG_1_LSB), 0x00);                // single 32-byte node
+    Memory::Write(MAP(MMU_COMMAND), MAP(MMU_CMD_ALLOC));    // execute the allocation command
+    _test_ro_handle = Memory::Read_Word(MAP(MMU_META_HANDLE));    // fetch the handle
+    // verify the handle after a single allocation
+    if (_test_ro_handle != 0x0001) {
+        UnitTest::Log(clr::RED + "(ROM) Memory Handle Allocation Failed!" + clr::RESET);
+        test_results = false;
+    }
+    // verify the remaining memory after a single allocation
+    if (Memory::Read_Word(MAP(MMU_BLOCKS_FREE)) != 0xCCCA) {
+        UnitTest::Log(clr::RED + "(ROM) [MMU_BLOCKS_FREE] Failed!" + clr::RESET);
+        test_results = false;
+    }
+    // verify the blocks allocated after a single allocation
+    if (Memory::Read_Word(MAP(MMU_BLOCKS_ALLOCATED)) != 2) {
+        UnitTest::Log(clr::RED + "(ROM) [MMU_BLOCKS_ALLOCATED] Failed!" + clr::RESET);
+        test_results = false;
+    }    
+    // verify the MMU_META_ROOT after a single allocation
+    if (Memory::Read_Word(MAP(MMU_META_ROOT)) != 1) {
+        UnitTest::Log(clr::RED + "(ROM) [MMU_META_ROOT] Failed!" + clr::RESET);
+        test_results = false;
+    }    
+    // verify the MMU_META_PREV after a single allocation
+    if (Memory::Read_Word(MAP(MMU_META_PREV)) != 1) {
+        UnitTest::Log(clr::RED + "(ROM) [MMU_META_PREV] Failed!" + clr::RESET);
+        test_results = false;
+    }    
+    // verify the MMU_META_NEXT after a single allocation
+    if (Memory::Read_Word(MAP(MMU_META_NEXT)) != MMU_BAD_HANDLE) {
+        UnitTest::Log(clr::RED + "(ROM) [MMU_META_NEXT] Failed!" + clr::RESET);
+        test_results = false;
+    }
+    // verify MMU_RAW_INDEX is same as the handle after a single allocation
+    if (Memory::Read_Word(MAP(MMU_RAW_INDEX)) != _test_ro_handle) {
+        UnitTest::Log(clr::RED + "(ROM) [MMU_RAW_INDEX] Failed!" + clr::RESET);
+        test_results = false;
+    }
+    data = 0xFF;   
+    for (Word addr = 0; addr < 32; ++addr) {
+        Memory::Write(MAP(MMU_META_DATA) + addr, data);
+        if (Memory::Read(MAP(MMU_META_DATA) + addr) == data) {
+            UnitTest::Log(clr::RED + "(ROM) [MMU_META_DATA + $" + clr::hex(addr, 2) + "] Failed Read Only Test!" + clr::RESET);
+            test_results = false;            
+        }
+        --data;
+    }
+
+    // test LOCKED allocation
+    // first allocate a single block and verify it
+    Memory::Write(MAP(MMU_ARG_1_MSB), MAP(MMU_STFLG_LOCKED));         // status flag
+    Memory::Write(MAP(MMU_ARG_1_LSB), 0x00);                // single 32-byte node
+    Memory::Write(MAP(MMU_COMMAND), MAP(MMU_CMD_ALLOC));    // execute the allocation command
+    _test_lock_handle = Memory::Read_Word(MAP(MMU_META_HANDLE));    // fetch the handle
+    // verify the handle after a single allocation
+    if (_test_lock_handle != 0x0002) {
+        UnitTest::Log(clr::RED + "(locked) Memory Handle Allocation Failed!" + clr::RESET);
+        test_results = false;
+    }
+    // verify the remaining memory after a single allocation
+    if (Memory::Read_Word(MAP(MMU_BLOCKS_FREE)) != 0xCCC9) {
+        UnitTest::Log(clr::RED + "(locked) [MMU_BLOCKS_FREE] Failed!" + clr::RESET);
+        test_results = false;
+    }
+    // verify the blocks allocated after a single allocation
+    if (Memory::Read_Word(MAP(MMU_BLOCKS_ALLOCATED)) != 3) {
+        UnitTest::Log(clr::RED + "(locked) [MMU_BLOCKS_ALLOCATED] Failed!" + clr::RESET);
+        test_results = false;
+    }    
+    // verify the MMU_META_ROOT after a single allocation
+    if (Memory::Read_Word(MAP(MMU_META_ROOT)) != 2) {
+        UnitTest::Log(clr::RED + "(locked) [MMU_META_ROOT] Failed!" + clr::RESET);
+        test_results = false;
+    }    
+    // verify the MMU_META_PREV after a single allocation
+    if (Memory::Read_Word(MAP(MMU_META_PREV)) != 2) {
+        UnitTest::Log(clr::RED + "(locked) [MMU_META_PREV] Failed!" + clr::RESET);
+        test_results = false;
+    }    
+    // verify the MMU_META_NEXT after a single allocation
+    if (Memory::Read_Word(MAP(MMU_META_NEXT)) != MMU_BAD_HANDLE) {
+        UnitTest::Log(clr::RED + "(locked) [MMU_META_NEXT] Failed!" + clr::RESET);
+        test_results = false;
+    }
+    // verify MMU_RAW_INDEX is same as the handle after a single allocation
+    if (Memory::Read_Word(MAP(MMU_RAW_INDEX)) != _test_lock_handle) {
+        UnitTest::Log(clr::RED + "(locked) [MMU_RAW_INDEX] Failed!" + clr::RESET);
+        test_results = false;
+    }
+    data = 0x40;   
+    for (Word addr = 0; addr < 32; ++addr) {
+        Memory::Write(MAP(MMU_META_DATA) + addr, data);
+        if (Memory::Read(MAP(MMU_META_DATA) + addr) == data) {
+            UnitTest::Log(clr::RED + "(locked) [MMU_META_DATA + $" + clr::hex(addr, 2) + "] Failed Locked Memory Test!" + clr::RESET);
+            test_results = false;            
+        }
+        data++;
+    }    
+
     return test_results;
 }
 
@@ -816,9 +1023,11 @@ bool MMU::OnTest()
 {
     bool all_tests_passed = true;
 
-    // Unit Tests
-        for (const auto& command : _mmu_command_list) {
-        if (!command.test()) {
+    // Perform Unit Tests for each command
+    for (const auto& command : _mmu_command_list) 
+    {
+        if (!command.test()) 
+        {
             UnitTest::Log(clr::RED + "Test failed for command: " + command.key);
             all_tests_passed = false;
         }
@@ -833,7 +1042,7 @@ bool MMU::OnTest()
     return all_tests_passed;
 }
 
-Word MMU::allocate_handle()
+Word MMU::create_handle()
 {
     // Look for an available node in the metadata pool
     for (size_t i = 0; i < _metadata_pool.size(); ++i) {

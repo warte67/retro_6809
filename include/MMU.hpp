@@ -201,26 +201,6 @@ std::vector<CommandInfo> _mmu_command_list = {
         { "MMU_ERR_SIZE",       "Total Number of MMU Errors" }
     };
 
-
-    // MMU_ERROR                    ; (Byte) Memory Management Unit Error Code:
-    // MMU_ERR_NONE                 ;    $00 = No Error
-    // MMU_ERR_OUTOFMEM             ;    $01 = Out of Memory Error
-    // MMU_ERR_ALLOC                ;    $02 = Failed to Allocate Memory
-    // MMU_ERR_FREE                 ;    $03 = Failed to Deallocate Memory
-    // MMU_ERR_MAPPING              ;    $04 = Memory Mapping Error
-    // MMU_ERR_UNMAPPING            ;    $05 = Error Unmapping Memory
-    // MMU_ERR_INVALID              ;    $06 = Invalid Command
-    // MMU_ERR_ARGUMENT             ;    $07 = Invalid Argument
-    // MMU_ERR_HANDLE               ;    $08 = Invalid Handle
-    // MMU_ERR_NODE                 ;    $09 = Invalid Node
-    // MMU_ERR_PAGE                 ;    $0A = Invalid Page
-    // MMU_ERR_BANK                 ;    $0B = Invalid Bank
-    // MMU_ERR_ADDRESS              ;    $0C = Invalid Address
-    // MMU_ERR_OFFSET               ;    $0D = Invalid Offset
-    // MMU_ERR_LENGTH               ;    $0E = Invalid Length
-    // MMU_ERR_INDEX                ;    $0F = Invalid Index
-    // MMU_ERR_UNKNOWN              ;    $10 = Unknown Error
-
     Word _mmu_handle = MMU_BAD_HANDLE;
     // MMU_HANDLE                   ; (Word) Handle for the current allocation chain
 
@@ -228,7 +208,7 @@ std::vector<CommandInfo> _mmu_command_list = {
     // MMU_STATUS                   ; (Byte) Status flags:
     // MMU_STFLG_ALLOC              ;    0000'0001: Is Allocated: 0 = Free, 1 = Allocated
     // MMU_STFLG_PAGED              ;    0000'0010: Paged Memory: 0 = No,   1 = Yes
-    // MMU_STFLG_RW_RO              ;    0000'0100: Memory Type:  0 = RAM,  1 = ROM
+    // MMU_STFLG_READONLY           ;    0000'0100: Memory Type:  0 = RAM,  1 = ROM
     // MMU_STFLG_FRAGD              ;    0000'1000: Fragmented:   0 = No,   1 = Yes
     // MMU_STFLG_LOCKED             ;    0001'0000: Locked:       0 = No,   1 = Yes
     // MMU_STFLG_RES_1              ;    0010'0000:   (reserved)
@@ -238,24 +218,23 @@ std::vector<CommandInfo> _mmu_command_list = {
     std::array<Byte,32> _meta_data{0};
     // MMU_META_DATA                ; (32-Bytes) 32-Byte data for the current allocation chain
 
-    Word _mmu_meta_root = 0;
-    // MMU_META_ROOT                ; (Word) (Read Only) Root node of the current allocation chain
-
-    Word _mmu_meta_prev = 0;
-    // MMU_META_PREV                ; (Word) (Read Only) Previous node of the current allocation chain
-
-    Word _mmu_meta_next = 0;
-    // MMU_META_NEXT                ; (Word) (Read Only) Next node of the current allocation chain    
-
     Word _mmu_raw_index = 0;
     // MMU_RAW_INDEX                ; Raw Index of the current memory node (For Debugging)
 
+    // *************** //
+    // UNIT TEST STUFF //
+    // *************** //
+
+    Word _test_rw_handle = 0xFFFF;
+    Word _test_ro_handle = 0xFFFF;
+    Word _test_lock_handle = 0xFFFF;
+    Word _test_handle_4 = 0xFFFF;
 
     // ************************* //
     // DATA TYPES AND STRUCTURES //
     // ************************* //
 
-    Word allocate_handle();
+    Word create_handle();
     void deallocate_handle(Word handle);
 
 

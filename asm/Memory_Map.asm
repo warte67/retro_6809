@@ -586,7 +586,7 @@ MMU_META_HANDLE       equ    $FE96    ; (Word) Handle for the current allocation
 MMU_META_STATUS       equ    $FE98    ; (Byte) Status Flags:
 MMU_STFLG_ALLOC       equ    $0001    ;    0000'0001: Is Allocated: 0 = Free, 1 = Allocated
 MMU_STFLG_PAGED       equ    $0002    ;    0000'0010: Paged Memory: 0 = No,   1 = Yes
-MMU_STFLG_RW_RO       equ    $0004    ;    0000'0100: Memory Type:  0 = RAM,  1 = ROM
+MMU_STFLG_READONLY    equ    $0004    ;    0000'0100: Memory Type:  0 = RAM,  1 = ROM
 MMU_STFLG_FRAGD       equ    $0008    ;    0000'1000: Fragmented:   0 = No,   1 = Yes
 MMU_STFLG_LOCKED      equ    $0010    ;    0001'0000: Locked:       0 = No,   1 = Yes
 MMU_STFLG_RES_1       equ    $0020    ;    0010'0000:   (reserved)
