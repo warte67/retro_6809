@@ -204,7 +204,7 @@ std::vector<CommandInfo> _mmu_command_list = {
     Word _mmu_handle = MMU_BAD_HANDLE;
     // MMU_HANDLE                   ; (Word) Handle for the current allocation chain
 
-    Byte _mmu_status = 0;
+    // Byte _mmu_status = 0;
     // MMU_STATUS                   ; (Byte) Status flags:
     // MMU_STFLG_ALLOC              ;    0000'0001: Is Allocated: 0 = Free, 1 = Allocated
     // MMU_STFLG_PAGED              ;    0000'0010: Paged Memory: 0 = No,   1 = Yes
@@ -225,10 +225,10 @@ std::vector<CommandInfo> _mmu_command_list = {
     // UNIT TEST STUFF //
     // *************** //
 
-    Word _test_rw_handle = 0xFFFF;
-    Word _test_ro_handle = 0xFFFF;
+    Word _test_rw_handle   = 0xFFFF;
+    Word _test_ro_handle   = 0xFFFF;
     Word _test_lock_handle = 0xFFFF;
-    Word _test_handle_4 = 0xFFFF;
+    Word _test_page_handle = 0xFFFF;
 
     // ************************* //
     // DATA TYPES AND STRUCTURES //
