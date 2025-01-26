@@ -107,3 +107,45 @@ Other Key Reminders:
         Discussed memory node windowing, how the MMU works with a 32-byte window for direct memory access, and the need for more devices, with a focus on small sizes.
     Ideas discussed about design optimization and how some devices, like the GPU and math co-processor, are nearing the limits of allocated space.
     Expressed appreciation for feedback and assistance with refining the design.
+
+
+    Daily Reminder: January 25, 2025
+Morning Focus
+
+    Refactor do_alloc() to simplify chained allocation.
+    Implement do_free() with thorough testing to ensure chain deallocation works correctly.
+    Address edge cases (e.g., invalid or locked handles).
+
+Midday Break
+
+    Take a short mental break. Reflect and revisit blockers or tough sections with fresh eyes.
+
+Achievements/Highlights
+
+    ✅ Streamlined do_alloc() logic for chaining nodes.
+    ✅ Implemented do_free() and verified with unit tests for:
+        RAM nodes
+        ROM nodes
+        Locked nodes
+    ✅ Confirmed metadata integrity after deallocation.
+
+Challenges/Blockers
+
+    🛑 Debugging edge cases for locked nodes delayed progress slightly.
+    🛑 Need to revisit performance concerns with larger metadata pools.
+
+Priorities for Tomorrow
+
+    Begin implementation of page-level allocation and deallocation.
+    Optimize traversal logic for handling metadata chains efficiently.
+    Add unit tests for edge cases in page-level commands.
+
+Notes/Insights
+
+    Metadata node chaining works well but could benefit from a caching mechanism.
+    Handle validation checks saved a lot of debugging time. Keep refining those!
+
+Mood/Reflection
+
+    Productive and focused, but a bit drained by the finer details of edge case testing.
+    Looking forward to tackling page-level logic next—it should tie everything together.
