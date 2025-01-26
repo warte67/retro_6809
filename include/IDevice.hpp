@@ -414,60 +414,6 @@ public:
 
 
 
-/*** class BANKED_MEM *******************************************************
- * 
- *      ____    _    _   _ _  _______ ____            __  __ _____ __  __ 
- *     | __ )  / \  | \ | | |/ / ____|  _ \          |  \/  | ____|  \/  |
- *     |  _ \ / _ \ |  \| | ' /|  _| | | | |         | |\/| |  _| | |\/| |
- *     | |_) / ___ \| |\  | . \| |___| |_| |         | |  | | |___| |  | |
- *     |____/_/   \_\_| \_|_|\_\_____|____/   _____  |_|  |_|_____|_|  |_|
- *                                           |_____|       
- * 
- * (This may be moved to its own files)
- ****************************************************************/
-class BANKED_MEM : public IDevice
-{
-public:
-    BANKED_MEM() {
-        //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
-        _device_name = "BANKED_MEMORY_REGION";
-    }
-    virtual ~BANKED_MEM() {
-        //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
-    }    
-
-    void OnInit() override 						{}
-    void OnQuit() override 						{}
-    void OnActivate() override 					{}
-    void OnDeactivate() override 				{}
-    void OnEvent(SDL_Event* evnt) override 		{ if (evnt==nullptr) {;} }
-    void OnUpdate(float fElapsedTime) override 	{ if (fElapsedTime==0) {;} }    
-    void OnRender() override 					{}
-    int OnAttach(int nextAddr) override       { 
-        int bank_size = 8*1024;
-        Word old_address=nextAddr;
-        this->heading = "Banked Memory Region (" + std::to_string(bank_size/512) + "K)";
-        mapped_register.push_back({ "BANKMEM_ONE", nextAddr, nullptr, nullptr,
-            { "Banked Memory Page One (8K)"}}); nextAddr+=bank_size;
-        mapped_register.push_back({ "BANKMEM_TWO", nextAddr, nullptr, nullptr,
-            { "Banked Memory Page Two (8K)"}}); nextAddr+=(bank_size-1);
-        mapped_register.push_back({ "BANKMEM_END", nextAddr, nullptr, nullptr,
-            { "End of Banked Memory Region"}}); nextAddr+=1;            
-        mapped_register.push_back({ "BANKMEM_TOP", nextAddr, nullptr, nullptr,
-            { "TOP of Banked Memory Region", "---"}}); 
-        _size = nextAddr - old_address;
-        return _size;
-    }  
-    bool OnTest() 
-    { 
-        // Check the number of mapped registers
-        size_t expectedRegisters = 4; // Number of interrupt vectors
-        ASSERT(mapped_register.size() == expectedRegisters, _device_name + ": Incorrect number of mapped registers");
-        // Check the mapped registers
-        return UnitTest::RangeTest_RW(_device_name, base_address, base_address+_size);
-    }     
-};
-
 
 
 class HDW_RESERVED : public IDevice

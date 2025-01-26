@@ -35,6 +35,8 @@
 #include "UnitTest.hpp"
 
 class MMU : public IDevice {
+    
+    friend class BANKED_MEM; // allow BANKED_MEM to access private members
 
 public: // PUBLIC CONSTRUCTOR / DESTRUCTOR
     MMU();
@@ -185,8 +187,7 @@ private:
         { "MMU_ERR_OUTOFMEM",   "Out of Memory Error" },
         { "MMU_ERR_ALLOC",      "Failed to Allocate Memory" },
         { "MMU_ERR_FREE",       "Failed to Deallocate Memory" },
-        { "MMU_ERR_MAPPING",    "Memory Mapping Error" },
-        { "MMU_ERR_UNMAPPING",  "Error Unmapping Memory" },
+        { "MMU_ERR_PG_FREE",    "Error Deallocating Page" },
         { "MMU_ERR_INVALID",    "Invalid Command" },
         { "MMU_ERR_ARGUMENT",   "Invalid Argument" },
         { "MMU_ERR_HANDLE",     "Invalid Handle" },
@@ -204,7 +205,7 @@ private:
     Word _mmu_handle = MMU_BAD_HANDLE;
     // MMU_HANDLE                   ; (Word) Handle for the current allocation chain
 
-    // Byte _mmu_status = 0;
+    // Byte _mmu_status = 0;        ; (this is handled within the individual METADATA_NODEs)
     // MMU_STATUS                   ; (Byte) Status flags:
     // MMU_STFLG_ALLOC              ;    0000'0001: Is Allocated: 0 = Free, 1 = Allocated
     // MMU_STFLG_PAGED              ;    0000'0010: Paged Memory: 0 = No,   1 = Yes
@@ -278,6 +279,112 @@ private:
 };
 
 
+
+/*** class BANKED_MEM *******************************************************
+ * 
+ *      ____    _    _   _ _  _______ ____            __  __ _____ __  __ 
+ *     | __ )  / \  | \ | | |/ / ____|  _ \          |  \/  | ____|  \/  |
+ *     |  _ \ / _ \ |  \| | ' /|  _| | | | |         | |\/| |  _| | |\/| |
+ *     | |_) / ___ \| |\  | . \| |___| |_| |         | |  | | |___| |  | |
+ *     |____/_/   \_\_| \_|_|\_\_____|____/   _____  |_|  |_|_____|_|  |_|
+ *                                           |_____|       
+ * 
+ ****************************************************************/
+class BANKED_MEM : public IDevice
+{
+    friend class MMU; // allow MMU to access private members
+
+public:
+    BANKED_MEM() {
+        //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;                    
+        _device_name = "BANKED_MEMORY_REGION";
+    }
+    virtual ~BANKED_MEM() {
+        //std::cout << clr::indent() << clr::LT_BLUE << "RAM Device Created" << clr::RETURN;        
+    }    
+
+    void OnInit() override 						{}
+    void OnQuit() override 						{}
+    void OnActivate() override 					{}
+    void OnDeactivate() override 				{}
+    void OnEvent(SDL_Event* evnt) override 		{ if (evnt==nullptr) {;} }
+    void OnUpdate(float fElapsedTime) override 	{ if (fElapsedTime==0) {;} }    
+    void OnRender() override 					{}
+    int OnAttach(int nextAddr) override       { 
+        int bank_size = 8*1024;
+        Word old_address=nextAddr;
+        this->heading = "Banked Memory Region (" + std::to_string(bank_size/512) + "K)";
+
+        mapped_register.push_back({ "BANKMEM_ONE", nextAddr, nullptr, nullptr,
+            { "Banked Memory Page One (8K)"}}); nextAddr+=bank_size;
+        mapped_register.push_back({ "BANKMEM_TWO", nextAddr, nullptr, nullptr,
+            { "Banked Memory Page Two (8K)"}}); nextAddr+=(bank_size-1);
+        
+        // // BANK ONE:
+        // mapped_register.push_back({ "BANKMEM_ONE", nextAddr, nullptr, nullptr,
+        //     { "Banked Memory Page One (8K)"}}); 
+        //     for (int i=0; i<bank_size; i++) 
+        //     {
+        //         mapped_register.push_back({ "", nextAddr, 
+        //             // // Read from Bank One:
+        //             // [this](Word address) 
+        //             // { 
+        //             //     // default (handle 0xFFFF) read
+        //             //     return Memory::memory(address); 
+        //             // },
+        //             nullptr,
+        //             // // Write to Bank One: 
+        //             // [this](Word address, Byte data) 
+        //             // {
+        //             //     // default (handle 0xFFFF) write
+        //             //     Memory::memory(address, data);
+        //             // },
+        //             nullptr,
+        //             { "" }}
+        //         ); nextAddr++;
+        //     }
+
+        // // BANK TWO:
+        // mapped_register.push_back({ "BANKMEM_TWO", nextAddr, nullptr, nullptr,
+        //     { "Banked Memory Page Two (8K)"}}); 
+        //     for (int i=0; i<bank_size; i++) 
+        //     {
+        //         mapped_register.push_back({ "", nextAddr, 
+        //             // // Read from Bank Two:
+        //             // [this](Word address) 
+        //             // { 
+        //             //     // default (handle 0xFFFF) read
+        //             //     return Memory::memory(address); 
+        //             // },   
+        //             nullptr,                 
+        //             // // Write to Bank Two: 
+        //             // [this](Word address, Byte data) 
+        //             // {
+        //             //     // default (handle 0xFFFF) write
+        //             //     Memory::memory(address, data);
+        //             // },
+        //             nullptr,
+        //             { "" }}
+        //         ); nextAddr++;
+        //     }
+
+        mapped_register.push_back({ "BANKMEM_END", nextAddr, nullptr, nullptr,
+            { "End of Banked Memory Region"}}); nextAddr+=1;            
+        mapped_register.push_back({ "BANKMEM_TOP", nextAddr, nullptr, nullptr,
+            { "TOP of Banked Memory Region", "---"}}); 
+        _size = nextAddr - old_address;
+        return _size;
+    }  
+    bool OnTest() 
+    { 
+        // Check the number of mapped registers
+        size_t expectedRegisters = 4; // Number of interrupt vectors
+        ASSERT(mapped_register.size() == expectedRegisters, _device_name + ": Incorrect number of mapped registers");
+        // Check the mapped registers
+        return UnitTest::RangeTest_RW(_device_name, base_address, base_address+_size);
+        return true;
+    }     
+};
 
 
 
@@ -382,161 +489,6 @@ Conclusion:
     3) Implementing decoupling capacitors to ensure clean power to the PSRAM.
 
 
-
-
-std::vector<std::vector<Byte>> _fast_ram(65536, std::vector<Byte>(32, 0));
-
-
-
-To-Do: Memory Management and C++ Code Refactoring
-
-    Implement Memory Banking Register:
-        Refactor memory bank management with simple 2-state tracking: RAM vs ROM.
-        Use a small array of bytes or std::bitset to track 256 x 8KB pages (RAM or ROM).
-        Remove persistent storage type (flash memory) handling for simplification.
-        Ensure memory type switching (RAM/ROM) is quick and handled via registers.
-
-    Refactor to Use std::bitset for Page Management:
-        Replace the manual bit flag handling with std::bitset<numPages> to track 
-        memory page types (RAM vs ROM). Use std::bitset for clean bit-level manipulation 
-        with page index operations. Simplify the code by leveraging set and test methods 
-        for fast page type updates.
-
-    Ensure Use of Standard C++ Libraries:
-        Rely on std::bitset to reduce the likelihood of new bugs and improve code reliability.
-        Keep the code efficient and maintainable by using well-tested and optimized 
-        standard libraries.Enhance portability and readability, and avoid custom, 
-        error-prone bit manipulation.
-
-    Memory Management Considerations:
-        Set up dynamic memory allocation in 32-byte blocks (using 16-bit pseudo-pointers).
-        Allow for a "fast" RAM window for direct access to small blocks (32 bytes). Implement 
-        slower, full-page (8KB) load/save operations with RAII for larger memory needs.
-
-    Fast Dynamic RAM Setup:
-        Implement "Fast RAM" as a 2D vector:
-
-    std::vector<std::vector<Byte>> _fast_ram(65536, std::vector<Byte>(32, 0));
-
-    Use this std::vector structure to simulate fast, 32-byte blocks that can be accessed 
-    directly. This "Fast RAM" will represent a 2MB space broken into 256 x 8KB blocks, with each
-    block further broken down into 32-byte sections for rapid access. Ensure that when the 
-    CPU accesses these blocks, it can quickly read/write to a 32-byte window, improving speed 
-    for smaller memory operations.
-
-Optimize and Test the Memory Management Flow:
-    Ensure the switch between RAM/ROM and the 2MB SPI memory is well-handled. Confirm that 
-    memory mapping, bank switching, and dynamic memory allocation perform efficiently.
-    Test the interaction between registers, page switching, and external memory (SPI-based SRAM 
-    or PSRAM). Verify that the "Fast RAM" block system behaves as expected for rapid memory 
-    operations.
-
-    Four Bits for Error Codes and Four Bits for Commands:
-    bit 7:  0=Read/Write, 1=Read Only
-    bit 6:  0=allocated, 1=free
-    bit 5:  0=not currently mapped, 1=mapped to the 32-byte fast mem register
-    bit 4:  0=not currently mapped, 1=mapped into one of the slow 8k pages    
-    bits 0-3:  16 commands: On Read = etch last command), On Write Issue a New Command:
-        Command 0 = Memory Allocation Error (Read Only)
-        Command 1 = Allocate Memory
-        Command 2 = Deallocate Memory
-        Command 3 = Load a Block of memory into the 32-byte "window" register
-        Command 4 = Save a Block of memory from the 32-byte "window" register
-        Command 5 = Copy a block of memory from the 32-byte "Window" to another memory node
-        Command 6 = Copy a block of memory from one memory node to the 32-byte "Window"
-        Command 7 = Copy a block of memory from one memory node to another memory node
-        ... etc
-
-    Byte for Per Node Memory Status:
-        0	Allocated: 0 = Free, 1 = Allocated	Tracks whether the block is in use.
-        1	Read/Write or Read-Only: 0 = RW, 1 = RO	Distinguishes between writable and immutable memory.
-        2	Mapped to Fast Memory: 0 = No, 1 = Yes	Indicates if the block is mapped to the 32-byte fast memory register.
-        3	Mapped to Paged Memory: 0 = No, 1 = Yes	Indicates if the block is mapped to the 8k page.
-        4	Fragmentation Marker	Marks blocks that are fragmented or part of a split allocation for debugging or defragmentation purposes.
-        5	Temporary Allocation Flag	Marks blocks as temporarily allocated (e.g., for a short-term operation, scratch memory).
-        6	Cacheable Flag	Marks whether the block is cacheable (useful in performance tuning).
-        7	Error State: 0 = No Error, 1 = Error	Indicates if an error has occurred with this block.        
-
-
-    // (note:  Words have been defined as unsigned shorts or Uint16
-    //         Bytes have been defined as unsigned chars or Uint8)
-    struct MEMORY_NODE {
-        Byte block_count;   // how many 32-byte blocks are included in this allocation
-        Byte status;        // status flags
-        Word start_block;   // index of the first block in this allocation
-        Word parent_node;   // index of the parent node in the memory pool
-        Word next_node;     // index of the child node in the memory pool
-    };
-
-    Exactly 8-Bytes in size. This should fit well within the 64-bit nature of the
-    software emulation as well as either 16-bit or 32-bit nature of the 
-    Raspberry PI PICO boards.
-
-
-=================================================================================
-
-Updated To-Do List: Memory System Implementation
-1. Memory Architecture
-
-    Fixed Memory:
-        Reserve 34 KB fixed RAM below the paged memory region (for stack, text buffer, etc.).
-    Paged Memory:
-        Reserve 16 KB for two default 8 KB pages (Page 0 and Page 1).
-        Implement mechanism for allocating additional 8 KB pages as RAM or ROM.
-    Dynamic Memory:
-        Design a system for allocating 32-byte blocks from the remaining memory pool (~1,934 KB after reserved areas).
-
-2. Banked Memory Mechanisms
-
-    Page-Based Allocation:
-        Allow allocation of 8 KB pages as RAM or ROM.
-        Support loading ROM data during boot or runtime from external media.
-    Dynamic Allocation:
-        Implement a 32-byte block allocator using:
-            std::vector<MEMORY_NODE> to track allocated and free blocks.
-            MEMORY_NODE Structure (8 bytes each):
-                Byte block_count: Number of 32-byte blocks in the allocation.
-                Byte status: Allocation, read-only, or mapping status flags.
-                Word start_block: Start index of the allocation.
-                Word parent_node and Word next_node: Linked list pointers for tracking allocations.
-
-3. Register and Hardware Design
-
-    Memory Control Registers:
-        BANK_1_SELECT and BANK_2_SELECT: Select 8 KB pages for Page 1 and Page 2.
-        BANK_FAST_INDEX: 16-bit register for selecting blocks in the 32-byte "Window."
-        BANK_FAST_WINDOW: 32-byte register for direct memory access to dynamic blocks.
-    Simplified Status and Commands:
-        Use separate status and command/error registers to manage memory nodes.
-        Include flags for:
-            Read/Write, Read-Only, Mapped, Allocated, Dirty, or Internal Use.
-
-4. User Interface for Programmers
-
-    ROM Allocation:
-        Enable allocation of multiple 8 KB pages as ROM.
-        Provide functionality for loading ROM data at boot or runtime.
-    RAM Allocation:
-        Enable allocation of multiple 8 KB pages for large working data.
-        Support deallocation and reuse of these pages.
-    Dynamic Memory Allocation:
-        Use the 32-byte block allocator for fine-grained, temporary memory needs.
-        Ensure memory fragmentation is minimized using a linked list or heap structure.
-    Safety Features:
-        Prevent users from changing pages while dynamic memory is buffered in paged memory regions.
-
-5. Implementation Tasks
-
-    Page Mechanisms:
-        Write functions to allocate/deallocate 8 KB pages.
-        Track page allocations with bitmaps or lightweight data structures.
-    Dynamic Memory System:
-        Develop the 32-byte block allocator with linked list support.
-        Implement functions for allocating, deallocating, and mapping memory nodes.
-        Test and debug garbage collection (e.g., using the "dirty" bit and deferred deallocation).
-    Performance Optimization:
-        Optimize mapping to 32-byte fast memory for rapid access.
-        Implement safe access patterns for paged memory to avoid programmer pitfalls.
 
 
  ************/

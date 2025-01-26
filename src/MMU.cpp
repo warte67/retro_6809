@@ -541,16 +541,52 @@ bool MMU::_test_nop()
 }
 
 
+/**
+ * Allocates an 8k memory page.
+ * 
+ * This function allocates an 8k memory page starting from the bottom
+ * of the memory pool and moving towards the top. The allocation is
+ * performed based on the status flag template provided in MMU_ARG_1_MSB.
+ * The function ensures that bit 1 is always set to indicate a full 8k page.
+ * The user can specify the memory type (RAM or ROM) using bit 2 of the
+ * status flag. After successfully allocating the memory page, the function
+ * returns the mapped command for page allocation (MMU_CMD_PG_ALLOC).
+ * 
+ * @param (MMU_ARG_1_MSB) status flag template for allocation
+ *         relevant bits:
+ *              0000'0010: Paged Memory: 0 = No,   1 = Yes (always 1 for this function)
+ *              0000'0100: Memory Type:  0 = RAM,  1 = ROM
+ *              0001'0000: Locked:       0 = No,   1 = Yes
+ *              0010'0000:   (reserved) or User Data
+ *              0100'0000:   (reserved) or User Data  
+ * 
+ * @return The command code for page allocation.
+ */
+
 Byte MMU::do_pg_alloc()
 {
-    // allocate 8k memory pages from the bottom of the pool towards the top
-    //const size_t page_size = 8192;  // 8 KB (8192 bytes)
+    // Set the status flag to indicate a full 8k page
+    Byte status = Memory::Read(MAP(MMU_ARG_1_MSB));
+    status &= 0b0110'0110;      // Mask out the error, fragmented, locked, and allocated bits
+    status |= MAP(MMU_STFLG_PAGED);  // Set bit 1 to indicate full 8k page
+    Memory::Write(MAP(MMU_ARG_1_MSB), status);
+    Memory::Write(MAP(MMU_ARG_1_LSB), 255); // allocate 256 nodes
 
-    // ...
+    // Allocate the memory page
+    Memory::Write(MAP(MMU_COMMAND), MAP(MMU_CMD_ALLOC));
+    Word handle = Memory::Read_Word(MAP(MMU_META_HANDLE));
+
+    // Check if the allocation was successful
+    if (handle == MMU_BAD_HANDLE) {
+        UnitTest::Log(clr::RED + "Error: Unable to allocate 8KB page!" + clr::RESET);
+        error(MAP(MMU_ERR_ALLOC));
+        return MAP(MMU_CMD_PG_ALLOC);
+    }
 
     // Return the mapped command for page allocation
     return MAP(MMU_CMD_PG_ALLOC);
 }
+
 
 bool MMU::_test_pg_alloc()
 {
@@ -571,17 +607,116 @@ bool MMU::_test_pg_alloc()
         test_results = false;
     }   
 
+    // Create a page and check if it was allocated
+    Memory::Write(MAP(MMU_ARG_1_MSB), 0);
+    Memory::Write(MAP(MMU_ARG_1_LSB), 0);
+    Memory::Write(MAP(MMU_COMMAND), MAP(MMU_CMD_PG_ALLOC));
+    _test_page_handle = Memory::Read_Word(MAP(MMU_META_HANDLE));
+    if (_test_page_handle == MMU_BAD_HANDLE) {
+        UnitTest::Log(clr::RED + "Error: Unable to allocate 8KB page!" + clr::RESET);
+        test_results = false;
+    }
+    if (_test_page_handle != 0x0000) {
+        UnitTest::Log(clr::RED + "(RAM) Memory Handle Allocation Failed! ($" + clr::hex(_test_page_handle, 4) + ")" + clr::RESET);
+        test_results = false;
+    }
+    // verify the remaining memory after a single allocation
+    if (Memory::Read_Word(MAP(MMU_BLOCKS_FREE)) != 0xCBCC) {
+        UnitTest::Log(clr::RED + "(RAM) [MMU_BLOCKS_FREE] Failed! ($" + clr::hex(Memory::Read_Word(MAP(MMU_BLOCKS_FREE)), 4) + ")" + clr::RESET);
+        test_results = false;
+    }
+    // verify the blocks allocated after a single allocation
+    if (Memory::Read_Word(MAP(MMU_BLOCKS_ALLOCATED)) != 0x0100) {
+        UnitTest::Log(clr::RED + "(RAM) [MMU_BLOCKS_ALLOCATED] Failed! ($" + clr::hex(Memory::Read_Word(MAP(MMU_BLOCKS_ALLOCATED)), 4) + ")" + clr::RESET);
+        test_results = false;
+    }    
+    // verify the MMU_META_ROOT after a single allocation
+    if (Memory::Read_Word(MAP(MMU_META_ROOT)) != 0x0000) {
+        UnitTest::Log(clr::RED + "(RAM) [MMU_META_ROOT] Failed! ($" + clr::hex(Memory::Read_Word(MAP(MMU_META_ROOT)), 4) + ")" + clr::RESET);
+        test_results = false;
+    }    
+    // verify the MMU_META_PREV after a single allocation
+    if (Memory::Read_Word(MAP(MMU_META_PREV)) != 0x0000) {
+        UnitTest::Log(clr::RED + "(RAM) [MMU_META_PREV] Failed! ($" + clr::hex(Memory::Read_Word(MAP(MMU_META_PREV)), 4) + ")" + clr::RESET);
+        test_results = false;
+    }    
+    // verify the MMU_META_NEXT after a single allocation
+    if (Memory::Read_Word(MAP(MMU_META_NEXT)) != 0x0001) {
+        UnitTest::Log(clr::RED + "(RAM) [MMU_META_NEXT] Failed! ($" + clr::hex(Memory::Read_Word(MAP(MMU_META_NEXT)), 4) + ")" + clr::RESET);
+        test_results = false;
+    }
+    // verify MMU_RAW_INDEX is same as the handle after a single allocation
+    if (Memory::Read_Word(MAP(MMU_RAW_INDEX)) != _test_page_handle) {
+        UnitTest::Log(clr::RED + "(RAM) [MMU_RAW_INDEX] Failed! ($" + clr::hex(Memory::Read_Word(MAP(MMU_RAW_INDEX)), 4) + ")" + clr::RESET);
+        test_results = false;
+    }
+    Byte data = 0x01;   
+    for (Word addr = 0; addr < 32; ++addr) {
+        Memory::Write(MAP(MMU_META_DATA) + addr, data);
+        if (Memory::Read(MAP(MMU_META_DATA) + addr) != data) {
+            UnitTest::Log(clr::RED + "(RAM) [MMU_META_DATA + $" + clr::hex(addr, 2) + "] Failed Read/Write Test!" + clr::RESET);
+            test_results = false;            
+        }
+        data++;
+    }
+
+    // Verify the parsing of the page allocation
+    int allocated_bytes = 8 * 1024;
+    Word current_node = _test_page_handle;
+    while (current_node != MMU_BAD_HANDLE) {
+        _mmu_raw_index = current_node;
+        for (Word addr = 0; addr < 32; ++addr) {
+            Memory::Write(MAP(MMU_META_DATA) + addr, data);
+            if (Memory::Read(MAP(MMU_META_DATA) + addr) != data) {
+                UnitTest::Log(clr::RED + "(RAM) [MMU_META_DATA + $" + clr::hex(addr, 2) + "] Failed Read/Write Test!" + clr::RESET);
+                test_results = false;            
+            }
+            data++;
+            allocated_bytes--;
+        }        
+        current_node = Memory::Read_Word(MAP(MMU_META_NEXT));
+        if (allocated_bytes < 0) {
+            UnitTest::Log(clr::RED + "(RAM) Page Parse Size Exceeded! " + std::to_string(allocated_bytes) + " bytes!" + clr::RESET);
+            test_results = false; 
+            break;            
+        }
+    }
     return test_results;
 }
 
 Byte MMU::do_pg_free()
 {
-    // ...
+    Word handle = Memory::Read_Word(MAP(MMU_META_HANDLE));
+    // is the root node actually allocated and is an 8k page?
+    if ((_metadata_pool[handle].status & 0x03) == 0x03) {
+        do_free();
+        return MAP(MMU_CMD_PG_FREE);
+    }
+    else {
+        error(MAP(MMU_ERR_PG_FREE));
+        UnitTest::Log(clr::RED + "MMU::do_pg_free() Page Free Failed!" + clr::RESET);
+        return MAP(MMU_CMD_PG_FREE);
+    }
     return MAP(MMU_CMD_PG_FREE);
 }
 bool MMU::_test_pg_free()
 {
     bool test_results = true;
+
+    // free the test page
+    Memory::Write_Word(MAP(MMU_META_HANDLE), _test_page_handle);
+    Memory::Write(MAP(MMU_COMMAND), MAP(MMU_CMD_FREE));
+
+    // verify the remaining memory after a single allocation
+    if (Memory::Read_Word(MAP(MMU_BLOCKS_FREE)) != 0xCCCC) {
+        UnitTest::Log(clr::RED + "[MMU_BLOCKS_FREE] 8K Page Free Failed! ($" + clr::hex(Memory::Read_Word(MAP(MMU_BLOCKS_FREE)), 4) + ")" + clr::RESET);
+        test_results = false;
+    }
+    // verify the blocks allocated after a single allocation
+    if (Memory::Read_Word(MAP(MMU_BLOCKS_ALLOCATED)) != 0x0000) {
+        UnitTest::Log(clr::RED + "[MMU_BLOCKS_ALLOCATED] 8K Page Free Failed! ($" + clr::hex(Memory::Read_Word(MAP(MMU_BLOCKS_ALLOCATED)), 4) + ")" + clr::RESET);
+        test_results = false;
+    }    
     return test_results;
 }
 
@@ -637,12 +772,14 @@ bool MMU::_test_pg_free()
 Byte MMU::do_alloc()
 {
     // Read the status flag and allocation size
-    Byte status_flag = Memory::Read(MAP(MMU_ARG_1_MSB)) & 0b0111'1110;
-    Word allocation_size = Memory::Read(MAP(MMU_ARG_1_LSB)); // + 1; // Nodes to allocate
+    Byte status_flag = Memory::Read(MAP(MMU_ARG_1_MSB)) & 0b0111'0110;  // Mask out the error, fragmented, 
+    Memory::Write(MAP(MMU_ARG_1_MSB), status_flag);                     // and allocated bits.
+
+    Word allocation_size = Memory::Read(MAP(MMU_ARG_1_LSB)); // Nodes to allocate
     // Check if full-page allocation is requested
     if (status_flag & MAP(MMU_STFLG_PAGED)) {
         Memory::Write(MAP(MMU_ARG_1_LSB), 255); // Update allocation size
-        allocation_size = 256;
+        allocation_size = 255;
     }
     // Create the root node handle
     Word handle = create_handle();
@@ -677,6 +814,7 @@ Byte MMU::do_alloc()
         _metadata_pool[new_node].prev_node = current_node;
         _metadata_pool[new_node].root_node = handle;
         _metadata_pool[current_node].next_node = new_node;
+        _metadata_pool[new_node].status = (status_flag & 0b0111'1111);  // Mask Out Errors
         _metadata_pool[new_node].status = (status_flag | 0b0000'0001);  // Set status flag as allocated
 
         // Update block counters
@@ -705,37 +843,37 @@ bool MMU::_test_alloc()
     _mmu_raw_index = _test_rw_handle;
     // verify the handle after a single allocation
     if (_test_rw_handle != 0x0000) {
-        UnitTest::Log(clr::RED + "(RAM) Memory Handle Allocation Failed!" + clr::RESET);
+        UnitTest::Log(clr::RED + "(RAM) Memory Handle Allocation Failed! ($" + clr::hex(_test_rw_handle, 4) + ")" + clr::RESET);
         test_results = false;
     }
     // verify the remaining memory after a single allocation
     if (Memory::Read_Word(MAP(MMU_BLOCKS_FREE)) != 0xCCCB) {
-        UnitTest::Log(clr::RED + "(RAM) [MMU_BLOCKS_FREE] Failed!" + clr::RESET);
+        UnitTest::Log(clr::RED + "(RAM) [MMU_BLOCKS_FREE] Failed! ($" + clr::hex(Memory::Read_Word(MAP(MMU_BLOCKS_FREE)), 4) + ")" + clr::RESET);
         test_results = false;
     }
     // verify the blocks allocated after a single allocation
-    if (Memory::Read_Word(MAP(MMU_BLOCKS_ALLOCATED)) != 1) {
-        UnitTest::Log(clr::RED + "(RAM) [MMU_BLOCKS_ALLOCATED] Failed!" + clr::RESET);
+    if (Memory::Read_Word(MAP(MMU_BLOCKS_ALLOCATED)) != 0x0001) {
+        UnitTest::Log(clr::RED + "(RAM) [MMU_BLOCKS_ALLOCATED] Failed! ($" + clr::hex(Memory::Read_Word(MAP(MMU_BLOCKS_ALLOCATED)), 4) + ")" + clr::RESET);
         test_results = false;
     }    
     // verify the MMU_META_ROOT after a single allocation
-    if (Memory::Read_Word(MAP(MMU_META_ROOT)) != 0) {
-        UnitTest::Log(clr::RED + "(RAM) [MMU_META_ROOT] Failed!" + clr::RESET);
+    if (Memory::Read_Word(MAP(MMU_META_ROOT)) != 0x0000) {
+        UnitTest::Log(clr::RED + "(RAM) [MMU_META_ROOT] Failed! ($" + clr::hex(Memory::Read_Word(MAP(MMU_META_ROOT)), 4) + ")" + clr::RESET);
         test_results = false;
     }    
     // verify the MMU_META_PREV after a single allocation
-    if (Memory::Read_Word(MAP(MMU_META_PREV)) != 0) {
-        UnitTest::Log(clr::RED + "(RAM) [MMU_META_PREV] Failed!" + clr::RESET);
+    if (Memory::Read_Word(MAP(MMU_META_PREV)) != 0x0000) {
+        UnitTest::Log(clr::RED + "(RAM) [MMU_META_PREV] Failed! ($" + clr::hex(Memory::Read_Word(MAP(MMU_META_PREV)), 4) + ")" + clr::RESET);
         test_results = false;
     }    
     // verify the MMU_META_NEXT after a single allocation
     if (Memory::Read_Word(MAP(MMU_META_NEXT)) != MMU_BAD_HANDLE) {
-        UnitTest::Log(clr::RED + "(RAM) [MMU_META_NEXT] Failed!" + clr::RESET);
+        UnitTest::Log(clr::RED + "(RAM) [MMU_META_NEXT] Failed! ($" + clr::hex(Memory::Read_Word(MAP(MMU_META_NEXT)), 4) + ")" + clr::RESET);
         test_results = false;
     }
     // verify MMU_RAW_INDEX is same as the handle after a single allocation
     if (Memory::Read_Word(MAP(MMU_RAW_INDEX)) != _test_rw_handle) {
-        UnitTest::Log(clr::RED + "(RAM) [MMU_RAW_INDEX] Failed!" + clr::RESET);
+        UnitTest::Log(clr::RED + "(RAM) [MMU_RAW_INDEX] Failed! ($" + clr::hex(Memory::Read_Word(MAP(MMU_RAW_INDEX)), 4) + ")" + clr::RESET);
         test_results = false;
     }
     Byte data = 0x01;   
@@ -756,37 +894,37 @@ bool MMU::_test_alloc()
     _test_ro_handle = Memory::Read_Word(MAP(MMU_META_HANDLE));    // fetch the handle
     // verify the handle after a single allocation
     if (_test_ro_handle != 0x0001) {
-        UnitTest::Log(clr::RED + "(ROM) Memory Handle Allocation Failed!" + clr::RESET);
+        UnitTest::Log(clr::RED + "(ROM) Memory Handle Allocation Failed! ($" + clr::hex(_test_ro_handle, 4) + ")" + clr::RESET); 
         test_results = false;
     }
     // verify the remaining memory after a single allocation
     if (Memory::Read_Word(MAP(MMU_BLOCKS_FREE)) != 0xCCCA) {
-        UnitTest::Log(clr::RED + "(ROM) [MMU_BLOCKS_FREE] Failed!" + clr::RESET);
+        UnitTest::Log(clr::RED + "(ROM) [MMU_BLOCKS_FREE] Failed! ($" + clr::hex(Memory::Read_Word(MAP(MMU_BLOCKS_FREE)), 4) + ")" + clr::RESET); 
         test_results = false;
     }
     // verify the blocks allocated after a single allocation
-    if (Memory::Read_Word(MAP(MMU_BLOCKS_ALLOCATED)) != 2) {
-        UnitTest::Log(clr::RED + "(ROM) [MMU_BLOCKS_ALLOCATED] Failed!" + clr::RESET);
+    if (Memory::Read_Word(MAP(MMU_BLOCKS_ALLOCATED)) != 0x0002) {
+        UnitTest::Log(clr::RED + "(ROM) [MMU_BLOCKS_ALLOCATED] Failed! ($" + clr::hex(Memory::Read_Word(MAP(MMU_BLOCKS_ALLOCATED)), 4) + ")" + clr::RESET); 
         test_results = false;
     }    
     // verify the MMU_META_ROOT after a single allocation
-    if (Memory::Read_Word(MAP(MMU_META_ROOT)) != 1) {
-        UnitTest::Log(clr::RED + "(ROM) [MMU_META_ROOT] Failed!" + clr::RESET);
+    if (Memory::Read_Word(MAP(MMU_META_ROOT)) != 0x0001) {
+        UnitTest::Log(clr::RED + "(ROM) [MMU_META_ROOT] Failed! ($" + clr::hex(Memory::Read_Word(MAP(MMU_META_ROOT)), 4) + ")" + clr::RESET); 
         test_results = false;
     }    
     // verify the MMU_META_PREV after a single allocation
-    if (Memory::Read_Word(MAP(MMU_META_PREV)) != 1) {
-        UnitTest::Log(clr::RED + "(ROM) [MMU_META_PREV] Failed!" + clr::RESET);
+    if (Memory::Read_Word(MAP(MMU_META_PREV)) != 0x0001) {
+        UnitTest::Log(clr::RED + "(ROM) [MMU_META_PREV] Failed! ($" + clr::hex(Memory::Read_Word(MAP(MMU_META_PREV)), 4) + ")" + clr::RESET); 
         test_results = false;
     }    
     // verify the MMU_META_NEXT after a single allocation
     if (Memory::Read_Word(MAP(MMU_META_NEXT)) != MMU_BAD_HANDLE) {
-        UnitTest::Log(clr::RED + "(ROM) [MMU_META_NEXT] Failed!" + clr::RESET);
+        UnitTest::Log(clr::RED + "(ROM) [MMU_META_NEXT] Failed! ($" + clr::hex(Memory::Read_Word(MAP(MMU_META_NEXT)), 4) + ")" + clr::RESET); 
         test_results = false;
     }
     // verify MMU_RAW_INDEX is same as the handle after a single allocation
     if (Memory::Read_Word(MAP(MMU_RAW_INDEX)) != _test_ro_handle) {
-        UnitTest::Log(clr::RED + "(ROM) [MMU_RAW_INDEX] Failed!" + clr::RESET);
+        UnitTest::Log(clr::RED + "(ROM) [MMU_RAW_INDEX] Failed! ($" + clr::hex(Memory::Read_Word(MAP(MMU_RAW_INDEX)), 4) + ")" + clr::RESET); 
         test_results = false;
     }
     data = 0xFF;   
@@ -808,37 +946,37 @@ bool MMU::_test_alloc()
     _test_lock_handle = Memory::Read_Word(MAP(MMU_META_HANDLE));    // fetch the handle
     // verify the handle after a single allocation
     if (_test_lock_handle != 0x0002) {
-        UnitTest::Log(clr::RED + "(locked) Memory Handle Allocation Failed!" + clr::RESET);
+        UnitTest::Log(clr::RED + "(locked) Memory Handle Allocation Failed! ($" + clr::hex(_test_lock_handle, 4) + ")" + clr::RESET); 
         test_results = false;
     }
     // verify the remaining memory after a single allocation
     if (Memory::Read_Word(MAP(MMU_BLOCKS_FREE)) != 0xCCC9) {
-        UnitTest::Log(clr::RED + "(locked) [MMU_BLOCKS_FREE] Failed!" + clr::RESET);
+        UnitTest::Log(clr::RED + "(locked) [MMU_BLOCKS_FREE] Failed! ($" + clr::hex(Memory::Read_Word(MAP(MMU_BLOCKS_FREE)), 4) + ")" + clr::RESET); 
         test_results = false;
     }
     // verify the blocks allocated after a single allocation
-    if (Memory::Read_Word(MAP(MMU_BLOCKS_ALLOCATED)) != 3) {
-        UnitTest::Log(clr::RED + "(locked) [MMU_BLOCKS_ALLOCATED] Failed!" + clr::RESET);
+    if (Memory::Read_Word(MAP(MMU_BLOCKS_ALLOCATED)) != 0x0003) {
+        UnitTest::Log(clr::RED + "(locked) [MMU_BLOCKS_ALLOCATED] Failed! ($" + clr::hex(Memory::Read_Word(MAP(MMU_BLOCKS_ALLOCATED)), 4) + ")" + clr::RESET); 
         test_results = false;
     }    
     // verify the MMU_META_ROOT after a single allocation
-    if (Memory::Read_Word(MAP(MMU_META_ROOT)) != 2) {
-        UnitTest::Log(clr::RED + "(locked) [MMU_META_ROOT] Failed!" + clr::RESET);
+    if (Memory::Read_Word(MAP(MMU_META_ROOT)) != 0x0002) {
+        UnitTest::Log(clr::RED + "(locked) [MMU_META_ROOT] Failed! ($" + clr::hex(Memory::Read_Word(MAP(MMU_META_ROOT)), 4) + ")" + clr::RESET); 
         test_results = false;
     }    
     // verify the MMU_META_PREV after a single allocation
-    if (Memory::Read_Word(MAP(MMU_META_PREV)) != 2) {
-        UnitTest::Log(clr::RED + "(locked) [MMU_META_PREV] Failed!" + clr::RESET);
+    if (Memory::Read_Word(MAP(MMU_META_PREV)) != 0x0002) {
+        UnitTest::Log(clr::RED + "(locked) [MMU_META_PREV] Failed! ($" + clr::hex(Memory::Read_Word(MAP(MMU_META_PREV)), 4) + ")" + clr::RESET); 
         test_results = false;
     }    
     // verify the MMU_META_NEXT after a single allocation
     if (Memory::Read_Word(MAP(MMU_META_NEXT)) != MMU_BAD_HANDLE) {
-        UnitTest::Log(clr::RED + "(locked) [MMU_META_NEXT] Failed!" + clr::RESET);
+        UnitTest::Log(clr::RED + "(locked) [MMU_META_NEXT] Failed! ($" + clr::hex(Memory::Read_Word(MAP(MMU_META_NEXT)), 4) + ")" + clr::RESET); 
         test_results = false;
     }
     // verify MMU_RAW_INDEX is same as the handle after a single allocation
     if (Memory::Read_Word(MAP(MMU_RAW_INDEX)) != _test_lock_handle) {
-        UnitTest::Log(clr::RED + "(locked) [MMU_RAW_INDEX] Failed!" + clr::RESET);
+        UnitTest::Log(clr::RED + "(locked) [MMU_RAW_INDEX] Failed! ($" + clr::hex(Memory::Read_Word(MAP(MMU_RAW_INDEX)), 4) + ")" + clr::RESET); 
         test_results = false;
     }
     data = 0x40;   
@@ -895,12 +1033,15 @@ Byte MMU::do_free()
         _metadata_pool[current_node].root_node = MMU_BAD_HANDLE;
         _metadata_pool[current_node].prev_node = MMU_BAD_HANDLE;
         _metadata_pool[current_node].next_node = MMU_BAD_HANDLE;
-        // _metadata_pool[current_node].status = 0; // Mark as free
-        _metadata_pool[current_node].status  &= ~0x01; // Mark as free
+        _metadata_pool[current_node].status = 0; // Clear Status
+        // _metadata_pool[current_node].status  &= ~0x01; // Mark as free
 
         // Update the block counters
         _mmu_blocks_free++;           // One more block is free
-        _mmu_blocks_allocated--;      // One less block is allocated         
+        _mmu_blocks_allocated--;      // One less block is allocated 
+
+        // clear the data too
+        for (int i=0; i<32; ++i) { _metadata_pool[current_node].data[i] = 0; }
 
         // Move to the next node
         current_node = next_node; 
@@ -919,6 +1060,7 @@ Byte MMU::do_free()
 bool MMU::_test_free()
 {
     bool test_results = true;
+
     // free the RAM node
     Memory::Write_Word(MAP(MMU_META_HANDLE), _test_rw_handle);
     Memory::Write(MAP(MMU_COMMAND), MAP(MMU_CMD_FREE));
@@ -1177,6 +1319,7 @@ Word MMU::create_handle()
         // Check if the node is free (assuming status flag bit 0 indicates allocation status)
         if ((node.status & 0x01) == 0) {  // If the node is not allocated
             node.status |= 0x01;  // Mark it as allocated
+            node.status &= 0x80;  // Mask out Errors
 
             // Update block counters
             _mmu_blocks_free--;           // One less block available
