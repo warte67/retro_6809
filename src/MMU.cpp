@@ -285,7 +285,8 @@ int  MMU::OnAttach(int nextAddr)
     /////
     mapped_register.push_back({ "MMU_META_STATUS", nextAddr, 
         [this](Word) { return _metadata_pool[_mmu_raw_index].status; },  
-        [this](Word, Byte data) { _metadata_pool[_mmu_raw_index].status = data; }, 
+        [this](Word, Byte data) { _metadata_pool[_mmu_raw_index].status = data; },
+        // [this](Word, Byte data) { _metadata_pool[_mmu_raw_index].status = data & 0b1111'1110; },   // do not allow the user to change the allocated bit       
         { "(Byte) Status Flags:" }}); nextAddr++;
     // ADD STATUS FLAGS ENUMERATION:
     Byte stat = 0;
@@ -702,154 +703,154 @@ bool MMU::_test_alloc()
     Memory::Write(MAP(MMU_COMMAND), MAP(MMU_CMD_ALLOC));    // execute the allocation command
     _test_rw_handle = Memory::Read_Word(MAP(MMU_META_HANDLE));    // save the handle
     _mmu_raw_index = _test_rw_handle;
-    // // verify the handle after a single allocation
-    // if (_test_rw_handle != 0x0000) {
-    //     UnitTest::Log(clr::RED + "(RAM) Memory Handle Allocation Failed!" + clr::RESET);
-    //     test_results = false;
-    // }
-    // // verify the remaining memory after a single allocation
-    // if (Memory::Read_Word(MAP(MMU_BLOCKS_FREE)) != 0xCCCB) {
-    //     UnitTest::Log(clr::RED + "(RAM) [MMU_BLOCKS_FREE] Failed!" + clr::RESET);
-    //     test_results = false;
-    // }
-    // // verify the blocks allocated after a single allocation
-    // if (Memory::Read_Word(MAP(MMU_BLOCKS_ALLOCATED)) != 1) {
-    //     UnitTest::Log(clr::RED + "(RAM) [MMU_BLOCKS_ALLOCATED] Failed!" + clr::RESET);
-    //     test_results = false;
-    // }    
-    // // verify the MMU_META_ROOT after a single allocation
-    // if (Memory::Read_Word(MAP(MMU_META_ROOT)) != 0) {
-    //     UnitTest::Log(clr::RED + "(RAM) [MMU_META_ROOT] Failed!" + clr::RESET);
-    //     test_results = false;
-    // }    
-    // // verify the MMU_META_PREV after a single allocation
-    // if (Memory::Read_Word(MAP(MMU_META_PREV)) != 0) {
-    //     UnitTest::Log(clr::RED + "(RAM) [MMU_META_PREV] Failed!" + clr::RESET);
-    //     test_results = false;
-    // }    
-    // // verify the MMU_META_NEXT after a single allocation
-    // if (Memory::Read_Word(MAP(MMU_META_NEXT)) != MMU_BAD_HANDLE) {
-    //     UnitTest::Log(clr::RED + "(RAM) [MMU_META_NEXT] Failed!" + clr::RESET);
-    //     test_results = false;
-    // }
-    // // verify MMU_RAW_INDEX is same as the handle after a single allocation
-    // if (Memory::Read_Word(MAP(MMU_RAW_INDEX)) != _test_rw_handle) {
-    //     UnitTest::Log(clr::RED + "(RAM) [MMU_RAW_INDEX] Failed!" + clr::RESET);
-    //     test_results = false;
-    // }
-    // Byte data = 0x01;   
-    // for (Word addr = 0; addr < 32; ++addr) {
-    //     Memory::Write(MAP(MMU_META_DATA) + addr, data);
-    //     if (Memory::Read(MAP(MMU_META_DATA) + addr) != data) {
-    //         UnitTest::Log(clr::RED + "(RAM) [MMU_META_DATA + $" + clr::hex(addr, 2) + "] Failed Read/Write Test!" + clr::RESET);
-    //         test_results = false;            
-    //     }
-    //     data++;
-    // }
+    // verify the handle after a single allocation
+    if (_test_rw_handle != 0x0000) {
+        UnitTest::Log(clr::RED + "(RAM) Memory Handle Allocation Failed!" + clr::RESET);
+        test_results = false;
+    }
+    // verify the remaining memory after a single allocation
+    if (Memory::Read_Word(MAP(MMU_BLOCKS_FREE)) != 0xCCCB) {
+        UnitTest::Log(clr::RED + "(RAM) [MMU_BLOCKS_FREE] Failed!" + clr::RESET);
+        test_results = false;
+    }
+    // verify the blocks allocated after a single allocation
+    if (Memory::Read_Word(MAP(MMU_BLOCKS_ALLOCATED)) != 1) {
+        UnitTest::Log(clr::RED + "(RAM) [MMU_BLOCKS_ALLOCATED] Failed!" + clr::RESET);
+        test_results = false;
+    }    
+    // verify the MMU_META_ROOT after a single allocation
+    if (Memory::Read_Word(MAP(MMU_META_ROOT)) != 0) {
+        UnitTest::Log(clr::RED + "(RAM) [MMU_META_ROOT] Failed!" + clr::RESET);
+        test_results = false;
+    }    
+    // verify the MMU_META_PREV after a single allocation
+    if (Memory::Read_Word(MAP(MMU_META_PREV)) != 0) {
+        UnitTest::Log(clr::RED + "(RAM) [MMU_META_PREV] Failed!" + clr::RESET);
+        test_results = false;
+    }    
+    // verify the MMU_META_NEXT after a single allocation
+    if (Memory::Read_Word(MAP(MMU_META_NEXT)) != MMU_BAD_HANDLE) {
+        UnitTest::Log(clr::RED + "(RAM) [MMU_META_NEXT] Failed!" + clr::RESET);
+        test_results = false;
+    }
+    // verify MMU_RAW_INDEX is same as the handle after a single allocation
+    if (Memory::Read_Word(MAP(MMU_RAW_INDEX)) != _test_rw_handle) {
+        UnitTest::Log(clr::RED + "(RAM) [MMU_RAW_INDEX] Failed!" + clr::RESET);
+        test_results = false;
+    }
+    Byte data = 0x01;   
+    for (Word addr = 0; addr < 32; ++addr) {
+        Memory::Write(MAP(MMU_META_DATA) + addr, data);
+        if (Memory::Read(MAP(MMU_META_DATA) + addr) != data) {
+            UnitTest::Log(clr::RED + "(RAM) [MMU_META_DATA + $" + clr::hex(addr, 2) + "] Failed Read/Write Test!" + clr::RESET);
+            test_results = false;            
+        }
+        data++;
+    }
 
-    // // test ROM allocation
-    // // first allocate a single block and verify it
-    // Memory::Write(MAP(MMU_ARG_1_MSB), MAP(MMU_STFLG_READONLY));         // status flag
-    // Memory::Write(MAP(MMU_ARG_1_LSB), 0x00);                // single 32-byte node
-    // Memory::Write(MAP(MMU_COMMAND), MAP(MMU_CMD_ALLOC));    // execute the allocation command
-    // _test_ro_handle = Memory::Read_Word(MAP(MMU_META_HANDLE));    // fetch the handle
-    // // verify the handle after a single allocation
-    // if (_test_ro_handle != 0x0001) {
-    //     UnitTest::Log(clr::RED + "(ROM) Memory Handle Allocation Failed!" + clr::RESET);
-    //     test_results = false;
-    // }
-    // // verify the remaining memory after a single allocation
-    // if (Memory::Read_Word(MAP(MMU_BLOCKS_FREE)) != 0xCCCA) {
-    //     UnitTest::Log(clr::RED + "(ROM) [MMU_BLOCKS_FREE] Failed!" + clr::RESET);
-    //     test_results = false;
-    // }
-    // // verify the blocks allocated after a single allocation
-    // if (Memory::Read_Word(MAP(MMU_BLOCKS_ALLOCATED)) != 2) {
-    //     UnitTest::Log(clr::RED + "(ROM) [MMU_BLOCKS_ALLOCATED] Failed!" + clr::RESET);
-    //     test_results = false;
-    // }    
-    // // verify the MMU_META_ROOT after a single allocation
-    // if (Memory::Read_Word(MAP(MMU_META_ROOT)) != 1) {
-    //     UnitTest::Log(clr::RED + "(ROM) [MMU_META_ROOT] Failed!" + clr::RESET);
-    //     test_results = false;
-    // }    
-    // // verify the MMU_META_PREV after a single allocation
-    // if (Memory::Read_Word(MAP(MMU_META_PREV)) != 1) {
-    //     UnitTest::Log(clr::RED + "(ROM) [MMU_META_PREV] Failed!" + clr::RESET);
-    //     test_results = false;
-    // }    
-    // // verify the MMU_META_NEXT after a single allocation
-    // if (Memory::Read_Word(MAP(MMU_META_NEXT)) != MMU_BAD_HANDLE) {
-    //     UnitTest::Log(clr::RED + "(ROM) [MMU_META_NEXT] Failed!" + clr::RESET);
-    //     test_results = false;
-    // }
-    // // verify MMU_RAW_INDEX is same as the handle after a single allocation
-    // if (Memory::Read_Word(MAP(MMU_RAW_INDEX)) != _test_ro_handle) {
-    //     UnitTest::Log(clr::RED + "(ROM) [MMU_RAW_INDEX] Failed!" + clr::RESET);
-    //     test_results = false;
-    // }
-    // data = 0xFF;   
-    // _mmu_raw_index = _test_ro_handle;
-    // for (Word addr = 0; addr < 32; ++addr) {
-    //     Memory::Write(MAP(MMU_META_DATA) + addr, data);
-    //     if (Memory::Read(MAP(MMU_META_DATA) + addr) == data) {
-    //         UnitTest::Log(clr::RED + "(ROM) [MMU_META_DATA + $" + clr::hex(addr, 2) + "] Failed Read Only Test!" + clr::RESET);
-    //         test_results = false;            
-    //     }
-    //     --data;
-    // }
+    // test ROM allocation
+    // first allocate a single block and verify it
+    Memory::Write(MAP(MMU_ARG_1_MSB), MAP(MMU_STFLG_READONLY));         // status flag
+    Memory::Write(MAP(MMU_ARG_1_LSB), 0x00);                // single 32-byte node
+    Memory::Write(MAP(MMU_COMMAND), MAP(MMU_CMD_ALLOC));    // execute the allocation command
+    _test_ro_handle = Memory::Read_Word(MAP(MMU_META_HANDLE));    // fetch the handle
+    // verify the handle after a single allocation
+    if (_test_ro_handle != 0x0001) {
+        UnitTest::Log(clr::RED + "(ROM) Memory Handle Allocation Failed!" + clr::RESET);
+        test_results = false;
+    }
+    // verify the remaining memory after a single allocation
+    if (Memory::Read_Word(MAP(MMU_BLOCKS_FREE)) != 0xCCCA) {
+        UnitTest::Log(clr::RED + "(ROM) [MMU_BLOCKS_FREE] Failed!" + clr::RESET);
+        test_results = false;
+    }
+    // verify the blocks allocated after a single allocation
+    if (Memory::Read_Word(MAP(MMU_BLOCKS_ALLOCATED)) != 2) {
+        UnitTest::Log(clr::RED + "(ROM) [MMU_BLOCKS_ALLOCATED] Failed!" + clr::RESET);
+        test_results = false;
+    }    
+    // verify the MMU_META_ROOT after a single allocation
+    if (Memory::Read_Word(MAP(MMU_META_ROOT)) != 1) {
+        UnitTest::Log(clr::RED + "(ROM) [MMU_META_ROOT] Failed!" + clr::RESET);
+        test_results = false;
+    }    
+    // verify the MMU_META_PREV after a single allocation
+    if (Memory::Read_Word(MAP(MMU_META_PREV)) != 1) {
+        UnitTest::Log(clr::RED + "(ROM) [MMU_META_PREV] Failed!" + clr::RESET);
+        test_results = false;
+    }    
+    // verify the MMU_META_NEXT after a single allocation
+    if (Memory::Read_Word(MAP(MMU_META_NEXT)) != MMU_BAD_HANDLE) {
+        UnitTest::Log(clr::RED + "(ROM) [MMU_META_NEXT] Failed!" + clr::RESET);
+        test_results = false;
+    }
+    // verify MMU_RAW_INDEX is same as the handle after a single allocation
+    if (Memory::Read_Word(MAP(MMU_RAW_INDEX)) != _test_ro_handle) {
+        UnitTest::Log(clr::RED + "(ROM) [MMU_RAW_INDEX] Failed!" + clr::RESET);
+        test_results = false;
+    }
+    data = 0xFF;   
+    _mmu_raw_index = _test_ro_handle;
+    for (Word addr = 0; addr < 32; ++addr) {
+        Memory::Write(MAP(MMU_META_DATA) + addr, data);
+        if (Memory::Read(MAP(MMU_META_DATA) + addr) == data) {
+            UnitTest::Log(clr::RED + "(ROM) [MMU_META_DATA + $" + clr::hex(addr, 2) + "] Failed Read Only Test!" + clr::RESET);
+            test_results = false;            
+        }
+        --data;
+    }
 
-    // // test LOCKED allocation
-    // // first allocate a single block and verify it
-    // Memory::Write(MAP(MMU_ARG_1_MSB), MAP(MMU_STFLG_LOCKED));         // status flag
-    // Memory::Write(MAP(MMU_ARG_1_LSB), 0x00);                // single 32-byte node
-    // Memory::Write(MAP(MMU_COMMAND), MAP(MMU_CMD_ALLOC));    // execute the allocation command
-    // _test_lock_handle = Memory::Read_Word(MAP(MMU_META_HANDLE));    // fetch the handle
-    // // verify the handle after a single allocation
-    // if (_test_lock_handle != 0x0002) {
-    //     UnitTest::Log(clr::RED + "(locked) Memory Handle Allocation Failed!" + clr::RESET);
-    //     test_results = false;
-    // }
-    // // verify the remaining memory after a single allocation
-    // if (Memory::Read_Word(MAP(MMU_BLOCKS_FREE)) != 0xCCC9) {
-    //     UnitTest::Log(clr::RED + "(locked) [MMU_BLOCKS_FREE] Failed!" + clr::RESET);
-    //     test_results = false;
-    // }
-    // // verify the blocks allocated after a single allocation
-    // if (Memory::Read_Word(MAP(MMU_BLOCKS_ALLOCATED)) != 3) {
-    //     UnitTest::Log(clr::RED + "(locked) [MMU_BLOCKS_ALLOCATED] Failed!" + clr::RESET);
-    //     test_results = false;
-    // }    
-    // // verify the MMU_META_ROOT after a single allocation
-    // if (Memory::Read_Word(MAP(MMU_META_ROOT)) != 2) {
-    //     UnitTest::Log(clr::RED + "(locked) [MMU_META_ROOT] Failed!" + clr::RESET);
-    //     test_results = false;
-    // }    
-    // // verify the MMU_META_PREV after a single allocation
-    // if (Memory::Read_Word(MAP(MMU_META_PREV)) != 2) {
-    //     UnitTest::Log(clr::RED + "(locked) [MMU_META_PREV] Failed!" + clr::RESET);
-    //     test_results = false;
-    // }    
-    // // verify the MMU_META_NEXT after a single allocation
-    // if (Memory::Read_Word(MAP(MMU_META_NEXT)) != MMU_BAD_HANDLE) {
-    //     UnitTest::Log(clr::RED + "(locked) [MMU_META_NEXT] Failed!" + clr::RESET);
-    //     test_results = false;
-    // }
-    // // verify MMU_RAW_INDEX is same as the handle after a single allocation
-    // if (Memory::Read_Word(MAP(MMU_RAW_INDEX)) != _test_lock_handle) {
-    //     UnitTest::Log(clr::RED + "(locked) [MMU_RAW_INDEX] Failed!" + clr::RESET);
-    //     test_results = false;
-    // }
-    // data = 0x40;   
-    // _mmu_raw_index = _test_lock_handle;
-    // for (Word addr = 0; addr < 32; ++addr) {
-    //     Memory::Write(MAP(MMU_META_DATA) + addr, data);
-    //     if (Memory::Read(MAP(MMU_META_DATA) + addr) == data) {
-    //         UnitTest::Log(clr::RED + "(locked) [MMU_META_DATA + $" + clr::hex(addr, 2) + "] Failed Locked Memory Test!" + clr::RESET);
-    //         test_results = false;            
-    //     }
-    //     data++;
-    // }    
+    // test LOCKED allocation
+    // first allocate a single block and verify it
+    Memory::Write(MAP(MMU_ARG_1_MSB), MAP(MMU_STFLG_LOCKED));         // status flag
+    Memory::Write(MAP(MMU_ARG_1_LSB), 0x00);                // single 32-byte node
+    Memory::Write(MAP(MMU_COMMAND), MAP(MMU_CMD_ALLOC));    // execute the allocation command
+    _test_lock_handle = Memory::Read_Word(MAP(MMU_META_HANDLE));    // fetch the handle
+    // verify the handle after a single allocation
+    if (_test_lock_handle != 0x0002) {
+        UnitTest::Log(clr::RED + "(locked) Memory Handle Allocation Failed!" + clr::RESET);
+        test_results = false;
+    }
+    // verify the remaining memory after a single allocation
+    if (Memory::Read_Word(MAP(MMU_BLOCKS_FREE)) != 0xCCC9) {
+        UnitTest::Log(clr::RED + "(locked) [MMU_BLOCKS_FREE] Failed!" + clr::RESET);
+        test_results = false;
+    }
+    // verify the blocks allocated after a single allocation
+    if (Memory::Read_Word(MAP(MMU_BLOCKS_ALLOCATED)) != 3) {
+        UnitTest::Log(clr::RED + "(locked) [MMU_BLOCKS_ALLOCATED] Failed!" + clr::RESET);
+        test_results = false;
+    }    
+    // verify the MMU_META_ROOT after a single allocation
+    if (Memory::Read_Word(MAP(MMU_META_ROOT)) != 2) {
+        UnitTest::Log(clr::RED + "(locked) [MMU_META_ROOT] Failed!" + clr::RESET);
+        test_results = false;
+    }    
+    // verify the MMU_META_PREV after a single allocation
+    if (Memory::Read_Word(MAP(MMU_META_PREV)) != 2) {
+        UnitTest::Log(clr::RED + "(locked) [MMU_META_PREV] Failed!" + clr::RESET);
+        test_results = false;
+    }    
+    // verify the MMU_META_NEXT after a single allocation
+    if (Memory::Read_Word(MAP(MMU_META_NEXT)) != MMU_BAD_HANDLE) {
+        UnitTest::Log(clr::RED + "(locked) [MMU_META_NEXT] Failed!" + clr::RESET);
+        test_results = false;
+    }
+    // verify MMU_RAW_INDEX is same as the handle after a single allocation
+    if (Memory::Read_Word(MAP(MMU_RAW_INDEX)) != _test_lock_handle) {
+        UnitTest::Log(clr::RED + "(locked) [MMU_RAW_INDEX] Failed!" + clr::RESET);
+        test_results = false;
+    }
+    data = 0x40;   
+    _mmu_raw_index = _test_lock_handle;
+    for (Word addr = 0; addr < 32; ++addr) {
+        Memory::Write(MAP(MMU_META_DATA) + addr, data);
+        if (Memory::Read(MAP(MMU_META_DATA) + addr) == data) {
+            UnitTest::Log(clr::RED + "(locked) [MMU_META_DATA + $" + clr::hex(addr, 2) + "] Failed Locked Memory Test!" + clr::RESET);
+            test_results = false;            
+        }
+        data++;
+    }    
 
     return test_results;
 }
@@ -919,52 +920,52 @@ bool MMU::_test_free()
 {
     bool test_results = true;
     // free the RAM node
-    // Memory::Write_Word(MAP(MMU_META_HANDLE), _test_rw_handle);
-    // Memory::Write(MAP(MMU_COMMAND), MAP(MMU_CMD_FREE));
-    // if (Memory::Read_Word(MAP(MMU_BLOCKS_FREE)) != 0xCCCA) {
-    //     UnitTest::Log(clr::RED + "(RAM) [MMU_BLOCKS_FREE] MMU_CMD_FREE Command Failed!" + clr::RESET);
-    //     test_results = false;        
-    // }
-    // if (Memory::Read_Word(MAP(MMU_BLOCKS_ALLOCATED)) != 2) {
-    //     UnitTest::Log(clr::RED + "(RAM) [MMU_BLOCKS_ALLOCATED] MMU_CMD_FREE Command Failed!" + clr::RESET);
-    //     test_results = false;        
-    // }
-    // if (Memory::Read_Word(MAP(MMU_META_HANDLE)) != MMU_BAD_HANDLE) {
-    //     UnitTest::Log(clr::RED + "(RAM) [MMU_META_HANDLE] MMU_CMD_FREE Command Failed!" + clr::RESET);
-    //     test_results = false;        
-    // }    
+    Memory::Write_Word(MAP(MMU_META_HANDLE), _test_rw_handle);
+    Memory::Write(MAP(MMU_COMMAND), MAP(MMU_CMD_FREE));
+    if (Memory::Read_Word(MAP(MMU_BLOCKS_FREE)) != 0xCCCA) {
+        UnitTest::Log(clr::RED + "(RAM) [MMU_BLOCKS_FREE] MMU_CMD_FREE Command Failed!" + clr::RESET);
+        test_results = false;        
+    }
+    if (Memory::Read_Word(MAP(MMU_BLOCKS_ALLOCATED)) != 2) {
+        UnitTest::Log(clr::RED + "(RAM) [MMU_BLOCKS_ALLOCATED] MMU_CMD_FREE Command Failed!" + clr::RESET);
+        test_results = false;        
+    }
+    if (Memory::Read_Word(MAP(MMU_META_HANDLE)) != MMU_BAD_HANDLE) {
+        UnitTest::Log(clr::RED + "(RAM) [MMU_META_HANDLE] MMU_CMD_FREE Command Failed!" + clr::RESET);
+        test_results = false;        
+    }    
 
-    // // free the ROM node
-    // Memory::Write_Word(MAP(MMU_META_HANDLE), _test_ro_handle);
-    // Memory::Write(MAP(MMU_COMMAND), MAP(MMU_CMD_FREE));
-    // if (Memory::Read_Word(MAP(MMU_BLOCKS_FREE)) != 0xCCCB) {
-    //     UnitTest::Log(clr::RED + "(RAM) [MMU_BLOCKS_FREE] MMU_CMD_FREE Command Failed!" + clr::RESET);
-    //     test_results = false;        
-    // }
-    // if (Memory::Read_Word(MAP(MMU_BLOCKS_ALLOCATED)) != 1) {
-    //     UnitTest::Log(clr::RED + "(RAM) [MMU_BLOCKS_ALLOCATED] MMU_CMD_FREE Command Failed!" + clr::RESET);
-    //     test_results = false;        
-    // }
-    // if (Memory::Read_Word(MAP(MMU_META_HANDLE)) != MMU_BAD_HANDLE) {
-    //     UnitTest::Log(clr::RED + "(RAM) [MMU_META_HANDLE] MMU_CMD_FREE Command Failed!" + clr::RESET);
-    //     test_results = false;        
-    // }  
+    // free the ROM node
+    Memory::Write_Word(MAP(MMU_META_HANDLE), _test_ro_handle);
+    Memory::Write(MAP(MMU_COMMAND), MAP(MMU_CMD_FREE));
+    if (Memory::Read_Word(MAP(MMU_BLOCKS_FREE)) != 0xCCCB) {
+        UnitTest::Log(clr::RED + "(RAM) [MMU_BLOCKS_FREE] MMU_CMD_FREE Command Failed!" + clr::RESET);
+        test_results = false;        
+    }
+    if (Memory::Read_Word(MAP(MMU_BLOCKS_ALLOCATED)) != 1) {
+        UnitTest::Log(clr::RED + "(RAM) [MMU_BLOCKS_ALLOCATED] MMU_CMD_FREE Command Failed!" + clr::RESET);
+        test_results = false;        
+    }
+    if (Memory::Read_Word(MAP(MMU_META_HANDLE)) != MMU_BAD_HANDLE) {
+        UnitTest::Log(clr::RED + "(RAM) [MMU_META_HANDLE] MMU_CMD_FREE Command Failed!" + clr::RESET);
+        test_results = false;        
+    }  
 
-    // // free the Locked node
-    // Memory::Write_Word(MAP(MMU_META_HANDLE), _test_lock_handle);
-    // Memory::Write(MAP(MMU_COMMAND), MAP(MMU_CMD_FREE));
-    // if (Memory::Read_Word(MAP(MMU_BLOCKS_FREE)) != 0xCCCC) {
-    //     UnitTest::Log(clr::RED + "(RAM) [MMU_BLOCKS_FREE] MMU_CMD_FREE Command Failed!" + clr::RESET);
-    //     test_results = false;        
-    // }
-    // if (Memory::Read_Word(MAP(MMU_BLOCKS_ALLOCATED)) != 0) {
-    //     UnitTest::Log(clr::RED + "(RAM) [MMU_BLOCKS_ALLOCATED] MMU_CMD_FREE Command Failed!" + clr::RESET);
-    //     test_results = false;        
-    // }
-    // if (Memory::Read_Word(MAP(MMU_META_HANDLE)) != MMU_BAD_HANDLE) {
-    //     UnitTest::Log(clr::RED + "(RAM) [MMU_META_HANDLE] MMU_CMD_FREE Command Failed!" + clr::RESET);
-    //     test_results = false;        
-    // }  
+    // free the Locked node
+    Memory::Write_Word(MAP(MMU_META_HANDLE), _test_lock_handle);
+    Memory::Write(MAP(MMU_COMMAND), MAP(MMU_CMD_FREE));
+    if (Memory::Read_Word(MAP(MMU_BLOCKS_FREE)) != 0xCCCC) {
+        UnitTest::Log(clr::RED + "(RAM) [MMU_BLOCKS_FREE] MMU_CMD_FREE Command Failed!" + clr::RESET);
+        test_results = false;        
+    }
+    if (Memory::Read_Word(MAP(MMU_BLOCKS_ALLOCATED)) != 0) {
+        UnitTest::Log(clr::RED + "(RAM) [MMU_BLOCKS_ALLOCATED] MMU_CMD_FREE Command Failed!" + clr::RESET);
+        test_results = false;        
+    }
+    if (Memory::Read_Word(MAP(MMU_META_HANDLE)) != MMU_BAD_HANDLE) {
+        UnitTest::Log(clr::RED + "(RAM) [MMU_META_HANDLE] MMU_CMD_FREE Command Failed!" + clr::RESET);
+        test_results = false;        
+    }  
 
     return test_results;
 }
