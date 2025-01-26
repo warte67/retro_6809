@@ -526,8 +526,8 @@ MATH_TOP              equ    $FE86    ; Top of Math Co-Processor Register Space
 ; _______________________________________________________________________
 
 MMU_DEVICE            equ    $FE86    ; START: Memory Management Unit Hardware Registers
-MMU_1_SELECT          equ    $FE86    ; (Word) Page Select for 8K Memory Bank 1
-MMU_2_SELECT          equ    $FE88    ; (Word) Page Select for 8K Memory Bank 2
+MMU_PAGE_1_SELECT     equ    $FE86    ; (Word) Page Select for 8K Memory Bank 1
+MMU_PAGE_2_SELECT     equ    $FE88    ; (Word) Page Select for 8K Memory Bank 2
 MMU_BLOCKS_FREE       equ    $FE8A    ; (Word) Number of 32-Byte Blocks Available for Allocation (Read Only)
 MMU_BLOCKS_ALLOCATED  equ    $FE8C    ; (Word) Number of 32-Byte Blocks Currently Allocated  (Read Only)
 MMU_BLOCKS_FRAGGED    equ    $FE8E    ; (Word) Number of 32-Byte Blocks Currently Fragmented  (Read Only)

@@ -550,8 +550,8 @@ FE86                  MATH_TOP              equ    $FE86    ; Top of Math Co-Pro
                       ; _______________________________________________________________________
                       
 FE86                  MMU_DEVICE            equ    $FE86    ; START: Memory Management Unit Hardware Registers
-FE86                  MMU_1_SELECT          equ    $FE86    ; (Word) Page Select for 8K Memory Bank 1
-FE88                  MMU_2_SELECT          equ    $FE88    ; (Word) Page Select for 8K Memory Bank 2
+FE86                  MMU_PAGE_1_SELECT     equ    $FE86    ; (Word) Page Select for 8K Memory Bank 1
+FE88                  MMU_PAGE_2_SELECT     equ    $FE88    ; (Word) Page Select for 8K Memory Bank 2
 FE8A                  MMU_BLOCKS_FREE       equ    $FE8A    ; (Word) Number of 32-Byte Blocks Available for Allocation (Read Only)
 FE8C                  MMU_BLOCKS_ALLOCATED  equ    $FE8C    ; (Word) Number of 32-Byte Blocks Currently Allocated  (Read Only)
 FE8E                  MMU_BLOCKS_FRAGGED    equ    $FE8E    ; (Word) Number of 32-Byte Blocks Currently Fragmented  (Read Only)
@@ -974,7 +974,7 @@ F207  8E0010                                  ldx         #SYSTEM_MEMORY_DEVICE 
 F20A  CC0000                                  ldd         #$0000              ; clear out D
 F20D  BF0400          1                       stx         VIDEO_START                 ; cycle first character to show progress
 F210  ED81                                    std         ,x++                ; clear out the next word of system memory
-F212  8CF000                                  cmpx    #KERNEL_ROM_DEVICE  ; at the end yet?
+F212  8CB000                                  cmpx    #USER_RAM_TOP       ; at the end yet?
 F215  26F6                                    bne         1b                  ; nope, keep going
                                                       ; initialize the system 
 F217  8EF180                                          ldx             #SYSTEM_DATA_START

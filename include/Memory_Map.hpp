@@ -528,8 +528,8 @@ enum MEMMAP
 // _______________________________________________________________________
 
     MMU_DEVICE            = 0xFE86,   // START: Memory Management Unit Hardware Registers
-    MMU_1_SELECT          = 0xFE86,   // (Word) Page Select for 8K Memory Bank 1
-    MMU_2_SELECT          = 0xFE88,   // (Word) Page Select for 8K Memory Bank 2
+    MMU_PAGE_1_SELECT     = 0xFE86,   // (Word) Page Select for 8K Memory Bank 1
+    MMU_PAGE_2_SELECT     = 0xFE88,   // (Word) Page Select for 8K Memory Bank 2
     MMU_BLOCKS_FREE       = 0xFE8A,   // (Word) Number of 32-Byte Blocks Available for Allocation (Read Only)
     MMU_BLOCKS_ALLOCATED  = 0xFE8C,   // (Word) Number of 32-Byte Blocks Currently Allocated  (Read Only)
     MMU_BLOCKS_FRAGGED    = 0xFE8E,   // (Word) Number of 32-Byte Blocks Currently Fragmented  (Read Only)

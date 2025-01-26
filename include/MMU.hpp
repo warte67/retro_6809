@@ -34,6 +34,8 @@
 #include "IDevice.hpp"
 #include "UnitTest.hpp"
 
+
+
 class MMU : public IDevice {
     
     friend class BANKED_MEM; // allow BANKED_MEM to access private members
@@ -41,6 +43,8 @@ class MMU : public IDevice {
 public: // PUBLIC CONSTRUCTOR / DESTRUCTOR
     MMU();
     virtual ~MMU();
+
+    const inline static Word MMU_BAD_HANDLE = 0xFFFF;    
 
 public: 
 
@@ -122,9 +126,6 @@ private:
     // ****************** //
     // HARDWARE REGISTERS //
     // ****************** //
-
-
-    Word MMU_BAD_HANDLE = 0xFFFF;
 
     Word _mmu_1_select = MMU_BAD_HANDLE;    
     // MMU_1_SELECT                 ; (Word) Page Select for 8K Memory Bank 1
@@ -237,6 +238,9 @@ private:
 
     Word create_handle();
     void deallocate_handle(Word handle);
+
+    inline static MMU* _mmu;
+    inline static MMU* instance() { return _mmu; }
     
     std::vector<Word> _handles;  // Holds the allocated memory handles (root node indices)
 
@@ -310,64 +314,61 @@ public:
     void OnEvent(SDL_Event* evnt) override 		{ if (evnt==nullptr) {;} }
     void OnUpdate(float fElapsedTime) override 	{ if (fElapsedTime==0) {;} }    
     void OnRender() override 					{}
+
+    Byte bank_read(Word address);
+    void bank_write(Word address, Byte data);
+
     int OnAttach(int nextAddr) override       { 
         int bank_size = 8*1024;
         Word old_address=nextAddr;
         this->heading = "Banked Memory Region (" + std::to_string(bank_size/512) + "K)";
 
-        mapped_register.push_back({ "BANKMEM_ONE", nextAddr, nullptr, nullptr,
-            { "Banked Memory Page One (8K)"}}); nextAddr+=bank_size;
-        mapped_register.push_back({ "BANKMEM_TWO", nextAddr, nullptr, nullptr,
-            { "Banked Memory Page Two (8K)"}}); nextAddr+=(bank_size-1);
-        
-        // // BANK ONE:
         // mapped_register.push_back({ "BANKMEM_ONE", nextAddr, nullptr, nullptr,
-        //     { "Banked Memory Page One (8K)"}}); 
-        //     for (int i=0; i<bank_size; i++) 
-        //     {
-        //         mapped_register.push_back({ "", nextAddr, 
-        //             // // Read from Bank One:
-        //             // [this](Word address) 
-        //             // { 
-        //             //     // default (handle 0xFFFF) read
-        //             //     return Memory::memory(address); 
-        //             // },
-        //             nullptr,
-        //             // // Write to Bank One: 
-        //             // [this](Word address, Byte data) 
-        //             // {
-        //             //     // default (handle 0xFFFF) write
-        //             //     Memory::memory(address, data);
-        //             // },
-        //             nullptr,
-        //             { "" }}
-        //         ); nextAddr++;
-        //     }
-
-        // // BANK TWO:
+        //     { "Banked Memory Page One (8K)"}}); nextAddr+=bank_size;
         // mapped_register.push_back({ "BANKMEM_TWO", nextAddr, nullptr, nullptr,
-        //     { "Banked Memory Page Two (8K)"}}); 
-        //     for (int i=0; i<bank_size; i++) 
-        //     {
-        //         mapped_register.push_back({ "", nextAddr, 
-        //             // // Read from Bank Two:
-        //             // [this](Word address) 
-        //             // { 
-        //             //     // default (handle 0xFFFF) read
-        //             //     return Memory::memory(address); 
-        //             // },   
-        //             nullptr,                 
-        //             // // Write to Bank Two: 
-        //             // [this](Word address, Byte data) 
-        //             // {
-        //             //     // default (handle 0xFFFF) write
-        //             //     Memory::memory(address, data);
-        //             // },
-        //             nullptr,
-        //             { "" }}
-        //         ); nextAddr++;
-        //     }
+        //     { "Banked Memory Page Two (8K)"}}); nextAddr+=(bank_size-1);
+        
+        // BANK ONE:
+        mapped_register.push_back({ "BANKMEM_ONE", nextAddr, nullptr, nullptr,
+            { "Banked Memory Page One (8K)"}}); 
+        for (int i=0; i<bank_size; i++) 
+        {
+            mapped_register.push_back({ "", nextAddr, 
+                // Read from Bank One:
+                [this](Word address) 
+                { 
+                    return bank_read(address); 
+                },
+                // Write to Bank One: 
+                [this](Word address, Byte data) 
+                {
+                    bank_write(address, data);
+                },
+                { "" }}
+            ); nextAddr++;
+        }
 
+        // BANK TWO:
+        mapped_register.push_back({ "BANKMEM_TWO", nextAddr, nullptr, nullptr,
+            { "Banked Memory Page Two (8K)"}}); 
+        for (int i=0; i<bank_size; i++) 
+        {
+            mapped_register.push_back({ "", nextAddr, 
+                // Read from Bank Two:
+                [this](Word address) 
+                { 
+                    return bank_read(address); 
+                },
+                // Write to Bank Two: 
+                [this](Word address, Byte data) 
+                {
+                    bank_write(address, data);
+                },
+                { "" }}
+            ); nextAddr++;
+        }
+
+        nextAddr--;
         mapped_register.push_back({ "BANKMEM_END", nextAddr, nullptr, nullptr,
             { "End of Banked Memory Region"}}); nextAddr+=1;            
         mapped_register.push_back({ "BANKMEM_TOP", nextAddr, nullptr, nullptr,
@@ -378,11 +379,10 @@ public:
     bool OnTest() 
     { 
         // Check the number of mapped registers
-        size_t expectedRegisters = 4; // Number of interrupt vectors
-        ASSERT(mapped_register.size() == expectedRegisters, _device_name + ": Incorrect number of mapped registers");
+        size_t expectedRegisters = 16388;   // size_t expectedRegisters = 4;
+        ASSERT(mapped_register.size() == expectedRegisters, _device_name + ": Incorrect number of mapped registers (" + std::to_string(mapped_register.size()) + ")");
         // Check the mapped registers
         return UnitTest::RangeTest_RW(_device_name, base_address, base_address+_size);
-        return true;
     }     
 };
 

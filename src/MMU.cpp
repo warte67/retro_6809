@@ -42,6 +42,7 @@ MMU::MMU()
     if (bWasInitialized != this) { 
         Bus::Error("MMU already initialized!", __FILE__, __LINE__);
     }
+    _mmu = this;
 
     _device_name = "MMU_DEVICE"; 
 } // END: MMU()
@@ -72,7 +73,7 @@ int  MMU::OnAttach(int nextAddr)
     // (Word) MMU_1_SELECT
     //      Page Select for 8K Memory Bank 1 (MMU_HANDLE)
     /////
-    mapped_register.push_back({ "MMU_1_SELECT", nextAddr, 
+    mapped_register.push_back({ "MMU_PAGE_1_SELECT", nextAddr, 
         [this](Word) { return (_mmu_1_select>>8) & 0xFF; }, 
         [this](Word, Byte data) { _mmu_1_select = (_mmu_1_select & 0x00FF) | (data << 8); },  
         { "(Word) Page Select for 8K Memory Bank 1"} });
@@ -87,7 +88,7 @@ int  MMU::OnAttach(int nextAddr)
     // (Word) MMU_2_SELECT
     //      Page Select for 8K Memory Bank 2 (MMU_HANDLE)
     /////
-    mapped_register.push_back({ "MMU_2_SELECT", nextAddr, 
+    mapped_register.push_back({ "MMU_PAGE_2_SELECT", nextAddr, 
         [this](Word) { return (_mmu_2_select>>8) & 0xFF; }, 
         [this](Word, Byte data) { _mmu_2_select = (_mmu_2_select & 0x00FF) | (data << 8); },  
         { "(Word) Page Select for 8K Memory Bank 2"} });
@@ -1375,3 +1376,144 @@ void MMU::deallocate_handle(Word handle)
         _handles.erase(it);
     }
 }
+
+
+
+
+
+
+
+
+
+
+/*** class BANKED_MEM *******************************************************
+ * 
+ *      ____    _    _   _ _  _______ ____            __  __ _____ __  __ 
+ *     | __ )  / \  | \ | | |/ / ____|  _ \          |  \/  | ____|  \/  |
+ *     |  _ \ / _ \ |  \| | ' /|  _| | | | |         | |\/| |  _| | |\/| |
+ *     | |_) / ___ \| |\  | . \| |___| |_| |         | |  | | |___| |  | |
+ *     |____/_/   \_\_| \_|_|\_\_____|____/   _____  |_|  |_|_____|_|  |_|
+ *                                           |_____|       
+ * 
+ ****************************************************************/
+
+
+Byte BANKED_MEM::bank_read(Word address)
+{
+    MMU* mmu = MMU::instance();
+
+    Byte bank_num = 0;
+    Word offset = address - MAP(BANKMEM_ONE);
+    if (address >= MAP(BANKMEM_TWO))
+    {
+        bank_num = 1;
+        offset = address - MAP(BANKMEM_TWO);
+    }
+    if ( ((Memory::Read_Word(MAP(MMU_PAGE_1_SELECT)) != 0xFFFF) && bank_num == 0) || 
+         ((Memory::Read_Word(MAP(MMU_PAGE_2_SELECT)) != 0xFFFF) && bank_num == 1) )
+    {
+        Byte node_num = (offset / 32);
+        Byte data_index = (offset % 32);
+        Word bank_handle;
+        if (bank_num == 0)
+        {
+            bank_handle = Memory::Read_Word(MAP(MMU_PAGE_1_SELECT));
+            if (bank_handle >= 0xCCCC) { bank_handle = 0xCCCB; }
+        }
+        else
+        {
+            bank_handle = Memory::Read_Word(MAP(MMU_PAGE_2_SELECT));
+            if (bank_handle >= 0xCCCC) { bank_handle = 0xCCCB; }
+        }
+        // verify that the handle is valid
+        if ( (mmu->_metadata_pool[bank_handle].status & 0x03) == 0x03)
+        {
+            Word current_node = bank_handle;
+            // if this is a valid handle
+            if  ( (mmu->_metadata_pool[bank_handle].status & 0x01) && 
+                  (mmu->_metadata_pool[bank_handle].root_node == bank_handle) )
+            {
+                // brute force search
+                while (node_num > 0)
+                {
+                    current_node = mmu->_metadata_pool[current_node].next_node;
+                    --node_num;
+                    if (current_node == MMU::MMU_BAD_HANDLE) 
+                    { 
+                        UnitTest::Log(clr::RED + "BANKED_MEM Page Read Error!" + clr::RESET);
+                        Bus::Error("BANKED_MEM Page Read Error!", __FILE__, __LINE__);
+                        return 0; 
+                    }
+                }
+                return mmu->_metadata_pool[current_node].data[data_index];
+            }
+        }
+    }
+
+    // default (handle 0xFFFF) read
+    return Memory::memory(address); 
+}
+
+
+
+
+
+
+void BANKED_MEM::bank_write(Word address, Byte data)
+{
+    MMU* mmu = MMU::instance();
+
+    Byte bank_num = 0;
+    Word offset = address - MAP(BANKMEM_ONE);
+    if (address >= MAP(BANKMEM_TWO))
+    {
+        bank_num = 1;
+        offset = address - MAP(BANKMEM_TWO);
+    }
+    if ( ((Memory::Read_Word(MAP(MMU_PAGE_1_SELECT)) != 0xFFFF) && bank_num == 0) || 
+         ((Memory::Read_Word(MAP(MMU_PAGE_2_SELECT)) != 0xFFFF) && bank_num == 1) )
+    {
+        Byte node_num = (offset / 32);
+        Byte data_index = (offset % 32);
+        Word bank_handle;
+        if (bank_num == 0)
+        {
+            bank_handle = Memory::Read_Word(MAP(MMU_PAGE_1_SELECT));
+            if (bank_handle >= 0xCCCC) { bank_handle = 0xCCCB; }
+        }
+        else
+        {
+            bank_handle = Memory::Read_Word(MAP(MMU_PAGE_2_SELECT));
+            if (bank_handle >= 0xCCCC) { bank_handle = 0xCCCB; }
+        }
+        // verify that the handle is valid
+        if ( (mmu->_metadata_pool[bank_handle].status & 0x03) == 0x03)
+        {
+            Word current_node = bank_handle;
+            // if this is a valid handle
+            if  ( (mmu->_metadata_pool[bank_handle].status & 0x01) && 
+                  (mmu->_metadata_pool[bank_handle].root_node == bank_handle) )
+            {
+                while (node_num > 0)
+                {
+                    current_node = mmu->_metadata_pool[current_node].next_node;
+                    --node_num;
+                    if (current_node == MMU::MMU_BAD_HANDLE) 
+                    { 
+                        UnitTest::Log(clr::RED + "BANKED_MEM Page Write Error!" + clr::RESET);
+                        Bus::Error("BANKED_MEM Page Write Error!", __FILE__, __LINE__);
+                        return; 
+                    }
+                }
+                mmu->_metadata_pool[current_node].data[data_index] = data;
+                return;
+            }
+        }
+    }
+
+
+    // default (handle 0xFFFF) write
+    Memory::memory(address, data);
+}
+
+

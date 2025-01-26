@@ -197,7 +197,7 @@ KRNL_COLD	    ; cold reset
 		        ldd	    #$0000              ; clear out D
 1		        stx	    VIDEO_START			; cycle first character to show progress
 		        std	    ,x++                ; clear out the next word of system memory
-		        cmpx	#KERNEL_ROM_DEVICE  ; at the end yet?
+		        cmpx	#USER_RAM_TOP       ; at the end yet?
 		        bne	    1b                  ; nope, keep going
 				; initialize the system	
 				ldx		#SYSTEM_DATA_START
