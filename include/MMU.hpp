@@ -220,7 +220,7 @@ private:
     std::array<Byte,32> _meta_data{0};
     // MMU_META_DATA                ; (32-Bytes) 32-Byte data for the current allocation chain
 
-    Word _mmu_raw_index = 0;
+    Word _mmu_raw_index = 0;        // This is the index of the currently windowed METADATA_NODE
     // MMU_RAW_INDEX                ; Raw Index of the current memory node (For Debugging)
 
     // *************** //
@@ -241,6 +241,7 @@ private:
 
     inline static MMU* _mmu;
     inline static MMU* instance() { return _mmu; }
+    Word allocate_new_node();
     
     std::vector<Word> _handles;  // Holds the allocated memory handles (root node indices)
     
@@ -273,19 +274,19 @@ private:
     std::vector<METADATA_NODE> _metadata_pool = std::vector<METADATA_NODE>(MMU_MEMORY_SIZE);
 
 
-    //          DATA pool = 1'677'696 bytes
-    //      METADATA pool =   419'424 bytes
-    //             equals = 2'097'120 bytes
-    //                2MB = 2'097'152 bytes
-    // the remaining 32 bytes left within the 2MB pool are reserved for flags
-    struct PageFlags {
-        std::bitset<256> flags; // 256 bits (32 bytes) to represent flags for each 32-byte block.
-    };
+    // //          DATA pool = 1'677'696 bytes
+    // //      METADATA pool =   419'424 bytes
+    // //             equals = 2'097'120 bytes
+    // //                2MB = 2'097'152 bytes
+    // // the remaining 32 bytes left within the 2MB pool are reserved for flags
+    // struct PageFlags {
+    //     std::bitset<256> flags; // 256 bits (32 bytes) to represent flags for each 32-byte block.
+    // };
 
 
-    Word _dynamic_memory_top = MMU_MEMORY_SIZE;     // top of dynamic memory $CCCC = 52'428
-    Word _dynamic_memory_bottom = 0x0000;           // bottom of dynamemic memory, 
-                                                    //     preinitialized to zero for now
+    // Word _dynamic_memory_top = MMU_MEMORY_SIZE;     // top of dynamic memory $CCCC = 52'428
+    // Word _dynamic_memory_bottom = 0x0000;           // bottom of dynamemic memory, 
+    //                                                 //     preinitialized to zero for now
 };
 
 
