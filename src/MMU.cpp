@@ -280,15 +280,15 @@ int  MMU::OnAttach(int nextAddr)
     nextAddr++;
 
 
-    ////////////////////////////////////////////////
-    // (Byte)  MMU_PAGE_INDEX
-    //      Page Index: 0xFF if not part of an 8K page
-    /////
-    mapped_register.push_back({ "MMU_PAGE_INDEX", nextAddr, 
-        [this](Word) { return _metadata_pool[_mmu_raw_index].page_index; }, 
-        [this](Word, Byte data) { _metadata_pool[_mmu_raw_index].page_index = data; },   
-        { "(Byte) Page Index: 0xFF if not part of an 8K page"} });
-    nextAddr++;
+    // ////////////////////////////////////////////////
+    // // (Byte)  MMU_PAGE_INDEX
+    // //      Page Index: 0xFF if not part of an 8K page
+    // /////
+    // mapped_register.push_back({ "MMU_PAGE_INDEX", nextAddr, 
+    //     [this](Word) { return _metadata_pool[_mmu_raw_index].page_index; }, 
+    //     [this](Word, Byte data) { _metadata_pool[_mmu_raw_index].page_index = data; },   
+    //     { "(Byte) Page Index: 0xFF if not part of an 8K page"} });
+    // nextAddr++;
 
 
     ////////////////////////////////////////////////

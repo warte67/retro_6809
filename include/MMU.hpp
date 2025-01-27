@@ -252,7 +252,7 @@ private:
 
 
     struct METADATA_NODE {
-        Byte page_index;            // index into the _paged_mem_nodes container
+        Byte page_index;            // index into the _paged_mem_nodes container (reserved)
         Byte status;                // status flags
                                     // bit  0   Is Allocated:     0 = Free,   1 = Allocated
                                     // bit  1   8k Paged Memory:  0 = No,     1 = Yes
