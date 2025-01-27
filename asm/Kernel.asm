@@ -46,38 +46,38 @@ READY_PROMPT	fcn	"Ready\n"
 ;	do_help		; #13		; Display usage help
 
 KRNL_CMD_TABLE	
-                fcn     "cls"	        ; #0
-                fcn     "color"	        ; #1
-                fcn     "load"	        ; #2
-                fcn     "exec"	        ; #3
-                fcn     "reset"	        ; #4
-                fcn     "dir"	        ; #5
-                fcn     "cd"	        ; #6
-                fcn     "chdir"	        ; #7
-                fcn     "pwd"	        ; #8
-                fcn     "exit"	        ; #9
-                fcn     "quit"	        ; #10
-                fcn     "mode"	        ; #11
-                fcn     "debug"	        ; #12
-                fcn     "help"	        ; #13
-                fcb     $FF	        ; $FF = end of list
+                fcn     "cls"           ; #0
+                fcn     "color"         ; #1
+                fcn     "load"          ; #2
+                fcn     "exec"          ; #3
+                fcn     "reset"         ; #4
+                fcn     "dir"           ; #5
+                fcn     "cd"            ; #6
+                fcn     "chdir"         ; #7
+                fcn     "pwd"           ; #8
+                fcn     "exit"          ; #9
+                fcn     "quit"          ; #10
+                fcn     "mode"          ; #11
+                fcn     "debug"         ; #12
+                fcn     "help"          ; #13
+                fcb     $FF             ; $FF = end of list
                 ; ...
 
 KRNL_CMD_VECTS  
-                fdb	do_cls		; #0
-                fdb	do_color	; #1
-                fdb	do_load		; #2
-                fdb	do_exec		; #3
-                fdb	do_reset	; #4
-                fdb	do_dir		; #5
-                fdb	do_cd		; #6
-                fdb	do_chdir	; #7
-                fdb	do_pwd		; #8
-                fdb	do_exit		; #9
-                fdb	do_quit		; #10
-                fdb	do_mode		; #11
-                fdb	do_debug	; #12
-                fdb	do_help		; #13
+                fdb	do_cls          ; #0
+                fdb	do_color        ; #1
+                fdb	do_load         ; #2
+                fdb	do_exec         ; #3
+                fdb	do_reset        ; #4
+                fdb	do_dir          ; #5
+                fdb	do_cd           ; #6
+                fdb	do_chdir        ; #7
+                fdb	do_pwd          ; #8
+                fdb	do_exit         ; #9
+                fdb	do_quit         ; #10
+                fdb	do_mode         ; #11
+                fdb	do_debug        ; #12
+                fdb	do_help         ; #13
                 ; ...
 KRNL_ERR_NFND 	fcn	"ERROR: Command Not Found\n"
 krnl_help_str	fcc	" valid commands are:\n"
