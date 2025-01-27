@@ -350,100 +350,100 @@ do_argh_0       lda     ,x+             ; load the next character
 ; *****************************************************************************
 ; * Command: EXEC "Execute a Program"                            ARG1 = none  *
 ; *****************************************************************************
-do_exec			jsr		[VEC_EXEC]		; call the users program
-                                rts						; return from this subroutine
+do_exec         jsr     [VEC_EXEC]      ; call the users program
+                rts                     ; return from this subroutine
 
 ; *****************************************************************************
 ; * Command: RESET "Perform a System Reset"                      ARG1 = none  *
 ; *****************************************************************************
-do_reset		lda		#FC_RESET		; load the FIO Command: RESET
-                                sta		FIO_COMMAND		; issue the Command
-                                rts						; return from subroutine
+do_reset        lda     #FC_RESET       ; load the FIO Command: RESET
+                sta     FIO_COMMAND     ; issue the Command
+                rts                     ; return from subroutine
 
 ; *****************************************************************************
 ; * Command: DIR "List a Directorys Files and Folders"     ARG1 = {filepath}  *
 ; *****************************************************************************
-do_dir			bsr		do_arg1_helper	; fetch path data from argument 1
-                                lda		#FC_LISTDIR		; load the FIO command: LISTDIR
-                                sta		FIO_COMMAND		; issue the Command
-do_dir_1		lda		FIO_DIR_DATA	; load a character from the Data Port
-                                beq		do_dir_2		; quit when we find the Null-Terminator
-                                jsr		KRNL_CHROUT		; output the character to the console
-                                bra		do_dir_1		; continue looping until done
-do_dir_2		rts						; return from subroutine
+do_dir          bsr     do_arg1_helper  ; fetch path data from argument 1
+                lda     #FC_LISTDIR     ; load the FIO command: LISTDIR
+                sta     FIO_COMMAND     ; issue the Command
+do_dir_1        lda     FIO_DIR_DATA    ; load a character from the Data Port
+                beq     do_dir_2        ; quit when we find the Null-Terminator
+                jsr     KRNL_CHROUT     ; output the character to the console
+                bra     do_dir_1        ; continue looping until done
+do_dir_2        rts                     ; return from subroutine
 
 ; *****************************************************************************
 ; * Command: CD / CHDIR "Change Current Folder"            ARG1 = {filepath}  *
 ; *****************************************************************************
-do_cd					; CD is an alias for CHDIR
-do_chdir		bsr		do_arg1_helper	; fetch path data from argument 1
-                                lda		#FC_CHANGEDIR	; load the FIO command: CHANGEDIR
-                                sta		FIO_COMMAND		; send it; change dir
-                                jmp		do_pwd			; output the current working directory
+do_cd                                   ; CD is an alias for CHDIR
+do_chdir        bsr     do_arg1_helper  ; fetch path data from argument 1
+                lda     #FC_CHANGEDIR   ; load the FIO command: CHANGEDIR
+                sta     FIO_COMMAND     ; send it; change dir
+                jmp     do_pwd          ; output the current working directory
 
 ; *****************************************************************************
-; * Command: PWD "Print Working Directory"  				     ARG1 = none  *
+; * Command: PWD "Print Working Directory"                       ARG1 = none  *
 ; *****************************************************************************
-do_pwd			lda		#FC_GETPATH		; load the FIO command: GETPATH	
-                                sta		FIO_COMMAND		; send it; fetch the current path
-                                clr		FIO_PATH_POS	; reset the path cursor position
-do_pwd_0		lda		FIO_PATH_DATA	; pull a character from the path data port
-                                beq		do_pwd_1		; if it's a null, we're done
-                                jsr		KRNL_CHROUT		; output the character to the console
-                                bra		do_pwd_0		; continue looping until done
-do_pwd_1		rts						; return from subroutine
+do_pwd          lda     #FC_GETPATH     ; load the FIO command: GETPATH	
+                sta     FIO_COMMAND     ; send it; fetch the current path
+                clr     FIO_PATH_POS    ; reset the path cursor position
+do_pwd_0        lda     FIO_PATH_DATA   ; pull a character from the path data port
+                beq     do_pwd_1        ; if it's a null, we're done
+                jsr     KRNL_CHROUT     ; output the character to the console
+                bra     do_pwd_0        ; continue looping until done
+do_pwd_1        rts                     ; return from subroutine
 
 ; *****************************************************************************
 ; * Command: EXIT / QUIT "Terminate the Emulator Program"        ARG1 = none  *
 ; *****************************************************************************
-do_exit			nop						; EXIT is an alias for QUIT
-do_quit			lda		#FC_SHUTDOWN	; load the FIO command: SHUTDOWN
-                                sta		FIO_COMMAND		; issue the shutdown command
-                                rts						; return from subroutine
+do_exit         nop                     ; EXIT is an alias for QUIT
+do_quit         lda     #FC_SHUTDOWN    ; load the FIO command: SHUTDOWN
+                sta     FIO_COMMAND     ; issue the shutdown command
+                rts                     ; return from subroutine
 
 ; *****************************************************************************
 ; * Command: MODE "Change Display Mode" (sets GMODE)    ARG1 = Graphics Mode  *
 ; *****************************************************************************
-do_mode			tst		,x				; test for an argument
-                                beq		do_mode_0		; just return if argument == zero
-                                jsr 	KRNL_ARG_TO_A	; fetch the numeric argument into A 
-                                anda	#%00000111		; mask out the mode bits
+do_mode         tst     ,x              ; test for an argument
+                beq     do_mode_0       ; just return if argument == zero
+                jsr     KRNL_ARG_TO_A   ; fetch the numeric argument into A 
+                anda    #%00000111      ; mask out the mode bits
                 sta     _LOCAL_3        ; store the mode bits
                 lda     GPU_MODE_LSB    ; fetch the current mode lsb
                 anda    #%11111000      ; mask out the mode bits
                 ora     _LOCAL_3        ; or them back in
-                                sta		GPU_MODE_LSB	; set the GMODE 
-                                lda		#' '			; load a SPACE character
-                                jsr		KRNL_CLS		; clear the screen
-do_mode_0		rts						; return from subroutine
+                sta     GPU_MODE_LSB    ; set the GMODE 
+                lda     #' '            ; load a SPACE character
+                jsr     KRNL_CLS        ; clear the screen
+do_mode_0       rts                     ; return from subroutine
 
 ; *****************************************************************************
 ; * Command: DEBUG "Enter / Exit Debugger"                       ARG1 = none  *
 ; *****************************************************************************
-do_debug_str	fcn		" ";
-do_debug_ena	fcn		"enabled\n";
-do_debug_dis	fcn		"disabled\n";
-do_debug		lda		SYS_DBG_FLAGS	; load the debug hardware flags
-                                anda	#$80			; test the enable bit
-                                beq		do_debug_0		; Go ENABLE the debugger
-                                ; DISABLE the debugger
-                                lda		SYS_DBG_FLAGS	; load the debug hardware flags
-                                anda	#$7f			; mask out the debugger bit
-                                sta		SYS_DBG_FLAGS	; store the updated debug flags
-                                ldx		#do_debug_str	; load the debugger response string
-                                jsr		KRNL_LINEOUT	; send the string to the console
-                                ldx		#do_debug_dis	; load the "disabled" string address
-                                jsr		KRNL_LINEOUT	; send it to the console
-                                rts						; return from this subroutine
-do_debug_0		; ENABLE the debugger
-                                lda		SYS_DBG_FLAGS	; load the debug hardware flags
-                                ora		#$80			; set the debug enable flag
-                                sta		SYS_DBG_FLAGS	; store the updated debug flags
-                                ldx		#do_debug_str	; load the debugger response string
-                                jsr		KRNL_LINEOUT	; send it to the console
-                                ldx		#do_debug_ena	; load the "enabled" string start
-                                jsr		KRNL_LINEOUT	; send it to the console
-                                rts						; return from this subroutine
+do_debug_str    fcn     " ";
+do_debug_ena    fcn     "enabled\n";
+do_debug_dis    fcn     "disabled\n";
+do_debug        lda     SYS_DBG_FLAGS   ; load the debug hardware flags
+                anda    #$80            ; test the enable bit
+                beq     do_debug_0      ; Go ENABLE the debugger
+                ; DISABLE the debugger
+                lda     SYS_DBG_FLAGS   ; load the debug hardware flags
+                anda    #$7f            ; mask out the debugger bit
+                sta     SYS_DBG_FLAGS   ; store the updated debug flags
+                ldx     #do_debug_str   ; load the debugger response string
+                jsr     KRNL_LINEOUT    ; send the string to the console
+                ldx     #do_debug_dis   ; load the "disabled" string address
+                jsr     KRNL_LINEOUT    ; send it to the console
+                rts                     ; return from this subroutine
+do_debug_0      ; ENABLE the debugger
+                lda     SYS_DBG_FLAGS   ; load the debug hardware flags
+                ora     #$80            ; set the debug enable flag
+                sta     SYS_DBG_FLAGS   ; store the updated debug flags
+                ldx     #do_debug_str   ; load the debugger response string
+                jsr     KRNL_LINEOUT    ; send it to the console
+                ldx     #do_debug_ena   ; load the "enabled" string start
+                jsr     KRNL_LINEOUT    ; send it to the console
+                rts                     ; return from this subroutine
 
 ; *****************************************************************************
 ; * Command: HELP basic help text message                        ARG1 = none  *
