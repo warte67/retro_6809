@@ -84,7 +84,7 @@ _LOCAL_1	    equ	    $0060	; (Byte) used locally for some kernel calls
 _LOCAL_2	    equ	    $0061	; (Byte) used locally for some kernel calls
 _LOCAL_3	    equ	    $0062	; (Byte) used locally for some kernel calls
 
-ZERO_PAGE_USER	equ	    _LOCAL_3+1	; start of user appropriate zero-page memory
+ZERO_PAGE_USER	    equ	    _LOCAL_3+1	; start of user appropriate zero-page memory
 
 
 ; *******************************************************************************
