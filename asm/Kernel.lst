@@ -2127,41 +2127,42 @@ F8CE  3583            K_DSP_INT_RET   puls    A,CC,PC         ; cleanup saved re
                       ; *                                                                           *
                       ; * EXIT CONDITIONS:    All registers preserved                               *
                       ; *****************************************************************************
-F8D0  BDF8D4          SYS_WRITE_ACA   jsr             KRNL_WRITE_ACA  ; call the kernel WRITE_ACA handler
-F8D3  3B                                              rti                                             ; return from the interrupt
-                                                      ; ...
-F8D4  6E9F0052        KRNL_WRITE_ACA  jmp             [VEC_WRITE_ACA] ; proceed through the software vector
-F8D8  3431            STUB_WRITE_ACA  pshs    X,Y,CC                  ; save the used registers onto the stack
-F8DA  108EFE67                                        ldy             #MATH_ACA_POS   ; point to the ACA chr pos register
-F8DE  8D26                                            bsr             KRNL_WRITE_HLP  ; display the number to the console
-F8E0  35B1                                            puls    X,Y,CC,PC               ; cleanup saved registers and return
+F8D0  BDF8D4          SYS_WRITE_ACA   jsr     KRNL_WRITE_ACA  ; call the kernel WRITE_ACA handler
+F8D3  3B                              rti                     ; return from the interrupt
+                                      ; ...
+F8D4  6E9F0052        KRNL_WRITE_ACA  jmp     [VEC_WRITE_ACA] ; proceed through the software vector
+F8D8  3431            STUB_WRITE_ACA  pshs    X,Y,CC          ; save the used registers onto the stack
+F8DA  108EFE67                        ldy     #MATH_ACA_POS   ; point to the ACA chr pos register
+F8DE  8D26                            bsr     KRNL_WRITE_HLP  ; display the number to the console
+F8E0  35B1                            puls    X,Y,CC,PC       ; cleanup saved registers and return
                       
-F8E2  BDF8E6          SYS_WRITE_ACB   jsr             KRNL_WRITE_ACB  ; call the kernel WRITE_ACB handler
-F8E5  3B                                              rti                                             ; return from the interrupt
-                                                      ; ...
-F8E6  6E9F0054        KRNL_WRITE_ACB  jmp             [VEC_WRITE_ACB] ; proceed through the software vector
-F8EA  3431            STUB_WRITE_ACB  pshs    X,Y,CC                  ; save the used registers onto the stack
-F8EC  108EFE71                                        ldy             #MATH_ACB_POS   ; point to the ACB chr pos register
-F8F0  8D14                                            bsr             KRNL_WRITE_HLP  ; display the number to the console
-F8F2  35B1                                            puls    X,Y,CC,PC               ; cleanup saved registers and return
+F8E2  BDF8E6          SYS_WRITE_ACB   jsr     KRNL_WRITE_ACB  ; call the kernel WRITE_ACB handler
+F8E5  3B                              rti                     ; return from the interrupt
+                                      ; ...
+F8E6  6E9F0054        KRNL_WRITE_ACB  jmp     [VEC_WRITE_ACB] ; proceed through the software vector
+F8EA  3431            STUB_WRITE_ACB  pshs    X,Y,CC          ; save the used registers onto the stack
+F8EC  108EFE71                        ldy     #MATH_ACB_POS   ; point to the ACB chr pos register
+F8F0  8D14                            bsr     KRNL_WRITE_HLP  ; display the number to the console
+F8F2  35B1                            puls    X,Y,CC,PC       ; cleanup saved registers and return
                       
-F8F4  BDF8F8          SYS_WRITE_ACR   jsr             KRNL_WRITE_ACR  ; call the kernel WRITE_ACR handler
-F8F7  3B                                              rti                                             ; return from the interrupt
-                                                      ; ...
-F8F8  6E9F0056        KRNL_WRITE_ACR  jmp             [VEC_WRITE_ACR] ; proceed through the software vector
-F8FC  3431            STUB_WRITE_ACR  pshs    X,Y,CC                  ; save the used registers onto the stack
-F8FE  108EFE7B                                        ldy             #MATH_ACR_POS   ; point to the ACR chr pos register
-F902  8D02                                            bsr             KRNL_WRITE_HLP  ; display the number to the console
-F904  35B1                                            puls    X,Y,CC,PC               ; cleanup saved registers and return    
+F8F4  BDF8F8          SYS_WRITE_ACR   jsr     KRNL_WRITE_ACR  ; call the kernel WRITE_ACR handler
+F8F7  3B                              rti                     ; return from the interrupt
+                                      ; ...
+F8F8  6E9F0056        KRNL_WRITE_ACR  jmp     [VEC_WRITE_ACR] ; proceed through the software vector
+F8FC  3431            STUB_WRITE_ACR  pshs    X,Y,CC          ; save the used registers onto the stack
+F8FE  108EFE7B                        ldy     #MATH_ACR_POS   ; point to the ACR chr pos register
+F902  8D02                            bsr     KRNL_WRITE_HLP  ; display the number to the console
+F904  35B1                            puls    X,Y,CC,PC       ; cleanup saved registers and return    
                       
                       ; X string to write, Y = ACn_POS
-F906  3431            KRNL_WRITE_HLP  pshs    X,Y,CC                  ; save the used registers onto the stack
-F908  6FA0                                            clr             ,y+                             ; set the chr pos to the start
-F90A  A680            KRNL_WRITE_0    lda             ,x+                             ; load the next char from the string
-F90C  2704                                            beq             KRNL_WRITE_DONE ; were done if it's a null-terminator
-F90E  A7A4                                            sta             ,y                              ; store the char into the FP port
-F910  20F8                                            bra             KRNL_WRITE_0    ; continue looping
-F912  35B1            KRNL_WRITE_DONE puls    X,Y,CC,PC               ; cleanup saved registers and return
+F906  3431            KRNL_WRITE_HLP  pshs    X,Y,CC          ; save the used registers onto the stack
+F908  6FA0                            clr     ,y+             ; set the chr pos to the start
+F90A  A680            KRNL_WRITE_0    lda     ,x+             ; load the next char from the string
+F90C  2704                            beq     KRNL_WRITE_DONE ; were done if it's a null-terminator
+F90E  A7A4                            sta     ,y              ; store the char into the FP port
+F910  20F8                            bra     KRNL_WRITE_0    ; continue looping
+F912  35B1            KRNL_WRITE_DONE puls    X,Y,CC,PC       ; cleanup saved registers and return
+                      
                       
                       ; *****************************************************************************
                       ; * KRNL_ARG_TO_A                                                             *
@@ -2174,46 +2175,43 @@ F912  35B1            KRNL_WRITE_DONE puls    X,Y,CC,PC               ; cleanup 
                       ; * EXIT CONDITIONS:    A = binary value represented by the input string      *
                       ; *                     All other registers preserved                         *
                       ; *****************************************************************************
-F914  BDF918          SYS_ARG_TO_A    jsr             KRNL_ARG_TO_A   ; call the kernel ARG_TO_A handler
-F917  3B                                              rti                                             ; return from the interrupt
+F914  BDF918          SYS_ARG_TO_A    jsr     KRNL_ARG_TO_A   ; call the kernel ARG_TO_A handler
+F917  3B                              rti                     ; return from the interrupt
                       
-F918  6E9F0058        KRNL_ARG_TO_A   jmp             [VEC_ARG_TO_A]  ; proceed through the software vector
-F91C  3415            STUB_ARG_TO_A   pshs    B,X,CC                  ; save the used registers onto the stack
-F91E  E684                                            ldb             ,x                              ; load character to be converted
-F920  C124                                            cmpb    #'$'                    ; is it the leading '$'?
-F922  2708                                            beq             KARG_0                  ;   yeah, go convert from hexidecimal
-F924  BDF8D4                                          jsr             KRNL_WRITE_ACA  ; use the FP to convert from decimal
-F927  B6FE70                                          lda             MATH_ACA_INT+3  ; load the converted binary into A
-F92A  2012                                            bra             KARG_DONE               ;   A now holds the binary, return
-F92C  3001            KARG_0                  leax    1,x                             ; skip passed the initial '$' character
-F92E  E680                                            ldb             ,x+                             ; load character to convert into B
-F930  8D0E                                            bsr             KARG_HEX                ; convert hex character to 0-15 binary
-F932  58                                              lslb                                    ; shift the 4-bit data ... 
-F933  58                                              lslb                                    ; ... into the most significant ...
-F934  58                                              lslb                                    ; ... four-bits
-F935  58                                              lslb                                    ; $n0 n = useful value
-F936  3404                                            pshs    b                               ; save our work so far
-F938  E680                                            ldb             ,x+                             ; load the next hex character
-F93A  8D04                                            bsr             KARG_HEX                ; decode it to 0-15
-F93C  AAE0                                            ora             ,s+                             ; merge the two and fix the stack
-F93E  3595            KARG_DONE               puls    B,X,CC,PC               ; clean up and return
-                                              ; helper sub
-F940  3404            KARG_HEX                pshs    b                               ; save it 
-F942  C030                                            subb    #'0'                    ; convert to binary
-F944  2B0C                                            bmi             2f                              ; go if not numeric
-F946  C109                                            cmpb    #$09                    ; is greater than 9?
-F948  2304                                            bls             1f                              ; branch if not
-F94A  CA20                                            orb             #$20                    ; to lower case
-F94C  C027                                            subb    #$27                    ; reduce from 'a'
-F94E  C10F            1                               cmpb    #$0f                    ; greater than 15?
-F950  2302                                            bls             3f                              ; go if not
-F952  C6FF            2                               ldb             #$ff                    ; load an error state $FF = BAD
-F954  E1E0            3                               cmpb    ,s+                             ; fix the stack
-F956  1F98                                            tfr             b,a                             ; restore into A
-F958  39                                              rts                                             ; return
-                      
-                      
-                      
+F918  6E9F0058        KRNL_ARG_TO_A   jmp     [VEC_ARG_TO_A]  ; proceed through the software vector
+F91C  3415            STUB_ARG_TO_A   pshs    B,X,CC          ; save the used registers onto the stack
+F91E  E684                            ldb     ,x              ; load character to be converted
+F920  C124                            cmpb    #'$'            ; is it the leading '$'?
+F922  2708                            beq     KARG_0          ;   yeah, go convert from hexidecimal
+F924  BDF8D4                          jsr     KRNL_WRITE_ACA  ; use the FP to convert from decimal
+F927  B6FE70                          lda     MATH_ACA_INT+3  ; load the converted binary into A
+F92A  2012                            bra     KARG_DONE       ;   A now holds the binary, return
+F92C  3001            KARG_0          leax    1,x             ; skip passed the initial '$' character
+F92E  E680                            ldb     ,x+             ; load character to convert into B
+F930  8D0E                            bsr     KARG_HEX        ; convert hex character to 0-15 binary
+F932  58                              lslb                    ; shift the 4-bit data ... 
+F933  58                              lslb                    ; ... into the most significant ...
+F934  58                              lslb                    ; ... four-bits
+F935  58                              lslb                    ; $n0 n = useful value
+F936  3404                            pshs    b               ; save our work so far
+F938  E680                            ldb     ,x+             ; load the next hex character
+F93A  8D04                            bsr     KARG_HEX        ; decode it to 0-15
+F93C  AAE0                            ora     ,s+             ; merge the two and fix the stack
+F93E  3595            KARG_DONE       puls    B,X,CC,PC       ; clean up and return
+                                      ; helper sub
+F940  3404            KARG_HEX        pshs    b               ; save it 
+F942  C030                            subb    #'0'            ; convert to binary
+F944  2B0C                            bmi     2f              ; go if not numeric
+F946  C109                            cmpb    #$09            ; is greater than 9?
+F948  2304                            bls     1f              ; branch if not
+F94A  CA20                            orb     #$20            ; to lower case
+F94C  C027                            subb    #$27            ; reduce from 'a'
+F94E  C10F            1               cmpb    #$0f            ; greater than 15?
+F950  2302                            bls     3f              ; go if not
+F952  C6FF            2               ldb     #$ff            ; load an error state $FF = BAD
+F954  E1E0            3               cmpb    ,s+             ; fix the stack
+F956  1F98                            tfr     b,a             ; restore into A
+F958  39                              rts                     ; return
                       
                       
                       
@@ -2237,14 +2235,14 @@ F958  39                                              rts                       
                       * ; *****************************************************************************
                       * ; * ROM BASED HARDWARE VECTORS                                                *
                       * ; *****************************************************************************
-FFF0                                      org ROM_VECTS_DEVICE
+FFF0                                  org     ROM_VECTS_DEVICE
 FFF0                  KRNL_HARD_VECT                  
-FFF0  F1CA                                fdb EXEC_start      ; (HARD_RSRVD) EXEC Interrupt Vector
-FFF2  F1CB                                fdb SWI3_start      ; (HARD_SWI3 ) SWI3 Hardware Interrupt Vector
-FFF4  F45E                                fdb SYS_Handler     ; (HARD_SWI2 ) SWI2 Hardware Interrupt Vector
-FFF6  F1D1                                fdb FIRQ_start      ; (HARD_FIRQ ) FIRQ Hardware Interrupt Vector
-FFF8  F1D4                                fdb IRQ_start       ; (HARD_IRQ  ) IRQ Hardware Interrupt Vector
-FFFA  F1D7                                fdb SWI_start       ; (HARD_SWI  ) SWI / SYS Hardware Interrupt Vector
-FFFC  F1DA                                fdb NMI_start       ; (HARD_NMI  ) NMI Hardware Interrupt Vector
-FFFE  F000                                fdb KRNL_START      ; (HARD_RESET) RESET Hardware Interrupt Vector
+FFF0  F1CA                            fdb     EXEC_start      ; (HARD_RSRVD) EXEC Interrupt Vector
+FFF2  F1CB                            fdb     SWI3_start      ; (HARD_SWI3 ) SWI3 Hardware Interrupt Vector
+FFF4  F45E                            fdb     SYS_Handler     ; (HARD_SWI2 ) SWI2 Hardware Interrupt Vector
+FFF6  F1D1                            fdb     FIRQ_start      ; (HARD_FIRQ ) FIRQ Hardware Interrupt Vector
+FFF8  F1D4                            fdb     IRQ_start       ; (HARD_IRQ  ) IRQ Hardware Interrupt Vector
+FFFA  F1D7                            fdb     SWI_start       ; (HARD_SWI  ) SWI / SYS Hardware Interrupt Vector
+FFFC  F1DA                            fdb     NMI_start       ; (HARD_NMI  ) NMI Hardware Interrupt Vector
+FFFE  F000                            fdb     KRNL_START      ; (HARD_RESET) RESET Hardware Interrupt Vector
 0000                  KRNL_HARD_VECT_END
