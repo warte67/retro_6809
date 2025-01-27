@@ -258,32 +258,29 @@ KRNL_MAIN_LOOP	ldb     _ATTRIB         ; fetch the current color attribute
                 ldx     #EDT_BUFFER     ; point to the edit buffer
 k_main_clr      clr     ,x+             ; clear an entry and advance to next
                 cmpx    #KEY_END        ; are we at the end of the buffer?
-                        blt	    k_main_clr	        ;   not yet, continue looping
+                blt     k_main_clr      ;   not yet, continue looping
 
-k_main_0	    jsr	    KRNL_LINEEDIT	    ; run the command line editor
-                         jsr	    KRNL_CMD_PROC	    ;    decode the command; A = Table Index
-                         tst	    EDT_BUFFER	        ; test the buffer for a null
-                         beq	    k_main_cont	        ; skip, nothing was entered
-                         cmpa	#$FF		        ; ERROR: command not found 
-                         beq	    k_main_error	    ;    display the error
-                         lsla			            ; index two byte addresses
-                         leax	1,x
-                         ldy	    #KRNL_CMD_VECTS	    ; the start of the command vector table
-                         jsr	    [a,y]		        ; call the command subroutine
-k_main_cont	    tst	    EDT_BUFFER	        ; nothing entered in the command line?
-                         beq	    k_main_0	        ;   nope, skip the ready prompt
-                         bra	    KRNL_MAIN_LOOP      ; back to the top of the main loop
-k_main_error	ldx	    #KRNL_ERR_NFND	    ; ERROR: Command Not Found
-                        jsr	    KRNL_LINEOUT	    ; send it to the console
-                        bra	    k_main_cont	        ; continue within the main loop
-
-
+k_main_0        jsr     KRNL_LINEEDIT   ; run the command line editor
+                jsr     KRNL_CMD_PROC   ;    decode the command; A = Table Index
+                tst     EDT_BUFFER      ; test the buffer for a null
+                beq     k_main_cont     ; skip, nothing was entered
+                cmpa    #$FF            ; ERROR: command not found 
+                beq     k_main_error    ;    display the error
+                lsla                    ; index two byte addresses
+                leax    1,x
+                ldy     #KRNL_CMD_VECTS ; the start of the command vector table
+                jsr     [a,y]           ; call the command subroutine
+k_main_cont     tst     EDT_BUFFER      ; nothing entered in the command line?
+                beq     k_main_0        ;   nope, skip the ready prompt
+                bra     KRNL_MAIN_LOOP  ; back to the top of the main loop
+k_main_error	ldx     #KRNL_ERR_NFND  ; ERROR: Command Not Found
+                jsr     KRNL_LINEOUT    ; send it to the console
+                bra     k_main_cont     ; continue within the main loop
                 ; ...
                 ; infinite loop (for now)
 
                 sys     CALL_GARBAGE
-KRNL_INF	    jmp 	KRNL_INF			
-
+KRNL_INF        jmp     KRNL_INF			
 
 
 
