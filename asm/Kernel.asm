@@ -1160,7 +1160,7 @@ KRNL_RAWR_TO_D  jmp     [VEC_RAWR_TO_D] ; proceed through the software vector
 STUB_RAWR_TO_D  pshs    CC              ; save the used registers onto the stack
                 ldd     MATH_ACR_RAW+2  ; load the ACR raw float value
                 puls    CC,PC           ; cleanup saved registers and return
-                
+
 
 ; *******************************************************************************
 ; * KRNL_INT(A, B, or R)_TO_D                                                 	*
@@ -1172,29 +1172,30 @@ STUB_RAWR_TO_D  pshs    CC              ; save the used registers onto the stack
 ; *                         All other registers preserved                     	*
 ; *                                                                           	*
 ; *******************************************************************************
-SYS_INTA_TO_D	jsr		KRNL_INTA_TO_D	; call the kernel INTA_TO_D handler
-                                rti						; return from the interrupt
-                                ; ...
-KRNL_INTA_TO_D	jmp		[VEC_INTA_TO_D]	; proceed through the software vector
-STUB_INTA_TO_D	pshs	CC				; save the used registers onto the stack
-                                ldd		MATH_ACA_INT+2	; load the ACA integer value
-                                puls	CC,PC			; cleanup saved registers and return
+SYS_INTA_TO_D   jsr     KRNL_INTA_TO_D  ; call the kernel INTA_TO_D handler
+                rti                     ; return from the interrupt
+                ; ...
+KRNL_INTA_TO_D  jmp     [VEC_INTA_TO_D]	; proceed through the software vector
+STUB_INTA_TO_D  pshs    CC              ; save the used registers onto the stack
+                ldd     MATH_ACA_INT+2  ; load the ACA integer value
+                puls    CC,PC           ; cleanup saved registers and return
 
-SYS_INTB_TO_D	jsr		KRNL_INTB_TO_D	; call the kernel INTB_TO_D handler
-                                rti						; return from the interrupt
-                                ; ...
-KRNL_INTB_TO_D	jmp		[VEC_INTB_TO_D]	; proceed through the software vector
-STUB_INTB_TO_D	pshs	CC				; save the used registers onto the stack
-                                ldd		MATH_ACB_INT+2	; load the ACB integer value
-                                puls	CC,PC			; cleanup saved registers and return
+SYS_INTB_TO_D   jsr     KRNL_INTB_TO_D  ; call the kernel INTB_TO_D handler
+                rti                     ; return from the interrupt
+                ; ...
+KRNL_INTB_TO_D  jmp     [VEC_INTB_TO_D] ; proceed through the software vector
+STUB_INTB_TO_D  pshs    CC              ; save the used registers onto the stack
+                ldd     MATH_ACB_INT+2  ; load the ACB integer value
+                puls    CC,PC           ; cleanup saved registers and return
 
-SYS_INTR_TO_D	jsr		KRNL_INTR_TO_D	; call the kernel INTR_TO_D handler
-                                rti						; return from the interrupt
-                                ; ...
-KRNL_INTR_TO_D	jmp		[VEC_INTR_TO_D]	; proceed through the software vector
-STUB_INTR_TO_D	pshs	CC				; save the used registers onto the stack
-                                ldd		MATH_ACR_INT+2	; load the ACR integer value
-                                puls	CC,PC			; cleanup saved registers and return
+SYS_INTR_TO_D   jsr     KRNL_INTR_TO_D  ; call the kernel INTR_TO_D handler
+                rti                     ; return from the interrupt
+                ; ...
+KRNL_INTR_TO_D  jmp     [VEC_INTR_TO_D] ; proceed through the software vector
+STUB_INTR_TO_D  pshs    CC              ; save the used registers onto the stack
+                ldd     MATH_ACR_INT+2  ; load the ACR integer value
+                puls    CC,PC            cleanup saved registers and return
+
 
 ; *****************************************************************************
 ; * KRNL_8BIT_MATH                                                            *
@@ -1208,27 +1209,28 @@ STUB_INTR_TO_D	pshs	CC				; save the used registers onto the stack
 ; * EXIT CONDITIONS:	D = Result                                            *
 ; *                     All other registers preserved                         *
 ; *****************************************************************************
-SYS_8BIT_MATH	jsr		KRNL_8BIT_MATH	; call the kernel 8BIT_MATH handler
-                                rti						; return from the interrupt
-                                ; ...
-KRNL_8BIT_MATH	jmp		[VEC_8BIT_MATH]	; proceed through the software vector
-STUB_8BIT_MATH	pshs	U,CC			; save the used registers onto the stack
-                                ; A to ACA
-                                clr		MATH_ACA_INT+0	; clear unneeded byte
-                                clr		MATH_ACA_INT+1	; clear unneeded byte
-                                clr		MATH_ACA_INT+2	; clear unneeded byte
-                                sta		MATH_ACA_INT+3	; store A in the ACA integer register
-                                ; B to ACB
-                                clr		MATH_ACB_INT+0	; clear unneeded byte
-                                clr		MATH_ACB_INT+1	; clear unneeded byte
-                                clr		MATH_ACB_INT+2	; clear unneeded byte
-                                stb		MATH_ACB_INT+3	; store B in the ACB integer register
-                                ; U to MATH_OPERATION
-                                tfr		U,D				; transfer the MOP instruction to D
-                                stb		MATH_OPERATION	; send the MOP command (in B)
-                                ; ACR to D
-                                ldd		MATH_ACR_INT+2	; load the result into the D register
-                                puls	U,CC,PC			; cleanup saved registers and return
+SYS_8BIT_MATH   jsr     KRNL_8BIT_MATH  ; call the kernel 8BIT_MATH handler
+                rti                     ; return from the interrupt
+                ; ...
+KRNL_8BIT_MATH  jmp     [VEC_8BIT_MATH] ; proceed through the software vector
+STUB_8BIT_MATH  pshs    U,CC            ; save the used registers onto the stack
+                ; A to ACA
+                clr     MATH_ACA_INT+0  ; clear unneeded byte
+                clr     MATH_ACA_INT+1  ; clear unneeded byte
+                clr     MATH_ACA_INT+2  ; clear unneeded byte
+                sta     MATH_ACA_INT+3  ; store A in the ACA integer register
+                ; B to ACB
+                clr     MATH_ACB_INT+0  ; clear unneeded byte
+                clr     MATH_ACB_INT+1  ; clear unneeded byte
+                clr     MATH_ACB_INT+2  ; clear unneeded byte
+                stb     MATH_ACB_INT+3  ; store B in the ACB integer register
+                ; U to MATH_OPERATION
+                tfr     U,D             ; transfer the MOP instruction to D
+                stb     MATH_OPERATION  ; send the MOP command (in B)
+                ; ACR to D
+                ldd     MATH_ACR_INT+2  ; load the result into the D register
+                puls    U,CC,PC         ; cleanup saved registers and return
+
 
 ; *****************************************************************************
 ; * KRNL_DSP_AC(A, B, or R)                                                   *
@@ -1238,40 +1240,41 @@ STUB_8BIT_MATH	pshs	U,CC			; save the used registers onto the stack
 ; *                                                                           *
 ; * EXIT CONDITIONS:    All registers preserved                               *
 ; *****************************************************************************
-SYS_DSP_ACA		jsr		KRNL_DSP_ACA	; call the kernel DSP_ACA handler
-                                rti						; return from the interrupt
-                                ; ...
-KRNL_DSP_ACA	jmp		[VEC_DSP_ACA]	; proceed through the software vector
-STUB_DSP_ACA	pshs	X,CC			; save the used registers onto the stack
-                                ldx		#MATH_ACA_POS	; index the ACA data
-                                bsr		KRNL_DSP_HELPER	; display the floating point of ACA
-                                puls	X,CC,PC			; cleanup saved registers and return
+SYS_DSP_ACA     jsr     KRNL_DSP_ACA    ; call the kernel DSP_ACA handler
+                rti                     ; return from the interrupt
+                ; ...
+KRNL_DSP_ACA    jmp     [VEC_DSP_ACA]   ; proceed through the software vector
+STUB_DSP_ACA    pshs    X,CC            ; save the used registers onto the stack
+                ldx     #MATH_ACA_POS   ; index the ACA data
+                bsr     KRNL_DSP_HELPER ; display the floating point of ACA
+                puls    X,CC,PC 	; cleanup saved registers and return
 
-SYS_DSP_ACB		jsr		KRNL_DSP_ACB	; call the kernel DSP_ACB handler
-                                rti						; return from the interrupt
-                                ; ...
-KRNL_DSP_ACB	jmp		[VEC_DSP_ACB]	; proceed through the software vector
-STUB_DSP_ACB	pshs	X,CC			; save the used registers onto the stack
-                                ldx		#MATH_ACB_POS	; index the ACB data
-                                bsr		KRNL_DSP_HELPER	; display the floating point of ACB
-                                puls	X,CC,PC			; cleanup saved registers and return
+SYS_DSP_ACB     jsr     KRNL_DSP_ACB    ; call the kernel DSP_ACB handler
+                rti                     ; return from the interrupt
+                ; ...
+KRNL_DSP_ACB    jmp     [VEC_DSP_ACB]    proceed through the software vector
+STUB_DSP_ACB    pshs    X,CC            ; save the used registers onto the stack
+                ldx     #MATH_ACB_POS   ; index the ACB data
+                bsr     KRNL_DSP_HELPER ; display the floating point of ACB
+                puls    X,CC,PC         ; cleanup saved registers and return
 
-SYS_DSP_ACR		jsr		KRNL_DSP_ACR	; call the kernel DSP_ACR handler
-                                rti						; return from the interrupt
-                                ; ...
-KRNL_DSP_ACR	jmp		[VEC_DSP_ACR]	; proceed through the software vector
-STUB_DSP_ACR	pshs	X,CC			; save the used registers onto the stack
-                                ldx		#MATH_ACR_POS	; index the ACR data
-                                bsr		KRNL_DSP_HELPER	; display the floating point of ACR
-                                puls	X,CC,PC			; cleanup saved registers and return
+SYS_DSP_ACR     jsr     KRNL_DSP_ACR    ; call the kernel DSP_ACR handler
+                rti                     ; return from the interrupt
+                ; ...
+KRNL_DSP_ACR    jmp     [VEC_DSP_ACR]   ; proceed through the software vector
+STUB_DSP_ACR    pshs    X,CC            ; save the used registers onto the stack
+                ldx     #MATH_ACR_POS   ; index the ACR data
+                bsr     KRNL_DSP_HELPER ; display the floating point of ACR
+                puls    X,CC,PC 	; cleanup saved registers and return
 
 ;HELPER:  X=address of a FP_POS register pointed to by X
-KRNL_DSP_HELPER	pshs  	A,CC			; save the used registers onto the stack
-                                clr		,x				; reset this math data port
-K_DSP_FP_0		lda		1,x				; pop a character from the port
-                                jsr		KRNL_CHROUT		; send it to the console
-                                bne		K_DSP_FP_0		; continue if not at the null-terminator
-                                puls	A,CC,PC			; cleanup saved registers and return
+KRNL_DSP_HELPER pshs    A,CC            ; save the used registers onto the stack
+                clr     ,x              ; reset this math data port
+K_DSP_FP_0      lda     1,x             ; pop a character from the port
+                jsr     KRNL_CHROUT     ; send it to the console
+                bne     K_DSP_FP_0      ; continue if not at the null-terminator
+                puls    A,CC,PC 	; cleanup saved registers and return
+
 
 ; *****************************************************************************
 ; * KRNL_DSP_INT(A, B, or R)                                                  *
