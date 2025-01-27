@@ -674,16 +674,16 @@ SYS_LINEOUT     ldx     4,S             ; fetch X from the stack
                 jsr     KRNL_LINEOUT    ; call the line out kernel handler
                 rti                     ; return from the sys interrupt
                 ; ...
-KRNL_LINEOUT	jmp		[VEC_LINEOUT]	; proceed through the software vector
-STUB_LINEOUT	pshs	D,X,U 		    ; save the used registers onto the stack
-                        tfr	    X,U		        ; move X to U
-                        jsr	    KRNL_CSRPOS	    ; set X to the cursor position 
-K_LINEOUT_0	    lda	    ,U+		        ; fetch the next character
-                        beq	    K_LINEOUT_DONE	; cleanup and return if null-terminator		
-                        jsr	    KRNL_CHROUT	    ; send the character to the console
-                        leax	1,X		        ; point to the next character
-                        bra	    K_LINEOUT_0	    ; continue looping until done
-K_LINEOUT_DONE	puls	D,U,X,PC 	    ; restore the saved registers and return
+KRNL_LINEOUT    jmp     [VEC_LINEOUT]	; proceed through the software vector
+STUB_LINEOUT    pshs    D,X,U           ; save the used registers onto the stack
+                tfr     X,U             ; move X to U
+                jsr     KRNL_CSRPOS     ; set X to the cursor position 
+K_LINEOUT_0     lda     ,U+             ; fetch the next character
+                beq     K_LINEOUT_DONE  ; cleanup and return if null-terminator		
+                jsr     KRNL_CHROUT     ; send the character to the console
+                leax    1,X             ; point to the next character
+                bra     K_LINEOUT_0     ; continue looping until done
+K_LINEOUT_DONE	puls	D,U,X,PC        ; restore the saved registers and return
 
 
 ; *******************************************************************************
@@ -702,19 +702,19 @@ SYS_CSRPOS      jsr     KRNL_CSRPOS     ; call the CSRPOS kernel subroutine
                 stx     4,S             ; replace X in the stack so it has ...
                 rti                     ; ... valid info on return
                 ; ...
-KRNL_CSRPOS	    jmp		[VEC_CSRPOS]	; proceed through the software vector
-STUB_CSRPOS		pshs	D		        ; save the used registers onto the stack
-                        lda	    _CURSOR_ROW	    ; current cursor row
-                        ldb	    GPU_TCOLS	    ; current text columns
-                        lslb			        ; times two (account for the attribute)
-                        mul			            ; row * columns
-                        ldx	    #VIDEO_START	; the buffer starting address
-                        leax	D,X		        ; add the video base address
-                        ldb	    _CURSOR_COL	    ; load the current cursor column
-                        lslb			        ; times two (account for the attribute)
-                        clra			        ; don't let B become negative, use D
-                        leax	D,X		        ; add the column to the return address
-                        puls	D,PC		    ; restore the saved registers and return
+KRNL_CSRPOS     jmp     [VEC_CSRPOS]    ; proceed through the software vector
+STUB_CSRPOS     pshs	D               ; save the used registers onto the stack
+                lda     _CURSOR_ROW     ; current cursor row
+                ldb     GPU_TCOLS       ; current text columns
+                lslb                    ; times two (account for the attribute)
+                mul                     ; row * columns
+                ldx     #VIDEO_START    ; the buffer starting address
+                leax    D,X             ; add the video base address
+                ldb     _CURSOR_COL     ; load the current cursor column
+                lslb                    ; times two (account for the attribute)
+                clra                    ; don't let B become negative, use D
+                leax	D,X             ; add the column to the return address
+                puls	D,PC            ; restore the saved registers and return
 
 ; *****************************************************************************
 ; * KRNL_SCROLL                                                               *
@@ -727,27 +727,27 @@ STUB_CSRPOS		pshs	D		        ; save the used registers onto the stack
 SYS_SCROLL      jsr     KRNL_SCROLL     ; call the text screen scroll handler
                 rti                     ; return from the sys interrupt
                 ; ...
-KRNL_SCROLL	    jmp		[VEC_SCROLL]	; proceed through the software vector
-STUB_SCROLL		pshs	d,x,u		    ; save the used registers onto the stack
-                        ldx		#VIDEO_START	; set X to the start of the video buffer
-                        tfr		x,u		        ; copy X into U
-                        ldb		GPU_TCOLS	    ; B = Screen Columns
-                        lslb			        ; account for the attribute byte
-                        clra			        ; MSB of D needs to not be negative
-                        leau	d,u		        ; U is now one line below X
-K_SCROLL_0	    ldd		,u++		    ; load a character from where U points
-                        std		,x++		    ; store it to where X points
-                        cmpu	GPU_VIDEO_MAX	; has U exceeded the screen buffer
-                        blt		K_SCROLL_0	    ; continue looping of not
-                                lda		_ATTRIB
-                        ldb		#' '		    ; set SPACE as the current character
-K_SCROLL_1	    std		,x++		    ; and store it to where X points
-                        cmpx	GPU_VIDEO_MAX	; continue looping until the bottom ...
-                        blt		K_SCROLL_1	    ; ... line has been cleared
-                        tst		EDT_ENABLE	    ; are we using the line editor?
-                        beq		K_SCROLL_DONE	; nope, just clean up and return
-                        dec		_ANCHOR_ROW	    ; yup, decrease the anchor row by one
-K_SCROLL_DONE	puls	d,x,u,pc	    ; restore the registers and return
+KRNL_SCROLL     jmp     [VEC_SCROLL]    ; proceed through the software vector
+STUB_SCROLL     pshs    d,x,u           ; save the used registers onto the stack
+                ldx     #VIDEO_START	; set X to the start of the video buffer
+                tfr     x,u             ; copy X into U
+                ldb     GPU_TCOLS       ; B = Screen Columns
+                lslb                    ; account for the attribute byte
+                clra                    ; MSB of D needs to not be negative
+                leau    d,u             ; U is now one line below X
+K_SCROLL_0      ldd     ,u++            ; load a character from where U points
+                std     ,x++            ; store it to where X points
+                cmpu    GPU_VIDEO_MAX   ; has U exceeded the screen buffer
+                blt     K_SCROLL_0      ; continue looping of not
+                lda     _ATTRIB
+                ldb     #' '            ; set SPACE as the current character
+K_SCROLL_1      std     ,x++            ; and store it to where X points
+                cmpx    GPU_VIDEO_MAX   ; continue looping until the bottom ...
+                blt     K_SCROLL_1      ; ... line has been cleared
+                tst     EDT_ENABLE      ; are we using the line editor?
+                beq     K_SCROLL_DONE   ; nope, just clean up and return
+                dec     _ANCHOR_ROW     ; yup, decrease the anchor row by one
+K_SCROLL_DONE   puls    d,x,u,pc        ; restore the registers and return
 
 ; *****************************************************************************
 ; * KRNL_LINEEDIT                                                             *
