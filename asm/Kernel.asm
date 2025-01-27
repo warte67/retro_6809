@@ -760,69 +760,69 @@ K_SCROLL_DONE   puls    d,x,u,pc        ; restore the registers and return
 SYS_LINEEDIT    jsr     KRNL_LINEEDIT   ; call the text line edit kernel handler
                 rti                     ; return from the interrupt
                 ; ...
-KRNL_LINEEDIT	jmp		[VEC_LINEEDIT]	; proceed through the software vector
-STUB_LINEEDIT	pshs	D,X,U,CC	    ; save the used registers onto the stack		
-                        ldd 	_CURSOR_COL	    ; load the current cursor position
-                        std	    _ANCHOR_COL	    ;   use it to update the anchor position
-                        lda	    #1		        ; load the enable condition
-                        sta	    EDT_ENABLE	    ; to enable the line editor
+KRNL_LINEEDIT	jmp     [VEC_LINEEDIT]	; proceed through the software vector
+STUB_LINEEDIT	pshs	D,X,U,CC        ; save the used registers onto the stack		
+                ldd 	_CURSOR_COL     ; load the current cursor position
+                std     _ANCHOR_COL     ;   use it to update the anchor position
+                lda     #1              ; load the enable condition
+                sta     EDT_ENABLE      ; to enable the line editor
 KRNL_LEDIT_0	; display the line up to the cursor		
-                        ldd 	_ANCHOR_COL	    ; restore the line editor anchor
-                        std	    _CURSOR_COL 	; into the console cursor position
-                        ldu	    #EDT_BUFFER	    ; point to the start of the edit buffer
-                        ldb	    EDT_BFR_CSR	    ; the buffer csr position
-                        stb	    _LOCAL_0	    ; store the edit csr position locally
-KRNL_LEDIT_1	tst	    _LOCAL_0	    ; test the edit csr position
-                        beq	    KRNL_LEDIT_2	; if we're there, go display the cursor
-                        dec	    _LOCAL_0	    ; decrement the edit csr position
-                        lda	    ,u+		        ; load the next character from the buffer
-                        beq	    KRNL_LEDIT_2	; display csr if at the null terminator
-                        jsr	    KRNL_CHROUT	    ; output the character to the console
-                        bra	    KRNL_LEDIT_1	; loop until we're at the cursor
+                ldd     _ANCHOR_COL     ; restore the line editor anchor
+                std     _CURSOR_COL     ; into the console cursor position
+                ldu    #EDT_BUFFER      ; point to the start of the edit buffer
+                ldb    EDT_BFR_CSR      ; the buffer csr position
+                stb    _LOCAL_0         ; store the edit csr position locally
+KRNL_LEDIT_1	tst    _LOCAL_0	        ; test the edit csr position
+                beq     KRNL_LEDIT_2    ; if we're there, go display the cursor
+                dec     _LOCAL_0        ; decrement the edit csr position
+                lda     ,u+             ; load the next character from the buffer
+                beq     KRNL_LEDIT_2    ; display csr if at the null terminator
+                jsr     KRNL_CHROUT     ; output the character to the console
+                bra     KRNL_LEDIT_1    ; loop until we're at the cursor
 KRNL_LEDIT_2	; display the cursor at the end of the line
-                        lda	    #' '		    ; load a blank SPACE character
-                        ldb	    SYS_CLOCK_DIV	; load clock timer data
-                                lslb					; times two
-                        andb	#$F0		    ; B now holds color cycled attribute
-                        tst	    ,u		        ; test the next character in the buffer
-                        beq	    KRNL_LEDIT_3	; use the SPACE if we're at a null
-                        lda	    ,u+		        ; load the next character from buffer
+                lda     #' '            ; load a blank SPACE character
+                ldb     SYS_CLOCK_DIV   ; load clock timer data
+                lslb                    ; times two
+                andb    #$F0            ; B now holds color cycled attribute
+                tst     ,u              ; test the next character in the buffer
+                beq     KRNL_LEDIT_3    ; use the SPACE if we're at a null
+                lda     ,u+             ; load the next character from buffer
 KRNL_LEDIT_3	; finish the line
-                        jsr	    KRNL_CSRPOS	    ; load X with the current cursor position 
-                                exg		a,b
-                        std	    ,x		        ; store the character where X points to
-                        inc	    _CURSOR_COL	    ; ipdate the cursor column number
-                        ; ldb	KRNL_ATTRIB	    ; load the default color attribute
-KRNL_LEDIT_4	lda	    ,u+		        ; fetch the next character from the buffer
-                        beq	    KRNL_DONE	    ; if it's null, we're done
-                        jsr	    KRNL_CHROUT	    ; output it to the console
-                        bra	    KRNL_LEDIT_4	; continue looping until we find the null
+                jsr     KRNL_CSRPOS     ; load X with the current cursor position 
+                exg     a,b
+                std     ,x              ; store the character where X points to
+                inc     _CURSOR_COL     ; ipdate the cursor column number
+                ; ldb   KRNL_ATTRIB     ; load the default color attribute
+KRNL_LEDIT_4    lda     ,u+             ; fetch the next character from the buffer
+                beq     KRNL_DONE       ; if it's null, we're done
+                jsr     KRNL_CHROUT     ; output it to the console
+                bra     KRNL_LEDIT_4    ; continue looping until we find the null
 KRNL_DONE	; space at the end	
-                        lda	    #' '		    ; load the SPACE character
-                        jsr	    KRNL_CSRPOS	    ; fetch the cursor position into X
-                        lda	    #' '		    ; load the SPACE character
-                        ldb	    _ATTRIB		    ; load the current color attribute
-                                exg		a,b
-                        std	    ,x		        ; update the console
-                        ; test for the user pressing ENTER / RETURN
-                        lda	    CHAR_POP	    ; Pop the top key from the queue
-                        beq	    KRNL_LEDIT_0	; loop to the top if no keys we're pressed
-                        cmpa	#$0d		    ; check for the RETURN / ENTER key press
-                        bne	    KRNL_LEDIT_0	; if not pressend, loop back to the top		
-                        clr	    EDT_ENABLE	    ; disable the line editor		
-                        jsr	    KRNL_CSRPOS	    ; load the cursor position into X
-                                lda		_ATTRIB
-                        ldb	    #' '		    ; load a SPACE character
-                        std	    -2,x		    ; store the character, clean up artifacts
-                        ldd 	_ANCHOR_COL	    ; restore the line editor anchor
-                        std	    _CURSOR_COL 	; into the console cursor position
-                        ldx	    #EDT_BUFFER	    ; point to the edit buffer
-                        jsr	    KRNL_LINEOUT	; send the edit buffer to the console
-                        puls	D,X,U,CC,PC	    ; cleanup saved registers and return
+                lda     #' '            ; load the SPACE character
+                jsr     KRNL_CSRPOS     ; fetch the cursor position into X
+                lda     #' '            ; load the SPACE character
+                ldb     _ATTRIB         ; load the current color attribute
+                exg     a,b
+                std     ,x              ; update the console
+                ; test for the user pressing ENTER / RETURN
+                lda     CHAR_POP        ; Pop the top key from the queue
+                beq     KRNL_LEDIT_0    ; loop to the top if no keys we're pressed
+                cmpa    #$0d            ; check for the RETURN / ENTER key press
+                bne     KRNL_LEDIT_0    ; if not pressend, loop back to the top		
+                clr     EDT_ENABLE      ; disable the line editor		
+                jsr     KRNL_CSRPOS     ; load the cursor position into X
+                lda     _ATTRIB
+                ldb     #' '            ; load a SPACE character
+                std     -2,x            ; store the character, clean up artifacts
+                ldd     _ANCHOR_COL     ; restore the line editor anchor
+                std     _CURSOR_COL     ; into the console cursor position
+                ldx     #EDT_BUFFER     ; point to the edit buffer
+                jsr     KRNL_LINEOUT    ; send the edit buffer to the console
+                puls    D,X,U,CC,PC     ; cleanup saved registers and return
 
 
 ; *****************************************************************************
-; * KRNL_GETKEY                                                                *
+; * KRNL_GETKEY                                                               *
 ; * 	Input a character from the console. Waits for the keypress.           *
 ; *                                                                           *
 ; * ENTRY REQUIREMENTS: NONE                                                  *
@@ -833,14 +833,14 @@ KRNL_DONE	; space at the end
 SYS_GETKEY      jsr     KRNL_GETKEY     ; call the kernel get key handler
                 rti                     ; return from interrupt
                 ; ...
-KRNL_GETKEY		jmp		[VEC_GETKEY]	; proceed through the software vector    
-STUB_GETKEY		pshs	b,CC		    ; save the used registers onto the stack
-K_GETKEY_0	    ldb	    CHAR_POP	    ; pop the next key from the queue
-                        bne	    K_GETKEY_0	    ; continue until the queue is empty		
-K_GETKEY_1	    ldb	    CHAR_Q_LEN	    ; how many keys are in the queue
-                        beq	    K_GETKEY_1	    ; loop until a key is queued
-                        lda	    CHAR_POP	    ; pop the key into A to be returned
-                        puls	b,CC,PC	        ; cleanup saved registers and return
+KRNL_GETKEY     jmp     [VEC_GETKEY]    ; proceed through the software vector    
+STUB_GETKEY     pshs    b,CC            ; save the used registers onto the stack
+K_GETKEY_0      ldb     CHAR_POP        ; pop the next key from the queue
+                bne     K_GETKEY_0      ; continue until the queue is empty		
+K_GETKEY_1      ldb     CHAR_Q_LEN      ; how many keys are in the queue
+                beq     K_GETKEY_1      ; loop until a key is queued
+                lda     CHAR_POP        ; pop the key into A to be returned
+                puls    b,CC,PC         ; cleanup saved registers and return
 
 
 ; *****************************************************************************
@@ -852,26 +852,26 @@ K_GETKEY_1	    ldb	    CHAR_Q_LEN	    ; how many keys are in the queue
 ; * EXIT CONDITIONS:	A = key code of the key that was pressed              *
 ; *                         All other registers preserved                     *
 ; *****************************************************************************
-SYS_GETHEX		jsr		KRNL_GETHEX		; call the kernel GetHex handler
-                                rti
-                                ; ...
-KRNL_GETHEX		jmp		[VEC_GETHEX]	; proceed through the software vector
-STUB_GETHEX		pshs	CC				; save the used registers onto the stack
-K_GETHEX_0		bsr		KRNL_GETKEY		; wait for and fetch a key press
-                                cmpa	#'0'			; compare with the '0' key
-                                blt		K_GETHEX_0		; keep scanning if less
-                                cmpa	#'9'			; compare with the '9' key
-                                bls		K_GETHEX_DONE	; found an appropriate key, return
-                                cmpa	#'A'			; compare with the 'A' key
-                                blt		K_GETHEX_0		; keep scanning if less
-                                cmpa	#'F'			; compare with the 'F' key
-                                bls		K_GETHEX_DONE	; found an appropriate key, return
-                                cmpa	#'a'			; compare with the 'a' key
-                                blt		K_GETHEX_0		; keep scanning if less
-                                cmpa	#'f'			; compare with the 'f' key
-                                bls		K_GETHEX_DONE	; found an appropriate key, return
-                                bra		K_GETHEX_0		; keep scanning
-K_GETHEX_DONE	puls	CC,PC			; cleanup saved registers and return
+SYS_GETHEX      jsr     KRNL_GETHEX     ; call the kernel GetHex handler
+                rti
+                ; ...
+KRNL_GETHEX     jmp     [VEC_GETHEX]	; proceed through the software vector
+STUB_GETHEX     pshs	CC              ; save the used registers onto the stack
+K_GETHEX_0      bsr     KRNL_GETKEY     ; wait for and fetch a key press
+                cmpa    #'0'            ; compare with the '0' key
+                blt     K_GETHEX_0      ; keep scanning if less
+                cmpa    #'9'            ; compare with the '9' key
+                bls     K_GETHEX_DONE   ; found an appropriate key, return
+                cmpa    #'A'            ; compare with the 'A' key
+                blt     K_GETHEX_0      ; keep scanning if less
+                cmpa    #'F'            ; compare with the 'F' key
+                bls     K_GETHEX_DONE   ; found an appropriate key, return
+                cmpa    #'a'            ; compare with the 'a' key
+                blt     K_GETHEX_0      ; keep scanning if less
+                cmpa    #'f'            ; compare with the 'f' key
+                bls     K_GETHEX_DONE   ; found an appropriate key, return
+                bra     K_GETHEX_0      ; keep scanning
+K_GETHEX_DONE	puls    CC,PC           ; cleanup saved registers and return
 
 
 ; *****************************************************************************
@@ -883,18 +883,18 @@ K_GETHEX_DONE	puls	CC,PC			; cleanup saved registers and return
 ; * EXIT CONDITIONS:	A = key code of the key that was pressed              *
 ; *                         All other registers preserved                     *
 ; *****************************************************************************
-SYS_GETNUM		jsr		KRNL_GETNUM		; call the kernel GetNum handler
-                                rti						; return from interrupt
-                                ; ...
-KRNL_GETNUM		jmp		[VEC_GETNUM]	; proceed through the software vector
-STUB_GETNUM		pshs	CC				; save the used registers onto the stack
-K_GETNUM_0		bsr		KRNL_GETKEY		; wait for and fetch a key press
-                                cmpa	#'0'			; compare with the '0' key
-                                blt		K_GETNUM_0		; keep scanning if less
-                                cmpa	#'9'			; compare with the '9' key
-                                bls		K_GETNUM_DONE	; found an appropriate key, return
-                                bra		K_GETNUM_0		; keep scanning
-K_GETNUM_DONE	puls	CC,PC			; cleanup saved registers and return
+SYS_GETNUM      jsr     KRNL_GETNUM     ; call the kernel GetNum handler
+                rti     ; return from interrupt
+                ; ...
+KRNL_GETNUM     jmp     [VEC_GETNUM]    ; proceed through the software vector
+STUB_GETNUM     pshs	CC              ; save the used registers onto the stack
+K_GETNUM_0      bsr     KRNL_GETKEY     ; wait for and fetch a key press
+                cmpa    #'0'            ; compare with the '0' key
+                blt     K_GETNUM_0      ; keep scanning if less
+                cmpa    #'9'            ; compare with the '9' key
+                bls     K_GETNUM_DONE   ; found an appropriate key, return
+                bra     K_GETNUM_0      ; keep scanning
+K_GETNUM_DONE	puls    CC,PC           ; cleanup saved registers and return
 
 
 ; *****************************************************************************
