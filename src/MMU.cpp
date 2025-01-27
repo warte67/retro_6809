@@ -809,6 +809,7 @@ Byte MMU::do_alloc()
         Memory::Write(MAP(MMU_ARG_1_LSB), (Byte)255); // Update allocation size
         allocation_size = 255;
     }
+
     // Create the root node handle
     Word handle = create_handle();
     if (handle == MMU_BAD_HANDLE) {
@@ -816,17 +817,20 @@ Byte MMU::do_alloc()
         return MAP(MMU_CMD_ALLOC);
     }
     _mmu_handle = handle;
+
     // Set the root node
     _mmu_raw_index = handle;
     _metadata_pool[_mmu_raw_index].root_node = handle;
     _metadata_pool[_mmu_raw_index].prev_node = MMU_BAD_HANDLE;
     _metadata_pool[_mmu_raw_index].next_node = MMU_BAD_HANDLE;
     _metadata_pool[_mmu_raw_index].status = (status_flag | 0b0000'0001);  // Set status flag as allocated
+
     Word current_node = handle;
+
     // Allocate a Chain of Nodes
     for (Word i = 0; i < allocation_size; ++i) 
     {
-        // find a free node
+        // Find a free node
         Word new_node = 0;
         for (new_node = 0; new_node < _metadata_pool.size(); ++new_node) 
         {
@@ -837,7 +841,8 @@ Byte MMU::do_alloc()
             error(MAP(MMU_ERR_ALLOC));
             _metadata_pool[current_node].next_node = MMU_BAD_HANDLE;            
             return MAP(MMU_CMD_ALLOC);
-        }    
+        }
+
         // Link the current node to the new node
         _metadata_pool[new_node].prev_node = current_node;
         _metadata_pool[new_node].root_node = handle;
@@ -845,16 +850,85 @@ Byte MMU::do_alloc()
         _metadata_pool[new_node].status = (status_flag & 0b0111'1111);  // Mask Out Errors
         _metadata_pool[new_node].status = (status_flag | 0b0000'0001);  // Set status flag as allocated
 
+        // Check for fragmentation (gap between nodes)
+        if (new_node != current_node + 1) {
+            // Set the fragmented flag if the nodes are not sequential
+            _metadata_pool[current_node].status |= MAP(MMU_STFLG_FRAGD);
+            _mmu_blocks_fragged++;
+            _metadata_pool[new_node].status |= MAP(MMU_STFLG_FRAGD);
+            _mmu_blocks_fragged++;
+        }
+
         // Update block counters
         _mmu_blocks_free--;           // One less block available
         _mmu_blocks_allocated++;      // One more block allocated
 
         current_node = new_node; // Move to the new node
     }    
+
     // Log success
     // UnitTest::Log("Allocation complete. Root handle: " + std::to_string(handle));
     return MAP(MMU_CMD_ALLOC);
 }
+
+// Byte MMU::do_alloc()
+// {
+//     // Read the status flag and allocation size
+//     Byte status_flag = Memory::Read(MAP(MMU_ARG_1_MSB)) & 0b0111'0110;  // Mask out the error, fragmented, 
+//     Memory::Write(MAP(MMU_ARG_1_MSB), (Byte)status_flag);                     // and allocated bits.
+
+//     Word allocation_size = Memory::Read(MAP(MMU_ARG_1_LSB)); // Nodes to allocate
+//     // Check if full-page allocation is requested
+//     if (status_flag & MAP(MMU_STFLG_PAGED)) {
+//         Memory::Write(MAP(MMU_ARG_1_LSB), (Byte)255); // Update allocation size
+//         allocation_size = 255;
+//     }
+//     // Create the root node handle
+//     Word handle = create_handle();
+//     if (handle == MMU_BAD_HANDLE) {
+//         error(MAP(MMU_ERR_HANDLE));
+//         return MAP(MMU_CMD_ALLOC);
+//     }
+//     _mmu_handle = handle;
+//     // Set the root node
+//     _mmu_raw_index = handle;
+//     _metadata_pool[_mmu_raw_index].root_node = handle;
+//     _metadata_pool[_mmu_raw_index].prev_node = MMU_BAD_HANDLE;
+//     _metadata_pool[_mmu_raw_index].next_node = MMU_BAD_HANDLE;
+//     _metadata_pool[_mmu_raw_index].status = (status_flag | 0b0000'0001);  // Set status flag as allocated
+//     Word current_node = handle;
+//     // Allocate a Chain of Nodes
+//     for (Word i = 0; i < allocation_size; ++i) 
+//     {
+//         // find a free node
+//         Word new_node = 0;
+//         for (new_node = 0; new_node < _metadata_pool.size(); ++new_node) 
+//         {
+//             if (!(_metadata_pool[new_node].status & 0b0000'0001)) { break; }            
+//         }   
+//         if (new_node == _metadata_pool.size())
+//         {
+//             error(MAP(MMU_ERR_ALLOC));
+//             _metadata_pool[current_node].next_node = MMU_BAD_HANDLE;            
+//             return MAP(MMU_CMD_ALLOC);
+//         }    
+//         // Link the current node to the new node
+//         _metadata_pool[new_node].prev_node = current_node;
+//         _metadata_pool[new_node].root_node = handle;
+//         _metadata_pool[current_node].next_node = new_node;
+//         _metadata_pool[new_node].status = (status_flag & 0b0111'1111);  // Mask Out Errors
+//         _metadata_pool[new_node].status = (status_flag | 0b0000'0001);  // Set status flag as allocated
+
+//         // Update block counters
+//         _mmu_blocks_free--;           // One less block available
+//         _mmu_blocks_allocated++;      // One more block allocated
+
+//         current_node = new_node; // Move to the new node
+//     }    
+//     // Log success
+//     // UnitTest::Log("Allocation complete. Root handle: " + std::to_string(handle));
+//     return MAP(MMU_CMD_ALLOC);
+// }
 
 
 
@@ -1526,11 +1600,74 @@ bool MMU::_test_unlock_node()
     return test_results;
 }
 
-Byte MMU::do_defrag()
-{
-    // ...
+Byte MMU::do_defrag() {
+    // Check if there are any fragmented blocks to defragment
+    if (_mmu_blocks_fragged == 0) {
+        UnitTest::Log(clr::YELLOW + "No fragmentation detected. Defrag skipped." + clr::RESET);
+        return MAP(MMU_CMD_DEFRAG);
+    }
+
+    UnitTest::Log("Defragmentation started...");
+
+    // // Initialize necessary variables for tracking the defrag process
+    // Word current_node = _mmu_raw_index;  // Start from the root node
+    // Word prev_node = MMU_BAD_HANDLE;
+    // Word first_fragmented_node = MMU_BAD_HANDLE;
+    // Word last_fragmented_node = MMU_BAD_HANDLE;
+
+    // // Iterate through the pool and find fragmented blocks
+    // while (current_node != MMU_BAD_HANDLE) 
+    // {
+    //     if (_metadata_pool[current_node].status & MAP(MMU_STFLG_FRAGD)) 
+    //     {
+    //         // If the current node is fragmented, we need to move it
+    //         if (first_fragmented_node == MMU_BAD_HANDLE) 
+    //         {
+    //             first_fragmented_node = current_node;  // Mark the first fragmented node
+    //         }
+    //         last_fragmented_node = current_node;  // Update the last fragmented node
+
+    //         // Remove the node from the chain
+    //         Word next_node = _metadata_pool[current_node].next_node;
+    //         if (prev_node != MMU_BAD_HANDLE) 
+    //         {
+    //             _metadata_pool[prev_node].next_node = next_node;
+    //         }
+    //         if (next_node != MMU_BAD_HANDLE) 
+    //         {
+    //             _metadata_pool[next_node].prev_node = prev_node;
+    //         }
+
+    //         // Now move the fragmented node to the end of the pool (to compact memory)
+    //         // Word new_location = _mmu_raw_index;  // Use this as a placeholder for the compaction location
+    //         _metadata_pool[current_node].next_node = MMU_BAD_HANDLE;
+    //         _metadata_pool[current_node].prev_node = MMU_BAD_HANDLE;
+    //         _metadata_pool[current_node].root_node = MMU_BAD_HANDLE;
+    //         _metadata_pool[current_node].status &= ~MAP(MMU_STFLG_FRAGD);  // Clear the fragmented flag
+
+    //         // Put the node back in the chain at the end (or wherever needed)
+    //         if (last_fragmented_node != MMU_BAD_HANDLE) 
+    //         {
+    //             _metadata_pool[last_fragmented_node].next_node = current_node;
+    //             _metadata_pool[current_node].prev_node = last_fragmented_node;
+    //         }
+    //         _mmu_blocks_fragged--;  // One less fragmented block
+
+    //         prev_node = current_node;  // Move to the next node in the chain
+    //     }
+    //     current_node = _metadata_pool[current_node].next_node;
+    // }
+
+    // // Finalize defragging and update root node
+    // if (first_fragmented_node != MMU_BAD_HANDLE) 
+    // {
+    //     _metadata_pool[first_fragmented_node].root_node = _mmu_raw_index;
+    // }
+
+    UnitTest::Log(clr::GREEN + "Defragmentation completed successfully!" + clr::RESET);
     return MAP(MMU_CMD_DEFRAG);
 }
+
 bool MMU::_test_defrag()
 {
     bool test_results = true;
