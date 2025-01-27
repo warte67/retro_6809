@@ -150,14 +150,14 @@ SYSTEM_DATA_END
 ; *****************************************************************************
 ; * DEFAULT VECTORS                                                           *
 ; *****************************************************************************
-EXEC_start	    rts                     ; EXEC program
-SWI3_start	    jmp     SWI3_start      ; SWI3 Implementation
-SWI2_start	    jmp     SWI2_start      ; SYS (SWI2) Implementation
-FIRQ_start	    jmp     FIRQ_start      ; FIRQ Implementation
-IRQ_start	    jmp     IRQ_start       ; IRQ Implementation
-SWI_start	    jmp     SWI_start       ; SWI / SYS Implementation
-NMI_start	    jmp     NMI_start       ; NMI Implementation
-RESET_start	    jmp     RESET_start     ; RESET Implementation
+EXEC_start      rts                     ; EXEC program
+SWI3_start      jmp     SWI3_start      ; SWI3 Implementation
+SWI2_start      jmp     SWI2_start      ; SYS (SWI2) Implementation
+FIRQ_start      jmp     FIRQ_start      ; FIRQ Implementation
+IRQ_start       jmp     IRQ_start       ; IRQ Implementation
+SWI_start       jmp     SWI_start       ; SWI / SYS Implementation
+NMI_start       jmp     NMI_start       ; NMI Implementation
+RESET_start     jmp     RESET_start     ; RESET Implementation
 
 
 ; *******************************************************************************
