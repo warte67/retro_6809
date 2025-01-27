@@ -1284,43 +1284,43 @@ K_DSP_FP_0      lda     1,x             ; pop a character from the port
 ; *                                                                           *
 ; * EXIT CONDITIONS:    All registers preserved                               *
 ; *****************************************************************************	
-SYS_DSP_INTA	jsr		KRNL_DSP_INTA	; call the kernel DSP_INTA handler
-                                rti						; return from the interrupt
-                                ; ...	
-KRNL_DSP_INTA	jmp		[VEC_DSP_INTA]	; proceed through the software vector
-STUB_DSP_INTA	pshs	X,CC			; save the used register onto the stack
-                                ldx		#MATH_ACA_POS	; index the ACA data
-                                bsr		KRNL_DSP_IHELP	; display the integer portion of ACA
-                                puls	X,CC,PC			; cleanup and return
+SYS_DSP_INTA    jsr     KRNL_DSP_INTA   ; call the kernel DSP_INTA handler
+                rti                     ; return from the interrupt
+                ; ...	
+KRNL_DSP_INTA   jmp     [VEC_DSP_INTA]  ; proceed through the software vector
+STUB_DSP_INTA   pshs    X,CC            ; save the used register onto the stack
+                ldx     #MATH_ACA_POS   ; index the ACA data
+                bsr     KRNL_DSP_IHELP  ; display the integer portion of ACA
+                puls    X,CC,PC         ; cleanup and return
 
-SYS_DSP_INTB	jsr		KRNL_DSP_INTB	; call the kernel DSP_INTB handler
-                                rti						; return from the interrupt
-                                ; ...	
-KRNL_DSP_INTB	jmp		[VEC_DSP_INTB]	; proceed through the software vector
-STUB_DSP_INTB	pshs	X,CC			; save the used register onto the stack
-                                ldx		#MATH_ACA_POS	; index the ACB data
-                                bsr		KRNL_DSP_IHELP	; display the integer portion of ACB
-                                puls	X,CC,PC			; cleanup and return
+SYS_DSP_INTB    jsr     KRNL_DSP_INTB   ; call the kernel DSP_INTB handler
+                rti                     ; return from the interrupt
+                ; ...	
+KRNL_DSP_INTB   jmp     [VEC_DSP_INTB]  ; proceed through the software vector
+STUB_DSP_INTB   pshs    X,CC            ; save the used register onto the stack
+                ldx     #MATH_ACA_POS   ; index the ACB data
+                bsr     KRNL_DSP_IHELP  ; display the integer portion of ACB
+                puls    X,CC,PC 	; cleanup and return
 
-SYS_DSP_INTR	jsr		KRNL_DSP_INTR	; call the kernel DSP_INTR handler
-                                rti						; return from the interrupt
-                                ; ...	
-KRNL_DSP_INTR	jmp		[VEC_DSP_INTR]	; proceed through the software vector
-STUB_DSP_INTR	pshs	X,CC			; save the used register onto the stack
-                                ldx		#MATH_ACR_POS	; index the ACR data
-                                bsr		KRNL_DSP_IHELP	; display the integer portion of ACR
-                                puls	X,CC,PC			; cleanup and return
+SYS_DSP_INTR    jsr     KRNL_DSP_INTR   ; call the kernel DSP_INTR handler
+                rti                     ; return from the interrupt
+                ; ...	
+KRNL_DSP_INTR   jmp     [VEC_DSP_INTR]  ; proceed through the software vector
+STUB_DSP_INTR   pshs    X,CC            ; save the used register onto the stack
+                ldx     #MATH_ACR_POS   ; index the ACR data
+                bsr     KRNL_DSP_IHELP  ; display the integer portion of ACR
+                puls    X,CC,PC 	; cleanup and return
 
 ;HELPER:  X=address of a FP_POS register pointed to by X. Display Integer
-KRNL_DSP_IHELP	pshs  	A,CC			; save the used registers onto the stack
-                                clr		,x				; reset this math data port
-K_DSP_INT_0		lda		1,x				; pop a character from the port
-                                cmpa	#'.'			; is it the decimal point?
-                                beq		K_DSP_INT_RET	;   yeah, we're done
-                                jsr		KRNL_CHROUT		; no, output to the console
-                                tsta					; are we at the null-terminator?
-                                bne		K_DSP_INT_0		;   no, continue looping
-K_DSP_INT_RET	puls	A,CC,PC			; cleanup saved registers and return
+KRNL_DSP_IHELP  pshs    A,CC            ; save the used registers onto the stack
+                clr     ,x              ; reset this math data port
+K_DSP_INT_0     lda     1,x             ; pop a character from the port
+                cmpa    #'.'            ; is it the decimal point?
+                beq     K_DSP_INT_RET   ;   yeah, we're done
+                jsr     KRNL_CHROUT     ; no, output to the console
+                tsta                    ; are we at the null-terminator?
+                bne     K_DSP_INT_0     ;   no, continue looping
+K_DSP_INT_RET   puls    A,CC,PC 	; cleanup saved registers and return
 
 
 ; *****************************************************************************
