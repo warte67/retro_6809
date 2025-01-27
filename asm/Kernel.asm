@@ -13,7 +13,7 @@
                 INCLUDE "Kernel_Header.asm"
 
                 org 	KERNEL_START
-KRNL_START	    jmp     KRNL_BEGIN
+KRNL_START      jmp     KRNL_BEGIN
 
 ; Notes: 
 ;	fcc 	stores raw character string with no default termination
@@ -277,76 +277,75 @@ k_main_error	ldx     #KRNL_ERR_NFND  ; ERROR: Command Not Found
                 jsr     KRNL_LINEOUT    ; send it to the console
                 bra     k_main_cont     ; continue within the main loop
                 ; ...
-                ; infinite loop (for now)
-
                 sys     CALL_GARBAGE
+                ; infinite loop (for now)
 KRNL_INF        jmp     KRNL_INF			
 
 
 
 ; *****************************************************************************
-; * Command: CLS "Clear Screen"			              ARG1 = Color Attribute  *
+; * Command: CLS "Clear Screen"                       ARG1 = Color Attribute  *
 ; *****************************************************************************
-do_cls			tst		,x				; test for an argument
-                                beq		do_cls_0		; no argument, just go clear the screen
-                                lda		,x				; first character in the argument
-                                cmpa	#$ff			; $FF is also a terminator
-                                beq		do_cls_0		; no argument, go clear the screen
-                                jsr 	KRNL_ARG_TO_A	; fetch the numeric argument into A
-                                tsta					; is the numeric value 0?
-                                beq		do_cls_0		; yeah, go clear the screen
-                                sta		_ATTRIB			; store the argument as the default color
-do_cls_0		lda		#' '			; load the SPACE character to clear with
-                                ldb		_ATTRIB			; load the color attribute
-                                jsr		KRNL_CLS		; clear the screen
-                                rts						; return from subroutine
+do_cls          tst     ,x              ; test for an argument
+                beq     do_cls_0        ; no argument, just go clear the screen
+                lda     ,x              ; first character in the argument
+                cmpa    #$ff            ; $FF is also a terminator
+                beq     do_cls_0        ; no argument, go clear the screen
+                jsr     KRNL_ARG_TO_A	; fetch the numeric argument into A
+                tsta                    ; is the numeric value 0?
+                beq     do_cls_0        ; yeah, go clear the screen
+                sta     _ATTRIB	        ; store the argument as the default color
+do_cls_0        lda     #' '            ; load the SPACE character to clear with
+                ldb     _ATTRIB         ; load the color attribute
+                jsr     KRNL_CLS        ; clear the screen
+                rts                     ; return from subroutine
 
 
 ; *****************************************************************************
-; * Command: COLOR "Change the Color Attribute"	      ARG1 = Color Attribute  *
+; * Command: COLOR "Change the Color Attribute"       ARG1 = Color Attribute  *
 ; *****************************************************************************
-do_color		tst		,x				; test for an argument
-                                beq		do_color_0		; if its zero, do nothing; just return
-                                jsr 	KRNL_ARG_TO_A	; fetch the numeric argument into A
-                                tsta					; is it a zero?
-                                beq		do_color_0		;   yeah, return
-                                cmpa	#$ff			; is it the other terminator?
-                                beq		do_color_0		;   yeah, return
-                                sta		_ATTRIB			; save the new default color attribute
-do_color_0		rts						; return from subroutine
+do_color        tst     ,x              ; test for an argument
+                beq	do_color_0      ; if its zero, do nothing; just return
+                jsr     KRNL_ARG_TO_A   ; fetch the numeric argument into A
+                tsta                    ; is it a zero?
+                beq     do_color_0      ;   yeah, return
+                cmpa    #$ff            ; is it the other terminator?
+                beq     do_color_0      ;   yeah, return
+                sta     _ATTRIB	        ; save the new default color attribute
+do_color_0      rts                     ; return from subroutine
 
 
 ; *****************************************************************************
 ; * Command: LOAD "Load a (Intel) Hex File        ARG1 = {filepath}/filename  *
 ; *****************************************************************************
-err_file_nf		fcn		"ERROR: File Not Found\n";
-err_file_no		fcn		"ERROR: File Not Open\n";
-err_wrong_file	fcn		"ERROR: Wrong File Type\n"
-do_load			jsr		do_arg1_helper	; fetch path data from argument 1
-                                lda		#FC_LOADHEX		; FIO Command
-                                sta		FIO_COMMAND		; Send the Load Hex Command
-                                lda		FIO_ERROR		; Examine the Error Code
-                                cmpa	#FE_NOTFOUND	; is the File Not Found bit set?
-                                beq		do_ld_notfound	; ERROR: File Not Found
-                                cmpa	#FE_NOTOPEN		; is the File Not Open bit set?
-                                beq		do_ld_notopen	; ERROR: File Not Open
-                                cmpa	#FE_WRONGTYPE	; is the Wrong File Type bit set?
-                                beq		do_ld_wrong		; ERROR: Wrong File Type
-                                bra		do_ld_done		; All done, return
-do_ld_wrong		ldx		#err_wrong_file	; point to the error message
-                                jsr		KRNL_LINEOUT	; send the text to the console
-                                bra		do_ld_done		; done, return
-do_ld_notopen	ldx		#err_file_no	; point to the error message
-                                jsr		KRNL_LINEOUT	; send it to the console
-                                bra		do_ld_done		; done, return
-do_ld_notfound	ldx		#err_file_nf	; point to the error message
-                                jsr		KRNL_LINEOUT	; send it to the console
-do_ld_done		rts						; done, return
-do_arg1_helper	clr		FIO_PATH_POS	; reset the path cursor position
-do_argh_0		lda		,x+				; load the next character
-                                sta		FIO_PATH_DATA	; push it into the FIO Path Data Port
-                                bne		do_argh_0		; Continue until Null-Terminator
-                                rts						; return from subroutine
+err_file_nf     fcn     "ERROR: File Not Found\n";
+err_file_no     fcn     "ERROR: File Not Open\n";
+err_wrong_file  fcn     "ERROR: Wrong File Type\n"
+do_load         jsr     do_arg1_helper  ; fetch path data from argument 1
+                lda     #FC_LOADHEX     ; FIO Command
+                sta     FIO_COMMAND     ; Send the Load Hex Command
+                lda     FIO_ERROR       ; Examine the Error Code
+                cmpa    #FE_NOTFOUND    ; is the File Not Found bit set?
+                beq     do_ld_notfound  ; ERROR: File Not Found
+                cmpa    #FE_NOTOPEN     ; is the File Not Open bit set?
+                beq     do_ld_notopen   ; ERROR: File Not Open
+                cmpa    #FE_WRONGTYPE   ; is the Wrong File Type bit set?
+                beq     do_ld_wrong     ; ERROR: Wrong File Type
+                bra     do_ld_done      ; All done, return
+do_ld_wrong     ldx     #err_wrong_file ; point to the error message
+                jsr     KRNL_LINEOUT    ; send the text to the console
+                bra     do_ld_done      ; done, return
+do_ld_notopen   ldx     #err_file_no    ; point to the error message
+                jsr     KRNL_LINEOUT    ; send it to the console
+                bra     do_ld_done      ; done, return
+do_ld_notfound	ldx     #err_file_nf    ; point to the error message
+                jsr     KRNL_LINEOUT    ; send it to the console
+do_ld_done      rts                     ; done, return
+do_arg1_helper  clr     FIO_PATH_POS    ; reset the path cursor position
+do_argh_0       lda     ,x+             ; load the next character
+                sta     FIO_PATH_DATA   ; push it into the FIO Path Data Port
+                bne     do_argh_0       ; Continue until Null-Terminator
+                rts                     ; return from subroutine
 
 ; *****************************************************************************
 ; * Command: EXEC "Execute a Program"                            ARG1 = none  *
