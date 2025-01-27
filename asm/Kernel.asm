@@ -1129,7 +1129,7 @@ STUB_D_TO_INTR  pshs    CC              ; save the used registers onto the stack
 
 ; *******************************************************************************
 ; * KRNL_RAW(A, B, or R)_TO_D                                                  	*
-; * 	Read one of the raw float registers into the D register          		*
+; * 	Read one of the raw float registers into the D register                 *
 ; *                                                                           	*
 ; * ENTRY REQUIREMENTS: none                                                  	*
 ; *                                                                           	*
@@ -1137,33 +1137,34 @@ STUB_D_TO_INTR  pshs    CC              ; save the used registers onto the stack
 ; *                         All other registers preserved                     	*
 ; *                                                                           	*
 ; *******************************************************************************
-SYS_RAWA_TO_D	jsr		KRNL_RAWA_TO_D	; call the kernel RAWA_TO_D handler
-                                rti						; return from the interrupt
-                                ; ...
-KRNL_RAWA_TO_D	jmp		[VEC_RAWA_TO_D]	; proceed through the software vector
-STUB_RAWA_TO_D	pshs	CC				; save the used registers onto the stack
-                                ldd		MATH_ACA_RAW+2	; load the ACA raw float value
-                                puls	CC,PC			; cleanup saved registers and return
+SYS_RAWA_TO_D   jsr     KRNL_RAWA_TO_D  ; call the kernel RAWA_TO_D handler
+                rti                     ; return from the interrupt
+                ; ...
+KRNL_RAWA_TO_D  jmp     [VEC_RAWA_TO_D] ; proceed through the software vector
+STUB_RAWA_TO_D  pshs    CC              ; save the used registers onto the stack
+                ldd     MATH_ACA_RAW+2  ; load the ACA raw float value
+                puls    CC,PC           ; cleanup saved registers and return
 
-SYS_RAWB_TO_D	jsr		KRNL_RAWB_TO_D	; call the kernel RAWB_TO_D handler
-                                rti						; return from the interrupt
-                                ; ...
-KRNL_RAWB_TO_D	jmp		[VEC_RAWB_TO_D]	; proceed through the software vector
-STUB_RAWB_TO_D	pshs	CC				; save the used registers onto the stack
-                                ldd		MATH_ACB_RAW+2	; load the ACB raw float value
-                                puls	CC,PC			; cleanup saved registers and return
+SYS_RAWB_TO_D   jsr     KRNL_RAWB_TO_D  ; call the kernel RAWB_TO_D handler
+                rti                     ; return from the interrupt
+                ; ...
+KRNL_RAWB_TO_D  jmp     [VEC_RAWB_TO_D] ; proceed through the software vector
+STUB_RAWB_TO_D  pshs    CC              ; save the used registers onto the stack
+                ldd     MATH_ACB_RAW+2  ; load the ACB raw float value
+                puls    CC,PC           ; cleanup saved registers and return
 
-SYS_RAWR_TO_D	jsr		KRNL_RAWR_TO_D	; call the kernel RAWR_TO_D handler
-                                rti						; return from the interrupt
-                                ; ...
-KRNL_RAWR_TO_D	jmp		[VEC_RAWR_TO_D]	; proceed through the software vector
-STUB_RAWR_TO_D	pshs	CC				; save the used registers onto the stack
-                                ldd		MATH_ACR_RAW+2	; load the ACR raw float value
-                                puls	CC,PC			; cleanup saved registers and return
+SYS_RAWR_TO_D   jsr     KRNL_RAWR_TO_D  ; call the kernel RAWR_TO_D handler
+                rti                     ; return from the interrupt
+                ; ...
+KRNL_RAWR_TO_D  jmp     [VEC_RAWR_TO_D] ; proceed through the software vector
+STUB_RAWR_TO_D  pshs    CC              ; save the used registers onto the stack
+                ldd     MATH_ACR_RAW+2  ; load the ACR raw float value
+                puls    CC,PC           ; cleanup saved registers and return
+                
 
 ; *******************************************************************************
 ; * KRNL_INT(A, B, or R)_TO_D                                                 	*
-; * 	Read one of the integer registers into the D register          			*
+; * 	Read one of the integer registers into the D register                   *
 ; *                                                                           	*
 ; * ENTRY REQUIREMENTS: none                                                  	*
 ; *                                                                           	*

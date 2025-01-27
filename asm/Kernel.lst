@@ -1924,7 +1924,7 @@ F7C3  3581                            puls    CC,PC           ; cleanup saved re
                       
                       ; *******************************************************************************
                       ; * KRNL_RAW(A, B, or R)_TO_D                                                   *
-                      ; *     Read one of the raw float registers into the D register                         *
+                      ; *     Read one of the raw float registers into the D register                 *
                       ; *                                                                             *
                       ; * ENTRY REQUIREMENTS: none                                                    *
                       ; *                                                                             *
@@ -1932,33 +1932,34 @@ F7C3  3581                            puls    CC,PC           ; cleanup saved re
                       ; *                         All other registers preserved                       *
                       ; *                                                                             *
                       ; *******************************************************************************
-F7C5  BDF7C9          SYS_RAWA_TO_D   jsr             KRNL_RAWA_TO_D  ; call the kernel RAWA_TO_D handler
-F7C8  3B                                              rti                                             ; return from the interrupt
-                                                      ; ...
-F7C9  6E9F0038        KRNL_RAWA_TO_D  jmp             [VEC_RAWA_TO_D] ; proceed through the software vector
-F7CD  3401            STUB_RAWA_TO_D  pshs    CC                              ; save the used registers onto the stack
-F7CF  FCFE6B                                          ldd             MATH_ACA_RAW+2  ; load the ACA raw float value
-F7D2  3581                                            puls    CC,PC                   ; cleanup saved registers and return
+F7C5  BDF7C9          SYS_RAWA_TO_D   jsr     KRNL_RAWA_TO_D  ; call the kernel RAWA_TO_D handler
+F7C8  3B                              rti                     ; return from the interrupt
+                                      ; ...
+F7C9  6E9F0038        KRNL_RAWA_TO_D  jmp     [VEC_RAWA_TO_D] ; proceed through the software vector
+F7CD  3401            STUB_RAWA_TO_D  pshs    CC              ; save the used registers onto the stack
+F7CF  FCFE6B                          ldd     MATH_ACA_RAW+2  ; load the ACA raw float value
+F7D2  3581                            puls    CC,PC           ; cleanup saved registers and return
                       
-F7D4  BDF7D8          SYS_RAWB_TO_D   jsr             KRNL_RAWB_TO_D  ; call the kernel RAWB_TO_D handler
-F7D7  3B                                              rti                                             ; return from the interrupt
-                                                      ; ...
-F7D8  6E9F003A        KRNL_RAWB_TO_D  jmp             [VEC_RAWB_TO_D] ; proceed through the software vector
-F7DC  3401            STUB_RAWB_TO_D  pshs    CC                              ; save the used registers onto the stack
-F7DE  FCFE75                                          ldd             MATH_ACB_RAW+2  ; load the ACB raw float value
-F7E1  3581                                            puls    CC,PC                   ; cleanup saved registers and return
+F7D4  BDF7D8          SYS_RAWB_TO_D   jsr     KRNL_RAWB_TO_D  ; call the kernel RAWB_TO_D handler
+F7D7  3B                              rti                     ; return from the interrupt
+                                      ; ...
+F7D8  6E9F003A        KRNL_RAWB_TO_D  jmp     [VEC_RAWB_TO_D] ; proceed through the software vector
+F7DC  3401            STUB_RAWB_TO_D  pshs    CC              ; save the used registers onto the stack
+F7DE  FCFE75                          ldd     MATH_ACB_RAW+2  ; load the ACB raw float value
+F7E1  3581                            puls    CC,PC           ; cleanup saved registers and return
                       
-F7E3  BDF7E7          SYS_RAWR_TO_D   jsr             KRNL_RAWR_TO_D  ; call the kernel RAWR_TO_D handler
-F7E6  3B                                              rti                                             ; return from the interrupt
-                                                      ; ...
-F7E7  6E9F003C        KRNL_RAWR_TO_D  jmp             [VEC_RAWR_TO_D] ; proceed through the software vector
-F7EB  3401            STUB_RAWR_TO_D  pshs    CC                              ; save the used registers onto the stack
-F7ED  FCFE7F                                          ldd             MATH_ACR_RAW+2  ; load the ACR raw float value
-F7F0  3581                                            puls    CC,PC                   ; cleanup saved registers and return
+F7E3  BDF7E7          SYS_RAWR_TO_D   jsr     KRNL_RAWR_TO_D  ; call the kernel RAWR_TO_D handler
+F7E6  3B                              rti                     ; return from the interrupt
+                                      ; ...
+F7E7  6E9F003C        KRNL_RAWR_TO_D  jmp     [VEC_RAWR_TO_D] ; proceed through the software vector
+F7EB  3401            STUB_RAWR_TO_D  pshs    CC              ; save the used registers onto the stack
+F7ED  FCFE7F                          ldd     MATH_ACR_RAW+2  ; load the ACR raw float value
+F7F0  3581                            puls    CC,PC           ; cleanup saved registers and return
+                                      
                       
                       ; *******************************************************************************
                       ; * KRNL_INT(A, B, or R)_TO_D                                                   *
-                      ; *     Read one of the integer registers into the D register                           *
+                      ; *     Read one of the integer registers into the D register                   *
                       ; *                                                                             *
                       ; * ENTRY REQUIREMENTS: none                                                    *
                       ; *                                                                             *
