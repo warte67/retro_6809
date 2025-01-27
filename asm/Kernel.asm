@@ -908,35 +908,35 @@ K_GETNUM_DONE	puls    CC,PC           ; cleanup saved registers and return
 ; *                     X = address last checked in string 1                  *
 ; *                     Y = address last checked in string 2                  *
 ; *****************************************************************************
-SYS_CMPSTR		jsr		KRNL_CMPSTR		; call the kernel CMPSTR handler
-                                rti						; return from the interrupt
-                                ; ...
-KRNL_CMPSTR		jmp		[VEC_CMPSTR]	; proceed through the software vector
-STUB_CMPSTR		pshs	D				; save the used registers onto the stack		
-K_CMP_LOOP		tst		,x				; test the current character in string 1
-                                bne		K_CMP_1			; if its non-null, go test in string 2
-                                tst		,y				; test if character in both are null
-                                beq		K_CMP_EQUAL		; if so, strings are equal
-                                bra		K_CMP_LESS		; is LESS if str1 is null but str2 is not
-K_CMP_1			tst		,y				; char in str1 is not null, but str2 is
-                                beq		K_CMP_GREATER	; return GREATER
-                                lda		,x+				; compare character from string 1
-                                ;
-                                ora		#$20			; convert all letters to lower case
-                                ;
-                                cmpa	,y+				;    with character from string 2
-                                blt		K_CMP_LESS		; return LESS
-                                bgt		K_CMP_GREATER	; return GREATER
-                                bra		K_CMP_LOOP		; otherwise continue looping
-K_CMP_LESS		lda		#1				; compare 1
-                                cmpa	#2				;    with 2
-                                bra		K_CMP_DONE		; return LESS
-K_CMP_GREATER	lda		#2				; compare 2
-                                cmpa	#1				;    with 1
-                                bra		K_CMP_DONE		; return GREATER
-K_CMP_EQUAL		clra					; set to zero
-                                cmpa	#0				; return EQUAL
-K_CMP_DONE		puls	D,PC			; cleanup saved registers and return
+SYS_CMPSTR      jsr     KRNL_CMPSTR     ; call the kernel CMPSTR handler
+                rti                     ; return from the interrupt
+                ; ...
+KRNL_CMPSTR     jmp     [VEC_CMPSTR]    ; proceed through the software vector
+STUB_CMPSTR     pshs    D               ; save the used registers onto the stack		
+K_CMP_LOOP      tst     ,x              ; test the current character in string 1
+                bne     K_CMP_1         ; if its non-null, go test in string 2
+                tst     ,y              ; test if character in both are null
+                beq     K_CMP_EQUAL     ; if so, strings are equal
+                bra     K_CMP_LESS      ; is LESS if str1 is null but str2 is not
+K_CMP_1 	tst     ,y              ; char in str1 is not null, but str2 is
+                beq     K_CMP_GREATER   ; return GREATER
+                lda     ,x+             ; compare character from string 1
+                ;
+                ora     #$20            ; convert all letters to lower case
+                ;
+                cmpa    ,y+             ;    with character from string 2
+                blt     K_CMP_LESS      ; return LESS
+                bgt     K_CMP_GREATER   ; return GREATER
+                bra     K_CMP_LOOP      ; otherwise continue looping
+K_CMP_LESS      lda     #1              ; compare 1
+                cmpa    #2              ;    with 2
+                bra     K_CMP_DONE      ; return LESS
+K_CMP_GREATER   lda     #2              ; compare 2
+                cmpa    #1              ;    with 1
+                bra     K_CMP_DONE      ; return GREATER
+K_CMP_EQUAL     clra                    ; set to zero
+                cmpa    #0              ; return EQUAL
+K_CMP_DONE      puls    D,PC            ; cleanup saved registers and return
 
 
 ; *****************************************************************************
@@ -949,55 +949,55 @@ K_CMP_DONE		puls	D,PC			; cleanup saved registers and return
 ' *                     X & Y Modified                                        *
 ; *                     FIO_BUFFER will be modified                           *
 ; *****************************************************************************
-SYS_CMD_PROC	jsr		KRNL_CMD_PROC	; call the kernel command proc handler
-                                rti						; return from the interrupt
-                                ; ...
-KRNL_CMD_PROC	jmp		[VEC_CMD_PROC]	; proceed through the software vector
-STUB_CMD_PROC	pshs	B,CC			; save the used registers onto the stack
-                        ; copy EDT_BUFFER to FIO_BUFFER
-                                ldx		#EDT_BUFFER		; the start of the input buffer
-                                ldy		#FIO_BUFFER		; use the I/O buffer temporarily
-K_CMDP_0		lda		,x+				; load a character from the input
-                                cmpa	#'A'			; make sure input is in lower case
-                                blt		K_CMDP_3		;   valid character if < 'A'
-                                cmpa	#'Z'			; all other characters are good to go
-                                bgt		K_CMDP_3		;   valid charcters above 'Z'
-                                * ora	#$20			; convert all letters to lower case (DONT DO THIS HERE!!!!)
-K_CMDP_3		sta		,y+				; copy it to the output
-                                bne		K_CMDP_0		; branch until done copying
-                        ; replace the null-terminator with $FF
-                                lda		#$ff			; the new character $FF
-                                sta		,y			; replace the null-terminator
-                        ; replace SPACES with NULL (unless within '' or "")
-                                ldx		#FIO_BUFFER		; the start of the temp buffer
-K_CMDP_1		lda		,x+				; load the next character from buffer
-                                beq		K_CMDP_2
-                                cmpa	#$FF			; are we at the end of the buffer?
-                                beq		K_CMDP_2		;   yes, go parse the buffer
-                                cmpa	#"'"			; are we at a single-quote character?
-                                beq		K_CPROC_SKIP	;   skip through until we find another
-                                cmpa	#'"'			; are we at a double-quote character?
-                                beq		K_CPROC_SKIP	;   skip through until we find another
-                                cmpa	#' '			; are we at a SPACE character?
-                                bne		K_CMDP_1		; nope, continue scanning	
-                                clr		-1,x			; convert the SPACE to a NULL
-                                bra		K_CMDP_1		; continue scanning through the buffer
-K_CPROC_SKIP	cmpa	,x+				; is character a quote character?
-                                beq		K_CMDP_1		;    yes, go back to scanning the buffer
-                                tst		,x				; are we at a NULL?
-                                bne		K_CPROC_SKIP	;    nope, keep scanning for a quote		
-                                jsr		KRNL_NEWLINE	; on error: send a linefeed cleanup
-                                lda		#$FF			; error: end of line found but no quote
-                                bra		K_CPROC_DONE	; continue looking for a quote character
-                        ; FIO_BUFFER should now be prepared for parsing
-K_CMDP_2		lda		#$0a			; line feed character
-                                jsr		KRNL_CHROUT		; send the line feed
-                                ldy		#KRNL_CMD_TABLE	; point to the command table to search
-                                ldx		#FIO_BUFFER		; point to the command to search for
-                        ; X now points to the command to search for in the table
-                                bsr		KRNL_TBLSEARCH	; seach the table for the command
-                        ; A = index of the found search string table index
-K_CPROC_DONE	puls	B,CC,PC			; cleanup saved registers and return
+SYS_CMD_PROC    jsr     KRNL_CMD_PROC   ; call the kernel command proc handler
+                rti                     ; return from the interrupt
+                ; ...
+KRNL_CMD_PROC   jmp     [VEC_CMD_PROC]  ; proceed through the software vector
+STUB_CMD_PROC   pshs    B,CC            ; save the used registers onto the stack
+                ; copy EDT_BUFFER to FIO_BUFFER
+                ldx     #EDT_BUFFER     ; the start of the input buffer
+                ldy     #FIO_BUFFER     ; use the I/O buffer temporarily
+K_CMDP_0        lda     ,x+             ; load a character from the input
+                cmpa    #'A'            ; make sure input is in lower case
+                blt     K_CMDP_3        ;   valid character if < 'A'
+                cmpa    #'Z'            ; all other characters are good to go
+                bgt     K_CMDP_3        ;   valid charcters above 'Z'
+                * ora   #$20            ; convert all letters to lower case (DONT DO THIS HERE!!!!)
+K_CMDP_3        sta     ,y+             ; copy it to the output
+                bne     K_CMDP_0        ; branch until done copying
+                ; replace the null-terminator with $FF
+                lda     #$ff            ; the new character $FF
+                sta     ,y              ; replace the null-terminator
+                ; replace SPACES with NULL (unless within '' or "")
+                ldx     #FIO_BUFFER     ; the start of the temp buffer
+K_CMDP_1        lda     ,x+             ; load the next character from buffer
+                beq     K_CMDP_2
+                cmpa    #$FF            ; are we at the end of the buffer?
+                beq     K_CMDP_2        ;   yes, go parse the buffer
+                cmpa    #"'"            ; are we at a single-quote character?
+                beq     K_CPROC_SKIP    ;   skip through until we find another
+                cmpa    #'"'            ; are we at a double-quote character?
+                beq     K_CPROC_SKIP    ;   skip through until we find another
+                cmpa    #' '            ; are we at a SPACE character?
+                bne     K_CMDP_1        ; nope, continue scanning	
+                clr     -1,x            ; convert the SPACE to a NULL
+                bra     K_CMDP_1        ; continue scanning through the buffer
+K_CPROC_SKIP    cmpa    ,x+             ; is character a quote character?
+                beq     K_CMDP_1        ;    yes, go back to scanning the buffer
+                tst     ,x              ; are we at a NULL?
+                bne     K_CPROC_SKIP    ;    nope, keep scanning for a quote		
+                jsr     KRNL_NEWLINE    ; on error: send a linefeed cleanup
+                lda     #$FF            ; error: end of line found but no quote
+                bra     K_CPROC_DONE    ; continue looking for a quote character
+                ; FIO_BUFFER should now be prepared for parsing
+K_CMDP_2        lda     #$0a            ; line feed character
+                jsr     KRNL_CHROUT     ; send the line feed
+                ldy     #KRNL_CMD_TABLE ; point to the command table to search
+                ldx     #FIO_BUFFER     ; point to the command to search for
+                ; X now points to the command to search for in the table
+                bsr     KRNL_TBLSEARCH  ; seach the table for the command
+                ; A = index of the found search string table index
+K_CPROC_DONE    puls    B,CC,PC         ; cleanup saved registers and return
 
 
 ; *****************************************************************************
