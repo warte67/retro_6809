@@ -89,20 +89,20 @@ ZERO_PAGE_USER	equ	    _LOCAL_3+1	; start of user appropriate zero-page memory
 
 ; *******************************************************************************
 ; * SYS CALL CONSTANTS                                                          *
-; *	usage:									                                    *
-; *		sys	CALL_CLS	; clear the screen			                            *
-; *		...								                                        *
-; *										                                        *
-; *		lda	#'Z'		; Load the text glyph 'Z' into A	                    *
-; *		sys	CALL_CHROUT	; Display the 'Z' on the text screen	                *
-; *		...								                                        *
-; *										                                        *
-; *										                                        *
-; *		sys	CALL_LINEOUT	; Display Null-terminated string	                *
-; *					; pointed to by X at the current	                        *
-; *					; cursor location: 			                                *
-; *						_CURSOR_COL x _CURSOR_ROW	                            *
-; *		...								                                        *
+; *	usage:		                                                        *
+; *		sys	CALL_CLS	; clear the screen			*
+; *		...								*
+; *										*
+; *		lda	#'Z'		; Load the text glyph 'Z' into A	*
+; *		sys	CALL_CHROUT	; Display the 'Z' on the text screen	*
+; *		...								*
+; *										*
+; *										*
+; *		sys	CALL_LINEOUT	; Display Null-terminated string	*
+; *					; pointed to by X at the current	*
+; *					; cursor location: 			*
+; *						_CURSOR_COL x _CURSOR_ROW	*
+; *		...								*
 ; *******************************************************************************
 CALL_GARBAGE	    equ	    $00	    ; $00 random garbage
 CALL_CLS            equ	    $01     	; $01 CLS
