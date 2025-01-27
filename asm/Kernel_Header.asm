@@ -1,20 +1,20 @@
 ; ***** kernel_header.asm ************************************************************************
-; *      _  __                    _     _   _                _                                 
-; *     | |/ /___ _ __ _ __   ___| |   | | | | ___  __ _  __| | ___ _ __    __ _ ___ _ __ ___  
-; *     | ' // _ \ '__| '_ \ / _ \ |   | |_| |/ _ \/ _` |/ _` |/ _ \ '__|  / _` / __| '_ ` _ \ 
+; *      _  __                    _     _   _                _
+; *     | |/ /___ _ __ _ __   ___| |   | | | | ___  __ _  __| | ___ _ __    __ _ ___ _ __ ___
+; *     | ' // _ \ '__| '_ \ / _ \ |   | |_| |/ _ \/ _` |/ _` |/ _ \ '__|  / _` / __| '_ ` _ \
 ; *     | . \  __/ |  | | | |  __/ |   |  _  |  __/ (_| | (_| |  __/ |_   | (_| \__ \ | | | | |
 ; *     |_|\_\___|_|  |_| |_|\___|_|___|_| |_|\___|\__,_|\__,_|\___|_(_)   \__,_|___/_| |_| |_|
-; *                               |_____|                          
-; *												
-; ************************************************************************************************           
+; *                               |_____|
+; *
+; ************************************************************************************************
 
-		        INCLUDE "Memory_Map.asm"
+                INCLUDE "Memory_Map.asm"
 
 ; sys macro expands to SWI2 with a following command byte
-sys		        macro
-		        swi2
-		        fcb	\1
-		        endm
+sys             macro
+                swi2
+                fcb	\1
+                endm
 
 
 ; *****************************************************************************
@@ -26,8 +26,8 @@ VEC_SWI2 	    equ     $0004	; SWI2 Software Interrupt Vector
 VEC_FIRQ 	    equ     $0006	; FIRQ Software Interrupt Vector
 VEC_IRQ  	    equ     $0008	; IRQ Software Interrupt Vector
 VEC_SWI  	    equ     $000A	; SWI / SYS Software Interrupt Vector
-VEC_NMI  	    equ     $000C	; NMI Software Interrupt Vector	
-VEC_RESET	    equ     $000E	; RESET Software Interrupt Vector	
+VEC_NMI  	    equ     $000C	; NMI Software Interrupt Vector
+VEC_RESET	    equ     $000E	; RESET Software Interrupt Vector
 
 ; *****************************************************************************
 ; * KERNAL ROUTINE SOFTWARE VECTORS                                           *
@@ -48,7 +48,7 @@ VEC_TBLSEARCH	equ	    $0028	; Table Search and Return index Vector
 VEC_CPY_DWORD	equ	    $002A	; Copy 32-bits from addr X addr Y Vector
 VEC_D_TO_RAWA	equ	    $002C	; Write the D register to RAWA  Vector
 VEC_D_TO_RAWB	equ	    $002E	; Write the D register to RAWB Vector
-VEC_D_TO_RAWR	equ	    $0030	; Write the D register to RAWR Vector 
+VEC_D_TO_RAWR	equ	    $0030	; Write the D register to RAWR Vector
 VEC_D_TO_INTA	equ	    $0032	; Write the D register to INTA Vector
 VEC_D_TO_INTB	equ	    $0034	; Write the D register to INTB Vector
 VEC_D_TO_INTR	equ	    $0036	; Write the D register to INTR Vector
@@ -66,7 +66,7 @@ VEC_DSP_INTA	equ	    $004C	; Send to console the integer in ACA Vector
 VEC_DSP_INTB	equ	    $004E	; Send to console the integer in ACB Vector
 VEC_DSP_INTR	equ	    $0050	; Send to console the integer in ACR Vector
 VEC_WRITE_ACA	equ	    $0052	; Write RAW float X points to into ACA Vector
-VEC_WRITE_ACB	equ	    $0054	; Write RAW float X points to into ACB Vector 
+VEC_WRITE_ACB	equ	    $0054	; Write RAW float X points to into ACB Vector
 VEC_WRITE_ACR	equ	    $0056	; Write RAW float X points to into ACR Vector
 VEC_ARG_TO_A	equ	    $0058	; Convert numeric string to binary in A Vector
 
@@ -90,36 +90,36 @@ ZERO_PAGE_USER	equ	    _LOCAL_3+1	; start of user appropriate zero-page memory
 ; *******************************************************************************
 ; * SYS CALL CONSTANTS                                                          *
 ; *	usage:									                                    *
-; *		sys	CALL_CLS	; clear the screen			                            *	
+; *		sys	CALL_CLS	; clear the screen			                            *
 ; *		...								                                        *
 ; *										                                        *
 ; *		lda	#'Z'		; Load the text glyph 'Z' into A	                    *
-; *		sys	CALL_CHROUT	; Display the 'Z' on the text screen	                *	
+; *		sys	CALL_CHROUT	; Display the 'Z' on the text screen	                *
 ; *		...								                                        *
 ; *										                                        *
 ; *										                                        *
 ; *		sys	CALL_LINEOUT	; Display Null-terminated string	                *
-; *					; pointed to by X at the current	                        *           
+; *					; pointed to by X at the current	                        *
 ; *					; cursor location: 			                                *
 ; *						_CURSOR_COL x _CURSOR_ROW	                            *
 ; *		...								                                        *
 ; *******************************************************************************
-CALL_GARBAGE	equ	    $00	    ; $00 random garbage 
-CALL_CLS        equ	    $01     	; $01 CLS 	    
-CALL_CHROUT	    equ	    $02	    ; $02 CHROUT	    
-CALL_NEWLINE    equ	    $03         ; $03 NEWLINE       
-CALL_TAB        equ	    $04         ; $04 TAB           
-CALL_LINEOUT    equ	    $05      	; $05 LINEOUT       
-CALL_CSRPOS     equ	    $06         ; $06 CSRPOS        
-CALL_SCROLL     equ	    $07         ; $07 SCROLL        
-CALL_LINEEDIT	equ	    $08	    ; $08 LINEEDIT	    
-CALL_GETKEY     equ	    $09	    ; $09 GETKEY        
-CALL_GETHEX     equ	    $0A	    ; $0A GETHEX	    
-CALL_GETNUM     equ	    $0B	    ; $0B GETNUM	    
-CALL_CMPSTR     equ	    $0C	    ; $0C CMPSTR	    
-CALL_CMD_PROC	equ	    $0D	    ; $0D CMD_PROC	    
-CALL_TBLSEARCH	equ	    $0E	    ; $0E TBLSEARCH     
-CALL_CPY_DWORD	equ	    $0F	    ; $0F CPY_DWORD     
+CALL_GARBAGE	equ	    $00	    ; $00 random garbage
+CALL_CLS        equ	    $01     	; $01 CLS
+CALL_CHROUT	    equ	    $02	    ; $02 CHROUT
+CALL_NEWLINE    equ	    $03         ; $03 NEWLINE
+CALL_TAB        equ	    $04         ; $04 TAB
+CALL_LINEOUT    equ	    $05      	; $05 LINEOUT
+CALL_CSRPOS     equ	    $06         ; $06 CSRPOS
+CALL_SCROLL     equ	    $07         ; $07 SCROLL
+CALL_LINEEDIT	equ	    $08	    ; $08 LINEEDIT
+CALL_GETKEY     equ	    $09	    ; $09 GETKEY
+CALL_GETHEX     equ	    $0A	    ; $0A GETHEX
+CALL_GETNUM     equ	    $0B	    ; $0B GETNUM
+CALL_CMPSTR     equ	    $0C	    ; $0C CMPSTR
+CALL_CMD_PROC	equ	    $0D	    ; $0D CMD_PROC
+CALL_TBLSEARCH	equ	    $0E	    ; $0E TBLSEARCH
+CALL_CPY_DWORD	equ	    $0F	    ; $0F CPY_DWORD
 CALL_D_TO_RAWA	equ	    $10	    ; $10 D_TO_RAWA
 CALL_D_TO_RAWB	equ	    $11	    ; $11 D_TO_RAWB
 CALL_D_TO_RAWR	equ	    $12	    ; $12 D_TO_RAWR
