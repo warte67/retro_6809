@@ -92,8 +92,6 @@
     // FileIO Device Constants:
     constexpr Word FILEHANDLESMAX = 256;
 
-    // MMU Device Constants:
-    constexpr size_t MMU_MEMORY_SIZE = 0xCCCC;
 
 
 

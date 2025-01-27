@@ -127,13 +127,14 @@ private:
     // HARDWARE REGISTERS //
     // ****************** //
 
+
     Word _mmu_1_select = MMU_BAD_HANDLE;    
     // MMU_1_SELECT                 ; (Word) Page Select for 8K Memory Bank 1
 
     Word _mmu_2_select = MMU_BAD_HANDLE;    
     // MMU_2_SELECT                 ; (Word) Page Select for 8K Memory Bank 2
 
-    Word _mmu_blocks_free = 0xCCCC;
+    Word _mmu_blocks_free = MMU_MEMORY_SIZE;
     // MMU_BLOCKS_FREE              ; (Word) Number of 32-Byte Blocks Available for Allocation
 
     Word _mmu_blocks_allocated = 0;
@@ -185,21 +186,12 @@ private:
     Byte _mmu_error = 0;
     std::vector<std::pair<std::string, std::string>> _mmu_error_list = {
         { "MMU_ERR_NONE",       "No Error" },
-        { "MMU_ERR_OUTOFMEM",   "Out of Memory Error" },
         { "MMU_ERR_ALLOC",      "Failed to Allocate Memory" },
         { "MMU_ERR_FREE",       "Failed to Deallocate Memory" },
         { "MMU_ERR_PG_FREE",    "Error Deallocating Page" },
         { "MMU_ERR_INVALID",    "Invalid Command" },
-        { "MMU_ERR_ARGUMENT",   "Invalid Argument" },
         { "MMU_ERR_HANDLE",     "Invalid Handle" },
         { "MMU_ERR_NODE",       "Invalid Node" },
-        { "MMU_ERR_PAGE",       "Invalid Page" },
-        { "MMU_ERR_BANK",       "Invalid Bank" },
-        { "MMU_ERR_ADDRESS",    "Invalid Address" },
-        { "MMU_ERR_OFFSET",     "Invalid Offset" },
-        { "MMU_ERR_LENGTH",     "Invalid Length" },
-        { "MMU_ERR_INDEX",      "Invalid Index" },
-        { "MMU_ERR_UNKNOWN",    "Unknown Error" },
         { "MMU_ERR_SIZE",       "Total Number of MMU Errors" }
     };
 
@@ -244,13 +236,6 @@ private:
     Word allocate_new_node();
     
     std::vector<Word> _handles;  // Holds the allocated memory handles (root node indices)
-    
-    // struct PAGED_MEM_NODE {
-    //     Word handle;                            // root hadnle for the allocation chain
-    //     std::array<Word, 256> meta_node = {0};  // index to within the _metadata_pool container
-    // };
-    // std::vector<PAGED_MEM_NODE> _paged_mem_nodes;
-
 
     struct METADATA_NODE {
         Byte page_index;            // index into the _paged_mem_nodes container (reserved)
@@ -269,24 +254,9 @@ private:
         Word next_node;             // index of the child node in this allocation        
     };
     // Allocate within the 2MB memory pool (Each METADATA_NODE represents 8-bytes)
-    // the metadata pool will be 52'428 * 8 = 419'424 bytes.
-    // MMU_MEMORY_SIZE = 52'428
+    //      ( the metadata pool will be 52'428 * 8 = 419'424 bytes. MMU_MEMORY_SIZE = 52'428 )
+    const size_t MMU_MEMORY_SIZE = 0xCCCC;    // 52'428 32-Byte Dynamically Allocatable Blocks
     std::vector<METADATA_NODE> _metadata_pool = std::vector<METADATA_NODE>(MMU_MEMORY_SIZE);
-
-
-    // //          DATA pool = 1'677'696 bytes
-    // //      METADATA pool =   419'424 bytes
-    // //             equals = 2'097'120 bytes
-    // //                2MB = 2'097'152 bytes
-    // // the remaining 32 bytes left within the 2MB pool are reserved for flags
-    // struct PageFlags {
-    //     std::bitset<256> flags; // 256 bits (32 bytes) to represent flags for each 32-byte block.
-    // };
-
-
-    // Word _dynamic_memory_top = MMU_MEMORY_SIZE;     // top of dynamic memory $CCCC = 52'428
-    // Word _dynamic_memory_bottom = 0x0000;           // bottom of dynamemic memory, 
-    //                                                 //     preinitialized to zero for now
 };
 
 
@@ -393,33 +363,178 @@ public:
 
 /**************************************+
 
-Consideration for Electronic Components:
-    Raspberry Pi Pico2 Board One -- Core 1:
-        1) CPU Emulation
-        2) 64KB CPU addressable memory
-        3) SPI Controller between PICO2 Board 1 and Board 2 (aka. Interrupts)
-        4) Secondary SPI Controller for 2MB Page Banked Memory (aka. DMA)
 
-    Raspberry Pi Pico2 Board One -- Core 2:
-        1) GPU Graphics Processor
-        2) 64KB GPU addressable memory
-        3) Dynamic Memory Management of 64KB video memory
-            - Video Display Buffer
-            - Tilemap Buffer
-            - Sprite Buffer (and sprite list)
-            - Tile Buffer
-        4) Common Board One Hardware Register Processing
+    std::vector<CommandInfo> _mmu_command_list = {
+    //    CONSTANT             , DESCRIPTION                                , FUNCTION POINTER FOR THE COMMAND,             , FUNCTION POINTER FOR THE UNIT TEST
+        {"MMU_CMD_NOP"        , "No Operation / Error",                     [this]() -> Byte { return do_nop(); },          [this]() -> bool { return _test_nop(); }},
+        {"MMU_CMD_PG_ALLOC"   , "Page Allocate (8K Bytes)",                 [this]() -> Byte { return do_pg_alloc(); },     [this]() -> bool { return _test_pg_alloc(); }},
+        {"MMU_CMD_PG_FREE"    , "Page Deallocate (8K Bytes)",               [this]() -> Byte { return do_pg_free(); },      [this]() -> bool { return _test_pg_free(); }},
+        {"MMU_CMD_ALLOC"      , "Allocate Chain (< 8K Bytes)",              [this]() -> Byte { return do_alloc(); },        [this]() -> bool { return _test_alloc(); }},
+        {"MMU_CMD_FREE"       , "Deallocate Chain (< 8K Bytes)",            [this]() -> Byte { return do_free(); },         [this]() -> bool { return _test_free(); }},
+        {"MMU_CMD_LOAD_ROOT"  , "Load Root Node",                           [this]() -> Byte { return do_load_root(); },    [this]() -> bool { return _test_load_root(); }},
+        {"MMU_CMD_LOAD_NEXT"  , "Load Next Node",                           [this]() -> Byte { return do_load_next(); },    [this]() -> bool { return _test_load_next(); }},
+        {"MMU_CMD_LOAD_PREV"  , "Load Prev Node",                           [this]() -> Byte { return do_load_prev(); },    [this]() -> bool { return _test_load_prev(); }},
+        {"MMU_CMD_LOAD_LAST"  , "Load Last Node",                           [this]() -> Byte { return do_load_last(); },    [this]() -> bool { return _test_load_last(); }},
+        {"MMU_CMD_DEL_NODE"   , "Remove Current Node (and Adjust Links)",   [this]() -> Byte { return do_del_node(); },     [this]() -> bool { return _test_del_node(); }},
+        {"MMU_CMD_INS_BEFORE" , "Insert Node Before (and activate)",        [this]() -> Byte { return do_ins_before(); },   [this]() -> bool { return _test_ins_before(); }},
+        {"MMU_CMD_INS_AFTER"  , "Insert Node After (and activate)",         [this]() -> Byte { return do_ins_after(); },    [this]() -> bool { return _test_ins_after(); }},
+        {"MMU_CMD_PUSH_BACK"  , "Push Back (and activate)",                 [this]() -> Byte { return do_push_back(); },    [this]() -> bool { return _test_push_back(); }},
+        {"MMU_CMD_PUSH_FRONT" , "Push Front (and activate)",                [this]() -> Byte { return do_push_front(); },   [this]() -> bool { return _test_push_front(); }},
+        {"MMU_CMD_POP_BACK"   , "Pop Back (and activate)",                  [this]() -> Byte { return do_pop_back(); },     [this]() -> bool { return _test_pop_back(); }},
+        {"MMU_CMD_POP_FRONT"  , "Pop Front (and activate)",                 [this]() -> Byte { return do_pop_front(); },    [this]() -> bool { return _test_pop_front(); }},
+        {"MMU_CMD_LOCK_NODE"  , "Lock Node",                                [this]() -> Byte { return do_lock_node(); },    [this]() -> bool { return _test_lock_node(); }},
+        {"MMU_CMD_UNLOCK_NODE", "Unlock Node",                              [this]() -> Byte { return do_unlock_node(); },  [this]() -> bool { return _test_unlock_node(); }},
+        {"MMU_CMD_DEFRAG"     , "Defragment / Collect Garbage",             [this]() -> Byte { return do_defrag(); },       [this]() -> bool { return _test_defrag(); }},
+        {"MMU_CMD_RESET"      , "Reset Memory Management Unit",             [this]() -> Byte { return do_reset(); },        [this]() -> bool { return _test_reset(); }},
+        {"MMU_CMD_SIZE"       , "Total Number of MMU Commands",             [this]() -> Byte { return do_size(); },         [this]() -> bool { return _test_size(); }}
+    };
 
-    Raspberry PI Pico2 Board Two -- Core 1:
-        1) FM Audio Synthesis (SID Emulation)
 
-    Raspberry PI Pico2 Board Two -- Core 2:
-        1) Input / Output
-        2) SPI Controller between PICO2 Board 1 and Board 2 (aka. Interrupts)
-        3) Serial Communication With Host Computer for Debugging
-        4) USB Devices
-        5) Common Board One Hardware Register Processing
+    Test Considerations:
 
+        X. Test Default Memory Pages
+            Fill BANKMEM_ONE with default predictable data
+            Fill BANKMEM_TWO with default predictable data
+            Verify BANKMEM_ONE contains default predictable data
+            Verify BANKMEM_TWO contains default predictable data
+
+        X. MMU_CMD_PG_ALLOC
+            Create a RAM page and load it into BANKMEM_ONE
+            Create a ROM page and load it into BANKMEM_TWO
+                Fill BANKMEM_ONE with predictable data
+                Fill BANKMEM_TWO with predictable data
+                Verify BANKMEM_ONE contains predictable data
+                Verify BANKMEM_TWO remnains unchanged
+
+        X. MMU_CMD_PG_FREE
+            Verify BANKMEM_ONE contains the original default predictable data
+            Verify BANKMEM_TWO contains the original default predictable data
+            Verify blocks_free == 0xCCCC and blocks_allocated == 0           
+
+        X. Allocate three dynamatic nodes (handle 1, 2, 3)
+            Handle 1 should be allocated as RAM
+            Handle 2 should be allocated as ROM
+            Handle 3 should be allocated as Locked RAM
+
+        X. Select Chain 1 (handle 1)
+            Test: Repeat MMU_CMD_LOAD_NEXT until Next == MMU_BAD_HANDLE
+                Mark: the handle of this node as end_node for future reference
+                Fill: 32-Bytes with predictable data
+                Verify: prev_node == last node
+                Verify: root_node == starting node
+                Verify: status == enabled: MMU_STFLG_ALLOC is set, all others clear
+            Test: Repeat MMU_CMD_LOAD_PREV until Prev == MMU_BAD_HANDLE
+                Read/Verify: 32-Bytes contain predictable data
+                Verify: next_node == last node
+                Verify: root_node == starting node
+            Test: MMU_CMD_LOAD_LAST
+                Verify: last_node == MMU_BAD_HANDLE
+            Test: MMU_CMD_LOAD_ROOT
+                Verify: prev_node == MMU_BAD_HANDLE
+
+        X. Select Chain 2 (handle 2)
+            Test: Attempt to clear 32-bytes
+                Verify: no change to memory data (should still contain predictable data)
+                Verify: status == enabled: MMU_STFLG_ALLOC and MMU_STFLG_READONLY are set, all others clear
+
+        X. Select Chain 3 (handle 3)
+            Test: Attempt to clear 32-bytes 
+                Verify: no change to memory data (should still contain predictable data)
+                Verify: status == enabled: MMU_STFLG_ALLOC and MMU_STFLG_LOCKED are set, all others clear
+
+        X. Select Chain 1 (handle 1)
+            Test: MMU_CMD_LOAD_NEXT
+                Mark this node as reference_node for use after next step
+            Test: MMU_CMD_DEL_NODE
+                Verify: handle == MMU_BAD_HANDLE
+                Verify: root_node == MMU_BAD_HANDLE
+                Verify: next_node == MMU_BAD_HANDLE
+                Verify: prev_node == MMU_BAD_HANDLE
+                Verify: status == 0x00
+                Verify: reference_node.pre_node == MMU_BAD_HANDLE
+                Verify: reference_node.root_node == reference_node.handle
+            Test: MMU_CMD_INS_BEFORE record this new_node
+                Verify: reference_node.next_node == MMU_BAD_HANDLE
+                Verify: reference_node.prev_node == new_node.handle
+                Verify: reference_node.root_node == new_node.handle
+            Test: MMU_CMD_INS_AFTER record this new node as after_node
+                Verify: after_node.prev_node == end_node.handle
+                Verify: after_node.next_node == MMU_BAD_HANDLE
+                Verify: after_node.root_node == reference_node.handle
+                Verify: after_node.status == MMU_STFLG_FRAGD bit set
+                Verify: after_node.prev_node.status == MMU_STFLG_FRAGD bit set
+
+        X. MMU_CMD_PUSH_BACK
+            Select end_node
+            Do MMU_CMD_PUSH_BACK
+                Verify: next_node = handle of the newly allocated node
+
+        X. MMU_CMD_PUSH_FRONT
+            Do MMU_CMD_PUSH_FRONT
+                Verify: current.root_node == handle of the newly allocated node
+                Verify: current.status == MMU_STFLG_FRAGD bit set
+                Verify: newly allocated node.status == MMU_STFLG_FRAGD bit set
+                Verify: number of nodes in this chain == 5
+
+        X. MMU_CMD_POP_BACK
+            Do MMU_CMD_POP_BACK
+                Verify: number of nodes in this chain == 4
+
+        X. MMU_CMD_POP_FRONT
+            Do MMU_CMD_POP_BACK
+                Verify: number of nodes in this chain == 4
+
+        X. MMU_CMD_LOCK_NODE
+            Do MMU_CMD_LOCK_NODE on chain 2
+                Verify: status == MMU_STFLG_LOCKED bit set
+
+        X. MMU_CMD_UNLOCK_NODE
+            Do MMU_CMD_UNLOCK_NODE on chain 2
+                Verify: status == MMU_STFLG_LOCKED bit cleared
+
+        X. MMU_CMD_DEFRAG
+            Verify _mmu_blocks_fragged == 6 (I think it should be 6 anyway)
+
+        X. MMU_CMD_RESET
+            Verify _mmu_blocks_fragged == 0
+            Verify blocks_free == 0xCCCC
+            Verify blocks_allocated == 0     
+
+        X. MMU_CMD_SIZE
+            do MMU_CMD_SIZE
+                Verify: MMU_CMD_SIZE == MMU_ARG_1
+
+
+
+ToDo:
+
+    Change MMU_ARG_1 to Byte
+    Change MMU_ARG_2 to Byte
+
+    Rename MMU_ARG_1_MSB to MMU_ARG_1
+    Rename MMU_ARG_1_LSB to MMU_ARG_2
+
+    Remove MMU_ARG_1_MSB
+    Remove MMU_ARG_1_LSB
+    Remove MMU_ARG_2_MSB
+    Remove MMU_ARG_2_LSB
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+HARDWARE CONSIDERATIONS:
 
 GPIO Expander Integration:
     Use SPI-compatible GPIO expanders like the MCP23S17:

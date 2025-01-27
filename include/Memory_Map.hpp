@@ -565,22 +565,13 @@ enum MEMMAP
                                       // 
     MMU_ERROR             = 0xFE95,   // (Byte) Memory Management Unit Error Code:     (Read Only)
     MMU_ERR_NONE          = 0x0000,   //    $00 = No Error
-    MMU_ERR_OUTOFMEM      = 0x0001,   //    $01 = Out of Memory Error
-    MMU_ERR_ALLOC         = 0x0002,   //    $02 = Failed to Allocate Memory
-    MMU_ERR_FREE          = 0x0003,   //    $03 = Failed to Deallocate Memory
-    MMU_ERR_PG_FREE       = 0x0004,   //    $04 = Error Deallocating Page
-    MMU_ERR_INVALID       = 0x0005,   //    $05 = Invalid Command
-    MMU_ERR_ARGUMENT      = 0x0006,   //    $06 = Invalid Argument
-    MMU_ERR_HANDLE        = 0x0007,   //    $07 = Invalid Handle
-    MMU_ERR_NODE          = 0x0008,   //    $08 = Invalid Node
-    MMU_ERR_PAGE          = 0x0009,   //    $09 = Invalid Page
-    MMU_ERR_BANK          = 0x000A,   //    $0A = Invalid Bank
-    MMU_ERR_ADDRESS       = 0x000B,   //    $0B = Invalid Address
-    MMU_ERR_OFFSET        = 0x000C,   //    $0C = Invalid Offset
-    MMU_ERR_LENGTH        = 0x000D,   //    $0D = Invalid Length
-    MMU_ERR_INDEX         = 0x000E,   //    $0E = Invalid Index
-    MMU_ERR_UNKNOWN       = 0x000F,   //    $0F = Unknown Error
-    MMU_ERR_SIZE          = 0x0010,   //    $10 = Total Number of MMU Errors
+    MMU_ERR_ALLOC         = 0x0001,   //    $01 = Failed to Allocate Memory
+    MMU_ERR_FREE          = 0x0002,   //    $02 = Failed to Deallocate Memory
+    MMU_ERR_PG_FREE       = 0x0003,   //    $03 = Error Deallocating Page
+    MMU_ERR_INVALID       = 0x0004,   //    $04 = Invalid Command
+    MMU_ERR_HANDLE        = 0x0005,   //    $05 = Invalid Handle
+    MMU_ERR_NODE          = 0x0006,   //    $06 = Invalid Node
+    MMU_ERR_SIZE          = 0x0007,   //    $07 = Total Number of MMU Errors
                                       // 
     MMU_META_HANDLE       = 0xFE96,   // (Word) Handle for the current allocation chain
                                       // 

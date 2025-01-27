@@ -563,22 +563,13 @@ MMU_CMD_SIZE          equ    $0014    ;    $14 = Total Number of MMU Commands
                                       ; 
 MMU_ERROR             equ    $FE95    ; (Byte) Memory Management Unit Error Code:     (Read Only)
 MMU_ERR_NONE          equ    $0000    ;    $00 = No Error
-MMU_ERR_OUTOFMEM      equ    $0001    ;    $01 = Out of Memory Error
-MMU_ERR_ALLOC         equ    $0002    ;    $02 = Failed to Allocate Memory
-MMU_ERR_FREE          equ    $0003    ;    $03 = Failed to Deallocate Memory
-MMU_ERR_PG_FREE       equ    $0004    ;    $04 = Error Deallocating Page
-MMU_ERR_INVALID       equ    $0005    ;    $05 = Invalid Command
-MMU_ERR_ARGUMENT      equ    $0006    ;    $06 = Invalid Argument
-MMU_ERR_HANDLE        equ    $0007    ;    $07 = Invalid Handle
-MMU_ERR_NODE          equ    $0008    ;    $08 = Invalid Node
-MMU_ERR_PAGE          equ    $0009    ;    $09 = Invalid Page
-MMU_ERR_BANK          equ    $000A    ;    $0A = Invalid Bank
-MMU_ERR_ADDRESS       equ    $000B    ;    $0B = Invalid Address
-MMU_ERR_OFFSET        equ    $000C    ;    $0C = Invalid Offset
-MMU_ERR_LENGTH        equ    $000D    ;    $0D = Invalid Length
-MMU_ERR_INDEX         equ    $000E    ;    $0E = Invalid Index
-MMU_ERR_UNKNOWN       equ    $000F    ;    $0F = Unknown Error
-MMU_ERR_SIZE          equ    $0010    ;    $10 = Total Number of MMU Errors
+MMU_ERR_ALLOC         equ    $0001    ;    $01 = Failed to Allocate Memory
+MMU_ERR_FREE          equ    $0002    ;    $02 = Failed to Deallocate Memory
+MMU_ERR_PG_FREE       equ    $0003    ;    $03 = Error Deallocating Page
+MMU_ERR_INVALID       equ    $0004    ;    $04 = Invalid Command
+MMU_ERR_HANDLE        equ    $0005    ;    $05 = Invalid Handle
+MMU_ERR_NODE          equ    $0006    ;    $06 = Invalid Node
+MMU_ERR_SIZE          equ    $0007    ;    $07 = Total Number of MMU Errors
                                       ; 
 MMU_META_HANDLE       equ    $FE96    ; (Word) Handle for the current allocation chain
                                       ; 

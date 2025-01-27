@@ -587,22 +587,13 @@ FE94                  MMU_COMMAND           equ    $FE94    ; (Byte) Memory Mana
                                                             ; 
 FE95                  MMU_ERROR             equ    $FE95    ; (Byte) Memory Management Unit Error Code:     (Read Only)
 0000                  MMU_ERR_NONE          equ    $0000    ;    $00 = No Error
-0001                  MMU_ERR_OUTOFMEM      equ    $0001    ;    $01 = Out of Memory Error
-0002                  MMU_ERR_ALLOC         equ    $0002    ;    $02 = Failed to Allocate Memory
-0003                  MMU_ERR_FREE          equ    $0003    ;    $03 = Failed to Deallocate Memory
-0004                  MMU_ERR_PG_FREE       equ    $0004    ;    $04 = Error Deallocating Page
-0005                  MMU_ERR_INVALID       equ    $0005    ;    $05 = Invalid Command
-0006                  MMU_ERR_ARGUMENT      equ    $0006    ;    $06 = Invalid Argument
-0007                  MMU_ERR_HANDLE        equ    $0007    ;    $07 = Invalid Handle
-0008                  MMU_ERR_NODE          equ    $0008    ;    $08 = Invalid Node
-0009                  MMU_ERR_PAGE          equ    $0009    ;    $09 = Invalid Page
-000A                  MMU_ERR_BANK          equ    $000A    ;    $0A = Invalid Bank
-000B                  MMU_ERR_ADDRESS       equ    $000B    ;    $0B = Invalid Address
-000C                  MMU_ERR_OFFSET        equ    $000C    ;    $0C = Invalid Offset
-000D                  MMU_ERR_LENGTH        equ    $000D    ;    $0D = Invalid Length
-000E                  MMU_ERR_INDEX         equ    $000E    ;    $0E = Invalid Index
-000F                  MMU_ERR_UNKNOWN       equ    $000F    ;    $0F = Unknown Error
-0010                  MMU_ERR_SIZE          equ    $0010    ;    $10 = Total Number of MMU Errors
+0001                  MMU_ERR_ALLOC         equ    $0001    ;    $01 = Failed to Allocate Memory
+0002                  MMU_ERR_FREE          equ    $0002    ;    $02 = Failed to Deallocate Memory
+0003                  MMU_ERR_PG_FREE       equ    $0003    ;    $03 = Error Deallocating Page
+0004                  MMU_ERR_INVALID       equ    $0004    ;    $04 = Invalid Command
+0005                  MMU_ERR_HANDLE        equ    $0005    ;    $05 = Invalid Handle
+0006                  MMU_ERR_NODE          equ    $0006    ;    $06 = Invalid Node
+0007                  MMU_ERR_SIZE          equ    $0007    ;    $07 = Total Number of MMU Errors
                                                             ; 
 FE96                  MMU_META_HANDLE       equ    $FE96    ; (Word) Handle for the current allocation chain
                                                             ; 
