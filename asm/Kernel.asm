@@ -13,7 +13,7 @@
                 INCLUDE "Kernel_Header.asm"
 
                 org 	KERNEL_START
-KRNL_START	jmp     KRNL_BEGIN
+KRNL_START	    jmp     KRNL_BEGIN
 
 ; Notes: 
 ;	fcc 	stores raw character string with no default termination
@@ -171,85 +171,71 @@ RESET_start     jmp     RESET_start     ; RESET Implementation
 ; *                                                                             *
 ; *******************************************************************************
 KRNL_BEGIN	; common start up code
-                ldd	    SOFT_RESET      ; load the soft reset vector
-                cmpd    #0	            ; has it already been initialized?
-                beq	    KRNL_COLD       ; no? Well then, do a cold start
-                jmp	    [SOFT_RESET]    ; yes? Follow the warm reset vector	
+                ldd	SOFT_RESET      ; load the soft reset vector
+                cmpd    #0              ; has it already been initialized?
+                beq	KRNL_COLD       ; no? Well then, do a cold start
+                jmp	[SOFT_RESET]    ; yes? Follow the warm reset vector	
                 ; ...		
 KRNL_COLD	; cold reset
-                ldx	    #KRNL_HARD_VECT         ; start of the hardcoded CPU vectors
-                ldu	    #SOFT_VECTORS_DEVICE	; start of the software vectors
-1		        ldd	    ,x++                    ; copy from hardcoded CPU vectors
-                std	    ,u++                    ; copy to the software vectors
+                ldx     #KRNL_HARD_VECT         ; start of the hardcoded CPU vectors
+                ldu     #SOFT_VECTORS_DEVICE	; start of the software vectors
+1		ldd     ,x++                    ; copy from hardcoded CPU vectors
+                std     ,u++                    ; copy to the software vectors
                 cmpx    #KRNL_HARD_VECT_END     ; at the end yet?
-                blt	    1b                      ; nope, keep going
-                ldd	    #KRNL_WARM              ; fetch the warm reboot vector
-                std	    SOFT_RESET              ; ... and store it appropriately
+                blt     1b                      ; nope, keep going
+                ldd     #KRNL_WARM              ; fetch the warm reboot vector
+                std     SOFT_RESET              ; ... and store it appropriately
                 ; CPU clock speed       
                 lda     #$0f	                ; set the CPU clock speed
-                sta     SYS_STATE	            ;	 to max
+                sta     SYS_STATE	        ;	 to max
                 ; ...		
-                        ; clear out system memory
-                         ldx	    #SYSTEM_MEMORY_DEVICE   ; start of system memory
-                        ldd	    #$0000              ; clear out D
-1		        stx	    VIDEO_START			; cycle first character to show progress
-                        std	    ,x++                ; clear out the next word of system memory
-                        cmpx	#USER_RAM_TOP       ; at the end yet?
-                        bne	    1b                  ; nope, keep going
-                                ; initialize the system	
-                                ldx		#SYSTEM_DATA_START
-                                ldy		#$0010
-1				lda		,x+
-                                sta		,y+
-                                cmpx	#SYSTEM_DATA_END
-                                blt		1b
-                                ; CPU clock speed
-                                lda		#$0a				; set the default CPU clock speed
-                                sta		SYS_STATE			;	to 900 Khz.
+                ; clear out system memory
+                ldx     #SYSTEM_MEMORY_DEVICE   ; start of system memory
+                ldd     #$0000                  ; clear out D
+1		stx     VIDEO_START		; cycle first character to show progress
+                std     ,x++                    ; clear out the next word of system memory
+                cmpx    #USER_RAM_TOP           ; at the end yet?
+                bne     1b                      ; nope, keep going
+                ; initialize the system	
+                ldx     #SYSTEM_DATA_START
+                ldy     #$0010
+1		lda     ,x+
+                sta     ,y+
+                cmpx    #SYSTEM_DATA_END
+                blt     1b
+                ; CPU clock speed
+                lda     #$0a            ; set the default CPU clock speed
+                sta     SYS_STATE       ;    to 900 Khz.
 
                 ; ...		
-KRNL_WARM	    ; warm reboot
-                        lds	    #SSTACK_TOP         ; give the stack a home
-                        lda	    #$4B	            ; $4B = green on dk.green
-                        sta	    _ATTRIB             ; set the default text color attribute
+KRNL_WARM	; warm reboot
+                lds     #SSTACK_TOP     ; give the stack a home
+                lda     #$4B	        ; $4B = green on dk.green
+                sta     _ATTRIB         ; set the default text color attribute
                 ; ...		
-                        * ; set default video
-                        * lda	    #%11110001          ; (bit 7)   Extended Bitmap, 
-                *                             ; (bit 5-6) 256-color, 
-                *                             ; (bit 4)   Extended Display Enabled, 
-                *                             ; (bit 3)   Emulation in Windowed Mode, 
-                *                             ; (bit 2)   Vsync Disabled, 
-                *                             ; (bit 1)   Presentation (Letterbox)                                            
-                *                             ; (bit 0)   Standard Display Enabled
-                        * ldb	    #%01100000          ; (bit 7)   Standard Text Display
-                *                             ; (bit 5-6) Color Mode (11=256-Color) 
-                *                             ; (bit 0-4) Video Mode 0 (40x25 / 320x200)
-                        * std	    GPU_OPTIONS         ; write to the GPU_OPTIONS and GPU_MODE
-                *                             ; ... registers to set the video mode                
-                ; ...		
-                        ; set up the initial display
-                        sys	    CALL_CLS           ; Clear the Text Screen
-                ldx     #KRNL_PROMPT0       ; Point X to the Kernel Version Text
-                sys     CALL_LINEOUT       ; Display the Text
-                ldx     #KRNL_PROMPT1       ; Point X to the Compilation Text
-                sys     CALL_LINEOUT       ; Display the Text
-                lda	    #FC_COMPDATE	    ; command to fetch the compilation date
-                sta	    FIO_COMMAND	        ; issue the command to the FileIO device
-1               lda	    FIO_PATH_DATA	    ; load a character from the response data
-                beq	    2f              	; if we've received a NULL, stop looping
-                sys     CALL_CHROUT        ; output the retrieved character to the console
-                bra     1b                  ; continue looping while there is still data
-2               lda     #$0a                ; line feed character
-                sys     CALL_CHROUT        ; send the line feed to the console                
-                ldx	    #KRNL_PROMPT2	    ; point to the third prompt line
-                sys	    CALL_LINEOUT	    ; output it to the console
-                ldx	    #KRNL_PROMPT3	    ; point to the fourth prompt line
-                sys	    CALL_LINEOUT	    ; output it to the console
+                ; set up the initial display
+                sys     CALL_CLS        ; Clear the Text Screen
+                ldx     #KRNL_PROMPT0   ; Point X to the Kernel Version Text
+                sys     CALL_LINEOUT    ; Display the Text
+                ldx     #KRNL_PROMPT1   ; Point X to the Compilation Text
+                sys     CALL_LINEOUT    ; Display the Text
+                lda     #FC_COMPDATE    ; command to fetch the compilation date
+                sta     FIO_COMMAND     ; issue the command to the FileIO device
+1               lda     FIO_PATH_DATA   ; load a character from the response data
+                beq     2f             	; if we've received a NULL, stop looping
+                sys     CALL_CHROUT     ; output the retrieved character to the console
+                bra     1b              ; continue looping while there is still data
+2               lda     #$0a            ; line feed character
+                sys     CALL_CHROUT     ; send the line feed to the console                
+                ldx     #KRNL_PROMPT2   ; point to the third prompt line
+                sys     CALL_LINEOUT    ; output it to the console
+                ldx     #KRNL_PROMPT3   ; point to the fourth prompt line
+                sys     CALL_LINEOUT    ; output it to the console
                 ; ...		
                 ; enable the mouse cursor
-                lda     CSR_FLAGS           ; load the mouse cursor flags
-                ora     #%1000'0000         ; set the enable bit
-                sta     CSR_FLAGS           ; update the cursor flags
+                lda     CSR_FLAGS       ; load the mouse cursor flags
+                ora     #%1000'0000     ; set the enable bit
+                sta     CSR_FLAGS       ; update the cursor flags
             
 ; *****************************************************************************
 ; * THE MAIN COMMAND LOOP                                                     *
@@ -260,18 +246,18 @@ KRNL_WARM	    ; warm reboot
 ; *     3) Dispatches the Operating System Commands                           *
 ; *                                                                           *
 ; *****************************************************************************
-KRNL_MAIN_LOOP	ldb	    _ATTRIB             ; fetch the current color attribute
-                        ldx	    #READY_PROMPT	    ; the ready prompt
-                sys     CALL_LINEOUT        ; output to the console
+KRNL_MAIN_LOOP	ldb     _ATTRIB         ; fetch the current color attribute
+                ldx     #READY_PROMPT   ; the ready prompt
+                sys     CALL_LINEOUT    ; output to the console
 
-                lda	    #$7F		        ; Initialize the line editor
-                sta	    EDT_BFR_LEN	        ; allow for the full sized buffer
-                clr	    EDT_BFR_CSR	        ; set the buffer cursor to the start
-                clr	    EDT_BUFFER	        	
+                lda     #$7F            ; Initialize the line editor
+                sta     EDT_BFR_LEN     ; allow for the full sized buffer
+                clr     EDT_BFR_CSR     ; set the buffer cursor to the start
+                clr     EDT_BUFFER	        	
 
-                ldx	    #EDT_BUFFER	        ; point to the edit buffer
-k_main_clr	    clr	    ,x+		            ; clear an entry and advance to next
-                        cmpx	#KEY_END	        ; are we at the end of the buffer?
+                ldx     #EDT_BUFFER     ; point to the edit buffer
+k_main_clr      clr     ,x+             ; clear an entry and advance to next
+                cmpx    #KEY_END        ; are we at the end of the buffer?
                         blt	    k_main_clr	        ;   not yet, continue looping
 
 k_main_0	    jsr	    KRNL_LINEEDIT	    ; run the command line editor
