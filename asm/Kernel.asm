@@ -1097,35 +1097,35 @@ STUB_D_TO_RAWR  pshs    CC              ; save the used registers onto the stack
 ; *                                                                           *
 ; * EXIT CONDITIONS:	    All registers preserved                           *
 ; *****************************************************************************
-SYS_D_TO_INTA	jsr		KRNL_D_TO_INTA	; call the kernel D_TO_INTA handler
-                                rti						; return from the interrupt
-                                ; ...
-KRNL_D_TO_INTA	jmp		[VEC_D_TO_INTA]	; proceed through the software vector
-STUB_D_TO_INTA	pshs	CC				; save the used registers onto the stack
-                                clr		MATH_ACA_INT+0	; clear unneeded byte
-                                clr		MATH_ACA_INT+1	; clear unneeded byte
-                                std		MATH_ACA_INT+2	; store D in the ACA integer register
-                                puls	CC,PC			; cleanup saved registers and return
+SYS_D_TO_INTA   jsr     KRNL_D_TO_INTA  ; call the kernel D_TO_INTA handler
+                rti                     ; return from the interrupt
+                ; ...
+KRNL_D_TO_INTA  jmp     [VEC_D_TO_INTA] ; proceed through the software vector
+STUB_D_TO_INTA  pshs    CC              ; save the used registers onto the stack
+                clr     MATH_ACA_INT+0  ; clear unneeded byte
+                clr     MATH_ACA_INT+1  ; clear unneeded byte
+                std     MATH_ACA_INT+2  ; store D in the ACA integer register
+                puls    CC,PC           ; cleanup saved registers and return
 
-SYS_D_TO_INTB	jsr		KRNL_D_TO_INTB	; call the kernel D_TO_INTB handler
-                                rti						; return from the interrupt
-                                ; ...		
-KRNL_D_TO_INTB	jmp		[VEC_D_TO_INTB]	; proceed through the software vector
-STUB_D_TO_INTB	pshs	CC				; save the used registers onto the stack
-                                clr		MATH_ACB_INT+0	; clear unneeded byte
-                                clr		MATH_ACB_INT+1	; clear unneeded byte
-                                std		MATH_ACB_INT+2	; store D in the ACB integer register
-                                puls	CC,PC			; cleanup saved registers and return
+SYS_D_TO_INTB   jsr     KRNL_D_TO_INTB  ; call the kernel D_TO_INTB handler
+                rti                     ; return from the interrupt
+                ; ...		
+KRNL_D_TO_INTB  jmp     [VEC_D_TO_INTB] ; proceed through the software vector
+STUB_D_TO_INTB  pshs    CC              ; save the used registers onto the stack
+                clr     MATH_ACB_INT+0  ; clear unneeded byte
+                clr     MATH_ACB_INT+1  ; clear unneeded byte
+                std     MATH_ACB_INT+2  ; store D in the ACB integer register
+                puls    CC,PC           ; cleanup saved registers and return
 
-SYS_D_TO_INTR	jsr		KRNL_D_TO_INTR	; call the kernel D_TO_INTR handler
-                                rti						; return from the interrupt
-                                ; ...
-KRNL_D_TO_INTR	jmp		[VEC_D_TO_INTR]	; proceed through the software vector
-STUB_D_TO_INTR	pshs	CC				; save the used registers onto the stack
-                                clr		MATH_ACR_INT+0	; clear unneeded byte
-                                clr		MATH_ACR_INT+1	; clear unneeded byte
-                                std		MATH_ACR_INT+2	; store D in the ACR integer register
-                                puls	CC,PC			; cleanup saved registers and return
+SYS_D_TO_INTR   jsr     KRNL_D_TO_INTR  ; call the kernel D_TO_INTR handler
+                rti                     ; return from the interrupt
+                ; ...
+KRNL_D_TO_INTR  jmp     [VEC_D_TO_INTR] ; proceed through the software vector
+STUB_D_TO_INTR  pshs    CC              ; save the used registers onto the stack
+                clr     MATH_ACR_INT+0  ; clear unneeded byte
+                clr     MATH_ACR_INT+1  ; clear unneeded byte
+                std     MATH_ACR_INT+2  ; store D in the ACR integer register
+                puls    CC,PC           ; cleanup saved registers and return
 
 ; *******************************************************************************
 ; * KRNL_RAW(A, B, or R)_TO_D                                                  	*

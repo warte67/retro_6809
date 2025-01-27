@@ -1806,23 +1806,23 @@ F70E  3585            K_CPROC_DONE    puls    B,CC,PC         ; cleanup saved re
                       ; *                     X = the end of the search string(next argument)       *
                       ; *                         All other registers preserved                     *
                       ; *****************************************************************************
-F710  BDF713          SYS_TBLSEARCH   jsr             KRNL_TBLSEARCH  ; call the kernel table search handler
-F713  6E9F0028        KRNL_TBLSEARCH  jmp             [VEC_TBLSEARCH] ; proceed through the software vector
-F717  3465            STUB_TBLSEARCH  pshs    B,Y,U,CC                ; save the used registers onto the stack
-F719  1F13                                            tfr             X,U                             ; save X in U
-F71B  4F                                              clra                                    ; set the return index to 0
-F71C  1F31            K_TBLS_0                tfr             U,X                             ; restore X
-F71E  BDF682                                          jsr     KRNL_CMPSTR             ; compare strings at X and at Y
-F721  270E                                            beq             K_TBLS_DONE             ; found the string in the table         
-F723  4C                                              inca                                    ; increment the index return value
-F724  E6A0            K_TBLS_1                ldb             ,y+                             ; look at the next character in table
-F726  C1FF                                            cmpb    #$ff                    ; is it the $ff terminator?
-F728  2705                                            beq             K_TBLS_NOTFOUND ; yes, the entry is not in the table
-F72A  5D                                              tstb                                    ; are we looking at a null character?
-F72B  26F7                                            bne             K_TBLS_1                ; loop until the end of this entry
-F72D  20ED                                            bra             K_TBLS_0                ; look at the next entry
-F72F  86FF            K_TBLS_NOTFOUND lda             #$ff                    ; not found error code
-F731  35E5            K_TBLS_DONE             puls    B,Y,U,CC,PC             ; cleanup saved registers and return
+F710  BDF713          SYS_TBLSEARCH   jsr     KRNL_TBLSEARCH  ; call the kernel table search handler
+F713  6E9F0028        KRNL_TBLSEARCH  jmp     [VEC_TBLSEARCH] ; proceed through the software vector
+F717  3465            STUB_TBLSEARCH  pshs    B,Y,U,CC        ; save the used registers onto the stack
+F719  1F13                            tfr     X,U             ; save X in U
+F71B  4F                              clra                    ; set the return index to 0
+F71C  1F31            K_TBLS_0        tfr     U,X             ; restore X
+F71E  BDF682                          jsr     KRNL_CMPSTR     ; compare strings at X and at Y
+F721  270E                            beq     K_TBLS_DONE     ; found the string in the table         
+F723  4C                              inca                    ; increment the index return value
+F724  E6A0            K_TBLS_1        ldb     ,y+             ; look at the next character in table
+F726  C1FF                            cmpb    #$ff            ; is it the $ff terminator?
+F728  2705                            beq     K_TBLS_NOTFOUND ; yes, the entry is not in the table
+F72A  5D                              tstb                    ; are we looking at a null character?
+F72B  26F7                            bne     K_TBLS_1        ; loop until the end of this entry
+F72D  20ED                            bra     K_TBLS_0        ; look at the next entry
+F72F  86FF            K_TBLS_NOTFOUND lda     #$ff            ; not found error code
+F731  35E5            K_TBLS_DONE     puls    B,Y,U,CC,PC     ; cleanup saved registers and return
                       
                       
                       ; *****************************************************************************
@@ -1834,54 +1834,55 @@ F731  35E5            K_TBLS_DONE             puls    B,Y,U,CC,PC             ; 
                       ; *                                                                           *
                       ; * EXIT CONDITIONS:        All registers preserved                           *
                       ; *****************************************************************************
-F733  BDF737          SYS_CPY_DWORD   jsr             KRNL_CPY_DWORD  ; call the kernel copy dword handler
-F736  3B                                              rti                                             ; return from the interrupt
-                                                      ; ...
-F737  6E9F002A        KRNL_CPY_DWORD  jmp             [VEC_CPY_DWORD] ; proceed through the software vector
-F73B  3407            STUB_CPY_DWORD  pshs    D,CC                    ; save the used registers onto the stack
-F73D  EC84                                            ldd             ,x                              ; load the most-significant 16-bit word
-F73F  EDA4                                            std             ,y                              ; save the most-significant 16-bit word
-F741  EC02                                            ldd             2,x                             ; load the least-significant 16-bit word
-F743  ED22                                            std             2,y                             ; save the least-significant 16-bit word
-F745  3587                                            puls    D,CC,PC                 ; cleanup saved registers and return
+F733  BDF737          SYS_CPY_DWORD   jsr     KRNL_CPY_DWORD  ; call the kernel copy dword handler
+F736  3B                              rti                     ; return from the interrupt
+                                      ; ...
+F737  6E9F002A        KRNL_CPY_DWORD  jmp     [VEC_CPY_DWORD] ; proceed through the software vector
+F73B  3407            STUB_CPY_DWORD  pshs    D,CC            ; save the used registers onto the stack
+F73D  EC84                            ldd     ,x              ; load the most-significant 16-bit word
+F73F  EDA4                            std     ,y              ; save the most-significant 16-bit word
+F741  EC02                            ldd     2,x             ; load the least-significant 16-bit word
+F743  ED22                            std     2,y             ; save the least-significant 16-bit word
+F745  3587                            puls    D,CC,PC         ; cleanup saved registers and return
                       
                       ; *******************************************************************************
-                      ; * KRNL_D_TO_RAW(A, B, or R)                                                           *
+                      ; * KRNL_D_TO_RAW(A, B, or R)                                                   *
                       ; *     Write the D register to one of the raw float registers                  *
                       ; *                                                                             *
                       ; * ENTRY REQUIREMENTS: D = 16-bit value to be written                          *
                       ; *                                                                             *
                       ; * EXIT CONDITIONS:        All registers preserved                             *
                       ; *******************************************************************************
-F747  BDF74B          SYS_D_TO_RAWA   jsr             KRNL_D_TO_RAWA  ; call the kernel D_TO_RAWA handler
-F74A  3B                                              rti                                             ; return from the interrupt
-                                                      ; ...
-F74B  6E9F002C        KRNL_D_TO_RAWA  jmp             [VEC_D_TO_RAWA] ; proceed through the software vector
-F74F  3401            STUB_D_TO_RAWA  pshs    CC                              ; save the used registers onto the stack
-F751  7FFE69                                          clr             MATH_ACA_RAW+0  ; clear unneeded byte
-F754  7FFE6A                                          clr             MATH_ACA_RAW+1  ; clear unneeded byte
-F757  FDFE6B                                          std             MATH_ACA_RAW+2  ; store D in the ACA raw float register
-F75A  3581                                            puls    CC,PC                   ; cleanup saved registers and return
+F747  BDF74B          SYS_D_TO_RAWA   jsr     KRNL_D_TO_RAWA  ; call the kernel D_TO_RAWA handler
+F74A  3B                              rti                     ; return from the interrupt
+                                      ; ...
+F74B  6E9F002C        KRNL_D_TO_RAWA  jmp     [VEC_D_TO_RAWA] ; proceed through the software vector
+F74F  3401            STUB_D_TO_RAWA  pshs    CC              ; save the used registers onto the stack
+F751  7FFE69                          clr     MATH_ACA_RAW+0  ; clear unneeded byte
+F754  7FFE6A                          clr     MATH_ACA_RAW+1  ; clear unneeded byte
+F757  FDFE6B                          std     MATH_ACA_RAW+2  ; store D in the ACA raw float register
+F75A  3581                            puls    CC,PC           ; cleanup saved registers and return
                                       
-F75C  BDF760          SYS_D_TO_RAWB   jsr             KRNL_D_TO_RAWB  ; call the kernel D_TO_RAWB handler
-F75F  3B                                              rti                                             ; return from the interrupt
-                                                      ; ...
-F760  6E9F002E        KRNL_D_TO_RAWB  jmp             [VEC_D_TO_RAWB] ; proceed through the software vector
-F764  3401            STUB_D_TO_RAWB  pshs    CC                              ; save the used registers onto the stack
-F766  7FFE73                                          clr             MATH_ACB_RAW+0  ; clear unneeded byte
-F769  7FFE74                                          clr             MATH_ACB_RAW+1  ; clear unneeded byte
-F76C  FDFE75                                          std             MATH_ACB_RAW+2  ; store D in the ACB raw float register
-F76F  3581                                            puls    CC,PC                   ; cleanup saved registers and return
+F75C  BDF760          SYS_D_TO_RAWB   jsr     KRNL_D_TO_RAWB  ; call the kernel D_TO_RAWB handler
+F75F  3B                              rti                     ; return from the interrupt
+                                      ; ...
+F760  6E9F002E        KRNL_D_TO_RAWB  jmp     [VEC_D_TO_RAWB] ; proceed through the software vector
+F764  3401            STUB_D_TO_RAWB  pshs    CC              ; save the used registers onto the stack
+F766  7FFE73                          clr     MATH_ACB_RAW+0  ; clear unneeded byte
+F769  7FFE74                          clr     MATH_ACB_RAW+1  ; clear unneeded byte
+F76C  FDFE75                          std     MATH_ACB_RAW+2  ; store D in the ACB raw float register
+F76F  3581                            puls    CC,PC           ; cleanup saved registers and return
                       
-F771  BDF775          SYS_D_TO_RAWR   jsr             KRNL_D_TO_RAWR  ; call the kernel D_TO_RAWR handler
-F774  3B                                              rti                                             ; return from the interrupt
-                                                      ; ...
-F775  6E9F0030        KRNL_D_TO_RAWR  jmp             [VEC_D_TO_RAWR] ; proceed through the software vector
-F779  3401            STUB_D_TO_RAWR  pshs    CC                              ; save the used registers onto the stack
-F77B  7FFE7D                                          clr             MATH_ACR_RAW+0  ; clear unneeded byte
-F77E  7FFE7E                                          clr             MATH_ACR_RAW+1  ; clear unneeded byte
-F781  FDFE7F                                          std             MATH_ACR_RAW+2  ; store D in the ACR raw float register
-F784  3581                                            puls    CC,PC                   ; cleanup saved registers and return
+F771  BDF775          SYS_D_TO_RAWR   jsr     KRNL_D_TO_RAWR  ; call the kernel D_TO_RAWR handler
+F774  3B                              rti                     ; return from the interrupt
+                                      ; ...
+F775  6E9F0030        KRNL_D_TO_RAWR  jmp     [VEC_D_TO_RAWR] ; proceed through the software vector
+F779  3401            STUB_D_TO_RAWR  pshs    CC              ; save the used registers onto the stack
+F77B  7FFE7D                          clr     MATH_ACR_RAW+0  ; clear unneeded byte
+F77E  7FFE7E                          clr     MATH_ACR_RAW+1  ; clear unneeded byte
+F781  FDFE7F                          std     MATH_ACR_RAW+2  ; store D in the ACR raw float register
+F784  3581                            puls    CC,PC           ; cleanup saved registers and return
+                      
                       
                       ; *****************************************************************************
                       ; * KRNL_D_TO_INT(A, B, or R)                                                 *
@@ -1891,35 +1892,35 @@ F784  3581                                            puls    CC,PC             
                       ; *                                                                           *
                       ; * EXIT CONDITIONS:        All registers preserved                           *
                       ; *****************************************************************************
-F786  BDF78A          SYS_D_TO_INTA   jsr             KRNL_D_TO_INTA  ; call the kernel D_TO_INTA handler
-F789  3B                                              rti                                             ; return from the interrupt
-                                                      ; ...
-F78A  6E9F0032        KRNL_D_TO_INTA  jmp             [VEC_D_TO_INTA] ; proceed through the software vector
-F78E  3401            STUB_D_TO_INTA  pshs    CC                              ; save the used registers onto the stack
-F790  7FFE6D                                          clr             MATH_ACA_INT+0  ; clear unneeded byte
-F793  7FFE6E                                          clr             MATH_ACA_INT+1  ; clear unneeded byte
-F796  FDFE6F                                          std             MATH_ACA_INT+2  ; store D in the ACA integer register
-F799  3581                                            puls    CC,PC                   ; cleanup saved registers and return
+F786  BDF78A          SYS_D_TO_INTA   jsr     KRNL_D_TO_INTA  ; call the kernel D_TO_INTA handler
+F789  3B                              rti                     ; return from the interrupt
+                                      ; ...
+F78A  6E9F0032        KRNL_D_TO_INTA  jmp     [VEC_D_TO_INTA] ; proceed through the software vector
+F78E  3401            STUB_D_TO_INTA  pshs    CC              ; save the used registers onto the stack
+F790  7FFE6D                          clr     MATH_ACA_INT+0  ; clear unneeded byte
+F793  7FFE6E                          clr     MATH_ACA_INT+1  ; clear unneeded byte
+F796  FDFE6F                          std     MATH_ACA_INT+2  ; store D in the ACA integer register
+F799  3581                            puls    CC,PC           ; cleanup saved registers and return
                       
-F79B  BDF79F          SYS_D_TO_INTB   jsr             KRNL_D_TO_INTB  ; call the kernel D_TO_INTB handler
-F79E  3B                                              rti                                             ; return from the interrupt
-                                                      ; ...           
-F79F  6E9F0034        KRNL_D_TO_INTB  jmp             [VEC_D_TO_INTB] ; proceed through the software vector
-F7A3  3401            STUB_D_TO_INTB  pshs    CC                              ; save the used registers onto the stack
-F7A5  7FFE77                                          clr             MATH_ACB_INT+0  ; clear unneeded byte
-F7A8  7FFE78                                          clr             MATH_ACB_INT+1  ; clear unneeded byte
-F7AB  FDFE79                                          std             MATH_ACB_INT+2  ; store D in the ACB integer register
-F7AE  3581                                            puls    CC,PC                   ; cleanup saved registers and return
+F79B  BDF79F          SYS_D_TO_INTB   jsr     KRNL_D_TO_INTB  ; call the kernel D_TO_INTB handler
+F79E  3B                              rti                     ; return from the interrupt
+                                      ; ...           
+F79F  6E9F0034        KRNL_D_TO_INTB  jmp     [VEC_D_TO_INTB] ; proceed through the software vector
+F7A3  3401            STUB_D_TO_INTB  pshs    CC              ; save the used registers onto the stack
+F7A5  7FFE77                          clr     MATH_ACB_INT+0  ; clear unneeded byte
+F7A8  7FFE78                          clr     MATH_ACB_INT+1  ; clear unneeded byte
+F7AB  FDFE79                          std     MATH_ACB_INT+2  ; store D in the ACB integer register
+F7AE  3581                            puls    CC,PC           ; cleanup saved registers and return
                       
-F7B0  BDF7B4          SYS_D_TO_INTR   jsr             KRNL_D_TO_INTR  ; call the kernel D_TO_INTR handler
-F7B3  3B                                              rti                                             ; return from the interrupt
-                                                      ; ...
-F7B4  6E9F0036        KRNL_D_TO_INTR  jmp             [VEC_D_TO_INTR] ; proceed through the software vector
-F7B8  3401            STUB_D_TO_INTR  pshs    CC                              ; save the used registers onto the stack
-F7BA  7FFE81                                          clr             MATH_ACR_INT+0  ; clear unneeded byte
-F7BD  7FFE82                                          clr             MATH_ACR_INT+1  ; clear unneeded byte
-F7C0  FDFE83                                          std             MATH_ACR_INT+2  ; store D in the ACR integer register
-F7C3  3581                                            puls    CC,PC                   ; cleanup saved registers and return
+F7B0  BDF7B4          SYS_D_TO_INTR   jsr     KRNL_D_TO_INTR  ; call the kernel D_TO_INTR handler
+F7B3  3B                              rti                     ; return from the interrupt
+                                      ; ...
+F7B4  6E9F0036        KRNL_D_TO_INTR  jmp     [VEC_D_TO_INTR] ; proceed through the software vector
+F7B8  3401            STUB_D_TO_INTR  pshs    CC              ; save the used registers onto the stack
+F7BA  7FFE81                          clr     MATH_ACR_INT+0  ; clear unneeded byte
+F7BD  7FFE82                          clr     MATH_ACR_INT+1  ; clear unneeded byte
+F7C0  FDFE83                          std     MATH_ACR_INT+2  ; store D in the ACR integer register
+F7C3  3581                            puls    CC,PC           ; cleanup saved registers and return
                       
                       ; *******************************************************************************
                       ; * KRNL_RAW(A, B, or R)_TO_D                                                   *
