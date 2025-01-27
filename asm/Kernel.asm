@@ -1011,23 +1011,23 @@ K_CPROC_DONE    puls    B,CC,PC         ; cleanup saved registers and return
 ; *                     X = the end of the search string(next argument)       *
 ; *                         All other registers preserved                     *
 ; *****************************************************************************
-SYS_TBLSEARCH	jsr		KRNL_TBLSEARCH	; call the kernel table search handler
-KRNL_TBLSEARCH	jmp		[VEC_TBLSEARCH]	; proceed through the software vector
-STUB_TBLSEARCH	pshs	B,Y,U,CC		; save the used registers onto the stack
-                                tfr		X,U				; save X in U
-                                clra					; set the return index to 0
-K_TBLS_0		tfr		U,X				; restore X
-                                jsr 	KRNL_CMPSTR		; compare strings at X and at Y
-                                beq		K_TBLS_DONE		; found the string in the table		
-                                inca					; increment the index return value
-K_TBLS_1		ldb		,y+				; look at the next character in table
-                                cmpb	#$ff			; is it the $ff terminator?
-                                beq		K_TBLS_NOTFOUND	; yes, the entry is not in the table
-                                tstb					; are we looking at a null character?
-                                bne		K_TBLS_1		; loop until the end of this entry
-                                bra		K_TBLS_0		; look at the next entry
-K_TBLS_NOTFOUND	lda		#$ff			; not found error code
-K_TBLS_DONE		puls	B,Y,U,CC,PC		; cleanup saved registers and return
+SYS_TBLSEARCH   jsr     KRNL_TBLSEARCH  ; call the kernel table search handler
+KRNL_TBLSEARCH  jmp     [VEC_TBLSEARCH] ; proceed through the software vector
+STUB_TBLSEARCH  pshs    B,Y,U,CC        ; save the used registers onto the stack
+                tfr     X,U		; save X in U
+                clra                    ; set the return index to 0
+K_TBLS_0        tfr     U,X             ; restore X
+                jsr     KRNL_CMPSTR     ; compare strings at X and at Y
+                beq     K_TBLS_DONE     ; found the string in the table		
+                inca                    ; increment the index return value
+K_TBLS_1        ldb     ,y+             ; look at the next character in table
+                cmpb    #$ff            ; is it the $ff terminator?
+                beq     K_TBLS_NOTFOUND ; yes, the entry is not in the table
+                tstb                    ; are we looking at a null character?
+                bne     K_TBLS_1        ; loop until the end of this entry
+                bra     K_TBLS_0        ; look at the next entry
+K_TBLS_NOTFOUND lda     #$ff            ; not found error code
+K_TBLS_DONE     puls    B,Y,U,CC,PC     ; cleanup saved registers and return
 
 
 ; *****************************************************************************
@@ -1039,54 +1039,55 @@ K_TBLS_DONE		puls	B,Y,U,CC,PC		; cleanup saved registers and return
 ; *                                                                           *
 ; * EXIT CONDITIONS:	    All registers preserved                           *
 ; *****************************************************************************
-SYS_CPY_DWORD	jsr		KRNL_CPY_DWORD	; call the kernel copy dword handler
-                                rti						; return from the interrupt
-                                ; ...
-KRNL_CPY_DWORD	jmp		[VEC_CPY_DWORD]	; proceed through the software vector
-STUB_CPY_DWORD	pshs 	D,CC			; save the used registers onto the stack
-                                ldd		,x				; load the most-significant 16-bit word
-                                std		,y				; save the most-significant 16-bit word
-                                ldd		2,x				; load the least-significant 16-bit word
-                                std		2,y				; save the least-significant 16-bit word
-                                puls	D,CC,PC			; cleanup saved registers and return
+SYS_CPY_DWORD   jsr     KRNL_CPY_DWORD	; call the kernel copy dword handler
+                rti                     ; return from the interrupt
+                ; ...
+KRNL_CPY_DWORD  jmp     [VEC_CPY_DWORD] ; proceed through the software vector
+STUB_CPY_DWORD  pshs    D,CC            ; save the used registers onto the stack
+                ldd     ,x              ; load the most-significant 16-bit word
+                std     ,y              ; save the most-significant 16-bit word
+                ldd     2,x             ; load the least-significant 16-bit word
+                std     2,y             ; save the least-significant 16-bit word
+                puls    D,CC,PC         ; cleanup saved registers and return
 
 ; *******************************************************************************
-; * KRNL_D_TO_RAW(A, B, or R)                                              		*
+; * KRNL_D_TO_RAW(A, B, or R)                                                   *
 ; * 	Write the D register to one of the raw float registers                	*
 ; *                                                                           	*
 ; * ENTRY REQUIREMENTS: D = 16-bit value to be written                        	*
 ; *                                                                           	*
 ; * EXIT CONDITIONS:	    All registers preserved                           	*
 ; *******************************************************************************
-SYS_D_TO_RAWA	jsr		KRNL_D_TO_RAWA	; call the kernel D_TO_RAWA handler
-                                rti						; return from the interrupt
-                                ; ...
-KRNL_D_TO_RAWA	jmp		[VEC_D_TO_RAWA]	; proceed through the software vector
-STUB_D_TO_RAWA	pshs	CC				; save the used registers onto the stack
-                                clr		MATH_ACA_RAW+0	; clear unneeded byte
-                                clr		MATH_ACA_RAW+1	; clear unneeded byte
-                                std		MATH_ACA_RAW+2	; store D in the ACA raw float register
-                                puls	CC,PC			; cleanup saved registers and return
+SYS_D_TO_RAWA   jsr     KRNL_D_TO_RAWA  ; call the kernel D_TO_RAWA handler
+                rti                     ; return from the interrupt
+                ; ...
+KRNL_D_TO_RAWA  jmp     [VEC_D_TO_RAWA] ; proceed through the software vector
+STUB_D_TO_RAWA  pshs    CC              ; save the used registers onto the stack
+                clr     MATH_ACA_RAW+0  ; clear unneeded byte
+                clr     MATH_ACA_RAW+1  ; clear unneeded byte
+                std     MATH_ACA_RAW+2  ; store D in the ACA raw float register
+                puls    CC,PC           ; cleanup saved registers and return
                 
-SYS_D_TO_RAWB	jsr		KRNL_D_TO_RAWB	; call the kernel D_TO_RAWB handler
-                                rti						; return from the interrupt
-                                ; ...
-KRNL_D_TO_RAWB	jmp		[VEC_D_TO_RAWB]	; proceed through the software vector
-STUB_D_TO_RAWB	pshs	CC				; save the used registers onto the stack
-                                clr		MATH_ACB_RAW+0	; clear unneeded byte
-                                clr		MATH_ACB_RAW+1	; clear unneeded byte
-                                std		MATH_ACB_RAW+2	; store D in the ACB raw float register
-                                puls	CC,PC			; cleanup saved registers and return
+SYS_D_TO_RAWB   jsr     KRNL_D_TO_RAWB  ; call the kernel D_TO_RAWB handler
+                rti                     ; return from the interrupt
+                ; ...
+KRNL_D_TO_RAWB  jmp     [VEC_D_TO_RAWB] ; proceed through the software vector
+STUB_D_TO_RAWB  pshs    CC              ; save the used registers onto the stack
+                clr     MATH_ACB_RAW+0  ; clear unneeded byte
+                clr     MATH_ACB_RAW+1  ; clear unneeded byte
+                std     MATH_ACB_RAW+2  ; store D in the ACB raw float register
+                puls    CC,PC           ; cleanup saved registers and return
 
-SYS_D_TO_RAWR	jsr		KRNL_D_TO_RAWR	; call the kernel D_TO_RAWR handler
-                                rti						; return from the interrupt
-                                ; ...
-KRNL_D_TO_RAWR	jmp		[VEC_D_TO_RAWR]	; proceed through the software vector
-STUB_D_TO_RAWR	pshs	CC				; save the used registers onto the stack
-                                clr		MATH_ACR_RAW+0	; clear unneeded byte
-                                clr		MATH_ACR_RAW+1	; clear unneeded byte
-                                std		MATH_ACR_RAW+2	; store D in the ACR raw float register
-                                puls	CC,PC			; cleanup saved registers and return
+SYS_D_TO_RAWR   jsr     KRNL_D_TO_RAWR  ; call the kernel D_TO_RAWR handler
+                rti                     ; return from the interrupt
+                ; ...
+KRNL_D_TO_RAWR  jmp     [VEC_D_TO_RAWR] ; proceed through the software vector
+STUB_D_TO_RAWR  pshs    CC              ; save the used registers onto the stack
+                clr     MATH_ACR_RAW+0  ; clear unneeded byte
+                clr     MATH_ACR_RAW+1  ; clear unneeded byte
+                std     MATH_ACR_RAW+2  ; store D in the ACR raw float register
+                puls    CC,PC           ; cleanup saved registers and return
+
 
 ; *****************************************************************************
 ; * KRNL_D_TO_INT(A, B, or R)                                                 *
