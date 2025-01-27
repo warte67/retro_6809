@@ -472,7 +472,7 @@ bool Math::_test_accumilators()
         Word math_aca_int = math_acx_int[i];
 
         // Step 1: Clear MATH_ACx_POS to reset position
-        Memory::Write(math_aca_pos, 0);
+        Memory::Write(math_aca_pos, (Byte)0);
 
         // Step 2: Write each character of the string to MATH_ACx_DATA
         for (char c : input_str) {
@@ -480,7 +480,7 @@ bool Math::_test_accumilators()
         }
 
         // Step 3: Write 0 after the last character to indicate null-terminator
-        Memory::Write(math_aca_data, 0);
+        Memory::Write(math_aca_data, (Byte)0);
 
         // Step 4: Verify the output in MATH_ACx_RAW and MATH_ACx_INT
         // The raw value (MATH_ACx_RAW) should represent the string "123.45" as a float in IEEE 754 format
@@ -601,7 +601,7 @@ bool Math::_test_math_operations()
             int fail_count = 0;
             for (int i = 0; i < iterations; i++) 
             {
-                Memory::Write(MAP(MATH_OPERATION), MAP(MOP_RANDOM)); // call the MOP_RANDOM operation
+                Memory::Write(MAP(MATH_OPERATION), (Byte)MAP(MOP_RANDOM)); // call the MOP_RANDOM operation
                 // all three accumilators should now contain random values
                 DWord rnd_aca_raw = Memory::Read_DWord(MAP(MATH_ACA_RAW));
                 DWord rnd_aca_int = Memory::Read_DWord(MAP(MATH_ACA_INT));
@@ -610,7 +610,7 @@ bool Math::_test_math_operations()
                 DWord rnd_acr_raw = Memory::Read_DWord(MAP(MATH_ACR_RAW));
                 DWord rnd_acr_int = Memory::Read_DWord(MAP(MATH_ACR_INT));
 
-                Memory::Write(MAP(MATH_OPERATION), MAP(MOP_RANDOM)); // call the MOP_RANDOM operation, again
+                Memory::Write(MAP(MATH_OPERATION), (Byte)MAP(MOP_RANDOM)); // call the MOP_RANDOM operation, again
                 // all three accumilators should now contain new random values
                 if (rnd_aca_raw == Memory::Read_DWord(MAP(MATH_ACA_RAW)) || 
                     rnd_aca_int == Memory::Read_DWord(MAP(MATH_ACA_INT)) || 
@@ -635,10 +635,10 @@ bool Math::_test_math_operations()
             for (int i = 0; i < iterations; i++) 
             { 
                 // randomize the seed by calling the MOP_RANDOM operation
-                Memory::Write(MAP(MATH_OPERATION), MAP(MOP_RANDOM)); // call the MOP_RANDOM operation
+                Memory::Write(MAP(MATH_OPERATION), (Byte)MAP(MOP_RANDOM)); // call the MOP_RANDOM operation
                 DWord aca_int = Memory::Read_DWord(MAP(MATH_ACA_INT));
                 // MOP_RND_SEED is set to the value in the ACA register (randomized at this point)
-                Memory::Write(MAP(MATH_OPERATION), MAP(MOP_RND_SEED)); // call the MOP_RND_SEED operation
+                Memory::Write(MAP(MATH_OPERATION), (Byte)MAP(MOP_RND_SEED)); // call the MOP_RND_SEED operation
                 // the seed should now have been randomized
                 DWord acr_result = Memory::Read_DWord(MAP(MATH_ACR_INT));
                 if (aca_int == acr_result)
@@ -661,7 +661,7 @@ bool Math::_test_math_operations()
             // Write the operation to MATH_OPERATION
             aca_float = aca_value; // directly assign the internal aca_float
             acb_float = acb_value; // directly assign the internal acb_float
-            Memory::Write(MAP(MATH_OPERATION), mop);           
+            Memory::Write(MAP(MATH_OPERATION), (Byte)mop);           
             // Read the result from MATH_ACR_FLOAT as a boolean
             bool expected_result = op.func(aca_value, acb_value);
             bool actual_result = (bool)acr_float; //(bool)Memory::Read_DWord(MAP(MATH_ACR_INT));

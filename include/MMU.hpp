@@ -243,10 +243,16 @@ private:
     inline static MMU* instance() { return _mmu; }
     
     std::vector<Word> _handles;  // Holds the allocated memory handles (root node indices)
+    
+    // struct PAGED_MEM_NODE {
+    //     Word handle;                            // root hadnle for the allocation chain
+    //     std::array<Word, 256> meta_node = {0};  // index to within the _metadata_pool container
+    // };
+    // std::vector<PAGED_MEM_NODE> _paged_mem_nodes;
 
 
     struct METADATA_NODE {
-        Byte reserved;              // padding to align to 8-bytes (reserved for future use)
+        Byte page_index;            // index into the _paged_mem_nodes container
         Byte status;                // status flags
                                     // bit  0   Is Allocated:     0 = Free,   1 = Allocated
                                     // bit  1   8k Paged Memory:  0 = No,     1 = Yes
@@ -322,11 +328,6 @@ public:
         int bank_size = 8*1024;
         Word old_address=nextAddr;
         this->heading = "Banked Memory Region (" + std::to_string(bank_size/512) + "K)";
-
-        // mapped_register.push_back({ "BANKMEM_ONE", nextAddr, nullptr, nullptr,
-        //     { "Banked Memory Page One (8K)"}}); nextAddr+=bank_size;
-        // mapped_register.push_back({ "BANKMEM_TWO", nextAddr, nullptr, nullptr,
-        //     { "Banked Memory Page Two (8K)"}}); nextAddr+=(bank_size-1);
         
         // BANK ONE:
         mapped_register.push_back({ "BANKMEM_ONE", nextAddr, nullptr, nullptr,

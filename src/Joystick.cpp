@@ -380,8 +380,8 @@ void Joystick::OnInit()
 			return;
 		}
 		// set the default analog dead band (dead zone)
-		Memory::Write(MAP(JOYS_1_DBND), 5, true);
-		Memory::Write(MAP(JOYS_2_DBND), 5, true);
+		Memory::Write(MAP(JOYS_1_DBND), (Byte)5, true);
+		Memory::Write(MAP(JOYS_2_DBND), (Byte)5, true);
 		OpenControllers();
 		bJoystickWasInit = true;
 	}   
@@ -442,13 +442,13 @@ void Joystick::OnUpdate(float fElapsedTime)
     (void)fElapsedTime;     // stop the compiler from complaining about unused parameters
     // update button registers
 	if (state[0].bIsActive)
-		Memory::Write_Word(MAP(JOYS_1_BTN), EncodeButtonRegister(0), true);
+		Memory::Write_Word(MAP(JOYS_1_BTN), (Word)EncodeButtonRegister(0), true);
 	else
-		Memory::Write_Word(MAP(JOYS_1_BTN), 0xffff, true);
+		Memory::Write_Word(MAP(JOYS_1_BTN), (Word)0xffff, true);
 	if (state[1].bIsActive)
-		Memory::Write_Word(MAP(JOYS_2_BTN), EncodeButtonRegister(1), true);
+		Memory::Write_Word(MAP(JOYS_2_BTN), (Word)EncodeButtonRegister(1), true);
 	else
-		Memory::Write_Word(MAP(JOYS_2_BTN), 0xffff, true);
+		Memory::Write_Word(MAP(JOYS_2_BTN), (Word)0xffff, true);
 	EncodeAxesRegister(0);
 	EncodeAxesRegister(1);
 
@@ -573,8 +573,8 @@ void Joystick::CloseControllers()
 {
     // Close Controller 0
 	state[0].bIsActive = false;
-	Memory::Write_Word(MAP(JOYS_1_BTN), 0xffff, true);
-	Memory::Write(MAP(JOYS_1_FLAGS), 0, true);
+	Memory::Write_Word(MAP(JOYS_1_BTN), (Word)0xffff, true);
+	Memory::Write(MAP(JOYS_1_FLAGS), (Byte)0, true);
     if (state[0].gamepad) {
         SDL_CloseGamepad(state[0].gamepad);
         state[0].gamepad = nullptr;
@@ -585,8 +585,8 @@ void Joystick::CloseControllers()
     }
     // Close Controller 1
 	state[1].bIsActive = false;
-	Memory::Write_Word(MAP(JOYS_2_BTN), 0xffff, true);
-	Memory::Write(MAP(JOYS_2_FLAGS), 0, true);
+	Memory::Write_Word(MAP(JOYS_2_BTN), (Word)0xffff, true);
+	Memory::Write(MAP(JOYS_2_FLAGS), (Byte)0, true);
     if (state[1].gamepad) {
         SDL_CloseGamepad(state[1].gamepad);
         state[1].gamepad = nullptr;
@@ -677,21 +677,21 @@ void Joystick::EncodeAxesRegister(int id)
 
 			if (id == 0)
 			{
-				Memory::Write(MAP(JOYS_1_LTX), LTX, true);	
-				Memory::Write(MAP(JOYS_1_LTY), LTY, true);	
-				Memory::Write(MAP(JOYS_1_RTX), RTX, true);	
-				Memory::Write(MAP(JOYS_1_RTY), RTY, true);	
-				Memory::Write(MAP(JOYS_1_Z1 ),  Z1, true);	
-				Memory::Write(MAP(JOYS_1_Z2 ),  Z2, true);	
+				Memory::Write(MAP(JOYS_1_LTX), (Byte)LTX, true);	
+				Memory::Write(MAP(JOYS_1_LTY), (Byte)LTY, true);	
+				Memory::Write(MAP(JOYS_1_RTX), (Byte)RTX, true);	
+				Memory::Write(MAP(JOYS_1_RTY), (Byte)RTY, true);	
+				Memory::Write(MAP(JOYS_1_Z1 ), (Byte) Z1, true);	
+				Memory::Write(MAP(JOYS_1_Z2 ), (Byte) Z2, true);	
 			}
 			else
 			{
-				Memory::Write(MAP(JOYS_2_LTX), LTX, true);	
-				Memory::Write(MAP(JOYS_2_LTY), LTY, true);	
-				Memory::Write(MAP(JOYS_2_RTX), RTX, true);	
-				Memory::Write(MAP(JOYS_2_RTY), RTY, true);	
-				Memory::Write(MAP(JOYS_2_Z1 ),  Z1, true);	
-				Memory::Write(MAP(JOYS_2_Z2 ),  Z2, true);	
+				Memory::Write(MAP(JOYS_2_LTX), (Byte)LTX, true);	
+				Memory::Write(MAP(JOYS_2_LTY), (Byte)LTY, true);	
+				Memory::Write(MAP(JOYS_2_RTX), (Byte)RTX, true);	
+				Memory::Write(MAP(JOYS_2_RTY), (Byte)RTY, true);	
+				Memory::Write(MAP(JOYS_2_Z1 ), (Byte) Z1, true);	
+				Memory::Write(MAP(JOYS_2_Z2 ), (Byte) Z2, true);	
 			}
 		}
 		else  // is Joystick
@@ -725,21 +725,21 @@ void Joystick::EncodeAxesRegister(int id)
 
 			if (id == 0)
 			{
-				Memory::Write(MAP(JOYS_1_LTX), LTX, true);	// bus->debug_write(JOYS_1_LTX, LTX);
-				Memory::Write(MAP(JOYS_1_LTY), LTY, true);	// bus->debug_write(JOYS_1_LTY, LTY);
-				Memory::Write(MAP(JOYS_1_RTX), RTX, true);	// bus->debug_write(JOYS_1_RTX, RTX);
-				Memory::Write(MAP(JOYS_1_RTY), RTY, true);	// bus->debug_write(JOYS_1_RTY, RTY);
-				Memory::Write(MAP(JOYS_1_Z1 ),  Z1, true);	// bus->debug_write(JOYS_1_Z1, Z1);
-				Memory::Write(MAP(JOYS_1_Z2 ),  Z2, true);	// bus->debug_write(JOYS_1_Z2, Z2);
+				Memory::Write(MAP(JOYS_1_LTX), (Byte)LTX, true);	// bus->debug_write(JOYS_1_LTX, LTX);
+				Memory::Write(MAP(JOYS_1_LTY), (Byte)LTY, true);	// bus->debug_write(JOYS_1_LTY, LTY);
+				Memory::Write(MAP(JOYS_1_RTX), (Byte)RTX, true);	// bus->debug_write(JOYS_1_RTX, RTX);
+				Memory::Write(MAP(JOYS_1_RTY), (Byte)RTY, true);	// bus->debug_write(JOYS_1_RTY, RTY);
+				Memory::Write(MAP(JOYS_1_Z1 ), (Byte) Z1, true);	// bus->debug_write(JOYS_1_Z1, Z1);
+				Memory::Write(MAP(JOYS_1_Z2 ), (Byte) Z2, true);	// bus->debug_write(JOYS_1_Z2, Z2);
 			}
 			else
 			{
-				Memory::Write(MAP(JOYS_2_LTX), LTX, true);	// bus->debug_write(JOYS_2_LTX, LTX);
-				Memory::Write(MAP(JOYS_2_LTY), LTY, true);	// bus->debug_write(JOYS_2_LTY, LTY);
-				Memory::Write(MAP(JOYS_2_RTX), RTX, true);	// bus->debug_write(JOYS_2_RTX, RTX);
-				Memory::Write(MAP(JOYS_2_RTY), RTY, true);	// bus->debug_write(JOYS_2_RTY, RTY);
-				Memory::Write(MAP(JOYS_2_Z1 ),  Z1, true);	// bus->debug_write(JOYS_2_Z1, Z1);
-				Memory::Write(MAP(JOYS_2_Z2 ),  Z2, true);	// bus->debug_write(JOYS_2_Z2, Z2);
+				Memory::Write(MAP(JOYS_2_LTX), (Byte)LTX, true);	// bus->debug_write(JOYS_2_LTX, LTX);
+				Memory::Write(MAP(JOYS_2_LTY), (Byte)LTY, true);	// bus->debug_write(JOYS_2_LTY, LTY);
+				Memory::Write(MAP(JOYS_2_RTX), (Byte)RTX, true);	// bus->debug_write(JOYS_2_RTX, RTX);
+				Memory::Write(MAP(JOYS_2_RTY), (Byte)RTY, true);	// bus->debug_write(JOYS_2_RTY, RTY);
+				Memory::Write(MAP(JOYS_2_Z1 ), (Byte) Z1, true);	// bus->debug_write(JOYS_2_Z1, Z1);
+				Memory::Write(MAP(JOYS_2_Z2 ), (Byte) Z2, true);	// bus->debug_write(JOYS_2_Z2, Z2);
 			}
 		}
 	}

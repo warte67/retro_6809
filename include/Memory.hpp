@@ -25,6 +25,10 @@
 #include <mutex>
 
 
+#include <type_traits>
+
+
+
 #include "IDevice.hpp"
 #include "types.hpp"
 #include "clr.hpp"
@@ -59,12 +63,37 @@ public:		// PUBLIC VIRTUAL METHODS
     int OnAttach(int nextAddr) override 		{ if (nextAddr) { return 0; } return 0; } // stop the argument not used warning
 
 public:     // PUBLIC ACCESSORS
+
+
+    // Helper type traits to ensure proper types are passed
+    template<typename T>
+    using is_byte = std::is_same<T, Byte>;
+
+
     static Byte Read(Word address, bool debug = false);
-    static void Write(Word address, Byte data, bool debug = false);
     static Word Read_Word(Word address, bool debug = false);
-    static void Write_Word(Word address, Word data, bool debug = false);     
     static DWord Read_DWord(Word address, bool debug = false);
+
+    static void Write(Word address, Byte data, bool debug = false);
+    static void Write_Word(Word address, Word data, bool debug = false);     
     static void Write_DWord(Word address, DWord data, bool debug = false);   
+
+    // Enforce Compile-time type checking for Write() methods
+    template<typename T>
+    static typename std::enable_if<!std::is_same<T, Byte>::value>::type
+    Write(Word address, T data, bool debug = false) {
+        static_assert(std::is_same<decltype(data), Byte>::value, "Error: data must be of type Byte.");
+    }
+    template<typename T>
+    static typename std::enable_if<!std::is_same<T, Word>::value>::type
+    Write_Word(Word address, T data, bool debug = false) {
+        static_assert(std::is_same<decltype(data), Word>::value, "Error: data must be of type Word.");
+    }
+    template<typename T>
+    static typename std::enable_if<!std::is_same<T, DWord>::value>::type
+    Write_Word(Word address, T data, bool debug = false) {
+        static_assert(std::is_same<decltype(data), DWord>::value, "Error: data must be of type DWord.");
+    }
 
     // Template method for device attachment with flexible parameters
     template<typename T, typename... Args>

@@ -20,6 +20,8 @@
 
 #include <algorithm>
 #include <fstream>
+
+
 #include "Bus.hpp"
 #include "clr.hpp"
 #include "Memory.hpp"
@@ -138,8 +140,6 @@ bool Memory::OnTest()
 //////////////////////
 
 
-
-
 Byte Memory::Read(Word address, bool debug)
 {
     // debug mode just returns raw data
@@ -158,6 +158,7 @@ Byte Memory::Read(Word address, bool debug)
 
     return memory(address);  
 }
+
 
 
 
@@ -207,8 +208,8 @@ void Memory::Write_Word(Word address, Word data, bool debug)
 {    
     Byte msb = (data >> 8) & 0xFF;
     Byte lsb = data & 0xff;
-    Memory::Write(address, msb, debug);
-    Memory::Write(address + 1, lsb, debug);
+    Memory::Write(address, (Byte)msb, debug);
+    Memory::Write(address + 1, (Byte)lsb, debug);
 }
 
 
@@ -226,10 +227,10 @@ DWord Memory::Read_DWord(Word address, bool debug)
 
 void Memory::Write_DWord(Word address, DWord data, bool debug)
 {
-    Memory::Write(address+0, (data>>24) & 0xFF, debug);
-    Memory::Write(address+1, (data>>16) & 0xFF, debug);
-    Memory::Write(address+2, (data>> 8) & 0xFF, debug);
-    Memory::Write(address+3, (data>> 0) & 0xFF, debug);
+    Memory::Write(address+0, (Byte)((data>>24) & 0xFF), debug);
+    Memory::Write(address+1, (Byte)((data>>16) & 0xFF), debug);
+    Memory::Write(address+2, (Byte)((data>> 8) & 0xFF), debug);
+    Memory::Write(address+3, (Byte)((data>> 0) & 0xFF), debug);
 }
 
 

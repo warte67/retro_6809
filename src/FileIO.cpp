@@ -551,7 +551,7 @@ bool FileIO::_bFileExists(const char* file)
         FILE* fp = fopen(file, "rb");
         if (!fp)
         {
-            Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
+            Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_NOTFOUND);
             return false;
         }
         fclose(fp);
@@ -576,7 +576,7 @@ void FileIO::_openFile(const char* mode)
     _vecFileStreams[_fileHandle] = fopen(filePath.c_str(), mode);
     if (!_vecFileStreams[_fileHandle])
     {
-        Memory::Write(MAP(FIO_ERROR), FE_NOTOPEN);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FE_NOTOPEN);
         return;
     } 
 }
@@ -626,7 +626,7 @@ void FileIO::_cmd_close_file()
     Byte handle = Memory::Read(MAP(FIO_HANDLE));
     if (handle==0 || _vecFileStreams[handle] == nullptr)
     {
-        Memory::Write(MAP(FIO_ERROR), FE_NOTOPEN);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FE_NOTOPEN);
         return;
     }
     fclose(_vecFileStreams[handle]);
@@ -646,13 +646,13 @@ void FileIO::_cmd_read_byte()
     Byte handle = Memory::Read(MAP(FIO_HANDLE));
     if (handle == 0 || _vecFileStreams[handle] == nullptr)
     {   
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTOPEN);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_NOTOPEN);
         return;
     }
     Byte data = (Byte)fgetc(_vecFileStreams[handle]);
     if (feof(_vecFileStreams[handle]))
     {
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_OVERRUN);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_OVERRUN);
         // _cmd_close_file();
         return;
     }
@@ -670,7 +670,7 @@ void FileIO::_cmd_write_byte()
     Byte handle = Memory::Read(MAP(FIO_HANDLE));
     if (handle == 0 || _vecFileStreams[handle] == nullptr)
     {
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTOPEN);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_NOTOPEN);
         return;
     }
     Byte data = (Byte)fputc(_io_data, _vecFileStreams[handle]);
@@ -693,7 +693,7 @@ bool FileIO::_cmd_does_file_exist()
     Memory::Write(MAP(FIO_IODATA), (Byte)exists);
     if (!exists)
     {
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_NOTFOUND);
         return false;
     }
     return true;
@@ -774,7 +774,7 @@ void FileIO::_cmd_load_hex_file()
     if (!std::filesystem::exists(f))
     {
         // printf("File '%s' Not Found\n", f.filename().string().c_str());
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_NOTFOUND);
         ifs.close();
         return;
     }
@@ -784,7 +784,7 @@ void FileIO::_cmd_load_hex_file()
     if (strExt != ".hex" && strExt != ".hex ")
     {
         // printf("EXTENSION: %s\n", strExt.c_str());
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_WRONGTYPE);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_WRONGTYPE);
         ifs.close();
         return;
     }
@@ -792,7 +792,7 @@ void FileIO::_cmd_load_hex_file()
     if (!ifs.is_open())
     {
         // printf("UNABLE TO OPEN FILE '%s'\n", f.filename().string().c_str());
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTOPEN);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_NOTOPEN);
         ifs.close();
         return;
     }
@@ -808,7 +808,7 @@ void FileIO::_cmd_load_hex_file()
         if (c != ':')
         {
             ifs.close();
-            Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_WRONGTYPE);
+            Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_WRONGTYPE);
             return;
         }
         n = _fread_hex_byte(ifs);		// byte count for this line
@@ -848,8 +848,8 @@ void FileIO::_cmd_get_file_length()
     std::filesystem::path arg1 = filePath;
     if (!std::filesystem::exists(arg1))
     {
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);  
-        Memory::Write(MAP(MATH_ACR_INT), 0);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_NOTFOUND);  
+        Memory::Write(MAP(MATH_ACR_INT), (Byte)0);
         return;
     }
     Uint32 file_size = std::filesystem::file_size(arg1);
@@ -972,7 +972,7 @@ void FileIO::_cmd_list_directory()
     }
     // clear the FIO_BUFFER
     for (int i = MAP(FIO_BUFFER); i <= MAP(FIO_BFR_END); i++)
-        Memory::Write(i, 0);
+        Memory::Write(i, (Byte)0);
 
     // build the result
     dir_data = seach_folder;
@@ -1003,7 +1003,7 @@ void FileIO::_cmd_change_directory()
     if (std::filesystem::exists(chdir))
         std::filesystem::current_path(chdir);
     else
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_NOTFOUND);
 }
 
 
@@ -1070,18 +1070,18 @@ void FileIO::_cmd_rename_directory()
     // Check if the old path is a valid directory or a file 
     // (which should be a directory in this case)
     if (!std::filesystem::exists(oldPath)) {
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_NOTFOUND);
         return;
     }
     // Ensure that oldPath is a valid directory
     if (!std::filesystem::is_directory(oldPath)) {
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_WRONGTYPE);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_WRONGTYPE);
         return;
     }
     // Check if the new path already exists 
     std::filesystem::path newPath = oldPath.parent_path() / newName;
     if (std::filesystem::exists(newPath)) {
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_WRONGTYPE);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_WRONGTYPE);
         return;
     }
     // Attempt to rename the directory
@@ -1089,7 +1089,7 @@ void FileIO::_cmd_rename_directory()
         std::filesystem::rename(oldPath, newPath);
         filePath = newName.string();  // Update the filePath to reflect the new directory name
     } catch (const std::filesystem::filesystem_error& e) {
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_BAD_CMD);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_BAD_CMD);
     }
 
     // see: std::filesystem::rename() for both rename_directory and rename_file
@@ -1114,19 +1114,19 @@ void FileIO::_cmd_remove_directory()
     const std::filesystem::path dirPath = filePath;
     // Check if the directory exists and is a directory
     if (!std::filesystem::exists(dirPath) || !std::filesystem::is_directory(dirPath)) {
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_NOTFOUND);
         return;
     }
     // Check if the directory is empty
     if (!std::filesystem::is_empty(dirPath)) {
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOT_EMPTY);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_NOT_EMPTY);
         return;
     }
     try {
         std::filesystem::remove(dirPath);
         filePath = "";  // Reset filePath since the directory has been removed
     } catch (const std::filesystem::filesystem_error& e) {
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_BAD_CMD);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_BAD_CMD);
     }  
 
     // see: std::filesystem::remove() for both remove_directory and delete_file
@@ -1150,17 +1150,17 @@ void FileIO::_cmd_delete_file()
 
     std::filesystem::path path = filePath;
     if (!std::filesystem::exists(path)) {
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_NOTFOUND);
         return;
     }
     if (!std::filesystem::is_regular_file(path)) {
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_WRONGTYPE);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_WRONGTYPE);
         return;
     }
     try {
         std::filesystem::remove(path);
     } catch (const std::filesystem::filesystem_error& e) {
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_BAD_CMD);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_BAD_CMD);
     }
 
     // see: std::filesystem::remove() for both remove_directory and delete_file
@@ -1187,18 +1187,18 @@ void FileIO::_cmd_rename_file()
     // Check if the old path is a valid directory or a file 
     // (which should be a directory in this case)
     if (!std::filesystem::exists(oldPath)) {
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_NOTFOUND);
         return;
     }
     // Ensure that oldPath is a valid file
     if (!std::filesystem::is_regular_file(oldPath)) {
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_WRONGTYPE);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_WRONGTYPE);
         return;
     }
     // Check if the new path already exists 
     std::filesystem::path newPath = oldPath.parent_path() / newName;
     if (std::filesystem::exists(newPath)) {
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_WRONGTYPE);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_WRONGTYPE);
         return;
     }
     // Attempt to rename the directory
@@ -1206,7 +1206,7 @@ void FileIO::_cmd_rename_file()
         std::filesystem::rename(oldPath, newPath);
         filePath = newName.string();  // Update the filePath to reflect the new directory name
     } catch (const std::filesystem::filesystem_error& e) {
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_BAD_CMD);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_BAD_CMD);
     }
 
     // see: std::filesystem::rename() for both rename_directory and rename_file
@@ -1232,24 +1232,24 @@ void FileIO::_cmd_copy_file()
     const std::filesystem::path destPath = altFilePath;
     // Check if the source file exists and is a regular file
     if (!std::filesystem::exists(srcPath)) {
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_NOTFOUND);
         return;
     }
     // Ensure that srcPath is a valid file
     if (!std::filesystem::is_regular_file(srcPath)) {
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_WRONGTYPE);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_WRONGTYPE);
         return;
     }
     // Check if the destination path already exists (which would be a file in this case)
     if (std::filesystem::exists(destPath)) {
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_FILE_EXISTS);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_FILE_EXISTS);
         return;
     }
     try {
         std::filesystem::copy(srcPath, destPath);
         filePath = destPath.filename().string();  // Update the filePath to reflect the new destination filename
     } catch (const std::filesystem::filesystem_error& e) {
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_BAD_CMD);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_BAD_CMD);
     }
     // see: std::filesystem::copy() to copy files, folders, and symlinks
     // https://en.cppreference.com/w/cpp/filesystem/copy
@@ -1268,7 +1268,7 @@ void FileIO::_cmd_seek_start()
 
     // Check if a file is currently open for reading/writing using the provided handle index
     if (_fileHandle == 0 || _vecFileStreams[_fileHandle] == nullptr) {
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_NOTFOUND);
         return;
     }
     // Move the file pointer to the end of the file and get its current position using tellg()
@@ -1294,14 +1294,14 @@ void FileIO::_cmd_seek_end()
 
     // Check if a file is currently open for reading/writing using the provided handle index
     if (_fileHandle == 0 || _vecFileStreams[_fileHandle] == nullptr) {
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_NOTFOUND);
         return;
     }
     // Move the file pointer to the end of the file and get its current position using tellg()
     fseek(_vecFileStreams[_fileHandle], 0, SEEK_END);
     // Check if seeking to the end was successful
     if (feof(_vecFileStreams[_fileHandle])) {
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_BADSTREAM);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_BADSTREAM);
         return;
     }
     // Set the seek position
@@ -1326,14 +1326,14 @@ void FileIO::_cmd_set_seek_position()
 
     // Check if a file is currently open for reading/writing using the provided handle index
     if (_fileHandle == 0 || _vecFileStreams[_fileHandle] == nullptr) {
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_NOTFOUND);
         return;
     }
     // Move the file pointer to the end of the file and get its current position using tellg()
     fseek(_vecFileStreams[_fileHandle], _seek_pos, SEEK_SET);
     // Check if seeking was past the end.
     if (feof(_vecFileStreams[_fileHandle])) {
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_BADSTREAM);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_BADSTREAM);
         return;
     }
     // Set the seek position
@@ -1357,14 +1357,14 @@ void FileIO::_cmd_get_seek_position()
 
     // Check if a file is currently open for reading/writing using the provided handle index
     if (_fileHandle == 0 || _vecFileStreams[_fileHandle] == nullptr) {
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_NOTFOUND);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_NOTFOUND);
         return;
     }
     // Get the current position of the file pointer using ftell()
     if (ftell(_vecFileStreams[_fileHandle]) != -1) {
         _seek_pos = ftell(_vecFileStreams[_fileHandle]);
     } else {
-        Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_BADSTREAM);
+        Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_BADSTREAM);
     }
 
     // https://en.cppreference.com/w/cpp/io/c/fgetpos
@@ -1395,10 +1395,10 @@ int FileIO::_find_free_file_slot()
 	// too many file handles?
 	if (found == 0)
 	{
-		Memory::Write(MAP(FIO_ERROR), FILE_ERROR::FE_BADSTREAM);
+		Memory::Write(MAP(FIO_ERROR), (Byte)FILE_ERROR::FE_BADSTREAM);
 		return 0;
 	}
-	Memory::Write(MAP(FIO_HANDLE), found);
+	Memory::Write(MAP(FIO_HANDLE), (Byte)found);
 	return found;
 }
 

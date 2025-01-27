@@ -582,7 +582,8 @@ MMU_ERR_SIZE          equ    $0010    ;    $10 = Total Number of MMU Errors
                                       ; 
 MMU_META_HANDLE       equ    $FE96    ; (Word) Handle for the current allocation chain
                                       ; 
-MMU_META_STATUS       equ    $FE98    ; (Byte) Status Flags:
+MMU_PAGE_INDEX        equ    $FE98    ; (Byte) Page Index: 0xFF if not part of an 8K page
+MMU_META_STATUS       equ    $FE99    ; (Byte) Status Flags:
 MMU_STFLG_ALLOC       equ    $0001    ;    0000'0001: Is Allocated: 0 = Free, 1 = Allocated
 MMU_STFLG_PAGED       equ    $0002    ;    0000'0010: Paged Memory: 0 = No,   1 = Yes
 MMU_STFLG_READONLY    equ    $0004    ;    0000'0100: Memory Type:  0 = RAM,  1 = ROM
@@ -592,18 +593,18 @@ MMU_STFLG_RES_1       equ    $0020    ;    0010'0000:   (reserved)
 MMU_STFLG_RES_2       equ    $0040    ;    0100'0000:   (reserved)
 MMU_STFLG_ERROR       equ    $0080    ;    1000'0000: Error:        0 = No,   1 = Yes
                                       ; 
-MMU_META_DATA         equ    $FE99    ; (32-Bytes) Data Window for the Current Allocation
-MMU_META_ROOT         equ    $FEB9    ; (Word) Root node of the current allocation       (Read Only)
-MMU_META_PREV         equ    $FEBB    ; (Word) Previous node of the current allocation   (Read Only)
-MMU_META_NEXT         equ    $FEBD    ; (Word) Next node of the current allocation       (Read Only)
-MMU_RAW_INDEX         equ    $FEBF    ; (Word) Raw Index of the current memory node  (For Debugging)
+MMU_META_DATA         equ    $FE9A    ; (32-Bytes) Data Window for the Current Allocation
+MMU_META_ROOT         equ    $FEBA    ; (Word) Root node of the current allocation       (Read Only)
+MMU_META_PREV         equ    $FEBC    ; (Word) Previous node of the current allocation   (Read Only)
+MMU_META_NEXT         equ    $FEBE    ; (Word) Next node of the current allocation       (Read Only)
+MMU_RAW_INDEX         equ    $FEC0    ; (Word) Raw Index of the current memory node  (For Debugging)
                                       ; 
-MMU_END               equ    $FEC0    ; End of Banked Memory Register Space
-MMU_TOP               equ    $FEC1    ; Top of Banked Memory Register Space
+MMU_END               equ    $FEC1    ; End of Banked Memory Register Space
+MMU_TOP               equ    $FEC2    ; Top of Banked Memory Register Space
 ; _______________________________________________________________________
 
-HDW_RESERVED_DEVICE   equ    $FEC1    ; START: Reserved Register Space
-HDW_REG_END           equ    $FFF0    ; 303 bytes reserved for future use.
+HDW_RESERVED_DEVICE   equ    $FEC2    ; START: Reserved Register Space
+HDW_REG_END           equ    $FFF0    ; 302 bytes reserved for future use.
 ; _______________________________________________________________________
 
 ROM_VECTS_DEVICE      equ    $FFF0    ; START: Hardware Interrupt Vectors

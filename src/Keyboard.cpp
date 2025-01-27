@@ -626,17 +626,17 @@ void Keyboard::_doEditBuffer(char xkey)
 	}
     // clear the edit buffer
 	editBuffer.at(0) = 0;
-    Memory::Write(MAP(EDT_BUFFER),0, true);
+    Memory::Write(MAP(EDT_BUFFER), (Byte)0, true);
     // write the edit buffer to the memory
 	Word i = 0;
 	for (auto& a : _str_edt_buffer)
     {
-        Memory::Write(MAP(EDT_BUFFER)+i,a, true);
+        Memory::Write(MAP(EDT_BUFFER)+i, (Byte)a, true);
 		editBuffer.at(i++) = a;
     }
     // write the null-terminator
 	editBuffer.at(i) = 0;
-    Memory::Write(MAP(EDT_BUFFER)+i,0, true);
+    Memory::Write(MAP(EDT_BUFFER)+i, (Byte)0, true);
 }
 
 
@@ -652,7 +652,7 @@ Byte Keyboard::charPopQueue() {
 
 	Byte ret = charQueue.front();
 	charQueue.pop();
-	Memory::Write(MAP(CHAR_Q_LEN), charQueue.size(), true);
+	Memory::Write(MAP(CHAR_Q_LEN), (Byte)charQueue.size(), true);
 	return ret;
 }
 

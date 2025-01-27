@@ -584,7 +584,8 @@ enum MEMMAP
                                       // 
     MMU_META_HANDLE       = 0xFE96,   // (Word) Handle for the current allocation chain
                                       // 
-    MMU_META_STATUS       = 0xFE98,   // (Byte) Status Flags:
+    MMU_PAGE_INDEX        = 0xFE98,   // (Byte) Page Index: 0xFF if not part of an 8K page
+    MMU_META_STATUS       = 0xFE99,   // (Byte) Status Flags:
     MMU_STFLG_ALLOC       = 0x0001,   //    0000'0001: Is Allocated: 0 = Free, 1 = Allocated
     MMU_STFLG_PAGED       = 0x0002,   //    0000'0010: Paged Memory: 0 = No,   1 = Yes
     MMU_STFLG_READONLY    = 0x0004,   //    0000'0100: Memory Type:  0 = RAM,  1 = ROM
@@ -594,18 +595,18 @@ enum MEMMAP
     MMU_STFLG_RES_2       = 0x0040,   //    0100'0000:   (reserved)
     MMU_STFLG_ERROR       = 0x0080,   //    1000'0000: Error:        0 = No,   1 = Yes
                                       // 
-    MMU_META_DATA         = 0xFE99,   // (32-Bytes) Data Window for the Current Allocation
-    MMU_META_ROOT         = 0xFEB9,   // (Word) Root node of the current allocation       (Read Only)
-    MMU_META_PREV         = 0xFEBB,   // (Word) Previous node of the current allocation   (Read Only)
-    MMU_META_NEXT         = 0xFEBD,   // (Word) Next node of the current allocation       (Read Only)
-    MMU_RAW_INDEX         = 0xFEBF,   // (Word) Raw Index of the current memory node  (For Debugging)
+    MMU_META_DATA         = 0xFE9A,   // (32-Bytes) Data Window for the Current Allocation
+    MMU_META_ROOT         = 0xFEBA,   // (Word) Root node of the current allocation       (Read Only)
+    MMU_META_PREV         = 0xFEBC,   // (Word) Previous node of the current allocation   (Read Only)
+    MMU_META_NEXT         = 0xFEBE,   // (Word) Next node of the current allocation       (Read Only)
+    MMU_RAW_INDEX         = 0xFEC0,   // (Word) Raw Index of the current memory node  (For Debugging)
                                       // 
-    MMU_END               = 0xFEC0,   // End of Banked Memory Register Space
-    MMU_TOP               = 0xFEC1,   // Top of Banked Memory Register Space
+    MMU_END               = 0xFEC1,   // End of Banked Memory Register Space
+    MMU_TOP               = 0xFEC2,   // Top of Banked Memory Register Space
 // _______________________________________________________________________
 
-    HDW_RESERVED_DEVICE   = 0xFEC1,   // START: Reserved Register Space
-    HDW_REG_END           = 0xFFF0,   // 303 bytes reserved for future use.
+    HDW_RESERVED_DEVICE   = 0xFEC2,   // START: Reserved Register Space
+    HDW_REG_END           = 0xFFF0,   // 302 bytes reserved for future use.
 // _______________________________________________________________________
 
     ROM_VECTS_DEVICE      = 0xFFF0,   // START: Hardware Interrupt Vectors

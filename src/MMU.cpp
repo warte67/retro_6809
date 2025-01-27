@@ -281,6 +281,17 @@ int  MMU::OnAttach(int nextAddr)
 
 
     ////////////////////////////////////////////////
+    // (Byte)  MMU_PAGE_INDEX
+    //      Page Index: 0xFF if not part of an 8K page
+    /////
+    mapped_register.push_back({ "MMU_PAGE_INDEX", nextAddr, 
+        [this](Word) { return _metadata_pool[_mmu_raw_index].page_index; }, 
+        [this](Word, Byte data) { _metadata_pool[_mmu_raw_index].page_index = data; },   
+        { "(Byte) Page Index: 0xFF if not part of an 8K page"} });
+    nextAddr++;
+
+
+    ////////////////////////////////////////////////
     // (Byte) MMU_META_STATUS
     //      Status flags for the current allocation node
     /////
@@ -543,38 +554,37 @@ bool MMU::_test_nop()
 
 
 /**
- * Allocates an 8k memory page.
+ * Allocates an 8KB memory page and updates the metadata.
  * 
- * This function allocates an 8k memory page starting from the bottom
- * of the memory pool and moving towards the top. The allocation is
- * performed based on the status flag template provided in MMU_ARG_1_MSB.
- * The function ensures that bit 1 is always set to indicate a full 8k page.
- * The user can specify the memory type (RAM or ROM) using bit 2 of the
- * status flag. After successfully allocating the memory page, the function
- * returns the mapped command for page allocation (MMU_CMD_PG_ALLOC).
+ * This function allocates a full 8KB memory page starting from the bottom
+ * of the memory pool and moving toward the top. The allocation is based on 
+ * the status flag template provided in `MMU_ARG_1_MSB`, ensuring that bit 1
+ * is set to indicate the allocation of a full 8KB page. The user can specify 
+ * the memory type (RAM or ROM) using bit 2 of the status flag. After successfully 
+ * allocating the page, the function updates the associated metadata and returns 
+ * the command code for page allocation (`MMU_CMD_PG_ALLOC`).
  * 
- * @param (MMU_ARG_1_MSB) status flag template for allocation
- *         relevant bits:
- *              0000'0010: Paged Memory: 0 = No,   1 = Yes (always 1 for this function)
- *              0000'0100: Memory Type:  0 = RAM,  1 = ROM
- *              0001'0000: Locked:       0 = No,   1 = Yes
- *              0010'0000:   (reserved) or User Data
- *              0100'0000:   (reserved) or User Data  
+ * The following relevant bits in the status flag template are considered:
  * 
- * @return The command code for page allocation.
+ *              0000'0010: Paged Memory: 0 = No, 1 = Yes (always 1 for this function)
+ *              0000'0100: Memory Type: 0 = RAM, 1 = ROM
+ *              0001'0000: Locked: 0 = No, 1 = Yes
+ *              0010'0000: Reserved or User Data
+ *              0100'0000: Reserved or User Data  
+ * 
+ * @return The command code for page allocation (`MMU_CMD_PG_ALLOC`).
  */
-
 Byte MMU::do_pg_alloc()
 {
     // Set the status flag to indicate a full 8k page
     Byte status = Memory::Read(MAP(MMU_ARG_1_MSB));
     status &= 0b0110'0110;      // Mask out the error, fragmented, locked, and allocated bits
     status |= MAP(MMU_STFLG_PAGED);  // Set bit 1 to indicate full 8k page
-    Memory::Write(MAP(MMU_ARG_1_MSB), status);
-    Memory::Write(MAP(MMU_ARG_1_LSB), 255); // allocate 256 nodes
+    Memory::Write(MAP(MMU_ARG_1_MSB), (Byte)status);
+    Memory::Write(MAP(MMU_ARG_1_LSB), (Byte)255); // allocate 256 nodes
 
     // Allocate the memory page
-    Memory::Write(MAP(MMU_COMMAND), MAP(MMU_CMD_ALLOC));
+    Memory::Write(MAP(MMU_COMMAND), (Byte)MAP(MMU_CMD_ALLOC));
     Word handle = Memory::Read_Word(MAP(MMU_META_HANDLE));
 
     // Check if the allocation was successful
@@ -609,9 +619,9 @@ bool MMU::_test_pg_alloc()
     }   
 
     // Create a page and check if it was allocated
-    Memory::Write(MAP(MMU_ARG_1_MSB), 0);
-    Memory::Write(MAP(MMU_ARG_1_LSB), 0);
-    Memory::Write(MAP(MMU_COMMAND), MAP(MMU_CMD_PG_ALLOC));
+    Memory::Write(MAP(MMU_ARG_1_MSB), (Byte)0);
+    Memory::Write(MAP(MMU_ARG_1_LSB), (Byte)0);
+    Memory::Write(MAP(MMU_COMMAND), (Byte)MAP(MMU_CMD_PG_ALLOC));
     _test_page_handle = Memory::Read_Word(MAP(MMU_META_HANDLE));
     if (_test_page_handle == MMU_BAD_HANDLE) {
         UnitTest::Log(clr::RED + "Error: Unable to allocate 8KB page!" + clr::RESET);
@@ -685,28 +695,35 @@ bool MMU::_test_pg_alloc()
     return test_results;
 }
 
+
 Byte MMU::do_pg_free()
 {
+    // Read the handle of the node to be freed from memory
     Word handle = Memory::Read_Word(MAP(MMU_META_HANDLE));
-    // is the root node actually allocated and is an 8k page?
+
+    // Check if the root node is allocated and is an 8k page
     if ((_metadata_pool[handle].status & 0x03) == 0x03) {
+        // Perform the actual memory free operation
         do_free();
         return MAP(MMU_CMD_PG_FREE);
     }
     else {
+        // Handle the case where the page cannot be freed (invalid state)
         error(MAP(MMU_ERR_PG_FREE));
         UnitTest::Log(clr::RED + "MMU::do_pg_free() Page Free Failed!" + clr::RESET);
         return MAP(MMU_CMD_PG_FREE);
     }
     return MAP(MMU_CMD_PG_FREE);
 }
+
+
 bool MMU::_test_pg_free()
 {
     bool test_results = true;
 
     // free the test page
     Memory::Write_Word(MAP(MMU_META_HANDLE), _test_page_handle);
-    Memory::Write(MAP(MMU_COMMAND), MAP(MMU_CMD_FREE));
+    Memory::Write(MAP(MMU_COMMAND), (Byte)MAP(MMU_CMD_FREE));
 
     // verify the remaining memory after a single allocation
     if (Memory::Read_Word(MAP(MMU_BLOCKS_FREE)) != 0xCCCC) {
@@ -774,12 +791,12 @@ Byte MMU::do_alloc()
 {
     // Read the status flag and allocation size
     Byte status_flag = Memory::Read(MAP(MMU_ARG_1_MSB)) & 0b0111'0110;  // Mask out the error, fragmented, 
-    Memory::Write(MAP(MMU_ARG_1_MSB), status_flag);                     // and allocated bits.
+    Memory::Write(MAP(MMU_ARG_1_MSB), (Byte)status_flag);                     // and allocated bits.
 
     Word allocation_size = Memory::Read(MAP(MMU_ARG_1_LSB)); // Nodes to allocate
     // Check if full-page allocation is requested
     if (status_flag & MAP(MMU_STFLG_PAGED)) {
-        Memory::Write(MAP(MMU_ARG_1_LSB), 255); // Update allocation size
+        Memory::Write(MAP(MMU_ARG_1_LSB), (Byte)255); // Update allocation size
         allocation_size = 255;
     }
     // Create the root node handle
@@ -837,9 +854,9 @@ bool MMU::_test_alloc()
 
     // test RAM allocation
     // first allocate a single block and verify it
-    Memory::Write(MAP(MMU_ARG_1_MSB), 0);         // status flag
-    Memory::Write(MAP(MMU_ARG_1_LSB), 0x00);                // single 32-byte node
-    Memory::Write(MAP(MMU_COMMAND), MAP(MMU_CMD_ALLOC));    // execute the allocation command
+    Memory::Write(MAP(MMU_ARG_1_MSB), (Byte)0);         // status flag
+    Memory::Write(MAP(MMU_ARG_1_LSB), (Byte)0x00);                // single 32-byte node
+    Memory::Write(MAP(MMU_COMMAND), (Byte)MAP(MMU_CMD_ALLOC));    // execute the allocation command
     _test_rw_handle = Memory::Read_Word(MAP(MMU_META_HANDLE));    // save the handle
     _mmu_raw_index = _test_rw_handle;
     // verify the handle after a single allocation
@@ -889,9 +906,9 @@ bool MMU::_test_alloc()
 
     // test ROM allocation
     // first allocate a single block and verify it
-    Memory::Write(MAP(MMU_ARG_1_MSB), MAP(MMU_STFLG_READONLY));         // status flag
-    Memory::Write(MAP(MMU_ARG_1_LSB), 0x00);                // single 32-byte node
-    Memory::Write(MAP(MMU_COMMAND), MAP(MMU_CMD_ALLOC));    // execute the allocation command
+    Memory::Write(MAP(MMU_ARG_1_MSB), (Byte)MAP(MMU_STFLG_READONLY));         // status flag
+    Memory::Write(MAP(MMU_ARG_1_LSB), (Byte)0x00);                // single 32-byte node
+    Memory::Write(MAP(MMU_COMMAND), (Byte)MAP(MMU_CMD_ALLOC));    // execute the allocation command
     _test_ro_handle = Memory::Read_Word(MAP(MMU_META_HANDLE));    // fetch the handle
     // verify the handle after a single allocation
     if (_test_ro_handle != 0x0001) {
@@ -941,9 +958,9 @@ bool MMU::_test_alloc()
 
     // test LOCKED allocation
     // first allocate a single block and verify it
-    Memory::Write(MAP(MMU_ARG_1_MSB), MAP(MMU_STFLG_LOCKED));         // status flag
-    Memory::Write(MAP(MMU_ARG_1_LSB), 0x00);                // single 32-byte node
-    Memory::Write(MAP(MMU_COMMAND), MAP(MMU_CMD_ALLOC));    // execute the allocation command
+    Memory::Write(MAP(MMU_ARG_1_MSB), (Byte)MAP(MMU_STFLG_LOCKED));         // status flag
+    Memory::Write(MAP(MMU_ARG_1_LSB), (Byte)0x00);                // single 32-byte node
+    Memory::Write(MAP(MMU_COMMAND), (Byte)MAP(MMU_CMD_ALLOC));    // execute the allocation command
     _test_lock_handle = Memory::Read_Word(MAP(MMU_META_HANDLE));    // fetch the handle
     // verify the handle after a single allocation
     if (_test_lock_handle != 0x0002) {
@@ -1064,7 +1081,7 @@ bool MMU::_test_free()
 
     // free the RAM node
     Memory::Write_Word(MAP(MMU_META_HANDLE), _test_rw_handle);
-    Memory::Write(MAP(MMU_COMMAND), MAP(MMU_CMD_FREE));
+    Memory::Write(MAP(MMU_COMMAND), (Byte)MAP(MMU_CMD_FREE));
     if (Memory::Read_Word(MAP(MMU_BLOCKS_FREE)) != 0xCCCA) {
         UnitTest::Log(clr::RED + "(RAM) [MMU_BLOCKS_FREE] MMU_CMD_FREE Command Failed!" + clr::RESET);
         test_results = false;        
@@ -1080,7 +1097,7 @@ bool MMU::_test_free()
 
     // free the ROM node
     Memory::Write_Word(MAP(MMU_META_HANDLE), _test_ro_handle);
-    Memory::Write(MAP(MMU_COMMAND), MAP(MMU_CMD_FREE));
+    Memory::Write(MAP(MMU_COMMAND), (Byte)MAP(MMU_CMD_FREE));
     if (Memory::Read_Word(MAP(MMU_BLOCKS_FREE)) != 0xCCCB) {
         UnitTest::Log(clr::RED + "(RAM) [MMU_BLOCKS_FREE] MMU_CMD_FREE Command Failed!" + clr::RESET);
         test_results = false;        
@@ -1096,7 +1113,7 @@ bool MMU::_test_free()
 
     // free the Locked node
     Memory::Write_Word(MAP(MMU_META_HANDLE), _test_lock_handle);
-    Memory::Write(MAP(MMU_COMMAND), MAP(MMU_CMD_FREE));
+    Memory::Write(MAP(MMU_COMMAND), (Byte)MAP(MMU_CMD_FREE));
     if (Memory::Read_Word(MAP(MMU_BLOCKS_FREE)) != 0xCCCC) {
         UnitTest::Log(clr::RED + "(RAM) [MMU_BLOCKS_FREE] MMU_CMD_FREE Command Failed!" + clr::RESET);
         test_results = false;        
@@ -1322,6 +1339,8 @@ Word MMU::create_handle()
             node.status |= 0x01;  // Mark it as allocated
             node.status &= 0x80;  // Mask out Errors
 
+            node.page_index = 0xff;     // 0xFF = invalid page index
+
             // Update block counters
             _mmu_blocks_free--;           // One less block available
             _mmu_blocks_allocated++;      // One more block allocated
@@ -1454,11 +1473,6 @@ Byte BANKED_MEM::bank_read(Word address)
     return Memory::memory(address); 
 }
 
-
-
-
-
-
 void BANKED_MEM::bank_write(Word address, Byte data)
 {
     MMU* mmu = MMU::instance();
@@ -1510,8 +1524,6 @@ void BANKED_MEM::bank_write(Word address, Byte data)
             }
         }
     }
-
-
     // default (handle 0xFFFF) write
     Memory::memory(address, data);
 }
