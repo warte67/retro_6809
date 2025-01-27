@@ -541,14 +541,14 @@ SYS_HNDLR_DONE	; Error Condition -- System Call Out of Bounds
 SYS_GARBAGE     jsr     KRNL_GARBAGE    ; call the kernel error handler (temp)
                 rti                     ; return from the sys interrupt
 KRNL_GARBAGE			
-                    ldd	    #$0100          ; initialize a starting attribute/character pair
-1	            ldx	    #VIDEO_START    ; point to the start of the text display
-                    addd	#1              ; increment the attribute/character to display
-2	            std	    ,x++            ; store the colored character to the next cell
-                    addd	#1              ; increment the attribute/character to display
-                    cmpx	GPU_VIDEO_MAX   ; at the end of displayed video memory?
-                    blt	    2b              ; nope, keep going with the next character
-                    bra	    1b              ; yup, start over.
+                ldd     #$0100          ; initialize a starting attribute/character pair
+1               ldx     #VIDEO_START    ; point to the start of the text display
+                addd    #1              ; increment the attribute/character to display
+2               std     ,x++            ; store the colored character to the next cell
+                addd    #1              ; increment the attribute/character to display
+                cmpx    GPU_VIDEO_MAX   ; at the end of displayed video memory?
+                blt     2b              ; nope, keep going with the next character
+                bra     1b              ; yup, start over.
 
 
 ; *****************************************************************************
@@ -563,17 +563,17 @@ KRNL_GARBAGE
 SYS_CLS         jsr     KRNL_CLS        ; call the kernel Clear Screen handler
                 rti                     ; return from the sys interrupt
                 ; ...
-KRNL_CLS	    jmp		[VEC_CLS]		; proceed through the software vector
-STUB_CLS		pshs	d,x		        ; save the used registers onto the stack
-                        lda	    _ATTRIB		    ; fetch the current color attribute
-                        ldb	    #' '		    ; the space character
-                        ldx	    #VIDEO_START	; index the start of the video buffer
-1		        std	    ,x++		    ; store a character to the buffer
-                        cmpx	GPU_VIDEO_MAX	; are we at the end yet?
-                        blt	    1b		        ; nope, keep storing characters
+KRNL_CLS        jmp     [VEC_CLS]       ; proceed through the software vector
+STUB_CLS        pshs    d,x             ; save the used registers onto the stack
+                lda     _ATTRIB         ; fetch the current color attribute
+                ldb     #' '            ; the space character
+                ldx     #VIDEO_START    ; index the start of the video buffer
+1               std     ,x++            ; store a character to the buffer
+                cmpx	GPU_VIDEO_MAX	; are we at the end yet?
+                blt     1b              ; nope, keep storing characters
                 clr     _CURSOR_COL     ; clear the current cursor position ...
-                clr	    _CURSOR_ROW     ; ... column and row the home (top/left)
-                        puls	d,x,pc		    ; cleanup and return
+                clr     _CURSOR_ROW     ; ... column and row the home (top/left)
+                puls    d,x,pc          ; cleanup and return
 
 
 ; *****************************************************************************
@@ -590,28 +590,28 @@ SYS_CHROUT      lda     1,S             ; fetch A from the stack
                 jsr     KRNL_CHROUT     ; call the character out kernel handler
                 rti                     ; return from the sys interrupt
                 ; ...
-KRNL_CHROUT		jmp		[VEC_CHROUT]    ; proceed through the software vector
-STUB_CHROUT		pshs	d,x,cc		    ; save the used registers onto the stack
-                                tfr		a,b
-                        lda	    _ATTRIB		    ; load the current color attribute
-K_CHROUT_1	    tstb			        ; is A a null?
-                        beq	    K_CHROUT_DONE	;    A is null, just return and do nothing		
-                        cmpb	#$0A		    ; is it a newline character?
-                        bne	    K_CHROUT_2	    ; nope, don't do a newline
-                        jsr	    KRNL_NEWLINE	; advance the cursor 
-                        bra	    K_CHROUT_DONE	; clean up and return
-K_CHROUT_2	    cmpb	#$09		    ; is it a tab character?
-                        bne	    K_CHROUT_0	    ; nope, don't do a tab
-                        jsr	    KRNL_TAB	    ; tab the character position
-                        bra	    K_CHROUT_DONE	; clean up and return
-K_CHROUT_0	    jsr	    KRNL_CSRPOS	    ; position X at the cursor position
-                        std	    ,x		        ; display the character/attribute combo
-                        inc	    _CURSOR_COL	    ; increment current cursor column position
-                        lda	    _CURSOR_COL	    ; load current cursor column position					
-                        cmpa	GPU_TCOLS	    ; compare with the current screen columns
-                        blt	    K_CHROUT_DONE	; if the csr column is okay, we're done
-                        jsr	    KRNL_NEWLINE	; perform a new line
-K_CHROUT_DONE	puls	d,x,cc,pc	    ; cleanup and return
+KRNL_CHROUT     jmp     [VEC_CHROUT]    ; proceed through the software vector
+STUB_CHROUT     pshs	d,x,cc          ; save the used registers onto the stack
+                tfr     a,b
+                lda     _ATTRIB         ; load the current color attribute
+K_CHROUT_1      tstb                    ; is A a null?
+                beq     K_CHROUT_DONE   ;    A is null, just return and do nothing		
+                cmpb    #$0A            ; is it a newline character?
+                bne     K_CHROUT_2      ; nope, don't do a newline
+                jsr     KRNL_NEWLINE    ; advance the cursor 
+                bra     K_CHROUT_DONE   ; clean up and return
+K_CHROUT_2      cmpb    #$09            ; is it a tab character?
+                bne     K_CHROUT_0      ; nope, don't do a tab
+                jsr     KRNL_TAB        ; tab the character position
+                bra     K_CHROUT_DONE   ; clean up and return
+K_CHROUT_0      jsr     KRNL_CSRPOS     ; position X at the cursor position
+                std     ,x              ; display the character/attribute combo
+                inc     _CURSOR_COL     ; increment current cursor column position
+                lda     _CURSOR_COL     ; load current cursor column position					
+                cmpa    GPU_TCOLS       ; compare with the current screen columns
+                blt     K_CHROUT_DONE   ; if the csr column is okay, we're done
+                jsr     KRNL_NEWLINE    ; perform a new line
+K_CHROUT_DONE	puls	d,x,cc,pc       ; cleanup and return
 
 
 ; *****************************************************************************
@@ -626,16 +626,16 @@ K_CHROUT_DONE	puls	d,x,cc,pc	    ; cleanup and return
 SYS_NEWLINE     jsr     KRNL_NEWLINE    ; call the newline kernel handler
                 rti                     ; return from the sys interrupt
                 ; ...
-KRNL_NEWLINE	jmp		[VEC_NEWLINE]	; proceed through the software vector
-STUB_NEWLINE	pshs	D,X		        ; save the used registers onto the stack
-                        clr	    _CURSOR_COL	    ; carrage return (move to left edge)
-                        inc	    _CURSOR_ROW	    ; increment the cursors row
-                        lda	    _CURSOR_ROW	    ; load the current row
-                        cmpa	GPU_TROWS	    ; compared to the current screen rows
-                        blt	    K_NEWLINE_DONE	; clean up and return if less than
-                        dec	    _CURSOR_ROW	    ; move the cursor the the bottom row
-                        jsr	    KRNL_SCROLL	    ; scroll the text screen up one line
-K_NEWLINE_DONE	puls	D,X,PC		    ; restore the saved registers and return
+KRNL_NEWLINE    jmp     [VEC_NEWLINE]   ; proceed through the software vector
+STUB_NEWLINE    pshs    D,X             ; save the used registers onto the stack
+                clr     _CURSOR_COL     ; carrage return (move to left edge)
+                inc     _CURSOR_ROW     ; increment the cursors row
+                lda     _CURSOR_ROW     ; load the current row
+                cmpa    GPU_TROWS       ; compared to the current screen rows
+                blt     K_NEWLINE_DONE  ; clean up and return if less than
+                dec     _CURSOR_ROW     ; move the cursor the the bottom row
+                jsr     KRNL_SCROLL     ; scroll the text screen up one line
+K_NEWLINE_DONE	puls    D,X,PC          ; restore the saved registers and return
 
 
 ; *****************************************************************************
@@ -650,15 +650,15 @@ K_NEWLINE_DONE	puls	D,X,PC		    ; restore the saved registers and return
 SYS_TAB         jsr     KRNL_TAB        ; call the tab character kernel handler
                 rti                     ; return from the sys interrupt
                 ; ...
-KRNL_TAB        pshs	b		        ; save B
-                ldb     _CURSOR_COL	    ; Fetch the current cursor col
+KRNL_TAB        pshs	b               ; save B
+                ldb     _CURSOR_COL     ; Fetch the current cursor col
                 addb    #4              ; Move cursor by 4 spaces
                 andb    #%11111100      ; Align to the next tab stop
-                stb     _CURSOR_COL	    ; update the cursor column
+                stb     _CURSOR_COL     ; update the cursor column
                 cmpb    GPU_TCOLS       ; Ensure column is within bounds
-                blt     K_TAB_DONE	    ; Within bounds, we're done
-                jsr     KRNL_NEWLINE   	; Handle line wrapping
-K_TAB_DONE	    puls	B,PC		    ; cleanup and return
+                blt     K_TAB_DONE      ; Within bounds, we're done
+                jsr     KRNL_NEWLINE    ; Handle line wrapping
+K_TAB_DONE      puls    B,PC            ; cleanup and return
 
 
 ; *******************************************************************************
