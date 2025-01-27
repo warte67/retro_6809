@@ -448,17 +448,15 @@ do_debug_0      ; ENABLE the debugger
 ; *****************************************************************************
 ; * Command: HELP basic help text message                        ARG1 = none  *
 ; *****************************************************************************
-do_help			ldx		#krnl_help_str	; load the help message string addresses
-                                jsr		KRNL_LINEOUT	; send it to the console
-                                rts			; return from subroutine
-
-
+do_help         ldx     #krnl_help_str  ; load the help message string addresses
+                jsr     KRNL_LINEOUT    ; send it to the console
+                rts                     ; return from subroutine
 
 
 ; *******************************************************************************
 ; * System Call Handler:                                                        *
 ; *                                                                             *
-; *	References the byte immediately following the SWI2 instruction and          *
+; *	References the byte immediately following the SWI2 instruction and      *
 ; * 	dispatches to the appropriate system call based on that value.          *
 ; *                                                                             *
 ; * ENTRY REQUIREMENTS: Varies                                                  *
@@ -478,59 +476,59 @@ do_help			ldx		#krnl_help_str	; load the help message string addresses
 ; *         PC  = 10,S                                                          *
 ; *                                                                             *
 ; *******************************************************************************
-KRNL_SYS_CALLS	fdb	    SYS_GARBAGE	    ; $00 random garbage
-                fdb	    SYS_CLS         ; $01 CLS 	    	
-                fdb	    SYS_CHROUT	    ; $02 CHROUT		
+KRNL_SYS_CALLS  fdb     SYS_GARBAGE     ; $00 random garbage
+                fdb     SYS_CLS         ; $01 CLS 	    	
+                fdb     SYS_CHROUT      ; $02 CHROUT		
                 fdb     SYS_NEWLINE     ; $03 NEWLINE   	
                 fdb     SYS_TAB         ; $04 TAB       	
                 fdb     SYS_LINEOUT     ; $05 LINEOUT   	
                 fdb     SYS_CSRPOS      ; $06 CSRPOS    	
                 fdb     SYS_SCROLL      ; $07 SCROLL    	
                 fdb     SYS_LINEEDIT	; $08 LINEEDIT		
-                fdb     SYS_GETKEY	    ; $09 GETKEY    	
-                                fdb		SYS_GETHEX		; $0A GETHEX		
-                                fdb		SYS_GETNUM		; $0B GETNUM		
-                                fdb 	SYS_CMPSTR		; $0C CMPSTR		
-                                fdb		SYS_CMD_PROC	; $0D CMD_PROC		
-                                fdb		SYS_TBLSEARCH	; $0E TBLSEARCH 	
-                                fdb		SYS_CPY_DWORD	; $0F CPY_DWORD 	
-                                fdb		SYS_D_TO_RAWA	; $10 SYS_D_TO_RAWA
-                                fdb		SYS_D_TO_RAWB	; $11 SYS_D_TO_RAWB
-                                fdb		SYS_D_TO_RAWR	; $12 SYS_D_TO_RAWR
-                                fdb		SYS_D_TO_INTA	; $13 SYS_D_TO_INTA
-                                fdb		SYS_D_TO_INTB	; $14 SYS_D_TO_INTB
-                                fdb		SYS_D_TO_INTR	; $15 SYS_D_TO_INTR
-                                fdb		SYS_RAWA_TO_D	; $16 SYS_RAWA_TO_D
-                                fdb		SYS_RAWB_TO_D	; $17 SYS_RAWB_TO_D
-                                fdb		SYS_RAWR_TO_D	; $18 SYS_RAWR_TO_D
-                                fdb		SYS_INTA_TO_D	; $19 SYS_INTA_TO_D
-                                fdb		SYS_INTB_TO_D	; $1A SYS_INTB_TO_D
-                                fdb		SYS_INTR_TO_D	; $1B SYS_INTR_TO_D
-                                fdb		SYS_8BIT_MATH	; $1C SYS_8BIT_MATH
-                                fdb		SYS_DSP_ACA		; $1D SYS_DSP_ACA
-                                fdb		SYS_DSP_ACB		; $1E SYS_DSP_ACB
-                                fdb		SYS_DSP_ACR		; $1F SYS_DSP_ACR
-                                fdb		SYS_DSP_INTA	; $20 SYS_DSP_INTA
-                                fdb		SYS_DSP_INTB	; $21 SYS_DSP_INTB
-                                fdb		SYS_DSP_INTR	; $22 SYS_DSP_INTR
-                                fdb		SYS_WRITE_ACA	; $23 SYS_WRITE_ACA
-                                fdb		SYS_WRITE_ACB	; $24 SYS_WRITE_ACB
-                                fdb		SYS_WRITE_ACR	; $25 SYS_WRITE_ACR
-                                fdb		SYS_ARG_TO_A	; $26 SYS_ARG_TO_A
+                fdb     SYS_GETKEY      ; $09 GETKEY    	
+                fdb     SYS_GETHEX      ; $0A GETHEX		
+                fdb     SYS_GETNUM      ; $0B GETNUM		
+                fdb     SYS_CMPSTR      ; $0C CMPSTR		
+                fdb     SYS_CMD_PROC    ; $0D CMD_PROC		
+                fdb     SYS_TBLSEARCH   ; $0E TBLSEARCH 	
+                fdb     SYS_CPY_DWORD   ; $0F CPY_DWORD 	
+                fdb     SYS_D_TO_RAWA   ; $10 SYS_D_TO_RAWA
+                fdb     SYS_D_TO_RAWB   ; $11 SYS_D_TO_RAWB
+                fdb     SYS_D_TO_RAWR   ; $12 SYS_D_TO_RAWR
+                fdb     SYS_D_TO_INTA   ; $13 SYS_D_TO_INTA
+                fdb     SYS_D_TO_INTB   ; $14 SYS_D_TO_INTB
+                fdb     SYS_D_TO_INTR   ; $15 SYS_D_TO_INTR
+                fdb     SYS_RAWA_TO_D   ; $16 SYS_RAWA_TO_D
+                fdb     SYS_RAWB_TO_D   ; $17 SYS_RAWB_TO_D
+                fdb     SYS_RAWR_TO_D   ; $18 SYS_RAWR_TO_D
+                fdb     SYS_INTA_TO_D   ; $19 SYS_INTA_TO_D
+                fdb     SYS_INTB_TO_D   ; $1A SYS_INTB_TO_D
+                fdb     SYS_INTR_TO_D   ; $1B SYS_INTR_TO_D
+                fdb     SYS_8BIT_MATH   ; $1C SYS_8BIT_MATH
+                fdb     SYS_DSP_ACA     ; $1D SYS_DSP_ACA
+                fdb     SYS_DSP_ACB     ; $1E SYS_DSP_ACB
+                fdb     SYS_DSP_ACR     ; $1F SYS_DSP_ACR
+                fdb     SYS_DSP_INTA    ; $20 SYS_DSP_INTA
+                fdb     SYS_DSP_INTB    ; $21 SYS_DSP_INTB
+                fdb     SYS_DSP_INTR    ; $22 SYS_DSP_INTR
+                fdb     SYS_WRITE_ACA   ; $23 SYS_WRITE_ACA
+                fdb     SYS_WRITE_ACB   ; $24 SYS_WRITE_ACB
+                fdb     SYS_WRITE_ACR   ; $25 SYS_WRITE_ACR
+                fdb     SYS_ARG_TO_A    ; $26 SYS_ARG_TO_A
 KRNL_SYS_CALLS_END				
                 
 
-SYS_Handler	; increment the return address on the stack past the command byte
-                        ldu	    $000a,S         ; fetch the command that follows the SWI2
-                        ldb	    0,U             ; load the command into B
-                        leau	1,U             ; address just past the command byte
-                        stu	    $000a,S         ; update the return address in the stack
-                        ldu	    #KRNL_SYS_CALLS ; system call vector base address
-                        lslb                    ; each address is two bytes long
-                        leau	B,U             ; U = system call vector effective address
-                        cmpu	#KRNL_SYS_CALLS_END ; Bounds check
-                        bge	    SYS_HNDLR_DONE  ; system call out of bounds; error
-                        jmp	    [,U]            ; take the appropriate system call vector
+SYS_Handler     ; increment the return address on the stack past the command byte
+                ldu     $000a,S         ; fetch the command that follows the SWI2
+                ldb     0,U             ; load the command into B
+                leau    1,U             ; address just past the command byte
+                stu     $000a,S         ; update the return address in the stack
+                ldu     #KRNL_SYS_CALLS ; system call vector base address
+                lslb                    ; each address is two bytes long
+                leau    B,U             ; U = system call vector effective address
+                cmpu    #KRNL_SYS_CALLS_END ; Bounds check
+                bge     SYS_HNDLR_DONE  ; system call out of bounds; error
+                jmp     [,U]            ; take the appropriate system call vector
 SYS_HNDLR_DONE	; Error Condition -- System Call Out of Bounds
                 ; ...  (ToDo)
                 jmp     KRNL_GARBAGE    ; temporary fatal error
