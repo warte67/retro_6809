@@ -14,7 +14,6 @@
  *************************************/
 
 #include "Bus.hpp"
-
 #include "UnitTest.hpp"
 
 UnitTest::UnitTest()
@@ -36,26 +35,67 @@ void UnitTest::Init(const std::string& filename)
         std::string err_msg = "Failed to open test log file: " + filename; 
         Bus::Error(err_msg, __FILE__, __LINE__);
     }
-    Log("Test Log Initialized");
+    Log(nullptr, "Test Log Initialized");
 }
 
 
 void UnitTest::Quit() 
 {
     if (testLog.is_open()) {
-        Log("Test Log Closed");
+        Log(nullptr, "Test Log Closed");
         testLog.close();
     }
     // print_log_to_console();
 }
 
 
-void UnitTest::Log(const std::string& message) 
+void UnitTest::TestInit(IDevice* device, const std::string& message) 
 {
     if (testLog.is_open()) {
-        testLog << GetCurrentTime() << " - " << message << std::endl;
+        if (device == nullptr) {
+            testLog << clr::DARK << GetCurrentTime() << " - " << clr::GREEN << message;
+        }
+        else
+        {
+            testLog << clr::DARK << GetCurrentTime() << " - "  << clr::WHITE << device->name() << 
+                    " - " << clr::GREEN << message;
+        }
 
-        std::cout << clr::indent() << clr::DARK << GetCurrentTime() << " - " << message << std::endl;
+        if (DISPLAY_RUNTIME_UNIT_TESTS) {
+            if (device == nullptr) {
+                std::cout << clr::DARK << GetCurrentTime() << " - " << clr::GREEN << message;
+                std::cout.flush();
+                // SDL_Delay(1000);    // remove this after verified  
+            } else {
+                std::cout << clr::DARK << GetCurrentTime() << " - "  << clr::WHITE << device->name() << 
+                    clr::GREEN << " " << message << clr::RESET;
+                std::cout.flush();
+                // SDL_Delay(1000);    // remove this after verified
+            }
+        }
+    }
+}
+
+void UnitTest::Log(IDevice* device, const std::string& message) 
+{
+    if (testLog.is_open()) {
+        if (device == nullptr) {
+            testLog << clr::ERASE_LINE << clr::DARK << GetCurrentTime() << " - " << message << clr::RESET << clr::RETURN;
+        }
+        else
+        {
+            testLog << clr::ERASE_LINE << clr::DARK << GetCurrentTime() << " - "  << 
+                    clr::WHITE << device->name() << " " << clr::GREEN << message << clr::RESET << clr::RETURN;
+        }
+
+        if (DISPLAY_RUNTIME_UNIT_TESTS) {
+            if (device == nullptr) {
+                std::cout  << clr::ERASE_LINE << clr::DARK << GetCurrentTime() << " - " << message << clr::RESET << clr::RETURN;
+            } else {
+                std::cout  << clr::ERASE_LINE << clr::DARK << GetCurrentTime() << " - "  << clr::WHITE << device->name() << 
+                    clr::GREEN << " " << message << clr::RESET << clr::RETURN;                
+            }
+        }
     }
 }
 
@@ -65,10 +105,8 @@ void UnitTest::Assert(bool condition, const std::string& message, const char* fi
     if (!condition) {
         std::ostringstream ss;
         ss << clr::RED << "ASSERT FAILED: " << message << clr::RESET; // << " (" << file << ":" << line << ")";
-        Log(ss.str());
+        Log(nullptr, ss.str());
         Bus::Error(ss.str(), file, line);
-        // std::cerr << ss.str() << std::endl;
-        // exit(EXIT_FAILURE);  // Stop execution if assertion fails
     }
 }
 
@@ -113,7 +151,7 @@ bool UnitTest::RangeTest_RW(std::string name, Word start, Word end)
                 if (Memory::Read(addr) != pattern) {
                     result = false;
                     testFailed = true;
-                    UnitTest::Log(clr::RED + "Read/Write failed at address $" + clr::hex(addr, 4) + clr::RESET );
+                    UnitTest::Log(nullptr, clr::RED + "Read/Write failed at address $" + clr::hex(addr, 4) + clr::RESET );
                     break;
                 }
             }
@@ -123,9 +161,9 @@ bool UnitTest::RangeTest_RW(std::string name, Word start, Word end)
         if (testFailed) { break; }
     }
     if (result)
-        UnitTest::Log(clr::WHITE + name + clr::GREEN + " Read/Write Test PASSED" + clr::RESET);
+        UnitTest::Log(nullptr, clr::WHITE + name + clr::GREEN + " Read/Write Test PASSED" + clr::RESET);
     else
-        UnitTest::Log(clr::WHITE + name + clr::RED + " Read/Write Test FAILED" + clr::RESET);
+        UnitTest::Log(nullptr, clr::WHITE + name + clr::RED + " Read/Write Test FAILED" + clr::RESET);
     return result;
 }
 
@@ -149,7 +187,7 @@ bool UnitTest::RangeTest_RO(std::string name, Word start, Word end)
                 if (Memory::Read(addr) == pattern) {
                     result = false;
                     testFailed = true;
-                    UnitTest::Log(clr::RED + "Write allowed to read-only memory at address $" + clr::hex(addr, 4) + " with pattern " + clr::hex(pattern, 2) + clr::RESET);
+                    UnitTest::Log(nullptr, clr::RED + "Write allowed to read-only memory at address $" + clr::hex(addr, 4) + " with pattern " + clr::hex(pattern, 2) + clr::RESET);
                     break;
                 }
             }
@@ -157,8 +195,8 @@ bool UnitTest::RangeTest_RO(std::string name, Word start, Word end)
         if (testFailed) { break; }
     }
     if (result)
-        UnitTest::Log(clr::WHITE + name + clr::GREEN + " Read-Only Test PASSED" + clr::RESET);
+        UnitTest::Log(nullptr, clr::WHITE + name + clr::GREEN + " Read-Only Test PASSED" + clr::RESET);
     else
-        UnitTest::Log(clr::WHITE + name + clr::RED + " Read-Only Test FAILED" + clr::RESET);
+        UnitTest::Log(nullptr, clr::WHITE + name + clr::RED + " Read-Only Test FAILED" + clr::RESET);
     return result;
 }

@@ -115,7 +115,7 @@ private:
     inline void register_command(Byte command, std::function<Byte()> handler)
     {
         if (_mmu_commands.find(command) != _mmu_commands.end()) {
-            UnitTest::Log("Warning: Command already registered: " + command);
+            UnitTest::Log(this, "Warning: Command already registered: " + std::to_string(command));
             Bus::Error("Command already registered", __FILE__, __LINE__);
             return;
         }        
@@ -123,7 +123,7 @@ private:
     }
 
 
-    // ****************** //
+    // ****************** //1
     // HARDWARE REGISTERS //
     // ****************** //
 
@@ -357,6 +357,8 @@ public:
     }  
     bool OnTest() 
     { 
+        UnitTest::TestInit(this, " Testing ...");
+
         // Check the number of mapped registers
         size_t expectedRegisters = 16388;   // size_t expectedRegisters = 4;
         ASSERT(mapped_register.size() == expectedRegisters, _device_name + ": Incorrect number of mapped registers (" + std::to_string(mapped_register.size()) + ")");

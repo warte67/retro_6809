@@ -31,6 +31,8 @@ public:
 
     bool OnTest() 
     { 
+        UnitTest::TestInit(this, " Testing ...");
+        
         // Check the number of mapped registers
         size_t expectedRegisters = 3; // Number of interrupt vectors
         ASSERT(mapped_register.size() == expectedRegisters, _device_name + ": Incorrect number of mapped registers");

@@ -383,7 +383,9 @@ int  Math::OnAttach(int nextAddr)
     mapped_register.push_back({ "MOP_ATAN",         enum_value++, nullptr, nullptr, {"    ACR = std::atan(ACA)"}});
     mapped_register.push_back({ "MOP_ATAN2",        enum_value++, nullptr, nullptr, {"    ACR = std::atan2(ACA, ACB)"}});
     mapped_register.push_back({ "MOP_SINH",         enum_value++, nullptr, nullptr, {"    ACR = std::sinh(ACA)"}});
-    mapped_register.push_back({ "MOP_COSH",         enum_value++, nullptr, nullptr, {"    ACR = std::acosh(ACA)"}});
+    mapped_register.push_back({ "MOP_COSH",         enum_value++, nullptr, nullptr, {"    ACR = std::cosh(ACA)"}});
+    mapped_register.push_back({ "MOP_ASINH",        enum_value++, nullptr, nullptr, {"    ACR = std::asinh(ACA)"}});
+    mapped_register.push_back({ "MOP_ACOSH",        enum_value++, nullptr, nullptr, {"    ACR = std::acosh(ACA)"}});
     mapped_register.push_back({ "MOP_ATANH",        enum_value++, nullptr, nullptr, {"    ACR = std::atanh(ACA)"}});
     mapped_register.push_back({ "MOP_ERF",          enum_value++, nullptr, nullptr, {"    ACR = std::erf(ACA)"}});
     mapped_register.push_back({ "MOP_ERFC",         enum_value++, nullptr, nullptr, {"    ACR = std::erfc(ACA)"}});
@@ -427,8 +429,11 @@ int  Math::OnAttach(int nextAddr)
 bool Math::OnTest() 
 { 
     bool test_results = true;
+
+    UnitTest::Log(this, "Testing ...");
+
     // Check the number of mapped registers
-    size_t expectedRegisters = 92; // Number of interrupt vectors
+    size_t expectedRegisters = 94; // Number of interrupt vectors
     std::string err = _device_name + ": Incorrect number of mapped registers. Was " + std::to_string(expectedRegisters) + 
                                     " should be " + std::to_string(mapped_register.size()) + ".";
     ASSERT(mapped_register.size() == expectedRegisters, err);
@@ -444,9 +449,9 @@ bool Math::OnTest()
 
     // display the result of the tests
     if (test_results)
-        UnitTest::Log(clr::WHITE + _device_name + clr::GREEN + " Unit Tests PASSED" + clr::RESET);
+        UnitTest::Log(this, "Unit Tests PASSED");
     else
-        UnitTest::Log(clr::WHITE + _device_name + clr::RED + " Unit Tests FAILED" + clr::RESET);
+        UnitTest::Log(this, clr::RED + "Unit Tests FAILED");
     return test_results;
 }
 
@@ -494,8 +499,11 @@ bool Math::_test_accumilators()
         // Log mismatch with expected vs actual value
         if (!ASSERT_TRUE(raw_result == expected_raw_value_dword)) {
             all_tests_passed = false;
-            UnitTest::Log(clr::RED + "MATH_AC" + reg_char[i] + "_RAW value mismatch: Expected $" +
-                clr::hex(expected_raw_value_dword,8) + ", Got $" + clr::hex(raw_result,8) + clr::RESET);
+            UnitTest::Log(this, clr::RED + "register MATH_AC" + reg_char[i] + "_RAW value mismatch: Expected $" +
+                clr::hex(expected_raw_value_dword,8) + ", Got $" + clr::hex(raw_result,8));
+        }
+        else {
+            UnitTest::Log(this, "register " + clr::YELLOW + "MATH_AC" + reg_char[i] + "_RAW" + clr::GREEN + " Success with $" + clr::hex(raw_result,8));
         }
 
         // The integer value (MATH_ACx_INT) should be the integer representation of the float (e.g., 123 from 123.45)
@@ -505,8 +513,11 @@ bool Math::_test_accumilators()
         // Log mismatch with expected vs actual value
         if (!ASSERT_TRUE(int_result == expected_int_value)) {
             all_tests_passed = false;
-            UnitTest::Log(clr::RED + "MATH_AC" + reg_char[i] + "_INT value mismatch: Expected " +
-                clr::hex(expected_int_value,8) + ", Got $" + clr::hex(int_result,8) + clr::RESET);
+            UnitTest::Log(this, clr::RED + "register MATH_AC" + reg_char[i] + "_INT value mismatch: Expected " +
+                clr::hex(expected_int_value,8) + ", Got $" + clr::hex(int_result,8));
+        }
+        else {
+            UnitTest::Log(this, "register " + clr::YELLOW + "MATH_AC" + reg_char[i] + "_INT" + clr::GREEN + " Success with $" + clr::hex(int_result,8));
         }
     }
 
@@ -521,7 +532,7 @@ bool Math::_test_math_operations()
     {
         Word mop_value;
         std::string name;   
-        std::function<bool(float, float)> func;
+        std::function<float(float, float)> func;
     };
 
     // Define the vector of MOP operations using mop_node structs with lambda functions
@@ -568,6 +579,8 @@ bool Math::_test_math_operations()
         { MAP(MOP_ATAN2),        "MOP_ATAN2",       [](float aca, float acb)    { return std::atan2(aca, acb); }},
         { MAP(MOP_SINH),         "MOP_SINH",        [](float aca, float)        { return std::sinh(aca); }},
         { MAP(MOP_COSH),         "MOP_COSH",        [](float aca, float)        { return std::cosh(aca); }},
+        { MAP(MOP_ASINH),        "MOP_ASINH",       [](float aca, float)        { return std::asinh(aca); }},
+        { MAP(MOP_ACOSH),        "MOP_ACOSH",       [](float aca, float)        { return std::acosh(aca); }},
         { MAP(MOP_ATANH),        "MOP_ATANH",       [](float aca, float)        { return std::atanh(aca); }},
         { MAP(MOP_ERF),          "MOP_ERF",         [](float aca, float)        { return std::erf(aca); }},
         { MAP(MOP_ERFC),         "MOP_ERFC",        [](float aca, float)        { return std::erfc(aca); }},
@@ -620,12 +633,16 @@ bool Math::_test_math_operations()
                     rnd_acr_int == Memory::Read_DWord(MAP(MATH_ACR_INT)))
                 {
                     fail_count++;
-                }                
+                }    
             }
             if (fail_count == iterations) 
             {
                 all_tests_passed = false;
-                UnitTest::Log(clr::RED + "MOP_RANDOM test failed: " + std::to_string(fail_count) + clr::RESET);
+                UnitTest::Log(this, clr::RED + "operation " + op.name + " test FAILED: " + std::to_string(fail_count));
+            }
+            else 
+            {
+                UnitTest::Log(this, "operation " + clr::YELLOW + op.name + clr::GREEN + " PASSED!");
             }
         } 
         else if (mop == MAP(MOP_RND_SEED)) 
@@ -648,40 +665,73 @@ bool Math::_test_math_operations()
                 if (fail_count == iterations) 
                 {
                     all_tests_passed = false;
-                    UnitTest::Log(clr::RED + "MOP_RND_SEED test failed. Expected: " + 
-                        std::to_string(aca_int) + ", Got: " + std::to_string(acr_result) + clr::RESET);
-                }            
+                    UnitTest::Log(this, clr::RED + "operation " + op.name + " test FAILED. Expected: " + 
+                        std::to_string(aca_int) + ", Got: " + std::to_string(acr_result));
+                }         
+            }
+            if (fail_count == 0) {
+                UnitTest::Log(this, "operation " + clr::YELLOW + op.name + clr::GREEN + " PASSED!");
             }
         } 
         else 
         {
-            // Arithmetic operations (binary)
-            aca_value = 5.0f;
-            acb_value = 3.0f;
-            // Write the operation to MATH_OPERATION
-            aca_float = aca_value; // directly assign the internal aca_float
-            acb_float = acb_value; // directly assign the internal acb_float
-            Memory::Write(MAP(MATH_OPERATION), (Byte)mop);           
-            // Read the result from MATH_ACR_FLOAT as a boolean
-            bool expected_result = op.func(aca_value, acb_value);
-            bool actual_result = (bool)acr_float; //(bool)Memory::Read_DWord(MAP(MATH_ACR_INT));
-            if (mop == MAP(MOP_IS_EQUAL) || 
-                mop == MAP(MOP_IS_NOT_EQUAL) || 
-                mop == MAP(MOP_IS_LESS) || 
-                mop == MAP(MOP_IS_GREATER) || 
-                mop == MAP(MOP_IS_LTE) || 
-                mop == MAP(MOP_IS_GTE) ||
-                mop == MAP(MOP_IS_INF) || 
-                mop == MAP(MOP_IS_NAN) || 
-                mop == MAP(MOP_SIGNBIT) )
-            { // Read the result from MATH_ACR_INT as a boolean
-                actual_result = (bool)Memory::Read_DWord(MAP(MATH_ACR_INT));
+            if (mop != MAP(MOP_ACOSH))
+            {
+                // Arithmetic operations (binary)
+                aca_value = 0.5f;
+                acb_value = 0.3f;
+                // Write the operation to MATH_OPERATION
+                aca_float = aca_value; // directly assign the internal aca_float
+                acb_float = acb_value; // directly assign the internal acb_float
+                Memory::Write(MAP(MATH_OPERATION), (Byte)mop);           
+                // Read the result from MATH_ACR_FLOAT as a boolean
+                float expected_result = op.func(aca_value, acb_value);
+                float actual_result = acr_float; //(bool)Memory::Read_DWord(MAP(MATH_ACR_INT));
+                if (mop == MAP(MOP_IS_EQUAL) || 
+                    mop == MAP(MOP_IS_NOT_EQUAL) || 
+                    mop == MAP(MOP_IS_LESS) || 
+                    mop == MAP(MOP_IS_GREATER) || 
+                    mop == MAP(MOP_IS_LTE) || 
+                    mop == MAP(MOP_IS_GTE) ||
+                    mop == MAP(MOP_IS_INF) || 
+                    mop == MAP(MOP_IS_NAN) || 
+                    mop == MAP(MOP_SIGNBIT) ||
+                    mop == MAP(MOP_IS_FINITE) ||
+                    mop == MAP(MOP_IS_NORMAL))
+                { // Read the result from MATH_ACR_INT as a boolean
+                    actual_result = (bool)Memory::Read_DWord(MAP(MATH_ACR_INT));
+                }           
+                // Compare the expected and actual results
+                if (actual_result != expected_result) {
+                    all_tests_passed = false;
+                    UnitTest::Log(this, clr::RED + "operation " + op.name + " FAILED. Expected: " + 
+                        std::to_string(expected_result) + ", Got: " + std::to_string(actual_result));
+                }
+                else {
+                    UnitTest::Log(this, "operation " + clr::YELLOW + op.name + clr::GREEN + " PASSED!");
+                }
             }
-            // Compare the expected and actual results
-            if (actual_result != expected_result) {
-                all_tests_passed = false;
-                UnitTest::Log(clr::RED + op.name + " failed. Expected: " + 
-                    std::to_string(expected_result) + ", Got: " + std::to_string(actual_result) + clr::RESET);
+            else // MOP_ACOSH
+            {
+                // Logical operations (binary)
+                aca_value = 10.0f;
+                acb_value = 0.0f;
+                // Write the operation to MATH_OPERATION
+                aca_float = aca_value; // directly assign the internal aca_float
+                acb_float = acb_value; // directly assign the internal acb_float
+                Memory::Write(MAP(MATH_OPERATION), (Byte)mop);           
+                // Read the result from MATH_ACR_FLOAT as a boolean
+                bool expected_result = op.func(aca_value, acb_value);
+                bool actual_result = (bool)Memory::Read_DWord(MAP(MATH_ACR_INT));
+                // Compare the expected and actual results
+                if (actual_result != expected_result) {
+                    all_tests_passed = false;
+                    UnitTest::Log(this, clr::RED + "operation " + op.name + " FAILED. Expected: " + 
+                        std::to_string(expected_result) + ", Got: " + std::to_string(actual_result));
+                }
+                else {
+                    
+                }
             }
         }
     }
@@ -1176,9 +1226,24 @@ void Math::_process_command(Byte data)
         _update_regs_from_float(std::atan2(aca_float, acb_float),
             acr_float, acr_pos, acr_string, acr_raw, acr_int);
     }
-    else if (data == MAP(MOP_COSH))
+    else if (data == MAP(MOP_ASINH))
+    {
+        _update_regs_from_float(std::asinh(aca_float),
+            acr_float, acr_pos, acr_string, acr_raw, acr_int);
+    }
+    else if (data == MAP(MOP_ACOSH))
     {
         _update_regs_from_float(std::acosh(aca_float),
+            acr_float, acr_pos, acr_string, acr_raw, acr_int);
+    }
+    else if (data == MAP(MOP_SINH))
+    {
+        _update_regs_from_float(std::sinh(aca_float),
+            acr_float, acr_pos, acr_string, acr_raw, acr_int);
+    }
+    else if (data == MAP(MOP_COSH))
+    {
+        _update_regs_from_float(std::cosh(aca_float),
             acr_float, acr_pos, acr_string, acr_raw, acr_int);
     }
     else if (data == MAP(MOP_ATANH))

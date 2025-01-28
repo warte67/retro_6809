@@ -32,7 +32,8 @@
 #define ASSERT_TRUE(condition) \
     (condition) ? true : false
 
-    
+
+class IDevice;
 
 class UnitTest {
 private:
@@ -50,7 +51,9 @@ public: // PUBLIC SINGLETON STUFF
     // Test Log Functions
     static void Init(const std::string& filename = "test.log");
     static void Quit();
-    static void Log(const std::string& message);
+    static void TestInit(IDevice* device, const std::string& message);
+    // static void Log(const std::string& message);
+    static void Log(IDevice* device, const std::string& message);
     static void Assert(bool condition, const std::string& message, const char* file, int line);
     static void print_log_to_console();
 

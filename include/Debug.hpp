@@ -40,7 +40,7 @@ public: // VIRTUAL METHODS
     virtual void OnEvent(SDL_Event* evnt) override;     // handle events
     virtual void OnUpdate(float fElapsedTime) override; // update
     virtual void OnRender() override;                   // render
-    virtual bool OnTest() override;                     // Unit Tests
+    // virtual bool OnTest() override;                     // Unit Tests
 
 public: // PUBLIC ACCESSORS
 

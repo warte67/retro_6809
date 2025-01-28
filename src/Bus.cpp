@@ -114,6 +114,8 @@ void Bus::Error(std::string err_msg, std::string file, int line)
 bool Bus::Run()
 {
     std::cout << clr::indent_push() << clr::CYAN << "Bus::Run() Entry" << clr::RETURN;
+
+    bool bLoggedError = false;
     bool bWasActivated = false;
 
     try
@@ -124,7 +126,9 @@ bool Bus::Run()
         // run the unit tests
         if (!_onTest())
         {
-            Bus::Error("Unit Tests Failed", __FILE__, __LINE__);
+            // Bus::Error("Unit Tests Failed", __FILE__, __LINE__);
+            bLoggedError = true;
+            UnitTest::Log(nullptr, clr::RED + "Unit Tests FAILED! Terminating." );
             Bus::IsRunning(false);
         }
 
@@ -174,6 +178,10 @@ bool Bus::Run()
         // shutdown SDL2 and return with status
         std::cout << clr::indent_pop() << clr::CYAN << "Bus::Run() Exit" << clr::RETURN;
         _onQuit();
+
+        if (DISPLAY_UNIT_TEST_RESULTS || bLoggedError) {
+            UnitTest::print_log_to_console();
+        }
 
         return true;
     }

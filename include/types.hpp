@@ -36,9 +36,7 @@
     constexpr bool MEMORY_MAP_DISPLAY_OUTPUT_FILE_ASM = false;
 
     #define MEMORY_MAP_OUTPUT_FILE_HPP  "./include/Memory_Map.hpp"
-    #define MEMORY_MAP_OUTPUT_FILE_ASM  "./asm/Memory_Map.asm"
-    // #define INITIAL_ASM_APPLICATION     "./asm/test.hex"                    // remove this after we have a valid kernel
-
+    #define MEMORY_MAP_OUTPUT_FILE_ASM  "./asm/Memory_Map.asm"    
     #define KERNEL_ROM_FILENAME         "./asm/Kernel.hex"
 
 
@@ -91,6 +89,10 @@
 
     // FileIO Device Constants:
     constexpr Word FILEHANDLESMAX = 256;
+
+    // Unit Test Constants:
+    #define DISPLAY_RUNTIME_UNIT_TESTS false
+    #define DISPLAY_UNIT_TEST_RESULTS false
 
 
 

@@ -58,8 +58,10 @@ public: // PUBLIC ACCESSORS
     Word GetBaseAddress() { return base_address; }
     void SetBaseAddress(Word address) { base_address = address; }
 
-protected: // PROTECTED ACCESSORS
     std::string name()          { return _device_name; }
+
+
+protected: // PROTECTED ACCESSORS
     void name(std::string n)    { _device_name = n; }
     std::string _device_name = "??DEV??";	
     Word base_address = 0;
@@ -213,6 +215,7 @@ public:
     }  
     bool OnTest() 
     { 
+        UnitTest::TestInit(this, "Testing ...");
         // Check the number of mapped registers
         size_t expectedRegisters = 8; // Number of interrupt vectors
         ASSERT(mapped_register.size() == expectedRegisters, _device_name + ": Incorrect number of mapped registers");
@@ -293,6 +296,8 @@ public:
     }  
     bool OnTest() 
     { 
+        UnitTest::TestInit(this, "Testing ...");
+
         // Check the number of mapped registers
         size_t expectedRegisters = 9; // Number of interrupt vectors
         ASSERT(mapped_register.size() == expectedRegisters, _device_name + ": Incorrect number of mapped registers");
@@ -351,6 +356,8 @@ public:
     }  
     bool OnTest() 
     { 
+        UnitTest::TestInit(this, "Testing ...");
+
         // Check the number of mapped registers
         size_t expectedRegisters = 3; // Number of interrupt vectors
         ASSERT(mapped_register.size() == expectedRegisters, _device_name + ": Incorrect number of mapped registers");
@@ -404,6 +411,8 @@ public:
     }  
     bool OnTest() 
     { 
+        UnitTest::TestInit(this, "Testing ...");
+
         // Check the number of mapped registers
         size_t expectedRegisters = 3; // Number of interrupt vectors
         ASSERT(mapped_register.size() == expectedRegisters, _device_name + ": Incorrect number of mapped registers");
@@ -439,6 +448,8 @@ public:
 
     bool OnTest() 
     { 
+        UnitTest::TestInit(this, "Testing ...");
+
         // Check the number of mapped registers
         size_t expectedRegisters = 1; // Number of interrupt vectors
         ASSERT(mapped_register.size() == expectedRegisters, _device_name + ": Incorrect number of mapped registers");
@@ -481,6 +492,8 @@ public:
     int OnAttach(int nextAddr) override; 
     bool OnTest() 
     { 
+        UnitTest::TestInit(this, "Testing ...");
+
         // Check the number of mapped registers
         size_t expectedRegisters = 8; // Number of interrupt vectors
         ASSERT(mapped_register.size() == expectedRegisters, _device_name + ": Incorrect number of mapped registers");

@@ -503,11 +503,11 @@ void MMU::error(Byte error_code)
     if (error_code < _mmu_error_list.size())
     {
         std::string comment = _mmu_error_list[error_code].second;
-        UnitTest::Log(clr::RED + "MMU Error: " + comment + " $" + clr::hex(error_code, 2) + clr::RESET);
+        UnitTest::Log(this, clr::RED + "MMU Error: " + comment + " $" + clr::hex(error_code, 2) );
     }
     else
     {
-        UnitTest::Log(clr::RED + "MMU Error: Unknown Error $" + clr::hex(error_code, 2) + clr::RESET);
+        UnitTest::Log(this, clr::RED + "MMU Error: Unknown Error $" + clr::hex(error_code, 2) );
     }
 }
 
@@ -589,7 +589,7 @@ Byte MMU::do_pg_alloc()
 
     // Check if the allocation was successful
     if (handle == MMU_BAD_HANDLE) {
-        UnitTest::Log(clr::RED + "Error: Unable to allocate 8KB page!" + clr::RESET);
+        UnitTest::Log(this, clr::RED + "Error: Unable to allocate 8KB page!" );
         error(MAP(MMU_ERR_ALLOC));
         return MAP(MMU_CMD_PG_ALLOC);
     }
@@ -606,8 +606,8 @@ bool MMU::verify_memory(Word base_addr, Byte pattern, size_t size, const std::st
         Byte data = Memory::Read(base_addr + i);
         if (data != pattern) 
         {
-            UnitTest::Log(clr::RED + test_name + " failed at address $" + clr::hex(base_addr + i, 4) + "." + clr::RESET);
-            UnitTest::Log(clr::RED + test_name + " $" + clr::hex(pattern, 2) + " was written, $" + clr::hex(data, 2) + " was read." + clr::RESET);
+            UnitTest::Log(this, clr::RED + test_name + " failed at address $" + clr::hex(base_addr + i, 4) + ".");
+            UnitTest::Log(this, clr::RED + test_name + " $" + clr::hex(pattern, 2) + " was written, $" + clr::hex(data, 2) + " was read.");
             return false;
         }
     }
@@ -634,19 +634,19 @@ bool MMU::_test_pg_alloc() {
     _test_page_RAM_handle = Memory::Read_Word(MAP(MMU_META_HANDLE));
     Memory::Write_Word(MAP(MMU_PAGE_1_SELECT), _test_page_RAM_handle);
     if (_test_page_RAM_handle == MMU_BAD_HANDLE) {
-        UnitTest::Log(clr::RED + "(MMU_CMD_PG_ALLOC) Test 2: Failed to allocate RAM page." + clr::RESET);
+        UnitTest::Log(this, clr::RED + "(MMU_CMD_PG_ALLOC) Test 2: Failed to allocate RAM page.");
         test_results = false;
     } else if (!verify_memory(MAP(BANKMEM_ONE), 0xAA, 8 * 1024, "(MMU_CMD_PG_ALLOC) Test 2: RAM page")) {
         test_results = false;
     }
     if (_mmu_blocks_free != initial_blocks_free - 0x0100) {
-        UnitTest::Log(clr::RED + "(MMU_CMD_PG_ALLOC) Test 2: Incorrect number of free blocks ($" + clr::hex(_mmu_blocks_free, 4) + 
-                                " expected $" + clr::hex(initial_blocks_free - 0x0100, 4) + "." + clr::RESET);
+        UnitTest::Log(this, clr::RED + "(MMU_CMD_PG_ALLOC) Test 2: Incorrect number of free blocks ($" + clr::hex(_mmu_blocks_free, 4) + 
+                                " expected $" + clr::hex(initial_blocks_free - 0x0100, 4) + ".");
         test_results = false;
     }   
     if (initial_blocks_allocated != _mmu_blocks_allocated - 0x0100) {
-        UnitTest::Log(clr::RED + "(MMU_CMD_PG_ALLOC) Test 2: Incorrect number of allocated blocks ($" + clr::hex(_mmu_blocks_allocated, 4) + 
-                                " expected $" + clr::hex(initial_blocks_allocated - 0x0100, 4) + "." + clr::RESET);
+        UnitTest::Log(this, clr::RED + "(MMU_CMD_PG_ALLOC) Test 2: Incorrect number of allocated blocks ($" + clr::hex(_mmu_blocks_allocated, 4) + 
+                                " expected $" + clr::hex(initial_blocks_allocated - 0x0100, 4) + ".");
         test_results = false;
     }   
 
@@ -658,19 +658,19 @@ bool MMU::_test_pg_alloc() {
     _test_page_ROM_handle = Memory::Read_Word(MAP(MMU_META_HANDLE));
     Memory::Write_Word(MAP(MMU_PAGE_2_SELECT), _test_page_ROM_handle);
     if (_test_page_ROM_handle == MMU_BAD_HANDLE) {
-        UnitTest::Log(clr::RED + "(MMU_CMD_PG_ALLOC) Test 3: Failed to allocate ROM page." + clr::RESET);
+        UnitTest::Log(this, clr::RED + "(MMU_CMD_PG_ALLOC) Test 3: Failed to allocate ROM page.");
         test_results = false;
     } else if (!verify_memory(MAP(BANKMEM_TWO), 0x55, 8 * 1024, "(MMU_CMD_PG_ALLOC) Test 3: ROM page")) {
         test_results = false;    
     }
     if (_mmu_blocks_free != initial_blocks_free - 0x0200) {
-        UnitTest::Log(clr::RED + "(MMU_CMD_PG_ALLOC) Test 3: Incorrect number of free blocks ($" + clr::hex(_mmu_blocks_free, 4) + 
-                                " expected $" + clr::hex(initial_blocks_free - 0x0200, 4) + "." + clr::RESET);
+        UnitTest::Log(this, clr::RED + "(MMU_CMD_PG_ALLOC) Test 3: Incorrect number of free blocks ($" + clr::hex(_mmu_blocks_free, 4) + 
+                                " expected $" + clr::hex(initial_blocks_free - 0x0200, 4) + ".");
         test_results = false;
     }   
     if (initial_blocks_allocated != _mmu_blocks_allocated - 0x0200) {
-        UnitTest::Log(clr::RED + "(MMU_CMD_PG_ALLOC) Test 3: Incorrect number of allocated blocks ($" + clr::hex(_mmu_blocks_allocated, 4) + 
-                                " expected $" + clr::hex(initial_blocks_allocated - 0x0200, 4) + "." + clr::RESET);
+        UnitTest::Log(this, clr::RED + "(MMU_CMD_PG_ALLOC) Test 3: Incorrect number of allocated blocks ($" + clr::hex(_mmu_blocks_allocated, 4) + 
+                                " expected $" + clr::hex(initial_blocks_allocated - 0x0200, 4) + ".");
         test_results = false;
     }   
 
@@ -708,7 +708,7 @@ Byte MMU::do_pg_free()
     {
         // Handle the case where the page cannot be freed (invalid state)
         error(MAP(MMU_ERR_PG_FREE));
-        UnitTest::Log(clr::RED + "MMU::do_pg_free() Page Free Failed!" + clr::RESET);
+        UnitTest::Log(this, clr::RED + "MMU::do_pg_free() Page Free Failed!" );
         return MAP(MMU_CMD_PG_FREE);
     }
     return MAP(MMU_CMD_PG_FREE);
@@ -731,14 +731,14 @@ bool MMU::_test_pg_free() {
         // Check the result of freeing the RAM page
         if (_mmu_blocks_free != initial_blocks_free + 0x0100) 
         {
-            UnitTest::Log(clr::RED + "(MMU_CMD_PG_FREE) Test 1: Incorrect number of free blocks ($" + clr::hex(_mmu_blocks_free, 4) + 
-                            " expected $" + clr::hex(initial_blocks_free + 0x0100, 4) + "." + clr::RESET);
+            UnitTest::Log(this, clr::RED + "(MMU_CMD_PG_FREE) Test 1: Incorrect number of free blocks ($" + clr::hex(_mmu_blocks_free, 4) + 
+                            " expected $" + clr::hex(initial_blocks_free + 0x0100, 4) + "." );
             test_results = false;
         }
         if (_mmu_blocks_allocated != initial_blocks_allocated - 0x0100) 
         {
-            UnitTest::Log(clr::RED + "(MMU_CMD_PG_FREE) Test 1: Incorrect number of allocated blocks ($" + clr::hex(_mmu_blocks_allocated, 4) + 
-                            " expected $" + clr::hex(initial_blocks_allocated - 0x0100, 4) + "." + clr::RESET);
+            UnitTest::Log(this, clr::RED + "(MMU_CMD_PG_FREE) Test 1: Incorrect number of allocated blocks ($" + clr::hex(_mmu_blocks_allocated, 4) + 
+                            " expected $" + clr::hex(initial_blocks_allocated - 0x0100, 4) + "." );
             test_results = false;
         }
 
@@ -749,7 +749,7 @@ bool MMU::_test_pg_free() {
     }
     else 
     {
-        UnitTest::Log(clr::RED + "(MMU_CMD_PG_FREE) Test 1: No RAM page allocated to free." + clr::RESET);
+        UnitTest::Log(this, clr::RED + "(MMU_CMD_PG_FREE) Test 1: No RAM page allocated to free." );
         test_results = false;
     }
 
@@ -763,14 +763,14 @@ bool MMU::_test_pg_free() {
         // Check the result of freeing the ROM page
         if (_mmu_blocks_free != initial_blocks_free + 0x0200) 
         {
-            UnitTest::Log(clr::RED + "(MMU_CMD_PG_FREE) Test 2: Incorrect number of free blocks ($" + clr::hex(_mmu_blocks_free, 4) + 
-                            " expected $" + clr::hex(initial_blocks_free + 0x0200, 4) + "." + clr::RESET);
+            UnitTest::Log(this, clr::RED + "(MMU_CMD_PG_FREE) Test 2: Incorrect number of free blocks ($" + clr::hex(_mmu_blocks_free, 4) + 
+                            " expected $" + clr::hex(initial_blocks_free + 0x0200, 4) + "." );
             test_results = false;
         }
         if (_mmu_blocks_allocated != initial_blocks_allocated - 0x0200) 
         {
-            UnitTest::Log(clr::RED + "(MMU_CMD_PG_FREE) Test 2: Incorrect number of allocated blocks ($" + clr::hex(_mmu_blocks_allocated, 4) + 
-                            " expected $" + clr::hex(initial_blocks_allocated - 0x0200, 4) + "." + clr::RESET);
+            UnitTest::Log(this, clr::RED + "(MMU_CMD_PG_FREE) Test 2: Incorrect number of allocated blocks ($" + clr::hex(_mmu_blocks_allocated, 4) + 
+                            " expected $" + clr::hex(initial_blocks_allocated - 0x0200, 4) + "." );
             test_results = false;
         }
         // Verify memory is back to default state (RAM in BANKMEM_TWO).
@@ -781,7 +781,7 @@ bool MMU::_test_pg_free() {
     }
     else 
     {
-        UnitTest::Log(clr::RED + "(MMU_CMD_PG_FREE) Test 2: No ROM page allocated to free." + clr::RESET);
+        UnitTest::Log(this, clr::RED + "(MMU_CMD_PG_FREE) Test 2: No ROM page allocated to free." );
         test_results = false;
     }
 
@@ -915,24 +915,25 @@ bool MMU::_test_alloc()
         // Verify the allocation result for RAM
         _test_rw_handle = Memory::Read_Word(MAP(MMU_META_HANDLE));
         if (_test_rw_handle == MMU_BAD_HANDLE) {
-            UnitTest::Log(clr::RED + "RAM Allocation failed for Handle 1." + clr::RESET);
+            UnitTest::Log(this, clr::RED + "RAM Allocation failed for Handle 1." );
             test_results = false;
         }
         // Verify that There were no allocation errors
         if (_metadata_pool[_test_rw_handle].status & 0b1001'1110) {
-            UnitTest::Log(clr::RED + "Handle 1 has allocation errors." + clr::RESET);
+            UnitTest::Log(this, clr::RED + "Handle 1 has allocation errors." );
             test_results = false;
         }
         // Verify that Handle 1 allocation bit is set
         if (!(_metadata_pool[_test_rw_handle].status & 0b00000001)) {
-            UnitTest::Log(clr::RED + "Handle 1 allocation bit was not set." + clr::RESET);
+            UnitTest::Log(this, clr::RED + "Handle 1 allocation bit was not set." );
             test_results = false;
         }
         // verify node count
         Word count = count_nodes_in_handle(_test_rw_handle);
         if (count != allocation_size) {
-            UnitTest::Log(clr::RED + "Handle 1 Node Number Mismatch." + clr::RESET);
-            UnitTest::Log(clr::RED + "Is: $" + clr::hex(count,4) + " Expected: $" + clr::hex(allocation_size,4) + "." + clr::RESET);
+            UnitTest::Log(this, clr::RED + "Handle 1 Node Number Mismatch." + clr::RESET);
+            UnitTest::Log(this, clr::RED + "Is: $" + clr::hex(count,4) + " Expected: $" + 
+                            clr::hex(allocation_size,4) + "." );
             test_results = false;
         }
     }
@@ -953,24 +954,25 @@ bool MMU::_test_alloc()
         // Verify the allocation result for ROM
         _test_ro_handle = Memory::Read_Word(MAP(MMU_META_HANDLE));
         if (_test_ro_handle == MMU_BAD_HANDLE) {
-            UnitTest::Log(clr::RED + "ROM Allocation failed for Handle 2." + clr::RESET);
+            UnitTest::Log(this, clr::RED + "ROM Allocation failed for Handle 2." );
             test_results = false;
         }
         // Verify that There were no allocation errors
         if (_metadata_pool[_test_ro_handle].status & 0b1001'1010) {
-            UnitTest::Log(clr::RED + "Handle 2 has allocation errors." + clr::RESET);
+            UnitTest::Log(this, clr::RED + "Handle 2 has allocation errors." );
             test_results = false;
         }
         // Verify that Handle 1 allocation and the ROM bits are set
         if (!(_metadata_pool[_test_ro_handle].status & 0b00000101)) {
-            UnitTest::Log(clr::RED + "Handle 2 allocation and/or ROM bit was not set." + clr::RESET);
+            UnitTest::Log(this, clr::RED + "Handle 2 allocation and/or ROM bit was not set." );
             test_results = false;
         }
         // verify node count
         Word count = count_nodes_in_handle(_test_ro_handle);
         if (count != allocation_size) {
-            UnitTest::Log(clr::RED + "Handle 2 Node Number Mismatch." + clr::RESET);
-            UnitTest::Log(clr::RED + "Is: $" + clr::hex(count,4) + " Expected: $" + clr::hex(allocation_size,4) + "." + clr::RESET);
+            UnitTest::Log(this, clr::RED + "Handle 2 Node Number Mismatch." );
+            UnitTest::Log(this, clr::RED + "Is: $" + clr::hex(count,4) + " Expected: $" + 
+                            clr::hex(allocation_size,4) + "." );
             test_results = false;
         }
     }
@@ -991,24 +993,25 @@ bool MMU::_test_alloc()
         // Verify the allocation result for Locked RAM
         _test_lock_handle = Memory::Read_Word(MAP(MMU_META_HANDLE));
         if (_test_lock_handle == MMU_BAD_HANDLE) {
-            UnitTest::Log(clr::RED + "Locked RAM Allocation failed for Handle 3." + clr::RESET);
+            UnitTest::Log(this, clr::RED + "Locked RAM Allocation failed for Handle 3." );
             test_results = false;
         }
         // Verify that There were no allocation errors
         if (_metadata_pool[_test_lock_handle].status & 0b1000'1110) {
-            UnitTest::Log(clr::RED + "Handle 3 has allocation errors." + clr::RESET);
+            UnitTest::Log(this, clr::RED + "Handle 3 has allocation errors." );
             test_results = false;
         }
         // Verify that Handle 1 allocation and the Locked bits are set
         if (!(_metadata_pool[_test_lock_handle].status & 0b0001'0001)) {
-            UnitTest::Log(clr::RED + "Handle 3 allocation and/or Locked bit was not set." + clr::RESET);
+            UnitTest::Log(this, clr::RED + "Handle 3 allocation and/or Locked bit was not set." );
             test_results = false;
         }        
         // verify node count
         Word count = count_nodes_in_handle(_test_lock_handle);
         if (count != allocation_size) {
-            UnitTest::Log(clr::RED + "Handle 3 Node Number Mismatch." + clr::RESET);
-            UnitTest::Log(clr::RED + "Is: $" + clr::hex(count,4) + " Expected: $" + clr::hex(allocation_size,4) + "." + clr::RESET);
+            UnitTest::Log(this, clr::RED + "Handle 3 Node Number Mismatch." );
+            UnitTest::Log(this, clr::RED + "Is: $" + clr::hex(count,4) + " Expected: $" + 
+                    clr::hex(allocation_size,4) + "." );
             test_results = false;
         }
     }
@@ -1016,15 +1019,17 @@ bool MMU::_test_alloc()
     // Step 2: Validate the changes in memory block counts
     Word expected_free_blocks = initial_free_blocks - allocation_size_total;
     if (_mmu_blocks_free != expected_free_blocks) {
-        UnitTest::Log(clr::RED + "Incorrect number of free blocks after allocation." + clr::RESET);
-        UnitTest::Log(clr::RED + "Is $" + clr::hex(_mmu_blocks_free,4) + ", expected $" + clr::hex(expected_free_blocks,4) + "." + clr::RESET);
+        UnitTest::Log(this, clr::RED + "Incorrect number of free blocks after allocation." );
+        UnitTest::Log(this, clr::RED + "Is $" + clr::hex(_mmu_blocks_free,4) + ", expected $" + 
+                    clr::hex(expected_free_blocks,4) + "." );
         test_results = false;
     }
 
     Word expected_allocated_blocks = initial_allocated_blocks + allocation_size_total;
     if (_mmu_blocks_allocated != expected_allocated_blocks) {
-        UnitTest::Log(clr::RED + "Incorrect number of allocated blocks after allocation." + clr::RESET);
-        UnitTest::Log(clr::RED + "Is $" + clr::hex(_mmu_blocks_allocated,4) + ", expected $" + clr::hex(expected_allocated_blocks,4) + "." + clr::RESET);
+        UnitTest::Log(this, clr::RED + "Incorrect number of allocated blocks after allocation." );
+        UnitTest::Log(this, clr::RED + "Is $" + clr::hex(_mmu_blocks_allocated,4) + 
+                ", expected $" + clr::hex(expected_allocated_blocks,4) + "." );
         test_results = false;
     }
 
@@ -1043,7 +1048,7 @@ Byte MMU::do_load_root()
     }
     else
     {
-        UnitTest::Log(clr::RED + "[MMU_CMD_LOAD_ROOT] Command Failed!" + clr::RESET);
+        UnitTest::Log(this, clr::RED + "[MMU_CMD_LOAD_ROOT] Command Failed!" );
         error(MAP(MMU_ERR_NODE));
     }
     return MAP(MMU_CMD_LOAD_ROOT);
@@ -1065,14 +1070,14 @@ bool MMU::_test_load_root()
     // Step 1: Invalid Raw Index Test
     if (!validate_raw_index())
     {
-        UnitTest::Log(clr::RED + "[MMU_CMD_LOAD_ROOT] Invalid Raw Index!" + clr::RESET);
+        UnitTest::Log(this, clr::RED + "[MMU_CMD_LOAD_ROOT] Invalid Raw Index!" );
         test_results = false;
     }
     // Step 2: Invalid Root Node Test
     _mmu_raw_index = 4;
     Word root_handle = _metadata_pool[_mmu_raw_index].root_node;
     if (root_handle == MMU_BAD_HANDLE) {
-        UnitTest::Log(clr::RED + "[MMU_CMD_LOAD_ROOT] Bad Root Node!" + clr::RESET);
+        UnitTest::Log(this, clr::RED + "[MMU_CMD_LOAD_ROOT] Bad Root Node!" );
         test_results = false;
     }
     // Step 3: Valid Root Node Test
@@ -1080,7 +1085,7 @@ bool MMU::_test_load_root()
     {
         Memory::Write(MAP(MMU_COMMAND), (Byte)MAP(MMU_CMD_LOAD_ROOT));
         if (_mmu_raw_index != root_handle) {
-            UnitTest::Log(clr::RED + "[MMU_CMD_LOAD_ROOT] Command Failed!" + clr::RESET);
+            UnitTest::Log(this, clr::RED + "[MMU_CMD_LOAD_ROOT] Command Failed!" );
             test_results = false;
         }
     }        
@@ -1099,7 +1104,7 @@ Byte MMU::do_load_next()
     }
     else
     {
-        UnitTest::Log(clr::RED + "[MMU_CMD_LOAD_NEXT] Command Failed!" + clr::RESET);
+        UnitTest::Log(this, clr::RED + "[MMU_CMD_LOAD_NEXT] Command Failed!" );
         error(MAP(MMU_ERR_NODE));
     }
     return MAP(MMU_CMD_LOAD_NEXT);
@@ -1113,7 +1118,7 @@ bool MMU::_test_load_next()
     Memory::Write(MAP(MMU_COMMAND), (Byte)MAP(MMU_CMD_LOAD_NEXT));
     // Step 3: Check if _mmu_raw_index matches the next node
     if (_metadata_pool[_test_ro_handle].next_node != _mmu_raw_index) {
-        UnitTest::Log(clr::RED + "[MMU_CMD_LOAD_NEXT] Command Failed!" + clr::RESET);
+        UnitTest::Log(this, clr::RED + "[MMU_CMD_LOAD_NEXT] Command Failed!" );
         test_results = false;        
     }
     // Step 4: Return the final test result
@@ -1129,7 +1134,7 @@ Byte MMU::do_load_prev()
     }
     else
     {
-        UnitTest::Log(clr::RED + "[MMU_CMD_LOAD_PREV] Command Failed!" + clr::RESET);
+        UnitTest::Log(this, clr::RED + "[MMU_CMD_LOAD_PREV] Command Failed!" );
         error(MAP(MMU_ERR_NODE));
     }
     return MAP(MMU_CMD_LOAD_PREV);
@@ -1153,18 +1158,18 @@ bool MMU::_test_load_prev()
     const Word expected_prev_node = 3;
     if (_mmu_raw_index != expected_prev_node)
     {  
-        UnitTest::Log(clr::RED + "[MMU_CMD_LOAD_PREV] Failed to Move to the Correct Node!" + clr::RESET);
+        UnitTest::Log(this, clr::RED + "[MMU_CMD_LOAD_PREV] Failed to Move to the Correct Node!" );
         test_results = false;
     }
 
     // Step 5: Check if _mmu_raw_index matches the previous node
     if (_metadata_pool[_mmu_raw_index].next_node != last_node) {
-        UnitTest::Log(clr::RED + "[MMU_CMD_LOAD_PREV] Failed to Link to the Next Node!" + clr::RESET);
+        UnitTest::Log(this, clr::RED + "[MMU_CMD_LOAD_PREV] Failed to Link to the Next Node!" );
         test_results = false;        
     }
     // Step 6: Check if _mmu_raw_index matches the previous node
     if (_metadata_pool[last_node].prev_node != _mmu_raw_index) {
-        UnitTest::Log(clr::RED + "[MMU_CMD_LOAD_PREV] Failed to Link to the Previous Node!" + clr::RESET);
+        UnitTest::Log(this, clr::RED + "[MMU_CMD_LOAD_PREV] Failed to Link to the Previous Node!" );
         test_results = false;        
     }
     
@@ -1187,7 +1192,7 @@ bool MMU::_test_load_last()
     _mmu_raw_index = _test_lock_handle;
     if (!validate_raw_index())
     {
-        UnitTest::Log(clr::RED + "[MMU_CMD_LOAD_LAST] Invalid Raw Index!" + clr::RESET);
+        UnitTest::Log(this, clr::RED + "[MMU_CMD_LOAD_LAST] Invalid Raw Index!" );
         test_results = false;
     }
     // Step 2: Single 32-Byte Node Test
@@ -1202,21 +1207,21 @@ bool MMU::_test_load_last()
         Word expected_last_node = 11;
         if (_mmu_raw_index != expected_last_node)
         {  
-            UnitTest::Log(clr::RED + "[MMU_CMD_LOAD_LAST] Failed to Move to the Correct Node!" + clr::RESET);
+            UnitTest::Log(this, clr::RED + "[MMU_CMD_LOAD_LAST] Failed to Move to the Correct Node!" );
             test_results = false;
         }
 
         // Step 4: Check if _mmu_raw_index matches the starting handle
         if (_mmu_raw_index == _test_lock_handle)
         {
-            UnitTest::Log(clr::RED + "[MMU_CMD_LOAD_LAST] Node Not Found!" + clr::RESET);
+            UnitTest::Log(this, clr::RED + "[MMU_CMD_LOAD_LAST] Node Not Found!" );
             test_results = false;
         }
 
         // Step 5: Check if _mmu_raw_index correctly points to the root node
         if (_metadata_pool[_mmu_raw_index].root_node != _test_lock_handle) 
         {
-            UnitTest::Log(clr::RED + "[MMU_CMD_LOAD_LAST] Failed! Invalid Root." + clr::RESET);
+            UnitTest::Log(this, clr::RED + "[MMU_CMD_LOAD_LAST] Failed! Invalid Root." );
             test_results = false;    
         }  
     }
@@ -1232,7 +1237,7 @@ Byte MMU::do_del_node()
 
     // 2. Validate that the node exists and is allocated
     if (handle == MMU_BAD_HANDLE || (_metadata_pool[handle].status & 0x01) != 0x01) {
-        UnitTest::Log(clr::RED + "Error: Invalid node or node not allocated!" + clr::RESET);
+        UnitTest::Log(this, clr::RED + "Error: Invalid node or node not allocated!" );
         error(MAP(MMU_ERR_NODE));
         return MAP(MMU_CMD_DEL_NODE);
     }
@@ -1241,7 +1246,7 @@ Byte MMU::do_del_node()
     Word page_handle = _metadata_pool[handle].root_node;
     if (page_handle != MMU_BAD_HANDLE) {
         // Node is part of an active page allocation, cannot delete it directly
-        UnitTest::Log(clr::RED + "Error: Node is part of an active page and cannot be deleted!" + clr::RESET);
+        UnitTest::Log(this, clr::RED + "Error: Node is part of an active page and cannot be deleted!" );
         error(MAP(MMU_ERR_NODE));
         return MAP(MMU_CMD_DEL_NODE);
     }
@@ -1325,7 +1330,7 @@ Byte MMU::do_ins_before() {
 
     // 2. Validate that the target node exists and is allocated
     if (target_handle == MMU_BAD_HANDLE || (_metadata_pool[target_handle].status & 0x01) == 0) {
-        UnitTest::Log(clr::RED + "Error: Invalid target node or node not allocated!" + clr::RESET);
+        UnitTest::Log(this, clr::RED + "Error: Invalid target node or node not allocated!" );
         error(MAP(MMU_ERR_NODE));
         return MAP(MMU_CMD_INS_BEFORE);
     }
@@ -1337,7 +1342,7 @@ Byte MMU::do_ins_before() {
 
     // 4. Check if the allocation was successful
     if (new_handle == MMU_BAD_HANDLE) {
-        UnitTest::Log(clr::RED + "Error: Unable to allocate new node!" + clr::RESET);
+        UnitTest::Log(this, clr::RED + "Error: Unable to allocate new node!" );
         error(MAP(MMU_ERR_ALLOC));
         return MAP(MMU_CMD_INS_BEFORE);
     }
@@ -1376,7 +1381,7 @@ Byte MMU::do_ins_before() {
         }
     }
 
-    // 9. Optionally add the new handle to the handles list if necessary
+    // 9. Add the new handle to the handles list
     _handles.push_back(new_handle);
 
     // 10. Return the appropriate command for the operation
@@ -1437,7 +1442,7 @@ Byte MMU::do_ins_after() {
 
     // 2. Validate that the target node exists and is allocated
     if (target_handle == MMU_BAD_HANDLE || (_metadata_pool[target_handle].status & 0x01) == 0) {
-        UnitTest::Log(clr::RED + "Error: Invalid target node or node not allocated!" + clr::RESET);
+        UnitTest::Log(this, clr::RED + "Error: Invalid target node or node not allocated!" );
         error(MAP(MMU_ERR_NODE));
         return MAP(MMU_CMD_INS_AFTER);
     }
@@ -1449,7 +1454,7 @@ Byte MMU::do_ins_after() {
 
     // 4. Check if the allocation was successful
     if (new_handle == MMU_BAD_HANDLE) {
-        UnitTest::Log(clr::RED + "Error: Unable to allocate new node!" + clr::RESET);
+        UnitTest::Log(this, clr::RED + "Error: Unable to allocate new node!" );
         error(MAP(MMU_ERR_ALLOC));
         return MAP(MMU_CMD_INS_AFTER);
     }
@@ -1772,11 +1777,9 @@ bool MMU::_test_free()
 Byte MMU::do_defrag() {
     // Check if there are any fragmented blocks to defragment
     if (_mmu_blocks_fragged == 0) {
-        UnitTest::Log(clr::YELLOW + "No fragmentation detected. Defrag skipped." + clr::RESET);
+        UnitTest::Log(this, clr::YELLOW + "No fragmentation detected. Defrag skipped." + clr::RESET);
         return MAP(MMU_CMD_DEFRAG);
     }
-
-    UnitTest::Log("Defragmentation started...");
 
     // // Initialize necessary variables for tracking the defrag process
     // Word current_node = _mmu_raw_index;  // Start from the root node
@@ -1833,7 +1836,7 @@ Byte MMU::do_defrag() {
     //     _metadata_pool[first_fragmented_node].root_node = _mmu_raw_index;
     // }
 
-    UnitTest::Log(clr::GREEN + "Defragmentation completed successfully!" + clr::RESET);
+    UnitTest::Log(this, clr::GREEN + "Defragmentation completed successfully!" );
     return MAP(MMU_CMD_DEFRAG);
 }
 
@@ -1921,7 +1924,7 @@ Byte MMU::do_reset() {
     }
 
 
-    UnitTest::Log(clr::GREEN + "MMU has been reset successfully!" + clr::RESET);
+    UnitTest::Log(this, clr::GREEN + "MMU has been reset successfully!" );
     return MAP(MMU_CMD_RESET);
 }
 
@@ -1955,18 +1958,23 @@ bool MMU::OnTest()
     // Perform Unit Tests for each command
     for (const auto& command : _mmu_command_list) 
     {
+        UnitTest::TestInit(this, "Testing " + clr::YELLOW + command.key + clr::RESET);
         if (!command.test()) 
         {
-            UnitTest::Log(clr::RED + "Test failed for command: " + command.key);
+            UnitTest::Log(this, clr::RED + "command " + clr::YELLOW + command.key + " " + clr::RED + "FAILED! ");
             all_tests_passed = false;
+        }
+        else
+        {
+            UnitTest::Log(this, clr::GREEN + "command " + clr::YELLOW + command.key + " " + clr::GREEN + "PASSED! ");
         }
     }
 
     // Display the result of the tests
     if (all_tests_passed)
-        UnitTest::Log(clr::WHITE + _device_name + clr::GREEN + " Unit Tests PASSED" + clr::RESET);
+        UnitTest::Log(this, "Unit Tests PASSED" );
     else
-        UnitTest::Log(clr::WHITE + _device_name + clr::RED + " Unit Tests FAILED" + clr::RESET);
+        UnitTest::Log(this, clr::RED + "Unit Tests FAILED" );
 
     return all_tests_passed;
 }
@@ -2007,7 +2015,7 @@ void MMU::deallocate_handle(Word handle)
     // Ensure the handle is valid
     if (handle >= _metadata_pool.size()) {
         // Handle invalid index
-        UnitTest::Log(clr::RED + "Error: Invalid handle!" + clr::RESET);
+        UnitTest::Log(this, clr::RED + "Error: Invalid handle!");
         return;
     }
 
@@ -2105,7 +2113,7 @@ Byte BANKED_MEM::bank_read(Word address)
                     --node_num;
                     if (current_node == MMU::MMU_BAD_HANDLE) 
                     { 
-                        UnitTest::Log(clr::RED + "BANKED_MEM Page Read Error!" + clr::RESET);
+                        UnitTest::Log(this, clr::RED + "BANKED_MEM Page Read Error!" );
                         Bus::Error("BANKED_MEM Page Read Error!", __FILE__, __LINE__);
                         return 0; 
                     }
@@ -2160,7 +2168,7 @@ void BANKED_MEM::bank_write(Word address, Byte data)
                     --node_num;
                     if (current_node == MMU::MMU_BAD_HANDLE) 
                     { 
-                        UnitTest::Log(clr::RED + "BANKED_MEM Page Write Error!" + clr::RESET);
+                        UnitTest::Log(this, clr::RED + "BANKED_MEM Page Write Error!" );
                         Bus::Error("BANKED_MEM Page Write Error!", __FILE__, __LINE__);
                         return; 
                     }

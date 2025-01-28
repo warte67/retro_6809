@@ -21,8 +21,8 @@
 
 bool IDevice::OnTest() 
 {
-    std::string msg = "No unit tests defined for " + _device_name + ".";
-    UnitTest::Log(msg);
+    std::string msg = clr::DARK +"No unit tests defined for " + _device_name + ".";
+    UnitTest::Log(this, msg);
     return true; 
 }
 
