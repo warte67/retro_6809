@@ -233,21 +233,45 @@ private: // PRIVATE MEMBERS
     // Extended Graphics Registers
     //
         
-    MEM_DSPLY_SIZE   = 0xFF83, // (Word) Extended Graphics Buffer Size
+    GPU_VIDEO_SIZE  (Word)      // (Word) Extended Graphics Buffer Size (Read Only)
+                                // The primary extended graphics buffer
+                                // always begins at $0000.
         
-    MEM_EXT_ADDR     = 0xFF85, // (Word) Extended Memory Address Port
-    MEM_EXT_PITCH    = 0xFF87, // (Word) number of bytes per line
-    MEM_EXT_WIDTH    = 0xFF89, // (Word) width before skipping to next line
-    MEM_EXT_DATA     = 0xFF8B, // (Byte) External Memory Data Port
+    GPU_MEM_ADDR    (Word)      // (Word) Extended Memory Address Port
+    GPU_MEM_PITCH   (Word)      // (Word) number of bytes per line
+    GPU_MEM_WIDTH   (Word)      // (Word) width before skipping to next line
+    GPU_MEM_DATA    (Byte)      // (Byte) GPU Memory Data Port
+
+    GPU_ARG_1       (Word)      // Argument 1
+    GPU_ARG_2       (Word)      // Argument 2
+    GPU_COMMAND     (Byte)      // Graphics Processing Unit Command
+        GPU_CMD_COPY    = 0x00, // Copy Memory to Video Buffer
+        GPU_CMD_CLEAR   = 0x01, // Clear Video Buffer
+        GPU_CMD_SCROLL  = 0x02, // Scroll Video Buffer        
+        ... etc
+
+    
+
+
+
+
+
+
+
         
-    MEM_DYN_SIZE     = 0xFF8C, // (Word) dynamic memory block size
+
+
+
+
+    // Potential GPU Dynamic Memory Registers    
+    GPU_DYN_SIZE     = 0xFF8C, // (Word) dynamic memory block size
         //      Notes: Memory allocation occurs when the 
         //             least-significant byte is written.
         //             Reads as total number of bytes allocated
         //             or freed. When $0000 is written to this 
         //             port, memory node at MEM_DYN_ADDR is freed.
-    MEM_DYN_ADDR     = 0xFF8E, // (Word) address of a dynamic memory node
-    MEM_DYN_AVAIL    = 0xFF90, // (Word) number of non-allocated bytes
+    GPU_DYN_ADDR     = 0xFF8E, // (Word) address of a dynamic memory node
+    GPU_DYN_AVAIL    = 0xFF90, // (Word) number of non-allocated bytes
 
     //
     // Sprite Registers
