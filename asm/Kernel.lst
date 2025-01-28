@@ -567,20 +567,20 @@ FE94                  MMU_COMMAND           equ    $FE94    ; (Byte) Memory Mana
 0001                  MMU_CMD_PG_ALLOC      equ    $0001    ;    $01 = Page Allocate (8K Bytes)
 0002                  MMU_CMD_PG_FREE       equ    $0002    ;    $02 = Page Deallocate (8K Bytes)
 0003                  MMU_CMD_ALLOC         equ    $0003    ;    $03 = Allocate Chain (< 8K Bytes)
-0004                  MMU_CMD_FREE          equ    $0004    ;    $04 = Deallocate Chain (< 8K Bytes)
-0005                  MMU_CMD_LOAD_ROOT     equ    $0005    ;    $05 = Load Root Node
-0006                  MMU_CMD_LOAD_NEXT     equ    $0006    ;    $06 = Load Next Node
-0007                  MMU_CMD_LOAD_PREV     equ    $0007    ;    $07 = Load Prev Node
-0008                  MMU_CMD_LOAD_LAST     equ    $0008    ;    $08 = Load Last Node
-0009                  MMU_CMD_DEL_NODE      equ    $0009    ;    $09 = Remove Current Node (and Adjust Links)
-000A                  MMU_CMD_INS_BEFORE    equ    $000A    ;    $0A = Insert Node Before (and activate)
-000B                  MMU_CMD_INS_AFTER     equ    $000B    ;    $0B = Insert Node After (and activate)
-000C                  MMU_CMD_PUSH_BACK     equ    $000C    ;    $0C = Push Back (and activate)
-000D                  MMU_CMD_PUSH_FRONT    equ    $000D    ;    $0D = Push Front (and activate)
-000E                  MMU_CMD_POP_BACK      equ    $000E    ;    $0E = Pop Back (and activate)
-000F                  MMU_CMD_POP_FRONT     equ    $000F    ;    $0F = Pop Front (and activate)
-0010                  MMU_CMD_LOCK_NODE     equ    $0010    ;    $10 = Lock Node
-0011                  MMU_CMD_UNLOCK_NODE   equ    $0011    ;    $11 = Unlock Node
+0004                  MMU_CMD_LOAD_ROOT     equ    $0004    ;    $04 = Load Root Node
+0005                  MMU_CMD_LOAD_NEXT     equ    $0005    ;    $05 = Load Next Node
+0006                  MMU_CMD_LOAD_PREV     equ    $0006    ;    $06 = Load Prev Node
+0007                  MMU_CMD_LOAD_LAST     equ    $0007    ;    $07 = Load Last Node
+0008                  MMU_CMD_DEL_NODE      equ    $0008    ;    $08 = Remove Current Node (and Adjust Links)
+0009                  MMU_CMD_INS_BEFORE    equ    $0009    ;    $09 = Insert Node Before (and activate)
+000A                  MMU_CMD_INS_AFTER     equ    $000A    ;    $0A = Insert Node After (and activate)
+000B                  MMU_CMD_PUSH_BACK     equ    $000B    ;    $0B = Push Back (and activate)
+000C                  MMU_CMD_PUSH_FRONT    equ    $000C    ;    $0C = Push Front (and activate)
+000D                  MMU_CMD_POP_BACK      equ    $000D    ;    $0D = Pop Back (and activate)
+000E                  MMU_CMD_POP_FRONT     equ    $000E    ;    $0E = Pop Front (and activate)
+000F                  MMU_CMD_LOCK_NODE     equ    $000F    ;    $0F = Lock Node
+0010                  MMU_CMD_UNLOCK_NODE   equ    $0010    ;    $10 = Unlock Node
+0011                  MMU_CMD_FREE          equ    $0011    ;    $11 = Deallocate Chain (< 8K Bytes)
 0012                  MMU_CMD_DEFRAG        equ    $0012    ;    $12 = Defragment / Collect Garbage
 0013                  MMU_CMD_RESET         equ    $0013    ;    $13 = Reset Memory Management Unit
 0014                  MMU_CMD_SIZE          equ    $0014    ;    $14 = Total Number of MMU Commands
@@ -593,7 +593,8 @@ FE95                  MMU_ERROR             equ    $FE95    ; (Byte) Memory Mana
 0004                  MMU_ERR_INVALID       equ    $0004    ;    $04 = Invalid Command
 0005                  MMU_ERR_HANDLE        equ    $0005    ;    $05 = Invalid Handle
 0006                  MMU_ERR_NODE          equ    $0006    ;    $06 = Invalid Node
-0007                  MMU_ERR_SIZE          equ    $0007    ;    $07 = Total Number of MMU Errors
+0007                  MMU_ERR_RAW_INDEX     equ    $0007    ;    $07 = Invalid Raw Index
+0008                  MMU_ERR_SIZE          equ    $0008    ;    $08 = Total Number of MMU Errors
                                                             ; 
 FE96                  MMU_META_HANDLE       equ    $FE96    ; (Word) Handle for the current allocation chain
                                                             ; 
@@ -611,7 +612,7 @@ FE99                  MMU_META_DATA         equ    $FE99    ; (32-Bytes) Data Wi
 FEB9                  MMU_META_ROOT         equ    $FEB9    ; (Word) Root node of the current allocation       (Read Only)
 FEBB                  MMU_META_PREV         equ    $FEBB    ; (Word) Previous node of the current allocation   (Read Only)
 FEBD                  MMU_META_NEXT         equ    $FEBD    ; (Word) Next node of the current allocation       (Read Only)
-FEBF                  MMU_RAW_INDEX         equ    $FEBF    ; (Word) Raw Index of the current memory node  (For Debugging)
+FEBF                  MMU_RAW_INDEX         equ    $FEBF    ; (Word) Raw Index of the current memory node  (Node Window)
                                                             ; 
 FEC0                  MMU_END               equ    $FEC0    ; End of Banked Memory Register Space
 FEC1                  MMU_TOP               equ    $FEC1    ; Top of Banked Memory Register Space

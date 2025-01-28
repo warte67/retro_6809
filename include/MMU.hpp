@@ -134,6 +134,7 @@ private:
     Word _mmu_2_select = MMU_BAD_HANDLE;    
     // MMU_2_SELECT                 ; (Word) Page Select for 8K Memory Bank 2
 
+    const size_t MMU_MEMORY_SIZE = 0xCCCC;    // 52'428 32-Byte Dynamically Allocatable Blocks
     Word _mmu_blocks_free = MMU_MEMORY_SIZE;
     // MMU_BLOCKS_FREE              ; (Word) Number of 32-Byte Blocks Available for Allocation
 
@@ -164,7 +165,6 @@ private:
         {"MMU_CMD_PG_ALLOC"   , "Page Allocate (8K Bytes)",                 [this]() -> Byte { return do_pg_alloc(); },     [this]() -> bool { return _test_pg_alloc(); }},
         {"MMU_CMD_PG_FREE"    , "Page Deallocate (8K Bytes)",               [this]() -> Byte { return do_pg_free(); },      [this]() -> bool { return _test_pg_free(); }},
         {"MMU_CMD_ALLOC"      , "Allocate Chain (< 8K Bytes)",              [this]() -> Byte { return do_alloc(); },        [this]() -> bool { return _test_alloc(); }},
-        {"MMU_CMD_FREE"       , "Deallocate Chain (< 8K Bytes)",            [this]() -> Byte { return do_free(); },         [this]() -> bool { return _test_free(); }},
         {"MMU_CMD_LOAD_ROOT"  , "Load Root Node",                           [this]() -> Byte { return do_load_root(); },    [this]() -> bool { return _test_load_root(); }},
         {"MMU_CMD_LOAD_NEXT"  , "Load Next Node",                           [this]() -> Byte { return do_load_next(); },    [this]() -> bool { return _test_load_next(); }},
         {"MMU_CMD_LOAD_PREV"  , "Load Prev Node",                           [this]() -> Byte { return do_load_prev(); },    [this]() -> bool { return _test_load_prev(); }},
@@ -178,6 +178,7 @@ private:
         {"MMU_CMD_POP_FRONT"  , "Pop Front (and activate)",                 [this]() -> Byte { return do_pop_front(); },    [this]() -> bool { return _test_pop_front(); }},
         {"MMU_CMD_LOCK_NODE"  , "Lock Node",                                [this]() -> Byte { return do_lock_node(); },    [this]() -> bool { return _test_lock_node(); }},
         {"MMU_CMD_UNLOCK_NODE", "Unlock Node",                              [this]() -> Byte { return do_unlock_node(); },  [this]() -> bool { return _test_unlock_node(); }},
+        {"MMU_CMD_FREE"       , "Deallocate Chain (< 8K Bytes)",            [this]() -> Byte { return do_free(); },         [this]() -> bool { return _test_free(); }},
         {"MMU_CMD_DEFRAG"     , "Defragment / Collect Garbage",             [this]() -> Byte { return do_defrag(); },       [this]() -> bool { return _test_defrag(); }},
         {"MMU_CMD_RESET"      , "Reset Memory Management Unit",             [this]() -> Byte { return do_reset(); },        [this]() -> bool { return _test_reset(); }},
         {"MMU_CMD_SIZE"       , "Total Number of MMU Commands",             [this]() -> Byte { return do_size(); },         [this]() -> bool { return _test_size(); }}
@@ -192,6 +193,7 @@ private:
         { "MMU_ERR_INVALID",    "Invalid Command" },
         { "MMU_ERR_HANDLE",     "Invalid Handle" },
         { "MMU_ERR_NODE",       "Invalid Node" },
+        { "MMU_ERR_RAW_INDEX",  "Invalid Raw Index" },
         { "MMU_ERR_SIZE",       "Total Number of MMU Errors" }
     };
 
@@ -213,27 +215,33 @@ private:
     // MMU_META_DATA                ; (32-Bytes) 32-Byte data for the current allocation chain
 
     Word _mmu_raw_index = 0;        // This is the index of the currently windowed METADATA_NODE
-    // MMU_RAW_INDEX                ; Raw Index of the current memory node (For Debugging)
+    // MMU_RAW_INDEX                ; Raw Index of the current memory node (node window)
 
     // *************** //
     // UNIT TEST STUFF //
     // *************** //
 
-    Word _test_rw_handle   = 0xFFFF;
-    Word _test_ro_handle   = 0xFFFF;
-    Word _test_lock_handle = 0xFFFF;
-    Word _test_page_handle = 0xFFFF;
+    Word _test_rw_handle        = MMU_BAD_HANDLE;
+    Word _test_ro_handle        = MMU_BAD_HANDLE;
+    Word _test_lock_handle      = MMU_BAD_HANDLE;
+    Word _test_page_RAM_handle  = MMU_BAD_HANDLE;
+    Word _test_page_ROM_handle  = MMU_BAD_HANDLE;
 
     // ************************* //
     // DATA TYPES AND STRUCTURES //
     // ************************* //
 
+    bool verify_memory(Word base_addr, Byte pattern, size_t size, const std::string& test_name);
     Word create_handle();
     void deallocate_handle(Word handle);
 
     inline static MMU* _mmu;
     inline static MMU* instance() { return _mmu; }
     Word allocate_new_node();
+    Word count_nodes_in_handle(Word handle);
+    bool validate_raw_index();      // true if _mmu_raw_index is valid, false if not
+                                    // sets _mmu_raw_index to MMU_MEMORY_SIZE-1 if invalid
+
     
     std::vector<Word> _handles;  // Holds the allocated memory handles (root node indices)
 
@@ -254,8 +262,7 @@ private:
         Word next_node;             // index of the child node in this allocation        
     };
     // Allocate within the 2MB memory pool (Each METADATA_NODE represents 8-bytes)
-    //      ( the metadata pool will be 52'428 * 8 = 419'424 bytes. MMU_MEMORY_SIZE = 52'428 )
-    const size_t MMU_MEMORY_SIZE = 0xCCCC;    // 52'428 32-Byte Dynamically Allocatable Blocks
+    //      ( the metadata pool will be 52'428 * 8 = 419'424 bytes. MMU_MEMORY_SIZE = 52'428 )    
     std::vector<METADATA_NODE> _metadata_pool = std::vector<METADATA_NODE>(MMU_MEMORY_SIZE);
 };
 
@@ -366,15 +373,14 @@ public:
 
     std::vector<CommandInfo> _mmu_command_list = {
     //    CONSTANT             , DESCRIPTION                                , FUNCTION POINTER FOR THE COMMAND,             , FUNCTION POINTER FOR THE UNIT TEST
-        {"MMU_CMD_NOP"        , "No Operation / Error",                     [this]() -> Byte { return do_nop(); },          [this]() -> bool { return _test_nop(); }},
-        {"MMU_CMD_PG_ALLOC"   , "Page Allocate (8K Bytes)",                 [this]() -> Byte { return do_pg_alloc(); },     [this]() -> bool { return _test_pg_alloc(); }},
-        {"MMU_CMD_PG_FREE"    , "Page Deallocate (8K Bytes)",               [this]() -> Byte { return do_pg_free(); },      [this]() -> bool { return _test_pg_free(); }},
-        {"MMU_CMD_ALLOC"      , "Allocate Chain (< 8K Bytes)",              [this]() -> Byte { return do_alloc(); },        [this]() -> bool { return _test_alloc(); }},
-        {"MMU_CMD_FREE"       , "Deallocate Chain (< 8K Bytes)",            [this]() -> Byte { return do_free(); },         [this]() -> bool { return _test_free(); }},
-        {"MMU_CMD_LOAD_ROOT"  , "Load Root Node",                           [this]() -> Byte { return do_load_root(); },    [this]() -> bool { return _test_load_root(); }},
-        {"MMU_CMD_LOAD_NEXT"  , "Load Next Node",                           [this]() -> Byte { return do_load_next(); },    [this]() -> bool { return _test_load_next(); }},
-        {"MMU_CMD_LOAD_PREV"  , "Load Prev Node",                           [this]() -> Byte { return do_load_prev(); },    [this]() -> bool { return _test_load_prev(); }},
-        {"MMU_CMD_LOAD_LAST"  , "Load Last Node",                           [this]() -> Byte { return do_load_last(); },    [this]() -> bool { return _test_load_last(); }},
+        *{"MMU_CMD_NOP"        , "No Operation / Error",                     [this]() -> Byte { return do_nop(); },          [this]() -> bool { return _test_nop(); }},
+        *{"MMU_CMD_PG_ALLOC"   , "Page Allocate (8K Bytes)",                 [this]() -> Byte { return do_pg_alloc(); },     [this]() -> bool { return _test_pg_alloc(); }},
+        *{"MMU_CMD_PG_FREE"    , "Page Deallocate (8K Bytes)",               [this]() -> Byte { return do_pg_free(); },      [this]() -> bool { return _test_pg_free(); }},
+        *{"MMU_CMD_ALLOC"      , "Allocate Chain (< 8K Bytes)",              [this]() -> Byte { return do_alloc(); },        [this]() -> bool { return _test_alloc(); }},
+        *{"MMU_CMD_LOAD_ROOT"  , "Load Root Node",                           [this]() -> Byte { return do_load_root(); },    [this]() -> bool { return _test_load_root(); }},
+        *{"MMU_CMD_LOAD_NEXT"  , "Load Next Node",                           [this]() -> Byte { return do_load_next(); },    [this]() -> bool { return _test_load_next(); }},
+        *{"MMU_CMD_LOAD_PREV"  , "Load Prev Node",                           [this]() -> Byte { return do_load_prev(); },    [this]() -> bool { return _test_load_prev(); }},
+        *{"MMU_CMD_LOAD_LAST"  , "Load Last Node",                           [this]() -> Byte { return do_load_last(); },    [this]() -> bool { return _test_load_last(); }},
         {"MMU_CMD_DEL_NODE"   , "Remove Current Node (and Adjust Links)",   [this]() -> Byte { return do_del_node(); },     [this]() -> bool { return _test_del_node(); }},
         {"MMU_CMD_INS_BEFORE" , "Insert Node Before (and activate)",        [this]() -> Byte { return do_ins_before(); },   [this]() -> bool { return _test_ins_before(); }},
         {"MMU_CMD_INS_AFTER"  , "Insert Node After (and activate)",         [this]() -> Byte { return do_ins_after(); },    [this]() -> bool { return _test_ins_after(); }},
@@ -384,21 +390,27 @@ public:
         {"MMU_CMD_POP_FRONT"  , "Pop Front (and activate)",                 [this]() -> Byte { return do_pop_front(); },    [this]() -> bool { return _test_pop_front(); }},
         {"MMU_CMD_LOCK_NODE"  , "Lock Node",                                [this]() -> Byte { return do_lock_node(); },    [this]() -> bool { return _test_lock_node(); }},
         {"MMU_CMD_UNLOCK_NODE", "Unlock Node",                              [this]() -> Byte { return do_unlock_node(); },  [this]() -> bool { return _test_unlock_node(); }},
+        {"MMU_CMD_FREE"       , "Deallocate Chain (< 8K Bytes)",            [this]() -> Byte { return do_free(); },         [this]() -> bool { return _test_free(); }},
         {"MMU_CMD_DEFRAG"     , "Defragment / Collect Garbage",             [this]() -> Byte { return do_defrag(); },       [this]() -> bool { return _test_defrag(); }},
         {"MMU_CMD_RESET"      , "Reset Memory Management Unit",             [this]() -> Byte { return do_reset(); },        [this]() -> bool { return _test_reset(); }},
         {"MMU_CMD_SIZE"       , "Total Number of MMU Commands",             [this]() -> Byte { return do_size(); },         [this]() -> bool { return _test_size(); }}
     };
+    * Completed
 
 
     Test Considerations:
-
-        X. Test Default Memory Pages
-            Fill BANKMEM_ONE with default predictable data
-            Fill BANKMEM_TWO with default predictable data
-            Verify BANKMEM_ONE contains default predictable data
-            Verify BANKMEM_TWO contains default predictable data
-
-        X. MMU_CMD_PG_ALLOC
+    bool test_results = true;
+    // Step 1: Set _mmu_raw_index to a valid handle (e.g., _test_ro_handle)
+    _mmu_raw_index = _test_ro_handle;
+    // Step 2: Execute the MMU_CMD_LOAD_NEXT command
+    Memory::Write(MAP(MMU_COMMAND), (Byte)MAP(MMU_CMD_LOAD_NEXT));
+    // Step 3: Check if _mmu_raw_index matches the next node
+    if (_metadata_pool[_test_ro_handle].next_node != _mmu_raw_index) {
+        UnitTest::Log(clr::RED + "[MMU_CMD_LOAD_NEXT] Command Failed!" + clr::RESET);
+        test_results = false;        
+    }
+    // Step 4: Return the final test result
+    return test_results;
             Create a RAM page and load it into BANKMEM_ONE
             Create a ROM page and load it into BANKMEM_TWO
                 Fill BANKMEM_ONE with predictable data
@@ -411,7 +423,7 @@ public:
             Verify BANKMEM_TWO contains the original default predictable data
             Verify blocks_free == 0xCCCC and blocks_allocated == 0           
 
-        X. Allocate three dynamatic nodes (handle 1, 2, 3)
+        X. Allocate three dynamatic nodes chains 3 long (handle 1, 2, 3)
             Handle 1 should be allocated as RAM
             Handle 2 should be allocated as ROM
             Handle 3 should be allocated as Locked RAM

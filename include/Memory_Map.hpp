@@ -545,20 +545,20 @@ enum MEMMAP
     MMU_CMD_PG_ALLOC      = 0x0001,   //    $01 = Page Allocate (8K Bytes)
     MMU_CMD_PG_FREE       = 0x0002,   //    $02 = Page Deallocate (8K Bytes)
     MMU_CMD_ALLOC         = 0x0003,   //    $03 = Allocate Chain (< 8K Bytes)
-    MMU_CMD_FREE          = 0x0004,   //    $04 = Deallocate Chain (< 8K Bytes)
-    MMU_CMD_LOAD_ROOT     = 0x0005,   //    $05 = Load Root Node
-    MMU_CMD_LOAD_NEXT     = 0x0006,   //    $06 = Load Next Node
-    MMU_CMD_LOAD_PREV     = 0x0007,   //    $07 = Load Prev Node
-    MMU_CMD_LOAD_LAST     = 0x0008,   //    $08 = Load Last Node
-    MMU_CMD_DEL_NODE      = 0x0009,   //    $09 = Remove Current Node (and Adjust Links)
-    MMU_CMD_INS_BEFORE    = 0x000A,   //    $0A = Insert Node Before (and activate)
-    MMU_CMD_INS_AFTER     = 0x000B,   //    $0B = Insert Node After (and activate)
-    MMU_CMD_PUSH_BACK     = 0x000C,   //    $0C = Push Back (and activate)
-    MMU_CMD_PUSH_FRONT    = 0x000D,   //    $0D = Push Front (and activate)
-    MMU_CMD_POP_BACK      = 0x000E,   //    $0E = Pop Back (and activate)
-    MMU_CMD_POP_FRONT     = 0x000F,   //    $0F = Pop Front (and activate)
-    MMU_CMD_LOCK_NODE     = 0x0010,   //    $10 = Lock Node
-    MMU_CMD_UNLOCK_NODE   = 0x0011,   //    $11 = Unlock Node
+    MMU_CMD_LOAD_ROOT     = 0x0004,   //    $04 = Load Root Node
+    MMU_CMD_LOAD_NEXT     = 0x0005,   //    $05 = Load Next Node
+    MMU_CMD_LOAD_PREV     = 0x0006,   //    $06 = Load Prev Node
+    MMU_CMD_LOAD_LAST     = 0x0007,   //    $07 = Load Last Node
+    MMU_CMD_DEL_NODE      = 0x0008,   //    $08 = Remove Current Node (and Adjust Links)
+    MMU_CMD_INS_BEFORE    = 0x0009,   //    $09 = Insert Node Before (and activate)
+    MMU_CMD_INS_AFTER     = 0x000A,   //    $0A = Insert Node After (and activate)
+    MMU_CMD_PUSH_BACK     = 0x000B,   //    $0B = Push Back (and activate)
+    MMU_CMD_PUSH_FRONT    = 0x000C,   //    $0C = Push Front (and activate)
+    MMU_CMD_POP_BACK      = 0x000D,   //    $0D = Pop Back (and activate)
+    MMU_CMD_POP_FRONT     = 0x000E,   //    $0E = Pop Front (and activate)
+    MMU_CMD_LOCK_NODE     = 0x000F,   //    $0F = Lock Node
+    MMU_CMD_UNLOCK_NODE   = 0x0010,   //    $10 = Unlock Node
+    MMU_CMD_FREE          = 0x0011,   //    $11 = Deallocate Chain (< 8K Bytes)
     MMU_CMD_DEFRAG        = 0x0012,   //    $12 = Defragment / Collect Garbage
     MMU_CMD_RESET         = 0x0013,   //    $13 = Reset Memory Management Unit
     MMU_CMD_SIZE          = 0x0014,   //    $14 = Total Number of MMU Commands
@@ -571,7 +571,8 @@ enum MEMMAP
     MMU_ERR_INVALID       = 0x0004,   //    $04 = Invalid Command
     MMU_ERR_HANDLE        = 0x0005,   //    $05 = Invalid Handle
     MMU_ERR_NODE          = 0x0006,   //    $06 = Invalid Node
-    MMU_ERR_SIZE          = 0x0007,   //    $07 = Total Number of MMU Errors
+    MMU_ERR_RAW_INDEX     = 0x0007,   //    $07 = Invalid Raw Index
+    MMU_ERR_SIZE          = 0x0008,   //    $08 = Total Number of MMU Errors
                                       // 
     MMU_META_HANDLE       = 0xFE96,   // (Word) Handle for the current allocation chain
                                       // 
@@ -589,7 +590,7 @@ enum MEMMAP
     MMU_META_ROOT         = 0xFEB9,   // (Word) Root node of the current allocation       (Read Only)
     MMU_META_PREV         = 0xFEBB,   // (Word) Previous node of the current allocation   (Read Only)
     MMU_META_NEXT         = 0xFEBD,   // (Word) Next node of the current allocation       (Read Only)
-    MMU_RAW_INDEX         = 0xFEBF,   // (Word) Raw Index of the current memory node  (For Debugging)
+    MMU_RAW_INDEX         = 0xFEBF,   // (Word) Raw Index of the current memory node  (Node Window)
                                       // 
     MMU_END               = 0xFEC0,   // End of Banked Memory Register Space
     MMU_TOP               = 0xFEC1,   // Top of Banked Memory Register Space
