@@ -162,98 +162,167 @@ enum MEMMAP
                                       // - bit  3    = Standard Bitmap:
                                       //               0: Text Display
                                       //               1: Bitmap Display
+                                      // MODE (bits 0-2):
                                       // - bit  2    = 0: 320/256 width,  1: 160/128 width
                                       // - bit  1    = 0: 200/160 height, 1: 160/80 height
-                                      // - bit  0    = Base Resolution: 0:320x200, 1:256x160            
+                                      // - bit  0    = Base Resolution: 0:320x200, 1:256x160
+                                      // 
+                                      //               Text Mode Table:
+                                      //    | MODE | COLUMNS |  ROWS  | BUFFER |
+                                      //    |:----:|:-------:|:------:|:------:|
+                                      //    |  $00 |    40   |   25   |  2000  |
+                                      //    |  $01 |    32   |   20   |  1280  |
+                                      //    |  $02 |    40   |   12   |   960  |
+                                      //    |  $03 |    32   |   10   |   640  |
+                                      //    |  $04 |    20   |   25   |  1000  |
+                                      //    |  $05 |    16   |   20   |   640  |
+                                      //    |  $06 |    20   |   12   |   480  |
+                                      //    |  $07 |    16   |   10   |   320  |
+                                      // 
+                                      //         Bitmap Display Mode Table:
+                                      // | MODE | WIDTH | HEIGHT | COLORS | BUFFER |
+                                      // |------|-------|--------|--------|--------|
+                                      // | $00  |  320  |   200  |    2   |  8000  |
+                                      // | $01  |  256  |   160  |    2   |  5120  |
+                                      // | $02  |  320  |   100  |    2   |  4000  |
+                                      // | $03  |  256  |    80  |    2   |  2560  |
+                                      // | $04  |  160  |   200  |    2   |  4000  |
+                                      // | $05  |  128  |   160  |    2   |  2560  |
+                                      // | $06  |  160  |   100  |    2   |  2000  |
+                                      // | $07  |  128  |    80  |    2   |  1280  |
+                                      // | $00  |  320  |   200  |    4   | 16000  | (bgnd only)
+                                      // | $01  |  256  |   160  |    4   | 10240  | (bgnd only)
+                                      // | $02  |  320  |   100  |    4   |  8000  |
+                                      // | $03  |  256  |    80  |    4   |  5120  |
+                                      // | $04  |  160  |   200  |    4   |  8000  |
+                                      // | $05  |  128  |   160  |    4   |  5120  |
+                                      // | $06  |  160  |   100  |    4   |  4000  |
+                                      // | $07  |  128  |    80  |    4   |  2560  |
+                                      // | $00  |  320  |   200  |   16   | 32000  | (bgnd only)
+                                      // | $01  |  256  |   160  |   16   | 20480  | (bgnd only)
+                                      // | $02  |  320  |   100  |   16   | 16000  | (bgnd only)
+                                      // | $03  |  256  |    80  |   16   | 10240  | (bgnd only)
+                                      // | $04  |  160  |   200  |   16   | 16000  | (bgnd only)
+                                      // | $05  |  128  |   160  |   16   | 10240  | (bgnd only)
+                                      // | $06  |  160  |   100  |   16   |  8000  |
+                                      // | $07  |  128  |    80  |   16   |  5120  |
+                                      // | $00  |  320  |   200  |  256   | 64000  | (bgnd only)
+                                      // | $01  |  256  |   160  |  256   | 40960  | (bgnd only)
+                                      // | $02  |  320  |   100  |  256   | 32000  | (bgnd only)
+                                      // | $03  |  256  |    80  |  256   | 20480  | (bgnd only)
+                                      // | $04  |  160  |   200  |  256   | 32000  | (bgnd only)
+                                      // | $05  |  128  |   160  |  256   | 20480  | (bgnd only)
+                                      // | $06  |  160  |   100  |  256   | 16000  | (bgnd only)
+                                      // | $07  |  128  |    80  |  256   | 10240  | (bgnd only)
                                       // 
     GPU_VIDEO_MAX         = 0xFE0D,   // (Word) Video Buffer Maximum (Read Only)
-                                      //  Note: This will change to reflect
-                                      //        the size of the last cpu
-                                      //        accessible memory location
-                                      //        of the currently active
-                                      //        standard video mode.
+                                      // Note: This will change to reflect
+                                      //       the size of the last cpu
+                                      //       accessible memory location
+                                      //       of the currently active
+                                      //       standard video mode.
                                       // 
     GPU_HRES              = 0xFE0F,   // (Word) Horizontal Pixel Resolution (Read Only)
-                                      //   Note: This will reflect the number of
-                                      //        pixel columns for bitmap modes.
+                                      // Note: This will reflect the number of
+                                      //       pixel columns for bitmap modes.
                                       // 
     GPU_VRES              = 0xFE11,   // (Word) Vertical Pixel Resolution (Read Only)
-                                      //   Note: This will reflect the number of
-                                      //        pixel rows for bitmap modes.
+                                      // Note: This will reflect the number of
+                                      //       pixel rows for bitmap modes.
                                       // 
     GPU_TCOLS             = 0xFE13,   // (Byte) Text Horizontal Columns (Read Only)
-                                      //   Note: This will reflect the number of
-                                      //        glyph columns for text modes.
+                                      // Note: This will reflect the number of
+                                      //       glyph columns for text modes.
                                       // 
     GPU_TROWS             = 0xFE14,   // (Byte) Text Vertical Rows (Read Only)
-                                      //   Note: This will reflect the number of
-                                      //        glyph rows for text modes.
+                                      // Note: This will reflect the number of
+                                      //       glyph rows for text modes.
                                       // 
     GPU_PAL_INDEX         = 0xFE15,   // (Byte) Color Palette Index
-                                      //   Note: Use this register to set the
-                                      //        index into the Color Palette.
-                                      //        Set this value prior referencing
-                                      //        the color data (GPU_PAL_COLOR).
+                                      // Note: Use this register to set the
+                                      //       index into the Color Palette.
+                                      //       Set this value prior referencing
+                                      //       the color data (GPU_PAL_COLOR).
                                       // 
     GPU_PAL_COLOR         = 0xFE16,   // (Word) Color Palette Data (A4R4G4B4 format)
-                                      //   Note: This is the color data for an
-                                      //        individual palette entry. Write to 
-                                      //        DSP_PAL_IDX with the index within the
-                                      //        color palette prior to reading or
-                                      //        writing the color data in the
-                                      //        GFX_PAL_CLR register.
+                                      // Note: This is the color data for an
+                                      //       individual palette entry. Write to 
+                                      //       DSP_PAL_IDX with the index within the
+                                      //       color palette prior to reading or
+                                      //       writing the color data in the
+                                      //       GFX_PAL_CLR register.
                                       // 
     GPU_GLYPH_IDX         = 0xFE18,   // (Byte) Text Glyph Index
-                                      //   Note: Use this register to set the
-                                      //        index of a specific text glyph.
-                                      //        Set this value prior to updating
-                                      //        the glyph data (GPU_GLYPH_DATA).
+                                      // Note: Use this register to set the
+                                      //       index of a specific text glyph.
+                                      //       Set this value prior to updating
+                                      //       the glyph data (GPU_GLYPH_DATA).
                                       // 
     GPU_GLYPH_DATA        = 0xFE19,   // (8-Bytes) 8 rows of binary encoded glyph pixel data
-                                      //   Note: This is the pixel data for a
-                                      //        specific text glyph. Each 8x8
-                                      //        text glyph is composed of 8 bytes.
-                                      //        The first byte in this array
-                                      //        represents the top line of 8 pixels.
-                                      //        Each array entry represents a row of 8 pixels.
+                                      // Note: This is the pixel data for a
+                                      //       specific text glyph. Each 8x8
+                                      //       text glyph is composed of 8 bytes.
+                                      //       The first byte in this array
+                                      //       represents the top line of 8 pixels.
+                                      //       Each array entry represents a row of 8 pixels.
                                       // 
-    GPU_END               = 0xFE20,   // End of GPU Register Space
-    GPU_TOP               = 0xFE21,   // Top of GPU Register Space
+    GPU_BGND_SIZE         = 0xFE21,   // (Word) Extended Graphics Buffer Size (Read Only)
+                                      // Note: The primary extended graphics buffer
+                                      //       always begins at $0000. This is also highest
+                                      //       accessible memory location of the currently
+                                      //       active background video mode.
+                                      // 
+    GPU_BLIT_ADDR         = 0xFE23,   // (Word) Graphics Memory Address Port 
+                                      // Note: When GPU_BLIT_DATA is accessed, this register
+                                      //       is automatically incremented to point to the  
+                                      //       next byte to be read or written based on the 
+                                      //       values in GPU_BLIT_PITCH and GPU_BLIT_WIDTH.
+                                      // 
+    GPU_BLIT_PITCH        = 0xFE25,   // (Word) Number of Bytes Per Display Line
+                                      // Note: This value represents the number of displayed
+                                      //       pixels per line.
+                                      // 
+    GPU_BLIT_PITCH        = 0xFE27,   // (Word) Width of the Image Block in Pixels
+                                      // 
+    GPU_BLIT_DATA         = 0xFE29,   // (Byte) GPU Memory Data Port
+                                      // 
+    GPU_END               = 0xFE29,   // End of GPU Register Space
+    GPU_TOP               = 0xFE2A,   // Top of GPU Register Space
 // _______________________________________________________________________
 
-    CSR_DEVICE            = 0xFE21,   // START: Mouse Device Hardware Registers
-    CSR_XPOS              = 0xFE21,   // (Word) Horizontal Mouse Cursor Coordinate
-    CSR_YPOS              = 0xFE23,   // (Word) Vertical Mouse Cursor Coordinate
-    CSR_XOFS              = 0xFE25,   // (Byte) Horizontal Mouse Cursor Offset
-    CSR_YOFS              = 0xFE26,   // (Byte) Vertical Mouse Cursor Offset
-    CSR_SCROLL            = 0xFE27,   // (char) MouseWheel Scroll: -1, 0, 1
-    CSR_FLAGS             = 0xFE28,   // (Byte) Mouse Device State Flags
+    CSR_DEVICE            = 0xFE2A,   // START: Mouse Device Hardware Registers
+    CSR_XPOS              = 0xFE2A,   // (Word) Horizontal Mouse Cursor Coordinate
+    CSR_YPOS              = 0xFE2C,   // (Word) Vertical Mouse Cursor Coordinate
+    CSR_XOFS              = 0xFE2E,   // (Byte) Horizontal Mouse Cursor Offset
+    CSR_YOFS              = 0xFE2F,   // (Byte) Vertical Mouse Cursor Offset
+    CSR_SCROLL            = 0xFE30,   // (char) MouseWheel Scroll: -1, 0, 1
+    CSR_FLAGS             = 0xFE31,   // (Byte) Mouse Device State Flags
                                       //    bits 0-4: button states
                                       //    bits 5-6: number of clicks
                                       //    bits 7:   cursor enable
                                       // 
-    CSR_BMP_INDX          = 0xFE29,   // (Byte) Mouse Cursor Bitmap Pixel Offset
-    CSR_BMP_DATA          = 0xFE2A,   // (Byte) Mouse Cursor Bitmap Pixel Color Data ($0-$F)
-    CSR_PAL_INDX          = 0xFE2B,   // (Byte) Mouse Cursor Color Palette Index (0-15)
-    CSR_PAL_DATA          = 0xFE2C,   // (Word) Mouse Cursor Color Palette Data A4R4G4B4
-    CSR_END               = 0xFE2D,   // End of Mouse Device Register Space
-    CSR_TOP               = 0xFE2E,   // Top of CSR Register Space
+    CSR_BMP_INDX          = 0xFE32,   // (Byte) Mouse Cursor Bitmap Pixel Offset
+    CSR_BMP_DATA          = 0xFE33,   // (Byte) Mouse Cursor Bitmap Pixel Color Data ($0-$F)
+    CSR_PAL_INDX          = 0xFE34,   // (Byte) Mouse Cursor Color Palette Index (0-15)
+    CSR_PAL_DATA          = 0xFE35,   // (Word) Mouse Cursor Color Palette Data A4R4G4B4
+    CSR_END               = 0xFE36,   // End of Mouse Device Register Space
+    CSR_TOP               = 0xFE37,   // Top of CSR Register Space
 // _______________________________________________________________________
 
-    KEYBOARD_DEVICE       = 0xFE2E,   // START: Keyboard Device Hardware Registers
-    CHAR_Q_LEN            = 0xFE2E,   // (Byte) Number of Characters Waiting in Queue   (Read Only)
-    CHAR_SCAN             = 0xFE2F,   // (Byte) Read Next Character in Queue (Not Popped When Read)
-    CHAR_POP              = 0xFE30,   // (Byte) Read Next Character in Queue     (Popped When Read)
-    XKEY_BUFFER           = 0xFE31,   // (16 Bytes) 128 bits for XK_KEY data buffer     (Read Only)
-    EDT_BFR_CSR           = 0xFE41,   // (Byte) Cursor Position Within Edit Buffer     (Read/Write)
-    EDT_ENABLE            = 0xFE42,   // (Byte) Line Editor Enable Flag                (Read/Write)
-    EDT_BFR_LEN           = 0xFE43,   // (Byte) Limit the Line Editor to This Length   (Read/Write)
-    KEYBOARD_END          = 0xFE43,   // End of Keyboard Register Space
-    KEYBOARD_TOP          = 0xFE44,   // Top of Keyboard Register Space
+    KEYBOARD_DEVICE       = 0xFE37,   // START: Keyboard Device Hardware Registers
+    CHAR_Q_LEN            = 0xFE37,   // (Byte) Number of Characters Waiting in Queue   (Read Only)
+    CHAR_SCAN             = 0xFE38,   // (Byte) Read Next Character in Queue (Not Popped When Read)
+    CHAR_POP              = 0xFE39,   // (Byte) Read Next Character in Queue     (Popped When Read)
+    XKEY_BUFFER           = 0xFE3A,   // (16 Bytes) 128 bits for XK_KEY data buffer     (Read Only)
+    EDT_BFR_CSR           = 0xFE4A,   // (Byte) Cursor Position Within Edit Buffer     (Read/Write)
+    EDT_ENABLE            = 0xFE4B,   // (Byte) Line Editor Enable Flag                (Read/Write)
+    EDT_BFR_LEN           = 0xFE4C,   // (Byte) Limit the Line Editor to This Length   (Read/Write)
+    KEYBOARD_END          = 0xFE4C,   // End of Keyboard Register Space
+    KEYBOARD_TOP          = 0xFE4D,   // Top of Keyboard Register Space
 // _______________________________________________________________________
 
-    JOYSTICK_DEVICE       = 0xFE44,   // START: Joystick/Gamepad Controller Device Hardware Registers
-    JOYS_1_FLAGS          = 0xFE44,   // (Byte) Gamepad/Joystick #1 Condition Flags:     (Read Only)
+    JOYSTICK_DEVICE       = 0xFE4D,   // START: Joystick/Gamepad Controller Device Hardware Registers
+    JOYS_1_FLAGS          = 0xFE4D,   // (Byte) Gamepad/Joystick #1 Condition Flags:     (Read Only)
                                       //            0000'0000: Not Connected
                                       //            0000'1111: Controller Type
                                       //            0001'0000: (reserved)
@@ -285,7 +354,7 @@ enum MEMMAP
                                       //            8:  Arcade Pad
                                       //            9:  Throttle
                                       // 
-    JOYS_1_BTN            = 0xFE45,   // (Word) Gamepad Controller Button Bits:         (Read Only)
+    JOYS_1_BTN            = 0xFE4E,   // (Word) Gamepad Controller Button Bits:         (Read Only)
                                       //            0000'0000'0000'0000 = Nothing Pressed
                                       //            0000'0000'0000'0001 = A
                                       //            0000'0000'0000'0010 = B
@@ -305,15 +374,15 @@ enum MEMMAP
                                       //            1000'0000'0000'0000 = DPad Right
                                       //            1111'1111'1111'1111 = Not Connected
                                       // 
-    JOYS_1_DBND           = 0xFE47,   // (Byte) PAD 1 analog deadband; default is 5   (read/write)
-    JOYS_1_LTX            = 0xFE48,   // (char) PAD 1 LThumb-X position (-128 _ +127)   (realtime)
-    JOYS_1_LTY            = 0xFE49,   // (char) PAD 1 LThumb-Y position (-128 _ +127)   (realtime)
-    JOYS_1_RTX            = 0xFE4A,   // (char) PAD 1 RThumb-X position (-128 _ +127)   (realtime)
-    JOYS_1_RTY            = 0xFE4B,   // (char) PAD 1 RThumb-Y position (-128 _ +127)   (realtime)
-    JOYS_1_Z1             = 0xFE4C,   // (char) PAD 1 left analog trigger (0 - 127)     (realtime)
-    JOYS_1_Z2             = 0xFE4D,   // (char) PAD 1 left analog trigger (0 - 127)     (realtime)
+    JOYS_1_DBND           = 0xFE50,   // (Byte) PAD 1 analog deadband; default is 5   (read/write)
+    JOYS_1_LTX            = 0xFE51,   // (char) PAD 1 LThumb-X position (-128 _ +127)   (realtime)
+    JOYS_1_LTY            = 0xFE52,   // (char) PAD 1 LThumb-Y position (-128 _ +127)   (realtime)
+    JOYS_1_RTX            = 0xFE53,   // (char) PAD 1 RThumb-X position (-128 _ +127)   (realtime)
+    JOYS_1_RTY            = 0xFE54,   // (char) PAD 1 RThumb-Y position (-128 _ +127)   (realtime)
+    JOYS_1_Z1             = 0xFE55,   // (char) PAD 1 left analog trigger (0 - 127)     (realtime)
+    JOYS_1_Z2             = 0xFE56,   // (char) PAD 1 left analog trigger (0 - 127)     (realtime)
                                       // 
-    JOYS_2_FLAGS          = 0xFE4E,   // (Byte) Gamepad/Joystick #2 Condition Flags:     (Read Only)
+    JOYS_2_FLAGS          = 0xFE57,   // (Byte) Gamepad/Joystick #2 Condition Flags:     (Read Only)
                                       //            0000'0000: Not Connected
                                       //            0000'1111: Controller Type
                                       //            0001'0000: (reserved)
@@ -345,7 +414,7 @@ enum MEMMAP
                                       //            8:  Arcade Pad
                                       //            9:  Throttle
                                       // 
-    JOYS_2_BTN            = 0xFE4F,   // (Word) Button Bits: Room For up to 16 Buttons  (realtime)
+    JOYS_2_BTN            = 0xFE58,   // (Word) Button Bits: Room For up to 16 Buttons  (realtime)
                                       //        Joystick Button Bits:
                                       //            0000'0000'0000'0000 = Nothing Pressed
                                       //            0000'0000'0000'0001 = Button 1 
@@ -366,19 +435,19 @@ enum MEMMAP
                                       //            1000'0000'0000'0000 = Hat Right
                                       //            1111'1111'1111'1111 = Not Connected
                                       // 
-    JOYS_2_DBND           = 0xFE51,   // (Byte) PAD 2 analog deadband; default is 5   (read/write)
-    JOYS_2_LTX            = 0xFE52,   // (char) PAD 2 LThumb-X position (-128 _ +127)   (realtime)
-    JOYS_2_LTY            = 0xFE53,   // (char) PAD 2 LThumb-Y position (-128 _ +127)   (realtime)
-    JOYS_2_RTX            = 0xFE54,   // (char) PAD 2 RThumb-X position (-128 _ +127)   (realtime)
-    JOYS_2_RTY            = 0xFE55,   // (char) PAD 2 RThumb-Y position (-128 _ +127)   (realtime)
-    JOYS_2_Z1             = 0xFE56,   // (char) PAD 2 left analog trigger (0 - 127)     (realtime)
-    JOYS_2_Z2             = 0xFE57,   // (char) PAD 2 left analog trigger (0 - 127)     (realtime)
-    JOYS_END              = 0xFE57,   // End of Joystick/Gamepad Device Register Space
-    JOYS_TOP              = 0xFE58,   // Top of Joystick/Gamepad Device Register Space
+    JOYS_2_DBND           = 0xFE5A,   // (Byte) PAD 2 analog deadband; default is 5   (read/write)
+    JOYS_2_LTX            = 0xFE5B,   // (char) PAD 2 LThumb-X position (-128 _ +127)   (realtime)
+    JOYS_2_LTY            = 0xFE5C,   // (char) PAD 2 LThumb-Y position (-128 _ +127)   (realtime)
+    JOYS_2_RTX            = 0xFE5D,   // (char) PAD 2 RThumb-X position (-128 _ +127)   (realtime)
+    JOYS_2_RTY            = 0xFE5E,   // (char) PAD 2 RThumb-Y position (-128 _ +127)   (realtime)
+    JOYS_2_Z1             = 0xFE5F,   // (char) PAD 2 left analog trigger (0 - 127)     (realtime)
+    JOYS_2_Z2             = 0xFE60,   // (char) PAD 2 left analog trigger (0 - 127)     (realtime)
+    JOYS_END              = 0xFE60,   // End of Joystick/Gamepad Device Register Space
+    JOYS_TOP              = 0xFE61,   // Top of Joystick/Gamepad Device Register Space
 // _______________________________________________________________________
 
-    FIO_DEVICE            = 0xFE58,   // START: File I/O Device Hardware Registers
-    FIO_ERROR             = 0xFE58,   // (Byte) FILE_ERROR enumeration result (FE_<error>)
+    FIO_DEVICE            = 0xFE61,   // START: File I/O Device Hardware Registers
+    FIO_ERROR             = 0xFE61,   // (Byte) FILE_ERROR enumeration result (FE_<error>)
                                       // 
     FE_BEGIN              = 0x0000,   //   Begin FILE_ERROR enumeration 
     FE_NOERROR            = 0x0000,   //      no error, condition normal
@@ -394,7 +463,7 @@ enum MEMMAP
     FE_INVALID_NAME       = 0x0007,   //      invalid file name         
     FE_LAST               = 0x0007,   //   End of FILE_ERROR enumeration
                                       // 
-    FIO_COMMAND           = 0xFE59,   // (Byte) Execute a File Command (FC_<cmd>)
+    FIO_COMMAND           = 0xFE62,   // (Byte) Execute a File Command (FC_<cmd>)
                                       // 
     FC_BEGIN              = 0x0000,   //   Begin FIO_COMMAND enumeration           
     FC_RESET              = 0x0000,   //     Reset                                 
@@ -424,46 +493,46 @@ enum MEMMAP
     FC_GET_SEEK           = 0x0018,   //     Get Seek Position (into FIO_IOWORD)   
     FC_LAST               = 0x0018,   //   End FIO_COMMAND enumeration             
                                       // 
-    FIO_HANDLE            = 0xFE5A,   // (Byte) Current File Stream HANDLE (0=NONE)
-    FIO_SEEKPOS           = 0xFE5B,   // (DWord) File Seek Position
-    FIO_IODATA            = 0xFE5F,   // (Byte) Input / Output Data
+    FIO_HANDLE            = 0xFE63,   // (Byte) Current File Stream HANDLE (0=NONE)
+    FIO_SEEKPOS           = 0xFE64,   // (DWord) File Seek Position
+    FIO_IODATA            = 0xFE68,   // (Byte) Input / Output Data
                                       // 
-    FIO_PATH_LEN          = 0xFE60,   // (Byte) Length of the Primary Filepath        (Read Only)
-    FIO_PATH_POS          = 0xFE61,   // (Byte) Character Position Within the Primary Filepath
-    FIO_PATH_DATA         = 0xFE62,   // (Byte) Data at the Character Position of the Primary Path
+    FIO_PATH_LEN          = 0xFE69,   // (Byte) Length of the Primary Filepath        (Read Only)
+    FIO_PATH_POS          = 0xFE6A,   // (Byte) Character Position Within the Primary Filepath
+    FIO_PATH_DATA         = 0xFE6B,   // (Byte) Data at the Character Position of the Primary Path
                                       // 
-    FIO_ALT_PATH_LEN      = 0xFE63,   // (Byte) Length of the alternate Filepath        (Read Only)
-    FIO_ALT_PATH_POS      = 0xFE64,   // (Byte) Character Position Within the Alternate Filepath
-    FIO_ALT_PATH_DATA     = 0xFE65,   // (Byte) Data at the Character Position of the Alternate Path
+    FIO_ALT_PATH_LEN      = 0xFE6C,   // (Byte) Length of the alternate Filepath        (Read Only)
+    FIO_ALT_PATH_POS      = 0xFE6D,   // (Byte) Character Position Within the Alternate Filepath
+    FIO_ALT_PATH_DATA     = 0xFE6E,   // (Byte) Data at the Character Position of the Alternate Path
                                       // 
-    FIO_DIR_DATA          = 0xFE66,   // (Byte) A Series of Null-Terminated Filenames
+    FIO_DIR_DATA          = 0xFE6F,   // (Byte) A Series of Null-Terminated Filenames
                                       //   NOTE: Current read-position is reset to the beginning
                                       //     following a List Directory command. The read-position
                                       //     is automatically advanced on read from this register.
                                       //     Each filename is $0A-terminated. The list itself is
                                       //     null-terminated.
                                       // 
-    FIO_END               = 0xFE66,   // End of FIO Device Register Space
-    FIO_TOP               = 0xFE67,   // Top of FIO Device Register Space
+    FIO_END               = 0xFE6F,   // End of FIO Device Register Space
+    FIO_TOP               = 0xFE70,   // Top of FIO Device Register Space
 // _______________________________________________________________________
 
-    MATH_DEVICE           = 0xFE67,   // START: Math Co-Processor Device Hardware Registers
-    MATH_ACA_POS          = 0xFE67,   // (Byte) Character Position Within the ACA Float String
-    MATH_ACA_DATA         = 0xFE68,   // (Byte) ACA Float String Character Port
-    MATH_ACA_RAW          = 0xFE69,   // (4-Bytes) ACA Raw Float Data
-    MATH_ACA_INT          = 0xFE6D,   // (4-Bytes) ACA Integer Data
+    MATH_DEVICE           = 0xFE70,   // START: Math Co-Processor Device Hardware Registers
+    MATH_ACA_POS          = 0xFE70,   // (Byte) Character Position Within the ACA Float String
+    MATH_ACA_DATA         = 0xFE71,   // (Byte) ACA Float String Character Port
+    MATH_ACA_RAW          = 0xFE72,   // (4-Bytes) ACA Raw Float Data
+    MATH_ACA_INT          = 0xFE76,   // (4-Bytes) ACA Integer Data
                                       // 
-    MATH_ACB_POS          = 0xFE71,   // (Byte) Character Position Within the ACB Float String
-    MATH_ACB_DATA         = 0xFE72,   // (Byte) ACB Float String Character Port
-    MATH_ACB_RAW          = 0xFE73,   // (4-Bytes) ACB Raw Float Data
-    MATH_ACB_INT          = 0xFE77,   // (4-Bytes) ACB Integer Data
+    MATH_ACB_POS          = 0xFE7A,   // (Byte) Character Position Within the ACB Float String
+    MATH_ACB_DATA         = 0xFE7B,   // (Byte) ACB Float String Character Port
+    MATH_ACB_RAW          = 0xFE7C,   // (4-Bytes) ACB Raw Float Data
+    MATH_ACB_INT          = 0xFE80,   // (4-Bytes) ACB Integer Data
                                       // 
-    MATH_ACR_POS          = 0xFE7B,   // (Byte) Character Position Within the ACR Float String
-    MATH_ACR_DATA         = 0xFE7C,   // (Byte) ACR Float String Character Port
-    MATH_ACR_RAW          = 0xFE7D,   // (4-Bytes) ACR Raw Float Data
-    MATH_ACR_INT          = 0xFE81,   // (4-Bytes) ACR Integer Data
+    MATH_ACR_POS          = 0xFE84,   // (Byte) Character Position Within the ACR Float String
+    MATH_ACR_DATA         = 0xFE85,   // (Byte) ACR Float String Character Port
+    MATH_ACR_RAW          = 0xFE86,   // (4-Bytes) ACR Raw Float Data
+    MATH_ACR_INT          = 0xFE8A,   // (4-Bytes) ACR Integer Data
                                       // 
-    MATH_OPERATION        = 0xFE85,   // (Byte) ACA Float String Character Port   (On Write)
+    MATH_OPERATION        = 0xFE8E,   // (Byte) ACA Float String Character Port   (On Write)
     MOP_BEGIN             = 0x0000,   //   BEGIN Math Operation Enumeration:
     MOP_RANDOM            = 0x0000,   //     ACA, ACB, and ACR are set to randomized values
     MOP_RND_SEED          = 0x0001,   //     MATH_ACA_INT seeds the pseudo-random number generator
@@ -525,24 +594,24 @@ enum MEMMAP
     MOP_NEXTAFTER         = 0x0039,   //     ACR = std::nextafter(ACA, ACB)
     MOP_COPYSIGN          = 0x003A,   //     ACR = std::copysign(ACA, ACB)
     MOP_LASTOP            = 0x003B,   //   END Math Operation Enumeration
-    MATH_END              = 0xFE85,   // End of Math Co-Processor Register Space
-    MATH_TOP              = 0xFE86,   // Top of Math Co-Processor Register Space
+    MATH_END              = 0xFE8E,   // End of Math Co-Processor Register Space
+    MATH_TOP              = 0xFE8F,   // Top of Math Co-Processor Register Space
 // _______________________________________________________________________
 
-    MMU_DEVICE            = 0xFE86,   // START: Memory Management Unit Hardware Registers
-    MMU_PAGE_1_SELECT     = 0xFE86,   // (Word) Page Select for 8K Memory Bank 1
-    MMU_PAGE_2_SELECT     = 0xFE88,   // (Word) Page Select for 8K Memory Bank 2
-    MMU_BLOCKS_FREE       = 0xFE8A,   // (Word) Number of 32-Byte Blocks Available for Allocation (Read Only)
-    MMU_BLOCKS_ALLOCATED  = 0xFE8C,   // (Word) Number of 32-Byte Blocks Currently Allocated  (Read Only)
-    MMU_BLOCKS_FRAGGED    = 0xFE8E,   // (Word) Number of 32-Byte Blocks Currently Fragmented  (Read Only)
-    MMU_ARG_1             = 0xFE90,   // (Word) Argument 1 for MMU Command
-    MMU_ARG_1_MSB         = 0xFE90,   // (Byte) Argument 1 Most Significant Byte for MMU Command
-    MMU_ARG_1_LSB         = 0xFE91,   // (Byte) Argument 1 Least Significant Byte for MMU Command
-    MMU_ARG_2             = 0xFE92,   // (Word) Argument 2 for MMU Command
-    MMU_ARG_2_MSB         = 0xFE92,   // (Byte) Argument 2 Most Significant Byte for MMU Command
-    MMU_ARG_2_LSB         = 0xFE93,   // (Byte) Argument 2 Least Significant Byte for MMU Command
+    MMU_DEVICE            = 0xFE8F,   // START: Memory Management Unit Hardware Registers
+    MMU_PAGE_1_SELECT     = 0xFE8F,   // (Word) Page Select for 8K Memory Bank 1
+    MMU_PAGE_2_SELECT     = 0xFE91,   // (Word) Page Select for 8K Memory Bank 2
+    MMU_BLOCKS_FREE       = 0xFE93,   // (Word) Number of 32-Byte Blocks Available for Allocation (Read Only)
+    MMU_BLOCKS_ALLOCATED  = 0xFE95,   // (Word) Number of 32-Byte Blocks Currently Allocated  (Read Only)
+    MMU_BLOCKS_FRAGGED    = 0xFE97,   // (Word) Number of 32-Byte Blocks Currently Fragmented  (Read Only)
+    MMU_ARG_1             = 0xFE99,   // (Word) Argument 1 for MMU Command
+    MMU_ARG_1_MSB         = 0xFE99,   // (Byte) Argument 1 Most Significant Byte for MMU Command
+    MMU_ARG_1_LSB         = 0xFE9A,   // (Byte) Argument 1 Least Significant Byte for MMU Command
+    MMU_ARG_2             = 0xFE9B,   // (Word) Argument 2 for MMU Command
+    MMU_ARG_2_MSB         = 0xFE9B,   // (Byte) Argument 2 Most Significant Byte for MMU Command
+    MMU_ARG_2_LSB         = 0xFE9C,   // (Byte) Argument 2 Least Significant Byte for MMU Command
                                       // 
-    MMU_COMMAND           = 0xFE94,   // (Byte) Memory Management Unit Command:
+    MMU_COMMAND           = 0xFE9D,   // (Byte) Memory Management Unit Command:
     MMU_CMD_NOP           = 0x0000,   //    $00 = No Operation / Error
     MMU_CMD_PG_ALLOC      = 0x0001,   //    $01 = Page Allocate (8K Bytes)
     MMU_CMD_PG_FREE       = 0x0002,   //    $02 = Page Deallocate (8K Bytes)
@@ -565,7 +634,7 @@ enum MEMMAP
     MMU_CMD_RESET         = 0x0013,   //    $13 = Reset Memory Management Unit
     MMU_CMD_SIZE          = 0x0014,   //    $14 = Total Number of MMU Commands
                                       // 
-    MMU_ERROR             = 0xFE95,   // (Byte) Memory Management Unit Error Code:     (Read Only)
+    MMU_ERROR             = 0xFE9E,   // (Byte) Memory Management Unit Error Code:     (Read Only)
     MMU_ERR_NONE          = 0x0000,   //    $00 = No Error
     MMU_ERR_ALLOC         = 0x0001,   //    $01 = Failed to Allocate Memory
     MMU_ERR_FREE          = 0x0002,   //    $02 = Failed to Deallocate Memory
@@ -576,9 +645,9 @@ enum MEMMAP
     MMU_ERR_RAW_INDEX     = 0x0007,   //    $07 = Invalid Raw Index
     MMU_ERR_SIZE          = 0x0008,   //    $08 = Total Number of MMU Errors
                                       // 
-    MMU_META_HANDLE       = 0xFE96,   // (Word) Handle for the current allocation chain
+    MMU_META_HANDLE       = 0xFE9F,   // (Word) Handle for the current allocation chain
                                       // 
-    MMU_META_STATUS       = 0xFE98,   // (Byte) Status Flags:
+    MMU_META_STATUS       = 0xFEA1,   // (Byte) Status Flags:
     MMU_STFLG_ALLOC       = 0x0001,   //    0000'0001: Is Allocated: 0 = Free, 1 = Allocated
     MMU_STFLG_PAGED       = 0x0002,   //    0000'0010: Paged Memory: 0 = No,   1 = Yes
     MMU_STFLG_READONLY    = 0x0004,   //    0000'0100: Memory Type:  0 = RAM,  1 = ROM
@@ -588,18 +657,18 @@ enum MEMMAP
     MMU_STFLG_RES_2       = 0x0040,   //    0100'0000:   (reserved)
     MMU_STFLG_ERROR       = 0x0080,   //    1000'0000: Error:        0 = No,   1 = Yes
                                       // 
-    MMU_META_DATA         = 0xFE99,   // (32-Bytes) Data Window for the Current Allocation
-    MMU_META_ROOT         = 0xFEB9,   // (Word) Root node of the current allocation       (Read Only)
-    MMU_META_PREV         = 0xFEBB,   // (Word) Previous node of the current allocation   (Read Only)
-    MMU_META_NEXT         = 0xFEBD,   // (Word) Next node of the current allocation       (Read Only)
-    MMU_RAW_INDEX         = 0xFEBF,   // (Word) Raw Index of the current memory node  (Node Window)
+    MMU_META_DATA         = 0xFEA2,   // (32-Bytes) Data Window for the Current Allocation
+    MMU_META_ROOT         = 0xFEC2,   // (Word) Root node of the current allocation       (Read Only)
+    MMU_META_PREV         = 0xFEC4,   // (Word) Previous node of the current allocation   (Read Only)
+    MMU_META_NEXT         = 0xFEC6,   // (Word) Next node of the current allocation       (Read Only)
+    MMU_RAW_INDEX         = 0xFEC8,   // (Word) Raw Index of the current memory node  (Node Window)
                                       // 
-    MMU_END               = 0xFEC0,   // End of Banked Memory Register Space
-    MMU_TOP               = 0xFEC1,   // Top of Banked Memory Register Space
+    MMU_END               = 0xFEC9,   // End of Banked Memory Register Space
+    MMU_TOP               = 0xFECA,   // Top of Banked Memory Register Space
 // _______________________________________________________________________
 
-    HDW_RESERVED_DEVICE   = 0xFEC1,   // START: Reserved Register Space
-    HDW_REG_END           = 0xFFF0,   // 303 bytes reserved for future use.
+    HDW_RESERVED_DEVICE   = 0xFECA,   // START: Reserved Register Space
+    HDW_REG_END           = 0xFFF0,   // 294 bytes reserved for future use.
 // _______________________________________________________________________
 
     ROM_VECTS_DEVICE      = 0xFFF0,   // START: Hardware Interrupt Vectors

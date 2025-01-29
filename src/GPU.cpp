@@ -8,8 +8,8 @@
  *                                   | |   | |    
  *                                   |_|   |_|    
  *
- * This is the base class for the primary graphics devices. It provides the
- * basic methods for reading and writing to the device's memory.
+ * This singleton device extends the GPU device to include dynamic 
+ * memory within the GPU and adds Sprite and Tilemap support.
  * 
  * Released under the GPL v3.0 License.
  * Original Author: Jay Faries (warte67)
@@ -65,56 +65,37 @@ int  GPU::OnAttach(int nextAddr)
     /////
     mapped_register.push_back( { "GPU_MODE", nextAddr, nullptr, nullptr, {""}});
     mapped_register.push_back( { "GPU_MODE_MSB", nextAddr, 
-        [this](Word nextAddr) 
-        { 
-            (void)nextAddr; 
-            return (_gpu_mode>>8) & 0xFF; 
-        }, 
-        [this](Word nextAddr, Byte data) 
-        { 
-            (void)nextAddr;
-            // _verify_gpu_mode_change(data, nextAddr);  // old version
-            Word new_mode = (_gpu_mode & 0x00FF) | (data << 8);
-            _verify_gpu_mode_change(new_mode); // new version
-    }, 
-    {   
-        "(Byte) Graphics Display Mode",
-        "- bit  7   = Extended Display Enable:",
-        "              0: Disabled",
-        "              1: Enabled",
-        "- bit  6   = (reserved)",
-        "- bits 4-5 = Extended Color Depth:",
-        "              00: 2-Colors",
-        "              01: 4-Colors",
-        "              10: 16-Colors",
-        "              11: 256-Colors",
-        "- bit  3   = Extended Rendering Mode", 
-        "              0: Tilemap Display",
-        "              1: Bitmap Display",
-        "- bit  2   = Emulation Screen Mode",
-        "              0: Windowed",
-        "              1: Fullscreen",
-        "- bit  1   = VSync Enable",
-        "              0: Disabled",
-        "              1: Enabled",
-        "- bit  0   = Presentation",
-        "              0: Letterbox",
-        "              1: Overscan / Stretch","" 
-    }
+        [this](Word) { return (_gpu_mode>>8) & 0xFF; }, 
+        [this](Word, Byte data) { _verify_gpu_mode_change( (_gpu_mode & 0x00FF) | (data << 8) ); }, 
+        {   
+            "(Byte) Graphics Display Mode",
+            "- bit  7   = Extended Display Enable:",
+            "              0: Disabled",
+            "              1: Enabled",
+            "- bit  6   = (reserved)",
+            "- bits 4-5 = Extended Color Depth:",
+            "              00: 2-Colors",
+            "              01: 4-Colors",
+            "              10: 16-Colors",
+            "              11: 256-Colors",
+            "- bit  3   = Extended Rendering Mode", 
+            "              0: Tilemap Display",
+            "              1: Bitmap Display",
+            "- bit  2   = Emulation Screen Mode",
+            "              0: Windowed",
+            "              1: Fullscreen",
+            "- bit  1   = VSync Enable",
+            "              0: Disabled",
+            "              1: Enabled",
+            "- bit  0   = Presentation",
+            "              0: Letterbox",
+            "              1: Overscan / Stretch","" 
+        }
     }); nextAddr+=1;
     // (Byte) GPU_MODE_LSB
     mapped_register.push_back( { "GPU_MODE_LSB", nextAddr,
-        [this](Word nextAddr) 
-        { 
-            (void)nextAddr; 
-            return _gpu_mode & 0xFF; 
-        },
-        [this](Word nextAddr, Byte data) 
-        { 
-            (void)nextAddr; 
-            Word new_mode = (_gpu_mode & 0xFF00) | (data & 0xFF);
-            _verify_gpu_mode_change(new_mode); // new version
-        }, 
+        [this](Word) { return _gpu_mode & 0xFF; },
+        [this](Word, Byte data) { _verify_gpu_mode_change( (_gpu_mode & 0xFF00) | (data & 0xFF) ); }, 
         {
             "- bit  7   = Standard Display Enable",
             "             0: Disabled",
@@ -128,13 +109,61 @@ int  GPU::OnAttach(int nextAddr)
             "- bit  3    = Standard Bitmap:",
             "              0: Text Display",
             "              1: Bitmap Display",
+            "MODE (bits 0-2):",
             "- bit  2    = 0: 320/256 width,  1: 160/128 width",
             "- bit  1    = 0: 200/160 height, 1: 160/80 height",
-            "- bit  0    = Base Resolution: 0:320x200, 1:256x160            ",
+            "- bit  0    = Base Resolution: 0:320x200, 1:256x160",
+            "",
+            "              Text Mode Table:",
+            "   | MODE | COLUMNS |  ROWS  | BUFFER |",
+            "   |:----:|:-------:|:------:|:------:|",
+            "   |  $00 |    40   |   25   |  2000  |",
+            "   |  $01 |    32   |   20   |  1280  |",
+            "   |  $02 |    40   |   12   |   960  |",
+            "   |  $03 |    32   |   10   |   640  |",
+            "   |  $04 |    20   |   25   |  1000  |",
+            "   |  $05 |    16   |   20   |   640  |",
+            "   |  $06 |    20   |   12   |   480  |",
+            "   |  $07 |    16   |   10   |   320  |",
+            "",
+            "        Bitmap Display Mode Table:",
+            "| MODE | WIDTH | HEIGHT | COLORS | BUFFER |",
+            "|------|-------|--------|--------|--------|",
+            "| $00  |  320  |   200  |    2   |  8000  |",
+            "| $01  |  256  |   160  |    2   |  5120  |",
+            "| $02  |  320  |   100  |    2   |  4000  |",
+            "| $03  |  256  |    80  |    2   |  2560  |",
+            "| $04  |  160  |   200  |    2   |  4000  |",
+            "| $05  |  128  |   160  |    2   |  2560  |",
+            "| $06  |  160  |   100  |    2   |  2000  |",
+            "| $07  |  128  |    80  |    2   |  1280  |",
+            "| $00  |  320  |   200  |    4   | 16000  | (bgnd only)",
+            "| $01  |  256  |   160  |    4   | 10240  | (bgnd only)",
+            "| $02  |  320  |   100  |    4   |  8000  |",
+            "| $03  |  256  |    80  |    4   |  5120  |",
+            "| $04  |  160  |   200  |    4   |  8000  |",
+            "| $05  |  128  |   160  |    4   |  5120  |",
+            "| $06  |  160  |   100  |    4   |  4000  |",
+            "| $07  |  128  |    80  |    4   |  2560  |",
+            "| $00  |  320  |   200  |   16   | 32000  | (bgnd only)",
+            "| $01  |  256  |   160  |   16   | 20480  | (bgnd only)",
+            "| $02  |  320  |   100  |   16   | 16000  | (bgnd only)",
+            "| $03  |  256  |    80  |   16   | 10240  | (bgnd only)",
+            "| $04  |  160  |   200  |   16   | 16000  | (bgnd only)",
+            "| $05  |  128  |   160  |   16   | 10240  | (bgnd only)",
+            "| $06  |  160  |   100  |   16   |  8000  |",
+            "| $07  |  128  |    80  |   16   |  5120  |",
+            "| $00  |  320  |   200  |  256   | 64000  | (bgnd only)",
+            "| $01  |  256  |   160  |  256   | 40960  | (bgnd only)",
+            "| $02  |  320  |   100  |  256   | 32000  | (bgnd only)",
+            "| $03  |  256  |    80  |  256   | 20480  | (bgnd only)",
+            "| $04  |  160  |   200  |  256   | 32000  | (bgnd only)",
+            "| $05  |  128  |   160  |  256   | 20480  | (bgnd only)",
+            "| $06  |  160  |   100  |  256   | 16000  | (bgnd only)",
+            "| $07  |  128  |    80  |  256   | 10240  | (bgnd only)",
             ""
         }
     }); nextAddr+=1;    
-
 
 
     ////////////////////////////////////////////////
@@ -142,17 +171,17 @@ int  GPU::OnAttach(int nextAddr)
     //       Video Buffer Maximum (Read Only)
     /////
     mapped_register.push_back( { "GPU_VIDEO_MAX", nextAddr,
-        [this](Word nextAddr) { (void)nextAddr; return _gpu_video_max >> 8; }, 
+        [this](Word) { return _gpu_video_max >> 8; }, 
         nullptr, {   
             "(Word) Video Buffer Maximum (Read Only)",
-            " Note: This will change to reflect",
-            "       the size of the last cpu",
-            "       accessible memory location",
-            "       of the currently active",
-            "       standard video mode.",""
+            "Note: This will change to reflect",
+            "      the size of the last cpu",
+            "      accessible memory location",
+            "      of the currently active",
+            "      standard video mode.",""
         }}); nextAddr+=1;
     mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { (void)nextAddr; return _gpu_video_max & 0xFF; }, 
+        [this](Word) { return _gpu_video_max & 0xFF; }, 
         nullptr, {""}}); nextAddr+=1;
 
 
@@ -161,14 +190,14 @@ int  GPU::OnAttach(int nextAddr)
     //      Horizontal Pixel Resolution (Read Only)
     /////
     mapped_register.push_back({ "GPU_HRES", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return _gpu_hres >> 8; }, 
+        [this](Word) { return _gpu_hres >> 8; }, 
         nullptr,  {
             "(Word) Horizontal Pixel Resolution (Read Only)",
-            "  Note: This will reflect the number of",
-            "       pixel columns for bitmap modes.",""
+            "Note: This will reflect the number of",
+            "      pixel columns for bitmap modes.",""
         }}); nextAddr+=1;        
      mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { (void)nextAddr; return _gpu_hres & 0xFF; }, 
+        [this](Word) { return _gpu_hres & 0xFF; }, 
         nullptr, {""}}); nextAddr+=1;
 
 
@@ -177,14 +206,14 @@ int  GPU::OnAttach(int nextAddr)
     //      Vertical Pixel Resolution (Read Only)
     /////
     mapped_register.push_back({ "GPU_VRES", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return _gpu_vres >> 8; }, 
+        [this](Word) { return _gpu_vres >> 8; }, 
         nullptr,  {
             "(Word) Vertical Pixel Resolution (Read Only)",
-            "  Note: This will reflect the number of",
-            "       pixel rows for bitmap modes.",""
+            "Note: This will reflect the number of",
+            "      pixel rows for bitmap modes.",""
         }}); nextAddr+=1;        
      mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { (void)nextAddr; return _gpu_vres & 0xFF; }, 
+        [this](Word) { return _gpu_vres & 0xFF; }, 
         nullptr, {""}}); nextAddr+=1;
 
 
@@ -193,11 +222,11 @@ int  GPU::OnAttach(int nextAddr)
     //      Text Horizontal Columns (Read Only)
     /////
     mapped_register.push_back({ "GPU_TCOLS", nextAddr,  
-        [this](Word nextAddr) { (void)nextAddr; return _gpu_tcols & 0xFF; }, 
+        [this](Word) { return _gpu_tcols & 0xFF; }, 
         nullptr,  {
             "(Byte) Text Horizontal Columns (Read Only)",
-            "  Note: This will reflect the number of",
-            "       glyph columns for text modes.",""
+            "Note: This will reflect the number of",
+            "      glyph columns for text modes.",""
             ""}}); nextAddr+=1;
  
 
@@ -206,11 +235,11 @@ int  GPU::OnAttach(int nextAddr)
     //      Text Vertical Rows (Read Only)
     /////
     mapped_register.push_back({ "GPU_TROWS", nextAddr,  
-        [this](Word nextAddr) { (void)nextAddr; return _gpu_trows & 0xFF; }, 
+        [this](Word) { return _gpu_trows & 0xFF; }, 
         nullptr,  {
             "(Byte) Text Vertical Rows (Read Only)",
-            "  Note: This will reflect the number of",
-            "       glyph rows for text modes.",""
+            "Note: This will reflect the number of",
+            "      glyph rows for text modes.",""
             ""}}); nextAddr+=1;
  
 
@@ -219,14 +248,14 @@ int  GPU::OnAttach(int nextAddr)
     //      Color Palette Index
     /////
     mapped_register.push_back({ "GPU_PAL_INDEX", nextAddr,  
-        [this](Word nextAddr) { (void)nextAddr; return _gpu_pal_index; }, 
-        [this](Word nextAddr, Byte data) { (void)nextAddr; _gpu_pal_index = data; }, 
+        [this](Word) { return _gpu_pal_index; }, 
+        [this](Word, Byte data) { _gpu_pal_index = data; }, 
         {
             "(Byte) Color Palette Index",
-            "  Note: Use this register to set the",
-            "       index into the Color Palette.",
-            "       Set this value prior referencing",
-            "       the color data (GPU_PAL_COLOR).",""
+            "Note: Use this register to set the",
+            "      index into the Color Palette.",
+            "      Set this value prior referencing",
+            "      the color data (GPU_PAL_COLOR).",""
             ""
         }
     }); nextAddr+=1;
@@ -237,23 +266,22 @@ int  GPU::OnAttach(int nextAddr)
     //      Indexed Color Palette Data (A4R4G4B4 format)
     /////
     mapped_register.push_back({ "GPU_PAL_COLOR", nextAddr,  
-        [this](Word nextAddr) { (void)nextAddr; return (_palette[_gpu_pal_index].color >> 8) & 0xFF; }, 
-        [this](Word nextAddr, Byte data) { 
-            (void)nextAddr; 
+        [this](Word) { return (_palette[_gpu_pal_index].color >> 8) & 0xFF; }, 
+        [this](Word, Byte data) { 
             Word c = _palette[_gpu_pal_index].color & 0x00ff;
 			_palette[_gpu_pal_index].color = c | ((Word)data << 8);
         }, {
             "(Word) Color Palette Data (A4R4G4B4 format)",
-            "  Note: This is the color data for an",
-            "       individual palette entry. Write to ",
-            "       DSP_PAL_IDX with the index within the",
-            "       color palette prior to reading or",
-            "       writing the color data in the",
-            "       GFX_PAL_CLR register.",
+            "Note: This is the color data for an",
+            "      individual palette entry. Write to ",
+            "      DSP_PAL_IDX with the index within the",
+            "      color palette prior to reading or",
+            "      writing the color data in the",
+            "      GFX_PAL_CLR register.",
             ""
         }}); nextAddr+=1;
     mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { (void)nextAddr; return _palette[_gpu_pal_index].color & 0xFF; }, 
+        [this](Word) { return _palette[_gpu_pal_index].color & 0xFF; }, 
         [this](Word nextAddr, Byte data) { 
             (void)nextAddr; 
 			Word c = _palette[_gpu_pal_index].color & 0xff00;
@@ -266,14 +294,14 @@ int  GPU::OnAttach(int nextAddr)
     //     Text Glyph Index (0-255)
     /////
     mapped_register.push_back({ "GPU_GLYPH_IDX", nextAddr,  
-        [this](Word nextAddr) { (void)nextAddr; return _gpu_glyph_idx; }, 
-        [this](Word nextAddr, Byte data) { (void)nextAddr; _gpu_glyph_idx = data; }, 
+        [this](Word) { return _gpu_glyph_idx; }, 
+        [this](Word, Byte data) { _gpu_glyph_idx = data; }, 
         {
             "(Byte) Text Glyph Index",
-            "  Note: Use this register to set the",
-            "       index of a specific text glyph.",
-            "       Set this value prior to updating",
-            "       the glyph data (GPU_GLYPH_DATA).",
+            "Note: Use this register to set the",
+            "      index of a specific text glyph.",
+            "      Set this value prior to updating",
+            "      the glyph data (GPU_GLYPH_DATA).",
             ""
         }
     }); nextAddr+=1;
@@ -284,52 +312,259 @@ int  GPU::OnAttach(int nextAddr)
     //      Text Glyph Pixel Data Array
     /////
     mapped_register.push_back({ "GPU_GLYPH_DATA", nextAddr,  
-        [this](Word nextAddr) { (void)nextAddr; return _gpu_glyph_data[_gpu_glyph_idx][0];  }, 
-        [this](Word nextAddr, Byte data) { (void)nextAddr; _gpu_glyph_data[_gpu_glyph_idx][0] = data; }, 
+        [this](Word) { return _gpu_glyph_data[_gpu_glyph_idx][0];  }, 
+        [this](Word, Byte data) { _gpu_glyph_data[_gpu_glyph_idx][0] = data; }, 
         {
             "(8-Bytes) 8 rows of binary encoded glyph pixel data",
-            "  Note: This is the pixel data for a", 
-            "       specific text glyph. Each 8x8",
-            "       text glyph is composed of 8 bytes.",            
-            "       The first byte in this array",
-            "       represents the top line of 8 pixels.",            
-            "       Each array entry represents a row of 8 pixels.",
+            "Note: This is the pixel data for a", 
+            "      specific text glyph. Each 8x8",
+            "      text glyph is composed of 8 bytes.",            
+            "      The first byte in this array",
+            "      represents the top line of 8 pixels.",            
+            "      Each array entry represents a row of 8 pixels.",
             ""
         }}); nextAddr+=1;
     mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { (void)nextAddr; return _gpu_glyph_data[_gpu_glyph_idx][1]; }, 
-        [this](Word nextAddr, Byte data) { (void)nextAddr; _gpu_glyph_data[_gpu_glyph_idx][1] = data; }, 
+        [this](Word) { return _gpu_glyph_data[_gpu_glyph_idx][1]; }, 
+        [this](Word, Byte data) { _gpu_glyph_data[_gpu_glyph_idx][1] = data; }, 
         {""}}); nextAddr+=1;      
     mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { (void)nextAddr; return _gpu_glyph_data[_gpu_glyph_idx][2]; }, 
-        [this](Word nextAddr, Byte data) { (void)nextAddr; _gpu_glyph_data[_gpu_glyph_idx][2] = data; }, 
+        [this](Word) { return _gpu_glyph_data[_gpu_glyph_idx][2]; }, 
+        [this](Word, Byte data) { _gpu_glyph_data[_gpu_glyph_idx][2] = data; }, 
         {""}}); nextAddr+=1;      
     mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { (void)nextAddr; return _gpu_glyph_data[_gpu_glyph_idx][3]; }, 
-        [this](Word nextAddr, Byte data) { (void)nextAddr; _gpu_glyph_data[_gpu_glyph_idx][3] = data; }, 
+        [this](Word) { return _gpu_glyph_data[_gpu_glyph_idx][3]; }, 
+        [this](Word, Byte data) { _gpu_glyph_data[_gpu_glyph_idx][3] = data; }, 
         {""}}); nextAddr+=1;      
     mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { (void)nextAddr; return _gpu_glyph_data[_gpu_glyph_idx][4]; }, 
-        [this](Word nextAddr, Byte data) { (void)nextAddr; _gpu_glyph_data[_gpu_glyph_idx][4] = data; }, 
+        [this](Word) { return _gpu_glyph_data[_gpu_glyph_idx][4]; }, 
+        [this](Word, Byte data) { _gpu_glyph_data[_gpu_glyph_idx][4] = data; }, 
         {""}}); nextAddr+=1;      
     mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { (void)nextAddr; return _gpu_glyph_data[_gpu_glyph_idx][5]; }, 
-        [this](Word nextAddr, Byte data) { (void)nextAddr; _gpu_glyph_data[_gpu_glyph_idx][5] = data; }, 
+        [this](Word) { return _gpu_glyph_data[_gpu_glyph_idx][5]; }, 
+        [this](Word, Byte data) { _gpu_glyph_data[_gpu_glyph_idx][5] = data; }, 
         {""}}); nextAddr+=1;      
     mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { (void)nextAddr; return _gpu_glyph_data[_gpu_glyph_idx][6]; }, 
-        [this](Word nextAddr, Byte data) { (void)nextAddr; _gpu_glyph_data[_gpu_glyph_idx][6] = data; }, 
+        [this](Word) { return _gpu_glyph_data[_gpu_glyph_idx][6]; }, 
+        [this](Word, Byte data) { _gpu_glyph_data[_gpu_glyph_idx][6] = data; }, 
         {""}}); nextAddr+=1;      
     mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { (void)nextAddr; return _gpu_glyph_data[_gpu_glyph_idx][7]; }, 
-        [this](Word nextAddr, Byte data) { (void)nextAddr; _gpu_glyph_data[_gpu_glyph_idx][7] = data; }, 
+        [this](Word) { return _gpu_glyph_data[_gpu_glyph_idx][7]; }, 
+        [this](Word, Byte data) { _gpu_glyph_data[_gpu_glyph_idx][7] = data; }, 
         {""}}); nextAddr+=1;      
 
-// ADD MORE HARDWARE REGISTERS FOR THE IMAGE and the MMU Nested Devices
-// LIKE THIS:
+    // ************************************** //
+    // Graphics Processor Extension Registers //
+    // ************************************** //
+
+
+    ////////////////////////////////////////////////
+    // (Word) GPU_BGND_SIZE
+    //      (Word) Extended Graphics Buffer Size (Read Only)
+    //      Note: The primary extended graphics buffer
+    //            always begins at $0000. This is also highest
+    //            accessible memory location of the currently
+    //            active background video mode.
+    /////
+    mapped_register.push_back( { "GPU_BGND_SIZE", nextAddr,
+        [this](Word) { return _gpu_bgnd_size >> 8; }, 
+        nullptr, 
+        {   
+            "(Word) Extended Graphics Buffer Size (Read Only)",
+            "Note: The primary extended graphics buffer",
+            "      always begins at $0000. This is also highest",
+            "      accessible memory location of the currently",
+            "      active background video mode.",""
+        }}); nextAddr+=1;
+    mapped_register.push_back( { "", nextAddr,
+        [this](Word) { return _gpu_bgnd_size & 0xFF; }, 
+        nullptr, 
+        {""}}); nextAddr+=1;
+
+
+    ////////////////////////////////////////////////
+    // (Word) GPU_BLIT_ADDR
+    //      Graphics Memory Address Port
+    //      Autoincrements on Read/Write
+    /////
+    mapped_register.push_back( { "GPU_BLIT_ADDR", nextAddr,
+        [this](Word) { return _gpu_blit_addr >> 8; }, 
+        [this](Word, Byte data) { _gpu_blit_addr = (_gpu_blit_addr & 0x00FF) | (data << 8); }, 
+        {   
+            "(Word) Graphics Memory Address Port ",
+            "Note: When GPU_BLIT_DATA is accessed, this register",
+            "      is automatically incremented to point to the  ",
+            "      next byte to be read or written based on the ",
+            "      values in GPU_BLIT_PITCH and GPU_BLIT_WIDTH.",""
+        }}); nextAddr+=1;
+    mapped_register.push_back( { "", nextAddr,
+        [this](Word) { return _gpu_blit_addr & 0xFF; }, 
+        [this](Word, Byte data) { _gpu_blit_addr = (_gpu_blit_addr & 0xFF00) | (data << 0); },  
+        {""}}); nextAddr+=1;
+
+
+    ////////////////////////////////////////////////
+    // (Word) GPU_BLIT_PITCH
+    //      Graphics Memory Address Port
+    //      Autoincrements on Read/Write
+    /////
+    mapped_register.push_back( { "GPU_BLIT_PITCH", nextAddr,
+        [this](Word) { return _gpu_blit_pitch >> 8; }, 
+        [this](Word, Byte data) { _gpu_blit_pitch = (_gpu_blit_pitch & 0x00FF) | (data << 8); }, 
+        {   
+            "(Word) Number of Bytes Per Display Line",
+            "Note: This value represents the number of displayed",
+            "      pixels per line.",""
+        }}); nextAddr+=1;
+    mapped_register.push_back( { "", nextAddr,
+        [this](Word) { return _gpu_blit_pitch & 0xFF; }, 
+        [this](Word, Byte data) { _gpu_blit_pitch = (_gpu_blit_pitch & 0xFF00) | (data << 0); },  
+        {""}}); nextAddr+=1;
+
+
+    ////////////////////////////////////////////////
+    // (Word) GPU_BLIT_WIDTH
+    //      Width of the Image Block in Pixels
+    /////
+    mapped_register.push_back( { "GPU_BLIT_PITCH", nextAddr,
+        [this](Word) { return _gpu_blit_width >> 8; }, 
+        [this](Word, Byte data) { _gpu_blit_width = (_gpu_blit_width & 0x00FF) | (data << 8); _gpu_blit_width_count = _gpu_blit_width; }, 
+        {   
+            "(Word) Width of the Image Block in Pixels",""
+        }}); nextAddr+=1;
+    mapped_register.push_back( { "", nextAddr,
+        [this](Word) { return _gpu_blit_width & 0xFF; }, 
+        [this](Word, Byte data) { _gpu_blit_width = (_gpu_blit_width & 0xFF00) | (data << 0); _gpu_blit_width_count = _gpu_blit_width; },  
+        {""}}); nextAddr+=1;
+
+
+    ////////////////////////////////////////////////
+    // (Byte) GPU_BLIT_DATA
+    //      GPU Memory Data Port
+    /////
+    mapped_register.push_back( { "GPU_BLIT_DATA", nextAddr,
+        [this](Word) { return _gpu_blit_read_data(); }, 
+        [this](Word, Byte data) { _gpu_blit_write_data(data); },
+        {   
+            "(Byte) GPU Memory Data Port",""
+        }}); nextAddr+=1;
+
+
+
 //
-// nextAddr = GPU::GPU_Image::OnAttach(nextAddr);
-// nextAddr = GPU::GPU_MMU::OnAttach(nextAddr);
+// GPU_BLIT_ADDR       (Word)      // (Word) Graphics Memory Address Port
+// GPU_BLIT_PITCH      (Word)      // (Word) number of bytes per line
+// GPU_BLIT_WIDTH      (Word)      // (Word) width before skipping to next line
+// GPU_BLIT_DATA       (Byte)      // (Byte) GPU Memory Data Port
+//
+// GPU_ARG_1           (Word)      // Argument 1
+// GPU_ARG_2           (Word)      // Argument 2
+// GPU_ARG_3           (Word)      // Argument 3
+// GPU_ARG_4           (Word)      // Argument 4
+// GPU_ARG_5           (Word)      // Argument 5
+//
+// GPU Dynamic Memory Registers:
+// GPU_DYN_HANDLE          (Byte)      // Dynamic Memory HANDLE
+// GPU_DYN_CUR_ADDR        (Word)      // Current Dynamic Memory ADDRESS
+//                                     // (autoincrements by 1 on read/write)
+// GPU_DYN_END_ADDR                    // Last Dynamic Memory ADDRESS in this block
+// GPU_DYN_END_DISTANCE    (Word)      // Dynamic Memory Distance to End
+// GPU_DYN_DATA            (Byte)      // Dynamic Memory DATA (Read/Write)
+//
+//
+// GPU_COMMAND         (Byte)      // Graphics Processing Unit Command
+// GPU_CMD_CLEAR                   // Clear Video Buffer:
+//                                 // GPU_ARG_1_MSB = Color Index
+//
+// GPU_CMD_COPY                    // Copy GPU Memory to GPU Memory
+//                                 // Copy from [GPU_ARG_1] through [GPU_ARG_2]
+//                                 // to [GPU_ARG_3] through [GPU_ARG_4]                                
+//
+// GPU_CMD_BLIT_GPU                // BLiT from GPU memory to Display (RAM to Screen) 
+// GPU_CMD_GPU_BLIT                // BLiT from Display to GPU memory (Screen to RAM)
+// GPU_CMD_SCROLL                  // Scroll Video Buffer:
+//                                 //     GPU_ARG_1_MSB = signed 8-bit horiz. offset
+//                                 //     GPU_ARG_1_LSB = signed 8-bit vert. offset
+// GPU_CMD_NEW_IMG                 // Allocate a new GPU Image as in a Sprite or Tile
+//                                 // returns a valid node address for the new image                                
+//                                 // size is based on color depth as 32, 64, 128, or 256
+// GPU_CMD_FREE_IMG                // Free a GPU Image (GPU_ARG_1_MSB = Image Index)
+//
+// GPU_CMD_NEW_BUFFER              // Allocate a new GPU Buffer (of arbetrary size)
+// GPU_CMD_FREE_BUFFER             // Free a GPU Buffer (GPU_ARG_1_MSB = Buffer Index)
+//
+// GPU_CMD_DRAW_LINE
+// GPU_CMD_DRAW_CIRCLE
+// GPU_CMD_DRAW_RECT
+// GPU_CMD_FILL_RECT
+//
+//
+//
+//     ... etc
+//
+// GPU_ERROR           (Byte)      // (Byte) Graphics Processing Unit Error
+//                                 // $NN = No Error
+//                                 // $NN = Invalid Command
+//                                 // $NN = Invalid Width
+//                                 // $NN = Invalid Height
+//                                 // $NN = Invalid Pitch
+//                                 // $NN = Invalid Data
+//                                 // $NN = Invalid Mode
+//                                 // $NN = Invalid Index
+//                                 // $NN = Invalid Address
+//                                 // $NN = Invalid Argument
+//                                 // $NN = Out of Memory
+//                                 // 
+//                                 // ... etc.
+//
+//
+// // Sprite Registers:
+// GPU_SPR_MAX         (Byte)      // Maximum Sprite Index (Read Only)
+// GPU_SPR_IDX         (Byte)      // Sprite Index
+// GPU_SPR_XPOS        (SInt16)    // Sprite X Position
+// GPU_SPR_YPOS        (SInt16)    // Sprite Y Position
+// GPU_SPR_IMG_IDX     (Byte)      // Sprite Image Index
+// GPU_SPR_MASK        (Byte)      // Sprite Collision Mask (4x4)
+// GPU_SPR_FLAGS       (Byte)      // Sprite Flags:
+//                                 // % 0000'0011: 
+//                                 //      00 = 2 colors, 
+//                                 //      01 = 4 colors, 
+//                                 //      10 = 16 colors, 
+//                                 //      11 = 256 colors
+//                                 // % 0000'0100: Double Width
+//                                 // % 0000'1000: Double Height
+//                                 // % 0001'0000: Flip Horizontal
+//                                 // % 0010'0000: Flip Vertical
+//                                 // % 0100'0000: Collision Enable
+//                                 // % 1000'0000: Display Enable
+//
+// // Image Editing Registers:              
+// GPU_BMP_MAX         (Byte)      // Maximum Bitmap Index (Read Only)
+// GPU_BMP_IDX         (Byte)      // Bitmap Image Index (0-255)
+// GPU_BMP_OFFSET      (Byte)      // Offset Within the Image Buffer(0-255)
+// GPU_BMP_DATA        (Byte)      // Bitmap Data (Read Write)
+// GPU_BMP_FLAGS       (Byte)      // Bitmap Flags:
+//                                 // % 0000'0011: 
+//                                 //      00 = 2 colors (size=32), 
+//                                 //      01 = 4 colors (size=64), 
+//                                 //      10 = 16 colors (size=128), 
+//                                 //      11 = 256 colors (size=256)
+//                                 // % 1111'1100: Reserved
+//
+// // Tilemap Registers:
+// GPU_TMAP_WIDTH      (Word)      // Tilemap Width (in pixels)
+// GPU_TMAP_HEIGHT     (Word)      // Tilemap Height (in Pixels)
+// GPU_TMAP_XPOS       (SInt16)    // Tilemap X Position (top left corner)
+// GPU_TMAP_YPOS       (SInt16)    // Tilemap Y Position (top left corner)
+// GPU_TMAP_CLIP_X1    (Word)      // Tilemap Clip Region X1
+// GPU_TMAP_CLIP_Y1    (Word)      // Tilemap Clip Region Y1
+// GPU_TMAP_CLIP_X2    (Word)      // Tilemap Clip Region X2
+// GPU_TMAP_CLIP_Y2    (Word)      // Tilemap Clip Region Y2
+
+
+
+
+
 
     ////////////////////////////////////////////////
     // (Constant) GPU_END
@@ -409,10 +644,9 @@ void GPU::OnInit()
     // initialize the font glyph buffer
     for (int i=0; i<256; i++)
         for (int r=0; r<8; r++)
-            _gpu_glyph_data[i][r] = font8x8_system[i][r];    
+            _gpu_glyph_data[i][r] = font8x8_system[i][r];  
 
-    // // initialize the initial default display mode   
-    // Memory::Write(MAP(GPU_OPTIONS), _gpu_options);
+    // initialize the initial default display mode   
     Memory::Write_Word(MAP(GPU_MODE), _gpu_mode);
 
     std::cout << clr::indent() << clr::CYAN << "GPU::OnInit() Exit" << clr::RETURN;
@@ -638,10 +872,6 @@ void GPU::OnEvent(SDL_Event* evnt)
 
 void GPU::OnUpdate(float fElapsedTime)
 {
-    //std::cout << clr::indent() << clr::CYAN << "GPU::OnUpdate() Entry" << clr::RETURN;
-    if (fElapsedTime==0.0f) { ; } // stop the compiler from complaining
-
-
     static float deltaTime = fElapsedTime;
     static float runningTime = fElapsedTime;
     if (runningTime > deltaTime + 0.01f) {
@@ -664,12 +894,10 @@ void GPU::OnUpdate(float fElapsedTime)
     if (_gpu_mode & 0b10000000'0000'0000)
     {
         _render_extended_graphics(); 
-//std::cout << "GPU::OnRender() ---> Rendering Extended Texture" << std::endl;
     }
     else
     {
         _clear_texture(pExt_Texture, 15, red(0), grn(0), blu(0));
-// std::cout << "GPU::OnRender() ---> Clearing Extended Texture" << std::endl;
     }
 
 
@@ -678,15 +906,11 @@ void GPU::OnUpdate(float fElapsedTime)
     if (_gpu_mode & 0b0000'0000'1000'0000)
     {
         _render_standard_graphics();
-// std::cout << "GPU::OnRender() ---> Rendering Standard Texture" << std::endl;
     }
     else
     {
         _clear_texture(pStd_Texture, 0, 0, 0, 0);
-// std::cout << "GPU::OnRender() ---> Clearing Standard Texture" << std::endl;
     }    
-
-    //std::cout << clr::indent() << clr::CYAN << "GPU::OnUpdate() Exit" << clr::RETURN;
 } // END: GPU::OnUpdate()
 
 
@@ -1319,5 +1543,45 @@ void GPU::_verify_gpu_mode_change(Word mode_data)
 }
 
 
+// **************************** //
+// Extended Graphics Functions: //
+// **************************** //
+
+Byte GPU::_gpu_blit_read_data() 
+{ 
+    Byte data = _ext_video_buffer[_gpu_blit_addr];
+    _gpu_blit_increment_address();
+    return data; 
+}
+
+void GPU::_gpu_blit_write_data(Byte data) 
+{ 
+    _ext_video_buffer[_gpu_blit_addr] = data; 
+    _gpu_blit_increment_address();
+}
+
+void GPU::_gpu_blit_increment_address()
+{
+    // Ensure width and pitch are at least 1 for safe addressing
+    if (_gpu_blit_width == 0) _gpu_blit_width = 1;
+    if (_gpu_blit_pitch == 0) _gpu_blit_pitch = 1;
+
+    if (_gpu_blit_width_count > 0)
+    {
+        // Process a pixel/byte in the current row and decrement the width count
+        _gpu_blit_width_count--;
+        _gpu_blit_addr++;
+    }
+    else
+    {
+        // At the end of the row, move to the next row, considering pitch and width
+        _gpu_blit_addr += _gpu_blit_pitch - _gpu_blit_width;
+        
+        // Reset width count for the next row
+        _gpu_blit_width_count = _gpu_blit_width;
+    }
+}
 // END: GPU.cpp
+
+
 
