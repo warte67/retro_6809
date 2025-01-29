@@ -450,18 +450,6 @@ int  GPU::OnAttach(int nextAddr)
         }}); nextAddr+=1;
 
 
-
-//
-// GPU_BLIT_ADDR       (Word)      // (Word) Graphics Memory Address Port
-// GPU_BLIT_PITCH      (Word)      // (Word) number of bytes per line
-// GPU_BLIT_WIDTH      (Word)      // (Word) width before skipping to next line
-// GPU_BLIT_DATA       (Byte)      // (Byte) GPU Memory Data Port
-//
-// GPU_ARG_1           (Word)      // Argument 1
-// GPU_ARG_2           (Word)      // Argument 2
-// GPU_ARG_3           (Word)      // Argument 3
-// GPU_ARG_4           (Word)      // Argument 4
-// GPU_ARG_5           (Word)      // Argument 5
 //
 // GPU Dynamic Memory Registers:
 // GPU_DYN_HANDLE          (Byte)      // Dynamic Memory HANDLE
@@ -471,35 +459,33 @@ int  GPU::OnAttach(int nextAddr)
 // GPU_DYN_END_DISTANCE    (Word)      // Dynamic Memory Distance to End
 // GPU_DYN_DATA            (Byte)      // Dynamic Memory DATA (Read/Write)
 //
+// GPU_ARG_1           (Word)      // Argument 1
+// GPU_ARG_2           (Word)      // Argument 2
+// GPU_ARG_3           (Word)      // Argument 3
+// GPU_ARG_4           (Word)      // Argument 4
+// GPU_ARG_5           (Word)      // Argument 5
 //
 // GPU_COMMAND         (Byte)      // Graphics Processing Unit Command
-// GPU_CMD_CLEAR                   // Clear Video Buffer:
-//                                 // GPU_ARG_1_MSB = Color Index
-//
-// GPU_CMD_COPY                    // Copy GPU Memory to GPU Memory
-//                                 // Copy from [GPU_ARG_1] through [GPU_ARG_2]
-//                                 // to [GPU_ARG_3] through [GPU_ARG_4]                                
-//
-// GPU_CMD_BLIT_GPU                // BLiT from GPU memory to Display (RAM to Screen) 
-// GPU_CMD_GPU_BLIT                // BLiT from Display to GPU memory (Screen to RAM)
-// GPU_CMD_SCROLL                  // Scroll Video Buffer:
-//                                 //     GPU_ARG_1_MSB = signed 8-bit horiz. offset
-//                                 //     GPU_ARG_1_LSB = signed 8-bit vert. offset
-// GPU_CMD_NEW_IMG                 // Allocate a new GPU Image as in a Sprite or Tile
-//                                 // returns a valid node address for the new image                                
-//                                 // size is based on color depth as 32, 64, 128, or 256
-// GPU_CMD_FREE_IMG                // Free a GPU Image (GPU_ARG_1_MSB = Image Index)
-//
-// GPU_CMD_NEW_BUFFER              // Allocate a new GPU Buffer (of arbetrary size)
-// GPU_CMD_FREE_BUFFER             // Free a GPU Buffer (GPU_ARG_1_MSB = Buffer Index)
-//
+// GPU_CMD_NEW_BUFFER               // Allocate a new GPU Buffer (of arbetrary size)
+// GPU_CMD_FREE_BUFFER              // Free a GPU Buffer (GPU_ARG_1_MSB = Buffer Index)
+// GPU_CMD_NEW_IMG                  // Allocate a new GPU Image as in a Sprite or Tile
+//                                  // returns a valid node address for the new image                                
+//                                  // size is based on color depth as 32, 64, 128, or 256
+// GPU_CMD_FREE_IMG                 // Free a GPU Image (GPU_ARG_1_MSB = Image Index)
+// GPU_CMD_CLEAR                    // Clear Video Buffer:
+//                                  // GPU_ARG_1_MSB = Color Index
+// GPU_CMD_COPY                     // Copy GPU Memory to GPU Memory
+//                                  // Copy from [GPU_ARG_1] through [GPU_ARG_2]
+//                                  // to [GPU_ARG_3] through [GPU_ARG_4]                                
+// GPU_CMD_BLIT_GPU                 // BLiT from GPU memory to Display (RAM to Screen) 
+// GPU_CMD_GPU_BLIT                 // BLiT from Display to GPU memory (Screen to RAM)
+// GPU_CMD_SCROLL                   // Scroll Video Buffer:
+//                                  //     GPU_ARG_1_MSB = signed 8-bit horiz. offset
+//                                  //     GPU_ARG_1_LSB = signed 8-bit vert. offset
 // GPU_CMD_DRAW_LINE
 // GPU_CMD_DRAW_CIRCLE
 // GPU_CMD_DRAW_RECT
 // GPU_CMD_FILL_RECT
-//
-//
-//
 //     ... etc
 //
 // GPU_ERROR           (Byte)      // (Byte) Graphics Processing Unit Error

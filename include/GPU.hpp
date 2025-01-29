@@ -281,6 +281,12 @@ GPU_BGND_SIZE       (Word)          // (Word) Extended Graphics Buffer Size (Rea
 // GPU_ARG_5           (Word)       // Argument 5
 //
 // GPU_COMMAND         (Byte)       // Graphics Processing Unit Command
+// GPU_CMD_NEW_BUFFER               // Allocate a new GPU Buffer (of arbetrary size)
+// GPU_CMD_FREE_BUFFER              // Free a GPU Buffer (GPU_ARG_1_MSB = Buffer Index)
+// GPU_CMD_NEW_IMG                  // Allocate a new GPU Image as in a Sprite or Tile
+//                                  // returns a valid node address for the new image                                
+//                                  // size is based on color depth as 32, 64, 128, or 256
+// GPU_CMD_FREE_IMG                 // Free a GPU Image (GPU_ARG_1_MSB = Image Index)
 // GPU_CMD_CLEAR                    // Clear Video Buffer:
 //                                  // GPU_ARG_1_MSB = Color Index
 // GPU_CMD_COPY                     // Copy GPU Memory to GPU Memory
@@ -291,12 +297,6 @@ GPU_BGND_SIZE       (Word)          // (Word) Extended Graphics Buffer Size (Rea
 // GPU_CMD_SCROLL                   // Scroll Video Buffer:
 //                                  //     GPU_ARG_1_MSB = signed 8-bit horiz. offset
 //                                  //     GPU_ARG_1_LSB = signed 8-bit vert. offset
-// GPU_CMD_NEW_IMG                  // Allocate a new GPU Image as in a Sprite or Tile
-//                                  // returns a valid node address for the new image                                
-//                                  // size is based on color depth as 32, 64, 128, or 256
-// GPU_CMD_FREE_IMG                 // Free a GPU Image (GPU_ARG_1_MSB = Image Index)
-// GPU_CMD_NEW_BUFFER               // Allocate a new GPU Buffer (of arbetrary size)
-// GPU_CMD_FREE_BUFFER              // Free a GPU Buffer (GPU_ARG_1_MSB = Buffer Index)
 // GPU_CMD_DRAW_LINE
 // GPU_CMD_DRAW_CIRCLE
 // GPU_CMD_DRAW_RECT
