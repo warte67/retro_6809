@@ -20,7 +20,7 @@ KRNL_START      jmp     KRNL_BEGIN
 ;	fcs	character string with its terminators high bit set
 ;	fcn	character string with null termination
 
-KRNL_PROMPT0	fcn	"Retro 6809 Kernel ROM V0.4\n"
+KRNL_PROMPT0	fcn	"Retro 6809 Kernel ROM V0.4.1\n"
 KRNL_PROMPT1	fcn	"Emulator compiled "
 KRNL_PROMPT2	fcn	"GNU General Public Liscense (GPL V3)\n"
 KRNL_PROMPT3	fcn	"Copyright (C) 2024-2025 By Jay Faries\n\n"  
