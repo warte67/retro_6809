@@ -52,25 +52,8 @@ public: // PUBLIC ACCESSORS
 
     static Byte GetGlyphData(Byte index, Byte row) { return _gpu_glyph_data[index][row]; }
 
-
-    // // testing ...
-    //         float Get_Texture_Width() 
-    //         { 
-    //             float w, h;
-    //             SDL_GetTextureSize(pExt_Texture, &w, &h);
-    //             return w; 
-    //         }
-    //         float Get_Texture_Height() 
-    //         { 
-    //             float w, h;
-    //             SDL_GetTextureSize(pExt_Texture, &w, &h);
-    //             return h; 
-    //         }
-
-            float Get_Width() { return _gpu_hres; }
-            float Get_Height() { return _gpu_vres; }
-    // ... testing
-
+    float Get_Width() { return _gpu_hres; }
+    float Get_Height() { return _gpu_vres; }
 
     // palette stuff
     union PALETTE {
