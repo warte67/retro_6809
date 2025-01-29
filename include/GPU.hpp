@@ -212,57 +212,125 @@ private: // PRIVATE MEMBERS
 
 /*** NOTES: ****************************************
  
-    //
-    // Extended Graphics Registers
-    //
-        
-    GPU_VIDEO_SIZE  (Word)      // (Word) Extended Graphics Buffer Size (Read Only)
-                                // The primary extended graphics buffer
-                                // always begins at $0000.
-        
-    GPU_MEM_ADDR    (Word)      // (Word) Extended Memory Address Port
-    GPU_MEM_PITCH   (Word)      // (Word) number of bytes per line
-    GPU_MEM_WIDTH   (Word)      // (Word) width before skipping to next line
-    GPU_MEM_DATA    (Byte)      // (Byte) GPU Memory Data Port
-
-    GPU_ARG_1       (Word)      // Argument 1
-    GPU_ARG_2       (Word)      // Argument 2
-    GPU_COMMAND     (Byte)      // Graphics Processing Unit Command
-        GPU_CMD_COPY    = 0x00, // Copy Memory to Video Buffer
-        GPU_CMD_CLEAR   = 0x01, // Clear Video Buffer
-        GPU_CMD_SCROLL  = 0x02, // Scroll Video Buffer        
-        ... etc
-
+//
+// Extended Graphics Registers
+//
+// (Class tentitively named GPU_EXT)
+//
     
+GPU_BGND_SIZE       (Word)      // (Word) Extended Graphics Buffer Size (Read Only)
+                                // The primary extended graphics buffer
+                                // always begins at $0000. This is also Last
+                                // Address for extended graphics.
+
+GPU_BGND_MODE       (Byte)      // (Byte) Background Video Mode
+                                // On Write, attempt to set the video mode
+                                // On Write, possibly destroys Bitmap Images
+
+GPU_BLIT_ADDR       (Word)      // (Word) Extended Memory Address Port
+GPU_BLIT_PITCH      (Word)      // (Word) number of bytes per line
+GPU_BLIT_WIDTH      (Word)      // (Word) width before skipping to next line
+GPU_BLIT_DATA       (Byte)      // (Byte) GPU Memory Data Port
+
+GPU_ARG_1           (Word)      // Argument 1
+GPU_ARG_2           (Word)      // Argument 2
+GPU_ARG_3           (Word)      // Argument 3
+GPU_ARG_4           (Word)      // Argument 4
+GPU_ARG_5           (Word)      // Argument 5
+
+GPU_COMMAND         (Byte)      // Graphics Processing Unit Command
+GPU_CMD_CLEAR                   // Clear Video Buffer:
+                                // GPU_ARG_1_MSB = Color Index
+
+GPU_CMD_COPY                    // Copy GPU Memory to GPU Memory
+                                // Copy from [GPU_ARG_1] through [GPU_ARG_2]
+                                // to [GPU_ARG_3] through [GPU_ARG_4]                                
+
+GPU_CMD_BLIT_GPU                // BLiT from GPU memory to Display (RAM to Screen) 
+GPU_CMD_GPU_BLIT                // BLiT from Display to GPU memory (Screen to RAM)
+GPU_CMD_SCROLL                  // Scroll Video Buffer:
+                                //     GPU_ARG_1_MSB = signed 8-bit horiz. offset
+                                //     GPU_ARG_1_LSB = signed 8-bit vert. offset
+GPU_CMD_NEW_IMG                 // Allocate a new GPU Image as in a Sprite or Tile
+                                // returns a valid node address for the new image                                
+                                // size is based on color depth as 32, 64, 128, or 256
+GPU_CMD_FREE_IMG                // Free a GPU Image (GPU_ARG_1_MSB = Image Index)
+
+GPU_CMD_NEW_BUFFER              // Allocate a new GPU Buffer (of arbetrary size)
+GPU_CMD_FREE_BUFFER             // Free a GPU Buffer (GPU_ARG_1_MSB = Buffer Index)
+
+GPU_CMD_DRAW_LINE
+GPU_CMD_DRAW_CIRCLE
+GPU_CMD_DRAW_RECT
+GPU_CMD_FILL_RECT
 
 
 
+    ... etc
+
+GPU_ERROR           (Byte)      // (Byte) Graphics Processing Unit Error
+                                // $NN = No Error
+                                // $NN = Invalid Command
+                                // $NN = Invalid Width
+                                // $NN = Invalid Height
+                                // $NN = Invalid Pitch
+                                // $NN = Invalid Data
+                                // $NN = Invalid Mode
+                                // $NN = Invalid Index
+                                // $NN = Invalid Address
+                                // $NN = Invalid Argument
+                                // $NN = Out of Memory
+                                // 
+                                // ... etc.
 
 
+// Sprite Registers:
+GPU_SPR_MAX         (Byte)      // Maximum Sprite Index (Read Only)
+GPU_SPR_IDX         (Byte)      // Sprite Index
+GPU_SPR_XPOS        (SInt16)    // Sprite X Position
+GPU_SPR_YPOS        (SInt16)    // Sprite Y Position
+GPU_SPR_IMG_IDX     (Byte)      // Sprite Image Index
+GPU_SPR_MASK        (Byte)      // Sprite Collision Mask (4x4)
+GPU_SPR_FLAGS       (Byte)      // Sprite Flags:
+                                // % 0000'0011: 
+                                //      00 = 2 colors, 
+                                //      01 = 4 colors, 
+                                //      10 = 16 colors, 
+                                //      11 = 256 colors
+                                // % 0000'0100: Double Width
+                                // % 0000'1000: Double Height
+                                // % 0001'0000: Flip Horizontal
+                                // % 0010'0000: Flip Vertical
+                                // % 0100'0000: Collision Enable
+                                // % 1000'0000: Display Enable
 
+// Image Editing Registers:              
+GPU_BMP_MAX         (Byte)      // Maximum Bitmap Index (Read Only)
+GPU_BMP_IDX         (Byte)      // Bitmap Image Index (0-255)
+GPU_BMP_OFFSET      (Byte)      // Offset Within the Image Buffer(0-255)
+GPU_BMP_DATA        (Byte)      // Bitmap Data (Read Write)
+GPU_BMP_FLAGS       (Byte)      // Bitmap Flags:
+                                // % 0000'0011: 
+                                //      00 = 2 colors (size=32), 
+                                //      01 = 4 colors (size=64), 
+                                //      10 = 16 colors (size=128), 
+                                //      11 = 256 colors (size=256)
+                                // % 1111'1100: Reserved
 
-        
+// Tilemap Registers:
+GPU_TMAP_WIDTH      (Word)      // Tilemap Width (in pixels)
+GPU_TMAP_HEIGHT     (Word)      // Tilemap Height (in Pixels)
+GPU_TMAP_XPOS       (SInt16)    // Tilemap X Position (top left corner)
+GPU_TMAP_YPOS       (SInt16)    // Tilemap Y Position (top left corner)
+GPU_TMAP_CLIP_X1    (Word)      // Tilemap Clip Region X1
+GPU_TMAP_CLIP_Y1    (Word)      // Tilemap Clip Region Y1
+GPU_TMAP_CLIP_X2    (Word)      // Tilemap Clip Region X2
+GPU_TMAP_CLIP_Y2    (Word)      // Tilemap Clip Region Y2
 
-
-
-
-    // Potential GPU Dynamic Memory Registers    
-    GPU_DYN_SIZE     = 0xFF8C, // (Word) dynamic memory block size
-        //      Notes: Memory allocation occurs when the 
-        //             least-significant byte is written.
-        //             Reads as total number of bytes allocated
-        //             or freed. When $0000 is written to this 
-        //             port, memory node at MEM_DYN_ADDR is freed.
-    GPU_DYN_ADDR     = 0xFF8E, // (Word) address of a dynamic memory node
-    GPU_DYN_AVAIL    = 0xFF90, // (Word) number of non-allocated bytes
-
-    //
-    // Sprite Registers
-    //
-
-    //
-    // Tilemap Registers
-    // 
+// GPU Dynamic Memory Registers:
+GPU_DYN_ADDR        (Word)      // Dynamic Memory ADDRESS
+                                // (autoincrements on read/write)
+GPU_DYN_DATA        (Byte)      // Dynamic Memory DATA (Read/Write)
 
 
 ******************************************************/

@@ -29,6 +29,13 @@ GPU::GPU()
 { 
     std::cout << clr::indent_push() << clr::CYAN << "GPU Created" << clr::RETURN;
     _device_name = "GPU_DEVICE"; 
+
+    // Enforce Pseudo-Singleton Pattern
+    static GPU* pGPU = this;
+    if (pGPU != this)
+    {
+        Bus::Error("GPU already initialized!", __FILE__, __LINE__);
+    }
 } // END: GPU()
 
 GPU::~GPU() 
@@ -318,6 +325,11 @@ int  GPU::OnAttach(int nextAddr)
         [this](Word nextAddr, Byte data) { (void)nextAddr; _gpu_glyph_data[_gpu_glyph_idx][7] = data; }, 
         {""}}); nextAddr+=1;      
 
+// ADD MORE HARDWARE REGISTERS FOR THE IMAGE and the MMU Nested Devices
+// LIKE THIS:
+//
+// nextAddr = GPU::GPU_Image::OnAttach(nextAddr);
+// nextAddr = GPU::GPU_MMU::OnAttach(nextAddr);
 
     ////////////////////////////////////////////////
     // (Constant) GPU_END
