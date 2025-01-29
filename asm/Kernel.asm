@@ -40,7 +40,7 @@ READY_PROMPT	fcn	"Ready\n"
 ; 	do_pwd		; #7		; Print Working Directory
 ;	do_chdir	; #8		; Alias of CD
 ;	do_exit		; #9		; Exit the Emulator
-;	do_quit		; #10		; Also Exits the Emulator
+;	do_quit		; #10		; Same as "do_exit"
 ;	do_mode		; #11		; Display Mode (0-31) or ($00-$1F)
 ;	do_debug	; #12		; Enter or Exit the Debugger
 ;	do_help		; #13		; Display usage help
@@ -97,7 +97,7 @@ krnl_help_str	fcc	" valid commands are:\n"
 * 		fcc     "chdir: Alias of CD\n"
 * 		fcc     "pwd:   Print Working Directory\n"
 * 		fcc     "exit:  Exit the Emulator\n"
-* 		fcc     "quit:  Also Exits the Emulator\n"
+* 		fcc     "quit:  Same as "do_exit"\n"
 * 		fcc     "mode:  Display Mode (0-31) or ($00-$1F)\n"
 * 		fcc     "debug: Enter or Exit the Debugger\n"
 * 		fcn     "help"  Display usage help\n"
