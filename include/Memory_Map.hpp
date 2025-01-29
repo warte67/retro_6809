@@ -282,7 +282,7 @@ enum MEMMAP
                                       // Note: This value represents the number of displayed
                                       //       pixels per line.
                                       // 
-    GPU_BLIT_PITCH        = 0xFE27,   // (Word) Width of the Image Block in Pixels
+    GPU_BLIT_WIDTH        = 0xFE27,   // (Word) Width of the Image Block in Pixels
                                       // 
     GPU_BLIT_DATA         = 0xFE29,   // (Byte) GPU Memory Data Port
                                       // 

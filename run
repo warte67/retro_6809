@@ -3,6 +3,7 @@
 # 'run' bash script
 
 ./kernel.sh
+./test.sh
 
 
 if [ "$1" == "clean" ]; then

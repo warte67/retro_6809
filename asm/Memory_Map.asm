@@ -280,7 +280,7 @@ GPU_BLIT_PITCH        equ    $FE25    ; (Word) Number of Bytes Per Display Line
                                       ; Note: This value represents the number of displayed
                                       ;       pixels per line.
                                       ; 
-GPU_BLIT_PITCH        equ    $FE27    ; (Word) Width of the Image Block in Pixels
+GPU_BLIT_WIDTH        equ    $FE27    ; (Word) Width of the Image Block in Pixels
                                       ; 
 GPU_BLIT_DATA         equ    $FE29    ; (Byte) GPU Memory Data Port
                                       ; 

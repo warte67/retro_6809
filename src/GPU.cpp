@@ -426,7 +426,7 @@ int  GPU::OnAttach(int nextAddr)
     // (Word) GPU_BLIT_WIDTH
     //      Width of the Image Block in Pixels
     /////
-    mapped_register.push_back( { "GPU_BLIT_PITCH", nextAddr,
+    mapped_register.push_back( { "GPU_BLIT_WIDTH", nextAddr,
         [this](Word) { return _gpu_blit_width >> 8; }, 
         [this](Word, Byte data) { _gpu_blit_width = (_gpu_blit_width & 0x00FF) | (data << 8); _gpu_blit_width_count = _gpu_blit_width; }, 
         {   
