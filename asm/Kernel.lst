@@ -305,46 +305,59 @@ FE25                  GPU_BLIT_PITCH        equ    $FE25    ; (Word) Number of B
                                                             ;       pixels per line.
                                                             ; 
 FE27                  GPU_BLIT_WIDTH        equ    $FE27    ; (Word) Width of the Image Block in Pixels
-                                                            ; 
 FE29                  GPU_BLIT_DATA         equ    $FE29    ; (Byte) GPU Memory Data Port
                                                             ; 
-FE29                  GPU_END               equ    $FE29    ; End of GPU Register Space
-FE2A                  GPU_TOP               equ    $FE2A    ; Top of GPU Register Space
+FE2A                  GPU_DYN_HANDLE        equ    $FE2A    ; (Word) Dynamic Memory HANDLE
+                                                            ; On Write: resets GPU_DYN_CUR_ADDR,
+                                                            ;     GPU_DYN_END_ADDR,  and GPU_DYN_END_DIST
+                                                            ; 
+FE2C                  GPU_DYN_CUR_ADDR      equ    $FE2C    ; (Word) Current Dynamic Memory ADDRESS
+FE2E                  GPU_TMAP_WIDTH        equ    $FE2E    ; (Word) Tilemap Width (in pixels)
+FE30                  GPU_TMAP_HEIGHT       equ    $FE30    ; (Word) Tilemap Height (in pixels)
+FE32                  GPU_TMAP_XPOS         equ    $FE32    ; (SInt16) Tilemap X Position (top left corner)
+FE34                  GPU_TMAP_YPOS         equ    $FE34    ; (SInt16) Tilemap Y Position (top left corner)
+FE36                  GPU_TMAP_CLIP_X1      equ    $FE36    ; (Word) Tilemap Clip Region X1
+FE38                  GPU_TMAP_CLIP_Y1      equ    $FE38    ; (Word) Tilemap Clip Region Y1
+FE3A                  GPU_TMAP_CLIP_X2      equ    $FE3A    ; (Word) Tilemap Clip Region X2
+FE3C                  GPU_TMAP_CLIP_Y2      equ    $FE3C    ; (Word) Tilemap Clip Region Y2
+                                                            ; 
+FE3D                  GPU_END               equ    $FE3D    ; End of GPU Register Space
+FE3E                  GPU_TOP               equ    $FE3E    ; Top of GPU Register Space
                       ; _______________________________________________________________________
                       
-FE2A                  CSR_DEVICE            equ    $FE2A    ; START: Mouse Device Hardware Registers
-FE2A                  CSR_XPOS              equ    $FE2A    ; (Word) Horizontal Mouse Cursor Coordinate
-FE2C                  CSR_YPOS              equ    $FE2C    ; (Word) Vertical Mouse Cursor Coordinate
-FE2E                  CSR_XOFS              equ    $FE2E    ; (Byte) Horizontal Mouse Cursor Offset
-FE2F                  CSR_YOFS              equ    $FE2F    ; (Byte) Vertical Mouse Cursor Offset
-FE30                  CSR_SCROLL            equ    $FE30    ; (char) MouseWheel Scroll: -1, 0, 1
-FE31                  CSR_FLAGS             equ    $FE31    ; (Byte) Mouse Device State Flags
+FE3E                  CSR_DEVICE            equ    $FE3E    ; START: Mouse Device Hardware Registers
+FE3E                  CSR_XPOS              equ    $FE3E    ; (Word) Horizontal Mouse Cursor Coordinate
+FE40                  CSR_YPOS              equ    $FE40    ; (Word) Vertical Mouse Cursor Coordinate
+FE42                  CSR_XOFS              equ    $FE42    ; (Byte) Horizontal Mouse Cursor Offset
+FE43                  CSR_YOFS              equ    $FE43    ; (Byte) Vertical Mouse Cursor Offset
+FE44                  CSR_SCROLL            equ    $FE44    ; (char) MouseWheel Scroll: -1, 0, 1
+FE45                  CSR_FLAGS             equ    $FE45    ; (Byte) Mouse Device State Flags
                                                             ;    bits 0-4: button states
                                                             ;    bits 5-6: number of clicks
                                                             ;    bits 7:   cursor enable
                                                             ; 
-FE32                  CSR_BMP_INDX          equ    $FE32    ; (Byte) Mouse Cursor Bitmap Pixel Offset
-FE33                  CSR_BMP_DATA          equ    $FE33    ; (Byte) Mouse Cursor Bitmap Pixel Color Data ($0-$F)
-FE34                  CSR_PAL_INDX          equ    $FE34    ; (Byte) Mouse Cursor Color Palette Index (0-15)
-FE35                  CSR_PAL_DATA          equ    $FE35    ; (Word) Mouse Cursor Color Palette Data A4R4G4B4
-FE36                  CSR_END               equ    $FE36    ; End of Mouse Device Register Space
-FE37                  CSR_TOP               equ    $FE37    ; Top of CSR Register Space
+FE46                  CSR_BMP_INDX          equ    $FE46    ; (Byte) Mouse Cursor Bitmap Pixel Offset
+FE47                  CSR_BMP_DATA          equ    $FE47    ; (Byte) Mouse Cursor Bitmap Pixel Color Data ($0-$F)
+FE48                  CSR_PAL_INDX          equ    $FE48    ; (Byte) Mouse Cursor Color Palette Index (0-15)
+FE49                  CSR_PAL_DATA          equ    $FE49    ; (Word) Mouse Cursor Color Palette Data A4R4G4B4
+FE4A                  CSR_END               equ    $FE4A    ; End of Mouse Device Register Space
+FE4B                  CSR_TOP               equ    $FE4B    ; Top of CSR Register Space
                       ; _______________________________________________________________________
                       
-FE37                  KEYBOARD_DEVICE       equ    $FE37    ; START: Keyboard Device Hardware Registers
-FE37                  CHAR_Q_LEN            equ    $FE37    ; (Byte) Number of Characters Waiting in Queue   (Read Only)
-FE38                  CHAR_SCAN             equ    $FE38    ; (Byte) Read Next Character in Queue (Not Popped When Read)
-FE39                  CHAR_POP              equ    $FE39    ; (Byte) Read Next Character in Queue     (Popped When Read)
-FE3A                  XKEY_BUFFER           equ    $FE3A    ; (16 Bytes) 128 bits for XK_KEY data buffer     (Read Only)
-FE4A                  EDT_BFR_CSR           equ    $FE4A    ; (Byte) Cursor Position Within Edit Buffer     (Read/Write)
-FE4B                  EDT_ENABLE            equ    $FE4B    ; (Byte) Line Editor Enable Flag                (Read/Write)
-FE4C                  EDT_BFR_LEN           equ    $FE4C    ; (Byte) Limit the Line Editor to This Length   (Read/Write)
-FE4C                  KEYBOARD_END          equ    $FE4C    ; End of Keyboard Register Space
-FE4D                  KEYBOARD_TOP          equ    $FE4D    ; Top of Keyboard Register Space
+FE4B                  KEYBOARD_DEVICE       equ    $FE4B    ; START: Keyboard Device Hardware Registers
+FE4B                  CHAR_Q_LEN            equ    $FE4B    ; (Byte) Number of Characters Waiting in Queue   (Read Only)
+FE4C                  CHAR_SCAN             equ    $FE4C    ; (Byte) Read Next Character in Queue (Not Popped When Read)
+FE4D                  CHAR_POP              equ    $FE4D    ; (Byte) Read Next Character in Queue     (Popped When Read)
+FE4E                  XKEY_BUFFER           equ    $FE4E    ; (16 Bytes) 128 bits for XK_KEY data buffer     (Read Only)
+FE5E                  EDT_BFR_CSR           equ    $FE5E    ; (Byte) Cursor Position Within Edit Buffer     (Read/Write)
+FE5F                  EDT_ENABLE            equ    $FE5F    ; (Byte) Line Editor Enable Flag                (Read/Write)
+FE60                  EDT_BFR_LEN           equ    $FE60    ; (Byte) Limit the Line Editor to This Length   (Read/Write)
+FE60                  KEYBOARD_END          equ    $FE60    ; End of Keyboard Register Space
+FE61                  KEYBOARD_TOP          equ    $FE61    ; Top of Keyboard Register Space
                       ; _______________________________________________________________________
                       
-FE4D                  JOYSTICK_DEVICE       equ    $FE4D    ; START: Joystick/Gamepad Controller Device Hardware Registers
-FE4D                  JOYS_1_FLAGS          equ    $FE4D    ; (Byte) Gamepad/Joystick #1 Condition Flags:     (Read Only)
+FE61                  JOYSTICK_DEVICE       equ    $FE61    ; START: Joystick/Gamepad Controller Device Hardware Registers
+FE61                  JOYS_1_FLAGS          equ    $FE61    ; (Byte) Gamepad/Joystick #1 Condition Flags:     (Read Only)
                                                             ;            0000'0000: Not Connected
                                                             ;            0000'1111: Controller Type
                                                             ;            0001'0000: (reserved)
@@ -376,7 +389,7 @@ FE4D                  JOYS_1_FLAGS          equ    $FE4D    ; (Byte) Gamepad/Joy
                                                             ;            8:  Arcade Pad
                                                             ;            9:  Throttle
                                                             ; 
-FE4E                  JOYS_1_BTN            equ    $FE4E    ; (Word) Gamepad Controller Button Bits:         (Read Only)
+FE62                  JOYS_1_BTN            equ    $FE62    ; (Word) Gamepad Controller Button Bits:         (Read Only)
                                                             ;            0000'0000'0000'0000 = Nothing Pressed
                                                             ;            0000'0000'0000'0001 = A
                                                             ;            0000'0000'0000'0010 = B
@@ -396,15 +409,15 @@ FE4E                  JOYS_1_BTN            equ    $FE4E    ; (Word) Gamepad Con
                                                             ;            1000'0000'0000'0000 = DPad Right
                                                             ;            1111'1111'1111'1111 = Not Connected
                                                             ; 
-FE50                  JOYS_1_DBND           equ    $FE50    ; (Byte) PAD 1 analog deadband; default is 5   (read/write)
-FE51                  JOYS_1_LTX            equ    $FE51    ; (char) PAD 1 LThumb-X position (-128 _ +127)   (realtime)
-FE52                  JOYS_1_LTY            equ    $FE52    ; (char) PAD 1 LThumb-Y position (-128 _ +127)   (realtime)
-FE53                  JOYS_1_RTX            equ    $FE53    ; (char) PAD 1 RThumb-X position (-128 _ +127)   (realtime)
-FE54                  JOYS_1_RTY            equ    $FE54    ; (char) PAD 1 RThumb-Y position (-128 _ +127)   (realtime)
-FE55                  JOYS_1_Z1             equ    $FE55    ; (char) PAD 1 left analog trigger (0 - 127)     (realtime)
-FE56                  JOYS_1_Z2             equ    $FE56    ; (char) PAD 1 left analog trigger (0 - 127)     (realtime)
+FE64                  JOYS_1_DBND           equ    $FE64    ; (Byte) PAD 1 analog deadband; default is 5   (read/write)
+FE65                  JOYS_1_LTX            equ    $FE65    ; (char) PAD 1 LThumb-X position (-128 _ +127)   (realtime)
+FE66                  JOYS_1_LTY            equ    $FE66    ; (char) PAD 1 LThumb-Y position (-128 _ +127)   (realtime)
+FE67                  JOYS_1_RTX            equ    $FE67    ; (char) PAD 1 RThumb-X position (-128 _ +127)   (realtime)
+FE68                  JOYS_1_RTY            equ    $FE68    ; (char) PAD 1 RThumb-Y position (-128 _ +127)   (realtime)
+FE69                  JOYS_1_Z1             equ    $FE69    ; (char) PAD 1 left analog trigger (0 - 127)     (realtime)
+FE6A                  JOYS_1_Z2             equ    $FE6A    ; (char) PAD 1 left analog trigger (0 - 127)     (realtime)
                                                             ; 
-FE57                  JOYS_2_FLAGS          equ    $FE57    ; (Byte) Gamepad/Joystick #2 Condition Flags:     (Read Only)
+FE6B                  JOYS_2_FLAGS          equ    $FE6B    ; (Byte) Gamepad/Joystick #2 Condition Flags:     (Read Only)
                                                             ;            0000'0000: Not Connected
                                                             ;            0000'1111: Controller Type
                                                             ;            0001'0000: (reserved)
@@ -436,7 +449,7 @@ FE57                  JOYS_2_FLAGS          equ    $FE57    ; (Byte) Gamepad/Joy
                                                             ;            8:  Arcade Pad
                                                             ;            9:  Throttle
                                                             ; 
-FE58                  JOYS_2_BTN            equ    $FE58    ; (Word) Button Bits: Room For up to 16 Buttons  (realtime)
+FE6C                  JOYS_2_BTN            equ    $FE6C    ; (Word) Button Bits: Room For up to 16 Buttons  (realtime)
                                                             ;        Joystick Button Bits:
                                                             ;            0000'0000'0000'0000 = Nothing Pressed
                                                             ;            0000'0000'0000'0001 = Button 1 
@@ -457,19 +470,19 @@ FE58                  JOYS_2_BTN            equ    $FE58    ; (Word) Button Bits
                                                             ;            1000'0000'0000'0000 = Hat Right
                                                             ;            1111'1111'1111'1111 = Not Connected
                                                             ; 
-FE5A                  JOYS_2_DBND           equ    $FE5A    ; (Byte) PAD 2 analog deadband; default is 5   (read/write)
-FE5B                  JOYS_2_LTX            equ    $FE5B    ; (char) PAD 2 LThumb-X position (-128 _ +127)   (realtime)
-FE5C                  JOYS_2_LTY            equ    $FE5C    ; (char) PAD 2 LThumb-Y position (-128 _ +127)   (realtime)
-FE5D                  JOYS_2_RTX            equ    $FE5D    ; (char) PAD 2 RThumb-X position (-128 _ +127)   (realtime)
-FE5E                  JOYS_2_RTY            equ    $FE5E    ; (char) PAD 2 RThumb-Y position (-128 _ +127)   (realtime)
-FE5F                  JOYS_2_Z1             equ    $FE5F    ; (char) PAD 2 left analog trigger (0 - 127)     (realtime)
-FE60                  JOYS_2_Z2             equ    $FE60    ; (char) PAD 2 left analog trigger (0 - 127)     (realtime)
-FE60                  JOYS_END              equ    $FE60    ; End of Joystick/Gamepad Device Register Space
-FE61                  JOYS_TOP              equ    $FE61    ; Top of Joystick/Gamepad Device Register Space
+FE6E                  JOYS_2_DBND           equ    $FE6E    ; (Byte) PAD 2 analog deadband; default is 5   (read/write)
+FE6F                  JOYS_2_LTX            equ    $FE6F    ; (char) PAD 2 LThumb-X position (-128 _ +127)   (realtime)
+FE70                  JOYS_2_LTY            equ    $FE70    ; (char) PAD 2 LThumb-Y position (-128 _ +127)   (realtime)
+FE71                  JOYS_2_RTX            equ    $FE71    ; (char) PAD 2 RThumb-X position (-128 _ +127)   (realtime)
+FE72                  JOYS_2_RTY            equ    $FE72    ; (char) PAD 2 RThumb-Y position (-128 _ +127)   (realtime)
+FE73                  JOYS_2_Z1             equ    $FE73    ; (char) PAD 2 left analog trigger (0 - 127)     (realtime)
+FE74                  JOYS_2_Z2             equ    $FE74    ; (char) PAD 2 left analog trigger (0 - 127)     (realtime)
+FE74                  JOYS_END              equ    $FE74    ; End of Joystick/Gamepad Device Register Space
+FE75                  JOYS_TOP              equ    $FE75    ; Top of Joystick/Gamepad Device Register Space
                       ; _______________________________________________________________________
                       
-FE61                  FIO_DEVICE            equ    $FE61    ; START: File I/O Device Hardware Registers
-FE61                  FIO_ERROR             equ    $FE61    ; (Byte) FILE_ERROR enumeration result (FE_<error>)
+FE75                  FIO_DEVICE            equ    $FE75    ; START: File I/O Device Hardware Registers
+FE75                  FIO_ERROR             equ    $FE75    ; (Byte) FILE_ERROR enumeration result (FE_<error>)
                                                             ; 
 0000                  FE_BEGIN              equ    $0000    ;   Begin FILE_ERROR enumeration 
 0000                  FE_NOERROR            equ    $0000    ;      no error, condition normal
@@ -485,7 +498,7 @@ FE61                  FIO_ERROR             equ    $FE61    ; (Byte) FILE_ERROR 
 0007                  FE_INVALID_NAME       equ    $0007    ;      invalid file name         
 0007                  FE_LAST               equ    $0007    ;   End of FILE_ERROR enumeration
                                                             ; 
-FE62                  FIO_COMMAND           equ    $FE62    ; (Byte) Execute a File Command (FC_<cmd>)
+FE76                  FIO_COMMAND           equ    $FE76    ; (Byte) Execute a File Command (FC_<cmd>)
                                                             ; 
 0000                  FC_BEGIN              equ    $0000    ;   Begin FIO_COMMAND enumeration           
 0000                  FC_RESET              equ    $0000    ;     Reset                                 
@@ -515,46 +528,46 @@ FE62                  FIO_COMMAND           equ    $FE62    ; (Byte) Execute a F
 0018                  FC_GET_SEEK           equ    $0018    ;     Get Seek Position (into FIO_IOWORD)   
 0018                  FC_LAST               equ    $0018    ;   End FIO_COMMAND enumeration             
                                                             ; 
-FE63                  FIO_HANDLE            equ    $FE63    ; (Byte) Current File Stream HANDLE (0=NONE)
-FE64                  FIO_SEEKPOS           equ    $FE64    ; (DWord) File Seek Position
-FE68                  FIO_IODATA            equ    $FE68    ; (Byte) Input / Output Data
+FE77                  FIO_HANDLE            equ    $FE77    ; (Byte) Current File Stream HANDLE (0=NONE)
+FE78                  FIO_SEEKPOS           equ    $FE78    ; (DWord) File Seek Position
+FE7C                  FIO_IODATA            equ    $FE7C    ; (Byte) Input / Output Data
                                                             ; 
-FE69                  FIO_PATH_LEN          equ    $FE69    ; (Byte) Length of the Primary Filepath        (Read Only)
-FE6A                  FIO_PATH_POS          equ    $FE6A    ; (Byte) Character Position Within the Primary Filepath
-FE6B                  FIO_PATH_DATA         equ    $FE6B    ; (Byte) Data at the Character Position of the Primary Path
+FE7D                  FIO_PATH_LEN          equ    $FE7D    ; (Byte) Length of the Primary Filepath        (Read Only)
+FE7E                  FIO_PATH_POS          equ    $FE7E    ; (Byte) Character Position Within the Primary Filepath
+FE7F                  FIO_PATH_DATA         equ    $FE7F    ; (Byte) Data at the Character Position of the Primary Path
                                                             ; 
-FE6C                  FIO_ALT_PATH_LEN      equ    $FE6C    ; (Byte) Length of the alternate Filepath        (Read Only)
-FE6D                  FIO_ALT_PATH_POS      equ    $FE6D    ; (Byte) Character Position Within the Alternate Filepath
-FE6E                  FIO_ALT_PATH_DATA     equ    $FE6E    ; (Byte) Data at the Character Position of the Alternate Path
+FE80                  FIO_ALT_PATH_LEN      equ    $FE80    ; (Byte) Length of the alternate Filepath        (Read Only)
+FE81                  FIO_ALT_PATH_POS      equ    $FE81    ; (Byte) Character Position Within the Alternate Filepath
+FE82                  FIO_ALT_PATH_DATA     equ    $FE82    ; (Byte) Data at the Character Position of the Alternate Path
                                                             ; 
-FE6F                  FIO_DIR_DATA          equ    $FE6F    ; (Byte) A Series of Null-Terminated Filenames
+FE83                  FIO_DIR_DATA          equ    $FE83    ; (Byte) A Series of Null-Terminated Filenames
                                                             ;   NOTE: Current read-position is reset to the beginning
                                                             ;     following a List Directory command. The read-position
                                                             ;     is automatically advanced on read from this register.
                                                             ;     Each filename is $0A-terminated. The list itself is
                                                             ;     null-terminated.
                                                             ; 
-FE6F                  FIO_END               equ    $FE6F    ; End of FIO Device Register Space
-FE70                  FIO_TOP               equ    $FE70    ; Top of FIO Device Register Space
+FE83                  FIO_END               equ    $FE83    ; End of FIO Device Register Space
+FE84                  FIO_TOP               equ    $FE84    ; Top of FIO Device Register Space
                       ; _______________________________________________________________________
                       
-FE70                  MATH_DEVICE           equ    $FE70    ; START: Math Co-Processor Device Hardware Registers
-FE70                  MATH_ACA_POS          equ    $FE70    ; (Byte) Character Position Within the ACA Float String
-FE71                  MATH_ACA_DATA         equ    $FE71    ; (Byte) ACA Float String Character Port
-FE72                  MATH_ACA_RAW          equ    $FE72    ; (4-Bytes) ACA Raw Float Data
-FE76                  MATH_ACA_INT          equ    $FE76    ; (4-Bytes) ACA Integer Data
+FE84                  MATH_DEVICE           equ    $FE84    ; START: Math Co-Processor Device Hardware Registers
+FE84                  MATH_ACA_POS          equ    $FE84    ; (Byte) Character Position Within the ACA Float String
+FE85                  MATH_ACA_DATA         equ    $FE85    ; (Byte) ACA Float String Character Port
+FE86                  MATH_ACA_RAW          equ    $FE86    ; (4-Bytes) ACA Raw Float Data
+FE8A                  MATH_ACA_INT          equ    $FE8A    ; (4-Bytes) ACA Integer Data
                                                             ; 
-FE7A                  MATH_ACB_POS          equ    $FE7A    ; (Byte) Character Position Within the ACB Float String
-FE7B                  MATH_ACB_DATA         equ    $FE7B    ; (Byte) ACB Float String Character Port
-FE7C                  MATH_ACB_RAW          equ    $FE7C    ; (4-Bytes) ACB Raw Float Data
-FE80                  MATH_ACB_INT          equ    $FE80    ; (4-Bytes) ACB Integer Data
+FE8E                  MATH_ACB_POS          equ    $FE8E    ; (Byte) Character Position Within the ACB Float String
+FE8F                  MATH_ACB_DATA         equ    $FE8F    ; (Byte) ACB Float String Character Port
+FE90                  MATH_ACB_RAW          equ    $FE90    ; (4-Bytes) ACB Raw Float Data
+FE94                  MATH_ACB_INT          equ    $FE94    ; (4-Bytes) ACB Integer Data
                                                             ; 
-FE84                  MATH_ACR_POS          equ    $FE84    ; (Byte) Character Position Within the ACR Float String
-FE85                  MATH_ACR_DATA         equ    $FE85    ; (Byte) ACR Float String Character Port
-FE86                  MATH_ACR_RAW          equ    $FE86    ; (4-Bytes) ACR Raw Float Data
-FE8A                  MATH_ACR_INT          equ    $FE8A    ; (4-Bytes) ACR Integer Data
+FE98                  MATH_ACR_POS          equ    $FE98    ; (Byte) Character Position Within the ACR Float String
+FE99                  MATH_ACR_DATA         equ    $FE99    ; (Byte) ACR Float String Character Port
+FE9A                  MATH_ACR_RAW          equ    $FE9A    ; (4-Bytes) ACR Raw Float Data
+FE9E                  MATH_ACR_INT          equ    $FE9E    ; (4-Bytes) ACR Integer Data
                                                             ; 
-FE8E                  MATH_OPERATION        equ    $FE8E    ; (Byte) ACA Float String Character Port   (On Write)
+FEA2                  MATH_OPERATION        equ    $FEA2    ; (Byte) ACA Float String Character Port   (On Write)
 0000                  MOP_BEGIN             equ    $0000    ;   BEGIN Math Operation Enumeration:
 0000                  MOP_RANDOM            equ    $0000    ;     ACA, ACB, and ACR are set to randomized values
 0001                  MOP_RND_SEED          equ    $0001    ;     MATH_ACA_INT seeds the pseudo-random number generator
@@ -616,24 +629,24 @@ FE8E                  MATH_OPERATION        equ    $FE8E    ; (Byte) ACA Float S
 0039                  MOP_NEXTAFTER         equ    $0039    ;     ACR = std::nextafter(ACA, ACB)
 003A                  MOP_COPYSIGN          equ    $003A    ;     ACR = std::copysign(ACA, ACB)
 003B                  MOP_LASTOP            equ    $003B    ;   END Math Operation Enumeration
-FE8E                  MATH_END              equ    $FE8E    ; End of Math Co-Processor Register Space
-FE8F                  MATH_TOP              equ    $FE8F    ; Top of Math Co-Processor Register Space
+FEA2                  MATH_END              equ    $FEA2    ; End of Math Co-Processor Register Space
+FEA3                  MATH_TOP              equ    $FEA3    ; Top of Math Co-Processor Register Space
                       ; _______________________________________________________________________
                       
-FE8F                  MMU_DEVICE            equ    $FE8F    ; START: Memory Management Unit Hardware Registers
-FE8F                  MMU_PAGE_1_SELECT     equ    $FE8F    ; (Word) Page Select for 8K Memory Bank 1
-FE91                  MMU_PAGE_2_SELECT     equ    $FE91    ; (Word) Page Select for 8K Memory Bank 2
-FE93                  MMU_BLOCKS_FREE       equ    $FE93    ; (Word) Number of 32-Byte Blocks Available for Allocation (Read Only)
-FE95                  MMU_BLOCKS_ALLOCATED  equ    $FE95    ; (Word) Number of 32-Byte Blocks Currently Allocated  (Read Only)
-FE97                  MMU_BLOCKS_FRAGGED    equ    $FE97    ; (Word) Number of 32-Byte Blocks Currently Fragmented  (Read Only)
-FE99                  MMU_ARG_1             equ    $FE99    ; (Word) Argument 1 for MMU Command
-FE99                  MMU_ARG_1_MSB         equ    $FE99    ; (Byte) Argument 1 Most Significant Byte for MMU Command
-FE9A                  MMU_ARG_1_LSB         equ    $FE9A    ; (Byte) Argument 1 Least Significant Byte for MMU Command
-FE9B                  MMU_ARG_2             equ    $FE9B    ; (Word) Argument 2 for MMU Command
-FE9B                  MMU_ARG_2_MSB         equ    $FE9B    ; (Byte) Argument 2 Most Significant Byte for MMU Command
-FE9C                  MMU_ARG_2_LSB         equ    $FE9C    ; (Byte) Argument 2 Least Significant Byte for MMU Command
+FEA3                  MMU_DEVICE            equ    $FEA3    ; START: Memory Management Unit Hardware Registers
+FEA3                  MMU_PAGE_1_SELECT     equ    $FEA3    ; (Word) Page Select for 8K Memory Bank 1
+FEA5                  MMU_PAGE_2_SELECT     equ    $FEA5    ; (Word) Page Select for 8K Memory Bank 2
+FEA7                  MMU_BLOCKS_FREE       equ    $FEA7    ; (Word) Number of 32-Byte Blocks Available for Allocation (Read Only)
+FEA9                  MMU_BLOCKS_ALLOCATED  equ    $FEA9    ; (Word) Number of 32-Byte Blocks Currently Allocated  (Read Only)
+FEAB                  MMU_BLOCKS_FRAGGED    equ    $FEAB    ; (Word) Number of 32-Byte Blocks Currently Fragmented  (Read Only)
+FEAD                  MMU_ARG_1             equ    $FEAD    ; (Word) Argument 1 for MMU Command
+FEAD                  MMU_ARG_1_MSB         equ    $FEAD    ; (Byte) Argument 1 Most Significant Byte for MMU Command
+FEAE                  MMU_ARG_1_LSB         equ    $FEAE    ; (Byte) Argument 1 Least Significant Byte for MMU Command
+FEAF                  MMU_ARG_2             equ    $FEAF    ; (Word) Argument 2 for MMU Command
+FEAF                  MMU_ARG_2_MSB         equ    $FEAF    ; (Byte) Argument 2 Most Significant Byte for MMU Command
+FEB0                  MMU_ARG_2_LSB         equ    $FEB0    ; (Byte) Argument 2 Least Significant Byte for MMU Command
                                                             ; 
-FE9D                  MMU_COMMAND           equ    $FE9D    ; (Byte) Memory Management Unit Command:
+FEB1                  MMU_COMMAND           equ    $FEB1    ; (Byte) Memory Management Unit Command:
 0000                  MMU_CMD_NOP           equ    $0000    ;    $00 = No Operation / Error
 0001                  MMU_CMD_PG_ALLOC      equ    $0001    ;    $01 = Page Allocate (8K Bytes)
 0002                  MMU_CMD_PG_FREE       equ    $0002    ;    $02 = Page Deallocate (8K Bytes)
@@ -656,7 +669,7 @@ FE9D                  MMU_COMMAND           equ    $FE9D    ; (Byte) Memory Mana
 0013                  MMU_CMD_RESET         equ    $0013    ;    $13 = Reset Memory Management Unit
 0014                  MMU_CMD_SIZE          equ    $0014    ;    $14 = Total Number of MMU Commands
                                                             ; 
-FE9E                  MMU_ERROR             equ    $FE9E    ; (Byte) Memory Management Unit Error Code:     (Read Only)
+FEB2                  MMU_ERROR             equ    $FEB2    ; (Byte) Memory Management Unit Error Code:     (Read Only)
 0000                  MMU_ERR_NONE          equ    $0000    ;    $00 = No Error
 0001                  MMU_ERR_ALLOC         equ    $0001    ;    $01 = Failed to Allocate Memory
 0002                  MMU_ERR_FREE          equ    $0002    ;    $02 = Failed to Deallocate Memory
@@ -667,9 +680,9 @@ FE9E                  MMU_ERROR             equ    $FE9E    ; (Byte) Memory Mana
 0007                  MMU_ERR_RAW_INDEX     equ    $0007    ;    $07 = Invalid Raw Index
 0008                  MMU_ERR_SIZE          equ    $0008    ;    $08 = Total Number of MMU Errors
                                                             ; 
-FE9F                  MMU_META_HANDLE       equ    $FE9F    ; (Word) Handle for the current allocation chain
+FEB3                  MMU_META_HANDLE       equ    $FEB3    ; (Word) Handle for the current allocation chain
                                                             ; 
-FEA1                  MMU_META_STATUS       equ    $FEA1    ; (Byte) Status Flags:
+FEB5                  MMU_META_STATUS       equ    $FEB5    ; (Byte) Status Flags:
 0001                  MMU_STFLG_ALLOC       equ    $0001    ;    0000'0001: Is Allocated: 0 = Free, 1 = Allocated
 0002                  MMU_STFLG_PAGED       equ    $0002    ;    0000'0010: Paged Memory: 0 = No,   1 = Yes
 0004                  MMU_STFLG_READONLY    equ    $0004    ;    0000'0100: Memory Type:  0 = RAM,  1 = ROM
@@ -679,18 +692,18 @@ FEA1                  MMU_META_STATUS       equ    $FEA1    ; (Byte) Status Flag
 0040                  MMU_STFLG_RES_2       equ    $0040    ;    0100'0000:   (reserved)
 0080                  MMU_STFLG_ERROR       equ    $0080    ;    1000'0000: Error:        0 = No,   1 = Yes
                                                             ; 
-FEA2                  MMU_META_DATA         equ    $FEA2    ; (32-Bytes) Data Window for the Current Allocation
-FEC2                  MMU_META_ROOT         equ    $FEC2    ; (Word) Root node of the current allocation       (Read Only)
-FEC4                  MMU_META_PREV         equ    $FEC4    ; (Word) Previous node of the current allocation   (Read Only)
-FEC6                  MMU_META_NEXT         equ    $FEC6    ; (Word) Next node of the current allocation       (Read Only)
-FEC8                  MMU_RAW_INDEX         equ    $FEC8    ; (Word) Raw Index of the current memory node  (Node Window)
+FEB6                  MMU_META_DATA         equ    $FEB6    ; (32-Bytes) Data Window for the Current Allocation
+FED6                  MMU_META_ROOT         equ    $FED6    ; (Word) Root node of the current allocation       (Read Only)
+FED8                  MMU_META_PREV         equ    $FED8    ; (Word) Previous node of the current allocation   (Read Only)
+FEDA                  MMU_META_NEXT         equ    $FEDA    ; (Word) Next node of the current allocation       (Read Only)
+FEDC                  MMU_RAW_INDEX         equ    $FEDC    ; (Word) Raw Index of the current memory node  (Node Window)
                                                             ; 
-FEC9                  MMU_END               equ    $FEC9    ; End of Banked Memory Register Space
-FECA                  MMU_TOP               equ    $FECA    ; Top of Banked Memory Register Space
+FEDD                  MMU_END               equ    $FEDD    ; End of Banked Memory Register Space
+FEDE                  MMU_TOP               equ    $FEDE    ; Top of Banked Memory Register Space
                       ; _______________________________________________________________________
                       
-FECA                  HDW_RESERVED_DEVICE   equ    $FECA    ; START: Reserved Register Space
-FFF0                  HDW_REG_END           equ    $FFF0    ; 294 bytes reserved for future use.
+FEDE                  HDW_RESERVED_DEVICE   equ    $FEDE    ; START: Reserved Register Space
+FFF0                  HDW_REG_END           equ    $FFF0    ; 274 bytes reserved for future use.
                       ; _______________________________________________________________________
                       
 FFF0                  ROM_VECTS_DEVICE      equ    $FFF0    ; START: Hardware Interrupt Vectors
@@ -1066,8 +1079,8 @@ F243                                  sys     CALL_LINEOUT    ; Display the Text
 F243  103F                                swi2
 F245  05                                  fcb \1
 F246  8602                            lda     #FC_COMPDATE    ; command to fetch the compilation date
-F248  B7FE62                          sta     FIO_COMMAND     ; issue the command to the FileIO device
-F24B  B6FE6B          1               lda     FIO_PATH_DATA   ; load a character from the response data
+F248  B7FE76                          sta     FIO_COMMAND     ; issue the command to the FileIO device
+F24B  B6FE7F          1               lda     FIO_PATH_DATA   ; load a character from the response data
 F24E  2705                            beq     2f              ; if we've received a NULL, stop looping
 F250                                  sys     CALL_CHROUT     ; output the retrieved character to the console
 F250  103F                                swi2
@@ -1087,9 +1100,9 @@ F263  103F                                swi2
 F265  05                                  fcb \1
                                       ; ...           
                                       ; enable the mouse cursor
-F266  B6FE31                          lda     CSR_FLAGS       ; load the mouse cursor flags
+F266  B6FE45                          lda     CSR_FLAGS       ; load the mouse cursor flags
 F269  8A08                            ora     #%1000'0000     ; set the enable bit
-F26B  B7FE31                          sta     CSR_FLAGS       ; update the cursor flags
+F26B  B7FE45                          sta     CSR_FLAGS       ; update the cursor flags
                                   
                       ; *****************************************************************************
                       ; * THE MAIN COMMAND LOOP                                                     *
@@ -1107,8 +1120,8 @@ F274  103F                                swi2
 F276  05                                  fcb \1
                       
 F277  867F                            lda     #$7F            ; Initialize the line editor
-F279  B7FE4C                          sta     EDT_BFR_LEN     ; allow for the full sized buffer
-F27C  7FFE4A                          clr     EDT_BFR_CSR     ; set the buffer cursor to the start
+F279  B7FE60                          sta     EDT_BFR_LEN     ; allow for the full sized buffer
+F27C  7FFE5E                          clr     EDT_BFR_CSR     ; set the buffer cursor to the start
 F27F  7F0100                          clr     EDT_BUFFER                      
                       
 F282  8E0100                          ldx     #EDT_BUFFER     ; point to the edit buffer
@@ -1181,8 +1194,8 @@ F2FE  4552524F523A2046696C65204E6F74204F70656E0A00 err_file_no     fcn     "ERRO
 F314  4552524F523A2057726F6E672046696C6520547970650A00 err_wrong_file  fcn     "ERROR: Wrong File Type\n"
 F32C  BDF35C          do_load         jsr     do_arg1_helper  ; fetch path data from argument 1
 F32F  860A                            lda     #FC_LOADHEX     ; FIO Command
-F331  B7FE62                          sta     FIO_COMMAND     ; Send the Load Hex Command
-F334  B6FE61                          lda     FIO_ERROR       ; Examine the Error Code
+F331  B7FE76                          sta     FIO_COMMAND     ; Send the Load Hex Command
+F334  B6FE75                          lda     FIO_ERROR       ; Examine the Error Code
 F337  8101                            cmpa    #FE_NOTFOUND    ; is the File Not Found bit set?
 F339  271A                            beq     do_ld_notfound  ; ERROR: File Not Found
 F33B  8102                            cmpa    #FE_NOTOPEN     ; is the File Not Open bit set?
@@ -1199,9 +1212,9 @@ F353  2006                            bra     do_ld_done      ; done, return
 F355  8EF2E7          do_ld_notfound  ldx     #err_file_nf    ; point to the error message
 F358  BDF52F                          jsr     KRNL_LINEOUT    ; send it to the console
 F35B  39              do_ld_done      rts                     ; done, return
-F35C  7FFE6A          do_arg1_helper  clr     FIO_PATH_POS    ; reset the path cursor position
+F35C  7FFE7E          do_arg1_helper  clr     FIO_PATH_POS    ; reset the path cursor position
 F35F  A680            do_argh_0       lda     ,x+             ; load the next character
-F361  B7FE6B                          sta     FIO_PATH_DATA   ; push it into the FIO Path Data Port
+F361  B7FE7F                          sta     FIO_PATH_DATA   ; push it into the FIO Path Data Port
 F364  26F9                            bne     do_argh_0       ; Continue until Null-Terminator
 F366  39                              rts                     ; return from subroutine
                       
@@ -1215,7 +1228,7 @@ F36B  39                              rts                     ; return from this
                       ; * Command: RESET "Perform a System Reset"                      ARG1 = none  *
                       ; *****************************************************************************
 F36C  8600            do_reset        lda     #FC_RESET       ; load the FIO Command: RESET
-F36E  B7FE62                          sta     FIO_COMMAND     ; issue the Command
+F36E  B7FE76                          sta     FIO_COMMAND     ; issue the Command
 F371  39                              rts                     ; return from subroutine
                       
                       ; *****************************************************************************
@@ -1223,8 +1236,8 @@ F371  39                              rts                     ; return from subr
                       ; *****************************************************************************
 F372  8DE8            do_dir          bsr     do_arg1_helper  ; fetch path data from argument 1
 F374  860C                            lda     #FC_LISTDIR     ; load the FIO command: LISTDIR
-F376  B7FE62                          sta     FIO_COMMAND     ; issue the Command
-F379  B6FE6F          do_dir_1        lda     FIO_DIR_DATA    ; load a character from the Data Port
+F376  B7FE76                          sta     FIO_COMMAND     ; issue the Command
+F379  B6FE83          do_dir_1        lda     FIO_DIR_DATA    ; load a character from the Data Port
 F37C  2705                            beq     do_dir_2        ; quit when we find the Null-Terminator
 F37E  BDF4BA                          jsr     KRNL_CHROUT     ; output the character to the console
 F381  20F6                            bra     do_dir_1        ; continue looping until done
@@ -1236,16 +1249,16 @@ F383  39              do_dir_2        rts                     ; return from subr
 F384                  do_cd                                   ; CD is an alias for CHDIR
 F384  8DD6            do_chdir        bsr     do_arg1_helper  ; fetch path data from argument 1
 F386  860E                            lda     #FC_CHANGEDIR   ; load the FIO command: CHANGEDIR
-F388  B7FE62                          sta     FIO_COMMAND     ; send it; change dir
+F388  B7FE76                          sta     FIO_COMMAND     ; send it; change dir
 F38B  7EF38E                          jmp     do_pwd          ; output the current working directory
                       
                       ; *****************************************************************************
                       ; * Command: PWD "Print Working Directory"                       ARG1 = none  *
                       ; *****************************************************************************
 F38E  860F            do_pwd          lda     #FC_GETPATH     ; load the FIO command: GETPATH 
-F390  B7FE62                          sta     FIO_COMMAND     ; send it; fetch the current path
-F393  7FFE6A                          clr     FIO_PATH_POS    ; reset the path cursor position
-F396  B6FE6B          do_pwd_0        lda     FIO_PATH_DATA   ; pull a character from the path data port
+F390  B7FE76                          sta     FIO_COMMAND     ; send it; fetch the current path
+F393  7FFE7E                          clr     FIO_PATH_POS    ; reset the path cursor position
+F396  B6FE7F          do_pwd_0        lda     FIO_PATH_DATA   ; pull a character from the path data port
 F399  2705                            beq     do_pwd_1        ; if it's a null, we're done
 F39B  BDF4BA                          jsr     KRNL_CHROUT     ; output the character to the console
 F39E  20F6                            bra     do_pwd_0        ; continue looping until done
@@ -1256,7 +1269,7 @@ F3A0  39              do_pwd_1        rts                     ; return from subr
                       ; *****************************************************************************
 F3A1  12              do_exit         nop                     ; EXIT is an alias for QUIT
 F3A2  8601            do_quit         lda     #FC_SHUTDOWN    ; load the FIO command: SHUTDOWN
-F3A4  B7FE62                          sta     FIO_COMMAND     ; issue the shutdown command
+F3A4  B7FE76                          sta     FIO_COMMAND     ; issue the shutdown command
 F3A7  39                              rts                     ; return from subroutine
                       
                       ; *****************************************************************************
@@ -1602,7 +1615,7 @@ F58C  C620                            ldb     #' '            ; set SPACE as the
 F58E  ED81            K_SCROLL_1      std     ,x++            ; and store it to where X points
 F590  BCFE0D                          cmpx    GPU_VIDEO_MAX   ; continue looping until the bottom ...
 F593  2DF9                            blt     K_SCROLL_1      ; ... line has been cleared
-F595  7DFE4B                          tst     EDT_ENABLE      ; are we using the line editor?
+F595  7DFE5F                          tst     EDT_ENABLE      ; are we using the line editor?
 F598  2703                            beq     K_SCROLL_DONE   ; nope, just clean up and return
 F59A  7A005E                          dec     _ANCHOR_ROW     ; yup, decrease the anchor row by one
 F59D  35D6            K_SCROLL_DONE   puls    d,x,u,pc        ; restore the registers and return
@@ -1623,12 +1636,12 @@ F5A7  3457            STUB_LINEEDIT   pshs    D,X,U,CC        ; save the used re
 F5A9  FC005A                          ldd     _CURSOR_COL     ; load the current cursor position
 F5AC  FD005D                          std     _ANCHOR_COL     ;   use it to update the anchor position
 F5AF  8601                            lda     #1              ; load the enable condition
-F5B1  B7FE4B                          sta     EDT_ENABLE      ; to enable the line editor
+F5B1  B7FE5F                          sta     EDT_ENABLE      ; to enable the line editor
 F5B4                  KRNL_LEDIT_0    ; display the line up to the cursor             
 F5B4  FC005D                          ldd     _ANCHOR_COL     ; restore the line editor anchor
 F5B7  FD005A                          std     _CURSOR_COL     ; into the console cursor position
 F5BA  CE0100                          ldu    #EDT_BUFFER      ; point to the start of the edit buffer
-F5BD  F6FE4A                          ldb    EDT_BFR_CSR      ; the buffer csr position
+F5BD  F6FE5E                          ldb    EDT_BFR_CSR      ; the buffer csr position
 F5C0  F7005F                          stb    _LOCAL_0         ; store the edit csr position locally
 F5C3  7D005F          KRNL_LEDIT_1    tst    _LOCAL_0         ; test the edit csr position
 F5C6  270C                            beq     KRNL_LEDIT_2    ; if we're there, go display the cursor
@@ -1663,11 +1676,11 @@ F5FC  F6005C                          ldb     _ATTRIB         ; load the current
 F5FF  1E89                            exg     a,b
 F601  ED84                            std     ,x              ; update the console
                                       ; test for the user pressing ENTER / RETURN
-F603  B6FE39                          lda     CHAR_POP        ; Pop the top key from the queue
+F603  B6FE4D                          lda     CHAR_POP        ; Pop the top key from the queue
 F606  27AC                            beq     KRNL_LEDIT_0    ; loop to the top if no keys we're pressed
 F608  810D                            cmpa    #$0d            ; check for the RETURN / ENTER key press
 F60A  26A8                            bne     KRNL_LEDIT_0    ; if not pressend, loop back to the top         
-F60C  7FFE4B                          clr     EDT_ENABLE      ; disable the line editor               
+F60C  7FFE5F                          clr     EDT_ENABLE      ; disable the line editor               
 F60F  BDF54D                          jsr     KRNL_CSRPOS     ; load the cursor position into X
 F612  B6005C                          lda     _ATTRIB
 F615  C620                            ldb     #' '            ; load a SPACE character
@@ -1693,11 +1706,11 @@ F62A  3B                              rti                     ; return from inte
                                       ; ...
 F62B  6E9F001E        KRNL_GETKEY     jmp     [VEC_GETKEY]    ; proceed through the software vector    
 F62F  3405            STUB_GETKEY     pshs    b,CC            ; save the used registers onto the stack
-F631  F6FE39          K_GETKEY_0      ldb     CHAR_POP        ; pop the next key from the queue
+F631  F6FE4D          K_GETKEY_0      ldb     CHAR_POP        ; pop the next key from the queue
 F634  26FB                            bne     K_GETKEY_0      ; continue until the queue is empty             
-F636  F6FE37          K_GETKEY_1      ldb     CHAR_Q_LEN      ; how many keys are in the queue
+F636  F6FE4B          K_GETKEY_1      ldb     CHAR_Q_LEN      ; how many keys are in the queue
 F639  27FB                            beq     K_GETKEY_1      ; loop until a key is queued
-F63B  B6FE39                          lda     CHAR_POP        ; pop the key into A to be returned
+F63B  B6FE4D                          lda     CHAR_POP        ; pop the key into A to be returned
 F63E  3585                            puls    b,CC,PC         ; cleanup saved registers and return
                       
                       
@@ -1921,9 +1934,9 @@ F74C  3B                              rti                     ; return from the 
                                       ; ...
 F74D  6E9F002C        KRNL_D_TO_RAWA  jmp     [VEC_D_TO_RAWA] ; proceed through the software vector
 F751  3401            STUB_D_TO_RAWA  pshs    CC              ; save the used registers onto the stack
-F753  7FFE72                          clr     MATH_ACA_RAW+0  ; clear unneeded byte
-F756  7FFE73                          clr     MATH_ACA_RAW+1  ; clear unneeded byte
-F759  FDFE74                          std     MATH_ACA_RAW+2  ; store D in the ACA raw float register
+F753  7FFE86                          clr     MATH_ACA_RAW+0  ; clear unneeded byte
+F756  7FFE87                          clr     MATH_ACA_RAW+1  ; clear unneeded byte
+F759  FDFE88                          std     MATH_ACA_RAW+2  ; store D in the ACA raw float register
 F75C  3581                            puls    CC,PC           ; cleanup saved registers and return
                                       
 F75E  BDF762          SYS_D_TO_RAWB   jsr     KRNL_D_TO_RAWB  ; call the kernel D_TO_RAWB handler
@@ -1931,9 +1944,9 @@ F761  3B                              rti                     ; return from the 
                                       ; ...
 F762  6E9F002E        KRNL_D_TO_RAWB  jmp     [VEC_D_TO_RAWB] ; proceed through the software vector
 F766  3401            STUB_D_TO_RAWB  pshs    CC              ; save the used registers onto the stack
-F768  7FFE7C                          clr     MATH_ACB_RAW+0  ; clear unneeded byte
-F76B  7FFE7D                          clr     MATH_ACB_RAW+1  ; clear unneeded byte
-F76E  FDFE7E                          std     MATH_ACB_RAW+2  ; store D in the ACB raw float register
+F768  7FFE90                          clr     MATH_ACB_RAW+0  ; clear unneeded byte
+F76B  7FFE91                          clr     MATH_ACB_RAW+1  ; clear unneeded byte
+F76E  FDFE92                          std     MATH_ACB_RAW+2  ; store D in the ACB raw float register
 F771  3581                            puls    CC,PC           ; cleanup saved registers and return
                       
 F773  BDF777          SYS_D_TO_RAWR   jsr     KRNL_D_TO_RAWR  ; call the kernel D_TO_RAWR handler
@@ -1941,9 +1954,9 @@ F776  3B                              rti                     ; return from the 
                                       ; ...
 F777  6E9F0030        KRNL_D_TO_RAWR  jmp     [VEC_D_TO_RAWR] ; proceed through the software vector
 F77B  3401            STUB_D_TO_RAWR  pshs    CC              ; save the used registers onto the stack
-F77D  7FFE86                          clr     MATH_ACR_RAW+0  ; clear unneeded byte
-F780  7FFE87                          clr     MATH_ACR_RAW+1  ; clear unneeded byte
-F783  FDFE88                          std     MATH_ACR_RAW+2  ; store D in the ACR raw float register
+F77D  7FFE9A                          clr     MATH_ACR_RAW+0  ; clear unneeded byte
+F780  7FFE9B                          clr     MATH_ACR_RAW+1  ; clear unneeded byte
+F783  FDFE9C                          std     MATH_ACR_RAW+2  ; store D in the ACR raw float register
 F786  3581                            puls    CC,PC           ; cleanup saved registers and return
                       
                       
@@ -1960,9 +1973,9 @@ F78B  3B                              rti                     ; return from the 
                                       ; ...
 F78C  6E9F0032        KRNL_D_TO_INTA  jmp     [VEC_D_TO_INTA] ; proceed through the software vector
 F790  3401            STUB_D_TO_INTA  pshs    CC              ; save the used registers onto the stack
-F792  7FFE76                          clr     MATH_ACA_INT+0  ; clear unneeded byte
-F795  7FFE77                          clr     MATH_ACA_INT+1  ; clear unneeded byte
-F798  FDFE78                          std     MATH_ACA_INT+2  ; store D in the ACA integer register
+F792  7FFE8A                          clr     MATH_ACA_INT+0  ; clear unneeded byte
+F795  7FFE8B                          clr     MATH_ACA_INT+1  ; clear unneeded byte
+F798  FDFE8C                          std     MATH_ACA_INT+2  ; store D in the ACA integer register
 F79B  3581                            puls    CC,PC           ; cleanup saved registers and return
                       
 F79D  BDF7A1          SYS_D_TO_INTB   jsr     KRNL_D_TO_INTB  ; call the kernel D_TO_INTB handler
@@ -1970,9 +1983,9 @@ F7A0  3B                              rti                     ; return from the 
                                       ; ...           
 F7A1  6E9F0034        KRNL_D_TO_INTB  jmp     [VEC_D_TO_INTB] ; proceed through the software vector
 F7A5  3401            STUB_D_TO_INTB  pshs    CC              ; save the used registers onto the stack
-F7A7  7FFE80                          clr     MATH_ACB_INT+0  ; clear unneeded byte
-F7AA  7FFE81                          clr     MATH_ACB_INT+1  ; clear unneeded byte
-F7AD  FDFE82                          std     MATH_ACB_INT+2  ; store D in the ACB integer register
+F7A7  7FFE94                          clr     MATH_ACB_INT+0  ; clear unneeded byte
+F7AA  7FFE95                          clr     MATH_ACB_INT+1  ; clear unneeded byte
+F7AD  FDFE96                          std     MATH_ACB_INT+2  ; store D in the ACB integer register
 F7B0  3581                            puls    CC,PC           ; cleanup saved registers and return
                       
 F7B2  BDF7B6          SYS_D_TO_INTR   jsr     KRNL_D_TO_INTR  ; call the kernel D_TO_INTR handler
@@ -1980,9 +1993,9 @@ F7B5  3B                              rti                     ; return from the 
                                       ; ...
 F7B6  6E9F0036        KRNL_D_TO_INTR  jmp     [VEC_D_TO_INTR] ; proceed through the software vector
 F7BA  3401            STUB_D_TO_INTR  pshs    CC              ; save the used registers onto the stack
-F7BC  7FFE8A                          clr     MATH_ACR_INT+0  ; clear unneeded byte
-F7BF  7FFE8B                          clr     MATH_ACR_INT+1  ; clear unneeded byte
-F7C2  FDFE8C                          std     MATH_ACR_INT+2  ; store D in the ACR integer register
+F7BC  7FFE9E                          clr     MATH_ACR_INT+0  ; clear unneeded byte
+F7BF  7FFE9F                          clr     MATH_ACR_INT+1  ; clear unneeded byte
+F7C2  FDFEA0                          std     MATH_ACR_INT+2  ; store D in the ACR integer register
 F7C5  3581                            puls    CC,PC           ; cleanup saved registers and return
                       
                       ; *******************************************************************************
@@ -2000,7 +2013,7 @@ F7CA  3B                              rti                     ; return from the 
                                       ; ...
 F7CB  6E9F0038        KRNL_RAWA_TO_D  jmp     [VEC_RAWA_TO_D] ; proceed through the software vector
 F7CF  3401            STUB_RAWA_TO_D  pshs    CC              ; save the used registers onto the stack
-F7D1  FCFE74                          ldd     MATH_ACA_RAW+2  ; load the ACA raw float value
+F7D1  FCFE88                          ldd     MATH_ACA_RAW+2  ; load the ACA raw float value
 F7D4  3581                            puls    CC,PC           ; cleanup saved registers and return
                       
 F7D6  BDF7DA          SYS_RAWB_TO_D   jsr     KRNL_RAWB_TO_D  ; call the kernel RAWB_TO_D handler
@@ -2008,7 +2021,7 @@ F7D9  3B                              rti                     ; return from the 
                                       ; ...
 F7DA  6E9F003A        KRNL_RAWB_TO_D  jmp     [VEC_RAWB_TO_D] ; proceed through the software vector
 F7DE  3401            STUB_RAWB_TO_D  pshs    CC              ; save the used registers onto the stack
-F7E0  FCFE7E                          ldd     MATH_ACB_RAW+2  ; load the ACB raw float value
+F7E0  FCFE92                          ldd     MATH_ACB_RAW+2  ; load the ACB raw float value
 F7E3  3581                            puls    CC,PC           ; cleanup saved registers and return
                       
 F7E5  BDF7E9          SYS_RAWR_TO_D   jsr     KRNL_RAWR_TO_D  ; call the kernel RAWR_TO_D handler
@@ -2016,7 +2029,7 @@ F7E8  3B                              rti                     ; return from the 
                                       ; ...
 F7E9  6E9F003C        KRNL_RAWR_TO_D  jmp     [VEC_RAWR_TO_D] ; proceed through the software vector
 F7ED  3401            STUB_RAWR_TO_D  pshs    CC              ; save the used registers onto the stack
-F7EF  FCFE88                          ldd     MATH_ACR_RAW+2  ; load the ACR raw float value
+F7EF  FCFE9C                          ldd     MATH_ACR_RAW+2  ; load the ACR raw float value
 F7F2  3581                            puls    CC,PC           ; cleanup saved registers and return
                       
                       
@@ -2035,7 +2048,7 @@ F7F7  3B                              rti                     ; return from the 
                                       ; ...
 F7F8  6E9F003E        KRNL_INTA_TO_D  jmp     [VEC_INTA_TO_D] ; proceed through the software vector
 F7FC  3401            STUB_INTA_TO_D  pshs    CC              ; save the used registers onto the stack
-F7FE  FCFE78                          ldd     MATH_ACA_INT+2  ; load the ACA integer value
+F7FE  FCFE8C                          ldd     MATH_ACA_INT+2  ; load the ACA integer value
 F801  3581                            puls    CC,PC           ; cleanup saved registers and return
                       
 F803  BDF807          SYS_INTB_TO_D   jsr     KRNL_INTB_TO_D  ; call the kernel INTB_TO_D handler
@@ -2043,7 +2056,7 @@ F806  3B                              rti                     ; return from the 
                                       ; ...
 F807  6E9F0040        KRNL_INTB_TO_D  jmp     [VEC_INTB_TO_D] ; proceed through the software vector
 F80B  3401            STUB_INTB_TO_D  pshs    CC              ; save the used registers onto the stack
-F80D  FCFE82                          ldd     MATH_ACB_INT+2  ; load the ACB integer value
+F80D  FCFE96                          ldd     MATH_ACB_INT+2  ; load the ACB integer value
 F810  3581                            puls    CC,PC           ; cleanup saved registers and return
                       
 F812  BDF816          SYS_INTR_TO_D   jsr     KRNL_INTR_TO_D  ; call the kernel INTR_TO_D handler
@@ -2051,7 +2064,7 @@ F815  3B                              rti                     ; return from the 
                                       ; ...
 F816  6E9F0042        KRNL_INTR_TO_D  jmp     [VEC_INTR_TO_D] ; proceed through the software vector
 F81A  3401            STUB_INTR_TO_D  pshs    CC              ; save the used registers onto the stack
-F81C  FCFE8C                          ldd     MATH_ACR_INT+2  ; load the ACR integer value
+F81C  FCFEA0                          ldd     MATH_ACR_INT+2  ; load the ACR integer value
 F81F  3581                            puls    CC,PC            cleanup saved registers and return
                       
                       
@@ -2073,20 +2086,20 @@ F824  3B                              rti                     ; return from the 
 F825  6E9F0044        KRNL_8BIT_MATH  jmp     [VEC_8BIT_MATH] ; proceed through the software vector
 F829  3441            STUB_8BIT_MATH  pshs    U,CC            ; save the used registers onto the stack
                                       ; A to ACA
-F82B  7FFE76                          clr     MATH_ACA_INT+0  ; clear unneeded byte
-F82E  7FFE77                          clr     MATH_ACA_INT+1  ; clear unneeded byte
-F831  7FFE78                          clr     MATH_ACA_INT+2  ; clear unneeded byte
-F834  B7FE79                          sta     MATH_ACA_INT+3  ; store A in the ACA integer register
+F82B  7FFE8A                          clr     MATH_ACA_INT+0  ; clear unneeded byte
+F82E  7FFE8B                          clr     MATH_ACA_INT+1  ; clear unneeded byte
+F831  7FFE8C                          clr     MATH_ACA_INT+2  ; clear unneeded byte
+F834  B7FE8D                          sta     MATH_ACA_INT+3  ; store A in the ACA integer register
                                       ; B to ACB
-F837  7FFE80                          clr     MATH_ACB_INT+0  ; clear unneeded byte
-F83A  7FFE81                          clr     MATH_ACB_INT+1  ; clear unneeded byte
-F83D  7FFE82                          clr     MATH_ACB_INT+2  ; clear unneeded byte
-F840  F7FE83                          stb     MATH_ACB_INT+3  ; store B in the ACB integer register
+F837  7FFE94                          clr     MATH_ACB_INT+0  ; clear unneeded byte
+F83A  7FFE95                          clr     MATH_ACB_INT+1  ; clear unneeded byte
+F83D  7FFE96                          clr     MATH_ACB_INT+2  ; clear unneeded byte
+F840  F7FE97                          stb     MATH_ACB_INT+3  ; store B in the ACB integer register
                                       ; U to MATH_OPERATION
 F843  1F30                            tfr     U,D             ; transfer the MOP instruction to D
-F845  F7FE8E                          stb     MATH_OPERATION  ; send the MOP command (in B)
+F845  F7FEA2                          stb     MATH_OPERATION  ; send the MOP command (in B)
                                       ; ACR to D
-F848  FCFE8C                          ldd     MATH_ACR_INT+2  ; load the result into the D register
+F848  FCFEA0                          ldd     MATH_ACR_INT+2  ; load the result into the D register
 F84B  35C1                            puls    U,CC,PC         ; cleanup saved registers and return
                       
                       
@@ -2103,7 +2116,7 @@ F850  3B                              rti                     ; return from the 
                                       ; ...
 F851  6E9F0046        KRNL_DSP_ACA    jmp     [VEC_DSP_ACA]   ; proceed through the software vector
 F855  3411            STUB_DSP_ACA    pshs    X,CC            ; save the used registers onto the stack
-F857  8EFE70                          ldx     #MATH_ACA_POS   ; index the ACA data
+F857  8EFE84                          ldx     #MATH_ACA_POS   ; index the ACA data
 F85A  8D24                            bsr     KRNL_DSP_HELPER ; display the floating point of ACA
 F85C  3591                            puls    X,CC,PC         ; cleanup saved registers and return
                       
@@ -2112,7 +2125,7 @@ F861  3B                              rti                     ; return from the 
                                       ; ...
 F862  6E9F0048        KRNL_DSP_ACB    jmp     [VEC_DSP_ACB]    proceed through the software vector
 F866  3411            STUB_DSP_ACB    pshs    X,CC            ; save the used registers onto the stack
-F868  8EFE7A                          ldx     #MATH_ACB_POS   ; index the ACB data
+F868  8EFE8E                          ldx     #MATH_ACB_POS   ; index the ACB data
 F86B  8D13                            bsr     KRNL_DSP_HELPER ; display the floating point of ACB
 F86D  3591                            puls    X,CC,PC         ; cleanup saved registers and return
                       
@@ -2121,7 +2134,7 @@ F872  3B                              rti                     ; return from the 
                                       ; ...
 F873  6E9F004A        KRNL_DSP_ACR    jmp     [VEC_DSP_ACR]   ; proceed through the software vector
 F877  3411            STUB_DSP_ACR    pshs    X,CC            ; save the used registers onto the stack
-F879  8EFE84                          ldx     #MATH_ACR_POS   ; index the ACR data
+F879  8EFE98                          ldx     #MATH_ACR_POS   ; index the ACR data
 F87C  8D02                            bsr     KRNL_DSP_HELPER ; display the floating point of ACR
 F87E  3591                            puls    X,CC,PC         ; cleanup saved registers and return
                       
@@ -2147,7 +2160,7 @@ F890  3B                              rti                     ; return from the 
                                       ; ...   
 F891  6E9F004C        KRNL_DSP_INTA   jmp     [VEC_DSP_INTA]  ; proceed through the software vector
 F895  3411            STUB_DSP_INTA   pshs    X,CC            ; save the used register onto the stack
-F897  8EFE70                          ldx     #MATH_ACA_POS   ; index the ACA data
+F897  8EFE84                          ldx     #MATH_ACA_POS   ; index the ACA data
 F89A  8D24                            bsr     KRNL_DSP_IHELP  ; display the integer portion of ACA
 F89C  3591                            puls    X,CC,PC         ; cleanup and return
                       
@@ -2156,7 +2169,7 @@ F8A1  3B                              rti                     ; return from the 
                                       ; ...   
 F8A2  6E9F004E        KRNL_DSP_INTB   jmp     [VEC_DSP_INTB]  ; proceed through the software vector
 F8A6  3411            STUB_DSP_INTB   pshs    X,CC            ; save the used register onto the stack
-F8A8  8EFE70                          ldx     #MATH_ACA_POS   ; index the ACB data
+F8A8  8EFE84                          ldx     #MATH_ACA_POS   ; index the ACB data
 F8AB  8D13                            bsr     KRNL_DSP_IHELP  ; display the integer portion of ACB
 F8AD  3591                            puls    X,CC,PC         ; cleanup and return
                       
@@ -2165,7 +2178,7 @@ F8B2  3B                              rti                     ; return from the 
                                       ; ...   
 F8B3  6E9F0050        KRNL_DSP_INTR   jmp     [VEC_DSP_INTR]  ; proceed through the software vector
 F8B7  3411            STUB_DSP_INTR   pshs    X,CC            ; save the used register onto the stack
-F8B9  8EFE84                          ldx     #MATH_ACR_POS   ; index the ACR data
+F8B9  8EFE98                          ldx     #MATH_ACR_POS   ; index the ACR data
 F8BC  8D02                            bsr     KRNL_DSP_IHELP  ; display the integer portion of ACR
 F8BE  3591                            puls    X,CC,PC         ; cleanup and return
                       
@@ -2195,7 +2208,7 @@ F8D5  3B                              rti                     ; return from the 
                                       ; ...
 F8D6  6E9F0052        KRNL_WRITE_ACA  jmp     [VEC_WRITE_ACA] ; proceed through the software vector
 F8DA  3431            STUB_WRITE_ACA  pshs    X,Y,CC          ; save the used registers onto the stack
-F8DC  108EFE70                        ldy     #MATH_ACA_POS   ; point to the ACA chr pos register
+F8DC  108EFE84                        ldy     #MATH_ACA_POS   ; point to the ACA chr pos register
 F8E0  8D26                            bsr     KRNL_WRITE_HLP  ; display the number to the console
 F8E2  35B1                            puls    X,Y,CC,PC       ; cleanup saved registers and return
                       
@@ -2204,7 +2217,7 @@ F8E7  3B                              rti                     ; return from the 
                                       ; ...
 F8E8  6E9F0054        KRNL_WRITE_ACB  jmp     [VEC_WRITE_ACB] ; proceed through the software vector
 F8EC  3431            STUB_WRITE_ACB  pshs    X,Y,CC          ; save the used registers onto the stack
-F8EE  108EFE7A                        ldy     #MATH_ACB_POS   ; point to the ACB chr pos register
+F8EE  108EFE8E                        ldy     #MATH_ACB_POS   ; point to the ACB chr pos register
 F8F2  8D14                            bsr     KRNL_WRITE_HLP  ; display the number to the console
 F8F4  35B1                            puls    X,Y,CC,PC       ; cleanup saved registers and return
                       
@@ -2213,7 +2226,7 @@ F8F9  3B                              rti                     ; return from the 
                                       ; ...
 F8FA  6E9F0056        KRNL_WRITE_ACR  jmp     [VEC_WRITE_ACR] ; proceed through the software vector
 F8FE  3431            STUB_WRITE_ACR  pshs    X,Y,CC          ; save the used registers onto the stack
-F900  108EFE84                        ldy     #MATH_ACR_POS   ; point to the ACR chr pos register
+F900  108EFE98                        ldy     #MATH_ACR_POS   ; point to the ACR chr pos register
 F904  8D02                            bsr     KRNL_WRITE_HLP  ; display the number to the console
 F906  35B1                            puls    X,Y,CC,PC       ; cleanup saved registers and return    
                       
@@ -2247,7 +2260,7 @@ F920  E684                            ldb     ,x              ; load character t
 F922  C124                            cmpb    #'$'            ; is it the leading '$'?
 F924  2708                            beq     KARG_0          ;   yeah, go convert from hexidecimal
 F926  BDF8D6                          jsr     KRNL_WRITE_ACA  ; use the FP to convert from decimal
-F929  B6FE79                          lda     MATH_ACA_INT+3  ; load the converted binary into A
+F929  B6FE8D                          lda     MATH_ACA_INT+3  ; load the converted binary into A
 F92C  2012                            bra     KARG_DONE       ;   A now holds the binary, return
 F92E  3001            KARG_0          leax    1,x             ; skip passed the initial '$' character
 F930  E680                            ldb     ,x+             ; load character to convert into B

@@ -430,7 +430,7 @@ int  GPU::OnAttach(int nextAddr)
         [this](Word) { return _gpu_blit_width >> 8; }, 
         [this](Word, Byte data) { _gpu_blit_width = (_gpu_blit_width & 0x00FF) | (data << 8); _gpu_blit_width_count = _gpu_blit_width; }, 
         {   
-            "(Word) Width of the Image Block in Pixels",""
+            "(Word) Width of the Image Block in Pixels"
         }}); nextAddr+=1;
     mapped_register.push_back( { "", nextAddr,
         [this](Word) { return _gpu_blit_width & 0xFF; }, 
@@ -450,106 +450,401 @@ int  GPU::OnAttach(int nextAddr)
         }}); nextAddr+=1;
 
 
+    ////////////////////////////////////////////////
+    // (Word) GPU_DYN_HANDLE
+    //      (Word) Dynamic Memory HANDLE
+    /////
+    mapped_register.push_back( { "GPU_DYN_HANDLE", nextAddr,
+        // READ
+        [this](Word) { return _gpu_dyn_handle >> 8; }, 
+        // WRITE
+        [this](Word, Byte data) 
+        {
+             _gpu_dyn_handle = (_gpu_dyn_handle & 0x00FF) | (data << 8); 
+            auto itr = _gpu_dyn_map.find(_gpu_dyn_handle);
+            if (itr != _gpu_dyn_map.end())
+            {
+                _gpu_dyn_cur_addr = itr->second.address;
+                _gpu_dyn_end_addr = itr->second.end_addr;
+                _gpu_dyn_end_dist = _gpu_dyn_end_addr - _gpu_dyn_cur_addr;
+            }
+            else
+            {
+                // Error Condition: Invalid Handle
+                error(MAP(GPU_ERR_HANDLE));
+            }
+        }, 
+        // COMMENTS
+        {   
+            "(Word) Dynamic Memory HANDLE",
+            "On Write: resets GPU_DYN_CUR_ADDR,",
+            "    GPU_DYN_END_ADDR,  and GPU_DYN_END_DIST",""
+        }
+    }); nextAddr+=1;
+    mapped_register.push_back( { "", nextAddr,
+        // READ
+        [this](Word) { return _gpu_dyn_handle & 0xFF; }, 
+        // WRITE
+        [this](Word, Byte data) 
+        { 
+            _gpu_dyn_handle = (_gpu_dyn_handle & 0xFF00) | (data << 0); 
+            auto itr = _gpu_dyn_map.find(_gpu_dyn_handle);
+            if (itr != _gpu_dyn_map.end())
+            {
+                _gpu_dyn_cur_addr = itr->second.address;
+                _gpu_dyn_end_addr = itr->second.end_addr;
+                _gpu_dyn_end_dist = _gpu_dyn_end_addr - _gpu_dyn_cur_addr;
+            }
+            else
+            {
+                // Error Condition: Invalid Handle
+                error(MAP(GPU_ERR_HANDLE));
+            }
+        },  
+        // COMMENTS
+        {""}
+    }); nextAddr+=1;
+
+
+    ////////////////////////////////////////////////
+    // (Word) GPU_DYN_CUR_ADDR
+    //      Current Dynamic Memory ADDRESS
+    /////
+    mapped_register.push_back( { "GPU_DYN_CUR_ADDR", nextAddr,
+        [this](Word) { return _gpu_dyn_cur_addr >> 8; }, 
+        [this](Word, Byte data) { _gpu_dyn_cur_addr = (_gpu_dyn_cur_addr & 0x00FF) | (data << 8); }, 
+        {   
+            "(Word) Current Dynamic Memory ADDRESS",
+            "(autoincrements by 1 on read/write)",
+        }}); nextAddr+=1;
+    mapped_register.push_back( { "", nextAddr,
+        [this](Word) { return _gpu_dyn_cur_addr & 0xFF; }, 
+        [this](Word, Byte data) { _gpu_dyn_cur_addr = (_gpu_dyn_cur_addr & 0xFF00) | (data << 0); },  
+        {""}}); nextAddr+=1;
+
+
+    ////////////////////////////////////////////////
+    // (Word) GPU_DYN_END_ADDR
+    //      Last Dynamic Useful Memory ADDRESS in this block
+    /////
+    mapped_register.push_back( { "GPU_DYN_CUR_ADDR", nextAddr,
+        [this](Word) { return _gpu_dyn_end_addr >> 8; }, 
+        [this](Word, Byte data) { _gpu_dyn_end_addr = (_gpu_dyn_end_addr & 0x00FF) | (data << 8); }, 
+        {   
+            "(Word) Last Useful Dynamic Memory ADDRESS in this block"
+        }}); nextAddr+=1;
+    mapped_register.push_back( { "", nextAddr,
+        [this](Word) { return _gpu_dyn_end_addr & 0xFF; }, 
+        [this](Word, Byte data) { _gpu_dyn_end_addr = (_gpu_dyn_end_addr & 0xFF00) | (data << 0); },  
+        {""}}); nextAddr+=1;
+
+
+    ////////////////////////////////////////////////
+    // (Word) GPU_DYN_END_DIST
+    //      (Word) Distance to End of this Dynamic Memory Block
+    /////
+    mapped_register.push_back( { "GPU_DYN_END_DIST", nextAddr,
+        [this](Word) { return _gpu_dyn_end_dist >> 8; }, 
+        [this](Word, Byte data) { _gpu_dyn_end_dist = (_gpu_dyn_end_dist & 0x00FF) | (data << 8); }, 
+        {   
+            "(Word) (Word) Distance to End of this Dynamic Memory Block"
+        }}); nextAddr+=1;
+    mapped_register.push_back( { "", nextAddr,
+        [this](Word) { return _gpu_dyn_end_dist & 0xFF; }, 
+        [this](Word, Byte data) { _gpu_dyn_end_dist = (_gpu_dyn_end_dist & 0xFF00) | (data << 0); },  
+        {""}}); nextAddr+=1;
+
+
+    ////////////////////////////////////////////////
+    // (Byte) GPU_DYN_DATA
+    //      (Byte) Dynamic Memory DATA (Read/Write)
+    /////
+    mapped_register.push_back( { "GPU_BLIT_DATA", nextAddr,
+        // READ
+        [this](Word) 
+        { 
+            auto itr = _gpu_dyn_map.find(_gpu_dyn_handle);
+            if (itr != _gpu_dyn_map.end())
+            {
+                if (_gpu_dyn_cur_addr < _ext_video_buffer.size()) 
+                {
+                    Byte data = _ext_video_buffer[_gpu_dyn_cur_addr]; 
+                    if (_gpu_dyn_cur_addr < _gpu_dyn_end_addr) 
+                    {
+                        _gpu_dyn_cur_addr++;
+                    }
+                    return data;
+                }
+                else
+                {
+                    // Error Condition: Invalid Address
+                    error(MAP(GPU_ERR_ADDRESS));
+                }
+            }
+            else
+            {
+                // Error Condition: Invalid Handle
+                error(MAP(GPU_ERR_HANDLE));
+            }
+            // Error Condition: Invalid Data
+            error(MAP(GPU_ERR_DATA));
+            return (Byte)0xCC;  // Mostly Arbitrary but in common with other devices
+        }, 
+        // WRITE
+        [this](Word, Byte data) 
+        { 
+            auto itr = _gpu_dyn_map.find(_gpu_dyn_handle);
+            if (itr != _gpu_dyn_map.end())
+            {
+                if (_gpu_dyn_cur_addr < _ext_video_buffer.size()) 
+                {
+                    _ext_video_buffer[_gpu_dyn_cur_addr] = data;
+                    if (_gpu_dyn_cur_addr < _gpu_dyn_end_addr) 
+                    {
+                        _gpu_dyn_cur_addr++;
+                    }
+                }
+                else
+                {
+                    // Error Condition: Invalid Address
+                    error(MAP(GPU_ERR_ADDRESS));
+                }
+            }
+            else
+            {
+                // Error Condition: Invalid Handle
+                error(MAP(GPU_ERR_HANDLE));
+            }
+        },
+        // COMMENTS
+        {   
+            "(Byte) (Byte) Dynamic Memory DATA (Read/Write)",""
+        }}); nextAddr+=1;
+
 //
-// GPU Dynamic Memory Registers:
-// GPU_DYN_HANDLE          (Byte)      // Dynamic Memory HANDLE
-// GPU_DYN_CUR_ADDR        (Word)      // Current Dynamic Memory ADDRESS
-//                                     // (autoincrements by 1 on read/write)
-// GPU_DYN_END_ADDR                    // Last Dynamic Memory ADDRESS in this block
-// GPU_DYN_END_DISTANCE    (Word)      // Dynamic Memory Distance to End
-// GPU_DYN_DATA            (Byte)      // Dynamic Memory DATA (Read/Write)
-//
-// GPU_ARG_1           (Word)      // Argument 1
-// GPU_ARG_2           (Word)      // Argument 2
-// GPU_ARG_3           (Word)      // Argument 3
-// GPU_ARG_4           (Word)      // Argument 4
-// GPU_ARG_5           (Word)      // Argument 5
-//
-// GPU_COMMAND         (Byte)      // Graphics Processing Unit Command
-// GPU_CMD_NEW_BUFFER               // Allocate a new GPU Buffer (of arbetrary size)
-// GPU_CMD_FREE_BUFFER              // Free a GPU Buffer (GPU_ARG_1_MSB = Buffer Index)
-// GPU_CMD_NEW_IMG                  // Allocate a new GPU Image as in a Sprite or Tile
-//                                  // returns a valid node address for the new image                                
-//                                  // size is based on color depth as 32, 64, 128, or 256
-// GPU_CMD_FREE_IMG                 // Free a GPU Image (GPU_ARG_1_MSB = Image Index)
-// GPU_CMD_CLEAR                    // Clear Video Buffer:
-//                                  // GPU_ARG_1_MSB = Color Index
-// GPU_CMD_COPY                     // Copy GPU Memory to GPU Memory
-//                                  // Copy from [GPU_ARG_1] through [GPU_ARG_2]
-//                                  // to [GPU_ARG_3] through [GPU_ARG_4]                                
-// GPU_CMD_BLIT_GPU                 // BLiT from GPU memory to Display (RAM to Screen) 
-// GPU_CMD_GPU_BLIT                 // BLiT from Display to GPU memory (Screen to RAM)
-// GPU_CMD_SCROLL                   // Scroll Video Buffer:
-//                                  //     GPU_ARG_1_MSB = signed 8-bit horiz. offset
-//                                  //     GPU_ARG_1_LSB = signed 8-bit vert. offset
+// GPU_ARG_1                (Word)      // Argument 1
+// GPU_ARG_2                (Word)      // Argument 2
+// GPU_ARG_3                (Word)      // Argument 3
+// GPU_ARG_4                (Word)      // Argument 4
+// GPU_ARG_5                (Word)      // Argument 5
+//      
+// GPU_COMMAND              (Byte)      // Graphics Processing Unit Command
+// GPU_CMD_NEW_BUFFER                   // Allocate a new GPU Buffer (of arbetrary size)
+// GPU_CMD_FREE_BUFFER                  // Free a GPU Buffer (GPU_ARG_1_MSB = Buffer Index)
+// GPU_CMD_NEW_IMG                      // Allocate a new GPU Image as in a Sprite or Tile
+//                                      // returns a valid node address for the new image                                
+//                                      // size is based on color depth as 32, 64, 128, or 256
+// GPU_CMD_FREE_IMG                     // Free a GPU Image (GPU_ARG_1_MSB = Image Index)
+// GPU_CMD_CLEAR                        // Clear Video Buffer:
+//                                      // GPU_ARG_1_MSB = Color Index
+// GPU_CMD_COPY                         // Copy GPU Memory to GPU Memory
+//                                      // Copy from [GPU_ARG_1] through [GPU_ARG_2]
+//                                      // to [GPU_ARG_3] through [GPU_ARG_4]                                
+// GPU_CMD_BLIT_GPU                     // BLiT from GPU memory to Display (RAM to Screen) 
+// GPU_CMD_GPU_BLIT                     // BLiT from Display to GPU memory (Screen to RAM)
+// GPU_CMD_SCROLL                       // Scroll Video Buffer:
+//                                      //     GPU_ARG_1_MSB = signed 8-bit horiz. offset
+//                                      //     GPU_ARG_1_LSB = signed 8-bit vert. offset
 // GPU_CMD_DRAW_LINE
 // GPU_CMD_DRAW_CIRCLE
 // GPU_CMD_DRAW_RECT
 // GPU_CMD_FILL_RECT
 //     ... etc
 //
-// GPU_ERROR           (Byte)      // (Byte) Graphics Processing Unit Error
-//                                 // $NN = No Error
-//                                 // $NN = Invalid Command
-//                                 // $NN = Invalid Width
-//                                 // $NN = Invalid Height
-//                                 // $NN = Invalid Pitch
-//                                 // $NN = Invalid Data
-//                                 // $NN = Invalid Mode
-//                                 // $NN = Invalid Index
-//                                 // $NN = Invalid Address
-//                                 // $NN = Invalid Argument
-//                                 // $NN = Out of Memory
-//                                 // 
-//                                 // ... etc.
 //
 //
-// // Sprite Registers:
-// GPU_SPR_MAX         (Byte)      // Maximum Sprite Index (Read Only)
-// GPU_SPR_IDX         (Byte)      // Sprite Index
-// GPU_SPR_XPOS        (SInt16)    // Sprite X Position
-// GPU_SPR_YPOS        (SInt16)    // Sprite Y Position
-// GPU_SPR_IMG_IDX     (Byte)      // Sprite Image Index
-// GPU_SPR_MASK        (Byte)      // Sprite Collision Mask (4x4)
-// GPU_SPR_FLAGS       (Byte)      // Sprite Flags:
-//                                 // % 0000'0011: 
-//                                 //      00 = 2 colors, 
-//                                 //      01 = 4 colors, 
-//                                 //      10 = 16 colors, 
-//                                 //      11 = 256 colors
-//                                 // % 0000'0100: Double Width
-//                                 // % 0000'1000: Double Height
-//                                 // % 0001'0000: Flip Horizontal
-//                                 // % 0010'0000: Flip Vertical
-//                                 // % 0100'0000: Collision Enable
-//                                 // % 1000'0000: Display Enable
-//
-// // Image Editing Registers:              
-// GPU_BMP_MAX         (Byte)      // Maximum Bitmap Index (Read Only)
-// GPU_BMP_IDX         (Byte)      // Bitmap Image Index (0-255)
-// GPU_BMP_OFFSET      (Byte)      // Offset Within the Image Buffer(0-255)
-// GPU_BMP_DATA        (Byte)      // Bitmap Data (Read Write)
-// GPU_BMP_FLAGS       (Byte)      // Bitmap Flags:
-//                                 // % 0000'0011: 
-//                                 //      00 = 2 colors (size=32), 
-//                                 //      01 = 4 colors (size=64), 
-//                                 //      10 = 16 colors (size=128), 
-//                                 //      11 = 256 colors (size=256)
-//                                 // % 1111'1100: Reserved
-//
-// // Tilemap Registers:
-// GPU_TMAP_WIDTH      (Word)      // Tilemap Width (in pixels)
-// GPU_TMAP_HEIGHT     (Word)      // Tilemap Height (in Pixels)
-// GPU_TMAP_XPOS       (SInt16)    // Tilemap X Position (top left corner)
-// GPU_TMAP_YPOS       (SInt16)    // Tilemap Y Position (top left corner)
-// GPU_TMAP_CLIP_X1    (Word)      // Tilemap Clip Region X1
-// GPU_TMAP_CLIP_Y1    (Word)      // Tilemap Clip Region Y1
-// GPU_TMAP_CLIP_X2    (Word)      // Tilemap Clip Region X2
-// GPU_TMAP_CLIP_Y2    (Word)      // Tilemap Clip Region Y2
+
+
+//  
+// // Sprite Registers: 
+// GPU_SPR_MAX              (Byte)      // Maximum Sprite Index (Read Only)
+// GPU_SPR_IDX              (Byte)      // Sprite Index
+// GPU_SPR_XPOS             (SInt16)    // Sprite X Position
+// GPU_SPR_YPOS             (SInt16)    // Sprite Y Position
+// GPU_SPR_IMG_IDX          (Byte)      // Sprite Image Index
+// GPU_SPR_MASK             (Byte)      // Sprite Collision Mask (4x4)
+// GPU_SPR_FLAGS            (Byte)      // Sprite Flags:
+//                                      // % 0000'0011: 
+//                                      //      00 = 2 colors, 
+//                                      //      01 = 4 colors, 
+//                                      //      10 = 16 colors, 
+//                                      //      11 = 256 colors
+//                                      // % 0000'0100: Double Width
+//                                      // % 0000'1000: Double Height
+//                                      // % 0001'0000: Flip Horizontal
+//                                      // % 0010'0000: Flip Vertical
+//                                      // % 0100'0000: Collision Enable
+//                                      // % 1000'0000: Display Enable
+//  
+// // Image Editing Registers:               
+// GPU_BMP_MAX              (Byte)      // Maximum Bitmap Index (Read Only)
+// GPU_BMP_IDX              (Byte)      // Bitmap Image Index (0-255)
+// GPU_BMP_OFFSET           (Byte)      // Offset Within the Image Buffer(0-255)
+// GPU_BMP_DATA             (Byte)      // Bitmap Data (Read Write)
+// GPU_BMP_FLAGS            (Byte)      // Bitmap Flags:
+//                                      // % 0000'0011: 
+//                                      //      00 = 2 colors (size=32), 
+//                                      //      01 = 4 colors (size=64), 
+//                                      //      10 = 16 colors (size=128), 
+//                                      //      11 = 256 colors (size=256)
+//                                      // % 1111'1100: Reserved
+//  
 
 
 
+    ////////////////////////////////////////////////
+    // (Word) GPU_TMAP_WIDTH
+    //      Tilemap Width (in pixels)
+    /////
+    mapped_register.push_back( { "GPU_TMAP_WIDTH", nextAddr,
+        [this](Word) { return _gpu_tmap_width >> 8; }, 
+        [this](Word, Byte data) { _gpu_tmap_width = (_gpu_tmap_width & 0x00FF) | (data << 8); }, 
+        {   
+            "(Word) Tilemap Width (in pixels)"
+        }}); nextAddr+=1;
+    mapped_register.push_back( { "", nextAddr,
+        [this](Word) { return _gpu_tmap_width & 0xFF; }, 
+        [this](Word, Byte data) { _gpu_tmap_width = (_gpu_tmap_width & 0xFF00) | (data << 0); },  
+        {""}}); nextAddr+=1;
 
+
+    ////////////////////////////////////////////////
+    // (Word) GPU_TMAP_HEIGHT
+    //      Tilemap Height (in pixels)
+    /////
+    mapped_register.push_back( { "GPU_TMAP_HEIGHT", nextAddr,
+        [this](Word) { return _gpu_tmap_height >> 8; }, 
+        [this](Word, Byte data) { _gpu_tmap_height = (_gpu_tmap_height & 0x00FF) | (data << 8); }, 
+        {   
+            "(Word) Tilemap Height (in pixels)"
+        }}); nextAddr+=1;
+    mapped_register.push_back( { "", nextAddr,
+        [this](Word) { return _gpu_tmap_height & 0xFF; }, 
+        [this](Word, Byte data) { _gpu_tmap_height = (_gpu_tmap_height & 0xFF00) | (data << 0); },  
+        {""}}); nextAddr+=1;
+
+
+    ////////////////////////////////////////////////
+    // (SInt16) GPU_TMAP_XPOS
+    //      Tilemap X Position (top left corner)
+    /////
+    mapped_register.push_back( { "GPU_TMAP_XPOS", nextAddr,
+        [this](Word) { return _gpu_tmap_xpos >> 8; }, 
+        [this](Word, Byte data) { _gpu_tmap_xpos = (_gpu_tmap_xpos & 0x00FF) | (data << 8); }, 
+        {   
+            "(SInt16) Tilemap X Position (top left corner)"
+        }}); nextAddr+=1;
+    mapped_register.push_back( { "", nextAddr,
+        [this](Word) { return _gpu_tmap_xpos & 0xFF; }, 
+        [this](Word, Byte data) { _gpu_tmap_xpos = (_gpu_tmap_xpos & 0xFF00) | (data << 0); },  
+        {""}}); nextAddr+=1;
+
+
+    ////////////////////////////////////////////////
+    // (SInt16) GPU_TMAP_YPOS
+    //      Tilemap Height (in pixels)
+    /////
+    mapped_register.push_back( { "GPU_TMAP_YPOS", nextAddr,
+        [this](Word) { return _gpu_tmap_ypos >> 8; }, 
+        [this](Word, Byte data) { _gpu_tmap_ypos = (_gpu_tmap_ypos & 0x00FF) | (data << 8); }, 
+        {   
+            "(SInt16) Tilemap Y Position (top left corner)"
+        }}); nextAddr+=1;
+    mapped_register.push_back( { "", nextAddr,
+        [this](Word) { return _gpu_tmap_ypos & 0xFF; }, 
+        [this](Word, Byte data) { _gpu_tmap_ypos = (_gpu_tmap_ypos & 0xFF00) | (data << 0); },  
+        {""}}); nextAddr+=1;
+
+
+    ////////////////////////////////////////////////
+    // (SInt16) GPU_TMAP_CLIP_X1
+    //      Tilemap X Position (top left corner)
+    /////
+    mapped_register.push_back( { "GPU_TMAP_CLIP_X1", nextAddr,
+        [this](Word) { return _gpu_tmap_clip_x1 >> 8; }, 
+        [this](Word, Byte data) { _gpu_tmap_clip_x1 = (_gpu_tmap_clip_x1 & 0x00FF) | (data << 8); }, 
+        {   
+            "(Word) Tilemap Clip Region X1"
+        }}); nextAddr+=1;
+    mapped_register.push_back( { "", nextAddr,
+        [this](Word) { return _gpu_tmap_clip_x1 & 0xFF; }, 
+        [this](Word, Byte data) { _gpu_tmap_clip_x1 = (_gpu_tmap_clip_x1 & 0xFF00) | (data << 0); },  
+        {""}}); nextAddr+=1;
+
+
+    ////////////////////////////////////////////////
+    // (SInt16) GPU_TMAP_CLIP_Y1
+    //      Tilemap Height (in pixels)
+    /////
+    mapped_register.push_back( { "GPU_TMAP_CLIP_Y1", nextAddr,
+        [this](Word) { return _gpu_tmap_clip_y1 >> 8; }, 
+        [this](Word, Byte data) { _gpu_tmap_clip_y1 = (_gpu_tmap_clip_y1 & 0x00FF) | (data << 8); }, 
+        {   
+            "(Word) Tilemap Clip Region Y1"
+        }}); nextAddr+=1;
+    mapped_register.push_back( { "", nextAddr,
+        [this](Word) { return _gpu_tmap_clip_y1 & 0xFF; }, 
+        [this](Word, Byte data) { _gpu_tmap_clip_y1 = (_gpu_tmap_clip_y1 & 0xFF00) | (data << 0); },  
+        {""}}); nextAddr+=1;
+
+
+    ////////////////////////////////////////////////
+    // (SInt16) GPU_TMAP_CLIP_X2
+    //      Tilemap X Position (top left corner)
+    /////
+    mapped_register.push_back( { "GPU_TMAP_CLIP_X2", nextAddr,
+        [this](Word) { return _gpu_tmap_clip_x2 >> 8; }, 
+        [this](Word, Byte data) { _gpu_tmap_clip_x2 = (_gpu_tmap_clip_x2 & 0x00FF) | (data << 8); }, 
+        {   
+            "(Word) Tilemap Clip Region X2"
+        }}); nextAddr+=1;
+    mapped_register.push_back( { "", nextAddr,
+        [this](Word) { return _gpu_tmap_clip_x2 & 0xFF; }, 
+        [this](Word, Byte data) { _gpu_tmap_clip_x2 = (_gpu_tmap_clip_x2 & 0xFF00) | (data << 0); },  
+        {""}}); nextAddr+=1;
+
+
+    ////////////////////////////////////////////////
+    // (SInt16) GPU_TMAP_CLIP_Y1
+    //      Tilemap Height (in pixels)
+    /////
+    mapped_register.push_back( { "GPU_TMAP_CLIP_Y2", nextAddr,
+        [this](Word) { return _gpu_tmap_clip_y2 >> 8; }, 
+        [this](Word, Byte data) { _gpu_tmap_clip_y2 = (_gpu_tmap_clip_y2 & 0x00FF) | (data << 8); }, 
+        {   
+            "(Word) Tilemap Clip Region Y2",""
+        }}); nextAddr+=1;
+    mapped_register.push_back( { "", nextAddr,
+        [this](Word) { return _gpu_tmap_clip_y2 & 0xFF; }, 
+        [this](Word, Byte data) { _gpu_tmap_clip_y2 = (_gpu_tmap_clip_y2 & 0xFF00) | (data << 0); },  
+        {""}}); nextAddr+=1;
+
+
+    ////////////////////////////////////////////////
+    // (Byte) GPU_ERROR             
+    //      Memory Management Unit Error Code:    (Read Only)
+    /////
+    mapped_register.push_back({ "GPU_ERROR", nextAddr, 
+        [this](Word) { return _gpu_error; },  
+        nullptr,  
+        { "(Byte) Graphics Processing Unit Error Code:     (Read Only)" }}); nextAddr++;
+    // ADD ERROR CODE ENUMERATION:
+    Byte err = 0;
+    for (const auto& error : _gpu_error_list)
+    {
+        std::vector<std::string> comments = { "   $" + clr::hex(err, 2) + " = " + error.second };
+        if (error.first == "GPU_ERR_SIZE")
+        {
+            comments.push_back("");  // Adding an extra empty string to add a blank line
+        }
+        mapped_register.push_back({
+            error.first,            // The constant name (e.g., "MMU_ERR_NONE")
+            err++,                  // Increment the error code value for each entry
+            nullptr,                // Placeholder for function pointer (not used here)
+            nullptr,                // Placeholder for another value (not used here)
+            { comments }            // Formatted description (error message)
+        });
+    }
 
 
     ////////////////////////////////////////////////
@@ -1533,6 +1828,32 @@ void GPU::_verify_gpu_mode_change(Word mode_data)
 // Extended Graphics Functions: //
 // **************************** //
 
+void GPU::_gpu_calc_bgnd_size()
+{
+    // Extended Display is Enabled
+    if (_gpu_mode & 0b1000'0000'0000'0000)
+    {
+        // bitmap mode?
+        if (_gpu_mode & 0b0000'0000'0000'1000)
+        {
+            Byte color_depth_shift = (_gpu_mode & 0b0011'0000'0000'0000) >> 12;
+            _gpu_bgnd_size = (_gpu_hres * _gpu_vres) / (1 << color_depth_shift);
+        }
+        // tile Mode?
+        else
+        {
+            _gpu_bgnd_size = _gpu_tmap_width * _gpu_tmap_height;
+        }
+    }
+    else
+    {   
+        // Background Display is Disabled, size is irrelevant
+        _gpu_bgnd_size = 0;
+    }
+}
+
+
+
 Byte GPU::_gpu_blit_read_data() 
 { 
     Byte data = _ext_video_buffer[_gpu_blit_addr];
@@ -1567,6 +1888,23 @@ void GPU::_gpu_blit_increment_address()
         _gpu_blit_width_count = _gpu_blit_width;
     }
 }
+
+void GPU::error(Byte error_code) 
+{
+    _gpu_error = error_code;    // Set the error code
+    _gpu_command = 0;           // Clear the command (indicates an error)
+    // Log the error with a helpful message
+    if (error_code < _gpu_error_list.size())
+    {
+        std::string comment = _gpu_error_list[error_code].second;
+        UnitTest::Log(this, clr::RED + "MMU Error: " + comment + " $" + clr::hex(error_code, 2) );
+    }
+    else
+    {
+        UnitTest::Log(this, clr::RED + "MMU Error: Unknown Error $" + clr::hex(error_code, 2) );
+    }
+}
+
 // END: GPU.cpp
 
 
