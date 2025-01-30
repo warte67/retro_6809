@@ -289,20 +289,64 @@ GPU_DYN_HANDLE        equ    $FE2A    ; (Word) Dynamic Memory HANDLE
                                       ; 
 GPU_DYN_CUR_ADDR      equ    $FE2C    ; (Word) Current Dynamic Memory ADDRESS
                                       ; (autoincrements by 1 on read/write)
-GPU_DYN_CUR_ADDR      equ    $FE2E    ; (Word) Last Useful Dynamic Memory ADDRESS in this block
-GPU_DYN_END_DIST      equ    $FE30    ; (Word) (Word) Distance to End of this Dynamic Memory Block
-GPU_BLIT_DATA         equ    $FE32    ; (Byte) (Byte) Dynamic Memory DATA (Read/Write)
+GPU_DYN_END_ADDR      equ    $FE2E    ; (Word) Last Useful Dynamic Memory ADDRESS in this block
+GPU_DYN_END_DIST      equ    $FE30    ; (Word) Distance to End of this Dynamic Memory Block
+GPU_DYN_DATA          equ    $FE32    ; (Byte) Dynamic Memory DATA (Read/Write)
                                       ; 
-GPU_TMAP_WIDTH        equ    $FE33    ; (Word) Tilemap Width (in pixels)
-GPU_TMAP_HEIGHT       equ    $FE35    ; (Word) Tilemap Height (in pixels)
-GPU_TMAP_XPOS         equ    $FE37    ; (SInt16) Tilemap X Position (top left corner)
-GPU_TMAP_YPOS         equ    $FE39    ; (SInt16) Tilemap Y Position (top left corner)
-GPU_TMAP_CLIP_X1      equ    $FE3B    ; (Word) Tilemap Clip Region X1
-GPU_TMAP_CLIP_Y1      equ    $FE3D    ; (Word) Tilemap Clip Region Y1
-GPU_TMAP_CLIP_X2      equ    $FE3F    ; (Word) Tilemap Clip Region X2
-GPU_TMAP_CLIP_Y2      equ    $FE41    ; (Word) Tilemap Clip Region Y2
+GPU_CMD_ARG_1         equ    $FE33    ; (Word) GPU Command Argument 1
+GPU_CMD_ARG_2         equ    $FE35    ; (Word) GPU Command Argument 2
+GPU_CMD_ARG_3         equ    $FE37    ; (Word) GPU Command Argument 3
+GPU_CMD_ARG_4         equ    $FE39    ; (Word) GPU Command Argument 4
+GPU_CMD_ARG_5         equ    $FE3B    ; (Word) GPU Command Argument 5
                                       ; 
-GPU_ERROR             equ    $FE43    ; (Byte) Graphics Processing Unit Error Code:     (Read Only)
+GPU_COMMAND           equ    $FE3D    ; (Byte) Memory Management Unit Command:
+                                      ; 
+GPU_CMD_NOP           equ    $0000    ;    $00 = No Operation / Error
+GPU_CMD_SIZE          equ    $0001    ;    $01 = Total Number of MMU Commands
+                                      ; 
+GPU_SPR_MAX           equ    $FE3E    ; (Byte) Maximum Sprite Index (Read Only)
+GPU_SPR_IDX           equ    $FE3F    ; (Byte) Sprite Index (loads sprite data for this index)
+GPU_SPR_XPOS          equ    $FE40    ; (Sint16) Sprite X Position
+GPU_SPR_YPOS          equ    $FE42    ; (Sint16) Sprite X Position
+GPU_SPR_BMP_IDX       equ    $FE44    ; (Byte) Sprite Bitmap Image Index
+GPU_SPR_APR_MASK      equ    $FE45    ; (Word) Sprite Collision Approx. Mask (4x4)
+GPU_SPR_FLAGS         equ    $FE47    ; (Byte) Sprite Flags:
+                                      ; 
+GPU_SPR_FL_DBL_WIDTH  equ    $0001    ;    % 0000'0001:  Double Width
+GPU_SPR_FL_DBL_HEIGHT equ    $0002    ;    % 0000'0010:  Double Height
+GPU_SPR_FL_FLP_HORIZ  equ    $0004    ;    % 0000'0100:  Flip Horizontal
+GPU_SPR_FL_FLP_VERT   equ    $0008    ;    % 0000'1000:  Flip Vertical
+                                      ;    % 0011'0000:  Collision Type:
+GPU_SPR_FL_COL_NONE   equ    $0000    ;         00 = none
+GPU_SPR_FL_COL_BNDS   equ    $0001    ;         01 = bounding box
+GPU_SPR_FL_COL_CNTR   equ    $0002    ;         10 = center box
+GPU_SPR_FL_COL_PXL    equ    $0003    ;         11 = pixel mask
+GPU_SPR_FL_IS_HIT     equ    $0040    ;    % 0100'0000:  Is Collided
+GPU_SPR_FL_ENABLE     equ    $0080    ;    % 1000'0000:  Sprite Enable
+                                      ; 
+GPU_TMAP_WIDTH        equ    $FE48    ; (Word) Tilemap Width (in pixels)
+GPU_TMAP_HEIGHT       equ    $FE4A    ; (Word) Tilemap Height (in pixels)
+GPU_TMAP_XPOS         equ    $FE4C    ; (SInt16) Tilemap X Position (top left corner)
+GPU_TMAP_YPOS         equ    $FE4E    ; (SInt16) Tilemap Y Position (top left corner)
+GPU_TMAP_CLIP_X1      equ    $FE50    ; (Word) Tilemap Clip Region X1
+GPU_TMAP_CLIP_Y1      equ    $FE52    ; (Word) Tilemap Clip Region Y1
+GPU_TMAP_CLIP_X2      equ    $FE54    ; (Word) Tilemap Clip Region X2
+GPU_TMAP_CLIP_Y2      equ    $FE56    ; (Word) Tilemap Clip Region Y2
+                                      ; 
+GPU_BMP_MAX           equ    $FE58    ; (Byte) Maximum Bitmap Index (Read Only)
+GPU_BMP_IDX           equ    $FE59    ; (Byte) Bitmap Image Index (0-255)
+GPU_BMP_OFFSET        equ    $FE5A    ; (Byte) Offset Within the Image Buffer    (0-255)
+GPU_BMP_DATA          equ    $FE5B    ; (Byte) Bitmap Data      (Read Write)
+                                      ; 
+GPU_BMP_FLAGS         equ    $FE5C    ; (Byte)  Bitmap Flags:
+                                      ;  % 0000'0011 - Colors:
+GPU_BMP_2_COLORS      equ    $0000    ;      00 = 2 colors (size=32)
+GPU_BMP_4_COLORS      equ    $0001    ;      01 = 4 colors (size=64)
+GPU_BMP_16_COLORS     equ    $0002    ;      10 = 16 colors (size=128)
+GPU_BMP_256_COLORS    equ    $0003    ;      11 = 256 colors (size=256)
+                                      ;  % 1111'1100 - Reserved
+                                      ; 
+GPU_ERROR             equ    $FE5D    ; (Byte) Graphics Processing Unit Error Code:     (Read Only)
 GPU_ERR_NONE          equ    $0000    ;    $00 = No Error
 GPU_ERR_COMMAND       equ    $0001    ;    $01 = Invalid Command
 GPU_ERR_ADDRESS       equ    $0002    ;    $02 = Invalid Address
@@ -315,43 +359,43 @@ GPU_ERR_ARGUMENT      equ    $0008    ;    $08 = Invalid Argument
 GPU_ERR_OOM           equ    $0009    ;    $09 = Out of Memory
 GPU_ERR_SIZE          equ    $000A    ;    $0A = Total Number of GPU Errors
                                       ; 
-GPU_END               equ    $FE43    ; End of GPU Register Space
-GPU_TOP               equ    $FE44    ; Top of GPU Register Space
+GPU_END               equ    $FE5D    ; End of GPU Register Space
+GPU_TOP               equ    $FE5E    ; Top of GPU Register Space
 ; _______________________________________________________________________
 
-CSR_DEVICE            equ    $FE44    ; START: Mouse Device Hardware Registers
-CSR_XPOS              equ    $FE44    ; (Word) Horizontal Mouse Cursor Coordinate
-CSR_YPOS              equ    $FE46    ; (Word) Vertical Mouse Cursor Coordinate
-CSR_XOFS              equ    $FE48    ; (Byte) Horizontal Mouse Cursor Offset
-CSR_YOFS              equ    $FE49    ; (Byte) Vertical Mouse Cursor Offset
-CSR_SCROLL            equ    $FE4A    ; (char) MouseWheel Scroll: -1, 0, 1
-CSR_FLAGS             equ    $FE4B    ; (Byte) Mouse Device State Flags
+CSR_DEVICE            equ    $FE5E    ; START: Mouse Device Hardware Registers
+CSR_XPOS              equ    $FE5E    ; (Word) Horizontal Mouse Cursor Coordinate
+CSR_YPOS              equ    $FE60    ; (Word) Vertical Mouse Cursor Coordinate
+CSR_XOFS              equ    $FE62    ; (Byte) Horizontal Mouse Cursor Offset
+CSR_YOFS              equ    $FE63    ; (Byte) Vertical Mouse Cursor Offset
+CSR_SCROLL            equ    $FE64    ; (char) MouseWheel Scroll: -1, 0, 1
+CSR_FLAGS             equ    $FE65    ; (Byte) Mouse Device State Flags
                                       ;    bits 0-4: button states
                                       ;    bits 5-6: number of clicks
                                       ;    bits 7:   cursor enable
                                       ; 
-CSR_BMP_INDX          equ    $FE4C    ; (Byte) Mouse Cursor Bitmap Pixel Offset
-CSR_BMP_DATA          equ    $FE4D    ; (Byte) Mouse Cursor Bitmap Pixel Color Data ($0-$F)
-CSR_PAL_INDX          equ    $FE4E    ; (Byte) Mouse Cursor Color Palette Index (0-15)
-CSR_PAL_DATA          equ    $FE4F    ; (Word) Mouse Cursor Color Palette Data A4R4G4B4
-CSR_END               equ    $FE50    ; End of Mouse Device Register Space
-CSR_TOP               equ    $FE51    ; Top of CSR Register Space
+CSR_BMP_INDX          equ    $FE66    ; (Byte) Mouse Cursor Bitmap Pixel Offset
+CSR_BMP_DATA          equ    $FE67    ; (Byte) Mouse Cursor Bitmap Pixel Color Data ($0-$F)
+CSR_PAL_INDX          equ    $FE68    ; (Byte) Mouse Cursor Color Palette Index (0-15)
+CSR_PAL_DATA          equ    $FE69    ; (Word) Mouse Cursor Color Palette Data A4R4G4B4
+CSR_END               equ    $FE6A    ; End of Mouse Device Register Space
+CSR_TOP               equ    $FE6B    ; Top of CSR Register Space
 ; _______________________________________________________________________
 
-KEYBOARD_DEVICE       equ    $FE51    ; START: Keyboard Device Hardware Registers
-CHAR_Q_LEN            equ    $FE51    ; (Byte) Number of Characters Waiting in Queue   (Read Only)
-CHAR_SCAN             equ    $FE52    ; (Byte) Read Next Character in Queue (Not Popped When Read)
-CHAR_POP              equ    $FE53    ; (Byte) Read Next Character in Queue     (Popped When Read)
-XKEY_BUFFER           equ    $FE54    ; (16 Bytes) 128 bits for XK_KEY data buffer     (Read Only)
-EDT_BFR_CSR           equ    $FE64    ; (Byte) Cursor Position Within Edit Buffer     (Read/Write)
-EDT_ENABLE            equ    $FE65    ; (Byte) Line Editor Enable Flag                (Read/Write)
-EDT_BFR_LEN           equ    $FE66    ; (Byte) Limit the Line Editor to This Length   (Read/Write)
-KEYBOARD_END          equ    $FE66    ; End of Keyboard Register Space
-KEYBOARD_TOP          equ    $FE67    ; Top of Keyboard Register Space
+KEYBOARD_DEVICE       equ    $FE6B    ; START: Keyboard Device Hardware Registers
+CHAR_Q_LEN            equ    $FE6B    ; (Byte) Number of Characters Waiting in Queue   (Read Only)
+CHAR_SCAN             equ    $FE6C    ; (Byte) Read Next Character in Queue (Not Popped When Read)
+CHAR_POP              equ    $FE6D    ; (Byte) Read Next Character in Queue     (Popped When Read)
+XKEY_BUFFER           equ    $FE6E    ; (16 Bytes) 128 bits for XK_KEY data buffer     (Read Only)
+EDT_BFR_CSR           equ    $FE7E    ; (Byte) Cursor Position Within Edit Buffer     (Read/Write)
+EDT_ENABLE            equ    $FE7F    ; (Byte) Line Editor Enable Flag                (Read/Write)
+EDT_BFR_LEN           equ    $FE80    ; (Byte) Limit the Line Editor to This Length   (Read/Write)
+KEYBOARD_END          equ    $FE80    ; End of Keyboard Register Space
+KEYBOARD_TOP          equ    $FE81    ; Top of Keyboard Register Space
 ; _______________________________________________________________________
 
-JOYSTICK_DEVICE       equ    $FE67    ; START: Joystick/Gamepad Controller Device Hardware Registers
-JOYS_1_FLAGS          equ    $FE67    ; (Byte) Gamepad/Joystick #1 Condition Flags:     (Read Only)
+JOYSTICK_DEVICE       equ    $FE81    ; START: Joystick/Gamepad Controller Device Hardware Registers
+JOYS_1_FLAGS          equ    $FE81    ; (Byte) Gamepad/Joystick #1 Condition Flags:     (Read Only)
                                       ;            0000'0000: Not Connected
                                       ;            0000'1111: Controller Type
                                       ;            0001'0000: (reserved)
@@ -383,7 +427,7 @@ JOYS_1_FLAGS          equ    $FE67    ; (Byte) Gamepad/Joystick #1 Condition Fla
                                       ;            8:  Arcade Pad
                                       ;            9:  Throttle
                                       ; 
-JOYS_1_BTN            equ    $FE68    ; (Word) Gamepad Controller Button Bits:         (Read Only)
+JOYS_1_BTN            equ    $FE82    ; (Word) Gamepad Controller Button Bits:         (Read Only)
                                       ;            0000'0000'0000'0000 = Nothing Pressed
                                       ;            0000'0000'0000'0001 = A
                                       ;            0000'0000'0000'0010 = B
@@ -403,15 +447,15 @@ JOYS_1_BTN            equ    $FE68    ; (Word) Gamepad Controller Button Bits:  
                                       ;            1000'0000'0000'0000 = DPad Right
                                       ;            1111'1111'1111'1111 = Not Connected
                                       ; 
-JOYS_1_DBND           equ    $FE6A    ; (Byte) PAD 1 analog deadband; default is 5   (read/write)
-JOYS_1_LTX            equ    $FE6B    ; (char) PAD 1 LThumb-X position (-128 _ +127)   (realtime)
-JOYS_1_LTY            equ    $FE6C    ; (char) PAD 1 LThumb-Y position (-128 _ +127)   (realtime)
-JOYS_1_RTX            equ    $FE6D    ; (char) PAD 1 RThumb-X position (-128 _ +127)   (realtime)
-JOYS_1_RTY            equ    $FE6E    ; (char) PAD 1 RThumb-Y position (-128 _ +127)   (realtime)
-JOYS_1_Z1             equ    $FE6F    ; (char) PAD 1 left analog trigger (0 - 127)     (realtime)
-JOYS_1_Z2             equ    $FE70    ; (char) PAD 1 left analog trigger (0 - 127)     (realtime)
+JOYS_1_DBND           equ    $FE84    ; (Byte) PAD 1 analog deadband; default is 5   (read/write)
+JOYS_1_LTX            equ    $FE85    ; (char) PAD 1 LThumb-X position (-128 _ +127)   (realtime)
+JOYS_1_LTY            equ    $FE86    ; (char) PAD 1 LThumb-Y position (-128 _ +127)   (realtime)
+JOYS_1_RTX            equ    $FE87    ; (char) PAD 1 RThumb-X position (-128 _ +127)   (realtime)
+JOYS_1_RTY            equ    $FE88    ; (char) PAD 1 RThumb-Y position (-128 _ +127)   (realtime)
+JOYS_1_Z1             equ    $FE89    ; (char) PAD 1 left analog trigger (0 - 127)     (realtime)
+JOYS_1_Z2             equ    $FE8A    ; (char) PAD 1 left analog trigger (0 - 127)     (realtime)
                                       ; 
-JOYS_2_FLAGS          equ    $FE71    ; (Byte) Gamepad/Joystick #2 Condition Flags:     (Read Only)
+JOYS_2_FLAGS          equ    $FE8B    ; (Byte) Gamepad/Joystick #2 Condition Flags:     (Read Only)
                                       ;            0000'0000: Not Connected
                                       ;            0000'1111: Controller Type
                                       ;            0001'0000: (reserved)
@@ -443,7 +487,7 @@ JOYS_2_FLAGS          equ    $FE71    ; (Byte) Gamepad/Joystick #2 Condition Fla
                                       ;            8:  Arcade Pad
                                       ;            9:  Throttle
                                       ; 
-JOYS_2_BTN            equ    $FE72    ; (Word) Button Bits: Room For up to 16 Buttons  (realtime)
+JOYS_2_BTN            equ    $FE8C    ; (Word) Button Bits: Room For up to 16 Buttons  (realtime)
                                       ;        Joystick Button Bits:
                                       ;            0000'0000'0000'0000 = Nothing Pressed
                                       ;            0000'0000'0000'0001 = Button 1 
@@ -464,19 +508,19 @@ JOYS_2_BTN            equ    $FE72    ; (Word) Button Bits: Room For up to 16 Bu
                                       ;            1000'0000'0000'0000 = Hat Right
                                       ;            1111'1111'1111'1111 = Not Connected
                                       ; 
-JOYS_2_DBND           equ    $FE74    ; (Byte) PAD 2 analog deadband; default is 5   (read/write)
-JOYS_2_LTX            equ    $FE75    ; (char) PAD 2 LThumb-X position (-128 _ +127)   (realtime)
-JOYS_2_LTY            equ    $FE76    ; (char) PAD 2 LThumb-Y position (-128 _ +127)   (realtime)
-JOYS_2_RTX            equ    $FE77    ; (char) PAD 2 RThumb-X position (-128 _ +127)   (realtime)
-JOYS_2_RTY            equ    $FE78    ; (char) PAD 2 RThumb-Y position (-128 _ +127)   (realtime)
-JOYS_2_Z1             equ    $FE79    ; (char) PAD 2 left analog trigger (0 - 127)     (realtime)
-JOYS_2_Z2             equ    $FE7A    ; (char) PAD 2 left analog trigger (0 - 127)     (realtime)
-JOYS_END              equ    $FE7A    ; End of Joystick/Gamepad Device Register Space
-JOYS_TOP              equ    $FE7B    ; Top of Joystick/Gamepad Device Register Space
+JOYS_2_DBND           equ    $FE8E    ; (Byte) PAD 2 analog deadband; default is 5   (read/write)
+JOYS_2_LTX            equ    $FE8F    ; (char) PAD 2 LThumb-X position (-128 _ +127)   (realtime)
+JOYS_2_LTY            equ    $FE90    ; (char) PAD 2 LThumb-Y position (-128 _ +127)   (realtime)
+JOYS_2_RTX            equ    $FE91    ; (char) PAD 2 RThumb-X position (-128 _ +127)   (realtime)
+JOYS_2_RTY            equ    $FE92    ; (char) PAD 2 RThumb-Y position (-128 _ +127)   (realtime)
+JOYS_2_Z1             equ    $FE93    ; (char) PAD 2 left analog trigger (0 - 127)     (realtime)
+JOYS_2_Z2             equ    $FE94    ; (char) PAD 2 left analog trigger (0 - 127)     (realtime)
+JOYS_END              equ    $FE94    ; End of Joystick/Gamepad Device Register Space
+JOYS_TOP              equ    $FE95    ; Top of Joystick/Gamepad Device Register Space
 ; _______________________________________________________________________
 
-FIO_DEVICE            equ    $FE7B    ; START: File I/O Device Hardware Registers
-FIO_ERROR             equ    $FE7B    ; (Byte) FILE_ERROR enumeration result (FE_<error>)
+FIO_DEVICE            equ    $FE95    ; START: File I/O Device Hardware Registers
+FIO_ERROR             equ    $FE95    ; (Byte) FILE_ERROR enumeration result (FE_<error>)
                                       ; 
 FE_BEGIN              equ    $0000    ;   Begin FILE_ERROR enumeration 
 FE_NOERROR            equ    $0000    ;      no error, condition normal
@@ -492,7 +536,7 @@ FE_FILE_EXISTS        equ    $0007    ;      file already exists
 FE_INVALID_NAME       equ    $0007    ;      invalid file name         
 FE_LAST               equ    $0007    ;   End of FILE_ERROR enumeration
                                       ; 
-FIO_COMMAND           equ    $FE7C    ; (Byte) Execute a File Command (FC_<cmd>)
+FIO_COMMAND           equ    $FE96    ; (Byte) Execute a File Command (FC_<cmd>)
                                       ; 
 FC_BEGIN              equ    $0000    ;   Begin FIO_COMMAND enumeration           
 FC_RESET              equ    $0000    ;     Reset                                 
@@ -522,46 +566,46 @@ FC_SET_SEEK           equ    $0017    ;     Set Seek Position (from FIO_IOWORD)
 FC_GET_SEEK           equ    $0018    ;     Get Seek Position (into FIO_IOWORD)   
 FC_LAST               equ    $0018    ;   End FIO_COMMAND enumeration             
                                       ; 
-FIO_HANDLE            equ    $FE7D    ; (Byte) Current File Stream HANDLE (0=NONE)
-FIO_SEEKPOS           equ    $FE7E    ; (DWord) File Seek Position
-FIO_IODATA            equ    $FE82    ; (Byte) Input / Output Data
+FIO_HANDLE            equ    $FE97    ; (Byte) Current File Stream HANDLE (0=NONE)
+FIO_SEEKPOS           equ    $FE98    ; (DWord) File Seek Position
+FIO_IODATA            equ    $FE9C    ; (Byte) Input / Output Data
                                       ; 
-FIO_PATH_LEN          equ    $FE83    ; (Byte) Length of the Primary Filepath        (Read Only)
-FIO_PATH_POS          equ    $FE84    ; (Byte) Character Position Within the Primary Filepath
-FIO_PATH_DATA         equ    $FE85    ; (Byte) Data at the Character Position of the Primary Path
+FIO_PATH_LEN          equ    $FE9D    ; (Byte) Length of the Primary Filepath        (Read Only)
+FIO_PATH_POS          equ    $FE9E    ; (Byte) Character Position Within the Primary Filepath
+FIO_PATH_DATA         equ    $FE9F    ; (Byte) Data at the Character Position of the Primary Path
                                       ; 
-FIO_ALT_PATH_LEN      equ    $FE86    ; (Byte) Length of the alternate Filepath        (Read Only)
-FIO_ALT_PATH_POS      equ    $FE87    ; (Byte) Character Position Within the Alternate Filepath
-FIO_ALT_PATH_DATA     equ    $FE88    ; (Byte) Data at the Character Position of the Alternate Path
+FIO_ALT_PATH_LEN      equ    $FEA0    ; (Byte) Length of the alternate Filepath        (Read Only)
+FIO_ALT_PATH_POS      equ    $FEA1    ; (Byte) Character Position Within the Alternate Filepath
+FIO_ALT_PATH_DATA     equ    $FEA2    ; (Byte) Data at the Character Position of the Alternate Path
                                       ; 
-FIO_DIR_DATA          equ    $FE89    ; (Byte) A Series of Null-Terminated Filenames
+FIO_DIR_DATA          equ    $FEA3    ; (Byte) A Series of Null-Terminated Filenames
                                       ;   NOTE: Current read-position is reset to the beginning
                                       ;     following a List Directory command. The read-position
                                       ;     is automatically advanced on read from this register.
                                       ;     Each filename is $0A-terminated. The list itself is
                                       ;     null-terminated.
                                       ; 
-FIO_END               equ    $FE89    ; End of FIO Device Register Space
-FIO_TOP               equ    $FE8A    ; Top of FIO Device Register Space
+FIO_END               equ    $FEA3    ; End of FIO Device Register Space
+FIO_TOP               equ    $FEA4    ; Top of FIO Device Register Space
 ; _______________________________________________________________________
 
-MATH_DEVICE           equ    $FE8A    ; START: Math Co-Processor Device Hardware Registers
-MATH_ACA_POS          equ    $FE8A    ; (Byte) Character Position Within the ACA Float String
-MATH_ACA_DATA         equ    $FE8B    ; (Byte) ACA Float String Character Port
-MATH_ACA_RAW          equ    $FE8C    ; (4-Bytes) ACA Raw Float Data
-MATH_ACA_INT          equ    $FE90    ; (4-Bytes) ACA Integer Data
+MATH_DEVICE           equ    $FEA4    ; START: Math Co-Processor Device Hardware Registers
+MATH_ACA_POS          equ    $FEA4    ; (Byte) Character Position Within the ACA Float String
+MATH_ACA_DATA         equ    $FEA5    ; (Byte) ACA Float String Character Port
+MATH_ACA_RAW          equ    $FEA6    ; (4-Bytes) ACA Raw Float Data
+MATH_ACA_INT          equ    $FEAA    ; (4-Bytes) ACA Integer Data
                                       ; 
-MATH_ACB_POS          equ    $FE94    ; (Byte) Character Position Within the ACB Float String
-MATH_ACB_DATA         equ    $FE95    ; (Byte) ACB Float String Character Port
-MATH_ACB_RAW          equ    $FE96    ; (4-Bytes) ACB Raw Float Data
-MATH_ACB_INT          equ    $FE9A    ; (4-Bytes) ACB Integer Data
+MATH_ACB_POS          equ    $FEAE    ; (Byte) Character Position Within the ACB Float String
+MATH_ACB_DATA         equ    $FEAF    ; (Byte) ACB Float String Character Port
+MATH_ACB_RAW          equ    $FEB0    ; (4-Bytes) ACB Raw Float Data
+MATH_ACB_INT          equ    $FEB4    ; (4-Bytes) ACB Integer Data
                                       ; 
-MATH_ACR_POS          equ    $FE9E    ; (Byte) Character Position Within the ACR Float String
-MATH_ACR_DATA         equ    $FE9F    ; (Byte) ACR Float String Character Port
-MATH_ACR_RAW          equ    $FEA0    ; (4-Bytes) ACR Raw Float Data
-MATH_ACR_INT          equ    $FEA4    ; (4-Bytes) ACR Integer Data
+MATH_ACR_POS          equ    $FEB8    ; (Byte) Character Position Within the ACR Float String
+MATH_ACR_DATA         equ    $FEB9    ; (Byte) ACR Float String Character Port
+MATH_ACR_RAW          equ    $FEBA    ; (4-Bytes) ACR Raw Float Data
+MATH_ACR_INT          equ    $FEBE    ; (4-Bytes) ACR Integer Data
                                       ; 
-MATH_OPERATION        equ    $FEA8    ; (Byte) ACA Float String Character Port   (On Write)
+MATH_OPERATION        equ    $FEC2    ; (Byte) ACA Float String Character Port   (On Write)
 MOP_BEGIN             equ    $0000    ;   BEGIN Math Operation Enumeration:
 MOP_RANDOM            equ    $0000    ;     ACA, ACB, and ACR are set to randomized values
 MOP_RND_SEED          equ    $0001    ;     MATH_ACA_INT seeds the pseudo-random number generator
@@ -623,24 +667,24 @@ MOP_LOGB              equ    $0038    ;     ACR = std::logb(ACA)
 MOP_NEXTAFTER         equ    $0039    ;     ACR = std::nextafter(ACA, ACB)
 MOP_COPYSIGN          equ    $003A    ;     ACR = std::copysign(ACA, ACB)
 MOP_LASTOP            equ    $003B    ;   END Math Operation Enumeration
-MATH_END              equ    $FEA8    ; End of Math Co-Processor Register Space
-MATH_TOP              equ    $FEA9    ; Top of Math Co-Processor Register Space
+MATH_END              equ    $FEC2    ; End of Math Co-Processor Register Space
+MATH_TOP              equ    $FEC3    ; Top of Math Co-Processor Register Space
 ; _______________________________________________________________________
 
-MMU_DEVICE            equ    $FEA9    ; START: Memory Management Unit Hardware Registers
-MMU_PAGE_1_SELECT     equ    $FEA9    ; (Word) Page Select for 8K Memory Bank 1
-MMU_PAGE_2_SELECT     equ    $FEAB    ; (Word) Page Select for 8K Memory Bank 2
-MMU_BLOCKS_FREE       equ    $FEAD    ; (Word) Number of 32-Byte Blocks Available for Allocation (Read Only)
-MMU_BLOCKS_ALLOCATED  equ    $FEAF    ; (Word) Number of 32-Byte Blocks Currently Allocated  (Read Only)
-MMU_BLOCKS_FRAGGED    equ    $FEB1    ; (Word) Number of 32-Byte Blocks Currently Fragmented  (Read Only)
-MMU_ARG_1             equ    $FEB3    ; (Word) Argument 1 for MMU Command
-MMU_ARG_1_MSB         equ    $FEB3    ; (Byte) Argument 1 Most Significant Byte for MMU Command
-MMU_ARG_1_LSB         equ    $FEB4    ; (Byte) Argument 1 Least Significant Byte for MMU Command
-MMU_ARG_2             equ    $FEB5    ; (Word) Argument 2 for MMU Command
-MMU_ARG_2_MSB         equ    $FEB5    ; (Byte) Argument 2 Most Significant Byte for MMU Command
-MMU_ARG_2_LSB         equ    $FEB6    ; (Byte) Argument 2 Least Significant Byte for MMU Command
+MMU_DEVICE            equ    $FEC3    ; START: Memory Management Unit Hardware Registers
+MMU_PAGE_1_SELECT     equ    $FEC3    ; (Word) Page Select for 8K Memory Bank 1
+MMU_PAGE_2_SELECT     equ    $FEC5    ; (Word) Page Select for 8K Memory Bank 2
+MMU_BLOCKS_FREE       equ    $FEC7    ; (Word) Number of 32-Byte Blocks Available for Allocation (Read Only)
+MMU_BLOCKS_ALLOCATED  equ    $FEC9    ; (Word) Number of 32-Byte Blocks Currently Allocated  (Read Only)
+MMU_BLOCKS_FRAGGED    equ    $FECB    ; (Word) Number of 32-Byte Blocks Currently Fragmented  (Read Only)
+MMU_ARG_1             equ    $FECD    ; (Word) Argument 1 for MMU Command
+MMU_ARG_1_MSB         equ    $FECD    ; (Byte) Argument 1 Most Significant Byte for MMU Command
+MMU_ARG_1_LSB         equ    $FECE    ; (Byte) Argument 1 Least Significant Byte for MMU Command
+MMU_ARG_2             equ    $FECF    ; (Word) Argument 2 for MMU Command
+MMU_ARG_2_MSB         equ    $FECF    ; (Byte) Argument 2 Most Significant Byte for MMU Command
+MMU_ARG_2_LSB         equ    $FED0    ; (Byte) Argument 2 Least Significant Byte for MMU Command
                                       ; 
-MMU_COMMAND           equ    $FEB7    ; (Byte) Memory Management Unit Command:
+MMU_COMMAND           equ    $FED1    ; (Byte) Memory Management Unit Command:
 MMU_CMD_NOP           equ    $0000    ;    $00 = No Operation / Error
 MMU_CMD_PG_ALLOC      equ    $0001    ;    $01 = Page Allocate (8K Bytes)
 MMU_CMD_PG_FREE       equ    $0002    ;    $02 = Page Deallocate (8K Bytes)
@@ -663,7 +707,7 @@ MMU_CMD_DEFRAG        equ    $0012    ;    $12 = Defragment / Collect Garbage
 MMU_CMD_RESET         equ    $0013    ;    $13 = Reset Memory Management Unit
 MMU_CMD_SIZE          equ    $0014    ;    $14 = Total Number of MMU Commands
                                       ; 
-MMU_ERROR             equ    $FEB8    ; (Byte) Memory Management Unit Error Code:     (Read Only)
+MMU_ERROR             equ    $FED2    ; (Byte) Memory Management Unit Error Code:     (Read Only)
 MMU_ERR_NONE          equ    $0000    ;    $00 = No Error
 MMU_ERR_ALLOC         equ    $0001    ;    $01 = Failed to Allocate Memory
 MMU_ERR_FREE          equ    $0002    ;    $02 = Failed to Deallocate Memory
@@ -674,9 +718,9 @@ MMU_ERR_NODE          equ    $0006    ;    $06 = Invalid Node
 MMU_ERR_RAW_INDEX     equ    $0007    ;    $07 = Invalid Raw Index
 MMU_ERR_SIZE          equ    $0008    ;    $08 = Total Number of MMU Errors
                                       ; 
-MMU_META_HANDLE       equ    $FEB9    ; (Word) Handle for the current allocation chain
+MMU_META_HANDLE       equ    $FED3    ; (Word) Handle for the current allocation chain
                                       ; 
-MMU_META_STATUS       equ    $FEBB    ; (Byte) Status Flags:
+MMU_META_STATUS       equ    $FED5    ; (Byte) Status Flags:
 MMU_STFLG_ALLOC       equ    $0001    ;    0000'0001: Is Allocated: 0 = Free, 1 = Allocated
 MMU_STFLG_PAGED       equ    $0002    ;    0000'0010: Paged Memory: 0 = No,   1 = Yes
 MMU_STFLG_READONLY    equ    $0004    ;    0000'0100: Memory Type:  0 = RAM,  1 = ROM
@@ -686,18 +730,18 @@ MMU_STFLG_RES_1       equ    $0020    ;    0010'0000:   (reserved)
 MMU_STFLG_RES_2       equ    $0040    ;    0100'0000:   (reserved)
 MMU_STFLG_ERROR       equ    $0080    ;    1000'0000: Error:        0 = No,   1 = Yes
                                       ; 
-MMU_META_DATA         equ    $FEBC    ; (32-Bytes) Data Window for the Current Allocation
-MMU_META_ROOT         equ    $FEDC    ; (Word) Root node of the current allocation       (Read Only)
-MMU_META_PREV         equ    $FEDE    ; (Word) Previous node of the current allocation   (Read Only)
-MMU_META_NEXT         equ    $FEE0    ; (Word) Next node of the current allocation       (Read Only)
-MMU_RAW_INDEX         equ    $FEE2    ; (Word) Raw Index of the current memory node  (Node Window)
+MMU_META_DATA         equ    $FED6    ; (32-Bytes) Data Window for the Current Allocation
+MMU_META_ROOT         equ    $FEF6    ; (Word) Root node of the current allocation       (Read Only)
+MMU_META_PREV         equ    $FEF8    ; (Word) Previous node of the current allocation   (Read Only)
+MMU_META_NEXT         equ    $FEFA    ; (Word) Next node of the current allocation       (Read Only)
+MMU_RAW_INDEX         equ    $FEFC    ; (Word) Raw Index of the current memory node  (Node Window)
                                       ; 
-MMU_END               equ    $FEE3    ; End of Banked Memory Register Space
-MMU_TOP               equ    $FEE4    ; Top of Banked Memory Register Space
+MMU_END               equ    $FEFD    ; End of Banked Memory Register Space
+MMU_TOP               equ    $FEFE    ; Top of Banked Memory Register Space
 ; _______________________________________________________________________
 
-HDW_RESERVED_DEVICE   equ    $FEE4    ; START: Reserved Register Space
-HDW_REG_END           equ    $FFF0    ; 268 bytes reserved for future use.
+HDW_RESERVED_DEVICE   equ    $FEFE    ; START: Reserved Register Space
+HDW_REG_END           equ    $FFF0    ; 242 bytes reserved for future use.
 ; _______________________________________________________________________
 
 ROM_VECTS_DEVICE      equ    $FFF0    ; START: Hardware Interrupt Vectors

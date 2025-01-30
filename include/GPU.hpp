@@ -29,14 +29,15 @@ public: // PUBLIC CONSTRUCTOR / DESTRUCTOR
     virtual ~GPU();
 
 public: // VIRTUAL METHODS
-    virtual int  OnAttach(int nextAddr);            // attach to the memory map
-    virtual void OnInit();                          // initialize
-    virtual void OnQuit();                          // shutdown
-    virtual void OnActivate();                      // activate
-    virtual void OnDeactivate();                    // deactivate
-    virtual void OnEvent(SDL_Event* evnt);          // handle events
-    virtual void OnUpdate(float fElapsedTime);      // update
-    virtual void OnRender();                        // render
+    virtual int  OnAttach(int nextAddr) override;       // attach to the memory map
+    virtual void OnInit() override;                     // initialize
+    virtual void OnQuit() override;                     // shutdown
+    virtual void OnActivate() override;                 // activate
+    virtual void OnDeactivate() override;               // deactivate
+    virtual void OnEvent(SDL_Event* evnt) override;     // handle events
+    virtual void OnUpdate(float fElapsedTime) override; // update
+    virtual void OnRender() override;                   // render
+    virtual bool OnTest() override;                     // return true for successful unit tests
 
 public: // PUBLIC ACCESSORS
     void RenderPresent() {
@@ -211,7 +212,8 @@ private: // PRIVATE MEMBERS
         Word end_addr;  // End Address
     };
     std::unordered_map<Word, DYNAMIC_MEMORY> _gpu_dyn_map;
-
+    // _gpu_dyn_map_new();
+    // _gpu_dyn_map_del();
 
     // GPU_DYN_CUR_ADDR                     // (Word) Current Dynamic Memory ADDRESS
     Word _gpu_dyn_cur_addr = 0;
@@ -231,62 +233,142 @@ private: // PRIVATE MEMBERS
 
 
 // GPU Command Registers:
-    // GPU_ARG_1                (Word)      // Argument 1
-    // GPU_ARG_2                (Word)      // Argument 2
-    // GPU_ARG_3                (Word)      // Argument 3
-    // GPU_ARG_4                (Word)      // Argument 4
-    // GPU_ARG_5                (Word)      // Argument 5
-    //      
+    // GPU_CMD_ARG_1            (Word)      // Argument 1
+    Word _gpu_cmd_arg_1 = 0;
+
+    // GPU_CMD_ARG_2            (Word)      // Argument 2
+    Word _gpu_cmd_arg_2 = 0;
+
+    // GPU_CMD_ARG_3            (Word)      // Argument 3
+    Word _gpu_cmd_arg_3 = 0;
+
+    // GPU_CMD_ARG_4            (Word)      // Argument 4
+    Word _gpu_cmd_arg_4 = 0;
+
+    // GPU_CMD_ARG_5            (Word)      // Argument 5
+    Word _gpu_cmd_arg_5 = 0;
+
     // GPU_COMMAND              (Byte)      // Graphics Processing Unit Command
-Byte _gpu_command = 0;
-    // GPU_CMD_NEW_BUFFER                   // Allocate a new GPU Buffer (of arbetrary size)
-    // GPU_CMD_FREE_BUFFER                  // Free a GPU Buffer (GPU_ARG_1_MSB = Buffer Index)
-    // GPU_CMD_NEW_IMG                      // Allocate a new GPU Image as in a Sprite or Tile
-    //                                      // returns a valid node address for the new image                                
-    //                                      // size is based on color depth as 32, 64, 128, or 256
-    // GPU_CMD_FREE_IMG                     // Free a GPU Image (GPU_ARG_1_MSB = Image Index)
-    // GPU_CMD_CLEAR                        // Clear Video Buffer:
-    //                                      // GPU_ARG_1_MSB = Color Index
-    // GPU_CMD_COPY                         // Copy GPU Memory to GPU Memory
-    //                                      // Copy from [GPU_ARG_1] through [GPU_ARG_2]
-    //                                      // to [GPU_ARG_3] through [GPU_ARG_4]                                
-    // GPU_CMD_BLIT_GPU                     // BLiT from GPU memory to Display (RAM to Screen) 
-    // GPU_CMD_GPU_BLIT                     // BLiT from Display to GPU memory (Screen to RAM)
-    // GPU_CMD_SCROLL                       // Scroll Video Buffer:
-    //                                      //     GPU_ARG_1_MSB = signed 8-bit horiz. offset
-    //                                      //     GPU_ARG_1_LSB = signed 8-bit vert. offset
-    // GPU_CMD_DRAW_LINE
-    // GPU_CMD_DRAW_CIRCLE
-    // GPU_CMD_DRAW_RECT
-    // GPU_CMD_FILL_RECT
-    //     ... etc
+    Byte _gpu_command = 0;
+    void do_command(Byte command);
+
+    // GPU Command Functions and their Unit Tests
+    Byte do_nop();
+    bool _test_nop();
+    // ...
+    Byte do_size();
+    bool _test_size();
+
+    // Command Structures and Maps
+    struct CommandInfo {
+        std::string key;
+        std::string description;
+        std::function<Byte()> action;  // Function pointer for the command
+        std::function<bool()> test;    // Function pointer for the unit test
+    };
+    std::vector<CommandInfo> _gpu_command_list = {
+    //    CONSTANT            , DESCRIPTION                                 , FUNCTION POINTER FOR THE COMMAND,             , FUNCTION POINTER FOR THE UNIT TEST
+        {"GPU_CMD_NOP"        , "No Operation / Error",                     [this]() -> Byte { return do_nop(); },          [this]() -> bool { return _test_nop(); }},
+            // GPU_CMD_NEW_BUFFER                   // Allocate a new GPU Buffer (of arbetrary size)
+            // GPU_CMD_FREE_BUFFER                  // Free a GPU Buffer (GPU_ARG_1_MSB = Buffer Index)
+            // GPU_CMD_NEW_IMG                      // Allocate a new GPU Image as in a Sprite or Tile
+            //                                      // returns a valid node address for the new image                                
+            //                                      // size is based on color depth as 32, 64, 128, or 256
+            // GPU_CMD_FREE_IMG                     // Free a GPU Image (GPU_ARG_1_MSB = Image Index)
+            // GPU_CMD_CLEAR                        // Clear Video Buffer:
+            //                                      // GPU_ARG_1_MSB = Color Index
+            // GPU_CMD_COPY                         // Copy GPU Memory to GPU Memory
+            //                                      // Copy from [GPU_ARG_1] through [GPU_ARG_2]
+            //                                      // to [GPU_ARG_3] through [GPU_ARG_4]                                
+            // GPU_CMD_BLIT_GPU                     // BLiT from GPU memory to Display (RAM to Screen) 
+            // GPU_CMD_GPU_BLIT                     // BLiT from Display to GPU memory (Screen to RAM)
+            // GPU_CMD_SCROLL                       // Scroll Video Buffer:
+            //                                      //     GPU_ARG_1_MSB = signed 8-bit horiz. offset
+            //                                      //     GPU_ARG_1_LSB = signed 8-bit vert. offset
+            // GPU_CMD_DRAW_LINE
+            // GPU_CMD_DRAW_CIRCLE
+            // GPU_CMD_DRAW_RECT
+            // GPU_CMD_FILL_RECT
+            //     ... etc
+        {"GPU_CMD_SIZE"       , "Total Number of MMU Commands",             [this]() -> Byte { return do_size(); },         [this]() -> bool { return _test_size(); }}
+    };
+    std::unordered_map<Byte, std::function<Byte()>> _gpu_commands;
+    void register_command(Byte command, std::function<Byte()> handler);
+
     
 // Sprite Registers: 
+    struct SPRITE_INFO 
+    {
+        Sint16 XPos = 0;    // Sprite X Position
+        Sint16 YPos = 0;    // Sprite Y Position
+        Byte bmp_idx = 0;   // Sprite Bitmap Image Index
+        Byte mask = 0;      // Sprite Collision Mask (4x4)
+        Byte flags = 0;     // Sprite Flags     
+    };
+    std::vector<SPRITE_INFO> _gpu_sprites;
+
     // GPU_SPR_MAX              (Byte)      // Maximum Sprite Index (Read Only)
+    Byte _gpu_spr_max = 0;
+
     // GPU_SPR_IDX              (Byte)      // Sprite Index
+    Byte _gpu_spr_idx = 0;
+
     // GPU_SPR_XPOS             (SInt16)    // Sprite X Position
+    Sint16 _gpu_spr_xpos = 0;
+
     // GPU_SPR_YPOS             (SInt16)    // Sprite Y Position
-    // GPU_SPR_IMG_IDX          (Byte)      // Sprite Image Index
-    // GPU_SPR_MASK             (Byte)      // Sprite Collision Mask (4x4)
+    Sint16 _gpu_spr_ypos = 0;
+
+    // GPU_SPR_BMP_IDX          (Byte)      // Sprite Bitmap Image Index
+    Byte _gpu_spr_bmp_idx = 0;
+
+    // GPU_SPR_APR_MASK         (Word)      // Sprite Collision Approx. Mask (4x4)
+    Word _gpu_spr_apr_mask = 0;
+
     // GPU_SPR_FLAGS            (Byte)      // Sprite Flags:
-    //                                      // % 0000'0011: 
-    //                                      //      00 = 2 colors, 
-    //                                      //      01 = 4 colors, 
-    //                                      //      10 = 16 colors, 
-    //                                      //      11 = 256 colors
-    //                                      // % 0000'0100: Double Width
-    //                                      // % 0000'1000: Double Height
-    //                                      // % 0001'0000: Flip Horizontal
-    //                                      // % 0010'0000: Flip Vertical
-    //                                      // % 0100'0000: Collision Enable
-    //                                      // % 1000'0000: Display Enable
-    
-// Bitmap Image Registers:               
+    Byte _gpu_spr_flags = 0;
+                            // % 0000'0001: Double Width    // GPU_SPR_FL_DBL_WIDTH 
+                            // % 0000'0010: Double Height   // GPU_SPR_FL_DBL_HEIGHT    
+                            // % 0000'0100: Flip Horizontal // GPU_SPR_FL_FLIP_HORIZ    
+                            // % 0000'1000: Flip Vertical   // GPU_SPR_FL_FLIP_VERT     
+                            // % 0011'0000: Collision Type:
+                            //      00 = collision disabled // GPU_SPR_FL_COL_NONE      
+                            //      01 = bounding box       // GPU_SPR_FL_COL_BOUNDS    
+                            //      10 = center box         // GPU_SPR_FL_COL_CENTER    
+                            //      11 = pixel mask         // GPU_SPR_FL_COL_PIXEL     
+                            // % 0100'0000: Is Collided     // GPU_SPR_FL_IS_COLLIDED   
+                            // % 1000'0000: Display Enable  // GPU_SPR_FL_ENABLE           
+
+    struct BITMAP16_INFO 
+    {
+        Word handle = 0;    // handle to the dynamic memory
+        Byte offset = 0;    // offset within the 16x16 image buffer (0-255)
+        Byte flags = 0;     // 16x16 bitmap flags
+                            // % 0000'0011: 
+                            //      00 = 2 colors (size=32), 
+                            //      01 = 4 colors (size=64), 
+                            //      10 = 16 colors (size=128), 
+                            //      11 = 256 colors (size=256)
+                            // % 0111'1100: Reserved
+                            // % 1000'0000: Is Allocated
+    };
+    std::vector<BITMAP16_INFO> _gpu_bitmaps;
+        
+// Bitmap Image Modification Registers:               
     // GPU_BMP_MAX              (Byte)      // Maximum Bitmap Index (Read Only)
+    // _gpu_bitmaps.size();
+
     // GPU_BMP_IDX              (Byte)      // Bitmap Image Index (0-255)
+    Byte _gpu_bmp_idx = 0;
+
     // GPU_BMP_OFFSET           (Byte)      // Offset Within the Image Buffer(0-255)
+    Byte _gpu_bmp_offset = 0;
+
     // GPU_BMP_DATA             (Byte)      // Bitmap Data (Read Write)
+    // data = _ext_video_buffer[_gpu_bmp_offset];
+
     // GPU_BMP_FLAGS            (Byte)      // Bitmap Flags:
+    Byte _gpu_bmp_flags = 0;
     //                                      // % 0000'0011: 
     //                                      //      00 = 2 colors (size=32), 
     //                                      //      01 = 4 colors (size=64), 

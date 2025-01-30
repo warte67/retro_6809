@@ -503,11 +503,11 @@ void MMU::error(Byte error_code)
     if (error_code < _mmu_error_list.size())
     {
         std::string comment = _mmu_error_list[error_code].second;
-        UnitTest::Log(this, clr::RED + "MMU Error: " + comment + " $" + clr::hex(error_code, 2) );
+        UnitTest::Log(this, clr::RED + "Error: " + comment + " $" + clr::hex(error_code, 2) );
     }
     else
     {
-        UnitTest::Log(this, clr::RED + "MMU Error: Unknown Error $" + clr::hex(error_code, 2) );
+        UnitTest::Log(this, clr::RED + "Error: Unknown Error $" + clr::hex(error_code, 2) );
     }
 }
 

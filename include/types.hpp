@@ -92,7 +92,7 @@
 
     // Unit Test Constants:
     #define DISPLAY_RUNTIME_UNIT_TESTS false
-    #define DISPLAY_UNIT_TEST_RESULTS false
+    #define DISPLAY_UNIT_TEST_RESULTS true
 
 
 

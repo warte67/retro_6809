@@ -470,8 +470,8 @@ int  GPU::OnAttach(int nextAddr)
             }
             else
             {
-                // Error Condition: Invalid Handle
-                error(MAP(GPU_ERR_HANDLE));
+                // // Error Condition: Invalid Handle
+                // error(MAP(GPU_ERR_HANDLE));
             }
         }, 
         // COMMENTS
@@ -497,8 +497,8 @@ int  GPU::OnAttach(int nextAddr)
             }
             else
             {
-                // Error Condition: Invalid Handle
-                error(MAP(GPU_ERR_HANDLE));
+                // // Error Condition: Invalid Handle
+                // error(MAP(GPU_ERR_HANDLE));
             }
         },  
         // COMMENTS
@@ -527,7 +527,7 @@ int  GPU::OnAttach(int nextAddr)
     // (Word) GPU_DYN_END_ADDR
     //      Last Dynamic Useful Memory ADDRESS in this block
     /////
-    mapped_register.push_back( { "GPU_DYN_CUR_ADDR", nextAddr,
+    mapped_register.push_back( { "GPU_DYN_END_ADDR", nextAddr,
         [this](Word) { return _gpu_dyn_end_addr >> 8; }, 
         [this](Word, Byte data) { _gpu_dyn_end_addr = (_gpu_dyn_end_addr & 0x00FF) | (data << 8); }, 
         {   
@@ -541,13 +541,13 @@ int  GPU::OnAttach(int nextAddr)
 
     ////////////////////////////////////////////////
     // (Word) GPU_DYN_END_DIST
-    //      (Word) Distance to End of this Dynamic Memory Block
+    //      Distance to End of this Dynamic Memory Block
     /////
     mapped_register.push_back( { "GPU_DYN_END_DIST", nextAddr,
         [this](Word) { return _gpu_dyn_end_dist >> 8; }, 
         [this](Word, Byte data) { _gpu_dyn_end_dist = (_gpu_dyn_end_dist & 0x00FF) | (data << 8); }, 
         {   
-            "(Word) (Word) Distance to End of this Dynamic Memory Block"
+            "(Word) Distance to End of this Dynamic Memory Block"
         }}); nextAddr+=1;
     mapped_register.push_back( { "", nextAddr,
         [this](Word) { return _gpu_dyn_end_dist & 0xFF; }, 
@@ -559,7 +559,7 @@ int  GPU::OnAttach(int nextAddr)
     // (Byte) GPU_DYN_DATA
     //      (Byte) Dynamic Memory DATA (Read/Write)
     /////
-    mapped_register.push_back( { "GPU_BLIT_DATA", nextAddr,
+    mapped_register.push_back( { "GPU_DYN_DATA", nextAddr,
         // READ
         [this](Word) 
         { 
@@ -583,11 +583,11 @@ int  GPU::OnAttach(int nextAddr)
             }
             else
             {
-                // Error Condition: Invalid Handle
-                error(MAP(GPU_ERR_HANDLE));
+                // // Error Condition: Invalid Handle
+                // error(MAP(GPU_ERR_HANDLE));
             }
             // Error Condition: Invalid Data
-            error(MAP(GPU_ERR_DATA));
+            // error(MAP(GPU_ERR_DATA));
             return (Byte)0xCC;  // Mostly Arbitrary but in common with other devices
         }, 
         // WRITE
@@ -612,84 +612,251 @@ int  GPU::OnAttach(int nextAddr)
             }
             else
             {
-                // Error Condition: Invalid Handle
-                error(MAP(GPU_ERR_HANDLE));
+                // // Error Condition: Invalid Handle
+                // error(MAP(GPU_ERR_HANDLE));
             }
         },
         // COMMENTS
         {   
-            "(Byte) (Byte) Dynamic Memory DATA (Read/Write)",""
+            "(Byte) Dynamic Memory DATA (Read/Write)",""
+        }
+    }); nextAddr+=1;
+
+
+    ////////////////////////////////////////////////
+    // (Word) GPU_CMD_ARG_1
+    //      (Word) GPU Command Argument 1
+    /////
+    mapped_register.push_back( { "GPU_CMD_ARG_1", nextAddr,
+        [this](Word) { return _gpu_cmd_arg_1 >> 8; }, 
+        [this](Word, Byte data) { _gpu_cmd_arg_1 = (_gpu_cmd_arg_1 & 0x00FF) | (data << 8); }, 
+        {   
+            "(Word) GPU Command Argument 1"
         }}); nextAddr+=1;
-
-//
-// GPU_ARG_1                (Word)      // Argument 1
-// GPU_ARG_2                (Word)      // Argument 2
-// GPU_ARG_3                (Word)      // Argument 3
-// GPU_ARG_4                (Word)      // Argument 4
-// GPU_ARG_5                (Word)      // Argument 5
-//      
-// GPU_COMMAND              (Byte)      // Graphics Processing Unit Command
-// GPU_CMD_NEW_BUFFER                   // Allocate a new GPU Buffer (of arbetrary size)
-// GPU_CMD_FREE_BUFFER                  // Free a GPU Buffer (GPU_ARG_1_MSB = Buffer Index)
-// GPU_CMD_NEW_IMG                      // Allocate a new GPU Image as in a Sprite or Tile
-//                                      // returns a valid node address for the new image                                
-//                                      // size is based on color depth as 32, 64, 128, or 256
-// GPU_CMD_FREE_IMG                     // Free a GPU Image (GPU_ARG_1_MSB = Image Index)
-// GPU_CMD_CLEAR                        // Clear Video Buffer:
-//                                      // GPU_ARG_1_MSB = Color Index
-// GPU_CMD_COPY                         // Copy GPU Memory to GPU Memory
-//                                      // Copy from [GPU_ARG_1] through [GPU_ARG_2]
-//                                      // to [GPU_ARG_3] through [GPU_ARG_4]                                
-// GPU_CMD_BLIT_GPU                     // BLiT from GPU memory to Display (RAM to Screen) 
-// GPU_CMD_GPU_BLIT                     // BLiT from Display to GPU memory (Screen to RAM)
-// GPU_CMD_SCROLL                       // Scroll Video Buffer:
-//                                      //     GPU_ARG_1_MSB = signed 8-bit horiz. offset
-//                                      //     GPU_ARG_1_LSB = signed 8-bit vert. offset
-// GPU_CMD_DRAW_LINE
-// GPU_CMD_DRAW_CIRCLE
-// GPU_CMD_DRAW_RECT
-// GPU_CMD_FILL_RECT
-//     ... etc
-//
-//
-//
+    mapped_register.push_back( { "", nextAddr,
+        [this](Word) { return _gpu_cmd_arg_1 & 0xFF; }, 
+        [this](Word, Byte data) { _gpu_cmd_arg_1 = (_gpu_cmd_arg_1 & 0xFF00) | (data << 0); },  
+        {""}}); nextAddr+=1;
 
 
-//  
-// // Sprite Registers: 
-// GPU_SPR_MAX              (Byte)      // Maximum Sprite Index (Read Only)
-// GPU_SPR_IDX              (Byte)      // Sprite Index
-// GPU_SPR_XPOS             (SInt16)    // Sprite X Position
-// GPU_SPR_YPOS             (SInt16)    // Sprite Y Position
-// GPU_SPR_IMG_IDX          (Byte)      // Sprite Image Index
-// GPU_SPR_MASK             (Byte)      // Sprite Collision Mask (4x4)
-// GPU_SPR_FLAGS            (Byte)      // Sprite Flags:
-//                                      // % 0000'0011: 
-//                                      //      00 = 2 colors, 
-//                                      //      01 = 4 colors, 
-//                                      //      10 = 16 colors, 
-//                                      //      11 = 256 colors
-//                                      // % 0000'0100: Double Width
-//                                      // % 0000'1000: Double Height
-//                                      // % 0001'0000: Flip Horizontal
-//                                      // % 0010'0000: Flip Vertical
-//                                      // % 0100'0000: Collision Enable
-//                                      // % 1000'0000: Display Enable
-//  
-// // Image Editing Registers:               
-// GPU_BMP_MAX              (Byte)      // Maximum Bitmap Index (Read Only)
-// GPU_BMP_IDX              (Byte)      // Bitmap Image Index (0-255)
-// GPU_BMP_OFFSET           (Byte)      // Offset Within the Image Buffer(0-255)
-// GPU_BMP_DATA             (Byte)      // Bitmap Data (Read Write)
-// GPU_BMP_FLAGS            (Byte)      // Bitmap Flags:
-//                                      // % 0000'0011: 
-//                                      //      00 = 2 colors (size=32), 
-//                                      //      01 = 4 colors (size=64), 
-//                                      //      10 = 16 colors (size=128), 
-//                                      //      11 = 256 colors (size=256)
-//                                      // % 1111'1100: Reserved
-//  
+    ////////////////////////////////////////////////
+    // (Word) GPU_CMD_ARG_2
+    //      (Word) GPU Command Argument 2
+    /////
+    mapped_register.push_back( { "GPU_CMD_ARG_2", nextAddr,
+        [this](Word) { return _gpu_cmd_arg_2 >> 8; }, 
+        [this](Word, Byte data) { _gpu_cmd_arg_2 = (_gpu_cmd_arg_2 & 0x00FF) | (data << 8); }, 
+        {   
+            "(Word) GPU Command Argument 2"
+        }}); nextAddr+=1;
+    mapped_register.push_back( { "", nextAddr,
+        [this](Word) { return _gpu_cmd_arg_2 & 0xFF; }, 
+        [this](Word, Byte data) { _gpu_cmd_arg_2 = (_gpu_cmd_arg_2 & 0xFF00) | (data << 0); },  
+        {""}}); nextAddr+=1;
 
+
+    ////////////////////////////////////////////////
+    // (Word) GPU_CMD_ARG_3
+    //      (Word) GPU Command Argument 3
+    /////
+    mapped_register.push_back( { "GPU_CMD_ARG_3", nextAddr,
+        [this](Word) { return _gpu_cmd_arg_3 >> 8; }, 
+        [this](Word, Byte data) { _gpu_cmd_arg_3 = (_gpu_cmd_arg_3 & 0x00FF) | (data << 8); }, 
+        {   
+            "(Word) GPU Command Argument 3"
+        }}); nextAddr+=1;
+    mapped_register.push_back( { "", nextAddr,
+        [this](Word) { return _gpu_cmd_arg_3 & 0xFF; }, 
+        [this](Word, Byte data) { _gpu_cmd_arg_3 = (_gpu_cmd_arg_3 & 0xFF00) | (data << 0); },  
+        {""}}); nextAddr+=1;
+
+
+    ////////////////////////////////////////////////
+    // (Word) GPU_CMD_ARG_4
+    //      (Word) GPU Command Argument 4
+    /////
+    mapped_register.push_back( { "GPU_CMD_ARG_4", nextAddr,
+        [this](Word) { return _gpu_cmd_arg_4 >> 8; }, 
+        [this](Word, Byte data) { _gpu_cmd_arg_4 = (_gpu_cmd_arg_4 & 0x00FF) | (data << 8); }, 
+        {   
+            "(Word) GPU Command Argument 4"
+        }}); nextAddr+=1;
+    mapped_register.push_back( { "", nextAddr,
+        [this](Word) { return _gpu_cmd_arg_4 & 0xFF; }, 
+        [this](Word, Byte data) { _gpu_cmd_arg_4 = (_gpu_cmd_arg_4 & 0xFF00) | (data << 0); },  
+        {""}}); nextAddr+=1;
+
+
+    ////////////////////////////////////////////////
+    // (Word) GPU_CMD_ARG_5
+    //      (Word) GPU Command Argument 5
+    /////
+    mapped_register.push_back( { "GPU_CMD_ARG_5", nextAddr,
+        [this](Word) { return _gpu_cmd_arg_5 >> 8; }, 
+        [this](Word, Byte data) { _gpu_cmd_arg_5 = (_gpu_cmd_arg_5 & 0x00FF) | (data << 8); }, 
+        {   
+            "(Word) GPU Command Argument 5",""
+        }}); nextAddr+=1;
+    mapped_register.push_back( { "", nextAddr,
+        [this](Word) { return _gpu_cmd_arg_5 & 0xFF; }, 
+        [this](Word, Byte data) { _gpu_cmd_arg_5 = (_gpu_cmd_arg_5 & 0xFF00) | (data << 0); },  
+        {""}}); nextAddr+=1;
+
+
+    ////////////////////////////////////////////////
+    // (Byte) GPU_COMMAND
+    //      Memory Management Unit Command
+    /////
+    mapped_register.push_back({ "GPU_COMMAND", nextAddr, 
+        [this](Word) { return _gpu_command; },  
+        [this](Word, Byte data) { 
+            // dispatch the GPU Command
+            _gpu_command = data; 
+            do_command(data);
+        },   
+        { "(Byte) Memory Management Unit Command:","" }}); nextAddr++;
+    // ADD COMMAND ENUMERATION:
+    Byte cmd = 0;
+    for (const auto& command : _gpu_command_list) 
+    {
+        const auto& key = command.key;
+        const auto& description = command.description;
+        std::vector<std::string> comment = { "   $" + clr::hex(cmd, 2) + " = " + description };
+        // Check for the special case of "GPU_CMD_SIZE" and add an extra empty string
+        if (key == "GPU_CMD_SIZE")
+        {
+            comment.push_back("");  // Adding an extra empty string to add a blank line
+        }
+        mapped_register.push_back({
+            key,                    // Command name (e.g., "GPU_CMD_NOP")
+            cmd++,                  // Increment the cmd value for each entry
+            nullptr,                // Placeholder for the read function pointer
+            nullptr,                // Placeholder for the write function pointer
+            comment                 // Formatted description
+        });
+    }
+ 
+
+    ////////////////////////////////////////////////
+    // (Byte) GPU_SPR_MAX
+    //      Maximum Sprite Index (Read Only)
+    /////
+    mapped_register.push_back({ "GPU_SPR_MAX", nextAddr,  
+        [this](Word) 
+        { 
+            _gpu_spr_max = _gpu_sprites.size() - 1;
+            return _gpu_spr_max; 
+        }, 
+        nullptr,  {
+            "(Byte) Maximum Sprite Index (Read Only)",
+    }}); nextAddr+=1;
+ 
+
+    ////////////////////////////////////////////////
+    // (Byte) GPU_SPR_IDX
+    //      Sprite Index
+    /////
+    mapped_register.push_back({ "GPU_SPR_IDX", nextAddr,  
+        [this](Word) { return _gpu_spr_idx; }, 
+        [this](Word, Byte data) 
+        { 
+            if (data > _gpu_sprites.size()) 
+            {
+                _gpu_spr_idx = _gpu_sprites.size();
+                _gpu_spr_idx = data; 
+            }
+        },  
+        { "(Byte) Sprite Index (loads sprite data for this index)", }
+    }); nextAddr+=1;
+
+
+    ////////////////////////////////////////////////
+    // (Sint16) GPU_SPR_XPOS
+    //      Sprite X Position
+    /////
+    mapped_register.push_back( { "GPU_SPR_XPOS", nextAddr,
+        [this](Word) { return _gpu_cmd_arg_5 >> 8; }, 
+        [this](Word, Byte data) { _gpu_spr_xpos = (_gpu_spr_xpos & 0x00FF) | (data << 8); }, 
+        {   
+            "(Sint16) Sprite X Position",
+        }}); nextAddr+=1;
+    mapped_register.push_back( { "", nextAddr,
+        [this](Word) { return _gpu_spr_xpos & 0xFF; }, 
+        [this](Word, Byte data) { _gpu_spr_xpos = (_gpu_spr_xpos & 0xFF00) | (data << 0); },  
+        {""}}); nextAddr+=1;
+
+
+    ////////////////////////////////////////////////
+    // (Sint16) GPU_SPR_YPOS
+    //      Sprite Y Position
+    /////
+    mapped_register.push_back( { "GPU_SPR_YPOS", nextAddr,
+        [this](Word) { return _gpu_spr_ypos >> 8; }, 
+        [this](Word, Byte data) { _gpu_spr_ypos = (_gpu_spr_ypos & 0x00FF) | (data << 8); }, 
+        {   
+            "(Sint16) Sprite X Position",
+        }}); nextAddr+=1;
+    mapped_register.push_back( { "", nextAddr,
+        [this](Word) { return _gpu_spr_ypos & 0xFF; }, 
+        [this](Word, Byte data) { _gpu_spr_ypos = (_gpu_spr_ypos & 0xFF00) | (data << 0); },  
+        {""}}); nextAddr+=1;
+ 
+
+    ////////////////////////////////////////////////
+    // (Byte) GPU_SPR_BMP_IDX
+    //      Sprite Bitmap Image Index
+    /////
+    mapped_register.push_back({ "GPU_SPR_BMP_IDX", nextAddr,  
+        [this](Word) { return _gpu_spr_bmp_idx; }, 
+        [this](Word, Byte data) 
+        { 
+            if (data > _gpu_bitmaps.size()) 
+            {
+                data = _gpu_bitmaps.size();
+                _gpu_spr_bmp_idx = data; 
+            }
+        },  
+        { "(Byte) Sprite Bitmap Image Index", }
+    }); nextAddr+=1;
+
+
+    ////////////////////////////////////////////////
+    // (Word) GPU_SPR_APR_MASK
+    //      prite Collision Approx. Mask (4x4)
+    /////
+    mapped_register.push_back( { "GPU_SPR_APR_MASK", nextAddr,
+        [this](Word) { return _gpu_spr_apr_mask >> 8; }, 
+        [this](Word, Byte data) { _gpu_spr_apr_mask = (_gpu_spr_apr_mask & 0x00FF) | (data << 8); }, 
+        {   
+            "(Word) Sprite Collision Approx. Mask (4x4)",
+        }}); nextAddr+=1;
+    mapped_register.push_back( { "", nextAddr,
+        [this](Word) { return _gpu_spr_apr_mask & 0xFF; }, 
+        [this](Word, Byte data) { _gpu_spr_apr_mask = (_gpu_spr_apr_mask & 0xFF00) | (data << 0); },  
+        {""}}); nextAddr+=1;
+  
+
+    ////////////////////////////////////////////////
+    // (Byte) GPU_SPR_FLAGS
+    //      Sprite Flags:
+    /////
+    mapped_register.push_back({ "GPU_SPR_FLAGS", nextAddr,  
+        [this](Word) { return _gpu_spr_flags; }, 
+        [this](Word, Byte data) { _gpu_spr_flags = data; },
+        { "(Byte) Sprite Flags:","" }
+    }); nextAddr+=1;
+    Byte flags = 0;
+    mapped_register.push_back({ "GPU_SPR_FL_DBL_WIDTH"  , (0b0000'0001), nullptr,nullptr, { "   % 0000'0001:  Double Width"}}); 
+    mapped_register.push_back({ "GPU_SPR_FL_DBL_HEIGHT" , (0b0000'0010), nullptr,nullptr, { "   % 0000'0010:  Double Height"}}); 
+    mapped_register.push_back({ "GPU_SPR_FL_FLP_HORIZ"  , (0b0000'0100), nullptr,nullptr, { "   % 0000'0100:  Flip Horizontal"}}); 
+    mapped_register.push_back({ "GPU_SPR_FL_FLP_VERT"   , (0b0000'1000), nullptr,nullptr, { "   % 0000'1000:  Flip Vertical",
+                                                                                            "   % 0011'0000:  Collision Type:"}}); 
+    mapped_register.push_back({ "GPU_SPR_FL_COL_NONE"   , (flags++),     nullptr,nullptr, { "        00 = none"}}); 
+    mapped_register.push_back({ "GPU_SPR_FL_COL_BNDS"   , (flags++),     nullptr,nullptr, { "        01 = bounding box"}}); 
+    mapped_register.push_back({ "GPU_SPR_FL_COL_CNTR"   , (flags++),     nullptr,nullptr, { "        10 = center box"}}); 
+    mapped_register.push_back({ "GPU_SPR_FL_COL_PXL"    , (flags++),     nullptr,nullptr, { "        11 = pixel mask"}}); 
+    mapped_register.push_back({ "GPU_SPR_FL_IS_HIT"     , (0b0100'0000), nullptr,nullptr, { "   % 0100'0000:  Is Collided"}}); 
+    mapped_register.push_back({ "GPU_SPR_FL_ENABLE"     , (0b1000'0000), nullptr,nullptr, { "   % 1000'0000:  Sprite Enable",""}}); 
 
 
     ////////////////////////////////////////////////
@@ -818,6 +985,86 @@ int  GPU::OnAttach(int nextAddr)
         [this](Word) { return _gpu_tmap_clip_y2 & 0xFF; }, 
         [this](Word, Byte data) { _gpu_tmap_clip_y2 = (_gpu_tmap_clip_y2 & 0xFF00) | (data << 0); },  
         {""}}); nextAddr+=1;
+ 
+
+    ////////////////////////////////////////////////
+    // (Byte) GPU_BMP_MAX
+    //      Maximum Bitmap Index (Read Only)
+    /////
+    mapped_register.push_back({ "GPU_BMP_MAX", nextAddr,  
+        [this](Word) { return _gpu_bitmaps.size(); }, 
+        nullptr,  
+        { "(Byte) Maximum Bitmap Index (Read Only)", }
+    }); nextAddr+=1;
+ 
+
+    ////////////////////////////////////////////////
+    // (Byte) GPU_BMP_IDX
+    //      Bitmap Image Index (0-255)
+    /////
+    mapped_register.push_back({ "GPU_BMP_IDX", nextAddr,  
+        [this](Word) { return _gpu_bmp_idx; }, 
+        [this](Word, Byte data) 
+        { 
+            if (data > _gpu_bitmaps.size()) 
+            {
+                _gpu_bmp_idx = _gpu_bitmaps.size();
+                _gpu_bmp_idx = data; 
+            }
+        },  
+        { "(Byte) Bitmap Image Index (0-255)", }
+    }); nextAddr+=1;
+ 
+
+    ////////////////////////////////////////////////
+    // (Byte) GPU_BMP_OFFSET
+    //      Offset Within the Image Buffer (0-255)
+    /////
+    mapped_register.push_back({ "GPU_BMP_OFFSET", nextAddr,  
+        [this](Word) { return _gpu_bmp_offset; }, 
+        [this](Word, Byte data) 
+        { 
+            Word handle = _gpu_bitmaps[_gpu_bmp_idx].handle;
+            auto itr = _gpu_dyn_map.find(handle);
+            if (itr != _gpu_dyn_map.end())
+            {
+                if (data > (_gpu_dyn_map[handle].end_addr - _gpu_dyn_map[handle].address)) 
+                {
+                    data = (_gpu_dyn_map[handle].end_addr - _gpu_dyn_map[handle].address);
+                    _gpu_dyn_map[handle].cur_addr = _gpu_dyn_map[handle].end_addr;
+                }
+                _gpu_bmp_offset = data; 
+            }
+        },  
+        { "(Byte) Offset Within the Image Buffer    (0-255)", }
+    }); nextAddr+=1;
+
+
+    ////////////////////////////////////////////////
+    // (Byte) GPU_BMP_DATA
+    //      Bitmap Data (Read Write)
+    /////
+    mapped_register.push_back({ "GPU_BMP_DATA", nextAddr,  
+        [this](Word) { return _ext_video_buffer[_gpu_bmp_offset]; }, 
+        [this](Word, Byte data) { _ext_video_buffer[_gpu_bmp_offset] = data; },
+        { "(Byte) Bitmap Data      (Read Write)","" }
+    }); nextAddr+=1;
+ 
+
+    ////////////////////////////////////////////////
+    // (Byte) GPU_BMP_FLAGS
+    //      Bitmap Flags:
+    /////
+    mapped_register.push_back({ "GPU_BMP_FLAGS", nextAddr,  
+        [this](Word) { return _ext_video_buffer[_gpu_bmp_offset]; }, 
+        [this](Word, Byte data) { _ext_video_buffer[_gpu_bmp_offset] = data; },
+        { "(Byte)  Bitmap Flags:", " % 0000'0011 - Colors:"}
+    }); nextAddr+=1;
+    mapped_register.push_back({ "GPU_BMP_2_COLORS"   , (0b0000'0000), nullptr,nullptr, { "     00 = 2 colors (size=32)"}}); 
+    mapped_register.push_back({ "GPU_BMP_4_COLORS"   , (0b0000'0001), nullptr,nullptr, { "     01 = 4 colors (size=64)"}}); 
+    mapped_register.push_back({ "GPU_BMP_16_COLORS"  , (0b0000'0010), nullptr,nullptr, { "     10 = 16 colors (size=128)"}}); 
+    mapped_register.push_back({ "GPU_BMP_256_COLORS" , (0b0000'0011), nullptr,nullptr, { "     11 = 256 colors (size=256)",
+                                                                                         " % 1111'1100 - Reserved",""}});    
 
 
     ////////////////////////////////////////////////
@@ -838,7 +1085,7 @@ int  GPU::OnAttach(int nextAddr)
             comments.push_back("");  // Adding an extra empty string to add a blank line
         }
         mapped_register.push_back({
-            error.first,            // The constant name (e.g., "MMU_ERR_NONE")
+            error.first,            // The constant name (e.g., "GPU_ERR_NONE")
             err++,                  // Increment the error code value for each entry
             nullptr,                // Placeholder for function pointer (not used here)
             nullptr,                // Placeholder for another value (not used here)
@@ -926,6 +1173,17 @@ void GPU::OnInit()
     for (int i=0; i<256; i++)
         for (int r=0; r<8; r++)
             _gpu_glyph_data[i][r] = font8x8_system[i][r];  
+
+    // initialize the GPU command functions:
+    for (const auto& command : _gpu_command_list) 
+    {
+        register_command(Memory::Map(command.key, __FILE__, __LINE__), 
+            [this, action = command.action]() -> Byte 
+            {
+                return action();
+            }
+        );
+    }
 
     // initialize the initial default display mode   
     Memory::Write_Word(MAP(GPU_MODE), _gpu_mode);
@@ -1897,15 +2155,103 @@ void GPU::error(Byte error_code)
     if (error_code < _gpu_error_list.size())
     {
         std::string comment = _gpu_error_list[error_code].second;
-        UnitTest::Log(this, clr::RED + "MMU Error: " + comment + " $" + clr::hex(error_code, 2) );
+        UnitTest::Log(this, clr::RED + "Error: " + comment + " $" + clr::hex(error_code, 2) );
     }
     else
     {
-        UnitTest::Log(this, clr::RED + "MMU Error: Unknown Error $" + clr::hex(error_code, 2) );
+        UnitTest::Log(this, clr::RED + "Error: Unknown Error $" + clr::hex(error_code, 2) );
     }
 }
 
+
+// ********************** //
+// GPU COMMANDS and TESTS //
+// ********************** //
+
+
+void GPU::do_command(Byte command)
+{
+    _gpu_command = command;
+    // find the command and run it
+    auto it = _gpu_commands.find(command);
+    if (it != _gpu_commands.end()) {
+        it->second();  // Call the associated function
+    } else {
+        error(MAP(GPU_ERR_COMMAND));  // Handle invalid commands
+    }    
+}
+
+bool GPU::OnTest()
+{
+    bool all_tests_passed = true;
+
+    // Perform Unit Tests for each command
+    for (const auto& command : _gpu_command_list) 
+    {
+        UnitTest::TestInit(this, "Testing " + clr::YELLOW + command.key + clr::RESET);
+        if (!command.test()) 
+        {
+            UnitTest::Log(this, clr::RED + "command " + clr::YELLOW + command.key + " " + clr::RED + "FAILED! ");
+            all_tests_passed = false;
+        }
+        else
+        {
+            UnitTest::Log(this, clr::GREEN + "command " + clr::YELLOW + command.key + " " + clr::GREEN + "PASSED! ");
+        }
+    }
+
+    // Display the result of the tests
+    if (all_tests_passed)
+        UnitTest::Log(this, "Unit Tests PASSED" );
+    else
+        UnitTest::Log(this, clr::RED + "Unit Tests FAILED" );
+
+    return all_tests_passed;
+}
+
+void GPU::register_command(Byte command, std::function<Byte()> handler)
+{
+    if (_gpu_commands.find(command) != _gpu_commands.end()) {
+        UnitTest::Log(this, "Warning: Command already registered: " + std::to_string(command));
+        Bus::Error("Command already registered", __FILE__, __LINE__);
+        return;
+    }        
+    _gpu_commands[command] = handler;
+}
+
+
+Byte GPU::do_nop()
+{
+    // This function literally does nothing
+    // (as in NO OPERATION)
+    return MAP(GPU_CMD_NOP);
+}
+bool GPU::_test_nop()
+{
+    bool test_results = true;
+    // This function literally does nothing
+    // (as in NO OPERATION)
+    return test_results;
+}
+
+// ...
+
+Byte GPU::do_size()
+{
+    return MAP(GPU_CMD_SIZE);
+}
+bool GPU::_test_size()
+{
+    bool test_results = true;
+    // ...
+    return test_results;
+}
+
+
+
 // END: GPU.cpp
+
+
 
 
 
