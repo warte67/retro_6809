@@ -16,6 +16,7 @@
  * 
  ************************************/
 
+#include <algorithm>
 #include "Bus.hpp"
 #include "GPU.hpp"
 #include "Memory.hpp"
@@ -385,7 +386,10 @@ int  GPU::OnAttach(int nextAddr)
     ////////////////////////////////////////////////
     // (Word) GPU_BLIT_ADDR
     //      Graphics Memory Address Port
-    //      Autoincrements on Read/Write
+    //      Note: When GPU_BLIT_DATA is accessed, this register
+    //            is automatically incremented to point to the
+    //            next byte to be read or written based on the
+    //            values in GPU_BLIT_PITCH and GPU_BLIT_WIDTH.
     /////
     mapped_register.push_back( { "GPU_BLIT_ADDR", nextAddr,
         [this](Word) { return _gpu_blit_addr >> 8; }, 
@@ -405,8 +409,9 @@ int  GPU::OnAttach(int nextAddr)
 
     ////////////////////////////////////////////////
     // (Word) GPU_BLIT_PITCH
-    //      Graphics Memory Address Port
-    //      Autoincrements on Read/Write
+    //        (Word) Number of Bytes Per Display Line
+    //        Note: This value represents the number of displayed
+    //              pixels per line.
     /////
     mapped_register.push_back( { "GPU_BLIT_PITCH", nextAddr,
         [this](Word) { return _gpu_blit_pitch >> 8; }, 
@@ -427,15 +432,31 @@ int  GPU::OnAttach(int nextAddr)
     //      Width of the Image Block in Pixels
     /////
     mapped_register.push_back( { "GPU_BLIT_WIDTH", nextAddr,
+        // READ
         [this](Word) { return _gpu_blit_width >> 8; }, 
-        [this](Word, Byte data) { _gpu_blit_width = (_gpu_blit_width & 0x00FF) | (data << 8); _gpu_blit_width_count = _gpu_blit_width; }, 
+        // WRITE
+        [this](Word, Byte data) 
+        { 
+            _gpu_blit_width = (_gpu_blit_width & 0x00FF) | (data << 8); 
+            // this is a counter that is decremented each time a pixel is copied
+            _gpu_blit_width_count = _gpu_blit_width; 
+        }, 
         {   
             "(Word) Width of the Image Block in Pixels"
-        }}); nextAddr+=1;
+        }
+    }); nextAddr+=1;
     mapped_register.push_back( { "", nextAddr,
+        // READ
         [this](Word) { return _gpu_blit_width & 0xFF; }, 
-        [this](Word, Byte data) { _gpu_blit_width = (_gpu_blit_width & 0xFF00) | (data << 0); _gpu_blit_width_count = _gpu_blit_width; },  
-        {""}}); nextAddr+=1;
+        // WRITE
+        [this](Word, Byte data) 
+        { 
+            _gpu_blit_width = (_gpu_blit_width & 0xFF00) | (data << 0); 
+            // this is a counter that is decremented each time a pixel is copied
+            _gpu_blit_width_count = _gpu_blit_width; 
+        },  
+        {""}
+    }); nextAddr+=1;
 
 
     ////////////////////////////////////////////////
@@ -470,8 +491,8 @@ int  GPU::OnAttach(int nextAddr)
             }
             else
             {
-                // // Error Condition: Invalid Handle
-                // error(MAP(GPU_ERR_HANDLE));
+                // Error Condition: Invalid Handle
+                error(MAP(GPU_ERR_HANDLE));
             }
         }, 
         // COMMENTS
@@ -497,8 +518,8 @@ int  GPU::OnAttach(int nextAddr)
             }
             else
             {
-                // // Error Condition: Invalid Handle
-                // error(MAP(GPU_ERR_HANDLE));
+                // Error Condition: Invalid Handle
+                error(MAP(GPU_ERR_HANDLE));
             }
         },  
         // COMMENTS
@@ -515,7 +536,6 @@ int  GPU::OnAttach(int nextAddr)
         [this](Word, Byte data) { _gpu_dyn_cur_addr = (_gpu_dyn_cur_addr & 0x00FF) | (data << 8); }, 
         {   
             "(Word) Current Dynamic Memory ADDRESS",
-            "(autoincrements by 1 on read/write)",
         }}); nextAddr+=1;
     mapped_register.push_back( { "", nextAddr,
         [this](Word) { return _gpu_dyn_cur_addr & 0xFF; }, 
@@ -544,14 +564,18 @@ int  GPU::OnAttach(int nextAddr)
     //      Distance to End of this Dynamic Memory Block
     /////
     mapped_register.push_back( { "GPU_DYN_END_DIST", nextAddr,
+        // READ
         [this](Word) { return _gpu_dyn_end_dist >> 8; }, 
-        [this](Word, Byte data) { _gpu_dyn_end_dist = (_gpu_dyn_end_dist & 0x00FF) | (data << 8); }, 
+        // write (Read Only)
+        nullptr, 
         {   
             "(Word) Distance to End of this Dynamic Memory Block"
         }}); nextAddr+=1;
     mapped_register.push_back( { "", nextAddr,
+        // READ
         [this](Word) { return _gpu_dyn_end_dist & 0xFF; }, 
-        [this](Word, Byte data) { _gpu_dyn_end_dist = (_gpu_dyn_end_dist & 0xFF00) | (data << 0); },  
+        // write (Read Only)
+        nullptr,  
         {""}}); nextAddr+=1;
 
 
@@ -579,15 +603,11 @@ int  GPU::OnAttach(int nextAddr)
                 {
                     // Error Condition: Invalid Address
                     error(MAP(GPU_ERR_ADDRESS));
+                    return (Byte)0xCC;  // Mostly Arbitrary but in common with other devices
                 }
             }
-            else
-            {
-                // // Error Condition: Invalid Handle
-                // error(MAP(GPU_ERR_HANDLE));
-            }
-            // Error Condition: Invalid Data
-            // error(MAP(GPU_ERR_DATA));
+            // Error Condition: Invalid Handle
+            error(MAP(GPU_ERR_HANDLE), false);
             return (Byte)0xCC;  // Mostly Arbitrary but in common with other devices
         }, 
         // WRITE
@@ -612,13 +632,14 @@ int  GPU::OnAttach(int nextAddr)
             }
             else
             {
-                // // Error Condition: Invalid Handle
-                // error(MAP(GPU_ERR_HANDLE));
+                // Error Condition: Invalid Handle
+                error(MAP(GPU_ERR_HANDLE));
             }
         },
         // COMMENTS
         {   
-            "(Byte) Dynamic Memory DATA (Read/Write)",""
+            "(Byte) Dynamic Memory DATA (Read/Write)",
+            "       (GPU_DYN_CUR_ADDR is auto-incremented by 1 on read/write)"
         }
     }); nextAddr+=1;
 
@@ -810,11 +831,7 @@ int  GPU::OnAttach(int nextAddr)
         [this](Word) { return _gpu_spr_bmp_idx; }, 
         [this](Word, Byte data) 
         { 
-            if (data > _gpu_bitmaps.size()) 
-            {
-                data = _gpu_bitmaps.size();
-                _gpu_spr_bmp_idx = data; 
-            }
+            _gpu_spr_bmp_idx = std::min(data, (Byte)(_gpu_bitmaps.size() - 1));
         },  
         { "(Byte) Sprite Bitmap Image Index", }
     }); nextAddr+=1;
@@ -909,7 +926,7 @@ int  GPU::OnAttach(int nextAddr)
 
     ////////////////////////////////////////////////
     // (SInt16) GPU_TMAP_YPOS
-    //      Tilemap Height (in pixels)
+    //      Tilemap Y Position (top left corner)
     /////
     mapped_register.push_back( { "GPU_TMAP_YPOS", nextAddr,
         [this](Word) { return _gpu_tmap_ypos >> 8; }, 
@@ -924,8 +941,8 @@ int  GPU::OnAttach(int nextAddr)
 
 
     ////////////////////////////////////////////////
-    // (SInt16) GPU_TMAP_CLIP_X1
-    //      Tilemap X Position (top left corner)
+    // (Word) GPU_TMAP_CLIP_X1
+    //      Tilemap Clip Region X1
     /////
     mapped_register.push_back( { "GPU_TMAP_CLIP_X1", nextAddr,
         [this](Word) { return _gpu_tmap_clip_x1 >> 8; }, 
@@ -940,8 +957,8 @@ int  GPU::OnAttach(int nextAddr)
 
 
     ////////////////////////////////////////////////
-    // (SInt16) GPU_TMAP_CLIP_Y1
-    //      Tilemap Height (in pixels)
+    // (Word) GPU_TMAP_CLIP_Y1
+    //      Tilemap Clip Region Y1
     /////
     mapped_register.push_back( { "GPU_TMAP_CLIP_Y1", nextAddr,
         [this](Word) { return _gpu_tmap_clip_y1 >> 8; }, 
@@ -956,8 +973,8 @@ int  GPU::OnAttach(int nextAddr)
 
 
     ////////////////////////////////////////////////
-    // (SInt16) GPU_TMAP_CLIP_X2
-    //      Tilemap X Position (top left corner)
+    // (Word) GPU_TMAP_CLIP_X2
+    //      Tilemap Clip Region X2
     /////
     mapped_register.push_back( { "GPU_TMAP_CLIP_X2", nextAddr,
         [this](Word) { return _gpu_tmap_clip_x2 >> 8; }, 
@@ -972,8 +989,8 @@ int  GPU::OnAttach(int nextAddr)
 
 
     ////////////////////////////////////////////////
-    // (SInt16) GPU_TMAP_CLIP_Y1
-    //      Tilemap Height (in pixels)
+    // (Word) GPU_TMAP_CLIP_Y2
+    //      Tilemap Clip Region Y2
     /////
     mapped_register.push_back( { "GPU_TMAP_CLIP_Y2", nextAddr,
         [this](Word) { return _gpu_tmap_clip_y2 >> 8; }, 
@@ -992,7 +1009,9 @@ int  GPU::OnAttach(int nextAddr)
     //      Maximum Bitmap Index (Read Only)
     /////
     mapped_register.push_back({ "GPU_BMP_MAX", nextAddr,  
+        // READ 
         [this](Word) { return _gpu_bitmaps.size(); }, 
+        // write (Read Only)
         nullptr,  
         { "(Byte) Maximum Bitmap Index (Read Only)", }
     }); nextAddr+=1;
@@ -1003,15 +1022,14 @@ int  GPU::OnAttach(int nextAddr)
     //      Bitmap Image Index (0-255)
     /////
     mapped_register.push_back({ "GPU_BMP_IDX", nextAddr,  
+        // READ 
         [this](Word) { return _gpu_bmp_idx; }, 
+        // WRITE
         [this](Word, Byte data) 
         { 
-            if (data > _gpu_bitmaps.size()) 
-            {
-                _gpu_bmp_idx = _gpu_bitmaps.size();
-                _gpu_bmp_idx = data; 
-            }
+            _gpu_bmp_idx = std::min(data, static_cast<Byte>(_gpu_bitmaps.size()));
         },  
+        // COMMENT
         { "(Byte) Bitmap Image Index (0-255)", }
     }); nextAddr+=1;
  
@@ -1020,22 +1038,21 @@ int  GPU::OnAttach(int nextAddr)
     // (Byte) GPU_BMP_OFFSET
     //      Offset Within the Image Buffer (0-255)
     /////
-    mapped_register.push_back({ "GPU_BMP_OFFSET", nextAddr,  
+    mapped_register.push_back({ "GPU_BMP_OFFSET", nextAddr, 
+        // READ 
         [this](Word) { return _gpu_bmp_offset; }, 
+        // WRITE
         [this](Word, Byte data) 
         { 
             Word handle = _gpu_bitmaps[_gpu_bmp_idx].handle;
             auto itr = _gpu_dyn_map.find(handle);
             if (itr != _gpu_dyn_map.end())
             {
-                if (data > (_gpu_dyn_map[handle].end_addr - _gpu_dyn_map[handle].address)) 
-                {
-                    data = (_gpu_dyn_map[handle].end_addr - _gpu_dyn_map[handle].address);
-                    _gpu_dyn_map[handle].cur_addr = _gpu_dyn_map[handle].end_addr;
-                }
-                _gpu_bmp_offset = data; 
+                _gpu_bmp_offset = std::min(data, static_cast<Byte>((_gpu_dyn_map[handle].end_addr - _gpu_dyn_map[handle].address)));
+                _gpu_dyn_map[handle].cur_addr = _gpu_dyn_map[handle].address + _gpu_bmp_offset;
             }
         },  
+        // COMMENT
         { "(Byte) Offset Within the Image Buffer    (0-255)", }
     }); nextAddr+=1;
 
@@ -1045,8 +1062,23 @@ int  GPU::OnAttach(int nextAddr)
     //      Bitmap Data (Read Write)
     /////
     mapped_register.push_back({ "GPU_BMP_DATA", nextAddr,  
-        [this](Word) { return _ext_video_buffer[_gpu_bmp_offset]; }, 
-        [this](Word, Byte data) { _ext_video_buffer[_gpu_bmp_offset] = data; },
+        // READ
+        [this](Word) 
+        { 
+            if (_gpu_bmp_offset < _ext_video_buffer.size()) {
+                return _ext_video_buffer[_gpu_bmp_offset];
+            } else {
+                error(MAP(GPU_ERR_OFFSET));
+                return static_cast<Byte>(0xCC); // Arbitrary, but 0xCC is used as convention elsewhere
+            }
+        },
+        // WRITE
+        [this](Word, Byte data) 
+        { 
+            if (_gpu_bmp_offset < _ext_video_buffer.size()) {
+                _ext_video_buffer[_gpu_bmp_offset] = data;
+            }
+        },
         { "(Byte) Bitmap Data      (Read Write)","" }
     }); nextAddr+=1;
  
@@ -1056,7 +1088,9 @@ int  GPU::OnAttach(int nextAddr)
     //      Bitmap Flags:
     /////
     mapped_register.push_back({ "GPU_BMP_FLAGS", nextAddr,  
+        // READ 
         [this](Word) { return _ext_video_buffer[_gpu_bmp_offset]; }, 
+        // WRITE
         [this](Word, Byte data) { _ext_video_buffer[_gpu_bmp_offset] = data; },
         { "(Byte)  Bitmap Flags:", " % 0000'0011 - Colors:"}
     }); nextAddr+=1;
@@ -2147,19 +2181,23 @@ void GPU::_gpu_blit_increment_address()
     }
 }
 
-void GPU::error(Byte error_code) 
+void GPU::error(Byte error_code, bool bLog) 
 {
     _gpu_error = error_code;    // Set the error code
     _gpu_command = 0;           // Clear the command (indicates an error)
+
     // Log the error with a helpful message
-    if (error_code < _gpu_error_list.size())
+    if (bLog)
     {
-        std::string comment = _gpu_error_list[error_code].second;
-        UnitTest::Log(this, clr::RED + "Error: " + comment + " $" + clr::hex(error_code, 2) );
-    }
-    else
-    {
-        UnitTest::Log(this, clr::RED + "Error: Unknown Error $" + clr::hex(error_code, 2) );
+        if (error_code < _gpu_error_list.size())
+        {
+            std::string comment = _gpu_error_list[error_code].second;
+            UnitTest::Log(this, clr::RED + "Error: " + comment + " $" + clr::hex(error_code, 2) );
+        }
+        else
+        {
+            UnitTest::Log(this, clr::RED + "Error: Unknown Error $" + clr::hex(error_code, 2) );
+        }
     }
 }
 
@@ -2232,7 +2270,11 @@ bool GPU::_test_nop()
     // This function literally does nothing
     // (as in NO OPERATION)
     return test_results;
-}
+}            // if (_gpu_dyn_map.empty()) {
+            //     // error(MAP(GPU_ERR_HANDLE));
+            //     return (Byte)0xCC;
+            // }            
+
 
 // ...
 

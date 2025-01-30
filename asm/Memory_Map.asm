@@ -288,11 +288,10 @@ GPU_DYN_HANDLE        equ    $FE2A    ; (Word) Dynamic Memory HANDLE
                                       ;     GPU_DYN_END_ADDR,  and GPU_DYN_END_DIST
                                       ; 
 GPU_DYN_CUR_ADDR      equ    $FE2C    ; (Word) Current Dynamic Memory ADDRESS
-                                      ; (autoincrements by 1 on read/write)
 GPU_DYN_END_ADDR      equ    $FE2E    ; (Word) Last Useful Dynamic Memory ADDRESS in this block
 GPU_DYN_END_DIST      equ    $FE30    ; (Word) Distance to End of this Dynamic Memory Block
 GPU_DYN_DATA          equ    $FE32    ; (Byte) Dynamic Memory DATA (Read/Write)
-                                      ; 
+                                      ;        (GPU_DYN_CUR_ADDR is auto-incremented by 1 on read/write)
 GPU_CMD_ARG_1         equ    $FE33    ; (Word) GPU Command Argument 1
 GPU_CMD_ARG_2         equ    $FE35    ; (Word) GPU Command Argument 2
 GPU_CMD_ARG_3         equ    $FE37    ; (Word) GPU Command Argument 3
@@ -355,9 +354,10 @@ GPU_ERR_WIDTH         equ    $0004    ;    $04 = Invalid Width
 GPU_ERR_HEIGHT        equ    $0005    ;    $05 = Invalid Height
 GPU_ERR_PITCH         equ    $0006    ;    $06 = Invalid Pitch
 GPU_ERR_DATA          equ    $0007    ;    $07 = Invalid Data
-GPU_ERR_ARGUMENT      equ    $0008    ;    $08 = Invalid Argument
-GPU_ERR_OOM           equ    $0009    ;    $09 = Out of Memory
-GPU_ERR_SIZE          equ    $000A    ;    $0A = Total Number of GPU Errors
+GPU_ERR_OFFSET        equ    $0008    ;    $08 = Invalid Offset
+GPU_ERR_ARGUMENT      equ    $0009    ;    $09 = Invalid Argument
+GPU_ERR_OOM           equ    $000A    ;    $0A = Out of Memory
+GPU_ERR_SIZE          equ    $000B    ;    $0B = Total Number of GPU Errors
                                       ; 
 GPU_END               equ    $FE5D    ; End of GPU Register Space
 GPU_TOP               equ    $FE5E    ; Top of GPU Register Space

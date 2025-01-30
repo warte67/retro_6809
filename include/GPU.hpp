@@ -413,11 +413,12 @@ private: // PRIVATE MEMBERS
         { "GPU_ERR_HEIGHT",     "Invalid Height" },
         { "GPU_ERR_PITCH",      "Invalid Pitch" },
         { "GPU_ERR_DATA",       "Invalid Data" },
+        { "GPU_ERR_OFFSET",     "Invalid Offset" },
         { "GPU_ERR_ARGUMENT",   "Invalid Argument" },
         { "GPU_ERR_OOM",        "Out of Memory" },
         { "GPU_ERR_SIZE",       "Total Number of GPU Errors" }
     };    
-    void error(Byte error_code);        // helper that sets an error code
+    void error(Byte error_code, bool bLog = true);        // helper that sets an error code
 
 
     // Helper Functions:

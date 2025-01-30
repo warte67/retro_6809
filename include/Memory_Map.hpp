@@ -290,11 +290,10 @@ enum MEMMAP
                                       //     GPU_DYN_END_ADDR,  and GPU_DYN_END_DIST
                                       // 
     GPU_DYN_CUR_ADDR      = 0xFE2C,   // (Word) Current Dynamic Memory ADDRESS
-                                      // (autoincrements by 1 on read/write)
     GPU_DYN_END_ADDR      = 0xFE2E,   // (Word) Last Useful Dynamic Memory ADDRESS in this block
     GPU_DYN_END_DIST      = 0xFE30,   // (Word) Distance to End of this Dynamic Memory Block
     GPU_DYN_DATA          = 0xFE32,   // (Byte) Dynamic Memory DATA (Read/Write)
-                                      // 
+                                      //        (GPU_DYN_CUR_ADDR is auto-incremented by 1 on read/write)
     GPU_CMD_ARG_1         = 0xFE33,   // (Word) GPU Command Argument 1
     GPU_CMD_ARG_2         = 0xFE35,   // (Word) GPU Command Argument 2
     GPU_CMD_ARG_3         = 0xFE37,   // (Word) GPU Command Argument 3
@@ -357,9 +356,10 @@ enum MEMMAP
     GPU_ERR_HEIGHT        = 0x0005,   //    $05 = Invalid Height
     GPU_ERR_PITCH         = 0x0006,   //    $06 = Invalid Pitch
     GPU_ERR_DATA          = 0x0007,   //    $07 = Invalid Data
-    GPU_ERR_ARGUMENT      = 0x0008,   //    $08 = Invalid Argument
-    GPU_ERR_OOM           = 0x0009,   //    $09 = Out of Memory
-    GPU_ERR_SIZE          = 0x000A,   //    $0A = Total Number of GPU Errors
+    GPU_ERR_OFFSET        = 0x0008,   //    $08 = Invalid Offset
+    GPU_ERR_ARGUMENT      = 0x0009,   //    $09 = Invalid Argument
+    GPU_ERR_OOM           = 0x000A,   //    $0A = Out of Memory
+    GPU_ERR_SIZE          = 0x000B,   //    $0B = Total Number of GPU Errors
                                       // 
     GPU_END               = 0xFE5D,   // End of GPU Register Space
     GPU_TOP               = 0xFE5E,   // Top of GPU Register Space

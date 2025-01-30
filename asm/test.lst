@@ -303,11 +303,10 @@ FE2A                  GPU_DYN_HANDLE        equ    $FE2A    ; (Word) Dynamic Mem
                                                             ;     GPU_DYN_END_ADDR,  and GPU_DYN_END_DIST
                                                             ; 
 FE2C                  GPU_DYN_CUR_ADDR      equ    $FE2C    ; (Word) Current Dynamic Memory ADDRESS
-                                                            ; (autoincrements by 1 on read/write)
 FE2E                  GPU_DYN_END_ADDR      equ    $FE2E    ; (Word) Last Useful Dynamic Memory ADDRESS in this block
 FE30                  GPU_DYN_END_DIST      equ    $FE30    ; (Word) Distance to End of this Dynamic Memory Block
 FE32                  GPU_DYN_DATA          equ    $FE32    ; (Byte) Dynamic Memory DATA (Read/Write)
-                                                            ; 
+                                                            ;        (GPU_DYN_CUR_ADDR is auto-incremented by 1 on read/write)
 FE33                  GPU_CMD_ARG_1         equ    $FE33    ; (Word) GPU Command Argument 1
 FE35                  GPU_CMD_ARG_2         equ    $FE35    ; (Word) GPU Command Argument 2
 FE37                  GPU_CMD_ARG_3         equ    $FE37    ; (Word) GPU Command Argument 3
@@ -370,9 +369,10 @@ FE5D                  GPU_ERROR             equ    $FE5D    ; (Byte) Graphics Pr
 0005                  GPU_ERR_HEIGHT        equ    $0005    ;    $05 = Invalid Height
 0006                  GPU_ERR_PITCH         equ    $0006    ;    $06 = Invalid Pitch
 0007                  GPU_ERR_DATA          equ    $0007    ;    $07 = Invalid Data
-0008                  GPU_ERR_ARGUMENT      equ    $0008    ;    $08 = Invalid Argument
-0009                  GPU_ERR_OOM           equ    $0009    ;    $09 = Out of Memory
-000A                  GPU_ERR_SIZE          equ    $000A    ;    $0A = Total Number of GPU Errors
+0008                  GPU_ERR_OFFSET        equ    $0008    ;    $08 = Invalid Offset
+0009                  GPU_ERR_ARGUMENT      equ    $0009    ;    $09 = Invalid Argument
+000A                  GPU_ERR_OOM           equ    $000A    ;    $0A = Out of Memory
+000B                  GPU_ERR_SIZE          equ    $000B    ;    $0B = Total Number of GPU Errors
                                                             ; 
 FE5D                  GPU_END               equ    $FE5D    ; End of GPU Register Space
 FE5E                  GPU_TOP               equ    $FE5E    ; Top of GPU Register Space
