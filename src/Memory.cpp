@@ -69,6 +69,12 @@ void Memory::OnQuit()
 	for (auto &d : Memory::_memory_nodes) {
         d->OnQuit();
     }
+
+    // // Iterate over the vector in reverse OnQuit()
+    // for (auto rit = Memory::_memory_nodes.rbegin(); rit != Memory::_memory_nodes.rend(); ++rit) {
+    //     (*rit)->OnQuit();
+    // }
+
     for (auto &d : Memory::_memory_nodes) {
         delete d;  // Add this line to properly release memory for each device
     }    

@@ -2,8 +2,8 @@
 #
 # 'run' bash script
 
-./kernel.sh
-./test.sh
+# ./kernel.sh
+# ./test.sh
 
 
 if [ "$1" == "clean" ]; then
@@ -23,6 +23,8 @@ if [ -e "$FILE" ]; then
         echo "done"
     else
         # if [ $? -eq 0 ]; then
+        ./kernel.sh
+        ./test.sh
         ./build/main
         # fi
     fi
@@ -35,6 +37,8 @@ else
         echo "done"
     else
         # if [ $? -eq 0 ]; then
+        ./kernel.sh
+        ./test.sh
         ./build/main
         # fi
     fi
