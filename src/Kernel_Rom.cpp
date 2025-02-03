@@ -63,10 +63,7 @@ int KERNEL_ROM::OnAttach(int nextAddr)
         Memory::add_entry_to_device_map(
             addr, 
             nullptr, 
-            [this](Word addr, Byte d) { 
-                (void)addr; 
-                (void)d;             
-            }        
+            [this](Word, Byte, bool) { }        
         );           
     }
 

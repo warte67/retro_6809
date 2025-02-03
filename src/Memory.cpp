@@ -148,8 +148,8 @@ bool Memory::OnTest()
 
 Byte Memory::Read(Word address, bool debug)
 {
-    // debug mode just returns raw data
-    if (debug) { return memory(address); }
+    // // debug mode just returns raw data
+    // if (debug) { return memory(address); }
 
     // find the device that is responsible for this address
     auto itr = _device_map.find(address);
@@ -158,10 +158,11 @@ Byte Memory::Read(Word address, bool debug)
     {
         if (itr->second.read != nullptr)
         {
-            return itr->second.read(address);
+            Byte data = itr->second.read(address, debug);                
+            // memory(address, data);  // update the raw memory                
+            return data;
         }
     }
-
     return memory(address);  
 }
 
@@ -170,8 +171,8 @@ Byte Memory::Read(Word address, bool debug)
 
 void Memory::Write(Word address, Byte data, bool debug)
 {
-    // debug mode just writes the raw data
-    if (debug) { memory(address, data); return; }
+    // // debug mode just writes the raw data
+    // if (debug) { memory(address, data); return; }
 
     // find the device that is responsible for this address
     auto itr = _device_map.find(address);
@@ -180,7 +181,10 @@ void Memory::Write(Word address, Byte data, bool debug)
     {
         if (itr->second.write != nullptr)
         {
-            itr->second.write(address, data);
+            // if (debug)
+            //     memory(address, data); 
+            // else
+                itr->second.write(address, data, debug);
             return;
         }  
         #if DEBUG_THROW_ERROR_ON_WRITE_TO_READ_ONLY_MEMORY == true                  
@@ -291,7 +295,7 @@ void Memory::Generate_Device_Map()
     }
 }
 
-void Memory::add_entry_to_device_map(Word addr, std::function<Byte(Word)> read, std::function<void(Word, Byte)> write)
+void Memory::add_entry_to_device_map(Word addr, std::function<Byte(Word, bool)> read, std::function<void(Word, Byte, bool)> write)
 {
     REGISTER_NODE rn = { "", addr, read, write, {""} };
     // Check if the address is already in the device map

@@ -98,6 +98,8 @@ private: // PRIVATE MEMBERS
     // Byte fio_err_flags = 0;                  // error flags (deprecated)
     FILE_ERROR fio_error_code = FILE_ERROR::FE_NOERROR;    // current error code
 
+    Byte _fio_command = 0;                      // current command
+
     Byte path_char_pos = 0;                     // active character position within the file path string
     std::string filePath = "";                  // the current file path
 

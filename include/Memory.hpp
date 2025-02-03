@@ -113,7 +113,7 @@ public:     // PUBLIC ACCESSORS
     static int NextAddress() { return _next_address; }
     static void Generate_Device_Map();
     static void Generate_Memory_Map();
-    static void add_entry_to_device_map(Word addr, std::function<Byte(Word)> read, std::function<void(Word, Byte)> write);
+    static void add_entry_to_device_map(Word addr, std::function<Byte(Word, bool)> read, std::function<void(Word, Byte, bool)> write);
 
 
     // Map a constants name to its address

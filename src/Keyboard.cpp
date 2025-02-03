@@ -72,7 +72,7 @@ int  Keyboard::OnAttach(int nextAddr)
     //       Number of Characters Waiting in Queue   (Read Only)
     /////
     mapped_register.push_back( { "CHAR_Q_LEN", nextAddr,
-        [this](Word nextAddr) { (void)nextAddr; return charQueueLen();	 }, 
+        [this](Word, bool) { return charQueueLen();	 }, 
         nullptr, {   
             "(Byte) Number of Characters Waiting in Queue   (Read Only)"
         }}); nextAddr+=1;   
@@ -83,7 +83,7 @@ int  Keyboard::OnAttach(int nextAddr)
     //      Read Next Character in Queue (Not Popped When Read)
     /////
     mapped_register.push_back( { "CHAR_SCAN", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; if (charQueueLen() > 0) { return charScanQueue(); } return (Byte)0;	 }, 
+        [this](Word, bool) { if (charQueueLen() > 0) { return charScanQueue(); } return (Byte)0;	 }, 
         nullptr, {   
             "(Byte) Read Next Character in Queue (Not Popped When Read)"
         }}); nextAddr+=1;   
@@ -94,7 +94,7 @@ int  Keyboard::OnAttach(int nextAddr)
     //      Read Next Character in Queue     (Popped When Read)
     /////
     mapped_register.push_back( { "CHAR_POP", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; if (charQueueLen() > 0) { return charPopQueue(); } return (Byte)0;	 }, 
+        [this](Word, bool) { if (charQueueLen() > 0) { return charPopQueue(); } return (Byte)0;	 }, 
         nullptr, {   
             "(Byte) Read Next Character in Queue     (Popped When Read)"
         }}); nextAddr+=1;   
@@ -105,13 +105,13 @@ int  Keyboard::OnAttach(int nextAddr)
     //       128 bits for XK_KEY data buffer     (Read Only)
     /////
     mapped_register.push_back( { "XKEY_BUFFER", nextAddr, 
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
+        [this](Word nextAddr, bool) { return IDevice::memory(nextAddr); }, 
         nullptr, {   
             "(16 Bytes) 128 bits for XK_KEY data buffer     (Read Only)"
         }}); nextAddr+=1;   
     for (int t=0; t<15; t++) {
         mapped_register.push_back( { "", nextAddr, 
-            [this](Word nextAddr) { return IDevice::memory(nextAddr); }, nullptr, { "" }}); nextAddr+=1;   
+            [this](Word nextAddr, bool) { return IDevice::memory(nextAddr); }, nullptr, { "" }}); nextAddr+=1;   
     }
 
 
@@ -120,8 +120,8 @@ int  Keyboard::OnAttach(int nextAddr)
     //      Cursor Position Within Edit Buffer     (Read/Write)
     /////
     mapped_register.push_back( { "EDT_BFR_CSR", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return edt_bfr_csr; }, 
-        [this](Word nextAddr, Byte data) { (void)nextAddr; edt_bfr_csr = data; }, 
+        [this](Word, bool) { return edt_bfr_csr; }, 
+        [this](Word, Byte data, bool) { edt_bfr_csr = data; }, 
         {   
             "(Byte) Cursor Position Within Edit Buffer     (Read/Write)"
         }}); nextAddr+=1;   
@@ -132,8 +132,8 @@ int  Keyboard::OnAttach(int nextAddr)
     //      Line Editor Enable Flag                (Read/Write)
     /////
     mapped_register.push_back( { "EDT_ENABLE", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return _line_editor_enable; }, 
-        [this](Word nextAddr, Byte data) { (void)nextAddr; _line_editor_enable = data; }, 
+        [this](Word, bool) { return _line_editor_enable; }, 
+        [this](Word, Byte data, bool) { _line_editor_enable = data; }, 
         {   
             "(Byte) Line Editor Enable Flag                (Read/Write)"
         }}); nextAddr+=1;   
@@ -144,10 +144,9 @@ int  Keyboard::OnAttach(int nextAddr)
     //      Limit the Line Editor to This Length   (Read/Write)
     /////
     mapped_register.push_back( { "EDT_BFR_LEN", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return _line_editor_length; }, 
-        [this](Word nextAddr, Byte data) 
+        [this](Word, bool) { return _line_editor_length; }, 
+        [this](Word, Byte data, bool) 
         { 
-            (void)nextAddr; 
 			_line_editor_length = data; 
 			if (_line_editor_length >= EDIT_BUFFER_SIZE)
 				_line_editor_length = (Byte)EDIT_BUFFER_SIZE-1;        

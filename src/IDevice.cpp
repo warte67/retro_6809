@@ -92,10 +92,7 @@ int ROM_VECTS::OnAttach(int nextAddr)
         Memory::add_entry_to_device_map(
             addr, 
             nullptr, 
-            [this](Word addr, Byte d) { 
-                (void)addr; 
-                (void)d;             
-            }        
+            [this](Word, Byte, bool) { }        
         );           
     }
 
@@ -119,8 +116,8 @@ int HDW_RESERVED::OnAttach(int nextAddr)
     {
         Memory::add_entry_to_device_map(
             addr, 
-            [this](Word addr) { return memory(addr); },
-            [this](Word addr, Byte d) { memory(addr, d); }        
+            [this](Word addr, bool) { return memory(addr); },
+            [this](Word addr, Byte d, bool) { memory(addr, d); }        
         );           
     }    
 

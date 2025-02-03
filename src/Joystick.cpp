@@ -64,8 +64,8 @@ int  Joystick::OnAttach(int nextAddr)
     // (Byte) JOYS_1_FLAGS
     //       PAD 1 Condition Flags   (read/write)
     mapped_register.push_back( { "JOYS_1_FLAGS", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
+        [this](Word nextAddr, bool) { return IDevice::memory(nextAddr); }, 
+        [this](Word nextAddr, Word data, bool) { IDevice::memory(nextAddr, data); },
         {   
             "(Byte) Gamepad/Joystick #1 Condition Flags:     (Read Only)",
             "           0000'0000: Not Connected",      
@@ -106,8 +106,8 @@ int  Joystick::OnAttach(int nextAddr)
     // (Word) JOYS_1_BTN
     //       Button Bits: Room For up to 16 Buttons  (realtime)
     mapped_register.push_back( { "JOYS_1_BTN", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
+        [this](Word nextAddr, bool) { return IDevice::memory(nextAddr); }, 
+        [this](Word nextAddr, Word data, bool) { IDevice::memory(nextAddr, data); },
         {   "(Word) Gamepad Controller Button Bits:         (Read Only)",
             "           0000'0000'0000'0000 = Nothing Pressed",
             "           0000'0000'0000'0001 = A",  
@@ -128,8 +128,8 @@ int  Joystick::OnAttach(int nextAddr)
             "           1000'0000'0000'0000 = DPad Right",     
             "           1111'1111'1111'1111 = Not Connected",""}}); nextAddr+=1;   
     mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
+        [this](Word nextAddr, bool) { return IDevice::memory(nextAddr); }, 
+        [this](Word nextAddr, Word data, bool) { IDevice::memory(nextAddr, data); },
         {"" }}); nextAddr+=1;   
 
 
@@ -137,8 +137,8 @@ int  Joystick::OnAttach(int nextAddr)
     // (Byte) JOYS_1_DBND
     //       PAD 1 analog deadband; default is 5   (read/write)
     mapped_register.push_back( { "JOYS_1_DBND", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
+        [this](Word nextAddr, bool) { return IDevice::memory(nextAddr); }, 
+        [this](Word nextAddr, Word data, bool) { IDevice::memory(nextAddr, data); },
         {   "(Byte) PAD 1 analog deadband; default is 5   (read/write)" }}); nextAddr+=1;   
 
 
@@ -146,8 +146,8 @@ int  Joystick::OnAttach(int nextAddr)
     // (char) JOYS_1_LTX
     //       PAD 1 LThumb-X position (-128 _ +127)   (realtime)
     mapped_register.push_back( { "JOYS_1_LTX", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
+        [this](Word nextAddr, bool) { return IDevice::memory(nextAddr); }, 
+        [this](Word nextAddr, Word data, bool) { IDevice::memory(nextAddr, data); },
         {   "(char) PAD 1 LThumb-X position (-128 _ +127)   (realtime)" }}); nextAddr+=1;   
 
 
@@ -155,8 +155,8 @@ int  Joystick::OnAttach(int nextAddr)
     // (char) JOYS_1_LTY
     //       PAD 1 LThumb-X position (-128 _ +127)   (realtime)
     mapped_register.push_back( { "JOYS_1_LTY", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
+        [this](Word nextAddr, bool) { return IDevice::memory(nextAddr); }, 
+        [this](Word nextAddr, Word data, bool) { IDevice::memory(nextAddr, data); },
         {   "(char) PAD 1 LThumb-Y position (-128 _ +127)   (realtime)" }}); nextAddr+=1;   
 
 
@@ -164,8 +164,8 @@ int  Joystick::OnAttach(int nextAddr)
     // (char) JOYS_1_RTX
     //       PAD 1 LThumb-X position (-128 _ +127)   (realtime)
     mapped_register.push_back( { "JOYS_1_RTX", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
+        [this](Word nextAddr, bool) { return IDevice::memory(nextAddr); }, 
+        [this](Word nextAddr, Word data, bool) { IDevice::memory(nextAddr, data); },
         {   "(char) PAD 1 RThumb-X position (-128 _ +127)   (realtime)" }}); nextAddr+=1;   
 
 
@@ -173,8 +173,8 @@ int  Joystick::OnAttach(int nextAddr)
     // (char) JOYS_1_RTY
     //       PAD 1 RThumb-Y position (-128 _ +127)   (realtime)
     mapped_register.push_back( { "JOYS_1_RTY", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
+        [this](Word nextAddr, bool) { return IDevice::memory(nextAddr); }, 
+        [this](Word nextAddr, Word data, bool) { IDevice::memory(nextAddr, data); },
         {   "(char) PAD 1 RThumb-Y position (-128 _ +127)   (realtime)" }}); nextAddr+=1;   
 
 
@@ -182,8 +182,8 @@ int  Joystick::OnAttach(int nextAddr)
     // (char) JOYS_1_Z1
     //       PAD 1 left analog trigger (0 - 127)     (realtime)
     mapped_register.push_back( { "JOYS_1_Z1", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
+        [this](Word nextAddr, bool) { return IDevice::memory(nextAddr); }, 
+        [this](Word nextAddr, Word data, bool) { IDevice::memory(nextAddr, data); },
         {   "(char) PAD 1 left analog trigger (0 - 127)     (realtime)" }}); nextAddr+=1;   
 
 
@@ -191,8 +191,8 @@ int  Joystick::OnAttach(int nextAddr)
     // (char) JOYS_1_Z2
     //       PAD 1 left analog trigger (0 - 127)     (realtime)
     mapped_register.push_back( { "JOYS_1_Z2", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
+        [this](Word nextAddr, bool) { return IDevice::memory(nextAddr); }, 
+        [this](Word nextAddr, Word data, bool) { IDevice::memory(nextAddr, data); },
         {   "(char) PAD 1 left analog trigger (0 - 127)     (realtime)","" }}); nextAddr+=1;   
 
 
@@ -200,8 +200,8 @@ int  Joystick::OnAttach(int nextAddr)
     // (Byte) JOYS_2_FLAGS
     //       PAD 2 Condition Flags   (read/write)
     mapped_register.push_back( { "JOYS_2_FLAGS", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
+        [this](Word nextAddr, bool) { return IDevice::memory(nextAddr); }, 
+        [this](Word nextAddr, Word data, bool) { IDevice::memory(nextAddr, data); },
         {   
             "(Byte) Gamepad/Joystick #2 Condition Flags:     (Read Only)",
             "           0000'0000: Not Connected",      
@@ -242,8 +242,8 @@ int  Joystick::OnAttach(int nextAddr)
     // (Word) JOYS_2_BTN
     //       Button Bits: Room For up to 16 Buttons  (realtime)
     mapped_register.push_back( { "JOYS_2_BTN", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
+        [this](Word nextAddr, bool) { return IDevice::memory(nextAddr); }, 
+        [this](Word nextAddr, Word data, bool) { IDevice::memory(nextAddr, data); },
          {   "(Word) Button Bits: Room For up to 16 Buttons  (realtime)",
             "       Joystick Button Bits:",
             "           0000'0000'0000'0000 = Nothing Pressed",
@@ -265,8 +265,8 @@ int  Joystick::OnAttach(int nextAddr)
             "           1000'0000'0000'0000 = Hat Right",   
             "           1111'1111'1111'1111 = Not Connected",""}}); nextAddr+=1;  
     mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
+        [this](Word nextAddr, bool) { return IDevice::memory(nextAddr); }, 
+        [this](Word nextAddr, Word data, bool) { IDevice::memory(nextAddr, data); },
         {"" }}); nextAddr+=1;   
 
 
@@ -274,8 +274,8 @@ int  Joystick::OnAttach(int nextAddr)
     // (Byte) JOYS_2_DBND
     //       PAD 2 analog deadband; default is 5   (read/write)
     mapped_register.push_back( { "JOYS_2_DBND", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
+        [this](Word nextAddr, bool) { return IDevice::memory(nextAddr); }, 
+        [this](Word nextAddr, Word data, bool) { IDevice::memory(nextAddr, data); },
         {   "(Byte) PAD 2 analog deadband; default is 5   (read/write)" }}); nextAddr+=1;   
 
 
@@ -283,8 +283,8 @@ int  Joystick::OnAttach(int nextAddr)
     // (char) JOYS_2_LTX
     //       PAD 2 LThumb-X position (-128 _ +127)   (realtime)
     mapped_register.push_back( { "JOYS_2_LTX", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
+        [this](Word nextAddr, bool) { return IDevice::memory(nextAddr); }, 
+        [this](Word nextAddr, Word data, bool) { IDevice::memory(nextAddr, data); },
         {   "(char) PAD 2 LThumb-X position (-128 _ +127)   (realtime)" }}); nextAddr+=1;   
 
 
@@ -292,8 +292,8 @@ int  Joystick::OnAttach(int nextAddr)
     // (char) JOYS_2_LTY
     //       PAD 2 LThumb-X position (-128 _ +127)   (realtime)
     mapped_register.push_back( { "JOYS_2_LTY", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
+        [this](Word nextAddr, bool) { return IDevice::memory(nextAddr); }, 
+        [this](Word nextAddr, Word data, bool) { IDevice::memory(nextAddr, data); },
         {   "(char) PAD 2 LThumb-Y position (-128 _ +127)   (realtime)" }}); nextAddr+=1;   
 
 
@@ -301,8 +301,8 @@ int  Joystick::OnAttach(int nextAddr)
     // (char) JOYS_2_RTX
     //       PAD 2 LThumb-X position (-128 _ +127)   (realtime)
     mapped_register.push_back( { "JOYS_2_RTX", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
+        [this](Word nextAddr, bool) { return IDevice::memory(nextAddr); }, 
+        [this](Word nextAddr, Word data, bool) { IDevice::memory(nextAddr, data); },
         {   "(char) PAD 2 RThumb-X position (-128 _ +127)   (realtime)" }}); nextAddr+=1;   
 
 
@@ -310,8 +310,8 @@ int  Joystick::OnAttach(int nextAddr)
     // (char) JOYS_2_RTY
     //       PAD 1 RThumb-Y position (-128 _ +127)   (realtime)
     mapped_register.push_back( { "JOYS_2_RTY", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
+        [this](Word nextAddr, bool) { return IDevice::memory(nextAddr); }, 
+        [this](Word nextAddr, Word data, bool) { IDevice::memory(nextAddr, data); },
         {   "(char) PAD 2 RThumb-Y position (-128 _ +127)   (realtime)" }}); nextAddr+=1;   
 
 
@@ -319,8 +319,8 @@ int  Joystick::OnAttach(int nextAddr)
     // (char) JOYS_2_Z1
     //       PAD 1 left analog trigger (0 - 127)     (realtime)
     mapped_register.push_back( { "JOYS_2_Z1", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
+        [this](Word nextAddr, bool) { return IDevice::memory(nextAddr); }, 
+        [this](Word nextAddr, Word data, bool) { IDevice::memory(nextAddr, data); },
         {   "(char) PAD 2 left analog trigger (0 - 127)     (realtime)" }}); nextAddr+=1;   
 
 
@@ -328,8 +328,8 @@ int  Joystick::OnAttach(int nextAddr)
     // (char) JOYS_2_Z2
     //       PAD 2 left analog trigger (0 - 127)     (realtime)
     mapped_register.push_back( { "JOYS_2_Z2", nextAddr,
-        [this](Word nextAddr) { return IDevice::memory(nextAddr); }, 
-        [this](Word nextAddr, Word data) { IDevice::memory(nextAddr, data); },
+        [this](Word nextAddr, bool) { return IDevice::memory(nextAddr); }, 
+        [this](Word nextAddr, Word data, bool) { IDevice::memory(nextAddr, data); },
         {   "(char) PAD 2 left analog trigger (0 - 127)     (realtime)" }}); nextAddr+=1;   
 
 

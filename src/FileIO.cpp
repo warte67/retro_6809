@@ -79,16 +79,12 @@ int  FileIO::OnAttach(int nextAddr)
     //      End of GPU Register Space
     /////
     mapped_register.push_back({ "FIO_ERROR", nextAddr, 
-        [this](Word addr) {
-            (void)addr;
+        [this](Word, bool) {
             Byte data = fio_error_code;
             fio_error_code = FILE_ERROR::FE_NOERROR;     
             return data;       
         }, 
-        [this](Word addr, Byte data) {
-            (void)addr;
-            fio_error_code = (FILE_ERROR)data;
-        },  
+        [this](Word, Byte data, bool) { fio_error_code = (FILE_ERROR)data; },  
         { "(Byte) FILE_ERROR enumeration result (FE_<error>)",""} });
     nextAddr++;
     Byte enumID = 0;
@@ -112,9 +108,8 @@ int  FileIO::OnAttach(int nextAddr)
     //      End of GPU Register Space
     /////
     mapped_register.push_back({ "FIO_COMMAND", nextAddr, 
-        [this](Word addr) { (void)addr; return Memory::Read(addr, true); }, 
-        [this](Word addr, Byte data) {
-            (void)addr;
+        [this](Word addr, bool) { return _fio_command; }, //Memory::Read(addr, true); }, 
+        [this](Word, Byte data, bool) {
                  if ( data == MAP(FC_RESET     ) )  { _cmd_reset();                      }
             else if ( data == MAP(FC_SHUTDOWN  ) )  { _cmd_system_shutdown();            }
             else if ( data == MAP(FC_COMPDATE  ) )  { _cmd_system_load_comilation_date();}
@@ -140,6 +135,7 @@ int  FileIO::OnAttach(int nextAddr)
             else if ( data == MAP(FC_SEEK_END  ) )  { _cmd_seek_end();                   }
             else if ( data == MAP(FC_SET_SEEK  ) )  { _cmd_set_seek_position();          }
             else if ( data == MAP(FC_GET_SEEK  ) )  { _cmd_get_seek_position();          }
+            _fio_command = data;
         },   
         { "(Byte) Execute a File Command (FC_<cmd>)",""} });
     nextAddr++;
@@ -179,8 +175,8 @@ int  FileIO::OnAttach(int nextAddr)
     //      Current File Stream HANDLE (0=NONE)
     /////
     mapped_register.push_back({ "FIO_HANDLE", nextAddr, 
-        [this](Word addr) { (void)addr; return _fileHandle; }, 
-        [this](Word addr, Byte data) { (void)addr; _fileHandle = data; },  
+        [this](Word, bool) { return _fileHandle; }, 
+        [this](Word, Byte data, bool) { _fileHandle = data; },  
         { "(Byte) Current File Stream HANDLE (0=NONE)"} });
     nextAddr++;
 
@@ -190,31 +186,23 @@ int  FileIO::OnAttach(int nextAddr)
     //      File Seek Position
     /////
     mapped_register.push_back({ "FIO_SEEKPOS", nextAddr, 
-        [this](Word addr) { (void)addr; return (_seek_pos>>24) & 0xFF; }, 
-        [this](Word addr, Byte data) { 
-            (void)addr; _seek_pos = (_seek_pos & 0xFFFFFF00) | ((data & 0xFF) << 24); 
-        },   
+        [this](Word, bool) { return (_seek_pos>>24) & 0xFF; }, 
+        [this](Word, Byte data, bool) { _seek_pos = (_seek_pos & 0xFFFFFF00) | ((data & 0xFF) << 24); },   
         { "(DWord) File Seek Position"} });
     nextAddr++;
     mapped_register.push_back({ "", nextAddr, 
-        [this](Word addr) { (void)addr; return (_seek_pos>>16) & 0xFF; }, 
-        [this](Word addr, Byte data) { 
-            (void)addr; _seek_pos = (_seek_pos & 0xFFFF00FF) | ((data & 0xFF) << 16);
-        },   
+        [this](Word, bool) { return (_seek_pos>>16) & 0xFF; }, 
+        [this](Word, Byte data, bool) { _seek_pos = (_seek_pos & 0xFFFF00FF) | ((data & 0xFF) << 16); },   
         {""} });
     nextAddr++;
     mapped_register.push_back({ "", nextAddr, 
-        [this](Word addr) { (void)addr; return (_seek_pos>> 8) & 0xFF; }, 
-        [this](Word addr, Byte data) { 
-            (void)addr; _seek_pos = (_seek_pos & 0xFF00FFFF) | ((data & 0xFF) << 8);
-        },   
+        [this](Word, bool) { return (_seek_pos>> 8) & 0xFF; }, 
+        [this](Word, Byte data, bool) { _seek_pos = (_seek_pos & 0xFF00FFFF) | ((data & 0xFF) << 8); },   
         {""} });
     nextAddr++;
     mapped_register.push_back({ "", nextAddr, 
-        [this](Word addr) { (void)addr; return (_seek_pos>> 0) & 0xFF;  }, 
-        [this](Word addr, Byte data) { 
-            (void)addr; _seek_pos = (_seek_pos & 0x00FFFFFF) | ((data & 0xFF) << 0);
-        },   
+        [this](Word, bool) { return (_seek_pos>> 0) & 0xFF;  }, 
+        [this](Word, Byte data, bool) { _seek_pos = (_seek_pos & 0x00FFFFFF) | ((data & 0xFF) << 0); },   
         {""} });
     nextAddr++;
 
@@ -224,8 +212,8 @@ int  FileIO::OnAttach(int nextAddr)
     //      Input / Output Data
     /////
     mapped_register.push_back({ "FIO_IODATA", nextAddr, 
-        [this](Word addr) { (void)addr; return _io_data; }, 
-        [this](Word addr, Byte data) { (void)addr; _io_data = data; },  
+        [this](Word, bool) { return _io_data; }, 
+        [this](Word, Byte data, bool) { _io_data = data; },  
         { "(Byte) Input / Output Data",""} });
     nextAddr++;
 
@@ -235,7 +223,7 @@ int  FileIO::OnAttach(int nextAddr)
     //      Length of the Filepath (Read Only)
     /////
     mapped_register.push_back({ "FIO_PATH_LEN", nextAddr, 
-        [this](Word addr) { (void)addr; return filePath.size(); }, 
+        [this](Word, bool) { return filePath.size(); }, 
         nullptr, // Read Only 
         { "(Byte) Length of the Primary Filepath        (Read Only)"} });
     nextAddr++;
@@ -246,8 +234,7 @@ int  FileIO::OnAttach(int nextAddr)
     //      Character Position Within the Filepath
     /////
     mapped_register.push_back({ "FIO_PATH_POS", nextAddr, 
-        [this](Word addr) { 
-            (void)addr; 
+        [this](Word, bool) { 
             Byte data = path_char_pos;
             if (data >= filePath.size())
                 data = filePath.size() - 1;
@@ -255,8 +242,7 @@ int  FileIO::OnAttach(int nextAddr)
                 data = 0;
             return data; 
         }, 
-        [this](Word addr, Byte data) { 
-            (void)addr; 
+        [this](Word, Byte data, bool) { 
             if (data > filePath.size())
                 data = filePath.size() - 1;
             path_char_pos = data;
@@ -270,8 +256,7 @@ int  FileIO::OnAttach(int nextAddr)
     //      Data at the Character Position of the Primary Path
     /////
     mapped_register.push_back({ "FIO_PATH_DATA", nextAddr, 
-        [this](Word addr) { 
-            (void)addr;
+        [this](Word, bool) { 
             Byte data = 0;
             if (filePath.size() > 0)
             {
@@ -289,8 +274,7 @@ int  FileIO::OnAttach(int nextAddr)
             }
             return data; 
         }, 
-        [this](Word addr, Byte data) { 
-            (void)addr; 
+        [this](Word, Byte data, bool) { 
             if (path_char_pos == 0)
             {
                 filePath = "";
@@ -314,7 +298,7 @@ int  FileIO::OnAttach(int nextAddr)
     //      Length of the Alternate Filepath (Read Only)
     /////
     mapped_register.push_back({ "FIO_ALT_PATH_LEN", nextAddr, 
-        [this](Word addr) { (void)addr; return altFilePath.size(); }, 
+        [this](Word, bool) { return altFilePath.size(); }, 
         nullptr, // Read Only 
         { "(Byte) Length of the alternate Filepath        (Read Only)"} });
     nextAddr++;
@@ -325,8 +309,7 @@ int  FileIO::OnAttach(int nextAddr)
     //      Character Position Within the Alternate Filepath
     /////
     mapped_register.push_back({ "FIO_ALT_PATH_POS", nextAddr, 
-        [this](Word addr) { 
-            (void)addr; 
+        [this](Word, bool) { 
             Byte data = path_alt_char_pos;
             if (data >= altFilePath.size())
                 data = altFilePath.size() - 1;
@@ -334,8 +317,7 @@ int  FileIO::OnAttach(int nextAddr)
                 data = 0;
             return data; 
         }, 
-        [this](Word addr, Byte data) { 
-            (void)addr; 
+        [this](Word, Byte data, bool) { 
             if (data > altFilePath.size())
                 data = altFilePath.size() - 1;
             path_alt_char_pos = data;
@@ -349,8 +331,7 @@ int  FileIO::OnAttach(int nextAddr)
     //      Data at the Character Position of the Alternate Path
     /////
     mapped_register.push_back({ "FIO_ALT_PATH_DATA", nextAddr, 
-        [this](Word addr) { 
-            (void)addr;
+        [this](Word, bool) { 
             Byte data = 0;
             if (altFilePath.size() > 0)
             {
@@ -368,8 +349,7 @@ int  FileIO::OnAttach(int nextAddr)
             }
             return data; 
         }, 
-        [this](Word addr, Byte data) { 
-            (void)addr; 
+        [this](Word, Byte data, bool) { 
             if (path_char_pos == 0)
             {
                 altFilePath = "";
@@ -393,9 +373,8 @@ int  FileIO::OnAttach(int nextAddr)
     //      A Series of Null-Terminated Filenames
     /////
     mapped_register.push_back({ "FIO_DIR_DATA", nextAddr, 
-        [this](Word addr) 
+        [this](Word, bool) 
         { 
-            (void)addr; 
             Byte data = 0;
             if (dir_data_pos < (int)dir_data.size())
             {
@@ -410,9 +389,8 @@ int  FileIO::OnAttach(int nextAddr)
             }
             return data; 
         },
-        [this](Word addr, Byte data) 
+        [this](Word, Byte data, bool) 
         {
-            (void)addr;
              if (path_char_pos == 0)
             {
                 filePath = "";

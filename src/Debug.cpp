@@ -62,8 +62,8 @@ int  Debug::OnAttach(int nextAddr)
 
 
     mapped_register.push_back({ "SYS_STATE", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return C6809::s_sys_state; }, 
-        [this](Word nextAddr, Byte data) { (void)nextAddr; C6809::s_sys_state = data; },  
+        [this](Word, bool ) { return C6809::s_sys_state; }, 
+        [this](Word, Byte data, bool) { C6809::s_sys_state = data; },  
         { 
             "(Byte) System State Register",
             "SYS_STATE: ABCD.SSSS                          ",
@@ -94,15 +94,15 @@ int  Debug::OnAttach(int nextAddr)
         
 
     mapped_register.push_back({ "SYS_SPEED", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return Bus::GetCpuSpeed() >> 8; }, nullptr,  
+        [this](Word, bool) { return Bus::GetCpuSpeed() >> 8; }, nullptr,  
         { "(Word) Average CPU Clock Speed (Read Only)"}}); nextAddr+=1;
     mapped_register.push_back({ "", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return Bus::GetCpuSpeed() & 0xFF; }, nullptr,  
+        [this](Word, bool) { return Bus::GetCpuSpeed() & 0xFF; }, nullptr,  
         { ""}}); nextAddr+=1;
 
 
     mapped_register.push_back({ "SYS_CLOCK_DIV", nextAddr,
-        [this](Word nextAddr) { (void)nextAddr; return Bus::GetClockDiv(); }, 
+        [this](Word, bool) { return Bus::GetClockDiv(); }, 
         nullptr,  
         { "(Byte) 60 hz Clock Divider Register (Read Only)",
             "- bit 7: 0.546875 hz",
@@ -122,41 +122,40 @@ int  Debug::OnAttach(int nextAddr)
 
 
     mapped_register.push_back({ "SYS_UPDATE_COUNT", nextAddr,    
-        [this](Word nextAddr) { (void)nextAddr; return Bus::GetUpdateCount() >> 24; }, 
-        [this](Word nextAddr, Byte data) { (void)nextAddr; Bus::SetUpdateCount( (data << 24) | (Bus::GetUpdateCount() & 0x00FFFFFF) ); },  
+        [this](Word, bool) { return Bus::GetUpdateCount() >> 24; }, 
+        [this](Word, Byte data, bool) { Bus::SetUpdateCount( (data << 24) | (Bus::GetUpdateCount() & 0x00FFFFFF) ); },  
         { "(DWord) Update Count (Read Only)" }}); nextAddr+=1;    
     mapped_register.push_back(
         { "", nextAddr,    
-        [this](Word nextAddr) { (void)nextAddr; return Bus::GetUpdateCount() >> 16; }, 
-        [this](Word nextAddr, Byte data) { (void)nextAddr; Bus::SetUpdateCount( (data << 16) | (Bus::GetUpdateCount() & 0xFF00FFFF) ); },  
+        [this](Word, bool) { return Bus::GetUpdateCount() >> 16; }, 
+        [this](Word, Byte data, bool) { Bus::SetUpdateCount( (data << 16) | (Bus::GetUpdateCount() & 0xFF00FFFF) ); },  
         { "" }}); nextAddr+=1;    
     mapped_register.push_back(
         { "", nextAddr,    
-        [this](Word nextAddr) { (void)nextAddr; return Bus::GetUpdateCount() >> 8; }, 
-        [this](Word nextAddr, Byte data) { (void)nextAddr; Bus::SetUpdateCount( (data << 8) | (Bus::GetUpdateCount() & 0xFFFF00FF) ); },  
+        [this](Word, bool) { return Bus::GetUpdateCount() >> 8; }, 
+        [this](Word, Byte data, bool) { Bus::SetUpdateCount( (data << 8) | (Bus::GetUpdateCount() & 0xFFFF00FF) ); },  
         { "" }}); nextAddr+=1;   
     mapped_register.push_back(
         { "", nextAddr,    
-        [this](Word nextAddr) { (void)nextAddr; return Bus::GetUpdateCount() & 0xFF; }, 
-        [this](Word nextAddr, Byte data) { (void)nextAddr; Bus::SetUpdateCount( (data << 0) | (Bus::GetUpdateCount() & 0xFFFFFF00) );  },  
+        [this](Word, bool) { return Bus::GetUpdateCount() & 0xFF; }, 
+        [this](Word, Byte data, bool) { Bus::SetUpdateCount( (data << 0) | (Bus::GetUpdateCount() & 0xFFFFFF00) );  },  
         { "" }}); nextAddr+=1;    
 
 
     mapped_register.push_back({ "SYS_DBG_BRK_ADDR", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return _dbg_brk_addr >> 8; }, 
-        [this](Word nextAddr, Byte data) { (void)nextAddr; _dbg_brk_addr = ((data << 8) | (_dbg_brk_addr & 0xFF)); },  
+        [this](Word, bool) { return _dbg_brk_addr >> 8; }, 
+        [this](Word, Byte data, bool) { _dbg_brk_addr = ((data << 8) | (_dbg_brk_addr & 0xFF)); },  
         { "(Word) Address of current debug breakpoint"} }); nextAddr+=1;
     mapped_register.push_back({ "", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return _dbg_brk_addr & 0xFF; }, 
-        [this](Word nextAddr, Byte data) { (void)nextAddr; _dbg_brk_addr = (data & 0xFF) | (_dbg_brk_addr & 0xFF00); },  
+        [this](Word, bool) { return _dbg_brk_addr & 0xFF; }, 
+        [this](Word, Byte data, bool) { _dbg_brk_addr = (data & 0xFF) | (_dbg_brk_addr & 0xFF00); },  
         { "" }}); nextAddr+=1;
 
 
 
     mapped_register.push_back({ "SYS_DBG_FLAGS", nextAddr, 
-        [this](Word nextAddr) 
+        [this](Word, bool) 
         {
-            (void)nextAddr; 
             (s_bIsDebugActive) ? _dbg_flags |= DBGF_DEBUG_ENABLE : _dbg_flags &= ~DBGF_DEBUG_ENABLE; // Enable
             (s_bSingleStep)     ? _dbg_flags |= DBGF_SINGLE_STEP_ENABLE : _dbg_flags &= ~DBGF_SINGLE_STEP_ENABLE; // Single-Step
             _dbg_flags &= ~DBGF_CLEAR_ALL_BRKPT;     // zero for Clear all Breakpoints
@@ -167,11 +166,9 @@ int  Debug::OnAttach(int nextAddr)
             _dbg_flags &= ~DBGF_RESET;     // RESET
             return _dbg_flags;  
         }, 
-        [this](Word nextAddr, Byte data)
+        [this](Word, Byte data, bool)
         {
-            (void)nextAddr; 
             _dbg_flags = data;
-
             if (_dbg_flags & DBGF_DEBUG_ENABLE) { s_bIsDebugActive = true; SDL_ShowWindow(_dbg_window); }
             else { s_bIsDebugActive = false; SDL_HideWindow(_dbg_window); }
             (_dbg_flags & DBGF_SINGLE_STEP_ENABLE) ? s_bSingleStep = true : s_bSingleStep = false;
@@ -805,7 +802,7 @@ void Debug::_update_debug_screen()
 
 void Debug::DumpMemory(int col, int row, Word addr)
 {
-    const bool use_debug_read = false;
+    // const bool use_debug_read = false;
     int line = 0;
     int width = 8;
     for (int ofs = addr; ofs < addr + 0x40; ofs += 8)
@@ -813,7 +810,7 @@ void Debug::DumpMemory(int col, int row, Word addr)
         int c = col;
         std::string out = _hex(ofs, 4) + " ";
         for (int b = 0; b < width; b++)
-            out += _hex(Memory::Read(ofs + b, use_debug_read), 2) + " ";
+            out += _hex(Memory::Read(ofs + b, DEBUG_USE_DEBUG_MEMORY), 2) + " ";
 
         c += OutText(col, row + line, out.c_str(), 0xe0);
 
@@ -823,7 +820,7 @@ void Debug::DumpMemory(int col, int row, Word addr)
             for (int b = 0; b < width; b++)
             {
                 Byte data;
-                data = Memory::Read(ofs + b, use_debug_read);
+                data = Memory::Read(ofs + b, DEBUG_USE_DEBUG_MEMORY);
                 OutGlyph(c++, row + line, data, 0xd0);
             }
         }
@@ -1072,7 +1069,8 @@ void Debug::DrawCursor(float fElapsedTime)
             if (csr_y > 18 && csr_y < 27) { ofs -= 144; addr = mem_bank[2]; }
             if (csr_y > 27 && csr_y < 36) { ofs -= 216; addr = mem_bank[3]; }
 
-            Byte data = Memory::Read(addr + ofs);//, true);
+            // Byte data = Memory::Read(addr + ofs);//, true);
+            Byte data = Memory::Read(addr + ofs, DEBUG_USE_DEBUG_MEMORY);
             if (digit == 0) num = (data & 0xf0) >> 4;
             if (digit == 1) num = (data & 0x0f) >> 0;
             ch = _hex(num, 1);
@@ -1669,10 +1667,13 @@ void Debug::KeyboardStuff()
             if (csr_y >  9 && csr_y < 18) { ofs -= 72 ; addr = mem_bank[1]; }
             if (csr_y > 18 && csr_y < 27) { ofs -= 144; addr = mem_bank[2]; }
             if (csr_y > 27 && csr_y < 36) { ofs -= 216; addr = mem_bank[3]; }
-            Byte data = Memory::Read(addr + ofs);//,true);
+
+            // Byte data = Memory::Read(addr + ofs);//,true);
+            Byte data = Memory::Read(addr + ofs, DEBUG_USE_DEBUG_MEMORY);
+
             if (digit == 0)		data = (data & 0x0f) | (ch << 4);
             if (digit == 1)		data = (data & 0xf0) | (ch << 0);
-            Memory::Write(addr + ofs, data);
+            Memory::Write(addr + ofs, data, DEBUG_USE_DEBUG_MEMORY);
             if (csr_x < 28)		while (!CoordIsValid(++csr_x, csr_y));
             break;
         }

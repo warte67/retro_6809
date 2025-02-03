@@ -74,13 +74,13 @@ int  MMU::OnAttach(int nextAddr)
     //      Page Select for 8K Memory Bank 1 (MMU_HANDLE)
     /////
     mapped_register.push_back({ "MMU_PAGE_1_SELECT", nextAddr, 
-        [this](Word) { return (_mmu_1_select>>8) & 0xFF; }, 
-        [this](Word, Byte data) { _mmu_1_select = (_mmu_1_select & 0x00FF) | (data << 8); },  
+        [this](Word, bool) { return (_mmu_1_select>>8) & 0xFF; }, 
+        [this](Word, Byte data, bool) { _mmu_1_select = (_mmu_1_select & 0x00FF) | (data << 8); },  
         { "(Word) Page Select for 8K Memory Bank 1"} });
     nextAddr++;
     mapped_register.push_back( { "", nextAddr, 
-        [this](Word) { return _mmu_1_select & 0xFF; }, 
-        [this](Word, Byte data) { _mmu_1_select = (_mmu_1_select & 0xFF00) | data; }, 
+        [this](Word, bool) { return _mmu_1_select & 0xFF; }, 
+        [this](Word, Byte data, bool) { _mmu_1_select = (_mmu_1_select & 0xFF00) | data; }, 
     {""}}); nextAddr+=1;       
 
 
@@ -89,13 +89,13 @@ int  MMU::OnAttach(int nextAddr)
     //      Page Select for 8K Memory Bank 2 (MMU_HANDLE)
     /////
     mapped_register.push_back({ "MMU_PAGE_2_SELECT", nextAddr, 
-        [this](Word) { return (_mmu_2_select>>8) & 0xFF; }, 
-        [this](Word, Byte data) { _mmu_2_select = (_mmu_2_select & 0x00FF) | (data << 8); },  
+        [this](Word, bool) { return (_mmu_2_select>>8) & 0xFF; }, 
+        [this](Word, Byte data, bool) { _mmu_2_select = (_mmu_2_select & 0x00FF) | (data << 8); },  
         { "(Word) Page Select for 8K Memory Bank 2"} });
     nextAddr++;
     mapped_register.push_back( { "", nextAddr, 
-        [this](Word) { return _mmu_2_select & 0xFF; }, 
-        [this](Word, Byte data) { _mmu_2_select = (_mmu_2_select & 0xFF00) | data; }, 
+        [this](Word, bool) { return _mmu_2_select & 0xFF; }, 
+        [this](Word, Byte data, bool) { _mmu_2_select = (_mmu_2_select & 0xFF00) | data; }, 
     {""}}); nextAddr+=1;     
 
 
@@ -104,12 +104,12 @@ int  MMU::OnAttach(int nextAddr)
     //      Number of 32-Byte Blocks Available for Allocation  (Read Only)
     /////
     mapped_register.push_back({ "MMU_BLOCKS_FREE", nextAddr, 
-        [this](Word) { return (_mmu_blocks_free>>8) & 0xFF; }, 
+        [this](Word, bool) { return (_mmu_blocks_free>>8) & 0xFF; }, 
         nullptr,    //[this](Word, Byte data) { _mmu_blocks_free = (_mmu_blocks_free & 0x00FF) | (data << 8); }, 
         { "(Word) Number of 32-Byte Blocks Available for Allocation (Read Only)"} });
     nextAddr++;
     mapped_register.push_back( { "", nextAddr, 
-        [this](Word) { return _mmu_blocks_free & 0xFF; }, 
+        [this](Word, bool) { return _mmu_blocks_free & 0xFF; }, 
         nullptr,    // [this](Word, Byte data) { _mmu_blocks_free = (_mmu_blocks_free & 0xFF00) | data; }, 
     {""}}); nextAddr+=1;   
 
@@ -119,12 +119,12 @@ int  MMU::OnAttach(int nextAddr)
     //      Number of 32-Byte Blocks Available for Allocation  (Read Only)
     /////
     mapped_register.push_back({ "MMU_BLOCKS_ALLOCATED", nextAddr, 
-        [this](Word) { return (_mmu_blocks_allocated>>8) & 0xFF; }, 
+        [this](Word, bool) { return (_mmu_blocks_allocated>>8) & 0xFF; }, 
         nullptr, // [this](Word, Byte data) { _mmu_blocks_allocated = (_mmu_blocks_allocated & 0x00FF) | (data << 8); }, 
         { "(Word) Number of 32-Byte Blocks Currently Allocated  (Read Only)"} });
     nextAddr++;
     mapped_register.push_back( { "", nextAddr, 
-        [this](Word) { return _mmu_blocks_allocated & 0xFF; },  
+        [this](Word, bool) { return _mmu_blocks_allocated & 0xFF; },  
         nullptr, // [this](Word, Byte data) { _mmu_blocks_allocated = (_mmu_blocks_allocated & 0xFF00) | data; }, 
     {""}}); nextAddr+=1;   
 
@@ -134,12 +134,12 @@ int  MMU::OnAttach(int nextAddr)
     //      Number of 32-Byte Blocks Available for Allocation  (Read Only)
     /////
     mapped_register.push_back({ "MMU_BLOCKS_FRAGGED", nextAddr, 
-        [this](Word) { return (_mmu_blocks_fragged>>8) & 0xFF; }, 
+        [this](Word, bool) { return (_mmu_blocks_fragged>>8) & 0xFF; }, 
         nullptr, // [this](Word, Byte data) { _mmu_blocks_fragged = (_mmu_blocks_fragged & 0x00FF) | (data << 8); },   
         { "(Word) Number of 32-Byte Blocks Currently Fragmented  (Read Only)"} });
     nextAddr++;
     mapped_register.push_back( { "", nextAddr, 
-        [this](Word) { return _mmu_blocks_fragged & 0xFF; },  
+        [this](Word, bool) { return _mmu_blocks_fragged & 0xFF; },  
         nullptr, // [this](Word, Byte data) { _mmu_blocks_fragged = (_mmu_blocks_fragged & 0xFF00) | data; }, 
     {""}}); nextAddr+=1;   
 
@@ -149,23 +149,23 @@ int  MMU::OnAttach(int nextAddr)
     //      Argument 1 for MMU Command
     /////
     mapped_register.push_back({ "MMU_ARG_1", nextAddr, 
-        [this](Word) { return (_mmu_arg_1>>8) & 0xFF; }, 
-        [this](Word, Byte data) { _mmu_arg_1 = (_mmu_arg_1 & 0x00FF) | (data << 8); },   
+        [this](Word, bool) { return (_mmu_arg_1>>8) & 0xFF; }, 
+        [this](Word, Byte data, bool) { _mmu_arg_1 = (_mmu_arg_1 & 0x00FF) | (data << 8); },   
         { "(Word) Argument 1 for MMU Command"} });
     mapped_register.push_back( { "", nextAddr+1, 
-        [this](Word) { return _mmu_arg_1 & 0xFF; }, 
-        [this](Word, Byte data) { _mmu_arg_1 = (_mmu_arg_1 & 0xFF00) | data; }, 
+        [this](Word, bool) { return _mmu_arg_1 & 0xFF; }, 
+        [this](Word, Byte data, bool) { _mmu_arg_1 = (_mmu_arg_1 & 0xFF00) | data; }, 
     {""}});
 
     mapped_register.push_back({ "MMU_ARG_1_MSB", nextAddr, 
-        [this](Word) { return (_mmu_arg_1>>8) & 0xFF; },  
-        [this](Word, Byte data) { _mmu_arg_1 = (_mmu_arg_1 & 0x00FF) | (data << 8); },   
+        [this](Word, bool) { return (_mmu_arg_1>>8) & 0xFF; },  
+        [this](Word, Byte data, bool) { _mmu_arg_1 = (_mmu_arg_1 & 0x00FF) | (data << 8); },   
         { "(Byte) Argument 1 Most Significant Byte for MMU Command"} }); 
         nextAddr++;
 
     mapped_register.push_back({ "MMU_ARG_1_LSB", nextAddr, 
-        [this](Word) { return _mmu_arg_1 & 0xFF; }, 
-        [this](Word, Byte data) { _mmu_arg_1 = (_mmu_arg_1 & 0xFF00) | data; }, 
+        [this](Word, bool) { return _mmu_arg_1 & 0xFF; }, 
+        [this](Word, Byte data, bool) { _mmu_arg_1 = (_mmu_arg_1 & 0xFF00) | data; }, 
         { "(Byte) Argument 1 Least Significant Byte for MMU Command"} }); 
         nextAddr++;
 
@@ -175,21 +175,21 @@ int  MMU::OnAttach(int nextAddr)
     //      Argument 2 for MMU Command
     /////
     mapped_register.push_back({ "MMU_ARG_2", nextAddr, 
-        [this](Word) { return (_mmu_arg_2>>8) & 0xFF; }, 
-        [this](Word, Byte data) { _mmu_arg_2 = (_mmu_arg_2 & 0x00FF) | (data << 8); },   
+        [this](Word, bool) { return (_mmu_arg_2>>8) & 0xFF; }, 
+        [this](Word, Byte data, bool) { _mmu_arg_2 = (_mmu_arg_2 & 0x00FF) | (data << 8); },   
         { "(Word) Argument 2 for MMU Command"} });
     mapped_register.push_back( { "", nextAddr+1, 
-        [this](Word) { return _mmu_arg_2 & 0xFF; }, 
-        [this](Word, Byte data) { _mmu_arg_2 = (_mmu_arg_2 & 0xFF00) | data; }, 
+        [this](Word, bool) { return _mmu_arg_2 & 0xFF; }, 
+        [this](Word, Byte data, bool) { _mmu_arg_2 = (_mmu_arg_2 & 0xFF00) | data; }, 
         {""}});
     mapped_register.push_back({ "MMU_ARG_2_MSB", nextAddr, 
-        [this](Word) { return (_mmu_arg_2>>8) & 0xFF; }, 
-        [this](Word, Byte data) { _mmu_arg_2 = (_mmu_arg_2 & 0x00FF) | (data << 8); },   
+        [this](Word, bool) { return (_mmu_arg_2>>8) & 0xFF; }, 
+        [this](Word, Byte data, bool) { _mmu_arg_2 = (_mmu_arg_2 & 0x00FF) | (data << 8); },   
         { "(Byte) Argument 2 Most Significant Byte for MMU Command"} }); 
         nextAddr++;
     mapped_register.push_back({ "MMU_ARG_2_LSB", nextAddr, 
-        [this](Word) { return _mmu_arg_2 & 0xFF; }, 
-        [this](Word, Byte data) { _mmu_arg_2 = (_mmu_arg_2 & 0xFF00) | data; }, 
+        [this](Word, bool) { return _mmu_arg_2 & 0xFF; }, 
+        [this](Word, Byte data, bool) { _mmu_arg_2 = (_mmu_arg_2 & 0xFF00) | data; }, 
         { "(Byte) Argument 2 Least Significant Byte for MMU Command",""} }); 
         nextAddr++;
 
@@ -199,8 +199,8 @@ int  MMU::OnAttach(int nextAddr)
     //      Memory Management Unit Command
     /////
     mapped_register.push_back({ "MMU_COMMAND", nextAddr, 
-        [this](Word) { return _mmu_command; },  
-        [this](Word, Byte data) { 
+        [this](Word, bool) { return _mmu_command; },  
+        [this](Word, Byte data, bool) { 
             // dispatch the MMU Command
             _mmu_command = data; 
             do_command(data);
@@ -233,7 +233,7 @@ int  MMU::OnAttach(int nextAddr)
     //      Memory Management Unit Error Code:    (Read Only)
     /////
     mapped_register.push_back({ "MMU_ERROR", nextAddr, 
-        [this](Word) { return _mmu_error; },  
+        [this](Word, bool) { return _mmu_error; },  
         nullptr,  
         { "(Byte) Memory Management Unit Error Code:     (Read Only)" }}); nextAddr++;
     // ADD ERROR CODE ENUMERATION:
@@ -260,8 +260,8 @@ int  MMU::OnAttach(int nextAddr)
     //      Handle for the current allocation chain
     /////
     mapped_register.push_back({ "MMU_META_HANDLE", nextAddr, 
-        [this](Word) { return (_mmu_handle>>8) & 0xFF; },  
-        [this](Word, Byte data) 
+        [this](Word, bool) { return (_mmu_handle>>8) & 0xFF; },  
+        [this](Word, Byte data, bool) 
         { 
             _mmu_handle = (_mmu_handle & 0x00FF) | (data << 8); 
             if (_mmu_handle >= MMU_MEMORY_SIZE) _mmu_handle = MMU_MEMORY_SIZE - 1;
@@ -270,8 +270,8 @@ int  MMU::OnAttach(int nextAddr)
         { "(Word) Handle for the current allocation chain",""} });
     nextAddr++;
     mapped_register.push_back( { "", nextAddr, 
-        [this](Word) { return _mmu_handle & 0xFF; },  
-        [this](Word, Byte data) {
+        [this](Word, bool) { return _mmu_handle & 0xFF; },  
+        [this](Word, Byte data, bool) {
             _mmu_handle = (_mmu_handle & 0xFF00) | data; 
             if (_mmu_handle >= MMU_MEMORY_SIZE) _mmu_handle = MMU_MEMORY_SIZE - 1;
             _mmu_raw_index = _mmu_handle; 
@@ -296,8 +296,8 @@ int  MMU::OnAttach(int nextAddr)
     //      Status flags for the current allocation node
     /////
     mapped_register.push_back({ "MMU_META_STATUS", nextAddr, 
-        [this](Word) { return _metadata_pool[_mmu_raw_index].status; },  
-        [this](Word, Byte data) { _metadata_pool[_mmu_raw_index].status = data; },
+        [this](Word, bool) { return _metadata_pool[_mmu_raw_index].status; },  
+        [this](Word, Byte data, bool) { _metadata_pool[_mmu_raw_index].status = data; },
         // [this](Word, Byte data) { _metadata_pool[_mmu_raw_index].status = data & 0b1111'1110; },   // do not allow the user to change the allocated bit       
         { "(Byte) Status Flags:" }}); nextAddr++;
     // ADD STATUS FLAGS ENUMERATION:
@@ -321,8 +321,8 @@ int  MMU::OnAttach(int nextAddr)
         if (i==0)
         {
             mapped_register.push_back({ "MMU_META_DATA", nextAddr, 
-            [this,i](Word) { return _metadata_pool[_mmu_raw_index].data[i]; }, 
-            [this,i](Word, Byte data) 
+            [this,i](Word, bool) { return _metadata_pool[_mmu_raw_index].data[i]; }, 
+            [this,i](Word, Byte data, bool) 
             { 
                 // Read Only if the root node or the current node is locked or Read Only
                 Word root_node = _metadata_pool[_mmu_raw_index].root_node;
@@ -338,8 +338,8 @@ int  MMU::OnAttach(int nextAddr)
         else
         {
             mapped_register.push_back( { "", nextAddr, 
-            [this,i](Word) { return _metadata_pool[_mmu_raw_index].data[i]; },   
-            [this,i](Word, Byte data) { 
+            [this,i](Word, bool) { return _metadata_pool[_mmu_raw_index].data[i]; },   
+            [this,i](Word, Byte data, bool) { 
                 // Read Only if the root node or the current node is locked or Read Only
                 Word root_node = _metadata_pool[_mmu_raw_index].root_node;
                 if (!(_metadata_pool[root_node].status & 0x04) &&
@@ -359,13 +359,13 @@ int  MMU::OnAttach(int nextAddr)
     //      Handle for the current allocation chain
     /////
     mapped_register.push_back({ "MMU_META_ROOT", nextAddr, 
-        [this](Word) { return (_metadata_pool[_mmu_raw_index].root_node>>8) & 0xFF; },  
-        [this](Word, Byte data) { _metadata_pool[_mmu_raw_index].root_node = (_metadata_pool[_mmu_raw_index].root_node & 0x00FF) | (data << 8); }, 
+        [this](Word, bool) { return (_metadata_pool[_mmu_raw_index].root_node>>8) & 0xFF; },  
+        [this](Word, Byte data, bool) { _metadata_pool[_mmu_raw_index].root_node = (_metadata_pool[_mmu_raw_index].root_node & 0x00FF) | (data << 8); }, 
         { "(Word) Root node of the current allocation       (Read Only)"} });
     nextAddr++;
     mapped_register.push_back( { "", nextAddr, 
-        [this](Word) { return _metadata_pool[_mmu_raw_index].root_node & 0xFF; },  
-        [this](Word, Byte data) { _metadata_pool[_mmu_raw_index].root_node = (_metadata_pool[_mmu_raw_index].root_node & 0xFF00) | data; },
+        [this](Word, bool) { return _metadata_pool[_mmu_raw_index].root_node & 0xFF; },  
+        [this](Word, Byte data, bool) { _metadata_pool[_mmu_raw_index].root_node = (_metadata_pool[_mmu_raw_index].root_node & 0xFF00) | data; },
     {""}}); nextAddr++;
 
 
@@ -374,13 +374,13 @@ int  MMU::OnAttach(int nextAddr)
     //      Handle for the current allocation chain
     /////
     mapped_register.push_back({ "MMU_META_PREV", nextAddr, 
-        [this](Word) { return (_metadata_pool[_mmu_raw_index].prev_node>>8) & 0xFF; },  
-        [this](Word, Byte data) { _metadata_pool[_mmu_raw_index].prev_node = (_metadata_pool[_mmu_raw_index].prev_node & 0x00FF) | (data << 8); },   
+        [this](Word, bool) { return (_metadata_pool[_mmu_raw_index].prev_node>>8) & 0xFF; },  
+        [this](Word, Byte data, bool) { _metadata_pool[_mmu_raw_index].prev_node = (_metadata_pool[_mmu_raw_index].prev_node & 0x00FF) | (data << 8); },   
         { "(Word) Previous node of the current allocation   (Read Only)"} });
     nextAddr++;
     mapped_register.push_back( { "", nextAddr, 
-        [this](Word) { return _metadata_pool[_mmu_raw_index].prev_node & 0xFF; },   
-        [this](Word, Byte data) { _metadata_pool[_mmu_raw_index].prev_node = (_metadata_pool[_mmu_raw_index].prev_node & 0xFF00) | data; },
+        [this](Word, bool) { return _metadata_pool[_mmu_raw_index].prev_node & 0xFF; },   
+        [this](Word, Byte data, bool) { _metadata_pool[_mmu_raw_index].prev_node = (_metadata_pool[_mmu_raw_index].prev_node & 0xFF00) | data; },
     {""}}); nextAddr++;
 
 
@@ -389,13 +389,13 @@ int  MMU::OnAttach(int nextAddr)
     //      Handle for the current allocation chain
     /////
     mapped_register.push_back({ "MMU_META_NEXT", nextAddr, 
-        [this](Word) { return (_metadata_pool[_mmu_raw_index].next_node>>8) & 0xFF; },
-        [this](Word, Byte data) { _metadata_pool[_mmu_raw_index].next_node = (_metadata_pool[_mmu_raw_index].next_node & 0x00FF) | (data << 8); }, 
+        [this](Word, bool) { return (_metadata_pool[_mmu_raw_index].next_node>>8) & 0xFF; },
+        [this](Word, Byte data, bool) { _metadata_pool[_mmu_raw_index].next_node = (_metadata_pool[_mmu_raw_index].next_node & 0x00FF) | (data << 8); }, 
         { "(Word) Next node of the current allocation       (Read Only)"} });
     nextAddr++;
     mapped_register.push_back( { "", nextAddr, 
-        [this](Word) { return _metadata_pool[_mmu_raw_index].next_node & 0xFF; }, 
-        [this](Word, Byte data) { _metadata_pool[_mmu_raw_index].next_node = (_metadata_pool[_mmu_raw_index].next_node & 0xFF00) | data; },
+        [this](Word, bool) { return _metadata_pool[_mmu_raw_index].next_node & 0xFF; }, 
+        [this](Word, Byte data, bool) { _metadata_pool[_mmu_raw_index].next_node = (_metadata_pool[_mmu_raw_index].next_node & 0xFF00) | data; },
     {""}}); nextAddr++;
 
 
@@ -404,8 +404,8 @@ int  MMU::OnAttach(int nextAddr)
     //      Handle for the current allocation chain
     /////
     mapped_register.push_back({ "MMU_RAW_INDEX", nextAddr, 
-        [this](Word) { return (_mmu_raw_index>>8) & 0xFF; }, 
-        [this](Word, Byte data) 
+        [this](Word, bool) { return (_mmu_raw_index>>8) & 0xFF; }, 
+        [this](Word, Byte data, bool) 
         { 
             _mmu_raw_index = (_mmu_raw_index & 0x00FF) | (data << 8); 
             if (_mmu_raw_index >= MMU_MEMORY_SIZE) { _mmu_raw_index = MMU_MEMORY_SIZE - 1; }
@@ -414,8 +414,8 @@ int  MMU::OnAttach(int nextAddr)
         { "(Word) Raw Index of the current memory node  (Node Window)",""} });
     nextAddr++;
     mapped_register.push_back( { "", nextAddr, 
-        [this](Word) { return _mmu_raw_index & 0xFF; },
-        [this](Word, Byte data) 
+        [this](Word, bool) { return _mmu_raw_index & 0xFF; },
+        [this](Word, Byte data, bool) 
         { 
             _mmu_raw_index = (_mmu_raw_index & 0xFF00) | data; 
             if (_mmu_raw_index >= MMU_MEMORY_SIZE) { _mmu_raw_index = MMU_MEMORY_SIZE - 1; }

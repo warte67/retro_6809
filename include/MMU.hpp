@@ -314,12 +314,12 @@ public:
         {
             mapped_register.push_back({ "", nextAddr, 
                 // Read from Bank One:
-                [this](Word address) 
+                [this](Word address, bool) 
                 { 
                     return bank_read(address); 
                 },
                 // Write to Bank One: 
-                [this](Word address, Byte data) 
+                [this](Word address, Byte data, bool) 
                 {
                     bank_write(address, data);
                 },
@@ -334,12 +334,12 @@ public:
         {
             mapped_register.push_back({ "", nextAddr, 
                 // Read from Bank Two:
-                [this](Word address) 
+                [this](Word address, bool) 
                 { 
                     return bank_read(address); 
                 },
                 // Write to Bank Two: 
-                [this](Word address, Byte data) 
+                [this](Word address, Byte data, bool) 
                 {
                     bank_write(address, data);
                 },

@@ -607,9 +607,8 @@ void Bus::load_hex(const char* filename)
 			while (n--) 
 			{
 				b = _fread_hex_byte(ifs);
-				// std::cout << "0x" << hex(addr,4) << ":";
-				// std::cout << "0x" << hex(b, 2) << std::endl;
-				Memory::Write(addr, b, true);
+				// Memory::Write(addr, b, true);
+                IDevice::memory(addr,b);
 				++addr;
 			}
 			// Read and discard checksum byte

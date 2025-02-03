@@ -60,12 +60,12 @@ int  Mouse::OnAttach(int nextAddr)
     //       Horizontal mouse cursor coordinate
     /////
     mapped_register.push_back( { "CSR_XPOS", nextAddr,
-        [this](Word nextAddr) { (void)nextAddr; return mouse_x >> 8; }, 
-        [this](Word nextAddr, Byte data) { (void)nextAddr; _bCsrIsDirty = true; mouse_x = (mouse_x & 0x00ff) | (data << 8); }, 
+        [this](Word, bool) { return mouse_x >> 8; }, 
+        [this](Word, Byte data, bool) { _bCsrIsDirty = true; mouse_x = (mouse_x & 0x00ff) | (data << 8); }, 
         { "(Word) Horizontal Mouse Cursor Coordinate" }}); nextAddr+=1;
     mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { (void)nextAddr; return mouse_x & 0xFF; }, 
-        [this](Word nextAddr, Byte data) { (void)nextAddr; _bCsrIsDirty = true; mouse_x = (mouse_x & 0xff00) | (data << 0); }, 
+        [this](Word, bool) { return mouse_x & 0xFF; }, 
+        [this](Word, Byte data, bool) { _bCsrIsDirty = true; mouse_x = (mouse_x & 0xff00) | (data << 0); }, 
         {{""}}}); nextAddr+=1;    
 
 
@@ -74,12 +74,12 @@ int  Mouse::OnAttach(int nextAddr)
     //       Vertical mouse cursor coordinate
     /////
     mapped_register.push_back( { "CSR_YPOS", nextAddr,
-        [this](Word nextAddr) { (void)nextAddr; return mouse_y >> 8; }, 
-        [this](Word nextAddr, Byte data) { (void)nextAddr; _bCsrIsDirty = true; mouse_y = (mouse_y & 0x00ff) | (data << 8); }, 
+        [this](Word, bool) { return mouse_y >> 8; }, 
+        [this](Word, Byte data, bool) { _bCsrIsDirty = true; mouse_y = (mouse_y & 0x00ff) | (data << 8); }, 
         {"(Word) Vertical Mouse Cursor Coordinate"}}); nextAddr+=1;
     mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { (void)nextAddr; return mouse_y & 0xFF; }, 
-        [this](Word nextAddr, Byte data) { (void)nextAddr; _bCsrIsDirty = true; mouse_y = (mouse_y & 0xff00) | (data << 0); }, 
+        [this](Word, bool) { return mouse_y & 0xFF; }, 
+        [this](Word, Byte data, bool) { _bCsrIsDirty = true; mouse_y = (mouse_y & 0xff00) | (data << 0); }, 
         {""}}); nextAddr+=1;    
 
 
@@ -88,8 +88,8 @@ int  Mouse::OnAttach(int nextAddr)
     //       Horizontal mouse cursor offset
     /////
     mapped_register.push_back( { "CSR_XOFS", nextAddr,
-        [this](Word nextAddr) { (void)nextAddr; return mouse_x_offset; }, 
-        [this](Word nextAddr, Byte data) { (void)nextAddr; _bCsrIsDirty = true; mouse_x_offset = data; }, 
+        [this](Word, bool) { return mouse_x_offset; }, 
+        [this](Word, Byte data, bool) { _bCsrIsDirty = true; mouse_x_offset = data; }, 
         { "(Byte) Horizontal Mouse Cursor Offset" }}); nextAddr+=1;
 
 
@@ -98,8 +98,8 @@ int  Mouse::OnAttach(int nextAddr)
     //       Vertical mouse cursor offset
     /////
     mapped_register.push_back( { "CSR_YOFS", nextAddr,
-        [this](Word nextAddr) { (void)nextAddr; return mouse_y_offset; }, 
-        [this](Word nextAddr, Byte data) { (void)nextAddr; _bCsrIsDirty = true; mouse_y_offset = data; }, 
+        [this](Word, bool) { return mouse_y_offset; }, 
+        [this](Word, Byte data, bool) { _bCsrIsDirty = true; mouse_y_offset = data; }, 
         { "(Byte) Vertical Mouse Cursor Offset" }}); nextAddr+=1;
 
 
@@ -108,8 +108,8 @@ int  Mouse::OnAttach(int nextAddr)
     //       (char) MouseWheel Scroll: -1, 0, 1
     /////
     mapped_register.push_back( { "CSR_SCROLL", nextAddr,
-        [this](Word nextAddr) { (void)nextAddr; return mouse_wheel; }, 
-        [this](Word nextAddr, Byte data) { (void)nextAddr; mouse_wheel = data; }, 
+        [this](Word, bool) { return mouse_wheel; }, 
+        [this](Word, Byte data, bool) { mouse_wheel = data; }, 
         { "(char) MouseWheel Scroll: -1, 0, 1" }}); nextAddr+=1;
 
 
@@ -118,9 +118,8 @@ int  Mouse::OnAttach(int nextAddr)
     //       Mouse Device State Flags
     /////
     mapped_register.push_back( { "CSR_FLAGS", nextAddr,
-        [this](Word nextAddr) { (void)nextAddr; return button_flags; }, 
-        [this](Word nextAddr, Byte data) {
-            (void)nextAddr;             
+        [this](Word, bool) { return button_flags; }, 
+        [this](Word, Byte data, bool) {
             if (data & 0x80)    {  _show_SDL_cursor(true);  }
             else                {  _show_SDL_cursor(false); }
             button_flags = data;           
@@ -137,8 +136,8 @@ int  Mouse::OnAttach(int nextAddr)
     //       Vertical mouse cursor offset
     /////
     mapped_register.push_back( { "CSR_BMP_INDX", nextAddr,
-        [this](Word nextAddr) { (void)nextAddr; return bmp_offset; }, 
-        [this](Word nextAddr, Byte data) { (void)nextAddr; bmp_offset = data; }, 
+        [this](Word, bool) { return bmp_offset; }, 
+        [this](Word, Byte data, bool) { bmp_offset = data; }, 
         { "(Byte) Mouse Cursor Bitmap Pixel Offset" }}); nextAddr+=1;
 
 
@@ -147,8 +146,8 @@ int  Mouse::OnAttach(int nextAddr)
     //       Mouse Cursor Bitmap Pixel Color Data ($0-$F)
     /////
     mapped_register.push_back( { "CSR_BMP_DATA", nextAddr,
-        [this](Word nextAddr) { (void)nextAddr; return csr_data[bmp_offset]; }, 
-        [this](Word nextAddr, Byte data) { (void)nextAddr; csr_data[bmp_offset] = data; }, 
+        [this](Word, bool) { return csr_data[bmp_offset]; }, 
+        [this](Word, Byte data, bool) { csr_data[bmp_offset] = data; }, 
         { "(Byte) Mouse Cursor Bitmap Pixel Color Data ($0-$F)" }}); nextAddr+=1;
 
 
@@ -157,8 +156,8 @@ int  Mouse::OnAttach(int nextAddr)
     //       Mouse Cursor Color Palette Index ($0-$F)
     /////
     mapped_register.push_back( { "CSR_PAL_INDX", nextAddr,
-        [this](Word nextAddr) { (void)nextAddr; return m_palette_index; }, 
-        [this](Word nextAddr, Byte data) { (void)nextAddr; m_palette_index = data;	 }, 
+        [this](Word, bool) { return m_palette_index; }, 
+        [this](Word, Byte data, bool) { m_palette_index = data;	 }, 
         { "(Byte) Mouse Cursor Color Palette Index (0-15)" }}); nextAddr+=1;
 
 
@@ -167,15 +166,13 @@ int  Mouse::OnAttach(int nextAddr)
     //       Mouse Cursor Color Palette Data A4R4G4B4
     /////
     mapped_register.push_back( { "CSR_PAL_DATA", nextAddr,
-        [this](Word nextAddr) { (void)nextAddr; return (_csr_palette[m_palette_index].color) >> 8; }, 
-        [this](Word nextAddr, Byte data) { 
-            (void)nextAddr; 
+        [this](Word, bool) { return (_csr_palette[m_palette_index].color) >> 8; }, 
+        [this](Word, Byte data, bool) { 
             _csr_palette[m_palette_index].color = (_csr_palette[m_palette_index].color & 0x00FF) | (data << 8); 
         }, { "(Word) Mouse Cursor Color Palette Data A4R4G4B4" }}); nextAddr+=1;
     mapped_register.push_back( { "", nextAddr,
-        [this](Word nextAddr) { (void)nextAddr; return(_csr_palette[m_palette_index].color) & 0xFF; }, 
-        [this](Word nextAddr, Byte data) { 
-            (void)nextAddr; 
+        [this](Word, bool) { return(_csr_palette[m_palette_index].color) & 0xFF; }, 
+        [this](Word, Byte data, bool) { 
             _csr_palette[m_palette_index].color = (_csr_palette[m_palette_index].color & 0xFF00) | (data << 0); 
         }, {""}}); nextAddr+=1;    
 

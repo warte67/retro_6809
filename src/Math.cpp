@@ -66,8 +66,8 @@ int  Math::OnAttach(int nextAddr)
     //      Character Position Within the ACA Float String
     /////
     mapped_register.push_back({ "MATH_ACA_POS", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return aca_pos; }, 
-        [this](Word nextAddr, Byte data) { (void)nextAddr; aca_pos = data; },
+        [this](Word, bool) { return aca_pos; }, 
+        [this](Word, Byte data, bool) { aca_pos = data; },
         { "(Byte) Character Position Within the ACA Float String"} });
     nextAddr++;
 
@@ -77,11 +77,10 @@ int  Math::OnAttach(int nextAddr)
     //      ACA Float String Character Port
     /////
     mapped_register.push_back({ "MATH_ACA_DATA", nextAddr, 
-        [this](Word nextAddr) { 
-            (void)nextAddr; 
+        [this](Word, bool) { 
             return _process_read_data(aca_string, aca_pos);
         }, 
-        [this](Word nextAddr, Byte data) { 
+        [this](Word nextAddr, Byte data, bool) { 
             _process_write_data(nextAddr, data, aca_string, aca_pos, aca_float, aca_raw, aca_int); 
         },
         { "(Byte) ACA Float String Character Port"} });
@@ -93,28 +92,24 @@ int  Math::OnAttach(int nextAddr)
     //      ACA Raw Float Data
     /////
     mapped_register.push_back({ "MATH_ACA_RAW", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return (aca_raw >> 24) & 0xff; }, 
-        [this](Word nextAddr, DWord data) { 
-        (void)nextAddr; 
+        [this](Word, bool) { return (aca_raw >> 24) & 0xff; }, 
+        [this](Word, DWord data, bool) { 
             _process_write_raw(data, aca_raw, aca_float, aca_int, acr_string, 0xFF000000, 24); 
         },
         { "(4-Bytes) ACA Raw Float Data"} }); nextAddr++;   
     mapped_register.push_back({ "", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return (aca_raw >> 16) & 0xff; },
-        [this](Word nextAddr, DWord data) { 
-            (void)nextAddr; 
+        [this](Word, bool) { return (aca_raw >> 16) & 0xff; },
+        [this](Word, DWord data, bool) { 
             _process_write_raw(data, aca_raw, aca_float, aca_int, aca_string, 0x00FF0000, 16);
         },{ "" }}); nextAddr++;
     mapped_register.push_back({ "", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return (aca_raw >> 8) & 0xff; },
-        [this](Word nextAddr, DWord data) { 
-            (void)nextAddr; 
+        [this](Word, bool) { return (aca_raw >> 8) & 0xff; },
+        [this](Word, DWord data, bool) { 
             _process_write_raw(data, aca_raw, aca_float, aca_int, aca_string, 0x0000FF00, 8);
         },{ "" }}); nextAddr++;
     mapped_register.push_back({ "", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return (aca_raw >> 0) & 0xff; },
-        [this](Word nextAddr, DWord data) { 
-            (void)nextAddr; 
+        [this](Word, bool) { return (aca_raw >> 0) & 0xff; },
+        [this](Word, DWord data, bool) { 
             _process_write_raw(data, aca_raw, aca_float, aca_int, aca_string, 0x000000FF, 0);
         },{ "" }}); nextAddr++;
 
@@ -124,27 +119,23 @@ int  Math::OnAttach(int nextAddr)
     //      ACA Integer Data
     /////
     mapped_register.push_back({ "MATH_ACA_INT", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return (aca_int >> 24) & 0xff; }, 
-        [this](Word nextAddr, DWord data) { 
-            (void)nextAddr; 
+        [this](Word, bool) { return (aca_int >> 24) & 0xff; }, 
+        [this](Word, DWord data, bool) { 
             _process_write_int(data, aca_int, aca_float, aca_raw, aca_string, 0xFF000000, 24);
         },{ "(4-Bytes) ACA Integer Data",""} }); nextAddr++;   
     mapped_register.push_back({ "", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return (aca_int >> 16) & 0xff; }, 
-        [this](Word nextAddr, DWord data) { 
-            (void)nextAddr; 
+        [this](Word, bool) { return (aca_int >> 16) & 0xff; }, 
+        [this](Word, DWord data, bool) { 
             _process_write_int(data, aca_int, aca_float, aca_raw, aca_string, 0x00FF0000, 16);
         },{ "" }}); nextAddr++;
     mapped_register.push_back({ "", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return (aca_int >> 8) & 0xff; }, 
-        [this](Word nextAddr, DWord data) {
-            (void)nextAddr; 
+        [this](Word, bool) { return (aca_int >> 8) & 0xff; }, 
+        [this](Word, DWord data, bool) {
             _process_write_int(data, aca_int, aca_float, aca_raw, aca_string, 0x0000FF00, 8);
         },{ "" }}); nextAddr++;
     mapped_register.push_back({ "", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return (aca_int >> 0) & 0xff; }, 
-        [this](Word nextAddr, DWord data) {
-            (void)nextAddr; 
+        [this](Word, bool) { return (aca_int >> 0) & 0xff; }, 
+        [this](Word, DWord data, bool) {
             _process_write_int(data, aca_int, aca_float, aca_raw, aca_string, 0x000000FF, 0);
         },{ "" }}); nextAddr++;
 
@@ -156,8 +147,8 @@ int  Math::OnAttach(int nextAddr)
     //      Character Position Within the ACB Float String
     /////
     mapped_register.push_back({ "MATH_ACB_POS", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return (acb_pos >> 0) & 0xff; }, 
-        [this](Word nextAddr, DWord data) { (void)nextAddr; acb_pos = data & 0xff; }, 
+        [this](Word, bool) { return (acb_pos >> 0) & 0xff; }, 
+        [this](Word, DWord data, bool) { acb_pos = data & 0xff; }, 
         { "(Byte) Character Position Within the ACB Float String"} }); 
     nextAddr++;
 
@@ -167,11 +158,10 @@ int  Math::OnAttach(int nextAddr)
     //      ACB Float String Character Port
     /////
     mapped_register.push_back({ "MATH_ACB_DATA", nextAddr, 
-        [this](Word nextAddr) { 
-            (void)nextAddr; 
+        [this](Word, bool) { 
             return _process_read_data(acb_string, acb_pos);
         }, 
-        [this](Word nextAddr, Byte data) { 
+        [this](Word nextAddr, Byte data, bool) { 
             _process_write_data(nextAddr, data, acb_string, acb_pos, acb_float, acb_raw, acb_int);         
         },
         { "(Byte) ACB Float String Character Port"} });
@@ -183,28 +173,24 @@ int  Math::OnAttach(int nextAddr)
     //      ACB Raw Float Data
     /////
     mapped_register.push_back({ "MATH_ACB_RAW", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return (acb_raw >> 24) & 0xff; }, 
-        [this](Word nextAddr, DWord data) { 
-            (void)nextAddr; 
+        [this](Word, bool) { return (acb_raw >> 24) & 0xff; }, 
+        [this](Word, DWord data, bool) { 
             _process_write_raw(data, acb_raw, acb_float, acb_int, acb_string, 0xFF000000, 24);
         },
         { "(4-Bytes) ACB Raw Float Data"} }); nextAddr++;   
     mapped_register.push_back({ "", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return (acb_raw >> 16) & 0xff; },
-        [this](Word nextAddr, DWord data) { 
-            (void)nextAddr; 
+        [this](Word, bool) { return (acb_raw >> 16) & 0xff; },
+        [this](Word, DWord data, bool) { 
             _process_write_raw(data, acb_raw, acb_float, acb_int, acb_string, 0x00FF0000, 16);
         },{ "" }}); nextAddr++;
     mapped_register.push_back({ "", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return (acb_raw >> 8) & 0xff; },
-        [this](Word nextAddr, DWord data) { 
-            (void)nextAddr; 
+        [this](Word, bool) { return (acb_raw >> 8) & 0xff; },
+        [this](Word, DWord data, bool) { 
             _process_write_raw(data, acb_raw, acb_float, acb_int, acb_string, 0x0000FF00, 8);
         },{ "" }}); nextAddr++;
     mapped_register.push_back({ "", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return (acb_raw >> 0) & 0xff; },
-        [this](Word nextAddr, DWord data) { 
-            (void)nextAddr; 
+        [this](Word, bool) { return (acb_raw >> 0) & 0xff; },
+        [this](Word, DWord data, bool) { 
             _process_write_raw(data, acb_raw, acb_float, acb_int, acb_string, 0x000000FF, 0);
         },{ "" }}); nextAddr++;
 
@@ -214,27 +200,23 @@ int  Math::OnAttach(int nextAddr)
     //      ACB Integer Data
     /////
     mapped_register.push_back({ "MATH_ACB_INT", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return (acb_int >> 24) & 0xff; }, 
-        [this](Word nextAddr, DWord data) { 
-            (void)nextAddr; 
+        [this](Word, bool) { return (acb_int >> 24) & 0xff; }, 
+        [this](Word, DWord data, bool) { 
             _process_write_int(data, acb_int, acb_float, acb_raw, acb_string, 0xFF000000, 24);
         },{ "(4-Bytes) ACB Integer Data",""} }); nextAddr++;   
     mapped_register.push_back({ "", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return (acb_int >> 16) & 0xff; }, 
-        [this](Word nextAddr, DWord data) { 
-            (void)nextAddr; 
+        [this](Word, bool) { return (acb_int >> 16) & 0xff; }, 
+        [this](Word, DWord data, bool) { 
             _process_write_int(data, acb_int, acb_float, acb_raw, acb_string, 0x00FF0000, 16);
         },{ "" }}); nextAddr++;
     mapped_register.push_back({ "", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return (acb_int >> 8) & 0xff; }, 
-        [this](Word nextAddr, DWord data) {
-            (void)nextAddr; 
+        [this](Word, bool) { return (acb_int >> 8) & 0xff; }, 
+        [this](Word, DWord data, bool) {
             _process_write_int(data, acb_int, acb_float, acb_raw, acb_string, 0x0000FF00, 8);
         },{ "" }}); nextAddr++;
     mapped_register.push_back({ "", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return (aca_int >> 0) & 0xff; }, 
-        [this](Word nextAddr, DWord data) {
-            (void)nextAddr; 
+        [this](Word, bool) { return (aca_int >> 0) & 0xff; }, 
+        [this](Word, DWord data, bool) {
             _process_write_int(data, acb_int, acb_float, acb_raw, acb_string, 0x000000FF, 0);       
         },{ "" }}); nextAddr++;
 
@@ -244,8 +226,8 @@ int  Math::OnAttach(int nextAddr)
     //      Character Position Within the ACR Float String
     /////
     mapped_register.push_back({ "MATH_ACR_POS", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return (acr_pos >> 0) & 0xff; }, 
-        [this](Word nextAddr, DWord data) { (void)nextAddr; acr_pos = data & 0xff; }, 
+        [this](Word, bool) { return (acr_pos >> 0) & 0xff; }, 
+        [this](Word, DWord data, bool) { acr_pos = data & 0xff; }, 
         { "(Byte) Character Position Within the ACR Float String"} }); 
     nextAddr++;
 
@@ -255,11 +237,10 @@ int  Math::OnAttach(int nextAddr)
     //      ACR Float String Character Port
     /////
     mapped_register.push_back({ "MATH_ACR_DATA", nextAddr, 
-        [this](Word nextAddr) { 
-            (void)nextAddr; 
+        [this](Word, bool) { 
             return _process_read_data(acr_string, acr_pos); 
         }, 
-        [this](Word nextAddr, Byte data) { 
+        [this](Word nextAddr, Byte data, bool) { 
             _process_write_data(nextAddr, data, acr_string, acr_pos, acr_float, acr_raw, acr_int);         
         },
         { "(Byte) ACR Float String Character Port"} });
@@ -271,28 +252,24 @@ int  Math::OnAttach(int nextAddr)
     //      ACR Raw Float Data
     /////
     mapped_register.push_back({ "MATH_ACR_RAW", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return (acr_raw >> 24) & 0xff; }, 
-        [this](Word nextAddr, DWord data) { 
-            (void)nextAddr; 
+        [this](Word, bool) { return (acr_raw >> 24) & 0xff; }, 
+        [this](Word, DWord data, bool) { 
             _process_write_raw(data, acr_raw, acr_float, acr_int, acr_string, 0xFF000000, 24);
         },
         { "(4-Bytes) ACR Raw Float Data"} }); nextAddr++;   
     mapped_register.push_back({ "", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return (acr_raw >> 16) & 0xff; },
-        [this](Word nextAddr, DWord data) { 
-            (void)nextAddr; 
+        [this](Word, bool) { return (acr_raw >> 16) & 0xff; },
+        [this](Word, DWord data, bool) { 
             _process_write_raw(data, acr_raw, acr_float, acr_int, acr_string, 0x00FF0000, 16);
         },{ "" }}); nextAddr++;
     mapped_register.push_back({ "", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return (acr_raw >> 8) & 0xff; },
-        [this](Word nextAddr, DWord data) { 
-            (void)nextAddr; 
+        [this](Word, bool) { return (acr_raw >> 8) & 0xff; },
+        [this](Word, DWord data, bool) { 
             _process_write_raw(data, acr_raw, acr_float, acr_int, acr_string, 0x0000FF00, 8);
         },{ "" }}); nextAddr++;
     mapped_register.push_back({ "", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return (acr_raw >> 0) & 0xff; },
-        [this](Word nextAddr, DWord data) { 
-            (void)nextAddr; 
+        [this](Word, bool) { return (acr_raw >> 0) & 0xff; },
+        [this](Word, DWord data, bool) { 
             _process_write_raw(data, acr_raw, acr_float, acr_int, acr_string, 0x000000FF, 0);
         },{ "" }}); nextAddr++;
 
@@ -302,27 +279,23 @@ int  Math::OnAttach(int nextAddr)
     //      ACR Integer Data
     /////
     mapped_register.push_back({ "MATH_ACR_INT", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return (acr_int >> 24) & 0xff; }, 
-        [this](Word nextAddr, DWord data) { 
-            (void)nextAddr; 
+        [this](Word, bool) { return (acr_int >> 24) & 0xff; }, 
+        [this](Word, DWord data, bool) { 
             _process_write_int(data, acr_int, acr_float, acr_raw, acr_string, 0xFF000000, 24);       
         },{ "(4-Bytes) ACR Integer Data",""} }); nextAddr++;   
     mapped_register.push_back({ "", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return (acr_int >> 16) & 0xff; }, 
-        [this](Word nextAddr, DWord data) { 
-            (void)nextAddr; 
+        [this](Word, bool) {return (acr_int >> 16) & 0xff; }, 
+        [this](Word, DWord data, bool) { 
             _process_write_int(data, acr_int, acr_float, acr_raw, acr_string, 0x00FF0000, 16);
         },{ "" }}); nextAddr++;
     mapped_register.push_back({ "", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return (acr_int >> 8) & 0xff; }, 
-        [this](Word nextAddr, DWord data) {
-            (void)nextAddr; 
+        [this](Word, bool) {return (acr_int >> 8) & 0xff; }, 
+        [this](Word, DWord data, bool) {
             _process_write_int(data, acr_int, acr_float, acr_raw, acr_string, 0x0000FF00, 8);
         },{ "" }}); nextAddr++;
     mapped_register.push_back({ "", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return (acr_int >> 0) & 0xff; }, 
-        [this](Word nextAddr, DWord data) {
-            (void)nextAddr; 
+        [this](Word, bool) { return (acr_int >> 0) & 0xff; }, 
+        [this](Word, DWord data, bool) {
             _process_write_int(data, acr_int, acr_float, acr_raw, acr_string, 0x000000FF, 0);
         },{ "" }}); nextAddr++;
 
@@ -332,9 +305,8 @@ int  Math::OnAttach(int nextAddr)
     //      The 'Math Operation' (MOP) to be Issued
     /////
     mapped_register.push_back({ "MATH_OPERATION", nextAddr, 
-        [this](Word nextAddr) { (void)nextAddr; return math_operation; },
-        [this](Word nextAddr, Byte data) { 
-            (void)nextAddr;
+        [this](Word, bool) { return math_operation; },
+        [this](Word, Byte data, bool) { 
             _process_command(data);
         },
         { "(Byte) ACA Float String Character Port   (On Write)"} });

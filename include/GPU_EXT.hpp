@@ -186,6 +186,9 @@ private:
     // GPU_BMP_OFFSET           (Byte)      // Offset Within the Image Buffer(0-255)
     Byte _gpu_bmp_offset = 0;
 
+    // GPU_USR_OFFSET           (Byte)      // Offset to User Data (Read Only)
+    Byte _gpu_usr_offset = 0;
+
     // GPU_BMP_DATA             (Byte)      // Bitmap Data (Read Write)
     std::array<std::array<Byte, 256>, 256> _gpu_bmp_data = {0};  // this is the secondary 64k block of GPU memory
 
@@ -198,8 +201,8 @@ private:
     };
     std::vector<IMG_INFO> _gpu_img_info;
 
-    // GPU_SPR_MAX              (Byte)      // Maximum Sprite Index (Read Only)
-    Byte _gpu_spr_max = 0;
+    // // GPU_SPR_MAX              (Byte)      // Maximum Sprite Index (Read Only)
+    // Byte _gpu_spr_max = 0;
 
     // // GPU_SPR_IDX              (Byte)      // Sprite Index
     // Byte _gpu_spr_idx = 0;
@@ -216,34 +219,33 @@ private:
     // // GPU_SPR_APR_MASK         (DWord)      // Sprite Collision Approx. Mask (4x4)
     // DWord _gpu_spr_apr_mask = 0;
 
-    // GPU_IMG_FLAGS            (Byte)      // Sprite Flags:
-    Byte _gpu_img_flags = 0;
-                            // % 0000'0001: Double Width    // GPU_SPR_FL_DBL_WIDTH 
-                            // % 0000'0010: Double Height   // GPU_SPR_FL_DBL_HEIGHT    
-                            // % 0000'0100: Flip Horizontal // GPU_SPR_FL_FLIP_HORIZ    
-                            // % 0000'1000: Flip Vertical   // GPU_SPR_FL_FLIP_VERT     
-                            // % 0011'0000: Collision Type:
-                            //      00 = collision disabled // GPU_SPR_FL_COL_NONE      
-                            //      01 = bounding box       // GPU_SPR_FL_COL_BOUNDS    
-                            //      10 = center box         // GPU_SPR_FL_COL_CENTER    
-                            //      11 = pixel mask         // GPU_SPR_FL_COL_PIXEL     
-                            // % 0100'0000: Is Collided     // GPU_SPR_FL_IS_COLLIDED   
-                            // % 1000'0000: Display Enable  // GPU_SPR_FL_ENABLE           
+                                // ; (Byte) Sprite Flags:
+                                // ; 
+                                // ;    % 0000'0001:  Double Width
+                                // ;    % 0000'0010:  Double Height
+                                // ;    % 0000'0100:  Flip Horizontal
+                                // ;    % 0000'1000:  Flip Vertical
+                                // ;    % 0011'0000:  Collision Type:
+                                // ;         00 = none
+                                // ;         01 = bounding box
+                                // ;         10 = center box
+                                // ;         11 = pixel mask
+                                // ;    % 0100'0000:  Sprite Enable
+                                // ;    % 1000'0000:  (reserved)
+                                // ; 
+                                // ; (Byte) Image Flags:
+                                // ; 
+                                // ;    % 0000'0011:  Color Mode:
+                                // ;         00 = 2-colors
+                                // ;         01 = 4-colors
+                                // ;         10 = 16-colors
+                                // ;         11 = 256-colors
+                                // ;    % 0000'0100:  Secondary Palette (rules apply)
+                                // ;    % 0000'1000:  32 pixel width (rules apply)
+                                // ;    % 0001'0000:  32 pixel height (rules apply)
+                                // ;    % 1110'0000:  (reserved)
+                                // ; 
 
-    // struct BITMAP16_INFO 
-    // {
-    //     Word handle = 0;    // handle to the dynamic memory
-    //     Byte offset = 0;    // offset within the 16x16 image buffer (0-255)
-    //     Byte flags = 0;     // 16x16 bitmap flags
-    //                         // % 0000'0011: 
-    //                         //      00 = 2 colors (size=32), 
-    //                         //      01 = 4 colors (size=64), 
-    //                         //      10 = 16 colors (size=128), 
-    //                         //      11 = 256 colors (size=256)
-    //                         // % 0111'1100: Reserved
-    //                         // % 1000'0000: Is Allocated
-    // };
-    // std::vector<BITMAP16_INFO> _gpu_bitmaps;
         
 
 // Tilemap Registers:     
@@ -289,6 +291,13 @@ private:
         { "GPU_ERR_SIZE",       "Total Number of GPU Errors" }
     };    
     void error(Byte error_code, bool bLog = true);        // helper that sets an error code
+
+    // **************** //
+    // HELPER FUNCTIONS //
+    // **************** //
+
+    Byte _validate_spr_flags(Byte data);
+    Byte _validate_img_flags(Byte data);
 
 
     // ********************** //

@@ -70,8 +70,8 @@ int  GPU::OnAttach(int nextAddr)
     /////
     mapped_register.push_back( { "GPU_MODE", nextAddr, nullptr, nullptr, {""}});
     mapped_register.push_back( { "GPU_MODE_MSB", nextAddr, 
-        [this](Word) { return (_gpu_mode>>8) & 0xFF; }, 
-        [this](Word, Byte data) { _verify_gpu_mode_change( (_gpu_mode & 0x00FF) | (data << 8) ); }, 
+        [this](Word, bool) { return (_gpu_mode>>8) & 0xFF; }, 
+        [this](Word, Byte data, bool) { _verify_gpu_mode_change( (_gpu_mode & 0x00FF) | (data << 8) ); }, 
         {   
             "(Byte) Graphics Display Mode",
             "- bit  7   = Extended Display Enable:",
@@ -99,8 +99,8 @@ int  GPU::OnAttach(int nextAddr)
     }); nextAddr+=1;
     // (Byte) GPU_MODE_LSB
     mapped_register.push_back( { "GPU_MODE_LSB", nextAddr,
-        [this](Word) { return _gpu_mode & 0xFF; },
-        [this](Word, Byte data) { _verify_gpu_mode_change( (_gpu_mode & 0xFF00) | (data & 0xFF) ); }, 
+        [this](Word, bool) { return _gpu_mode & 0xFF; },
+        [this](Word, Byte data, bool) { _verify_gpu_mode_change( (_gpu_mode & 0xFF00) | (data & 0xFF) ); }, 
         {
             "- bit  7   = Standard Display Enable",
             "             0: Disabled",
@@ -176,7 +176,7 @@ int  GPU::OnAttach(int nextAddr)
     //       Video Buffer Maximum (Read Only)
     /////
     mapped_register.push_back( { "GPU_VIDEO_MAX", nextAddr,
-        [this](Word) { return _gpu_video_max >> 8; }, 
+        [this](Word, bool) { return _gpu_video_max >> 8; }, 
         nullptr, {   
             "(Word) Video Buffer Maximum (Read Only)",
             "Note: This will change to reflect",
@@ -186,7 +186,7 @@ int  GPU::OnAttach(int nextAddr)
             "      standard video mode.",""
         }}); nextAddr+=1;
     mapped_register.push_back( { "", nextAddr,
-        [this](Word) { return _gpu_video_max & 0xFF; }, 
+        [this](Word, bool) { return _gpu_video_max & 0xFF; }, 
         nullptr, {""}}); nextAddr+=1;
 
 
@@ -195,14 +195,14 @@ int  GPU::OnAttach(int nextAddr)
     //      Horizontal Pixel Resolution (Read Only)
     /////
     mapped_register.push_back({ "GPU_HRES", nextAddr, 
-        [this](Word) { return _gpu_hres >> 8; }, 
+        [this](Word, bool) { return _gpu_hres >> 8; }, 
         nullptr,  {
             "(Word) Horizontal Pixel Resolution (Read Only)",
             "Note: This will reflect the number of",
             "      pixel columns for bitmap modes.",""
         }}); nextAddr+=1;        
      mapped_register.push_back( { "", nextAddr,
-        [this](Word) { return _gpu_hres & 0xFF; }, 
+        [this](Word, bool) { return _gpu_hres & 0xFF; }, 
         nullptr, {""}}); nextAddr+=1;
 
 
@@ -211,14 +211,14 @@ int  GPU::OnAttach(int nextAddr)
     //      Vertical Pixel Resolution (Read Only)
     /////
     mapped_register.push_back({ "GPU_VRES", nextAddr, 
-        [this](Word) { return _gpu_vres >> 8; }, 
+        [this](Word, bool) { return _gpu_vres >> 8; }, 
         nullptr,  {
             "(Word) Vertical Pixel Resolution (Read Only)",
             "Note: This will reflect the number of",
             "      pixel rows for bitmap modes.",""
         }}); nextAddr+=1;        
      mapped_register.push_back( { "", nextAddr,
-        [this](Word) { return _gpu_vres & 0xFF; }, 
+        [this](Word, bool) { return _gpu_vres & 0xFF; }, 
         nullptr, {""}}); nextAddr+=1;
 
 
@@ -227,7 +227,7 @@ int  GPU::OnAttach(int nextAddr)
     //      Text Horizontal Columns (Read Only)
     /////
     mapped_register.push_back({ "GPU_TCOLS", nextAddr,  
-        [this](Word) { return _gpu_tcols & 0xFF; }, 
+        [this](Word, bool) { return _gpu_tcols & 0xFF; }, 
         nullptr,  {
             "(Byte) Text Horizontal Columns (Read Only)",
             "Note: This will reflect the number of",
@@ -240,7 +240,7 @@ int  GPU::OnAttach(int nextAddr)
     //      Text Vertical Rows (Read Only)
     /////
     mapped_register.push_back({ "GPU_TROWS", nextAddr,  
-        [this](Word) { return _gpu_trows & 0xFF; }, 
+        [this](Word, bool) { return _gpu_trows & 0xFF; }, 
         nullptr,  {
             "(Byte) Text Vertical Rows (Read Only)",
             "Note: This will reflect the number of",
@@ -253,8 +253,8 @@ int  GPU::OnAttach(int nextAddr)
     //      Color Palette Index
     /////
     mapped_register.push_back({ "GPU_PAL_INDEX", nextAddr,  
-        [this](Word) { return _gpu_pal_index; }, 
-        [this](Word, Byte data) { _gpu_pal_index = data; }, 
+        [this](Word, bool) { return _gpu_pal_index; }, 
+        [this](Word, Byte data, bool) { _gpu_pal_index = data; }, 
         {
             "(Byte) Color Palette Index",
             "Note: Use this register to set the",
@@ -271,8 +271,8 @@ int  GPU::OnAttach(int nextAddr)
     //      Indexed Color Palette Data (A4R4G4B4 format)
     /////
     mapped_register.push_back({ "GPU_PAL_COLOR", nextAddr,  
-        [this](Word) { return (_palette[_gpu_pal_index].color >> 8) & 0xFF; }, 
-        [this](Word, Byte data) { 
+        [this](Word, bool) { return (_palette[_gpu_pal_index].color >> 8) & 0xFF; }, 
+        [this](Word, Byte data, bool) { 
             Word c = _palette[_gpu_pal_index].color & 0x00ff;
 			_palette[_gpu_pal_index].color = c | ((Word)data << 8);
         }, {
@@ -286,9 +286,8 @@ int  GPU::OnAttach(int nextAddr)
             ""
         }}); nextAddr+=1;
     mapped_register.push_back( { "", nextAddr,
-        [this](Word) { return _palette[_gpu_pal_index].color & 0xFF; }, 
-        [this](Word nextAddr, Byte data) { 
-            (void)nextAddr; 
+        [this](Word, bool) { return _palette[_gpu_pal_index].color & 0xFF; }, 
+        [this](Word, Byte data, bool) { 
 			Word c = _palette[_gpu_pal_index].color & 0xff00;
 			_palette[_gpu_pal_index].color = c | data;
         }, {""}}); nextAddr+=1;      
@@ -299,8 +298,8 @@ int  GPU::OnAttach(int nextAddr)
     //     Text Glyph Index (0-255)
     /////
     mapped_register.push_back({ "GPU_GLYPH_IDX", nextAddr,  
-        [this](Word) { return _gpu_glyph_idx; }, 
-        [this](Word, Byte data) { _gpu_glyph_idx = data; }, 
+        [this](Word, bool) { return _gpu_glyph_idx; }, 
+        [this](Word, Byte data, bool) { _gpu_glyph_idx = data; }, 
         {
             "(Byte) Text Glyph Index",
             "Note: Use this register to set the",
@@ -317,8 +316,8 @@ int  GPU::OnAttach(int nextAddr)
     //      Text Glyph Pixel Data Array
     /////
     mapped_register.push_back({ "GPU_GLYPH_DATA", nextAddr,  
-        [this](Word) { return _gpu_glyph_data[_gpu_glyph_idx][0];  }, 
-        [this](Word, Byte data) { _gpu_glyph_data[_gpu_glyph_idx][0] = data; }, 
+        [this](Word, bool) { return _gpu_glyph_data[_gpu_glyph_idx][0];  }, 
+        [this](Word, Byte data, bool) { _gpu_glyph_data[_gpu_glyph_idx][0] = data; }, 
         {
             "(8-Bytes) 8 rows of binary encoded glyph pixel data",
             "Note: This is the pixel data for a", 
@@ -330,32 +329,32 @@ int  GPU::OnAttach(int nextAddr)
             ""
         }}); nextAddr+=1;
     mapped_register.push_back( { "", nextAddr,
-        [this](Word) { return _gpu_glyph_data[_gpu_glyph_idx][1]; }, 
-        [this](Word, Byte data) { _gpu_glyph_data[_gpu_glyph_idx][1] = data; }, 
+        [this](Word, bool) { return _gpu_glyph_data[_gpu_glyph_idx][1]; }, 
+        [this](Word, Byte data, bool) { _gpu_glyph_data[_gpu_glyph_idx][1] = data; }, 
         {""}}); nextAddr+=1;      
     mapped_register.push_back( { "", nextAddr,
-        [this](Word) { return _gpu_glyph_data[_gpu_glyph_idx][2]; }, 
-        [this](Word, Byte data) { _gpu_glyph_data[_gpu_glyph_idx][2] = data; }, 
+        [this](Word, bool) { return _gpu_glyph_data[_gpu_glyph_idx][2]; }, 
+        [this](Word, Byte data, bool) { _gpu_glyph_data[_gpu_glyph_idx][2] = data; }, 
         {""}}); nextAddr+=1;      
     mapped_register.push_back( { "", nextAddr,
-        [this](Word) { return _gpu_glyph_data[_gpu_glyph_idx][3]; }, 
-        [this](Word, Byte data) { _gpu_glyph_data[_gpu_glyph_idx][3] = data; }, 
+        [this](Word, bool) { return _gpu_glyph_data[_gpu_glyph_idx][3]; }, 
+        [this](Word, Byte data, bool) { _gpu_glyph_data[_gpu_glyph_idx][3] = data; }, 
         {""}}); nextAddr+=1;      
     mapped_register.push_back( { "", nextAddr,
-        [this](Word) { return _gpu_glyph_data[_gpu_glyph_idx][4]; }, 
-        [this](Word, Byte data) { _gpu_glyph_data[_gpu_glyph_idx][4] = data; }, 
+        [this](Word, bool) { return _gpu_glyph_data[_gpu_glyph_idx][4]; }, 
+        [this](Word, Byte data, bool) { _gpu_glyph_data[_gpu_glyph_idx][4] = data; }, 
         {""}}); nextAddr+=1;      
     mapped_register.push_back( { "", nextAddr,
-        [this](Word) { return _gpu_glyph_data[_gpu_glyph_idx][5]; }, 
-        [this](Word, Byte data) { _gpu_glyph_data[_gpu_glyph_idx][5] = data; }, 
+        [this](Word, bool) { return _gpu_glyph_data[_gpu_glyph_idx][5]; }, 
+        [this](Word, Byte data, bool) { _gpu_glyph_data[_gpu_glyph_idx][5] = data; }, 
         {""}}); nextAddr+=1;      
     mapped_register.push_back( { "", nextAddr,
-        [this](Word) { return _gpu_glyph_data[_gpu_glyph_idx][6]; }, 
-        [this](Word, Byte data) { _gpu_glyph_data[_gpu_glyph_idx][6] = data; }, 
+        [this](Word, bool) { return _gpu_glyph_data[_gpu_glyph_idx][6]; }, 
+        [this](Word, Byte data, bool) { _gpu_glyph_data[_gpu_glyph_idx][6] = data; }, 
         {""}}); nextAddr+=1;      
     mapped_register.push_back( { "", nextAddr,
-        [this](Word) { return _gpu_glyph_data[_gpu_glyph_idx][7]; }, 
-        [this](Word, Byte data) { _gpu_glyph_data[_gpu_glyph_idx][7] = data; }, 
+        [this](Word, bool) { return _gpu_glyph_data[_gpu_glyph_idx][7]; }, 
+        [this](Word, Byte data, bool) { _gpu_glyph_data[_gpu_glyph_idx][7] = data; }, 
         {""}}); nextAddr+=1;      
 
     // ************************************** //
@@ -512,13 +511,11 @@ void GPU::OnActivate()
     // std::cout << clr::indent() << clr::CYAN << "GPU::OnActivate() Entry" << clr::RETURN;
 
     // clear out the extended video buffer
-    Word d=0;
-    for (int i=0; i<(64000); i++) 
-    { 
-        _ext_video_buffer[i] = d++; 
-        if (i%256) d=0;
+    Word d = 0;
+    for (int i = 0; i < (int)_ext_video_buffer.size(); i++) {
+        _ext_video_buffer.at(i) = (Byte)d++;
+        if (i % 256) d = 0;
     }
-
     // std::cout << clr::indent() << clr::CYAN << "GPU::OnActivate() Exit" << clr::RETURN;
 } // END: GPU::OnActivate()
 

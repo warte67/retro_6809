@@ -70,11 +70,11 @@ protected: // PROTECTED ACCESSORS
     // device memory map description
     std::string heading;                    // string that describes the entire device
     struct REGISTER_NODE {
-        std::string name;                   // register label
-        int address;                        // register starting address
-        std::function<Byte(Word)> read;         // Read handler (lambda or function pointer)
-        std::function<void(Word, Byte)> write;    // Write handler (lambda or function pointer)    
-        std::vector<std::string> comment;   // register comments (can be multiple lines)
+        std::string name;                               // register label
+        int address;                                    // register starting address
+        std::function<Byte(Word, bool)> read;           // Read handler (lambda or function pointer)
+        std::function<void(Word, Byte, bool)> write;    // Write handler (lambda or function pointer)    
+        std::vector<std::string> comment;               // register comments (can be multiple lines)
     };
     std::vector<REGISTER_NODE> mapped_register;
 };

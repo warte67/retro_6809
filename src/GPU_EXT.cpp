@@ -35,7 +35,7 @@ int GPU_EXT::_onAttach(int nextAddr)
     //            active background video mode.
     /////
     _gpu->mapped_register.push_back( { "GPU_BGND_SIZE", nextAddr,
-        [this](Word) { return _gpu_bgnd_size >> 8; }, 
+        [this](Word, bool) { return _gpu_bgnd_size >> 8; }, 
         nullptr, 
         {   
             "(Word) Extended Graphics Buffer Size (Read Only)",
@@ -45,7 +45,7 @@ int GPU_EXT::_onAttach(int nextAddr)
             "      active background video mode.",""
         }}); nextAddr+=1;
     _gpu->mapped_register.push_back( { "", nextAddr,
-        [this](Word) { return _gpu_bgnd_size & 0xFF; }, 
+        [this](Word, bool) { return _gpu_bgnd_size & 0xFF; }, 
         nullptr, 
         {""}}); nextAddr+=1;
 
@@ -59,8 +59,8 @@ int GPU_EXT::_onAttach(int nextAddr)
     //            values in GPU_BLIT_PITCH and GPU_BLIT_WIDTH.
     /////
     _gpu->mapped_register.push_back( { "GPU_BLIT_ADDR", nextAddr,
-        [this](Word) { return _gpu_blit_addr >> 8; }, 
-        [this](Word, Byte data) { _gpu_blit_addr = (_gpu_blit_addr & 0x00FF) | (data << 8); }, 
+        [this](Word, bool) { return _gpu_blit_addr >> 8; }, 
+        [this](Word, Byte data, bool) { _gpu_blit_addr = (_gpu_blit_addr & 0x00FF) | (data << 8); }, 
         {   
             "(Word) Graphics Memory Address Port ",
             "Note: When GPU_BLIT_DATA is accessed, this register",
@@ -69,8 +69,8 @@ int GPU_EXT::_onAttach(int nextAddr)
             "      values in GPU_BLIT_PITCH and GPU_BLIT_WIDTH.",""
         }}); nextAddr+=1;
     _gpu->mapped_register.push_back( { "", nextAddr,
-        [this](Word) { return _gpu_blit_addr & 0xFF; }, 
-        [this](Word, Byte data) { _gpu_blit_addr = (_gpu_blit_addr & 0xFF00) | (data << 0); },  
+        [this](Word, bool) { return _gpu_blit_addr & 0xFF; }, 
+        [this](Word, Byte data, bool) { _gpu_blit_addr = (_gpu_blit_addr & 0xFF00) | (data << 0); },  
         {""}}); nextAddr+=1;
 
 
@@ -81,16 +81,16 @@ int GPU_EXT::_onAttach(int nextAddr)
     //              pixels per line.
     /////
     _gpu->mapped_register.push_back( { "GPU_BLIT_PITCH", nextAddr,
-        [this](Word) { return _gpu_blit_pitch >> 8; }, 
-        [this](Word, Byte data) { _gpu_blit_pitch = (_gpu_blit_pitch & 0x00FF) | (data << 8); }, 
+        [this](Word, bool) { return _gpu_blit_pitch >> 8; }, 
+        [this](Word, Byte data, bool) { _gpu_blit_pitch = (_gpu_blit_pitch & 0x00FF) | (data << 8); }, 
         {   
             "(Word) Number of Bytes Per Display Line",
             "Note: This value represents the number of displayed",
             "      pixels per line.",""
         }}); nextAddr+=1;
     _gpu->mapped_register.push_back( { "", nextAddr,
-        [this](Word) { return _gpu_blit_pitch & 0xFF; }, 
-        [this](Word, Byte data) { _gpu_blit_pitch = (_gpu_blit_pitch & 0xFF00) | (data << 0); },  
+        [this](Word, bool) { return _gpu_blit_pitch & 0xFF; }, 
+        [this](Word, Byte data, bool) { _gpu_blit_pitch = (_gpu_blit_pitch & 0xFF00) | (data << 0); },  
         {""}}); nextAddr+=1;
 
 
@@ -100,9 +100,9 @@ int GPU_EXT::_onAttach(int nextAddr)
     /////
     _gpu->mapped_register.push_back( { "GPU_BLIT_WIDTH", nextAddr,
         // READ
-        [this](Word) { return _gpu_blit_width >> 8; }, 
+        [this](Word, bool) { return _gpu_blit_width >> 8; }, 
         // WRITE
-        [this](Word, Byte data) 
+        [this](Word, Byte data, bool) 
         { 
             _gpu_blit_width = (_gpu_blit_width & 0x00FF) | (data << 8); 
             // this is a counter that is decremented each time a pixel is copied
@@ -114,9 +114,9 @@ int GPU_EXT::_onAttach(int nextAddr)
     }); nextAddr+=1;
     _gpu->mapped_register.push_back( { "", nextAddr,
         // READ
-        [this](Word) { return _gpu_blit_width & 0xFF; }, 
+        [this](Word, bool) { return _gpu_blit_width & 0xFF; }, 
         // WRITE
-        [this](Word, Byte data) 
+        [this](Word, Byte data, bool) 
         { 
             _gpu_blit_width = (_gpu_blit_width & 0xFF00) | (data << 0); 
             // this is a counter that is decremented each time a pixel is copied
@@ -131,8 +131,8 @@ int GPU_EXT::_onAttach(int nextAddr)
     //      GPU Memory Data Port
     /////
     _gpu->mapped_register.push_back( { "GPU_BLIT_DATA", nextAddr,
-        [this](Word) { return _gpu_blit_read_data(); }, 
-        [this](Word, Byte data) { _gpu_blit_write_data(data); },
+        [this](Word, bool) { return _gpu_blit_read_data(); }, 
+        [this](Word, Byte data, bool) { _gpu_blit_write_data(data); },
         {   
             "(Byte) GPU Memory Data Port",""
         }}); nextAddr+=1;
@@ -143,14 +143,14 @@ int GPU_EXT::_onAttach(int nextAddr)
     //      (Word) GPU Command Argument 1
     /////
     _gpu->mapped_register.push_back( { "GPU_CMD_ARG_1", nextAddr,
-        [this](Word) { return _gpu_cmd_arg_1 >> 8; }, 
-        [this](Word, Byte data) { _gpu_cmd_arg_1 = (_gpu_cmd_arg_1 & 0x00FF) | (data << 8); }, 
+        [this](Word, bool) { return _gpu_cmd_arg_1 >> 8; }, 
+        [this](Word, Byte data, bool) { _gpu_cmd_arg_1 = (_gpu_cmd_arg_1 & 0x00FF) | (data << 8); }, 
         {   
             "(Word) GPU Command Argument 1"
         }}); nextAddr+=1;
     _gpu->mapped_register.push_back( { "", nextAddr,
-        [this](Word) { return _gpu_cmd_arg_1 & 0xFF; }, 
-        [this](Word, Byte data) { _gpu_cmd_arg_1 = (_gpu_cmd_arg_1 & 0xFF00) | (data << 0); },  
+        [this](Word, bool) { return _gpu_cmd_arg_1 & 0xFF; }, 
+        [this](Word, Byte data, bool) { _gpu_cmd_arg_1 = (_gpu_cmd_arg_1 & 0xFF00) | (data << 0); },  
         {""}}); nextAddr+=1;
 
 
@@ -159,14 +159,14 @@ int GPU_EXT::_onAttach(int nextAddr)
     //      (Word) GPU Command Argument 2
     /////
     _gpu->mapped_register.push_back( { "GPU_CMD_ARG_2", nextAddr,
-        [this](Word) { return _gpu_cmd_arg_2 >> 8; }, 
-        [this](Word, Byte data) { _gpu_cmd_arg_2 = (_gpu_cmd_arg_2 & 0x00FF) | (data << 8); }, 
+        [this](Word, bool) { return _gpu_cmd_arg_2 >> 8; }, 
+        [this](Word, Byte data, bool) { _gpu_cmd_arg_2 = (_gpu_cmd_arg_2 & 0x00FF) | (data << 8); }, 
         {   
             "(Word) GPU Command Argument 2"
         }}); nextAddr+=1;
     _gpu->mapped_register.push_back( { "", nextAddr,
-        [this](Word) { return _gpu_cmd_arg_2 & 0xFF; }, 
-        [this](Word, Byte data) { _gpu_cmd_arg_2 = (_gpu_cmd_arg_2 & 0xFF00) | (data << 0); },  
+        [this](Word, bool) { return _gpu_cmd_arg_2 & 0xFF; }, 
+        [this](Word, Byte data, bool) { _gpu_cmd_arg_2 = (_gpu_cmd_arg_2 & 0xFF00) | (data << 0); },  
         {""}}); nextAddr+=1;
 
 
@@ -175,14 +175,14 @@ int GPU_EXT::_onAttach(int nextAddr)
     //      (Word) GPU Command Argument 3
     /////
     _gpu->mapped_register.push_back( { "GPU_CMD_ARG_3", nextAddr,
-        [this](Word) { return _gpu_cmd_arg_3 >> 8; }, 
-        [this](Word, Byte data) { _gpu_cmd_arg_3 = (_gpu_cmd_arg_3 & 0x00FF) | (data << 8); }, 
+        [this](Word, bool) { return _gpu_cmd_arg_3 >> 8; }, 
+        [this](Word, Byte data, bool) { _gpu_cmd_arg_3 = (_gpu_cmd_arg_3 & 0x00FF) | (data << 8); }, 
         {   
             "(Word) GPU Command Argument 3"
         }}); nextAddr+=1;
     _gpu->mapped_register.push_back( { "", nextAddr,
-        [this](Word) { return _gpu_cmd_arg_3 & 0xFF; }, 
-        [this](Word, Byte data) { _gpu_cmd_arg_3 = (_gpu_cmd_arg_3 & 0xFF00) | (data << 0); },  
+        [this](Word, bool) { return _gpu_cmd_arg_3 & 0xFF; }, 
+        [this](Word, Byte data, bool) { _gpu_cmd_arg_3 = (_gpu_cmd_arg_3 & 0xFF00) | (data << 0); },  
         {""}}); nextAddr+=1;
 
 
@@ -191,14 +191,14 @@ int GPU_EXT::_onAttach(int nextAddr)
     //      (Word) GPU Command Argument 4
     /////
     _gpu->mapped_register.push_back( { "GPU_CMD_ARG_4", nextAddr,
-        [this](Word) { return _gpu_cmd_arg_4 >> 8; }, 
-        [this](Word, Byte data) { _gpu_cmd_arg_4 = (_gpu_cmd_arg_4 & 0x00FF) | (data << 8); }, 
+        [this](Word, bool) { return _gpu_cmd_arg_4 >> 8; }, 
+        [this](Word, Byte data, bool) { _gpu_cmd_arg_4 = (_gpu_cmd_arg_4 & 0x00FF) | (data << 8); }, 
         {   
             "(Word) GPU Command Argument 4"
         }}); nextAddr+=1;
     _gpu->mapped_register.push_back( { "", nextAddr,
-        [this](Word) { return _gpu_cmd_arg_4 & 0xFF; }, 
-        [this](Word, Byte data) { _gpu_cmd_arg_4 = (_gpu_cmd_arg_4 & 0xFF00) | (data << 0); },  
+        [this](Word, bool) { return _gpu_cmd_arg_4 & 0xFF; }, 
+        [this](Word, Byte data, bool) { _gpu_cmd_arg_4 = (_gpu_cmd_arg_4 & 0xFF00) | (data << 0); },  
         {""}}); nextAddr+=1;
 
 
@@ -207,14 +207,14 @@ int GPU_EXT::_onAttach(int nextAddr)
     //      (Word) GPU Command Argument 5
     /////
     _gpu->mapped_register.push_back( { "GPU_CMD_ARG_5", nextAddr,
-        [this](Word) { return _gpu_cmd_arg_5 >> 8; }, 
-        [this](Word, Byte data) { _gpu_cmd_arg_5 = (_gpu_cmd_arg_5 & 0x00FF) | (data << 8); }, 
+        [this](Word, bool) { return _gpu_cmd_arg_5 >> 8; }, 
+        [this](Word, Byte data, bool) { _gpu_cmd_arg_5 = (_gpu_cmd_arg_5 & 0x00FF) | (data << 8); }, 
         {   
             "(Word) GPU Command Argument 5",""
         }}); nextAddr+=1;
     _gpu->mapped_register.push_back( { "", nextAddr,
-        [this](Word) { return _gpu_cmd_arg_5 & 0xFF; }, 
-        [this](Word, Byte data) { _gpu_cmd_arg_5 = (_gpu_cmd_arg_5 & 0xFF00) | (data << 0); },  
+        [this](Word, bool) { return _gpu_cmd_arg_5 & 0xFF; }, 
+        [this](Word, Byte data, bool) { _gpu_cmd_arg_5 = (_gpu_cmd_arg_5 & 0xFF00) | (data << 0); },  
         {""}}); nextAddr+=1;
 
 
@@ -223,8 +223,8 @@ int GPU_EXT::_onAttach(int nextAddr)
     //      Memory Management Unit Command
     /////
     _gpu->mapped_register.push_back({ "GPU_COMMAND", nextAddr, 
-        [this](Word) { return _gpu_command; },  
-        [this](Word, Byte data) { 
+        [this](Word, bool) { return _gpu_command; },  
+        [this](Word, Byte data, bool) { 
             // dispatch the GPU Command
             _gpu_command = data; 
             do_command(data);
@@ -258,9 +258,9 @@ int GPU_EXT::_onAttach(int nextAddr)
     /////
     _gpu->mapped_register.push_back({ "GPU_BMP_IDX", nextAddr,  
         // READ 
-        [this](Word) { return _gpu_bmp_idx; }, 
+        [this](Word, bool) { return _gpu_bmp_idx; }, 
         // WRITE
-        [this](Word, Byte data) { _gpu_bmp_idx = data; },  
+        [this](Word, Byte data, bool) { _gpu_bmp_idx = data; },  
         // COMMENT
         { "(Byte) Bitmap Image Index (0-255)", }
     }); nextAddr+=1;
@@ -272,12 +272,26 @@ int GPU_EXT::_onAttach(int nextAddr)
     /////
     _gpu->mapped_register.push_back({ "GPU_BMP_OFFSET", nextAddr, 
         // READ 
-        [this](Word) { return _gpu_bmp_offset; }, 
+        [this](Word, bool) { return _gpu_bmp_offset; }, 
         // WRITE
-        [this](Word, Byte data) { _gpu_bmp_offset = data; },  
+        [this](Word, Byte data, bool) { _gpu_bmp_offset = data; },  
         // COMMENT
         { "(Byte) Offset Within the Image Buffer    (0-255)", }
     }); nextAddr+=1;
+ 
+
+    ////////////////////////////////////////////////
+    // (Byte) GPU_USR_OFFSET
+    //      Offset Within the Image Buffer Where User Data Starts (0-255)
+    /////
+    _gpu->mapped_register.push_back({ "GPU_USR_OFFSET", nextAddr, 
+        // READ 
+        [this](Word, bool) { return _gpu_usr_offset; }, 
+        // WRITE
+        [this](Word, Byte data, bool) { _gpu_usr_offset = data; },    // GPU_ERR_OFFSET error condition if 256-color mode or other invalid offset
+        // COMMENT
+        { "(Byte) Offset Where User Data Starts (0-255)", }
+    }); nextAddr+=1;    
 
 
     ////////////////////////////////////////////////
@@ -286,17 +300,19 @@ int GPU_EXT::_onAttach(int nextAddr)
     /////
     _gpu->mapped_register.push_back({ "GPU_BMP_DATA", nextAddr,  
         // READ
-        [this](Word) 
+        [this](Word, bool debug) 
         { 
             Byte data = _gpu_bmp_data[_gpu_bmp_idx][_gpu_bmp_offset];
-            _gpu_bmp_offset = (_gpu_bmp_offset == 255) ? 255 : _gpu_bmp_offset + 1;
+            if (!debug)
+                _gpu_bmp_offset = (_gpu_bmp_offset == 255) ? 255 : _gpu_bmp_offset + 1;
             return data;
         },
         // WRITE
-        [this](Word, Byte data) 
+        [this](Word, Byte data, bool debug) 
         { 
             _gpu_bmp_data[_gpu_bmp_idx][_gpu_bmp_offset] = data;
-            _gpu_bmp_offset = (_gpu_bmp_offset == 255) ? 255 : _gpu_bmp_offset + 1;
+            if (!debug)
+                _gpu_bmp_offset = (_gpu_bmp_offset == 255) ? 255 : _gpu_bmp_offset + 1;
         },
         { "(Byte) Bitmap Data      (Read Write)","" }
     }); nextAddr+=1;
@@ -306,31 +322,41 @@ int GPU_EXT::_onAttach(int nextAddr)
     // (Sint16) GPU_SPR_XPOS
     //      Sprite X Position
     /////
-    _gpu->mapped_register.push_back( { "GPU_SPR_XPOS", nextAddr,
-        [this](Word) { return _gpu_cmd_arg_5 >> 8; }, 
-        [this](Word, Byte data) { _gpu_spr_xpos = (_gpu_spr_xpos & 0x00FF) | (data << 8); }, 
+    _gpu->mapped_register.push_back( { "GPU_SPR_XPOS", nextAddr, // MSB
+        // READ
+        [this](Word, bool) { return (_gpu_img_info[_gpu_bmp_idx].XPos) >> 8; }, 
+        // WRITE
+        [this](Word, Byte data, bool) { _gpu_img_info[_gpu_bmp_idx].XPos = (_gpu_img_info[_gpu_bmp_idx].XPos & 0x00FF) | (data << 8); }, 
         {   
             "(Sint16) Sprite X Position",
-        }}); nextAddr+=1;
-    _gpu->mapped_register.push_back( { "", nextAddr,
-        [this](Word) { return _gpu_spr_xpos & 0xFF; }, 
-        [this](Word, Byte data) { _gpu_spr_xpos = (_gpu_spr_xpos & 0xFF00) | (data << 0); },  
-        {""}}); nextAddr+=1;
+        }
+    }); nextAddr+=1;
+    _gpu->mapped_register.push_back( { "", nextAddr, // LSB
+        // READ
+        [this](Word, bool) { return _gpu_img_info[_gpu_bmp_idx].XPos & 0xFF; }, 
+        // WRITE
+        [this](Word, Byte data, bool) { _gpu_img_info[_gpu_bmp_idx].XPos = (_gpu_img_info[_gpu_bmp_idx].XPos & 0xFF00) | (data << 0); },  
+        {""}
+    }); nextAddr+=1;
 
 
     ////////////////////////////////////////////////
     // (Sint16) GPU_SPR_YPOS
     //      Sprite Y Position
     /////
-    _gpu->mapped_register.push_back( { "GPU_SPR_YPOS", nextAddr,
-        [this](Word) { return _gpu_spr_ypos >> 8; }, 
-        [this](Word, Byte data) { _gpu_spr_ypos = (_gpu_spr_ypos & 0x00FF) | (data << 8); }, 
+    _gpu->mapped_register.push_back( { "GPU_SPR_YPOS", nextAddr, // MSB
+        // READ
+        [this](Word, bool) { return _gpu_img_info[_gpu_bmp_idx].YPos >> 8; }, 
+        // WRITE
+        [this](Word, Byte data, bool) { _gpu_img_info[_gpu_bmp_idx].YPos = (_gpu_img_info[_gpu_bmp_idx].YPos & 0x00FF) | (data << 8); }, 
         {   
-            "(Sint16) Sprite X Position",
+            "(Sint16) Sprite Y Position",
         }}); nextAddr+=1;
-    _gpu->mapped_register.push_back( { "", nextAddr,
-        [this](Word) { return _gpu_spr_ypos & 0xFF; }, 
-        [this](Word, Byte data) { _gpu_spr_ypos = (_gpu_spr_ypos & 0xFF00) | (data << 0); },  
+    _gpu->mapped_register.push_back( { "", nextAddr, // LSB
+        // READ
+        [this](Word, bool) { return _gpu_img_info[_gpu_bmp_idx].YPos & 0xFF; }, 
+        // WRITE
+        [this](Word, Byte data, bool) { _gpu_img_info[_gpu_bmp_idx].YPos = (_gpu_img_info[_gpu_bmp_idx].YPos & 0xFF00) | (data << 0); },  
         {""}}); nextAddr+=1;
  
 
@@ -339,10 +365,10 @@ int GPU_EXT::_onAttach(int nextAddr)
     //      Sprite Flags:
     /////
     _gpu->mapped_register.push_back({ "GPU_SPR_FLAGS", nextAddr,  
-        [this](Word) { return _gpu_img_flags; }, 
-        [this](Word, Byte data) { _gpu_img_flags = data; },
+        [this](Word, bool) { return _gpu_img_info[_gpu_bmp_idx].spr_flags; }, 
+        [this](Word, Byte data, bool) { _gpu_img_info[_gpu_bmp_idx].spr_flags = _validate_spr_flags(data); },
         { "(Byte) Sprite Flags:","" }
-    }); nextAddr+=1;
+    }); nextAddr+=1;  
     Byte flags = 0;
     _gpu->mapped_register.push_back({ "GPU_SPR_FL_DBL_WIDTH"  , (0b0000'0001), nullptr,nullptr, { "   % 0000'0001:  Double Width"}}); 
     _gpu->mapped_register.push_back({ "GPU_SPR_FL_DBL_HEIGHT" , (0b0000'0010), nullptr,nullptr, { "   % 0000'0010:  Double Height"}}); 
@@ -362,8 +388,8 @@ int GPU_EXT::_onAttach(int nextAddr)
     //      Image Flags:
     /////
     _gpu->mapped_register.push_back({ "GPU_IMG_FLAGS", nextAddr,  
-        [this](Word) { return _gpu_img_flags; }, 
-        [this](Word, Byte data) { _gpu_img_flags = data; },
+        [this](Word, bool) { return _gpu_img_info[_gpu_bmp_idx].img_flags; }, 
+        [this](Word, Byte data, bool) { _gpu_img_info[_gpu_bmp_idx].img_flags = _validate_img_flags(data); },
         { "(Byte) Image Flags:","" }
     }); nextAddr+=1;
     flags = 0;
@@ -383,14 +409,14 @@ int GPU_EXT::_onAttach(int nextAddr)
     //      Tilemap Width (in pixels)
     /////
     _gpu->mapped_register.push_back( { "GPU_TMAP_WIDTH", nextAddr,
-        [this](Word) { return _gpu_tmap_width >> 8; }, 
-        [this](Word, Byte data) { _gpu_tmap_width = (_gpu_tmap_width & 0x00FF) | (data << 8); }, 
+        [this](Word, bool) { return _gpu_tmap_width >> 8; }, 
+        [this](Word, Byte data, bool) { _gpu_tmap_width = (_gpu_tmap_width & 0x00FF) | (data << 8); }, 
         {   
             "(Word) Tilemap Width (in pixels)"
         }}); nextAddr+=1;
     _gpu->mapped_register.push_back( { "", nextAddr,
-        [this](Word) { return _gpu_tmap_width & 0xFF; }, 
-        [this](Word, Byte data) { _gpu_tmap_width = (_gpu_tmap_width & 0xFF00) | (data << 0); },  
+        [this](Word, bool) { return _gpu_tmap_width & 0xFF; }, 
+        [this](Word, Byte data, bool) { _gpu_tmap_width = (_gpu_tmap_width & 0xFF00) | (data << 0); },  
         {""}}); nextAddr+=1;
 
 
@@ -399,14 +425,14 @@ int GPU_EXT::_onAttach(int nextAddr)
     //      Tilemap Height (in pixels)
     /////
     _gpu->mapped_register.push_back( { "GPU_TMAP_HEIGHT", nextAddr,
-        [this](Word) { return _gpu_tmap_height >> 8; }, 
-        [this](Word, Byte data) { _gpu_tmap_height = (_gpu_tmap_height & 0x00FF) | (data << 8); }, 
+        [this](Word, bool) { return _gpu_tmap_height >> 8; }, 
+        [this](Word, Byte data, bool) { _gpu_tmap_height = (_gpu_tmap_height & 0x00FF) | (data << 8); }, 
         {   
             "(Word) Tilemap Height (in pixels)"
         }}); nextAddr+=1;
     _gpu->mapped_register.push_back( { "", nextAddr,
-        [this](Word) { return _gpu_tmap_height & 0xFF; }, 
-        [this](Word, Byte data) { _gpu_tmap_height = (_gpu_tmap_height & 0xFF00) | (data << 0); },  
+        [this](Word, bool) { return _gpu_tmap_height & 0xFF; }, 
+        [this](Word, Byte data, bool) { _gpu_tmap_height = (_gpu_tmap_height & 0xFF00) | (data << 0); },  
         {""}}); nextAddr+=1;
 
 
@@ -415,14 +441,14 @@ int GPU_EXT::_onAttach(int nextAddr)
     //      Tilemap X Position (top left corner)
     /////
     _gpu->mapped_register.push_back( { "GPU_TMAP_XPOS", nextAddr,
-        [this](Word) { return _gpu_tmap_xpos >> 8; }, 
-        [this](Word, Byte data) { _gpu_tmap_xpos = (_gpu_tmap_xpos & 0x00FF) | (data << 8); }, 
+        [this](Word, bool) { return _gpu_tmap_xpos >> 8; }, 
+        [this](Word, Byte data, bool) { _gpu_tmap_xpos = (_gpu_tmap_xpos & 0x00FF) | (data << 8); }, 
         {   
             "(SInt16) Tilemap X Position (top left corner)"
         }}); nextAddr+=1;
     _gpu->mapped_register.push_back( { "", nextAddr,
-        [this](Word) { return _gpu_tmap_xpos & 0xFF; }, 
-        [this](Word, Byte data) { _gpu_tmap_xpos = (_gpu_tmap_xpos & 0xFF00) | (data << 0); },  
+        [this](Word, bool) { return _gpu_tmap_xpos & 0xFF; }, 
+        [this](Word, Byte data, bool) { _gpu_tmap_xpos = (_gpu_tmap_xpos & 0xFF00) | (data << 0); },  
         {""}}); nextAddr+=1;
 
 
@@ -431,14 +457,14 @@ int GPU_EXT::_onAttach(int nextAddr)
     //      Tilemap Y Position (top left corner)
     /////
     _gpu->mapped_register.push_back( { "GPU_TMAP_YPOS", nextAddr,
-        [this](Word) { return _gpu_tmap_ypos >> 8; }, 
-        [this](Word, Byte data) { _gpu_tmap_ypos = (_gpu_tmap_ypos & 0x00FF) | (data << 8); }, 
+        [this](Word, bool) { return _gpu_tmap_ypos >> 8; }, 
+        [this](Word, Byte data, bool) { _gpu_tmap_ypos = (_gpu_tmap_ypos & 0x00FF) | (data << 8); }, 
         {   
             "(SInt16) Tilemap Y Position (top left corner)"
         }}); nextAddr+=1;
     _gpu->mapped_register.push_back( { "", nextAddr,
-        [this](Word) { return _gpu_tmap_ypos & 0xFF; }, 
-        [this](Word, Byte data) { _gpu_tmap_ypos = (_gpu_tmap_ypos & 0xFF00) | (data << 0); },  
+        [this](Word, bool) { return _gpu_tmap_ypos & 0xFF; }, 
+        [this](Word, Byte data, bool) { _gpu_tmap_ypos = (_gpu_tmap_ypos & 0xFF00) | (data << 0); },  
         {""}}); nextAddr+=1;
 
 
@@ -447,14 +473,14 @@ int GPU_EXT::_onAttach(int nextAddr)
     //      Tilemap Clip Region X1
     /////
     _gpu->mapped_register.push_back( { "GPU_TMAP_CLIP_X1", nextAddr,
-        [this](Word) { return _gpu_tmap_clip_x1 >> 8; }, 
-        [this](Word, Byte data) { _gpu_tmap_clip_x1 = (_gpu_tmap_clip_x1 & 0x00FF) | (data << 8); }, 
+        [this](Word, bool) { return _gpu_tmap_clip_x1 >> 8; }, 
+        [this](Word, Byte data, bool) { _gpu_tmap_clip_x1 = (_gpu_tmap_clip_x1 & 0x00FF) | (data << 8); }, 
         {   
             "(Word) Tilemap Clip Region X1"
         }}); nextAddr+=1;
     _gpu->mapped_register.push_back( { "", nextAddr,
-        [this](Word) { return _gpu_tmap_clip_x1 & 0xFF; }, 
-        [this](Word, Byte data) { _gpu_tmap_clip_x1 = (_gpu_tmap_clip_x1 & 0xFF00) | (data << 0); },  
+        [this](Word, bool) { return _gpu_tmap_clip_x1 & 0xFF; }, 
+        [this](Word, Byte data, bool) { _gpu_tmap_clip_x1 = (_gpu_tmap_clip_x1 & 0xFF00) | (data << 0); },  
         {""}}); nextAddr+=1;
 
 
@@ -463,14 +489,14 @@ int GPU_EXT::_onAttach(int nextAddr)
     //      Tilemap Clip Region Y1
     /////
     _gpu->mapped_register.push_back( { "GPU_TMAP_CLIP_Y1", nextAddr,
-        [this](Word) { return _gpu_tmap_clip_y1 >> 8; }, 
-        [this](Word, Byte data) { _gpu_tmap_clip_y1 = (_gpu_tmap_clip_y1 & 0x00FF) | (data << 8); }, 
+        [this](Word, bool) { return _gpu_tmap_clip_y1 >> 8; }, 
+        [this](Word, Byte data, bool) { _gpu_tmap_clip_y1 = (_gpu_tmap_clip_y1 & 0x00FF) | (data << 8); }, 
         {   
             "(Word) Tilemap Clip Region Y1"
         }}); nextAddr+=1;
     _gpu->mapped_register.push_back( { "", nextAddr,
-        [this](Word) { return _gpu_tmap_clip_y1 & 0xFF; }, 
-        [this](Word, Byte data) { _gpu_tmap_clip_y1 = (_gpu_tmap_clip_y1 & 0xFF00) | (data << 0); },  
+        [this](Word, bool) { return _gpu_tmap_clip_y1 & 0xFF; }, 
+        [this](Word, Byte data, bool) { _gpu_tmap_clip_y1 = (_gpu_tmap_clip_y1 & 0xFF00) | (data << 0); },  
         {""}}); nextAddr+=1;
 
 
@@ -479,14 +505,14 @@ int GPU_EXT::_onAttach(int nextAddr)
     //      Tilemap Clip Region X2
     /////
     _gpu->mapped_register.push_back( { "GPU_TMAP_CLIP_X2", nextAddr,
-        [this](Word) { return _gpu_tmap_clip_x2 >> 8; }, 
-        [this](Word, Byte data) { _gpu_tmap_clip_x2 = (_gpu_tmap_clip_x2 & 0x00FF) | (data << 8); }, 
+        [this](Word, bool) { return _gpu_tmap_clip_x2 >> 8; }, 
+        [this](Word, Byte data, bool) { _gpu_tmap_clip_x2 = (_gpu_tmap_clip_x2 & 0x00FF) | (data << 8); }, 
         {   
             "(Word) Tilemap Clip Region X2"
         }}); nextAddr+=1;
     _gpu->mapped_register.push_back( { "", nextAddr,
-        [this](Word) { return _gpu_tmap_clip_x2 & 0xFF; }, 
-        [this](Word, Byte data) { _gpu_tmap_clip_x2 = (_gpu_tmap_clip_x2 & 0xFF00) | (data << 0); },  
+        [this](Word, bool) { return _gpu_tmap_clip_x2 & 0xFF; }, 
+        [this](Word, Byte data, bool) { _gpu_tmap_clip_x2 = (_gpu_tmap_clip_x2 & 0xFF00) | (data << 0); },  
         {""}}); nextAddr+=1;
 
 
@@ -495,14 +521,14 @@ int GPU_EXT::_onAttach(int nextAddr)
     //      Tilemap Clip Region Y2
     /////
     _gpu->mapped_register.push_back( { "GPU_TMAP_CLIP_Y2", nextAddr,
-        [this](Word) { return _gpu_tmap_clip_y2 >> 8; }, 
-        [this](Word, Byte data) { _gpu_tmap_clip_y2 = (_gpu_tmap_clip_y2 & 0x00FF) | (data << 8); }, 
+        [this](Word, bool) { return _gpu_tmap_clip_y2 >> 8; }, 
+        [this](Word, Byte data, bool) { _gpu_tmap_clip_y2 = (_gpu_tmap_clip_y2 & 0x00FF) | (data << 8); }, 
         {   
             "(Word) Tilemap Clip Region Y2",""
         }}); nextAddr+=1;
     _gpu->mapped_register.push_back( { "", nextAddr,
-        [this](Word) { return _gpu_tmap_clip_y2 & 0xFF; }, 
-        [this](Word, Byte data) { _gpu_tmap_clip_y2 = (_gpu_tmap_clip_y2 & 0xFF00) | (data << 0); },  
+        [this](Word, bool) { return _gpu_tmap_clip_y2 & 0xFF; }, 
+        [this](Word, Byte data, bool) { _gpu_tmap_clip_y2 = (_gpu_tmap_clip_y2 & 0xFF00) | (data << 0); },  
         {""}}); nextAddr+=1;
  
 
@@ -511,7 +537,7 @@ int GPU_EXT::_onAttach(int nextAddr)
     //      Memory Management Unit Error Code:    (Read Only)
     /////
     _gpu->mapped_register.push_back({ "GPU_ERROR", nextAddr, 
-        [this](Word) { return _gpu_error; },  
+        [this](Word, bool) { return _gpu_error; },  
         nullptr,  
         { "(Byte) Graphics Processing Unit Error Code:     (Read Only)" }}); nextAddr++;
     // ADD ERROR CODE ENUMERATION:
@@ -645,6 +671,64 @@ void GPU_EXT::error(Byte error_code, bool bLog)
 }
 
 
+Byte GPU_EXT::_validate_spr_flags(Byte data)
+{
+    Byte result = data;
+    // This one is easy, nothing to do. This function is implemented 
+    // for the potential future use of the (reserved) bit.
+    // ...
+    return result;
+}
+
+
+Byte GPU_EXT::_validate_img_flags(Byte data)
+{
+    Byte result = data;
+    Byte color_mode = data & 0b0000'0011;
+    // if 256-color mode, nothing else is valid
+    if (color_mode == 0b0000'0011) {
+        result = data &0b0000'0011;
+        _gpu_usr_offset=255;
+    }
+    else
+    {
+        // new base offset
+        switch (color_mode & 0x03) 
+        {
+            case 0: // 2-color mode
+                _gpu_usr_offset = 32;
+                break;
+            case 1: // 4-color mode
+                _gpu_usr_offset = 64;
+                break;
+            case 2: // 16-color mode
+                _gpu_usr_offset = 128;
+                break;
+        }
+
+        // Is this a sprite?
+        if (Memory::Read(MAP(GPU_SPR_FLAGS)) & MAP(GPU_SPR_FL_SPR_ENABLE))
+        {
+            // secondary palette
+            if (data & MAP(GPU_IMG_FL_SEC_PAL))
+            {
+                // ...
+            }
+            // 32 pixel width
+            if (data & MAP(GPU_IMG_FL_32_WIDTH)) 
+            {
+                // ...
+            }
+            // 32 pixel height
+            if (data & MAP(GPU_IMG_FL_32_HEIGHT) && color_mode <= 2) 
+            {
+                // ...
+            }
+        }
+    }
+
+    return result;
+}
 
 
 
@@ -736,4 +820,5 @@ bool GPU_EXT::_test_size()
     // ...
     return test_results;
 }
+
 
