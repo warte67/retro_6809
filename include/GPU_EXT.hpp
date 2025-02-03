@@ -159,6 +159,32 @@ private:
     // GPU_BMP_DATA             (Byte)      // Bitmap Data (Read Write)
     std::array<std::array<Byte, 256>, 256> _gpu_bmp_data = {0};  // this is the secondary 64k block of GPU memory
 
+    // (Byte) Sprite Flags:                             // GPU_SPR_FLAGS      
+    //                                                         
+    //    % 0000'0001:  Double Width                    // GPU_SPR_FL_DBL_WIDTH                      
+    //    % 0000'0010:  Double Height                   // GPU_SPR_FL_DBL_HEIGHT                             
+    //    % 0000'0100:  Flip Horizontal                 // GPU_SPR_FL_FLP_HORIZ                          
+    //    % 0000'1000:  Flip Vertical                   // GPU_SPR_FL_FLP_VERT                               
+    //    % 0011'0000:  Collision Type:
+    //         00 = none                                // GPU_SPR_FL_COL_NONE                               
+    //         01 = bounding box                        // GPU_SPR_FL_COL_BNDS                               
+    //         10 = center box                          // GPU_SPR_FL_COL_CNTR                                                                       
+    //         11 = pixel mask                          // GPU_SPR_FL_COL_PXL                    
+    //    % 0100'0000:  Sprite Enable                   // GPU_SPR_FL_SPR_ENABLE                         
+    //    % 1000'0000:  (reserved)                      // GPU_SPR_FL_RESERVED                               
+    //
+    // (Byte) Image Flags:                              // GPU_IMG_FLAGS                 
+    //
+    //    % 0000'0011:  Color Mode:                     // GPU_IMG_COLOR_MODE                                        
+    //         00 = 2-colors                            // GPU_IMG_FL_2_COLORS                       
+    //         01 = 4-colors                            // GPU_IMG_FL_4_COLORS                   
+    //         10 = 16-colors                           // GPU_IMG_FL_16_COLORS                          
+    //         11 = 256-colors                          // GPU_IMG_FL_256_COLORS                 
+    //    % 0000'0100:  Secondary Palette (rules apply) // GPU_IMG_FL_SEC_PAL                        
+    //    % 0000'1000:  32 pixel width (rules apply)    // GPU_IMG_FL_32_WIDTH               
+    //    % 0001'0000:  32 pixel height (rules apply)   // GPU_IMG_FL_32_HEIGHT          
+    //    % 1110'0000:  (reserved)                      // GPU_IMG_FL_DBL_WIDTH       
+    //
     struct IMG_INFO 
     {
         Sint16 XPos = 0;    // Sprite X Position

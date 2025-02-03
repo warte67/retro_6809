@@ -288,9 +288,9 @@ int GPU_EXT::_onAttach(int nextAddr)
         // READ 
         [this](Word, bool) { return _gpu_usr_offset; }, 
         // WRITE
-        [this](Word, Byte data, bool) { _gpu_usr_offset = data; },    // GPU_ERR_OFFSET error condition if 256-color mode or other invalid offset
+        nullptr, //[this](Word, Byte data, bool) { _gpu_usr_offset = data; },    // GPU_ERR_OFFSET error condition if 256-color mode or other invalid offset
         // COMMENT
-        { "(Byte) Offset Where User Data Starts (0-255)", }
+        { "(Byte) Offset Where User Data Starts (Read Only)", }
     }); nextAddr+=1;    
 
 
@@ -684,6 +684,7 @@ Byte GPU_EXT::_validate_spr_flags(Byte data)
 Byte GPU_EXT::_validate_img_flags(Byte data)
 {
     Byte result = data;
+    Word offset = 0;
     Byte color_mode = data & 0b0000'0011;
     // if 256-color mode, nothing else is valid
     if (color_mode == 0b0000'0011) {
@@ -696,22 +697,42 @@ Byte GPU_EXT::_validate_img_flags(Byte data)
         switch (color_mode & 0x03) 
         {
             case 0: // 2-color mode
-                _gpu_usr_offset = 32;
+                if (offset + 32 <= 255) {
+                    offset += 32;
+                    _gpu_usr_offset = offset;
+                }
                 break;
             case 1: // 4-color mode
-                _gpu_usr_offset = 64;
+                if (offset + 64 <= 255) {
+                    offset += 64;
+                    _gpu_usr_offset = offset;
+                }
                 break;
             case 2: // 16-color mode
-                _gpu_usr_offset = 128;
+                if (offset + 128 <= 255) {
+                    offset += 128;
+                    _gpu_usr_offset = offset;
+                }
                 break;
         }
+        // secondary palette
+        if (data & MAP(GPU_IMG_FL_SEC_PAL))
+        {
+            // ...
+        }        
 
         // Is this a sprite?
         if (Memory::Read(MAP(GPU_SPR_FLAGS)) & MAP(GPU_SPR_FL_SPR_ENABLE))
         {
-            // secondary palette
-            if (data & MAP(GPU_IMG_FL_SEC_PAL))
+            // collision pixel mask            
+            Byte spr_flags = (Memory::Read(MAP(GPU_SPR_FLAGS)) >> 4) & 0b0000'0011;
+            if (spr_flags == MAP(GPU_SPR_FL_COL_PXL))
             {
+                // if (offset + 2 <= 255) {
+                //     offset += 2;
+                //     _gpu_usr_offset = offset;
+                // }
+
                 // ...
             }
             // 32 pixel width

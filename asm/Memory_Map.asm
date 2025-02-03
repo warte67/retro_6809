@@ -296,7 +296,7 @@ GPU_CMD_SIZE          equ    $0001    ;    $01 = Total Number of MMU Commands
                                       ; 
 GPU_BMP_IDX           equ    $FE35    ; (Byte) Bitmap Image Index (0-255)
 GPU_BMP_OFFSET        equ    $FE36    ; (Byte) Offset Within the Image Buffer    (0-255)
-GPU_USR_OFFSET        equ    $FE37    ; (Byte) Offset Where User Data Starts (0-255)
+GPU_USR_OFFSET        equ    $FE37    ; (Byte) Offset Where User Data Starts (Read Only)
 GPU_BMP_DATA          equ    $FE38    ; (Byte) Bitmap Data      (Read Write)
                                       ; 
 GPU_SPR_XPOS          equ    $FE39    ; (Sint16) Sprite X Position

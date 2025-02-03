@@ -298,7 +298,7 @@ enum MEMMAP
                                       // 
     GPU_BMP_IDX           = 0xFE35,   // (Byte) Bitmap Image Index (0-255)
     GPU_BMP_OFFSET        = 0xFE36,   // (Byte) Offset Within the Image Buffer    (0-255)
-    GPU_USR_OFFSET        = 0xFE37,   // (Byte) Offset Where User Data Starts (0-255)
+    GPU_USR_OFFSET        = 0xFE37,   // (Byte) Offset Where User Data Starts (Read Only)
     GPU_BMP_DATA          = 0xFE38,   // (Byte) Bitmap Data      (Read Write)
                                       // 
     GPU_SPR_XPOS          = 0xFE39,   // (Sint16) Sprite X Position
