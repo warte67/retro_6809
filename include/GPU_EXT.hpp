@@ -41,7 +41,7 @@ public:      // PUBLIC SINGLETON STUFF
 private: 
 
     int  _onAttach(int nextAddr);   // attach to the memory map
-    void _onInit(GPU* pGpu);        // initialize
+    void _onInit();                 // initialize
     void _onQuit();                 // shutdown
 
     

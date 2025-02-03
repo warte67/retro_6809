@@ -108,7 +108,7 @@ int  FileIO::OnAttach(int nextAddr)
     //      End of GPU Register Space
     /////
     mapped_register.push_back({ "FIO_COMMAND", nextAddr, 
-        [this](Word addr, bool) { return _fio_command; }, //Memory::Read(addr, true); }, 
+        [this](Word, bool) { return _fio_command; }, //Memory::Read(addr, true); }, 
         [this](Word, Byte data, bool) {
                  if ( data == MAP(FC_RESET     ) )  { _cmd_reset();                      }
             else if ( data == MAP(FC_SHUTDOWN  ) )  { _cmd_system_shutdown();            }

@@ -561,7 +561,7 @@ int GPU_EXT::_onAttach(int nextAddr)
     return nextAddr;
 }
 
-void GPU_EXT::_onInit(GPU* pGpu) 
+void GPU_EXT::_onInit() 
 {
     // initialize the GPU command functions:
     for (const auto& command : _gpu_command_list) 

@@ -447,18 +447,7 @@ void GPU::OnInit()
             _gpu_glyph_data[i][r] = font8x8_system[i][r];  
 
     // initialize the GPU command functions:
-    // gpu_ext._gpu = this;
-    gpu_ext._onInit(this);
-
-    // for (const auto& command : _gpu_command_list) 
-    // {
-    //     register_command(Memory::Map(command.key, __FILE__, __LINE__), 
-    //         [this, action = command.action]() -> Byte 
-    //         {
-    //             return action();
-    //         }
-    //     );
-    // }
+    gpu_ext._onInit();
 
     // initialize the initial default display mode   
     Memory::Write_Word(MAP(GPU_MODE), _gpu_mode);
