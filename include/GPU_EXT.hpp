@@ -80,39 +80,6 @@ private:
     void _gpu_blit_increment_address();     // GPU_BLIT_DATA Helper Function
 
 
-// ...
-
-    // // GPU_DYN_HANDLE                       // (Word) Dynamic Memory HANDLE
-    // Word _gpu_dyn_handle = 0;               // On Write: resets GPU_DYN_CUR_ADDR, 
-    //                                         // GPU_DYN_END_ADDR,  and GPU_DYN_END_DIST
-
-    // struct DYNAMIC_MEMORY
-    // {
-    //     Word address;   // Memory Starting Address
-    //     Word cur_addr;  // Current Address
-    //     Word end_addr;  // End Address
-    // };
-    // std::unordered_map<Word, DYNAMIC_MEMORY> _gpu_dyn_map;
-    // // _gpu_dyn_map_new();
-    // // _gpu_dyn_map_del();
-
-    // // GPU_DYN_CUR_ADDR                     // (Word) Current Dynamic Memory ADDRESS
-    // Word _gpu_dyn_cur_addr = 0;
-    // // _gpu_dyn_map[_gpu_dyn_handle].cur_addr;  //      (autoincrements by 1 on read/write)
-    
-    // // GPU_DYN_END_ADDR                     // (Word) Last Useful Dynamic Memory ADDRESS in this block
-    // Word _gpu_dyn_end_addr = 0;
-    // // _gpu_dyn_map[_gpu_dyn_handle].end_addr;
-
-    // // GPU_DYN_END_DIST                     // (Word) Distance to End of this Dynamic Memory Block
-    // Word _gpu_dyn_end_dist = 0;
-    // // _gpu_dyn_map[_gpu_dyn_handle].end_dist;
-
-    // // GPU_DYN_DATA                         // (Byte) Dynamic Memory DATA (Read/Write)
-    // Byte _gpu_dyn_data = 0;
-    // // _gpu_dyn_data = _ext_video_buffer[_gpu_dyn_map[_gpu_dyn_handle].cur_addr]
-
-
 // GPU Command Registers:
     // GPU_CMD_ARG_1            (Word)      // Argument 1
     Word _gpu_cmd_arg_1 = 0;
@@ -201,12 +168,6 @@ private:
     };
     std::vector<IMG_INFO> _gpu_img_info;
 
-    // // GPU_SPR_MAX              (Byte)      // Maximum Sprite Index (Read Only)
-    // Byte _gpu_spr_max = 0;
-
-    // // GPU_SPR_IDX              (Byte)      // Sprite Index
-    // Byte _gpu_spr_idx = 0;
-
     // GPU_SPR_XPOS             (SInt16)    // Sprite X Position
     Sint16 _gpu_spr_xpos = 0;
 
@@ -218,35 +179,6 @@ private:
 
     // // GPU_SPR_APR_MASK         (DWord)      // Sprite Collision Approx. Mask (4x4)
     // DWord _gpu_spr_apr_mask = 0;
-
-                                // ; (Byte) Sprite Flags:
-                                // ; 
-                                // ;    % 0000'0001:  Double Width
-                                // ;    % 0000'0010:  Double Height
-                                // ;    % 0000'0100:  Flip Horizontal
-                                // ;    % 0000'1000:  Flip Vertical
-                                // ;    % 0011'0000:  Collision Type:
-                                // ;         00 = none
-                                // ;         01 = bounding box
-                                // ;         10 = center box
-                                // ;         11 = pixel mask
-                                // ;    % 0100'0000:  Sprite Enable
-                                // ;    % 1000'0000:  (reserved)
-                                // ; 
-                                // ; (Byte) Image Flags:
-                                // ; 
-                                // ;    % 0000'0011:  Color Mode:
-                                // ;         00 = 2-colors
-                                // ;         01 = 4-colors
-                                // ;         10 = 16-colors
-                                // ;         11 = 256-colors
-                                // ;    % 0000'0100:  Secondary Palette (rules apply)
-                                // ;    % 0000'1000:  32 pixel width (rules apply)
-                                // ;    % 0001'0000:  32 pixel height (rules apply)
-                                // ;    % 1110'0000:  (reserved)
-                                // ; 
-
-        
 
 // Tilemap Registers:     
     // GPU_TMAP_WIDTH           
@@ -310,42 +242,5 @@ private:
 
 
 /*
-
-Image Descriptor (6-Bytes):
-Sint16 Xpos
-Sint16 Ypos
-Byte spr_flags
-Byte img_flags
-
-
-
-
-(Byte) Sprite Flags:
-
- % 0000'0001:  Double Width
- % 0000'0010:  Double Height
- % 0000'0100:  Flip Horizontal
- % 0000'1000:  Flip Vertical
- % 0011'0000:  Collision Type
-      00 = none
-      01 = bounding box
-      10 = center box
-      11 = pixel mask
- % 0100'0000:  Sprite Enable (0=disable, 1=enable)
- % 1000'0000:  (reserved)
-
-(Byte) Image Flags:
- % 0000'0011:  Color Mode
-      00 = 2-color
-      01 = 4-color
-      10 = 16-color
-      11 = 256-color
-    Note: Bits 2-7 are only valid if the Color Mode is not 256-color.
- % 0000'0100:  Secondary Palette (rules apply)
- % 0000'1000:  32 pixel width (rules apply)
- % 0001'0000:  32 pixel height (rules apply)
- % 1110'0000:  (reserved)
-
-
 
 */
